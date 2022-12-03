@@ -288,7 +288,7 @@ static struct isea_pt isea_triangle_xy(int triangle)
     default:
         /* should be impossible */
         exit(EXIT_FAILURE);
-    };
+    }
     c.x *= Rprime;
     c.y *= Rprime;
 

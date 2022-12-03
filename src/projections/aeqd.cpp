@@ -104,7 +104,7 @@ static PJ_XY aeqd_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
     switch (Q->mode) {
     case N_POLE:
         coslam = - coslam;
-        /*-fallthrough*/
+        PROJ_FALLTHROUGH;
     case S_POLE:
         rho = fabs(Q->Mp - pj_mlfn(lp.phi, sinphi, cosphi, Q->en));
         xy.x = rho * sin(lp.lam);
@@ -165,7 +165,7 @@ oblcon:
     case N_POLE:
         lp.phi = -lp.phi;
         coslam = -coslam;
-        /*-fallthrough*/
+        PROJ_FALLTHROUGH;
     case S_POLE:
         if (fabs(lp.phi - M_HALFPI) < EPS10) {
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);

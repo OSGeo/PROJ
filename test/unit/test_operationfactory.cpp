@@ -3724,7 +3724,7 @@ TEST(operation, transformation_Geographic3D_to_GravityRelatedHeight_gtx) {
         "        AREA[\"Netherlands - onshore\"],\n"
         "        BBOX[50.75,3.2,53.7,7.22]],\n"
         "    ID[\"EPSG\",7001]]";
-    ;
+
     auto obj = WKTParser().createFromWKT(wkt);
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(transf != nullptr);

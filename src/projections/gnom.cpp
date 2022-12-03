@@ -68,7 +68,7 @@ static PJ_XY gnom_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
             break;
         case N_POLE:
             coslam = - coslam;
-            /*-fallthrough*/
+            PROJ_FALLTHROUGH;
         case S_POLE:
             xy.y *= cosphi * coslam;
             break;

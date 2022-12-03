@@ -69,7 +69,7 @@ opt_given (o, option):
 opt_arg (o, option):
         A char pointer to the argument for <option>
 
-The 2 additional functions (of which, one is really a macro) implements
+An additional function "opt_input_loop" implements
 a "read all operands sequentially" functionality, eliminating the need to
 handle open/close of a sequence of input files:
 
@@ -78,9 +78,6 @@ enum OPTARGS_FILE_MODE:
 opt_input_loop (o, mode):
         When used as condition in a while loop, traverses all operands,
         giving the impression of reading just a single input file.
-opt_eof_handler (o):
-        Auxiliary macro, to be called inside the input loop after each
-        read operation
 
 Usage is probably easiest understood by a brief textbook style example:
 
@@ -134,7 +131,9 @@ int main(int argc, char **argv) {
     while (opt_input_loop (o, optargs_file_format_text)) {
         char buf[1000];
         int ret = fgets (buf, 1000, o->input);
-        opt_eof_handler (o);
+        if (opt_eof (o)) {
+            continue;
+        }
         if (nullptr==ret) {
             fprintf (stderr, "Read error in record %d\n", (int) o->record_index);
             continue;
@@ -207,7 +206,6 @@ char *opt_arg (OPTARGS *opt, const char *option);
 const char *opt_strip_path (const char *full_name);
 OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, const char **longflags, const char **longkeys);
 
-#define opt_eof_handler(opt) if (opt_eof (opt)) {continue;} else {;}
 /**************************************************************************************************/
 
 struct OPTARGS {

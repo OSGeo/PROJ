@@ -84,7 +84,7 @@ static PJ_XY stere_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forwar
         lp.phi = -lp.phi;
         coslam = - coslam;
         sinphi = -sinphi;
-        /*-fallthrough*/
+        PROJ_FALLTHROUGH;
     case N_POLE:
         if( fabs(lp.phi - M_HALFPI) < 1e-15 )
             xy.x = 0;
@@ -128,7 +128,7 @@ oblcon:
     case N_POLE:
         coslam = - coslam;
         lp.phi = - lp.phi;
-        /*-fallthrough*/
+        PROJ_FALLTHROUGH;
     case S_POLE:
         if (fabs (lp.phi - M_HALFPI) < TOL) {
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
@@ -169,7 +169,7 @@ static PJ_LP stere_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
         break;
     case N_POLE:
         xy.y = -xy.y;
-        /*-fallthrough*/
+        PROJ_FALLTHROUGH;
     case S_POLE:
         tp = - rho / Q->akm1;
         phi_l = M_HALFPI - 2. * atan (tp);
@@ -226,7 +226,7 @@ static PJ_LP stere_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         break;
     case N_POLE:
         xy.y = -xy.y;
-        /*-fallthrough*/
+        PROJ_FALLTHROUGH;
     case S_POLE:
         if (fabs (rh) <= EPS10)
             lp.phi = P->phi0;
@@ -282,7 +282,7 @@ static PJ *setup(PJ *P) {                   /* general initialization */
         case OBLIQ:
             sinph0 = sin (P->phi0);
             cosph0 = cos (P->phi0);
-            /*-fallthrough*/
+            PROJ_FALLTHROUGH;
         case EQUIT:
             Q->akm1 = 2. * P->k0;
             break;

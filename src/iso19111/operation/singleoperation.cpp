@@ -2728,7 +2728,7 @@ extractGeographicCRSIfGeographicCRSOrEquivalent(const crs::CRSNNPtr &crs) {
 
 // ---------------------------------------------------------------------------
 
-static void ThrowExceptionNotGeodeticGeographic(const char *trfrm_name) {
+[[noreturn]] static void ThrowExceptionNotGeodeticGeographic(const char *trfrm_name) {
     throw io::FormattingException(concat("Can apply ", std::string(trfrm_name),
                                          " only to GeodeticCRS / "
                                          "GeographicCRS"));

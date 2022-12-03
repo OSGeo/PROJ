@@ -70,16 +70,16 @@ struct pj_opaque {
 
 static void seraz0(double lam, double mult, PJ *P) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double sdsq, h, s, fc, sd, sq, d__1 = 0;
+    double sdsq, h, s, fc, sd, sq, d_1 = 0;
 
     lam *= DEG_TO_RAD;
     sd = sin(lam);
     sdsq = sd * sd;
     s = Q->p22 * Q->sa * cos(lam) * sqrt((1. + Q->t * sdsq) / ((
         1. + Q->w * sdsq) * (1. + Q->q * sdsq)));
-    d__1 = 1. + Q->q * sdsq;
+    d_1 = 1. + Q->q * sdsq;
     h = sqrt((1. + Q->q * sdsq) / (1. + Q->w * sdsq)) * ((1. +
-        Q->w * sdsq) / (d__1 * d__1) - Q->p22 * Q->ca);
+        Q->w * sdsq) / (d_1 * d_1) - Q->p22 * Q->ca);
     sq = sqrt(Q->xj * Q->xj + s * s);
     fc = mult * (h * Q->xj - s * s) / sq;
     Q->b += fc;

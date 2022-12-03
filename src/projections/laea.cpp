@@ -121,7 +121,7 @@ oblcon:
         break;
     case N_POLE:
         coslam = -coslam;
-        /*-fallthrough*/
+        PROJ_FALLTHROUGH;
     case S_POLE:
         if (fabs(lp.phi + P->phi0) < EPS10) {
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
@@ -175,7 +175,7 @@ static PJ_LP laea_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
     }
     case N_POLE:
         xy.y = -xy.y;
-        /*-fallthrough*/
+        PROJ_FALLTHROUGH;
     case S_POLE:
         q = (xy.x * xy.x + xy.y * xy.y);
         if (q == 0.0) {

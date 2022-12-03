@@ -76,7 +76,7 @@ enum Face {
 } // anonymous namespace
 
 enum S2ProjectionType {Linear, Quadratic, Tangent, NoUVtoST};
-std::map<std::string, S2ProjectionType> stringToS2ProjectionType { {"linear", Linear}, {"quadratic", Quadratic}, {"tangent", Tangent}, {"none", NoUVtoST} };
+static std::map<std::string, S2ProjectionType> stringToS2ProjectionType { {"linear", Linear}, {"quadratic", Quadratic}, {"tangent", Tangent}, {"none", NoUVtoST} };
 
 namespace { // anonymous namespace
 struct pj_opaque {

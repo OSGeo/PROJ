@@ -4814,7 +4814,6 @@ TEST(wkt_parse, DerivedGeodeticCRS) {
                "            ORDER[3],\n"
                "            LENGTHUNIT[\"metre\",1,\n"
                "                ID[\"EPSG\",9001]]]]";
-    ;
 
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<DerivedGeodeticCRS>(obj);

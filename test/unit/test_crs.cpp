@@ -5685,7 +5685,6 @@ static DateTimeTemporalCSNNPtr createDateTimeTemporalCS() {
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "Time"), "T",
             AxisDirection::FUTURE, UnitOfMeasure::NONE));
-    ;
 }
 
 // ---------------------------------------------------------------------------

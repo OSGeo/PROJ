@@ -43,6 +43,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 
 NS_PROJ_START
 
@@ -3012,7 +3013,7 @@ ListOfHGrids pj_hgrid_init(PJ *P, const char *gridkey) {
 // ---------------------------------------------------------------------------
 
 typedef struct {
-    pj_int32 lam, phi;
+    int32_t lam, phi;
 } ILP;
 
 // Apply bilinear interpolation for horizontal shift grids
@@ -3024,9 +3025,9 @@ static PJ_LP pj_hgrid_interpolate(PJ_LP t, const HorizontalShiftGrid *grid,
 
     const auto &extent = grid->extentAndRes();
     t.lam /= extent.resX;
-    indx.lam = std::isnan(t.lam) ? 0 : (pj_int32)lround(floor(t.lam));
+    indx.lam = std::isnan(t.lam) ? 0 : (int32_t)lround(floor(t.lam));
     t.phi /= extent.resY;
-    indx.phi = std::isnan(t.phi) ? 0 : (pj_int32)lround(floor(t.phi));
+    indx.phi = std::isnan(t.phi) ? 0 : (int32_t)lround(floor(t.phi));
 
     frct.lam = t.lam - indx.lam;
     frct.phi = t.phi - indx.phi;

@@ -49,6 +49,22 @@
 #  endif
 #endif
 
+// Use "PROJ_FALLTHROUGH;" to annotate deliberate fall-through in switches,
+// use it analogously to "break;".  The trailing semi-colon is required.
+#if !defined(PROJ_FALLTHROUGH) && defined(__has_cpp_attribute)
+#if __cplusplus >= 201703L && __has_cpp_attribute(fallthrough)
+#define PROJ_FALLTHROUGH [[fallthrough]]
+#elif __cplusplus >= 201103L && __has_cpp_attribute(gnu::fallthrough)
+#define PROJ_FALLTHROUGH [[gnu::fallthrough]]
+#elif __cplusplus >= 201103L && __has_cpp_attribute(clang::fallthrough)
+#define PROJ_FALLTHROUGH [[clang::fallthrough]]
+#endif
+#endif
+
+#ifndef PROJ_FALLTHROUGH
+#define PROJ_FALLTHROUGH ((void)0)
+#endif
+
 /* standard inclusions */
 #include <limits.h>
 #include <math.h>
@@ -103,14 +119,6 @@
 
 #ifndef ABS
 #  define ABS(x)        ((x<0) ? (-1*(x)) : x)
-#endif
-
-#if INT_MAX == 2147483647
-typedef int pj_int32;
-#elif LONG_MAX == 2147483647
-typedef long pj_int32;
-#else
-#warning It seems no 32-bit integer type is available
 #endif
 
 /* maximum path/filename */

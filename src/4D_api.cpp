@@ -1029,7 +1029,7 @@ static double simple_max(const double* data, const int arr_len) {
 
 
 // ---------------------------------------------------------------------------
-static int _find_previous_index(const int iii, const double* data, const int arr_len) {
+static int find_previous_index(const int iii, const double* data, const int arr_len) {
     // find index of nearest valid previous value if exists
     int prev_iii = iii - 1;
     if (prev_iii == -1)  // handle wraparound
@@ -1099,7 +1099,7 @@ static double antimeridian_min(const double* data, const int arr_len) {
     for( int iii = 0; iii < arr_len; iii++ ) {
         if (data[iii] == HUGE_VAL)
             continue;
-        int prev_iii = _find_previous_index(iii, data, arr_len);
+        int prev_iii = find_previous_index(iii, data, arr_len);
         // check if crossed meridian
         double delta = data[prev_iii] - data[iii];
         // 180 -> -180
@@ -1148,7 +1148,7 @@ static double antimeridian_max(const double* data, const int arr_len) {
     for( int iii = 0; iii < arr_len; iii++ ) {
         if (data[iii] == HUGE_VAL)
             continue;
-        int prev_iii = _find_previous_index(iii, data, arr_len);
+        int prev_iii = find_previous_index(iii, data, arr_len);
         // check if crossed meridian
         double delta = data[prev_iii] - data[iii];
         // 180 -> -180

@@ -65,7 +65,7 @@ static PJ_XY ortho_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         break;
     case N_POLE:
         coslam = - coslam;
-                /*-fallthrough*/
+        PROJ_FALLTHROUGH;
     case S_POLE:
         if (fabs(lp.phi - P->phi0) - EPS10 > M_HALFPI)
             return forward_error(P, lp, xy);

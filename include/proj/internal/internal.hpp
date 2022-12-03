@@ -50,23 +50,25 @@
 
 //! @cond Doxygen_Suppress
 
-#if ((defined(__clang__) &&                                                    \
-      (__clang_major__ > 3 ||                                                  \
-       (__clang_major__ == 3 && __clang_minor__ >= 7))) ||                     \
-     (__GNUC__ >= 7 && !__INTEL_COMPILER))
-/** Macro for fallthrough in a switch case construct */
-#define PROJ_FALLTHROUGH [[clang::fallthrough]];
-#else
-/** Macro for fallthrough in a switch case construct */
-#define PROJ_FALLTHROUGH
+// Use "PROJ_FALLTHROUGH;" to annotate deliberate fall-through in switches,
+// use it analogously to "break;".  The trailing semi-colon is required.
+#if !defined(PROJ_FALLTHROUGH) && defined(__has_cpp_attribute)
+#if __cplusplus >= 201703L && __has_cpp_attribute(fallthrough)
+#define PROJ_FALLTHROUGH [[fallthrough]]
+#elif __cplusplus >= 201103L && __has_cpp_attribute(gnu::fallthrough)
+#define PROJ_FALLTHROUGH [[gnu::fallthrough]]
+#elif __cplusplus >= 201103L && __has_cpp_attribute(clang::fallthrough)
+#define PROJ_FALLTHROUGH [[clang::fallthrough]]
 #endif
+#endif
+
+#ifndef PROJ_FALLTHROUGH
+#define PROJ_FALLTHROUGH ((void)0)
+#endif
+
 
 #if defined(__clang__) || defined(_MSC_VER)
 #define COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT
-#endif
-
-#if !(defined(__clang__) && __clang_major__ < 5) && !defined(__INTEL_COMPILER)
-#define SUPPORT_DELETED_FUNCTION
 #endif
 
 NS_PROJ_START
@@ -145,9 +147,7 @@ PROJ_FOR_TEST std::vector<std::string> split(const std::string &osStr,
 
 bool ci_equal(const char *a, const char *b) noexcept;
 
-#ifdef SUPPORT_DELETED_FUNCTION
 bool ci_equal(const char *a, const std::string &b) = delete;
-#endif
 
 PROJ_FOR_TEST bool ci_equal(const std::string &a, const char *b) noexcept;
 
@@ -163,18 +163,13 @@ PROJ_FOR_TEST std::string toString(double val, int precision = 15);
 PROJ_FOR_TEST double
 c_locale_stod(const std::string &s); // throw(std::invalid_argument)
 
-#ifdef SUPPORT_DELETED_FUNCTION
 std::string concat(const std::string &, const std::string &) = delete;
 std::string concat(const char *, const char *) = delete;
-#endif
 std::string concat(const char *a, const std::string &b);
-#ifdef SUPPORT_DELETED_FUNCTION
 std::string concat(const std::string &, const char *) = delete;
 std::string concat(const char *, const char *, const char *) = delete;
 std::string concat(const char *, const char *, const std::string &) = delete;
-#endif
 std::string concat(const char *a, const std::string &b, const char *c);
-#ifdef SUPPORT_DELETED_FUNCTION
 std::string concat(const char *, const std::string &,
                    const std::string &) = delete;
 std::string concat(const std::string &, const char *, const char *) = delete;
@@ -184,8 +179,6 @@ std::string concat(const std::string &, const std::string &,
                    const char *) = delete;
 std::string concat(const std::string &, const std::string &,
                    const std::string &) = delete;
-#endif
-
 } // namespace internal
 
 NS_PROJ_END
