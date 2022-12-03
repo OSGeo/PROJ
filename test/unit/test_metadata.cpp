@@ -279,6 +279,35 @@ TEST(metadata, extent) {
 
 // ---------------------------------------------------------------------------
 
+TEST(metadata, extent_edge_cases) {
+    Extent::create(
+        optional<std::string>(), std::vector<GeographicExtentNNPtr>(),
+        std::vector<VerticalExtentNNPtr>(), std::vector<TemporalExtentNNPtr>());
+
+    auto A = Extent::createFromBBOX(-180, -90, 180, 90);
+    auto B = Extent::createFromBBOX(180, -90, 180, 90);
+    EXPECT_FALSE(A->intersects(B));
+    EXPECT_FALSE(B->intersects(A));
+    EXPECT_FALSE(A->contains(B));
+    EXPECT_TRUE(A->intersection(B) == nullptr);
+    EXPECT_TRUE(B->intersection(A) == nullptr);
+
+    EXPECT_THROW(Extent::createFromBBOX(
+                     std::numeric_limits<double>::quiet_NaN(), -90, 180, 90),
+                 InvalidValueTypeException);
+    EXPECT_THROW(Extent::createFromBBOX(
+                     -180, std::numeric_limits<double>::quiet_NaN(), 180, 90),
+                 InvalidValueTypeException);
+    EXPECT_THROW(Extent::createFromBBOX(
+                     -180, -90, std::numeric_limits<double>::quiet_NaN(), 90),
+                 InvalidValueTypeException);
+    EXPECT_THROW(Extent::createFromBBOX(
+                     -180, -90, 180, std::numeric_limits<double>::quiet_NaN()),
+                 InvalidValueTypeException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(metadata, identifier_empty) {
     auto id(Identifier::create());
     Identifier id2(*id);
