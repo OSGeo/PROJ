@@ -5264,6 +5264,39 @@ TEST(wkt_parse, ENGINEERINGCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, ENGCRS_unknown_unit) {
+    auto wkt = "ENGCRS[\"Undefined Cartesian SRS with unknown unit\",\n"
+               "    EDATUM[\"Unknown engineering datum\"],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"X\",unspecified,\n"
+               "            ORDER[1],\n"
+               "            LENGTHUNIT[\"unknown\",0]],\n"
+               "        AXIS[\"Y\",unspecified,\n"
+               "            ORDER[2],\n"
+               "            LENGTHUNIT[\"unknown\",0]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->nameStr(), "Undefined Cartesian SRS with unknown unit");
+    EXPECT_EQ(crs->datum()->nameStr(), "Unknown engineering datum");
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 2U);
+    auto axis0 = cs->axisList()[0];
+    EXPECT_EQ(axis0->nameStr(), "X");
+    EXPECT_EQ(axis0->direction(), AxisDirection::UNSPECIFIED);
+    EXPECT_EQ(axis0->unit().name(), "unknown");
+    EXPECT_EQ(axis0->unit().conversionToSI(), 0.0);
+    auto axis1 = cs->axisList()[1];
+    EXPECT_EQ(axis1->nameStr(), "Y");
+    EXPECT_EQ(axis1->direction(), AxisDirection::UNSPECIFIED);
+    EXPECT_EQ(axis1->unit().name(), "unknown");
+    EXPECT_EQ(axis1->unit().conversionToSI(), 0.0);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, LOCAL_CS_short) {
     auto wkt = "LOCAL_CS[\"Engineering CRS\"]";
 
