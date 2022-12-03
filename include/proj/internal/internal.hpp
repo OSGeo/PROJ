@@ -66,7 +66,6 @@
 #define PROJ_FALLTHROUGH ((void)0)
 #endif
 
-
 #if defined(__clang__) || defined(_MSC_VER)
 #define COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT
 #endif
