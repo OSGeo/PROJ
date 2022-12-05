@@ -3243,8 +3243,16 @@ bool DatabaseContext::lookForGridInfo(
     std::string &fullFilename, std::string &packageName, std::string &url,
     bool &directDownload, bool &openLicense, bool &gridAvailable) const {
     Private::GridInfoCache info;
-    const std::string key(projFilename +
-                          (considerKnownGridsAsAvailable ? "true" : "false"));
+
+    auto ctxt = d->pjCtxt();
+    if (ctxt == nullptr) {
+        ctxt = pj_get_default_ctx();
+        d->setPjCtxt(ctxt);
+    }
+
+    std::string key(projFilename);
+    key += proj_context_is_network_enabled(ctxt) ? "true" : "false";
+    key += considerKnownGridsAsAvailable ? "true" : "false";
     if (d->getGridInfoFromCache(key, info)) {
         fullFilename = info.fullFilename;
         packageName = info.packageName;
@@ -3262,11 +3270,6 @@ bool DatabaseContext::lookForGridInfo(
     directDownload = false;
 
     fullFilename.resize(2048);
-    auto ctxt = d->pjCtxt();
-    if (ctxt == nullptr) {
-        ctxt = pj_get_default_ctx();
-        d->setPjCtxt(ctxt);
-    }
     int errno_before = proj_context_errno(ctxt);
     gridAvailable = NS_PROJ::FileManager::open_resource_file(
                         ctxt, projFilename.c_str(), &fullFilename[0],
