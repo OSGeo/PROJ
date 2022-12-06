@@ -1974,4 +1974,51 @@ TEST(networking, proj_coordoperation_get_grid_used) {
 
 #endif
 
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+TEST(networking, pyproj_issue_1192) {
+    if (!networkAccessOK) {
+        return;
+    }
+
+    const auto doTest = [](PJ_CONTEXT *ctxt) {
+        auto factory_context =
+            proj_create_operation_factory_context(ctxt, nullptr);
+        proj_operation_factory_context_set_grid_availability_use(
+            ctxt, factory_context, PROJ_GRID_AVAILABILITY_IGNORED);
+        proj_operation_factory_context_set_spatial_criterion(
+            ctxt, factory_context, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+        auto from = proj_create(ctxt, "EPSG:4326");
+        auto to = proj_create(ctxt, "EPSG:2964");
+        auto pj_operations =
+            proj_create_operations(ctxt, from, to, factory_context);
+        proj_destroy(from);
+        proj_destroy(to);
+        auto num_operations = proj_list_get_count(pj_operations);
+        for (int i = 0; i < num_operations; ++i) {
+            PJ *P = proj_list_get(ctxt, pj_operations, i);
+            int is_instantiable = proj_coordoperation_is_instantiable(ctxt, P);
+            if (is_instantiable) {
+                EXPECT_TRUE(proj_pj_info(P).id != nullptr);
+            }
+            proj_destroy(P);
+        }
+        proj_operation_factory_context_destroy(factory_context);
+        proj_list_destroy(pj_operations);
+    };
+
+    auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
+    proj_context_set_enable_network(ctx, true);
+    doTest(ctx);
+    proj_context_set_enable_network(ctx, false);
+    doTest(ctx);
+
+    proj_context_destroy(ctx);
+}
+
+#endif
+
 } // namespace
