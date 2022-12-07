@@ -6543,6 +6543,24 @@ TEST(crs, crs_alterCSLinearUnit) {
     }
 
     {
+        auto crs = createDerivedProjectedCRSNorthingEasting();
+        auto alteredCRS = crs->alterCSLinearUnit(UnitOfMeasure("my unit", 2));
+
+        auto leftHandedDerivedCRS =
+            dynamic_cast<DerivedProjectedCRS *>(alteredCRS.get());
+        ASSERT_TRUE(leftHandedDerivedCRS != nullptr);
+        auto cs = dynamic_cast<CartesianCS *>(
+            leftHandedDerivedCRS->coordinateSystem().get());
+        ASSERT_EQ(cs->axisList().size(), 2U);
+        EXPECT_EQ(cs->axisList()[0]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::NORTH);
+        EXPECT_EQ(cs->axisList()[0]->unit().conversionToSI(), 2);
+        EXPECT_EQ(cs->axisList()[1]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[1]->direction(), AxisDirection::EAST);
+        EXPECT_EQ(cs->axisList()[1]->unit().conversionToSI(), 2);
+    }
+
+    {
         auto crs = GeodeticCRS::EPSG_4978->alterCSLinearUnit(
             UnitOfMeasure("my unit", 2));
         auto geodCRS = dynamic_cast<GeodeticCRS *>(crs.get());
