@@ -21,7 +21,7 @@
 
 Thomas Knudsen, thokn@sdfe.dk, 2016-05-24/06-05
 Kristian Evers, kreve@sdfe.dk, 2017-05-01
-Even Rouault, even.roault@spatialys.com
+Even Rouault, even.rouault@spatialys.com
 Last update: 2018-10-26
 
 ************************************************************************
