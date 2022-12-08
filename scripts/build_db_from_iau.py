@@ -25,7 +25,7 @@ all_sql.append("INSERT INTO axis VALUES('PROJ','PROJECTED_WEST_NORTH_W','Westing
 all_sql.append("INSERT INTO axis VALUES('PROJ','PROJECTED_WEST_NORTH_N','Northing','N','north','PROJ','PROJECTED_WEST_NORTH',2,'EPSG','9001');");
 
 
-SOURCE_IAU = "Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5"
+SOURCE_IAU = "Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5"
 
 
 def get_longitude_positive_direction(Body, Naif_id, rotation):

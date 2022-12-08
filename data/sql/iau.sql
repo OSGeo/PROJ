@@ -46,7 +46,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 1000, 'Reference Meridian', 0.0, '
 INSERT INTO ellipsoid VALUES('IAU_2015',1000,'Sun (2015) - Sphere',NULL,'IAU_2015',10,695700000.000000,'EPSG','9001',NULL,695700000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',1000,'Sun (2015) - Sphere','','IAU_2015',1000,'IAU_2015',1000,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_1000','geodetic_datum','IAU_2015',1000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',1000,'Sun (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',1000,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',1000,'Sun (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',1000,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_1000','geodetic_crs','IAU_2015',1000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',1010,'Sun (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',1000,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_1010','projected_crs','IAU_2015',1010,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -85,7 +85,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 19900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',19900,'Mercury (2015) - Sphere',NULL,'IAU_2015',199,2440530.000000,'EPSG','9001',NULL,2440530.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',19900,'Mercury (2015) - Sphere','','IAU_2015',19900,'IAU_2015',19900,NULL,NULL,NULL,'Hun Kal: 20 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_19900','geodetic_datum','IAU_2015',19900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',19900,'Mercury (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',19900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',19900,'Mercury (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',19900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_19900','geodetic_crs','IAU_2015',19900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',19910,'Mercury (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',19900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_19910','projected_crs','IAU_2015',19910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -122,7 +122,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_19985','projected_crs','IAU_2015',1998
 INSERT INTO ellipsoid VALUES('IAU_2015',19901,'Mercury (2015)',NULL,'IAU_2015',199,2440530.000000,'EPSG','9001',NULL,2438260.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',19901,'Mercury (2015)','','IAU_2015',19901,'IAU_2015',19900,NULL,NULL,NULL,'Hun Kal: 20 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_19901','geodetic_datum','IAU_2015',19901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',19901,'Mercury (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',19901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',19901,'Mercury (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',19901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_19901','geodetic_crs','IAU_2015',19901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',19911,'Mercury (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',19901,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_19911','projected_crs','IAU_2015',19911,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -156,7 +156,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',19981,'Mercury (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_19981','projected_crs','IAU_2015',19981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',19986,'Mercury (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',19901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_19986','projected_crs','IAU_2015',19986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',19902,'Mercury (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',19901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',19902,'Mercury (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',19901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_19902','geodetic_crs','IAU_2015',19902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',19912,'Mercury (2015) / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',19902,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_19912','projected_crs','IAU_2015',19912,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -195,7 +195,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 29900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',29900,'Venus (2015) - Sphere',NULL,'IAU_2015',299,6051800.000000,'EPSG','9001',NULL,6051800.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',29900,'Venus (2015) - Sphere','','IAU_2015',29900,'IAU_2015',29900,NULL,NULL,NULL,'Ariadne: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_29900','geodetic_datum','IAU_2015',29900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',29900,'Venus (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',29900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',29900,'Venus (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',29900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_29900','geodetic_crs','IAU_2015',29900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',29910,'Venus (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',29900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_29910','projected_crs','IAU_2015',29910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -234,7 +234,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 39900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',39900,'Earth (2015) - Sphere',NULL,'IAU_2015',399,6378136.600000,'EPSG','9001',NULL,6378136.600000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',39900,'Earth (2015) - Sphere','','IAU_2015',39900,'IAU_2015',39900,NULL,NULL,NULL,'Greenwich: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_39900','geodetic_datum','IAU_2015',39900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',39900,'Earth (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',39900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',39900,'Earth (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',39900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_39900','geodetic_crs','IAU_2015',39900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',39910,'Earth (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',39900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_39910','projected_crs','IAU_2015',39910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -271,7 +271,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_39985','projected_crs','IAU_2015',3998
 INSERT INTO ellipsoid VALUES('IAU_2015',39901,'Earth (2015)',NULL,'IAU_2015',399,6378136.600000,'EPSG','9001',NULL,6356751.900000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',39901,'Earth (2015)','','IAU_2015',39901,'IAU_2015',39900,NULL,NULL,NULL,'Greenwich: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_39901','geodetic_datum','IAU_2015',39901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',39901,'Earth (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',39901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',39901,'Earth (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',39901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_39901','geodetic_crs','IAU_2015',39901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',39911,'Earth (2015) / Ographic / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',39901,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_39911','projected_crs','IAU_2015',39911,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -305,14 +305,14 @@ INSERT INTO projected_crs VALUES('IAU_2015',39981,'Earth (2015) / Ographic / Lam
 INSERT INTO usage VALUES('IAU_2015','PCRS_39981','projected_crs','IAU_2015',39981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',39986,'Earth (2015) / Ographic / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',39901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_39986','projected_crs','IAU_2015',39986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',39902,'Earth (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',39901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',39902,'Earth (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',39901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_39902','geodetic_crs','IAU_2015',39902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 301, 'Moon', 1737400.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 30100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
 INSERT INTO ellipsoid VALUES('IAU_2015',30100,'Moon (2015) - Sphere',NULL,'IAU_2015',301,1737400.000000,'EPSG','9001',NULL,1737400.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',30100,'Moon (2015) - Sphere','','IAU_2015',30100,'IAU_2015',30100,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_30100','geodetic_datum','IAU_2015',30100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',30100,'Moon (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',30100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',30100,'Moon (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',30100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_30100','geodetic_crs','IAU_2015',30100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',30110,'Moon (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',30100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_30110','projected_crs','IAU_2015',30110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -351,7 +351,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 49900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',49900,'Mars (2015) - Sphere',NULL,'IAU_2015',499,3396190.000000,'EPSG','9001',NULL,3396190.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',49900,'Mars (2015) - Sphere','','IAU_2015',49900,'IAU_2015',49900,NULL,NULL,NULL,'Viking 1 lander: 47.95137 W',0);
 INSERT INTO usage VALUES('IAU_2015','GD_49900','geodetic_datum','IAU_2015',49900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',49900,'Mars (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',49900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',49900,'Mars (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',49900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_49900','geodetic_crs','IAU_2015',49900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',49910,'Mars (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',49900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_49910','projected_crs','IAU_2015',49910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -388,7 +388,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_49985','projected_crs','IAU_2015',4998
 INSERT INTO ellipsoid VALUES('IAU_2015',49901,'Mars (2015)',NULL,'IAU_2015',499,3396190.000000,'EPSG','9001',NULL,3376200.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',49901,'Mars (2015)','','IAU_2015',49901,'IAU_2015',49900,NULL,NULL,NULL,'Viking 1 lander: 47.95137 W',0);
 INSERT INTO usage VALUES('IAU_2015','GD_49901','geodetic_datum','IAU_2015',49901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',49901,'Mars (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',49901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',49901,'Mars (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',49901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_49901','geodetic_crs','IAU_2015',49901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',49911,'Mars (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',49901,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_49911','projected_crs','IAU_2015',49911,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -422,7 +422,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',49981,'Mars (2015) / Ographic / Lamb
 INSERT INTO usage VALUES('IAU_2015','PCRS_49981','projected_crs','IAU_2015',49981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',49986,'Mars (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',49901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_49986','projected_crs','IAU_2015',49986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',49902,'Mars (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',49901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',49902,'Mars (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',49901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_49902','geodetic_crs','IAU_2015',49902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',49912,'Mars (2015) / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',49902,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_49912','projected_crs','IAU_2015',49912,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -461,7 +461,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 40100, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',40100,'Phobos (2015) - Sphere',NULL,'IAU_2015',401,11080.000000,'EPSG','9001',NULL,11080.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',40100,'Phobos (2015) - Sphere','','IAU_2015',40100,'IAU_2015',40100,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_40100','geodetic_datum','IAU_2015',40100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',40100,'Phobos (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',40100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',40100,'Phobos (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',40100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_40100','geodetic_crs','IAU_2015',40100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',40110,'Phobos (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',40100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_40110','projected_crs','IAU_2015',40110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -500,7 +500,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 40200, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',40200,'Deimos (2015) - Sphere',NULL,'IAU_2015',402,6200.000000,'EPSG','9001',NULL,6200.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',40200,'Deimos (2015) - Sphere','','IAU_2015',40200,'IAU_2015',40200,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_40200','geodetic_datum','IAU_2015',40200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',40200,'Deimos (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',40200,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',40200,'Deimos (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',40200,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_40200','geodetic_crs','IAU_2015',40200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',40210,'Deimos (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',40200,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_40210','projected_crs','IAU_2015',40210,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -539,7 +539,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 59900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',59900,'Jupiter (2015) - Sphere',NULL,'IAU_2015',599,71492000.000000,'EPSG','9001',NULL,71492000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',59900,'Jupiter (2015) - Sphere','','IAU_2015',59900,'IAU_2015',59900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_59900','geodetic_datum','IAU_2015',59900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',59900,'Jupiter (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',59900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',59900,'Jupiter (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',59900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_59900','geodetic_crs','IAU_2015',59900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',59910,'Jupiter (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',59900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_59910','projected_crs','IAU_2015',59910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -576,7 +576,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_59985','projected_crs','IAU_2015',5998
 INSERT INTO ellipsoid VALUES('IAU_2015',59901,'Jupiter (2015)',NULL,'IAU_2015',599,71492000.000000,'EPSG','9001',NULL,66854000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',59901,'Jupiter (2015)','','IAU_2015',59901,'IAU_2015',59900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_59901','geodetic_datum','IAU_2015',59901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',59901,'Jupiter (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',59901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',59901,'Jupiter (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',59901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_59901','geodetic_crs','IAU_2015',59901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',59911,'Jupiter (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',59901,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_59911','projected_crs','IAU_2015',59911,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -610,7 +610,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',59981,'Jupiter (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_59981','projected_crs','IAU_2015',59981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',59986,'Jupiter (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',59901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_59986','projected_crs','IAU_2015',59986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',59902,'Jupiter (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',59901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',59902,'Jupiter (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',59901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_59902','geodetic_crs','IAU_2015',59902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',59912,'Jupiter (2015) / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',59902,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_59912','projected_crs','IAU_2015',59912,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -649,7 +649,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 50100, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',50100,'Io (2015) - Sphere',NULL,'IAU_2015',501,1821490.000000,'EPSG','9001',NULL,1821490.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50100,'Io (2015) - Sphere','','IAU_2015',50100,'IAU_2015',50100,NULL,NULL,NULL,'The mean sub-Jovian direction: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_50100','geodetic_datum','IAU_2015',50100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',50100,'Io (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',50100,'Io (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_50100','geodetic_crs','IAU_2015',50100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50110,'Io (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',50100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50110','projected_crs','IAU_2015',50110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -688,7 +688,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 50200, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',50200,'Europa (2015) - Sphere',NULL,'IAU_2015',502,1560800.000000,'EPSG','9001',NULL,1560800.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50200,'Europa (2015) - Sphere','','IAU_2015',50200,'IAU_2015',50200,NULL,NULL,NULL,'Cilix: 182 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_50200','geodetic_datum','IAU_2015',50200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',50200,'Europa (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50200,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',50200,'Europa (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50200,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_50200','geodetic_crs','IAU_2015',50200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50210,'Europa (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',50200,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50210','projected_crs','IAU_2015',50210,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -727,7 +727,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 50300, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',50300,'Ganymede (2015) - Sphere',NULL,'IAU_2015',503,2631200.000000,'EPSG','9001',NULL,2631200.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50300,'Ganymede (2015) - Sphere','','IAU_2015',50300,'IAU_2015',50300,NULL,NULL,NULL,'Anat: 128 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_50300','geodetic_datum','IAU_2015',50300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',50300,'Ganymede (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',50300,'Ganymede (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_50300','geodetic_crs','IAU_2015',50300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50310,'Ganymede (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',50300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50310','projected_crs','IAU_2015',50310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -764,7 +764,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_50385','projected_crs','IAU_2015',5038
 INSERT INTO ellipsoid VALUES('IAU_2015',50301,'Ganymede (2015)',NULL,'IAU_2015',503,2631200.000000,'EPSG','9001',NULL,2631200.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50301,'Ganymede (2015)','','IAU_2015',50301,'IAU_2015',50300,NULL,NULL,NULL,'Anat: 128 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_50301','geodetic_datum','IAU_2015',50301,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',50301,'Ganymede (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',50301,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',50301,'Ganymede (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',50301,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_50301','geodetic_crs','IAU_2015',50301,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50311,'Ganymede (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',50301,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50311','projected_crs','IAU_2015',50311,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -803,7 +803,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 50400, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',50400,'Callisto (2015) - Sphere',NULL,'IAU_2015',504,2410300.000000,'EPSG','9001',NULL,2410300.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50400,'Callisto (2015) - Sphere','','IAU_2015',50400,'IAU_2015',50400,NULL,NULL,NULL,'Saga: 326 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_50400','geodetic_datum','IAU_2015',50400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',50400,'Callisto (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50400,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',50400,'Callisto (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50400,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_50400','geodetic_crs','IAU_2015',50400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50410,'Callisto (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',50400,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50410','projected_crs','IAU_2015',50410,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -840,7 +840,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_50485','projected_crs','IAU_2015',5048
 INSERT INTO ellipsoid VALUES('IAU_2015',50401,'Callisto (2015)',NULL,'IAU_2015',504,2410300.000000,'EPSG','9001',NULL,2410300.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50401,'Callisto (2015)','','IAU_2015',50401,'IAU_2015',50400,NULL,NULL,NULL,'Saga: 326 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_50401','geodetic_datum','IAU_2015',50401,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',50401,'Callisto (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',50401,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',50401,'Callisto (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',50401,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_50401','geodetic_crs','IAU_2015',50401,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50411,'Callisto (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',50401,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50411','projected_crs','IAU_2015',50411,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -879,7 +879,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 50500, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',50500,'Amalthea (2015) - Sphere',NULL,'IAU_2015',505,83500.000000,'EPSG','9001',NULL,83500.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50500,'Amalthea (2015) - Sphere','','IAU_2015',50500,'IAU_2015',50500,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_50500','geodetic_datum','IAU_2015',50500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',50500,'Amalthea (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50500,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',50500,'Amalthea (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50500,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_50500','geodetic_crs','IAU_2015',50500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50510,'Amalthea (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',50500,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50510','projected_crs','IAU_2015',50510,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -918,7 +918,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 50600, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',50600,'Himalia (2015) - Sphere',NULL,'IAU_2015',506,85000.000000,'EPSG','9001',NULL,85000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50600,'Himalia (2015) - Sphere','','IAU_2015',50600,'IAU_2015',50600,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_50600','geodetic_datum','IAU_2015',50600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',50600,'Himalia (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50600,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',50600,'Himalia (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50600,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_50600','geodetic_crs','IAU_2015',50600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50610,'Himalia (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',50600,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50610','projected_crs','IAU_2015',50610,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -957,7 +957,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 50700, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',50700,'Elara (2015) - Sphere',NULL,'IAU_2015',507,40000.000000,'EPSG','9001',NULL,40000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50700,'Elara (2015) - Sphere','','IAU_2015',50700,'IAU_2015',50700,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_50700','geodetic_datum','IAU_2015',50700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',50700,'Elara (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50700,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',50700,'Elara (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50700,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_50700','geodetic_crs','IAU_2015',50700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50710,'Elara (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',50700,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50710','projected_crs','IAU_2015',50710,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -996,7 +996,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 50800, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',50800,'Pasiphae (2015) - Sphere',NULL,'IAU_2015',508,18000.000000,'EPSG','9001',NULL,18000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50800,'Pasiphae (2015) - Sphere','','IAU_2015',50800,'IAU_2015',50800,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_50800','geodetic_datum','IAU_2015',50800,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',50800,'Pasiphae (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50800,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',50800,'Pasiphae (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50800,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_50800','geodetic_crs','IAU_2015',50800,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50810,'Pasiphae (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',50800,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50810','projected_crs','IAU_2015',50810,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1035,7 +1035,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 50900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',50900,'Sinope (2015) - Sphere',NULL,'IAU_2015',509,14000.000000,'EPSG','9001',NULL,14000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50900,'Sinope (2015) - Sphere','','IAU_2015',50900,'IAU_2015',50900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_50900','geodetic_datum','IAU_2015',50900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',50900,'Sinope (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',50900,'Sinope (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',50900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_50900','geodetic_crs','IAU_2015',50900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50910,'Sinope (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',50900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50910','projected_crs','IAU_2015',50910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1074,7 +1074,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 51000, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',51000,'Lysithea (2015) - Sphere',NULL,'IAU_2015',510,12000.000000,'EPSG','9001',NULL,12000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',51000,'Lysithea (2015) - Sphere','','IAU_2015',51000,'IAU_2015',51000,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_51000','geodetic_datum','IAU_2015',51000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',51000,'Lysithea (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51000,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',51000,'Lysithea (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51000,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_51000','geodetic_crs','IAU_2015',51000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51010,'Lysithea (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',51000,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51010','projected_crs','IAU_2015',51010,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1113,7 +1113,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 51100, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',51100,'Carme (2015) - Sphere',NULL,'IAU_2015',511,15000.000000,'EPSG','9001',NULL,15000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',51100,'Carme (2015) - Sphere','','IAU_2015',51100,'IAU_2015',51100,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_51100','geodetic_datum','IAU_2015',51100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',51100,'Carme (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',51100,'Carme (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_51100','geodetic_crs','IAU_2015',51100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51110,'Carme (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',51100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51110','projected_crs','IAU_2015',51110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1152,7 +1152,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 51200, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',51200,'Ananke (2015) - Sphere',NULL,'IAU_2015',512,10000.000000,'EPSG','9001',NULL,10000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',51200,'Ananke (2015) - Sphere','','IAU_2015',51200,'IAU_2015',51200,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_51200','geodetic_datum','IAU_2015',51200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',51200,'Ananke (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51200,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',51200,'Ananke (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51200,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_51200','geodetic_crs','IAU_2015',51200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51210,'Ananke (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',51200,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51210','projected_crs','IAU_2015',51210,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1191,7 +1191,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 51300, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',51300,'Leda (2015) - Sphere',NULL,'IAU_2015',513,5000.000000,'EPSG','9001',NULL,5000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',51300,'Leda (2015) - Sphere','','IAU_2015',51300,'IAU_2015',51300,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_51300','geodetic_datum','IAU_2015',51300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',51300,'Leda (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',51300,'Leda (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_51300','geodetic_crs','IAU_2015',51300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51310,'Leda (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',51300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51310','projected_crs','IAU_2015',51310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1230,7 +1230,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 51400, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',51400,'Thebe (2015) - Sphere',NULL,'IAU_2015',514,49300.000000,'EPSG','9001',NULL,49300.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',51400,'Thebe (2015) - Sphere','','IAU_2015',51400,'IAU_2015',51400,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_51400','geodetic_datum','IAU_2015',51400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',51400,'Thebe (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51400,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',51400,'Thebe (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51400,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_51400','geodetic_crs','IAU_2015',51400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51410,'Thebe (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',51400,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51410','projected_crs','IAU_2015',51410,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1269,7 +1269,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 51500, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',51500,'Adrastea (2015) - Sphere',NULL,'IAU_2015',515,8200.000000,'EPSG','9001',NULL,8200.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',51500,'Adrastea (2015) - Sphere','','IAU_2015',51500,'IAU_2015',51500,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_51500','geodetic_datum','IAU_2015',51500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',51500,'Adrastea (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51500,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',51500,'Adrastea (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51500,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_51500','geodetic_crs','IAU_2015',51500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51510,'Adrastea (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',51500,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51510','projected_crs','IAU_2015',51510,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1308,7 +1308,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 51600, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',51600,'Metis (2015) - Sphere',NULL,'IAU_2015',516,21500.000000,'EPSG','9001',NULL,21500.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',51600,'Metis (2015) - Sphere','','IAU_2015',51600,'IAU_2015',51600,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_51600','geodetic_datum','IAU_2015',51600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',51600,'Metis (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51600,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',51600,'Metis (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',51600,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_51600','geodetic_crs','IAU_2015',51600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51610,'Metis (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',51600,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51610','projected_crs','IAU_2015',51610,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1381,7 +1381,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 69900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',69900,'Saturn (2015) - Sphere',NULL,'IAU_2015',699,60268000.000000,'EPSG','9001',NULL,60268000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',69900,'Saturn (2015) - Sphere','','IAU_2015',69900,'IAU_2015',69900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_69900','geodetic_datum','IAU_2015',69900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',69900,'Saturn (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',69900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',69900,'Saturn (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',69900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_69900','geodetic_crs','IAU_2015',69900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',69910,'Saturn (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',69900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_69910','projected_crs','IAU_2015',69910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1418,7 +1418,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_69985','projected_crs','IAU_2015',6998
 INSERT INTO ellipsoid VALUES('IAU_2015',69901,'Saturn (2015)',NULL,'IAU_2015',699,60268000.000000,'EPSG','9001',NULL,54364000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',69901,'Saturn (2015)','','IAU_2015',69901,'IAU_2015',69900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_69901','geodetic_datum','IAU_2015',69901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',69901,'Saturn (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',69901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',69901,'Saturn (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',69901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_69901','geodetic_crs','IAU_2015',69901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',69911,'Saturn (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',69901,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_69911','projected_crs','IAU_2015',69911,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1452,7 +1452,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',69981,'Saturn (2015) / Ographic / La
 INSERT INTO usage VALUES('IAU_2015','PCRS_69981','projected_crs','IAU_2015',69981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',69986,'Saturn (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',69901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_69986','projected_crs','IAU_2015',69986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',69902,'Saturn (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',69901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',69902,'Saturn (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',69901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_69902','geodetic_crs','IAU_2015',69902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',69912,'Saturn (2015) / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',69902,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_69912','projected_crs','IAU_2015',69912,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1491,7 +1491,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 60100, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',60100,'Mimas (2015) - Sphere',NULL,'IAU_2015',601,198200.000000,'EPSG','9001',NULL,198200.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',60100,'Mimas (2015) - Sphere','','IAU_2015',60100,'IAU_2015',60100,NULL,NULL,NULL,'Palomides: 162 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_60100','geodetic_datum','IAU_2015',60100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',60100,'Mimas (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',60100,'Mimas (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60100','geodetic_crs','IAU_2015',60100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60110,'Mimas (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',60100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60110','projected_crs','IAU_2015',60110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1530,7 +1530,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 60200, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',60200,'Enceladus (2015) - Sphere',NULL,'IAU_2015',602,252100.000000,'EPSG','9001',NULL,252100.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',60200,'Enceladus (2015) - Sphere','','IAU_2015',60200,'IAU_2015',60200,NULL,NULL,NULL,'Salih: 5 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_60200','geodetic_datum','IAU_2015',60200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',60200,'Enceladus (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60200,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',60200,'Enceladus (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60200,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60200','geodetic_crs','IAU_2015',60200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60210,'Enceladus (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',60200,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60210','projected_crs','IAU_2015',60210,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1569,7 +1569,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 60300, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',60300,'Tethys (2015) - Sphere',NULL,'IAU_2015',603,531000.000000,'EPSG','9001',NULL,531000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',60300,'Tethys (2015) - Sphere','','IAU_2015',60300,'IAU_2015',60300,NULL,NULL,NULL,'Arete: 299 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_60300','geodetic_datum','IAU_2015',60300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',60300,'Tethys (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',60300,'Tethys (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60300','geodetic_crs','IAU_2015',60300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60310,'Tethys (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',60300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60310','projected_crs','IAU_2015',60310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1608,7 +1608,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 60400, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',60400,'Dione (2015) - Sphere',NULL,'IAU_2015',604,561400.000000,'EPSG','9001',NULL,561400.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',60400,'Dione (2015) - Sphere','','IAU_2015',60400,'IAU_2015',60400,NULL,NULL,NULL,'Palinurus: 63 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_60400','geodetic_datum','IAU_2015',60400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',60400,'Dione (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60400,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',60400,'Dione (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60400,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60400','geodetic_crs','IAU_2015',60400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60410,'Dione (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',60400,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60410','projected_crs','IAU_2015',60410,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1647,7 +1647,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 60500, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',60500,'Rhea (2015) - Sphere',NULL,'IAU_2015',605,763500.000000,'EPSG','9001',NULL,763500.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',60500,'Rhea (2015) - Sphere','','IAU_2015',60500,'IAU_2015',60500,NULL,NULL,NULL,'Tore: 340 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_60500','geodetic_datum','IAU_2015',60500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',60500,'Rhea (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60500,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',60500,'Rhea (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60500,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60500','geodetic_crs','IAU_2015',60500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60510,'Rhea (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',60500,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60510','projected_crs','IAU_2015',60510,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1686,7 +1686,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 60600, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',60600,'Titan (2015) - Sphere',NULL,'IAU_2015',606,2575000.000000,'EPSG','9001',NULL,2575000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',60600,'Titan (2015) - Sphere','','IAU_2015',60600,'IAU_2015',60600,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_60600','geodetic_datum','IAU_2015',60600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',60600,'Titan (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60600,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',60600,'Titan (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60600,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60600','geodetic_crs','IAU_2015',60600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60610,'Titan (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',60600,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60610','projected_crs','IAU_2015',60610,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1725,7 +1725,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 60700, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',60700,'Hyperion (2015) - Sphere',NULL,'IAU_2015',607,135000.000000,'EPSG','9001',NULL,135000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',60700,'Hyperion (2015) - Sphere','','IAU_2015',60700,'IAU_2015',60700,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_60700','geodetic_datum','IAU_2015',60700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',60700,'Hyperion (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60700,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',60700,'Hyperion (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60700,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60700','geodetic_crs','IAU_2015',60700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60710,'Hyperion (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',60700,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60710','projected_crs','IAU_2015',60710,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1764,7 +1764,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 60800, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',60800,'Iapetus (2015) - Sphere',NULL,'IAU_2015',608,745700.000000,'EPSG','9001',NULL,745700.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',60800,'Iapetus (2015) - Sphere','','IAU_2015',60800,'IAU_2015',60800,NULL,NULL,NULL,'Almeric: 276 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_60800','geodetic_datum','IAU_2015',60800,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',60800,'Iapetus (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60800,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',60800,'Iapetus (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60800,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60800','geodetic_crs','IAU_2015',60800,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60810,'Iapetus (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',60800,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60810','projected_crs','IAU_2015',60810,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1801,7 +1801,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_60885','projected_crs','IAU_2015',6088
 INSERT INTO ellipsoid VALUES('IAU_2015',60801,'Iapetus (2015)',NULL,'IAU_2015',608,745700.000000,'EPSG','9001',NULL,712100.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',60801,'Iapetus (2015)','','IAU_2015',60801,'IAU_2015',60800,NULL,NULL,NULL,'Almeric: 276 W.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_60801','geodetic_datum','IAU_2015',60801,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',60801,'Iapetus (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',60801,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',60801,'Iapetus (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',60801,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60801','geodetic_crs','IAU_2015',60801,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60811,'Iapetus (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',60801,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60811','projected_crs','IAU_2015',60811,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1835,7 +1835,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60881,'Iapetus (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_60881','projected_crs','IAU_2015',60881,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60886,'Iapetus (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',60801,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60886','projected_crs','IAU_2015',60886,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',60802,'Iapetus (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',60801,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',60802,'Iapetus (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',60801,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60802','geodetic_crs','IAU_2015',60802,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60812,'Iapetus (2015) / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',60802,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60812','projected_crs','IAU_2015',60812,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1874,7 +1874,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 60900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',60900,'Phoebe (2015) - Sphere',NULL,'IAU_2015',609,106500.000000,'EPSG','9001',NULL,106500.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',60900,'Phoebe (2015) - Sphere','','IAU_2015',60900,'IAU_2015',60900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_60900','geodetic_datum','IAU_2015',60900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',60900,'Phoebe (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',60900,'Phoebe (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',60900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60900','geodetic_crs','IAU_2015',60900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60910,'Phoebe (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',60900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60910','projected_crs','IAU_2015',60910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1913,7 +1913,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 61000, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',61000,'Janus (2015) - Sphere',NULL,'IAU_2015',610,89200.000000,'EPSG','9001',NULL,89200.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',61000,'Janus (2015) - Sphere','','IAU_2015',61000,'IAU_2015',61000,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_61000','geodetic_datum','IAU_2015',61000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',61000,'Janus (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61000,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',61000,'Janus (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61000,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_61000','geodetic_crs','IAU_2015',61000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61010,'Janus (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',61000,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61010','projected_crs','IAU_2015',61010,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1952,7 +1952,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 61100, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',61100,'Epimetheus (2015) - Sphere',NULL,'IAU_2015',611,58200.000000,'EPSG','9001',NULL,58200.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',61100,'Epimetheus (2015) - Sphere','','IAU_2015',61100,'IAU_2015',61100,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_61100','geodetic_datum','IAU_2015',61100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',61100,'Epimetheus (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',61100,'Epimetheus (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_61100','geodetic_crs','IAU_2015',61100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61110,'Epimetheus (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',61100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61110','projected_crs','IAU_2015',61110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1991,7 +1991,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 61200, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',61200,'Helene (2015) - Sphere',NULL,'IAU_2015',612,18000.000000,'EPSG','9001',NULL,18000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',61200,'Helene (2015) - Sphere','','IAU_2015',61200,'IAU_2015',61200,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_61200','geodetic_datum','IAU_2015',61200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',61200,'Helene (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61200,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',61200,'Helene (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61200,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_61200','geodetic_crs','IAU_2015',61200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61210,'Helene (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',61200,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61210','projected_crs','IAU_2015',61210,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2030,7 +2030,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 61300, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',61300,'Telesto (2015) - Sphere',NULL,'IAU_2015',613,12400.000000,'EPSG','9001',NULL,12400.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',61300,'Telesto (2015) - Sphere','','IAU_2015',61300,'IAU_2015',61300,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_61300','geodetic_datum','IAU_2015',61300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',61300,'Telesto (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',61300,'Telesto (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_61300','geodetic_crs','IAU_2015',61300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61310,'Telesto (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',61300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61310','projected_crs','IAU_2015',61310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2069,7 +2069,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 61400, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',61400,'Calypso (2015) - Sphere',NULL,'IAU_2015',614,9600.000000,'EPSG','9001',NULL,9600.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',61400,'Calypso (2015) - Sphere','','IAU_2015',61400,'IAU_2015',61400,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_61400','geodetic_datum','IAU_2015',61400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',61400,'Calypso (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61400,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',61400,'Calypso (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61400,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_61400','geodetic_crs','IAU_2015',61400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61410,'Calypso (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',61400,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61410','projected_crs','IAU_2015',61410,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2108,7 +2108,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 61500, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',61500,'Atlas (2015) - Sphere',NULL,'IAU_2015',615,15100.000000,'EPSG','9001',NULL,15100.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',61500,'Atlas (2015) - Sphere','','IAU_2015',61500,'IAU_2015',61500,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_61500','geodetic_datum','IAU_2015',61500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',61500,'Atlas (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61500,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',61500,'Atlas (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61500,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_61500','geodetic_crs','IAU_2015',61500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61510,'Atlas (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',61500,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61510','projected_crs','IAU_2015',61510,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2147,7 +2147,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 61600, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',61600,'Prometheus (2015) - Sphere',NULL,'IAU_2015',616,43100.000000,'EPSG','9001',NULL,43100.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',61600,'Prometheus (2015) - Sphere','','IAU_2015',61600,'IAU_2015',61600,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_61600','geodetic_datum','IAU_2015',61600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',61600,'Prometheus (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61600,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',61600,'Prometheus (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61600,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_61600','geodetic_crs','IAU_2015',61600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61610,'Prometheus (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',61600,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61610','projected_crs','IAU_2015',61610,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2186,7 +2186,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 61700, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',61700,'Pandora (2015) - Sphere',NULL,'IAU_2015',617,40600.000000,'EPSG','9001',NULL,40600.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',61700,'Pandora (2015) - Sphere','','IAU_2015',61700,'IAU_2015',61700,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_61700','geodetic_datum','IAU_2015',61700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',61700,'Pandora (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61700,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',61700,'Pandora (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61700,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_61700','geodetic_crs','IAU_2015',61700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61710,'Pandora (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',61700,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61710','projected_crs','IAU_2015',61710,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2225,7 +2225,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 61800, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',61800,'Pan (2015) - Sphere',NULL,'IAU_2015',618,14000.000000,'EPSG','9001',NULL,14000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',61800,'Pan (2015) - Sphere','','IAU_2015',61800,'IAU_2015',61800,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_61800','geodetic_datum','IAU_2015',61800,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',61800,'Pan (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61800,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',61800,'Pan (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',61800,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_61800','geodetic_crs','IAU_2015',61800,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61810,'Pan (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',61800,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61810','projected_crs','IAU_2015',61810,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2277,7 +2277,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 63200, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',63200,'Methone (2015) - Sphere',NULL,'IAU_2015',632,1450.000000,'EPSG','9001',NULL,1450.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',63200,'Methone (2015) - Sphere','','IAU_2015',63200,'IAU_2015',63200,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_63200','geodetic_datum','IAU_2015',63200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',63200,'Methone (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',63200,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',63200,'Methone (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',63200,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_63200','geodetic_crs','IAU_2015',63200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',63210,'Methone (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',63200,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63210','projected_crs','IAU_2015',63210,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2316,7 +2316,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 63300, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',63300,'Pallene (2015) - Sphere',NULL,'IAU_2015',633,2230.000000,'EPSG','9001',NULL,2230.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',63300,'Pallene (2015) - Sphere','','IAU_2015',63300,'IAU_2015',63300,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_63300','geodetic_datum','IAU_2015',63300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',63300,'Pallene (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',63300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',63300,'Pallene (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',63300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_63300','geodetic_crs','IAU_2015',63300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',63310,'Pallene (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',63300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63310','projected_crs','IAU_2015',63310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2355,7 +2355,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 63400, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',63400,'Polydeuces (2015) - Sphere',NULL,'IAU_2015',634,1300.000000,'EPSG','9001',NULL,1300.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',63400,'Polydeuces (2015) - Sphere','','IAU_2015',63400,'IAU_2015',63400,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_63400','geodetic_datum','IAU_2015',63400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',63400,'Polydeuces (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',63400,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',63400,'Polydeuces (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',63400,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_63400','geodetic_crs','IAU_2015',63400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',63410,'Polydeuces (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',63400,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63410','projected_crs','IAU_2015',63410,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2394,7 +2394,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 63500, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',63500,'Daphnis (2015) - Sphere',NULL,'IAU_2015',635,3800.000000,'EPSG','9001',NULL,3800.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',63500,'Daphnis (2015) - Sphere','','IAU_2015',63500,'IAU_2015',63500,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_63500','geodetic_datum','IAU_2015',63500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',63500,'Daphnis (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',63500,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',63500,'Daphnis (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',63500,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_63500','geodetic_crs','IAU_2015',63500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',63510,'Daphnis (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',63500,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63510','projected_crs','IAU_2015',63510,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2446,7 +2446,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 64900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',64900,'Anthe (2015) - Sphere',NULL,'IAU_2015',649,500.000000,'EPSG','9001',NULL,500.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',64900,'Anthe (2015) - Sphere','','IAU_2015',64900,'IAU_2015',64900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_64900','geodetic_datum','IAU_2015',64900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',64900,'Anthe (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',64900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',64900,'Anthe (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',64900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_64900','geodetic_crs','IAU_2015',64900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',64910,'Anthe (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',64900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_64910','projected_crs','IAU_2015',64910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2488,7 +2488,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 65300, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',65300,'Aegaeon (2015) - Sphere',NULL,'IAU_2015',653,330.000000,'EPSG','9001',NULL,330.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',65300,'Aegaeon (2015) - Sphere','','IAU_2015',65300,'IAU_2015',65300,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_65300','geodetic_datum','IAU_2015',65300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',65300,'Aegaeon (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',65300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',65300,'Aegaeon (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',65300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_65300','geodetic_crs','IAU_2015',65300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',65310,'Aegaeon (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',65300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_65310','projected_crs','IAU_2015',65310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2527,7 +2527,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 79900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',79900,'Uranus (2015) - Sphere',NULL,'IAU_2015',799,25559000.000000,'EPSG','9001',NULL,25559000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',79900,'Uranus (2015) - Sphere','','IAU_2015',79900,'IAU_2015',79900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_79900','geodetic_datum','IAU_2015',79900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',79900,'Uranus (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',79900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',79900,'Uranus (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',79900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_79900','geodetic_crs','IAU_2015',79900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',79910,'Uranus (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',79900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_79910','projected_crs','IAU_2015',79910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2564,7 +2564,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_79985','projected_crs','IAU_2015',7998
 INSERT INTO ellipsoid VALUES('IAU_2015',79901,'Uranus (2015)',NULL,'IAU_2015',799,25559000.000000,'EPSG','9001',NULL,24973000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',79901,'Uranus (2015)','','IAU_2015',79901,'IAU_2015',79900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_79901','geodetic_datum','IAU_2015',79901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',79901,'Uranus (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',79901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',79901,'Uranus (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',79901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_79901','geodetic_crs','IAU_2015',79901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',79911,'Uranus (2015) / Ographic / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',79901,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_79911','projected_crs','IAU_2015',79911,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2598,14 +2598,14 @@ INSERT INTO projected_crs VALUES('IAU_2015',79981,'Uranus (2015) / Ographic / La
 INSERT INTO usage VALUES('IAU_2015','PCRS_79981','projected_crs','IAU_2015',79981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',79986,'Uranus (2015) / Ographic / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',79901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_79986','projected_crs','IAU_2015',79986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',79902,'Uranus (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',79901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',79902,'Uranus (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',79901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_79902','geodetic_crs','IAU_2015',79902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 701, 'Ariel', 578900.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 70100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
 INSERT INTO ellipsoid VALUES('IAU_2015',70100,'Ariel (2015) - Sphere',NULL,'IAU_2015',701,578900.000000,'EPSG','9001',NULL,578900.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',70100,'Ariel (2015) - Sphere','','IAU_2015',70100,'IAU_2015',70100,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_70100','geodetic_datum','IAU_2015',70100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',70100,'Ariel (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',70100,'Ariel (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_70100','geodetic_crs','IAU_2015',70100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70110,'Ariel (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',70100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70110','projected_crs','IAU_2015',70110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2644,7 +2644,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 70200, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',70200,'Umbriel (2015) - Sphere',NULL,'IAU_2015',702,584700.000000,'EPSG','9001',NULL,584700.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',70200,'Umbriel (2015) - Sphere','','IAU_2015',70200,'IAU_2015',70200,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_70200','geodetic_datum','IAU_2015',70200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',70200,'Umbriel (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70200,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',70200,'Umbriel (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70200,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_70200','geodetic_crs','IAU_2015',70200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70210,'Umbriel (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',70200,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70210','projected_crs','IAU_2015',70210,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2683,7 +2683,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 70300, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',70300,'Titania (2015) - Sphere',NULL,'IAU_2015',703,788900.000000,'EPSG','9001',NULL,788900.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',70300,'Titania (2015) - Sphere','','IAU_2015',70300,'IAU_2015',70300,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_70300','geodetic_datum','IAU_2015',70300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',70300,'Titania (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',70300,'Titania (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_70300','geodetic_crs','IAU_2015',70300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70310,'Titania (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',70300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70310','projected_crs','IAU_2015',70310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2722,7 +2722,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 70400, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',70400,'Oberon (2015) - Sphere',NULL,'IAU_2015',704,761400.000000,'EPSG','9001',NULL,761400.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',70400,'Oberon (2015) - Sphere','','IAU_2015',70400,'IAU_2015',70400,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_70400','geodetic_datum','IAU_2015',70400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',70400,'Oberon (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70400,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',70400,'Oberon (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70400,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_70400','geodetic_crs','IAU_2015',70400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70410,'Oberon (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',70400,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70410','projected_crs','IAU_2015',70410,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2761,7 +2761,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 70500, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',70500,'Miranda (2015) - Sphere',NULL,'IAU_2015',705,235800.000000,'EPSG','9001',NULL,235800.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',70500,'Miranda (2015) - Sphere','','IAU_2015',70500,'IAU_2015',70500,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_70500','geodetic_datum','IAU_2015',70500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',70500,'Miranda (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70500,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',70500,'Miranda (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70500,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_70500','geodetic_crs','IAU_2015',70500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70510,'Miranda (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',70500,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70510','projected_crs','IAU_2015',70510,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2800,7 +2800,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 70600, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',70600,'Cordelia (2015) - Sphere',NULL,'IAU_2015',706,13000.000000,'EPSG','9001',NULL,13000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',70600,'Cordelia (2015) - Sphere','','IAU_2015',70600,'IAU_2015',70600,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_70600','geodetic_datum','IAU_2015',70600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',70600,'Cordelia (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70600,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',70600,'Cordelia (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70600,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_70600','geodetic_crs','IAU_2015',70600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70610,'Cordelia (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',70600,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70610','projected_crs','IAU_2015',70610,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2839,7 +2839,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 70700, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',70700,'Ophelia (2015) - Sphere',NULL,'IAU_2015',707,15000.000000,'EPSG','9001',NULL,15000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',70700,'Ophelia (2015) - Sphere','','IAU_2015',70700,'IAU_2015',70700,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_70700','geodetic_datum','IAU_2015',70700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',70700,'Ophelia (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70700,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',70700,'Ophelia (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70700,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_70700','geodetic_crs','IAU_2015',70700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70710,'Ophelia (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',70700,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70710','projected_crs','IAU_2015',70710,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2878,7 +2878,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 70800, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',70800,'Bianca (2015) - Sphere',NULL,'IAU_2015',708,21000.000000,'EPSG','9001',NULL,21000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',70800,'Bianca (2015) - Sphere','','IAU_2015',70800,'IAU_2015',70800,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_70800','geodetic_datum','IAU_2015',70800,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',70800,'Bianca (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70800,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',70800,'Bianca (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70800,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_70800','geodetic_crs','IAU_2015',70800,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70810,'Bianca (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',70800,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70810','projected_crs','IAU_2015',70810,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2917,7 +2917,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 70900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',70900,'Cressida (2015) - Sphere',NULL,'IAU_2015',709,31000.000000,'EPSG','9001',NULL,31000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',70900,'Cressida (2015) - Sphere','','IAU_2015',70900,'IAU_2015',70900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_70900','geodetic_datum','IAU_2015',70900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',70900,'Cressida (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',70900,'Cressida (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',70900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_70900','geodetic_crs','IAU_2015',70900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70910,'Cressida (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',70900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70910','projected_crs','IAU_2015',70910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2956,7 +2956,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 71000, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',71000,'Desdemona (2015) - Sphere',NULL,'IAU_2015',710,27000.000000,'EPSG','9001',NULL,27000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',71000,'Desdemona (2015) - Sphere','','IAU_2015',71000,'IAU_2015',71000,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_71000','geodetic_datum','IAU_2015',71000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',71000,'Desdemona (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71000,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',71000,'Desdemona (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71000,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_71000','geodetic_crs','IAU_2015',71000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71010,'Desdemona (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',71000,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71010','projected_crs','IAU_2015',71010,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2995,7 +2995,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 71100, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',71100,'Juliet (2015) - Sphere',NULL,'IAU_2015',711,42000.000000,'EPSG','9001',NULL,42000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',71100,'Juliet (2015) - Sphere','','IAU_2015',71100,'IAU_2015',71100,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_71100','geodetic_datum','IAU_2015',71100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',71100,'Juliet (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',71100,'Juliet (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_71100','geodetic_crs','IAU_2015',71100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71110,'Juliet (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',71100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71110','projected_crs','IAU_2015',71110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3034,7 +3034,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 71200, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',71200,'Portia (2015) - Sphere',NULL,'IAU_2015',712,54000.000000,'EPSG','9001',NULL,54000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',71200,'Portia (2015) - Sphere','','IAU_2015',71200,'IAU_2015',71200,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_71200','geodetic_datum','IAU_2015',71200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',71200,'Portia (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71200,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',71200,'Portia (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71200,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_71200','geodetic_crs','IAU_2015',71200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71210,'Portia (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',71200,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71210','projected_crs','IAU_2015',71210,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3073,7 +3073,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 71300, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',71300,'Rosalind (2015) - Sphere',NULL,'IAU_2015',713,27000.000000,'EPSG','9001',NULL,27000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',71300,'Rosalind (2015) - Sphere','','IAU_2015',71300,'IAU_2015',71300,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_71300','geodetic_datum','IAU_2015',71300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',71300,'Rosalind (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',71300,'Rosalind (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_71300','geodetic_crs','IAU_2015',71300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71310,'Rosalind (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',71300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71310','projected_crs','IAU_2015',71310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3112,7 +3112,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 71400, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',71400,'Belinda (2015) - Sphere',NULL,'IAU_2015',714,33000.000000,'EPSG','9001',NULL,33000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',71400,'Belinda (2015) - Sphere','','IAU_2015',71400,'IAU_2015',71400,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_71400','geodetic_datum','IAU_2015',71400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',71400,'Belinda (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71400,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',71400,'Belinda (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71400,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_71400','geodetic_crs','IAU_2015',71400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71410,'Belinda (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',71400,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71410','projected_crs','IAU_2015',71410,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3151,7 +3151,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 71500, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',71500,'Puck (2015) - Sphere',NULL,'IAU_2015',715,77000.000000,'EPSG','9001',NULL,77000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',71500,'Puck (2015) - Sphere','','IAU_2015',71500,'IAU_2015',71500,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_71500','geodetic_datum','IAU_2015',71500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',71500,'Puck (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71500,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',71500,'Puck (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',71500,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_71500','geodetic_crs','IAU_2015',71500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71510,'Puck (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',71500,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71510','projected_crs','IAU_2015',71510,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3202,7 +3202,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 89900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',89900,'Neptune (2015) - Sphere',NULL,'IAU_2015',899,24764000.000000,'EPSG','9001',NULL,24764000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',89900,'Neptune (2015) - Sphere','','IAU_2015',89900,'IAU_2015',89900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_89900','geodetic_datum','IAU_2015',89900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',89900,'Neptune (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',89900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',89900,'Neptune (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',89900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_89900','geodetic_crs','IAU_2015',89900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',89910,'Neptune (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',89900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_89910','projected_crs','IAU_2015',89910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3239,7 +3239,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_89985','projected_crs','IAU_2015',8998
 INSERT INTO ellipsoid VALUES('IAU_2015',89901,'Neptune (2015)',NULL,'IAU_2015',899,24764000.000000,'EPSG','9001',NULL,24341000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',89901,'Neptune (2015)','','IAU_2015',89901,'IAU_2015',89900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_89901','geodetic_datum','IAU_2015',89901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',89901,'Neptune (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',89901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',89901,'Neptune (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',89901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_89901','geodetic_crs','IAU_2015',89901,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',89911,'Neptune (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',89901,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_89911','projected_crs','IAU_2015',89911,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3273,7 +3273,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',89981,'Neptune (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_89981','projected_crs','IAU_2015',89981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',89986,'Neptune (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',89901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_89986','projected_crs','IAU_2015',89986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',89902,'Neptune (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',89901,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',89902,'Neptune (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',89901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_89902','geodetic_crs','IAU_2015',89902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',89912,'Neptune (2015) / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',89902,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_89912','projected_crs','IAU_2015',89912,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3312,7 +3312,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 80100, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',80100,'Triton (2015) - Sphere',NULL,'IAU_2015',801,1352600.000000,'EPSG','9001',NULL,1352600.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80100,'Triton (2015) - Sphere','','IAU_2015',80100,'IAU_2015',80100,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80100','geodetic_datum','IAU_2015',80100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80100,'Triton (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80100,'Triton (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80100','geodetic_crs','IAU_2015',80100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80110,'Triton (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',80100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80110','projected_crs','IAU_2015',80110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3351,7 +3351,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 80200, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',80200,'Nereid (2015) - Sphere',NULL,'IAU_2015',802,170000.000000,'EPSG','9001',NULL,170000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80200,'Nereid (2015) - Sphere','','IAU_2015',80200,'IAU_2015',80200,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80200','geodetic_datum','IAU_2015',80200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80200,'Nereid (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80200,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80200,'Nereid (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80200,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80200','geodetic_crs','IAU_2015',80200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80210,'Nereid (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',80200,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80210','projected_crs','IAU_2015',80210,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3390,7 +3390,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 80300, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',80300,'Naiad (2015) - Sphere',NULL,'IAU_2015',803,29000.000000,'EPSG','9001',NULL,29000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80300,'Naiad (2015) - Sphere','','IAU_2015',80300,'IAU_2015',80300,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80300','geodetic_datum','IAU_2015',80300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80300,'Naiad (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80300,'Naiad (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80300','geodetic_crs','IAU_2015',80300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80310,'Naiad (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',80300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80310','projected_crs','IAU_2015',80310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3427,7 +3427,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_80385','projected_crs','IAU_2015',8038
 INSERT INTO ellipsoid VALUES('IAU_2015',80301,'Naiad (2015)',NULL,'IAU_2015',803,29000.000000,'EPSG','9001',NULL,29000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80301,'Naiad (2015)','','IAU_2015',80301,'IAU_2015',80300,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80301','geodetic_datum','IAU_2015',80301,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80301,'Naiad (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',80301,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80301,'Naiad (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',80301,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80301','geodetic_crs','IAU_2015',80301,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80311,'Naiad (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80301,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80311','projected_crs','IAU_2015',80311,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3466,7 +3466,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 80400, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',80400,'Thalassa (2015) - Sphere',NULL,'IAU_2015',804,40000.000000,'EPSG','9001',NULL,40000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80400,'Thalassa (2015) - Sphere','','IAU_2015',80400,'IAU_2015',80400,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80400','geodetic_datum','IAU_2015',80400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80400,'Thalassa (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80400,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80400,'Thalassa (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80400,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80400','geodetic_crs','IAU_2015',80400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80410,'Thalassa (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',80400,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80410','projected_crs','IAU_2015',80410,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3503,7 +3503,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_80485','projected_crs','IAU_2015',8048
 INSERT INTO ellipsoid VALUES('IAU_2015',80401,'Thalassa (2015)',NULL,'IAU_2015',804,40000.000000,'EPSG','9001',NULL,40000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80401,'Thalassa (2015)','','IAU_2015',80401,'IAU_2015',80400,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80401','geodetic_datum','IAU_2015',80401,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80401,'Thalassa (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',80401,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80401,'Thalassa (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',80401,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80401','geodetic_crs','IAU_2015',80401,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80411,'Thalassa (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80401,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80411','projected_crs','IAU_2015',80411,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3542,7 +3542,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 80500, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',80500,'Despina (2015) - Sphere',NULL,'IAU_2015',805,74000.000000,'EPSG','9001',NULL,74000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80500,'Despina (2015) - Sphere','','IAU_2015',80500,'IAU_2015',80500,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80500','geodetic_datum','IAU_2015',80500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80500,'Despina (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80500,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80500,'Despina (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80500,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80500','geodetic_crs','IAU_2015',80500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80510,'Despina (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',80500,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80510','projected_crs','IAU_2015',80510,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3579,7 +3579,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_80585','projected_crs','IAU_2015',8058
 INSERT INTO ellipsoid VALUES('IAU_2015',80501,'Despina (2015)',NULL,'IAU_2015',805,74000.000000,'EPSG','9001',NULL,74000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80501,'Despina (2015)','','IAU_2015',80501,'IAU_2015',80500,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80501','geodetic_datum','IAU_2015',80501,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80501,'Despina (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',80501,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80501,'Despina (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',80501,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80501','geodetic_crs','IAU_2015',80501,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80511,'Despina (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80501,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80511','projected_crs','IAU_2015',80511,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3618,7 +3618,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 80600, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',80600,'Galatea (2015) - Sphere',NULL,'IAU_2015',806,79000.000000,'EPSG','9001',NULL,79000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80600,'Galatea (2015) - Sphere','','IAU_2015',80600,'IAU_2015',80600,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80600','geodetic_datum','IAU_2015',80600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80600,'Galatea (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80600,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80600,'Galatea (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80600,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80600','geodetic_crs','IAU_2015',80600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80610,'Galatea (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',80600,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80610','projected_crs','IAU_2015',80610,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3655,7 +3655,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_80685','projected_crs','IAU_2015',8068
 INSERT INTO ellipsoid VALUES('IAU_2015',80601,'Galatea (2015)',NULL,'IAU_2015',806,79000.000000,'EPSG','9001',NULL,79000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80601,'Galatea (2015)','','IAU_2015',80601,'IAU_2015',80600,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80601','geodetic_datum','IAU_2015',80601,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80601,'Galatea (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',80601,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80601,'Galatea (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',80601,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80601','geodetic_crs','IAU_2015',80601,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80611,'Galatea (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80601,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80611','projected_crs','IAU_2015',80611,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3694,7 +3694,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 80700, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',80700,'Larissa (2015) - Sphere',NULL,'IAU_2015',807,96000.000000,'EPSG','9001',NULL,96000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80700,'Larissa (2015) - Sphere','','IAU_2015',80700,'IAU_2015',80700,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80700','geodetic_datum','IAU_2015',80700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80700,'Larissa (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80700,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80700,'Larissa (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80700,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80700','geodetic_crs','IAU_2015',80700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80710,'Larissa (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',80700,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80710','projected_crs','IAU_2015',80710,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3731,7 +3731,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_80785','projected_crs','IAU_2015',8078
 INSERT INTO ellipsoid VALUES('IAU_2015',80701,'Larissa (2015)',NULL,'IAU_2015',807,96000.000000,'EPSG','9001',NULL,89000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80701,'Larissa (2015)','','IAU_2015',80701,'IAU_2015',80700,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80701','geodetic_datum','IAU_2015',80701,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80701,'Larissa (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',80701,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80701,'Larissa (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','PROJ','OGRAPHIC_NORTH_WEST','IAU_2015',80701,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80701','geodetic_crs','IAU_2015',80701,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80711,'Larissa (2015) / Ographic / Equirectangular, clon = 0',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80701,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80711','projected_crs','IAU_2015',80711,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3765,7 +3765,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80781,'Larissa (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_80781','projected_crs','IAU_2015',80781,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80786,'Larissa (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80701,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80786','projected_crs','IAU_2015',80786,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80702,'Larissa (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',80701,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80702,'Larissa (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',80701,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80702','geodetic_crs','IAU_2015',80702,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80712,'Larissa (2015) / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',80702,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80712','projected_crs','IAU_2015',80712,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3804,7 +3804,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 80800, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',80800,'Proteus (2015) - Sphere',NULL,'IAU_2015',808,208000.000000,'EPSG','9001',NULL,208000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80800,'Proteus (2015) - Sphere','','IAU_2015',80800,'IAU_2015',80800,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_80800','geodetic_datum','IAU_2015',80800,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',80800,'Proteus (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80800,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',80800,'Proteus (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',80800,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80800','geodetic_crs','IAU_2015',80800,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80810,'Proteus (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',80800,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80810','projected_crs','IAU_2015',80810,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3848,7 +3848,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 99900, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',99900,'Pluto (2015) - Sphere',NULL,'IAU_2015',999,1188300.000000,'EPSG','9001',NULL,1188300.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',99900,'Pluto (2015) - Sphere','','IAU_2015',99900,'IAU_2015',99900,NULL,NULL,NULL,'Mean sub-Charon meridian: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_99900','geodetic_datum','IAU_2015',99900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',99900,'Pluto (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',99900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',99900,'Pluto (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',99900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_99900','geodetic_crs','IAU_2015',99900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',99910,'Pluto (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',99900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_99910','projected_crs','IAU_2015',99910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3887,7 +3887,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 90100, 'Reference Meridian', 0.0, 
 INSERT INTO ellipsoid VALUES('IAU_2015',90100,'Charon (2015) - Sphere',NULL,'IAU_2015',901,606000.000000,'EPSG','9001',NULL,606000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',90100,'Charon (2015) - Sphere','','IAU_2015',90100,'IAU_2015',90100,NULL,NULL,NULL,'Mean sub-Pluto meridian: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_90100','geodetic_datum','IAU_2015',90100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',90100,'Charon (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',90100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',90100,'Charon (2015) - Sphere / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',90100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_90100','geodetic_crs','IAU_2015',90100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',90110,'Charon (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',90100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_90110','projected_crs','IAU_2015',90110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3927,7 +3927,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 100000500, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',100000500,'Borrelly (2015) - Sphere',NULL,'IAU_2015',1000005,4220.000000,'EPSG','9001',NULL,4220.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',100000500,'Borrelly (2015) - Sphere','','IAU_2015',100000500,'IAU_2015',100000500,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_100000500','geodetic_datum','IAU_2015',100000500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',100000500,'Borrelly (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100000500,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',100000500,'Borrelly (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100000500,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_100000500','geodetic_crs','IAU_2015',100000500,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100000510,'Borrelly (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',100000500,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100000510','projected_crs','IAU_2015',100000510,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3966,7 +3966,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 100001200, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',100001200,'Churyumov-Gerasimenko (2015) - Sphere',NULL,'IAU_2015',1000012,1650.000000,'EPSG','9001',NULL,1650.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',100001200,'Churyumov-Gerasimenko (2015) - Sphere','','IAU_2015',100001200,'IAU_2015',100001200,NULL,NULL,NULL,'a large boulder called Cheops: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_100001200','geodetic_datum','IAU_2015',100001200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',100001200,'Churyumov-Gerasimenko (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100001200,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',100001200,'Churyumov-Gerasimenko (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100001200,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_100001200','geodetic_crs','IAU_2015',100001200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100001210,'Churyumov-Gerasimenko (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',100001200,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100001210','projected_crs','IAU_2015',100001210,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4005,7 +4005,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 100003600, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',100003600,'Halley (2015) - Sphere',NULL,'IAU_2015',1000036,8000.000000,'EPSG','9001',NULL,8000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',100003600,'Halley (2015) - Sphere','','IAU_2015',100003600,'IAU_2015',100003600,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_100003600','geodetic_datum','IAU_2015',100003600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',100003600,'Halley (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100003600,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',100003600,'Halley (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100003600,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_100003600','geodetic_crs','IAU_2015',100003600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100003610,'Halley (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',100003600,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100003610','projected_crs','IAU_2015',100003610,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4042,7 +4042,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_100003685','projected_crs','IAU_2015',
 INSERT INTO ellipsoid VALUES('IAU_2015',100003601,'Halley (2015)',NULL,'IAU_2015',1000036,8000.000000,'EPSG','9001',NULL,4000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',100003601,'Halley (2015)','','IAU_2015',100003601,'IAU_2015',100003600,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_100003601','geodetic_datum','IAU_2015',100003601,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',100003601,'Halley (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100003601,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',100003601,'Halley (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100003601,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_100003601','geodetic_crs','IAU_2015',100003601,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100003611,'Halley (2015) / Ographic / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',100003601,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100003611','projected_crs','IAU_2015',100003611,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4076,7 +4076,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',100003681,'Halley (2015) / Ographic 
 INSERT INTO usage VALUES('IAU_2015','PCRS_100003681','projected_crs','IAU_2015',100003681,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100003686,'Halley (2015) / Ographic / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',100003601,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100003686','projected_crs','IAU_2015',100003686,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',100003602,'Halley (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',100003601,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',100003602,'Halley (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',100003601,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_100003602','geodetic_crs','IAU_2015',100003602,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Hartley 2 has inconsistent values: semimajor < axisb or axis < semiminor. Only consider its mean value.
 INSERT INTO celestial_body VALUES('IAU_2015', 1000041, 'Hartley 2', 580.000000);
@@ -4084,7 +4084,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 100004100, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',100004100,'Hartley 2 (2015) - Sphere',NULL,'IAU_2015',1000041,580.000000,'EPSG','9001',NULL,580.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',100004100,'Hartley 2 (2015) - Sphere','','IAU_2015',100004100,'IAU_2015',100004100,NULL,NULL,NULL,'An isolated large mount on the waist near the large lobe: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_100004100','geodetic_datum','IAU_2015',100004100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',100004100,'Hartley 2 (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100004100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',100004100,'Hartley 2 (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100004100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_100004100','geodetic_crs','IAU_2015',100004100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100004110,'Hartley 2 (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',100004100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100004110','projected_crs','IAU_2015',100004110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4124,7 +4124,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 100009300, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',100009300,'Tempel 1 (2015) - Sphere',NULL,'IAU_2015',1000093,3000.000000,'EPSG','9001',NULL,3000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',100009300,'Tempel 1 (2015) - Sphere','','IAU_2015',100009300,'IAU_2015',100009300,NULL,NULL,NULL,'A 350 m diameter unnamed circular feature near the Deep Impactor impact site: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_100009300','geodetic_datum','IAU_2015',100009300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',100009300,'Tempel 1 (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100009300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',100009300,'Tempel 1 (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100009300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_100009300','geodetic_crs','IAU_2015',100009300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100009310,'Tempel 1 (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',100009300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100009310','projected_crs','IAU_2015',100009310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4163,7 +4163,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 100010700, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',100010700,'Wild 2 (2015) - Sphere',NULL,'IAU_2015',1000107,1975.000000,'EPSG','9001',NULL,1975.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',100010700,'Wild 2 (2015) - Sphere','','IAU_2015',100010700,'IAU_2015',100010700,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_100010700','geodetic_datum','IAU_2015',100010700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',100010700,'Wild 2 (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100010700,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',100010700,'Wild 2 (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',100010700,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_100010700','geodetic_crs','IAU_2015',100010700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100010710,'Wild 2 (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',100010700,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100010710','projected_crs','IAU_2015',100010710,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4202,7 +4202,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 951101000, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',951101000,'Gaspra (2015) - Sphere',NULL,'IAU_2015',9511010,6100.000000,'EPSG','9001',NULL,6100.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',951101000,'Gaspra (2015) - Sphere','','IAU_2015',951101000,'IAU_2015',951101000,NULL,NULL,NULL,'Charax: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_951101000','geodetic_datum','IAU_2015',951101000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',951101000,'Gaspra (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',951101000,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',951101000,'Gaspra (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',951101000,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_951101000','geodetic_crs','IAU_2015',951101000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',951101010,'Gaspra (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',951101000,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_951101010','projected_crs','IAU_2015',951101010,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4241,7 +4241,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 243101000, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',243101000,'Ida (2015) - Sphere',NULL,'IAU_2015',2431010,15650.000000,'EPSG','9001',NULL,15650.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',243101000,'Ida (2015) - Sphere','','IAU_2015',243101000,'IAU_2015',243101000,NULL,NULL,NULL,'Afon: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_243101000','geodetic_datum','IAU_2015',243101000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',243101000,'Ida (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',243101000,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',243101000,'Ida (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',243101000,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_243101000','geodetic_crs','IAU_2015',243101000,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',243101010,'Ida (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',243101000,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_243101010','projected_crs','IAU_2015',243101010,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4281,7 +4281,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 200000100, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',200000100,'Ceres (2015) - Sphere',NULL,'IAU_2015',2000001,487300.000000,'EPSG','9001',NULL,487300.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200000100,'Ceres (2015) - Sphere','','IAU_2015',200000100,'IAU_2015',200000100,NULL,NULL,NULL,'Kait: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_200000100','geodetic_datum','IAU_2015',200000100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200000100,'Ceres (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200000100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200000100,'Ceres (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200000100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200000100','geodetic_crs','IAU_2015',200000100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200000110,'Ceres (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200000100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000110','projected_crs','IAU_2015',200000110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4318,7 +4318,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_200000185','projected_crs','IAU_2015',
 INSERT INTO ellipsoid VALUES('IAU_2015',200000101,'Ceres (2015)',NULL,'IAU_2015',2000001,487300.000000,'EPSG','9001',NULL,446000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200000101,'Ceres (2015)','','IAU_2015',200000101,'IAU_2015',200000100,NULL,NULL,NULL,'Kait: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_200000101','geodetic_datum','IAU_2015',200000101,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200000101,'Ceres (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200000101,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200000101,'Ceres (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200000101,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200000101','geodetic_crs','IAU_2015',200000101,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200000111,'Ceres (2015) / Ographic / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200000101,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000111','projected_crs','IAU_2015',200000111,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4352,7 +4352,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200000181,'Ceres (2015) / Ographic /
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000181','projected_crs','IAU_2015',200000181,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200000186,'Ceres (2015) / Ographic / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200000101,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000186','projected_crs','IAU_2015',200000186,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200000102,'Ceres (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',200000101,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200000102,'Ceres (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',200000101,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200000102','geodetic_crs','IAU_2015',200000102,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Skip Pallas has it lacks all axis information
 INSERT INTO celestial_body VALUES('IAU_2015', 2000004, 'Vesta', 255000.000000);
@@ -4360,7 +4360,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 200000400, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',200000400,'Vesta (2015) - Sphere',NULL,'IAU_2015',2000004,255000.000000,'EPSG','9001',NULL,255000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200000400,'Vesta (2015) - Sphere','','IAU_2015',200000400,'IAU_2015',200000400,NULL,NULL,NULL,'Claudia: 146.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_200000400','geodetic_datum','IAU_2015',200000400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200000400,'Vesta (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200000400,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200000400,'Vesta (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200000400,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200000400','geodetic_crs','IAU_2015',200000400,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200000410,'Vesta (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200000400,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000410','projected_crs','IAU_2015',200000410,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4399,7 +4399,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 200001600, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',200001600,'Psyche (2015) - Sphere',NULL,'IAU_2015',2000016,113000.000000,'EPSG','9001',NULL,113000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200001600,'Psyche (2015) - Sphere','','IAU_2015',200001600,'IAU_2015',200001600,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_200001600','geodetic_datum','IAU_2015',200001600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200001600,'Psyche (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200001600,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200001600,'Psyche (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200001600,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200001600','geodetic_crs','IAU_2015',200001600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200001610,'Psyche (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200001600,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200001610','projected_crs','IAU_2015',200001610,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4438,7 +4438,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 200002100, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',200002100,'Lutetia (2015) - Sphere',NULL,'IAU_2015',2000021,52500.000000,'EPSG','9001',NULL,52500.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200002100,'Lutetia (2015) - Sphere','','IAU_2015',200002100,'IAU_2015',200002100,NULL,NULL,NULL,'Arbitrarily defined based on light curve information: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_200002100','geodetic_datum','IAU_2015',200002100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200002100,'Lutetia (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200002100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200002100,'Lutetia (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200002100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200002100','geodetic_crs','IAU_2015',200002100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200002110,'Lutetia (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200002100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200002110','projected_crs','IAU_2015',200002110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4477,7 +4477,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 200005200, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',200005200,'52 Europa (2015) - Sphere',NULL,'IAU_2015',2000052,157500.000000,'EPSG','9001',NULL,157500.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200005200,'52 Europa (2015) - Sphere','','IAU_2015',200005200,'IAU_2015',200005200,NULL,NULL,NULL,'long axis that pointed toward the Earth on 2007 May28 8.3125 UT (light-time corrected): 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_200005200','geodetic_datum','IAU_2015',200005200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200005200,'52 Europa (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200005200,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200005200,'52 Europa (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200005200,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200005200','geodetic_crs','IAU_2015',200005200,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200005210,'52 Europa (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200005200,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200005210','projected_crs','IAU_2015',200005210,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4516,7 +4516,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 200021600, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',200021600,'Kleopatra (2015) - Sphere',NULL,'IAU_2015',2000216,65333.333333,'EPSG','9001',NULL,65333.333333,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200021600,'Kleopatra (2015) - Sphere','','IAU_2015',200021600,'IAU_2015',200021600,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_200021600','geodetic_datum','IAU_2015',200021600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200021600,'Kleopatra (2015) - Sphere / Ocentric','Use R_m = (a+b+c)/3 as mean radius. Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200021600,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200021600,'Kleopatra (2015) - Sphere / Ocentric','Use R_m = (a+b+c)/3 as mean radius. Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200021600,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200021600','geodetic_crs','IAU_2015',200021600,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200021610,'Kleopatra (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200021600,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200021610','projected_crs','IAU_2015',200021610,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4555,7 +4555,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 200043300, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',200043300,'Eros (2015) - Sphere',NULL,'IAU_2015',2000433,17000.000000,'EPSG','9001',NULL,17000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200043300,'Eros (2015) - Sphere','','IAU_2015',200043300,'IAU_2015',200043300,NULL,NULL,NULL,'unnamed crater: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_200043300','geodetic_datum','IAU_2015',200043300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200043300,'Eros (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200043300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200043300,'Eros (2015) - Sphere / Ocentric','Use semi-major radius as sphere for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200043300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200043300','geodetic_crs','IAU_2015',200043300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200043310,'Eros (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200043300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200043310','projected_crs','IAU_2015',200043310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4592,7 +4592,7 @@ INSERT INTO usage VALUES('IAU_2015','PCRS_200043385','projected_crs','IAU_2015',
 INSERT INTO ellipsoid VALUES('IAU_2015',200043301,'Eros (2015)',NULL,'IAU_2015',2000433,17000.000000,'EPSG','9001',NULL,5500.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200043301,'Eros (2015)','','IAU_2015',200043301,'IAU_2015',200043300,NULL,NULL,NULL,'unnamed crater: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_200043301','geodetic_datum','IAU_2015',200043301,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200043301,'Eros (2015) / Ographic','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200043301,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200043301,'Eros (2015) / Ographic','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200043301,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200043301','geodetic_crs','IAU_2015',200043301,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200043311,'Eros (2015) / Ographic / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200043301,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200043311','projected_crs','IAU_2015',200043311,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4626,14 +4626,14 @@ INSERT INTO projected_crs VALUES('IAU_2015',200043381,'Eros (2015) / Ographic / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_200043381','projected_crs','IAU_2015',200043381,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200043386,'Eros (2015) / Ographic / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200043301,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200043386','projected_crs','IAU_2015',200043386,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200043302,'Eros (2015) / Ocentric','Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',200043301,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200043302,'Eros (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',200043301,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200043302','geodetic_crs','IAU_2015',200043302,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 2000511, 'Davida', 150000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 200051100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
 INSERT INTO ellipsoid VALUES('IAU_2015',200051100,'Davida (2015) - Sphere',NULL,'IAU_2015',2000511,150000.000000,'EPSG','9001',NULL,150000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200051100,'Davida (2015) - Sphere','','IAU_2015',200051100,'IAU_2015',200051100,NULL,NULL,NULL,'the long axis that points toward the Earth on 2002 December27 7.83 UT: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_200051100','geodetic_datum','IAU_2015',200051100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200051100,'Davida (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200051100,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200051100,'Davida (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200051100,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200051100','geodetic_crs','IAU_2015',200051100,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200051110,'Davida (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200051100,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200051110','projected_crs','IAU_2015',200051110,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4672,7 +4672,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 200025300, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',200025300,'Mathilde (2015) - Sphere',NULL,'IAU_2015',2000253,26500.000000,'EPSG','9001',NULL,26500.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200025300,'Mathilde (2015) - Sphere','','IAU_2015',200025300,'IAU_2015',200025300,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_200025300','geodetic_datum','IAU_2015',200025300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200025300,'Mathilde (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200025300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200025300,'Mathilde (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200025300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200025300','geodetic_crs','IAU_2015',200025300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200025310,'Mathilde (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200025300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200025310','projected_crs','IAU_2015',200025310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4711,7 +4711,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 200286700, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',200286700,'Steins (2015) - Sphere',NULL,'IAU_2015',2002867,2700.000000,'EPSG','9001',NULL,2700.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200286700,'Steins (2015) - Sphere','','IAU_2015',200286700,'IAU_2015',200286700,NULL,NULL,NULL,'Topaz: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_200286700','geodetic_datum','IAU_2015',200286700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200286700,'Steins (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200286700,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200286700,'Steins (2015) - Sphere / Ocentric','Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200286700,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200286700','geodetic_crs','IAU_2015',200286700,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200286710,'Steins (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200286700,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200286710','projected_crs','IAU_2015',200286710,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4753,7 +4753,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 200417900, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',200417900,'Toutatis (2015) - Sphere',NULL,'IAU_2015',2004179,1331.666667,'EPSG','9001',NULL,1331.666667,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200417900,'Toutatis (2015) - Sphere','','IAU_2015',200417900,'IAU_2015',200417900,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GD_200417900','geodetic_datum','IAU_2015',200417900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',200417900,'Toutatis (2015) - Sphere / Ocentric','Use R_m = (a+b+c)/3 as mean radius. Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200417900,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',200417900,'Toutatis (2015) - Sphere / Ocentric','Use R_m = (a+b+c)/3 as mean radius. Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',200417900,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200417900','geodetic_crs','IAU_2015',200417900,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200417910,'Toutatis (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',200417900,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200417910','projected_crs','IAU_2015',200417910,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4792,7 +4792,7 @@ INSERT INTO prime_meridian VALUES('IAU_2015', 202514300, 'Reference Meridian', 0
 INSERT INTO ellipsoid VALUES('IAU_2015',202514300,'Itokawa (2015) - Sphere',NULL,'IAU_2015',2025143,173.000000,'EPSG','9001',NULL,173.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',202514300,'Itokawa (2015) - Sphere','','IAU_2015',202514300,'IAU_2015',202514300,NULL,NULL,NULL,'deﬁned with W0=0: 0.0',0);
 INSERT INTO usage VALUES('IAU_2015','GD_202514300','geodetic_datum','IAU_2015',202514300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO geodetic_crs VALUES('IAU_2015',202514300,'Itokawa (2015) - Sphere / Ocentric','Use R_m = (a+b+c)/3 as mean radius. Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: doi://10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',202514300,NULL,0);
+INSERT INTO geodetic_crs VALUES('IAU_2015',202514300,'Itokawa (2015) - Sphere / Ocentric','Use R_m = (a+b+c)/3 as mean radius. Use mean radius as sphere radius for interoperability. Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','geographic 2D','EPSG','6422','IAU_2015',202514300,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_202514300','geodetic_crs','IAU_2015',202514300,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',202514310,'Itokawa (2015) - Sphere / Ocentric / Equirectangular, clon = 0',NULL,'EPSG','4400','IAU_2015',202514300,'IAU_2015',10,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_202514310','projected_crs','IAU_2015',202514310,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
