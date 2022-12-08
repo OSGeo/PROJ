@@ -378,10 +378,14 @@ CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
     {
         auto derivedProjCRS = dynamic_cast<const DerivedProjectedCRS *>(this);
         if (derivedProjCRS) {
+            auto cs = derivedProjCRS->coordinateSystem();
+            auto cartCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
+            if (cartCS) {
+                cs = cartCS->alterUnit(unit);
+            }
             return DerivedProjectedCRS::create(
                 createPropertyMap(this), derivedProjCRS->baseCRS(),
-                derivedProjCRS->derivingConversion(),
-                derivedProjCRS->baseCRS()->coordinateSystem()->alterUnit(unit));
+                derivedProjCRS->derivingConversion(), cs);
         }
     }
 
