@@ -168,7 +168,10 @@ static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P) {
     {
         if( !step.omit_fwd )
         {
-            point = proj_trans (step.pj, PJ_FWD, point);
+            if (!step.pj->inverted)
+                pj_fwd4d (point, step.pj);
+            else
+                pj_inv4d (point, step.pj);
             if( point.xyzt.x == HUGE_VAL ) {
                 break;
             }
@@ -187,7 +190,10 @@ static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P) {
         const auto& step = *iterStep;
         if( !step.omit_inv )
         {
-            point = proj_trans (step.pj, PJ_INV, point);
+            if (step.pj->inverted)
+                pj_fwd4d (point, step.pj);
+            else
+                pj_inv4d (point, step.pj);
             if( point.xyzt.x == HUGE_VAL ) {
                 break;
             }

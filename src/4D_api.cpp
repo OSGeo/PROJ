@@ -326,8 +326,11 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
                 }
                 P->iCurCoordOp = iBest;
             }
-            PJ_COORD res = direction == PJ_FWD ?
-                        pj_fwd4d( coord, alt.pj ) : pj_inv4d( coord, alt.pj );
+            PJ_COORD res = coord;
+            if( direction == PJ_FWD )
+                pj_fwd4d( res, alt.pj );
+            else
+                pj_inv4d( res, alt.pj );
             if( proj_errno(alt.pj) == PROJ_ERR_OTHER_NETWORK_ERROR ) {
                 return proj_coord_error ();
             }
@@ -368,11 +371,12 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
                         P->iCurCoordOp = i;
                     }
                     if( direction == PJ_FWD ) {
-                        return pj_fwd4d( coord, alt.pj );
+                        pj_fwd4d( coord, alt.pj );
                     }
                     else {
-                        return pj_inv4d( coord, alt.pj );
+                        pj_inv4d( coord, alt.pj );
                     }
+                    return coord;
                 }
             }
         }
@@ -383,9 +387,10 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
 
     P->iCurCoordOp = 0; // dummy value, to be used by proj_trans_get_last_used_operation()
     if (direction == PJ_FWD)
-        return pj_fwd4d (coord, P);
+        pj_fwd4d (coord, P);
     else
-        return pj_inv4d (coord, P);
+        pj_inv4d (coord, P);
+    return coord;
 }
 
 /*****************************************************************************/
