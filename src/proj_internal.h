@@ -277,13 +277,13 @@ PJ_DESTRUCTOR:
 
 PJ_OPERATOR:
 
-    A function taking a PJ_COORD and a pointer-to-PJ as args, applying the
-    PJ to the PJ_COORD, and returning the resulting PJ_COORD.
+    A function taking a reference to a PJ_COORD and a pointer-to-PJ as args, applying the
+    PJ to the PJ_COORD, and modifying in-place the passed PJ_COORD.
 
 *****************************************************************************/
 typedef    PJ       *(* PJ_CONSTRUCTOR) (PJ *);
 typedef    PJ       *(* PJ_DESTRUCTOR)  (PJ *, int);
-typedef    PJ_COORD  (* PJ_OPERATOR)    (PJ_COORD, PJ *);
+typedef    void      (* PJ_OPERATOR)    (PJ_COORD&, PJ *);
 /****************************************************************************/
 
 

@@ -161,7 +161,7 @@ PJ_LP pj_inv(PJ_XY xy, PJ *P) {
         coo.lpz = lpz;
     }
     else if (P->inv4d)
-        coo = P->inv4d (coo, P);
+        P->inv4d (coo, P);
     else {
         proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
         return proj_coord_error ().lp;
@@ -196,7 +196,7 @@ PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
         coo.lpz = lpz;
     }
     else if (P->inv4d)
-        coo = P->inv4d (coo, P);
+        P->inv4d (coo, P);
     else if (P->inv)
     {
         const auto lp = P->inv (coo.xy, P);
@@ -232,7 +232,7 @@ bool pj_inv4d (PJ_COORD& coo, PJ *P) {
 
     /* Call the highest dimensional converter available */
     if (P->inv4d)
-        coo = P->inv4d (coo, P);
+        P->inv4d (coo, P);
     else if (P->inv3d)
     {
         const auto lpz = P->inv3d (coo.xyz, P);

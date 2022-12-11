@@ -74,15 +74,11 @@ static PJ_LPZ latlong_inverse_3d (PJ_XYZ xyz, PJ *P) {
     return lpz;
 }
 
-static PJ_COORD latlong_forward_4d (PJ_COORD obs, PJ *P) {
-    (void) P;
-    return obs;
+static void latlong_forward_4d (PJ_COORD&, PJ *) {
 }
 
 
-static PJ_COORD latlong_inverse_4d (PJ_COORD obs, PJ *P) {
-    (void) P;
-    return obs;
+static void latlong_inverse_4d (PJ_COORD&, PJ *) {
 }
 
 

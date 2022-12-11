@@ -383,22 +383,19 @@ static PJ_UV real_iterative_inverse_impl(PJ *P, const HORNER *transformation, PJ
     }
 }
 
-static PJ_COORD horner_forward_4d (PJ_COORD point, PJ *P) {
+static void horner_forward_4d (PJ_COORD& point, PJ *P) {
     const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
     point.uv = real_default_impl(P, transformation, PJ_FWD, point.uv);
-    return point;
 }
 
-static PJ_COORD horner_inverse_4d (PJ_COORD point, PJ *P) {
+static void horner_inverse_4d (PJ_COORD& point, PJ *P) {
     const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
     point.uv = real_default_impl(P, transformation, PJ_INV, point.uv);
-    return point;
 }
 
-static PJ_COORD horner_iterative_inverse_4d(PJ_COORD point, PJ *P) {
+static void horner_iterative_inverse_4d(PJ_COORD& point, PJ *P) {
     const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
     point.uv = real_iterative_inverse_impl(P, transformation, point.uv);
-    return point;
 }
 
 static PJ_UV complex_default_impl(PJ *P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
@@ -481,22 +478,19 @@ static PJ_UV complex_iterative_inverse_impl(PJ *P, const HORNER *transformation,
     }
 }
 
-static PJ_COORD complex_horner_forward_4d (PJ_COORD point, PJ *P) {
+static void complex_horner_forward_4d (PJ_COORD& point, PJ *P) {
     const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
     point.uv = complex_default_impl(P, transformation, PJ_FWD, point.uv);
-    return point;
 }
 
-static PJ_COORD complex_horner_inverse_4d (PJ_COORD point, PJ *P) {
+static void complex_horner_inverse_4d (PJ_COORD& point, PJ *P) {
     const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
     point.uv = complex_default_impl(P, transformation, PJ_INV, point.uv);
-    return point;
 }
 
-static PJ_COORD complex_horner_iterative_inverse_4d (PJ_COORD point, PJ *P) {
+static void complex_horner_iterative_inverse_4d (PJ_COORD& point, PJ *P) {
     const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
     point.uv = complex_iterative_inverse_impl(P, transformation, point.uv);
-    return point;
 }
 
 

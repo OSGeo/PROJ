@@ -19,7 +19,7 @@ struct Set {
 };
 } // anonymous namespace
 
-static PJ_COORD set_fwd_inv(PJ_COORD point, PJ *P) {
+static void set_fwd_inv(PJ_COORD& point, PJ *P) {
 
     struct Set *set = static_cast<struct Set*>(P->opaque);
 
@@ -31,8 +31,6 @@ static PJ_COORD set_fwd_inv(PJ_COORD point, PJ *P) {
         point.v[2] = set->v3_val;
     if (set->v4)
         point.v[3] = set->v4_val;
-
-    return point;
 }
 
 PJ *OPERATION(set, 0) {

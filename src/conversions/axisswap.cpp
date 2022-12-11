@@ -138,31 +138,26 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 }
 
 
-static PJ_COORD forward_4d(PJ_COORD coo, PJ *P) {
+static void forward_4d(PJ_COORD& coo, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD out;
-
-    out = proj_coord_error();
 
     for (i=0; i<4; i++)
         out.v[i] = coo.v[Q->axis[i]] * Q->sign[i];
-
-    return out;
+    coo = out;
 }
 
 
-static PJ_COORD reverse_4d(PJ_COORD coo, PJ *P) {
+static void reverse_4d(PJ_COORD& coo, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD out;
-
-    out = proj_coord_error();
 
     for (i=0; i<4; i++)
         out.v[Q->axis[i]] = coo.v[i] * Q->sign[i];
 
-    return out;
+    coo = out;
 }
 
 

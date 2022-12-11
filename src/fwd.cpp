@@ -203,7 +203,7 @@ PJ_XY pj_fwd(PJ_LP lp, PJ *P) {
         coo.xyz = xyz;
     }
     else if (P->fwd4d)
-        coo = P->fwd4d (coo, P);
+        P->fwd4d (coo, P);
     else {
         proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
         return proj_coord_error ().xy;
@@ -238,7 +238,7 @@ PJ_XYZ pj_fwd3d(PJ_LPZ lpz, PJ *P) {
         coo.xyz = xyz;
     }
     else if (P->fwd4d)
-        coo = P->fwd4d (coo, P);
+        P->fwd4d (coo, P);
     else if (P->fwd)
     {
         const auto xy = P->fwd (coo.lp, P);
@@ -274,7 +274,7 @@ bool pj_fwd4d (PJ_COORD& coo, PJ *P) {
 
     /* Call the highest dimensional converter available */
     if (P->fwd4d)
-        coo = P->fwd4d (coo, P);
+        P->fwd4d (coo, P);
     else if (P->fwd3d)
     {
         const auto xyz = P->fwd3d (coo.lpz, P);

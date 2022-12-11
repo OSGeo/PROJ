@@ -278,26 +278,22 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 }
 
 
-static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
+static void forward_4d(PJ_COORD& coo, PJ *P) {
     struct deformationData *Q = (struct deformationData *) P->opaque;
     double dt;
     PJ_XYZ shift;
-    PJ_COORD out = in;
 
     if (Q->dt != HUGE_VAL) {
         dt = Q->dt;
     } else {
-        dt = in.xyzt.t - Q->t_epoch ;
+        dt = coo.xyzt.t - Q->t_epoch ;
     }
 
-    shift = get_grid_shift(P, in.xyz);
+    shift = get_grid_shift(P, coo.xyz);
 
-    out.xyzt.x += dt*shift.x;
-    out.xyzt.y += dt*shift.y;
-    out.xyzt.z += dt*shift.z;
-
-
-    return out;
+    coo.xyzt.x += dt*shift.x;
+    coo.xyzt.y += dt*shift.y;
+    coo.xyzt.z += dt*shift.z;
 }
 
 
@@ -317,20 +313,17 @@ static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
     return out.lpz;
 }
 
-static PJ_COORD reverse_4d(PJ_COORD in, PJ *P) {
+static void reverse_4d(PJ_COORD& coo, PJ *P) {
     struct deformationData *Q = (struct deformationData *) P->opaque;
-    PJ_COORD out = in;
     double dt;
-
 
     if (Q->dt != HUGE_VAL) {
             dt = Q->dt;
         } else {
-            dt = in.xyzt.t - Q->t_epoch;
+            dt = coo.xyzt.t - Q->t_epoch;
     }
 
-    out.xyz = reverse_shift(P, in.xyz, dt);
-    return out;
+    coo.xyz = reverse_shift(P, coo.xyz, dt);
 }
 
 static PJ *destructor(PJ *P, int errlev) {
