@@ -577,6 +577,7 @@ struct PJconsts {
     **************************************************************************************/
 
     NS_PROJ::common::IdentifiedObjectPtr iso_obj{};
+    bool                                 iso_obj_is_coordinate_operation = false;
 
     // cached results
     mutable std::string lastWKT{};

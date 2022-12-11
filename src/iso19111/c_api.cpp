@@ -202,6 +202,7 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
             ctx->defer_grid_opening = false;
             if (pj) {
                 pj->iso_obj = objIn;
+                pj->iso_obj_is_coordinate_operation = true;
                 return pj;
             }
         } catch (const std::exception &) {
@@ -214,6 +215,7 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
         pj->ctx = ctx;
         pj->descr = "ISO-19111 object";
         pj->iso_obj = objIn;
+        pj->iso_obj_is_coordinate_operation = coordop != nullptr;
         try {
             auto crs = dynamic_cast<const CRS *>(objIn.get());
             if (crs) {
