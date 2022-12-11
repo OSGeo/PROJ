@@ -103,7 +103,7 @@ Which CRS apply to a given location?
 --------------------------------------------------------------------------------
 
 You can use the webpage
-`CRS Explorer <https://jjimenezshaw.github.io/crs-explorer/>`_
+`CRS Explorer <https://crs-explorer.proj.org/>`_
 to view a list of all coordinate reference systems in `proj.db`, and
 filter by type, authority, name and location (clicking on the map). It provides
 WKTs for every coordinate reference system and quick links to epsg.org.

@@ -297,7 +297,7 @@ The following control parameters can appear in any order:
     Affected by options :option:`--authority`, :option:`--area`, :option:`--bbox` and :option:`--spatial-test`
 
     A visual alternative is the webpage
-    `CRS Explorer <https://jjimenezshaw.github.io/crs-explorer/?all=true>`_ .
+    `CRS Explorer <https://crs-explorer.proj.org/?all=true>`_ .
 
 .. option:: --3d
 
