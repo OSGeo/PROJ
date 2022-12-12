@@ -58,55 +58,58 @@ struct pj_opaque_affine {
 } // anonymous namespace
 
 
-static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
-    PJ_COORD newObs;
+static void forward_4d(PJ_COORD& coo, PJ *P) {
     const struct pj_opaque_affine *Q = (const struct pj_opaque_affine *) P->opaque;
     const struct pj_affine_coeffs *C = &(Q->forward);
-    newObs.xyzt.x = Q->xoff + C->s11 * obs.xyzt.x + C->s12 * obs.xyzt.y + C->s13 * obs.xyzt.z;
-    newObs.xyzt.y = Q->yoff + C->s21 * obs.xyzt.x + C->s22 * obs.xyzt.y + C->s23 * obs.xyzt.z;
-    newObs.xyzt.z = Q->zoff + C->s31 * obs.xyzt.x + C->s32 * obs.xyzt.y + C->s33 * obs.xyzt.z;
-    newObs.xyzt.t = Q->toff + C->tscale * obs.xyzt.t;
-    return newObs;
+    const double x = coo.xyz.x;
+    const double y = coo.xyz.y;
+    const double z = coo.xyz.z;
+    coo.xyzt.x = Q->xoff + C->s11 * x + C->s12 * y + C->s13 * z;
+    coo.xyzt.y = Q->yoff + C->s21 * x + C->s22 * y + C->s23 * z;
+    coo.xyzt.z = Q->zoff + C->s31 * x + C->s32 * y + C->s33 * z;
+    coo.xyzt.t = Q->toff + C->tscale * coo.xyzt.t;
 }
 
 static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
-    return forward_4d(point, P).xyz;
+    forward_4d(point, P);
+    return point.xyz;
 }
 
 
 static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.lp = lp;
-    return forward_4d(point, P).xy;
+    forward_4d(point, P);
+    return point.xy;
 }
 
 
-static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
-    PJ_COORD newObs;
+static void reverse_4d(PJ_COORD& coo, PJ *P) {
     const struct pj_opaque_affine *Q = (const struct pj_opaque_affine *) P->opaque;
     const struct pj_affine_coeffs *C = &(Q->reverse);
-    obs.xyzt.x -= Q->xoff;
-    obs.xyzt.y -= Q->yoff;
-    obs.xyzt.z -= Q->zoff;
-    newObs.xyzt.x = C->s11 * obs.xyzt.x + C->s12 * obs.xyzt.y + C->s13 * obs.xyzt.z;
-    newObs.xyzt.y = C->s21 * obs.xyzt.x + C->s22 * obs.xyzt.y + C->s23 * obs.xyzt.z;
-    newObs.xyzt.z = C->s31 * obs.xyzt.x + C->s32 * obs.xyzt.y + C->s33 * obs.xyzt.z;
-    newObs.xyzt.t = C->tscale * (obs.xyzt.t - Q->toff);
-    return newObs;
+    double x = coo.xyzt.x - Q->xoff;
+    double y = coo.xyzt.y - Q->yoff;
+    double z = coo.xyzt.z - Q->zoff;
+    coo.xyzt.x = C->s11 * x + C->s12 * y + C->s13 * z;
+    coo.xyzt.y = C->s21 * x + C->s22 * y + C->s23 * z;
+    coo.xyzt.z = C->s31 * x + C->s32 * y + C->s33 * z;
+    coo.xyzt.t = C->tscale * (coo.xyzt.t - Q->toff);
 }
 
 static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
-    return reverse_4d(point, P).lpz;
+    reverse_4d(point, P);
+    return point.lpz;
 }
 
 static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.xy = xy;
-    return reverse_4d(point, P).lp;
+    reverse_4d(point, P);
+    return point.lp;
 }
 
 static struct pj_opaque_affine * initQ() {

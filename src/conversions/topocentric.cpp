@@ -48,28 +48,27 @@ struct pj_opaque {
 } // anonymous namespace
 
 // Convert from geocentric to topocentric
-static PJ_COORD topocentric_fwd(PJ_COORD in, PJ * P)
+static void topocentric_fwd(PJ_COORD& coo, PJ * P)
 {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    PJ_COORD out;
-    const double dX = in.xyz.x - Q->X0;
-    const double dY = in.xyz.y - Q->Y0;
-    const double dZ = in.xyz.z - Q->Z0;
-    out.xyz.x = -dX * Q->sinlam0              + dY * Q->coslam0;
-    out.xyz.y = -dX * Q->sinphi0 * Q->coslam0 - dY * Q->sinphi0 * Q->sinlam0 + dZ * Q->cosphi0;
-    out.xyz.z =  dX * Q->cosphi0 * Q->coslam0 + dY * Q->cosphi0 * Q->sinlam0 + dZ * Q->sinphi0;
-    return out;
+    const double dX = coo.xyz.x - Q->X0;
+    const double dY = coo.xyz.y - Q->Y0;
+    const double dZ = coo.xyz.z - Q->Z0;
+    coo.xyz.x = -dX * Q->sinlam0              + dY * Q->coslam0;
+    coo.xyz.y = -dX * Q->sinphi0 * Q->coslam0 - dY * Q->sinphi0 * Q->sinlam0 + dZ * Q->cosphi0;
+    coo.xyz.z =  dX * Q->cosphi0 * Q->coslam0 + dY * Q->cosphi0 * Q->sinlam0 + dZ * Q->sinphi0;
 }
 
 // Convert from topocentric to geocentric
-static PJ_COORD topocentric_inv(PJ_COORD in, PJ * P)
+static void topocentric_inv(PJ_COORD& coo, PJ * P)
 {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    PJ_COORD out;
-    out.xyz.x = Q->X0 - in.xyz.x * Q->sinlam0 - in.xyz.y * Q->sinphi0 * Q->coslam0 + in.xyz.z * Q->cosphi0 * Q->coslam0;
-    out.xyz.y = Q->Y0 + in.xyz.x * Q->coslam0 - in.xyz.y * Q->sinphi0 * Q->sinlam0 + in.xyz.z * Q->cosphi0 * Q->sinlam0;
-    out.xyz.z = Q->Z0                         + in.xyz.y * Q->cosphi0              + in.xyz.z * Q->sinphi0;
-    return out;
+    const double x = coo.xyz.x;
+    const double y = coo.xyz.y;
+    const double z = coo.xyz.z;
+    coo.xyz.x = Q->X0 - x * Q->sinlam0 - y * Q->sinphi0 * Q->coslam0 + z * Q->cosphi0 * Q->coslam0;
+    coo.xyz.y = Q->Y0 + x * Q->coslam0 - y * Q->sinphi0 * Q->sinlam0 + z * Q->cosphi0 * Q->sinlam0;
+    coo.xyz.z = Q->Z0                         + y * Q->cosphi0              + z * Q->sinphi0;
 }
 
 

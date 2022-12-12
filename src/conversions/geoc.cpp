@@ -36,13 +36,13 @@
 PROJ_HEAD(geoc, "Geocentric Latitude");
 
 /* Geographical to geocentric */
-static PJ_COORD forward(PJ_COORD coo, PJ *P) {
-    return pj_geocentric_latitude (P, PJ_FWD, coo);
+static void forward(PJ_COORD& coo, PJ *P) {
+    coo = pj_geocentric_latitude (P, PJ_FWD, coo);
 }
 
 /* Geocentric to geographical */
-static PJ_COORD inverse(PJ_COORD coo, PJ *P) {
-    return pj_geocentric_latitude (P, PJ_INV, coo);
+static void inverse(PJ_COORD& coo, PJ *P) {
+    coo = pj_geocentric_latitude (P, PJ_INV, coo);
 }
 
 

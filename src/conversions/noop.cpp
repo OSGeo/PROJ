@@ -4,9 +4,7 @@
 
 PROJ_HEAD(noop,    "No operation");
 
-static PJ_COORD noop(PJ_COORD coord, PJ *P) {
-    (void) P;
-    return coord;
+static void noop(PJ_COORD& , PJ *) {
 }
 
 PJ *CONVERSION(noop, 0) {

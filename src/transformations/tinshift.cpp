@@ -60,26 +60,22 @@ static PJ *destructor(PJ *P, int errlev) {
     return pj_default_destructor(P, errlev);
 }
 
-static PJ_COORD tinshift_forward_4d(PJ_COORD in, PJ *P) {
+static void tinshift_forward_4d(PJ_COORD &coo, PJ *P) {
     auto *Q = (struct tinshiftData *)P->opaque;
 
-    PJ_COORD out = in;
-    if (!Q->evaluator->forward(in.xyz.x, in.xyz.y, in.xyz.z, out.xyz.x,
-                               out.xyz.y, out.xyz.z)) {
-        return proj_coord_error();
+    if (!Q->evaluator->forward(coo.xyz.x, coo.xyz.y, coo.xyz.z, coo.xyz.x,
+                               coo.xyz.y, coo.xyz.z)) {
+        coo = proj_coord_error();
     }
-    return out;
 }
 
-static PJ_COORD tinshift_reverse_4d(PJ_COORD in, PJ *P) {
+static void tinshift_reverse_4d(PJ_COORD &coo, PJ *P) {
     auto *Q = (struct tinshiftData *)P->opaque;
 
-    PJ_COORD out = in;
-    if (!Q->evaluator->inverse(in.xyz.x, in.xyz.y, in.xyz.z, out.xyz.x,
-                               out.xyz.y, out.xyz.z)) {
-        return proj_coord_error();
+    if (!Q->evaluator->inverse(coo.xyz.x, coo.xyz.y, coo.xyz.z, coo.xyz.x,
+                               coo.xyz.y, coo.xyz.z)) {
+        coo = proj_coord_error();
     }
-    return out;
 }
 
 PJ *TRANSFORMATION(tinshift, 1) {

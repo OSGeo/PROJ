@@ -194,8 +194,8 @@ struct projCppContext;
 /* not sure why we need to export it, but mingw needs it */
 void PROJ_DLL proj_context_delete_cpp_context(struct projCppContext* cppContext);
 
-PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P);
-PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
+bool pj_fwd4d (PJ_COORD& coo, PJ *P);
+bool pj_inv4d (PJ_COORD& coo, PJ *P);
 
 PJ_COORD PROJ_DLL pj_approx_2D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 PJ_COORD PROJ_DLL pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
@@ -277,13 +277,13 @@ PJ_DESTRUCTOR:
 
 PJ_OPERATOR:
 
-    A function taking a PJ_COORD and a pointer-to-PJ as args, applying the
-    PJ to the PJ_COORD, and returning the resulting PJ_COORD.
+    A function taking a reference to a PJ_COORD and a pointer-to-PJ as args, applying the
+    PJ to the PJ_COORD, and modifying in-place the passed PJ_COORD.
 
 *****************************************************************************/
 typedef    PJ       *(* PJ_CONSTRUCTOR) (PJ *);
 typedef    PJ       *(* PJ_DESTRUCTOR)  (PJ *, int);
-typedef    PJ_COORD  (* PJ_OPERATOR)    (PJ_COORD, PJ *);
+typedef    void      (* PJ_OPERATOR)    (PJ_COORD&, PJ *);
 /****************************************************************************/
 
 

@@ -57,6 +57,8 @@ operation:
 #include <stdlib.h>
 #include <string.h>
 
+#include <algorithm>
+
 #include "proj.h"
 #include "proj_internal.h"
 
@@ -75,19 +77,13 @@ static int sign(int x) {
 
 static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
-    unsigned int i;
-    PJ_COORD out, in;
+    PJ_XY xy;
 
-    in.v[0] = lp.lam;
-    in.v[1] = lp.phi;
-    out = proj_coord_error();
-
-    for (i=0; i<2; i++)
-        out.v[i] = in.v[Q->axis[i]] * Q->sign[i];
-
-    return out.xy;
+    double in[2] = {lp.lam, lp.phi};
+    xy.x = in[Q->axis[0]] * Q->sign[0];
+    xy.y = in[Q->axis[1]] * Q->sign[1];
+    return xy;
 }
-
 
 static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
@@ -103,7 +99,6 @@ static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
 
     return out.lp;
 }
-
 
 static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
@@ -137,32 +132,31 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     return out.lpz;
 }
 
-
-static PJ_COORD forward_4d(PJ_COORD coo, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
-    unsigned int i;
-    PJ_COORD out;
-
-    out = proj_coord_error();
-
-    for (i=0; i<4; i++)
-        out.v[i] = coo.v[Q->axis[i]] * Q->sign[i];
-
-    return out;
+static void swap_xy_4d(PJ_COORD& coo, PJ *) {
+    std::swap(coo.xyzt.x, coo.xyzt.y);
 }
 
 
-static PJ_COORD reverse_4d(PJ_COORD coo, PJ *P) {
+static void forward_4d(PJ_COORD& coo, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD out;
 
-    out = proj_coord_error();
+    for (i=0; i<4; i++)
+        out.v[i] = coo.v[Q->axis[i]] * Q->sign[i];
+    coo = out;
+}
+
+
+static void reverse_4d(PJ_COORD& coo, PJ *P) {
+    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    unsigned int i;
+    PJ_COORD out;
 
     for (i=0; i<4; i++)
         out.v[Q->axis[i]] = coo.v[i] * Q->sign[i];
 
-    return out;
+    coo = out;
 }
 
 
@@ -278,9 +272,18 @@ PJ *CONVERSION(axisswap,0) {
         P->fwd3d  = forward_3d;
         P->inv3d  = reverse_3d;
     }
-    if (n == 2 && Q->axis[0] < 2 && Q->axis[1] < 2) {
-        P->fwd    = forward_2d;
-        P->inv    = reverse_2d;
+    if (n == 2) {
+        if( Q->axis[0] == 1 && Q->sign[0] == 1 &&
+            Q->axis[1] == 0 && Q->sign[1] == 1 )
+        {
+            P->fwd4d = swap_xy_4d;
+            P->inv4d = swap_xy_4d;
+        }
+        else if( Q->axis[0] < 2 && Q->axis[1] < 2 )
+        {
+            P->fwd    = forward_2d;
+            P->inv    = reverse_2d;
+        }
     }
 
 

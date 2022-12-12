@@ -161,7 +161,7 @@ PJ_LP pj_inv(PJ_XY xy, PJ *P) {
         coo.lpz = lpz;
     }
     else if (P->inv4d)
-        coo = P->inv4d (coo, P);
+        P->inv4d (coo, P);
     else {
         proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
         return proj_coord_error ().lp;
@@ -196,7 +196,7 @@ PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
         coo.lpz = lpz;
     }
     else if (P->inv4d)
-        coo = P->inv4d (coo, P);
+        P->inv4d (coo, P);
     else if (P->inv)
     {
         const auto lp = P->inv (coo.xy, P);
@@ -217,7 +217,7 @@ PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
 
 
 
-PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
+bool pj_inv4d (PJ_COORD& coo, PJ *P) {
 
     const int last_errno = P->ctx->last_errno;
     P->ctx->last_errno = 0;
@@ -225,11 +225,14 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
     if (!P->skip_inv_prepare)
         inv_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
-        return proj_coord_error ();
+    {
+        coo = proj_coord_error ();
+        return false;
+    }
 
     /* Call the highest dimensional converter available */
     if (P->inv4d)
-        coo = P->inv4d (coo, P);
+        P->inv4d (coo, P);
     else if (P->inv3d)
     {
         const auto lpz = P->inv3d (coo.xyz, P);
@@ -242,13 +245,24 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
     }
     else {
         proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
-        return proj_coord_error ();
+        coo = proj_coord_error ();
+        return false;
     }
     if (HUGE_VAL==coo.v[0])
-        return proj_coord_error ();
+    {
+        coo = proj_coord_error ();
+        return false;
+    }
 
     if (!P->skip_inv_finalize)
         inv_finalize (P, coo);
 
-    return error_or_coord(P, coo, last_errno);
+    if (P->ctx->last_errno)
+    {
+        coo = proj_coord_error();
+        return false;
+    }
+
+    P->ctx->last_errno = last_errno;
+    return true;
 }

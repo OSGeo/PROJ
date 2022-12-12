@@ -70,39 +70,32 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     return point.lpz;
 }
 
-static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
+static void forward_4d(PJ_COORD& coo, PJ *P) {
     struct hgridshiftData *Q = (struct hgridshiftData *) P->opaque;
-    PJ_COORD point = obs;
 
     /* If transformation is not time restricted, we always call it */
     if (Q->t_final==0 || Q->t_epoch==0) {
-        point.xyz = forward_3d (obs.lpz, P);
-        return point;
+        coo.xyz = forward_3d (coo.lpz, P);
+        return;
     }
 
     /* Time restricted - only apply transform if within time bracket */
-    if (obs.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
-        point.xyz = forward_3d (obs.lpz, P);
-
-
-    return point;
+    if (coo.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
+        coo.xyz = forward_3d (coo.lpz, P);
 }
 
-static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
+static void reverse_4d(PJ_COORD& coo, PJ *P) {
     struct hgridshiftData *Q = (struct hgridshiftData *) P->opaque;
-    PJ_COORD point = obs;
 
     /* If transformation is not time restricted, we always call it */
     if (Q->t_final==0 || Q->t_epoch==0) {
-        point.lpz = reverse_3d (obs.xyz, P);
-        return point;
+        coo.lpz = reverse_3d (coo.xyz, P);
+        return;
     }
 
     /* Time restricted - only apply transform if within time bracket */
-    if (obs.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
-        point.lpz = reverse_3d (obs.xyz, P);
-
-    return point;
+    if (coo.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
+        coo.lpz = reverse_3d (coo.xyz, P);
 }
 
 static PJ *destructor (PJ *P, int errlev) {

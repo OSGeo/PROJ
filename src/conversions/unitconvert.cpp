@@ -351,42 +351,36 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 
 
 /***********************************************************************/
-static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
+static void forward_4d(PJ_COORD& coo, PJ *P) {
 /************************************************************************
     Forward conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_COORD out = obs;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
-    out.xyz = forward_3d(obs.lpz, P);
+    coo.xyz = forward_3d(coo.lpz, P);
 
     if (Q->t_in_id >= 0)
-        out.xyzt.t = time_units[Q->t_in_id].t_in( obs.xyzt.t );
+        coo.xyzt.t = time_units[Q->t_in_id].t_in( coo.xyzt.t );
     if (Q->t_out_id >= 0)
-        out.xyzt.t = time_units[Q->t_out_id].t_out( out.xyzt.t );
-
-    return out;
+        coo.xyzt.t = time_units[Q->t_out_id].t_out( coo.xyzt.t );
 }
 
 
 /***********************************************************************/
-static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
+static void reverse_4d(PJ_COORD& coo, PJ *P) {
 /************************************************************************
     Reverse conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_COORD out = obs;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
-    out.lpz = reverse_3d(obs.xyz, P);
+    coo.lpz = reverse_3d(coo.xyz, P);
 
     if (Q->t_out_id >= 0)
-        out.xyzt.t = time_units[Q->t_out_id].t_in( obs.xyzt.t );
+        coo.xyzt.t = time_units[Q->t_out_id].t_in( coo.xyzt.t );
     if (Q->t_in_id >= 0)
-        out.xyzt.t = time_units[Q->t_in_id].t_out( out.xyzt.t );
-
-    return out;
+        coo.xyzt.t = time_units[Q->t_in_id].t_out( coo.xyzt.t );
 }
 
 /***********************************************************************/

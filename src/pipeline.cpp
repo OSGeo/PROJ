@@ -147,8 +147,8 @@ struct PushPop {
 } // anonymous namespace
 
 
-static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P);
-static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P);
+static void pipeline_forward_4d (PJ_COORD& point, PJ *P);
+static void pipeline_reverse_4d (PJ_COORD& point, PJ *P);
 static PJ_XYZ    pipeline_forward_3d (PJ_LPZ lpz, PJ *P);
 static PJ_LPZ    pipeline_reverse_3d (PJ_XYZ xyz, PJ *P);
 static PJ_XY     pipeline_forward (PJ_LP lp, PJ *P);
@@ -162,24 +162,25 @@ static void pipeline_reassign_context( PJ* P, PJ_CONTEXT* ctx )
 }
 
 
-static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P) {
+static void pipeline_forward_4d (PJ_COORD& point, PJ *P) {
     auto pipeline = static_cast<struct Pipeline*>(P->opaque);
     for( auto& step: pipeline->steps )
     {
         if( !step.omit_fwd )
         {
-            point = proj_trans (step.pj, PJ_FWD, point);
+            if (!step.pj->inverted)
+                pj_fwd4d (point, step.pj);
+            else
+                pj_inv4d (point, step.pj);
             if( point.xyzt.x == HUGE_VAL ) {
                 break;
             }
         }
     }
-
-    return point;
 }
 
 
-static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P) {
+static void pipeline_reverse_4d (PJ_COORD& point, PJ *P) {
     auto pipeline = static_cast<struct Pipeline*>(P->opaque);
     for( auto iterStep = pipeline->steps.rbegin();
               iterStep != pipeline->steps.rend(); ++iterStep )
@@ -187,14 +188,15 @@ static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P) {
         const auto& step = *iterStep;
         if( !step.omit_inv )
         {
-            point = proj_trans (step.pj, PJ_INV, point);
+            if (step.pj->inverted)
+                pj_fwd4d (point, step.pj);
+            else
+                pj_inv4d (point, step.pj);
             if( point.xyzt.x == HUGE_VAL ) {
                 break;
             }
         }
     }
-
-    return point;
 }
 
 
@@ -619,9 +621,9 @@ PJ *OPERATION(pipeline,0) {
     return P;
 }
 
-static PJ_COORD push(PJ_COORD point, PJ *P) {
+static void push(PJ_COORD& point, PJ *P) {
     if (P->parent == nullptr)
-        return point;
+        return;
 
     struct Pipeline *pipeline = static_cast<struct Pipeline*>(P->parent->opaque);
     struct PushPop *pushpop = static_cast<struct PushPop*>(P->opaque);
@@ -634,13 +636,11 @@ static PJ_COORD push(PJ_COORD point, PJ *P) {
         pipeline->stack[2].push(point.v[2]);
     if (pushpop->v4)
         pipeline->stack[3].push(point.v[3]);
-
-    return point;
 }
 
-static PJ_COORD pop(PJ_COORD point, PJ *P) {
+static void pop(PJ_COORD& point, PJ *P) {
     if (P->parent == nullptr)
-        return point;
+        return;
 
     struct Pipeline *pipeline = static_cast<struct Pipeline*>(P->parent->opaque);
     struct PushPop *pushpop = static_cast<struct PushPop*>(P->opaque);
@@ -664,8 +664,6 @@ static PJ_COORD pop(PJ_COORD point, PJ *P) {
             point.v[3] = pipeline->stack[3].top();
             pipeline->stack[3].pop();
     }
-
-    return point;
 }
 
 
