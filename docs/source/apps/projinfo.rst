@@ -296,6 +296,9 @@ The following control parameters can appear in any order:
     geographic,geographic_2d,geographic_3d,vertical,projected,compound.
     Affected by options :option:`--authority`, :option:`--area`, :option:`--bbox` and :option:`--spatial-test`
 
+    A visual alternative is the webpage
+    `CRS Explorer <https://crs-explorer.proj.org/?all=true>`_ .
+
 .. option:: --3d
 
     .. versionadded:: 6.3
