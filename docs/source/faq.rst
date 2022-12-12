@@ -99,6 +99,15 @@ erroneous transformations.
 For compatibility reasons PROJ supports several WKT dialects
 (see :option:`projinfo -o`). If possible WKT2 should be used.
 
+Which CRS apply to a given location?
+--------------------------------------------------------------------------------
+
+You can use the webpage
+`CRS Explorer <https://crs-explorer.proj.org/>`_
+to view a list of all coordinate reference systems in `proj.db`, and
+filter by type, authority, name and location (clicking on the map). It provides
+WKTs for every coordinate reference system and quick links to epsg.org.
+
 Why is the axis ordering in PROJ not consistent?
 --------------------------------------------------------------------------------
 
