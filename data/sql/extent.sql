@@ -2464,7 +2464,7 @@ INSERT INTO "extent" VALUES('EPSG','3484','USA - 180°W to 174°W - AK','United 
 INSERT INTO "extent" VALUES('EPSG','3485','USA - 174°W to 168°W - AK','United States (USA) - between 174°W and 168°W - Alaska (AK).',48.7,73.0,-174.0,-168.0,1);
 INSERT INTO "extent" VALUES('EPSG','3486','USA - 168°W to 162°W - AK','United States (USA) - between 168°W and 162°W - Alaska (AK).',49.6,74.3,-168.0,-162.0,1);
 INSERT INTO "extent" VALUES('EPSG','3487','USA - 162°W to 156°W - AK','United States (USA) - between 162°W and 156°W - Alaska (AK).',51.1,74.7,-162.0,-156.0,1);
-INSERT INTO "extent" VALUES('EPSG','3488','USA - 162°W to 156°W onshore - HI','United States (USA) - between 162°W and 156°W onshore - Hawaii.',19.51,22.29,-160.3,-15.0,0);
+INSERT INTO "extent" VALUES('EPSG','3488','USA - 162°W to 156°W onshore - HI','United States (USA) - between 162°W and 156°W onshore - Hawaii.',19.51,22.29,-160.3,-155.99,0);
 INSERT INTO "extent" VALUES('EPSG','3489','USA - 162°W to 156°W - AK, HI','United States (USA) - between 162°W and 156°W onshore and offshore - Alaska, Hawaii.',15.57,74.71,-162.0,-155.99,0);
 INSERT INTO "extent" VALUES('EPSG','3490','USA - 156°W to 150°W - AK','United States (USA) - between 156°W and 150°W - Alaska (AK).',52.1,74.7,-156.0,-150.0,1);
 INSERT INTO "extent" VALUES('EPSG','3491','USA - 156°W to 150°W onshore - HI','United States (USA) - between 156°W and 150°W onshore - Hawaii.',18.87,20.86,-156.0,-154.74,0);

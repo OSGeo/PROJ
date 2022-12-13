@@ -752,7 +752,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','9935','DB_REF2016 zone 5',NULL,'EPSG',
 INSERT INTO "usage" VALUES('EPSG','17296','compound_crs','EPSG','9935','EPSG','3998','EPSG','1141');
 INSERT INTO "compound_crs" VALUES('EPSG','9944','EBBWV14 Grid + ODN height',NULL,'EPSG','9943','EPSG','5701',0);
 INSERT INTO "usage" VALUES('EPSG','17350','compound_crs','EPSG','9944','EPSG','4661','EPSG','1141');
-INSERT INTO "compound_crs" VALUES('EPSG','9948','ISN93 + ISH2004 height ',NULL,'EPSG','4659','EPSG','8089',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9948','ISN93 + ISH2004 height',NULL,'EPSG','4659','EPSG','8089',0);
 INSERT INTO "usage" VALUES('EPSG','17415','compound_crs','EPSG','9948','EPSG','4662','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9949','ISN2004 + ISH2004 height',NULL,'EPSG','5324','EPSG','8089',0);
 INSERT INTO "usage" VALUES('EPSG','17390','compound_crs','EPSG','9949','EPSG','4662','EPSG','1026');

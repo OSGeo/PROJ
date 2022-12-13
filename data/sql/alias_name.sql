@@ -236,10 +236,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6692','MOP 1983','EPSG'
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6628','Tahiti','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6629','Tahaa','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5195','NGPF','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6694','POSGAR 94','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6694','POSGAR','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6190','POSGAR','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6694','Posiciones Geodésicas Argentinas 1994','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6701','IGCB 1955','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6701','Bas Congo 1955','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6182','Observatorio Meteorologico 1939','EPSG');
@@ -669,6 +666,9 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1324','MWC18-IRF','EPSG
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1328','INAGEOID2020 v2','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1327','SIRGAS-Chile 2021','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1253','SIRGAS-Chile 2016','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6694','POSGAR 94','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6694','POSGAR','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6694','Posiciones Geodésicas Argentinas 1994','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1331','CD UK & Ireland VORF08','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1330','MSL UK & Ireland VORF08','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1082','Approximate Highest Astronomical Tide','EPSG');
