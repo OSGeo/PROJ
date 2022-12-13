@@ -173,7 +173,8 @@ set +e
 /tmp/proj_static_install_from_dist_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory 2>/dev/null 1>static.out
 set -e
 if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-    # on macOS /tmp is a symblink to /private/tmp only for the shared build
+    # on macOS 11 /tmp is resolved by PROJ as a symlink to /private/tmp only for the shared build.
+    # on macOS 12 for both static and shared builds
     INST=/private/tmp
 else
     INST=/tmp
@@ -181,7 +182,7 @@ fi
 cat shared.out
 grep "Downloading from https://cdn.proj.org into $INST/proj_shared_install_from_dist_renamed/subdir/share/proj" shared.out
 cat static.out
-grep "Downloading from https://cdn.proj.org into /tmp/proj_static_install_from_dist_renamed/subdir/share/proj" static.out
+grep "Downloading from https://cdn.proj.org into \($INST\|/tmp\)/proj_static_install_from_dist_renamed/subdir/share/proj" static.out
 rm shared.out static.out
 
 sed -i'.bak' -e '1c\
