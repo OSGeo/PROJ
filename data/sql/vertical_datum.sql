@@ -240,6 +240,10 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1326','Canadian Geodetic Vertical Da
 INSERT INTO "usage" VALUES('EPSG','18302','vertical_datum','EPSG','1326','EPSG','1061','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','1328','Indonesian Geoid 2020 version 2',NULL,'2022-06-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18439','vertical_datum','EPSG','1328','EPSG','1122','EPSG','1178');
+INSERT INTO "vertical_datum" VALUES('EPSG','1330','Mean Sea Level UK & Ireland VORF08',NULL,'2008-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','18593','vertical_datum','EPSG','1330','EPSG','4668','EPSG','1198');
+INSERT INTO "vertical_datum" VALUES('EPSG','1331','Chart Datum UK & Ireland VORF08',NULL,'2008-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','18581','vertical_datum','EPSG','1331','EPSG','4668','EPSG','1198');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,NULL,0);

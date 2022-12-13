@@ -11970,7 +11970,7 @@ TEST(io, createFromUserInput) {
     {
         // Exact match of a CompoundCRS object
         auto obj = createFromUserInput(
-            "WGS 84 / World Mercator +  EGM2008 height", dbContext);
+            "WGS 84 / World Mercator + EGM2008 height", dbContext);
         auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         EXPECT_EQ(crs->identifiers().size(), 1U);

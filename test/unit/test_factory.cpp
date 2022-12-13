@@ -3661,7 +3661,8 @@ TEST(factory, getCRSInfoList) {
                 EXPECT_EQ(info.south_lat_degree, -90.0);
                 EXPECT_EQ(info.east_lon_degree, 180.0);
                 EXPECT_EQ(info.north_lat_degree, 90.0);
-                EXPECT_EQ(info.areaName, "World.");
+                EXPECT_TRUE(std::string(info.areaName).find("World") == 0)
+                    << std::string(info.areaName);
                 EXPECT_TRUE(info.projectionMethodName.empty());
                 found4326 = true;
             } else if (info.code == "4296") { // Soudan - deprecated
