@@ -483,6 +483,9 @@ class GTiffGrid : public Grid {
 
     bool valueAt(uint16_t sample, int x, int y, float &out) const;
 
+    bool valuesAt(int x_start, int y_start, int x_count, int y_count,
+                  int sample_count, const int *sample_idx, float *out) const;
+
     bool isNodata(float val) const;
 
     const std::string &metadataItem(const std::string &key,
@@ -760,6 +763,162 @@ bool GTiffGrid::valueAt(uint16_t sample, int x, int yFromBottom,
         break;
     }
 
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+bool GTiffGrid::valuesAt(int x_start, int y_start, int x_count, int y_count,
+                         int sample_count, const int *sample_idx,
+                         float *out) const {
+    const auto getTIFFRow = [this](int y) {
+        return m_bottomUp ? y : m_height - 1 - y;
+    };
+    if (m_blockIs256Pixel && m_planarConfig == PLANARCONFIG_CONTIG &&
+        m_dt == TIFFDataType::Float32 &&
+        (x_start / 256) == (x_start + x_count - 1) / 256 &&
+        getTIFFRow(y_start) / 256 == getTIFFRow(y_start + y_count - 1) / 256 &&
+        !m_hasNodata && m_adfScale.empty() &&
+        (sample_count == 1 ||
+         (sample_count == 2 && sample_idx[1] == sample_idx[0] + 1) ||
+         (sample_count == 3 && sample_idx[1] == sample_idx[0] + 1 &&
+          sample_idx[2] == sample_idx[0] + 2))) {
+        const int yTIFF = m_bottomUp ? y_start : m_height - (y_start + y_count);
+        int blockXOff;
+        int blockYOff;
+        uint32_t blockId;
+        const int blockX = x_start / 256;
+        blockXOff = x_start % 256;
+        const int blockY = yTIFF / 256;
+        blockYOff = yTIFF % 256;
+        blockId = blockY * m_blocksPerRow + blockX;
+
+        const std::vector<unsigned char> *pBuffer =
+            blockId == m_bufferBlockId ? &m_buffer
+                                       : m_cache.get(m_ifdIdx, blockId);
+        if (pBuffer == nullptr) {
+            if (TIFFCurrentDirOffset(m_hTIFF) != m_dirOffset &&
+                !TIFFSetSubDirectory(m_hTIFF, m_dirOffset)) {
+                return false;
+            }
+            if (m_buffer.empty()) {
+                const auto blockSize =
+                    static_cast<size_t>(m_tiled ? TIFFTileSize64(m_hTIFF)
+                                                : TIFFStripSize64(m_hTIFF));
+                try {
+                    m_buffer.resize(blockSize);
+                } catch (const std::exception &e) {
+                    pj_log(m_ctx, PJ_LOG_ERROR, _("Exception %s"), e.what());
+                    return false;
+                }
+            }
+
+            if (m_tiled) {
+                if (TIFFReadEncodedTile(m_hTIFF, blockId, m_buffer.data(),
+                                        m_buffer.size()) == -1) {
+                    return false;
+                }
+            } else {
+                if (TIFFReadEncodedStrip(m_hTIFF, blockId, m_buffer.data(),
+                                         m_buffer.size()) == -1) {
+                    return false;
+                }
+            }
+
+            pBuffer = &m_buffer;
+            try {
+                m_cache.insert(m_ifdIdx, blockId, m_buffer);
+                m_bufferBlockId = blockId;
+            } catch (const std::exception &e) {
+                // Should normally not happen
+                pj_log(m_ctx, PJ_LOG_ERROR, _("Exception %s"), e.what());
+            }
+        }
+
+        uint32_t offsetInBlockStart = blockXOff + blockYOff * 256U;
+
+        if (sample_count == m_samplesPerPixel) {
+            const int sample_count_mul_x_count = sample_count * x_count;
+            for (int y = 0; y < y_count; ++y) {
+                uint32_t offsetInBlock =
+                    (offsetInBlockStart +
+                     256 * (m_bottomUp ? y : y_count - 1 - y)) *
+                        m_samplesPerPixel +
+                    sample_idx[0];
+                memcpy(out,
+                       reinterpret_cast<const float *>(pBuffer->data()) +
+                           offsetInBlock,
+                       sample_count_mul_x_count * sizeof(float));
+                out += sample_count_mul_x_count;
+            }
+        } else {
+            switch (sample_count) {
+            case 1:
+                for (int y = 0; y < y_count; ++y) {
+                    uint32_t offsetInBlock =
+                        (offsetInBlockStart +
+                         256 * (m_bottomUp ? y : y_count - 1 - y)) *
+                            m_samplesPerPixel +
+                        sample_idx[0];
+                    const float *in_ptr =
+                        reinterpret_cast<const float *>(pBuffer->data()) +
+                        offsetInBlock;
+                    for (int x = 0; x < x_count; ++x) {
+                        memcpy(out, in_ptr, sample_count * sizeof(float));
+                        in_ptr += m_samplesPerPixel;
+                        out += sample_count;
+                    }
+                }
+                break;
+            case 2:
+                for (int y = 0; y < y_count; ++y) {
+                    uint32_t offsetInBlock =
+                        (offsetInBlockStart +
+                         256 * (m_bottomUp ? y : y_count - 1 - y)) *
+                            m_samplesPerPixel +
+                        sample_idx[0];
+                    const float *in_ptr =
+                        reinterpret_cast<const float *>(pBuffer->data()) +
+                        offsetInBlock;
+                    for (int x = 0; x < x_count; ++x) {
+                        memcpy(out, in_ptr, sample_count * sizeof(float));
+                        in_ptr += m_samplesPerPixel;
+                        out += sample_count;
+                    }
+                }
+                break;
+            case 3:
+                for (int y = 0; y < y_count; ++y) {
+                    uint32_t offsetInBlock =
+                        (offsetInBlockStart +
+                         256 * (m_bottomUp ? y : y_count - 1 - y)) *
+                            m_samplesPerPixel +
+                        sample_idx[0];
+                    const float *in_ptr =
+                        reinterpret_cast<const float *>(pBuffer->data()) +
+                        offsetInBlock;
+                    for (int x = 0; x < x_count; ++x) {
+                        memcpy(out, in_ptr, sample_count * sizeof(float));
+                        in_ptr += m_samplesPerPixel;
+                        out += sample_count;
+                    }
+                }
+                break;
+            }
+        }
+        return true;
+    }
+
+    for (int y = y_start; y < y_start + y_count; ++y) {
+        for (int x = x_start; x < x_start + x_count; ++x) {
+            for (int isample = 0; isample < sample_count; ++isample) {
+                if (!valueAt(static_cast<uint16_t>(sample_idx[isample]), x, y,
+                             *out))
+                    return false;
+                ++out;
+            }
+        }
+    }
     return true;
 }
 
@@ -2681,6 +2840,10 @@ class GTiffGenericGrid final : public GenericShiftGrid {
 
     bool valueAt(int x, int y, int sample, float &out) const override;
 
+    bool valuesAt(int x_start, int y_start, int x_count, int y_count,
+                  int sample_count, const int *sample_idx,
+                  float *out) const override;
+
     int samplesPerPixel() const override { return m_grid->samplesPerPixel(); }
 
     std::string unit(int sample) const override {
@@ -2744,6 +2907,15 @@ bool GTiffGenericGrid::valueAt(int x, int y, int sample, float &out) const {
         static_cast<unsigned>(sample) >= m_grid->samplesPerPixel())
         return false;
     return m_grid->valueAt(static_cast<uint16_t>(sample), x, y, out);
+}
+
+// ---------------------------------------------------------------------------
+
+bool GTiffGenericGrid::valuesAt(int x_start, int y_start, int x_count,
+                                int y_count, int sample_count,
+                                const int *sample_idx, float *out) const {
+    return m_grid->valuesAt(x_start, y_start, x_count, y_count, sample_count,
+                            sample_idx, out);
 }
 
 // ---------------------------------------------------------------------------
@@ -2866,6 +3038,23 @@ GenericShiftGrid::GenericShiftGrid(const std::string &nameIn, int widthIn,
 // ---------------------------------------------------------------------------
 
 GenericShiftGrid::~GenericShiftGrid() = default;
+
+// ---------------------------------------------------------------------------
+
+bool GenericShiftGrid::valuesAt(int x_start, int y_start, int x_count,
+                                int y_count, int sample_count,
+                                const int *sample_idx, float *out) const {
+    for (int y = y_start; y < y_start + y_count; ++y) {
+        for (int x = x_start; x < x_start + x_count; ++x) {
+            for (int isample = 0; isample < sample_count; ++isample) {
+                if (!valueAt(x, y, sample_idx[isample], *out))
+                    return false;
+                ++out;
+            }
+        }
+    }
+    return true;
+}
 
 // ---------------------------------------------------------------------------
 
