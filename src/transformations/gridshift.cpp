@@ -54,6 +54,10 @@ struct GridInfo {
     int idxSampleLon = -1;
     int idxSampleZ = -1;
     bool bilinearInterpolation = true;
+    std::vector<float> shifts;
+    std::vector<int> idxSampleLatLonZ{-1, -1, -1};
+    int lastIdxLam = -1;
+    int lastIdxPhi = -1;
 };
 
 // ---------------------------------------------------------------------------
@@ -260,10 +264,14 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
         gridInfo.bilinearInterpolation =
             (interpolation == "bilinear" || grid->width() < 3 ||
              grid->height() < 3);
+        gridInfo.shifts.resize(3 * 3 * 3);
+        gridInfo.idxSampleLatLonZ[0] = idxSampleLat;
+        gridInfo.idxSampleLatLonZ[1] = idxSampleLon;
+        gridInfo.idxSampleLatLonZ[2] = idxSampleZ;
         m_cacheGridInfo[grid] = gridInfo;
         iterCache = m_cacheGridInfo.find(grid);
     }
-    const GridInfo &gridInfo = iterCache->second;
+    GridInfo &gridInfo = iterCache->second;
     const int idxSampleLat = gridInfo.idxSampleLat;
     const int idxSampleLon = gridInfo.idxSampleLon;
     const int idxSampleZ = gridInfo.idxSampleZ;
@@ -321,42 +329,53 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
         m00 *= frct.phi;
         m10 *= frct.phi;
         if (idxSampleLon >= 0 && idxSampleLat >= 0) {
-            float shifts[2 * 2 * 3];
-            const int idxSampleLonLat[] = {idxSampleLat, idxSampleLon,
-                                           idxSampleZ};
-            if (!grid->valuesAt(indx.lam, indx.phi, 2, 2,
-                                idxSampleZ >= 0 ? 3 : 2, idxSampleLonLat,
-                                shifts)) {
-                return val;
+            if (gridInfo.lastIdxPhi != indx.phi ||
+                gridInfo.lastIdxLam != indx.lam) {
+                if (!grid->valuesAt(indx.lam, indx.phi, 2, 2,
+                                    idxSampleZ >= 0 ? 3 : 2,
+                                    gridInfo.idxSampleLatLonZ.data(),
+                                    gridInfo.shifts.data())) {
+                    return val;
+                }
+                gridInfo.lastIdxPhi = indx.phi;
+                gridInfo.lastIdxLam = indx.lam;
             }
             if (idxSampleZ >= 0) {
-                val.phi = (m00 * shifts[0] + m10 * shifts[3] + m01 * shifts[6] +
-                           m11 * shifts[9]) *
-                          convFactorLatLon;
-                val.lam = (m00 * shifts[1] + m10 * shifts[4] + m01 * shifts[7] +
-                           m11 * shifts[10]) *
-                          convFactorLatLon;
-                val.z = m00 * shifts[2] + m10 * shifts[5] + m01 * shifts[8] +
-                        m11 * shifts[11];
+                val.phi =
+                    (m00 * gridInfo.shifts[0] + m10 * gridInfo.shifts[3] +
+                     m01 * gridInfo.shifts[6] + m11 * gridInfo.shifts[9]) *
+                    convFactorLatLon;
+                val.lam =
+                    (m00 * gridInfo.shifts[1] + m10 * gridInfo.shifts[4] +
+                     m01 * gridInfo.shifts[7] + m11 * gridInfo.shifts[10]) *
+                    convFactorLatLon;
+                val.z = m00 * gridInfo.shifts[2] + m10 * gridInfo.shifts[5] +
+                        m01 * gridInfo.shifts[8] + m11 * gridInfo.shifts[11];
             } else {
-                val.phi = (m00 * shifts[0] + m10 * shifts[2] + m01 * shifts[4] +
-                           m11 * shifts[6]) *
-                          convFactorLatLon;
-                val.lam = (m00 * shifts[1] + m10 * shifts[3] + m01 * shifts[5] +
-                           m11 * shifts[7]) *
-                          convFactorLatLon;
+                val.phi =
+                    (m00 * gridInfo.shifts[0] + m10 * gridInfo.shifts[2] +
+                     m01 * gridInfo.shifts[4] + m11 * gridInfo.shifts[6]) *
+                    convFactorLatLon;
+                val.lam =
+                    (m00 * gridInfo.shifts[1] + m10 * gridInfo.shifts[3] +
+                     m01 * gridInfo.shifts[5] + m11 * gridInfo.shifts[7]) *
+                    convFactorLatLon;
             }
         } else {
             val.lam = 0;
             val.phi = 0;
             if (idxSampleZ >= 0) {
-                float shifts[2 * 2];
-                if (!grid->valuesAt(indx.lam, indx.phi, 2, 2, 1, &idxSampleZ,
-                                    shifts)) {
-                    return val;
+                if (gridInfo.lastIdxPhi != indx.phi ||
+                    gridInfo.lastIdxLam != indx.lam) {
+                    if (!grid->valuesAt(indx.lam, indx.phi, 2, 2, 1,
+                                        &idxSampleZ, gridInfo.shifts.data())) {
+                        return val;
+                    }
+                    gridInfo.lastIdxPhi = indx.phi;
+                    gridInfo.lastIdxLam = indx.lam;
                 }
-                val.z = m00 * shifts[0] + m10 * shifts[1] + m01 * shifts[2] +
-                        m11 * shifts[3];
+                val.z = m00 * gridInfo.shifts[0] + m10 * gridInfo.shifts[1] +
+                        m01 * gridInfo.shifts[2] + m11 * gridInfo.shifts[3];
             }
         }
     } else // biquadratic
@@ -388,15 +407,18 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
         };
 
         if (idxSampleLon >= 0 && idxSampleLat >= 0) {
-            float shifts[3 * 3 * 3 + 1];
-            const int idxSampleLonLat[] = {idxSampleLat, idxSampleLon,
-                                           idxSampleZ};
-            if (!grid->valuesAt(indx.lam, indx.phi, 3, 3,
-                                idxSampleZ >= 0 ? 3 : 2, idxSampleLonLat,
-                                shifts)) {
-                return val;
+            if (gridInfo.lastIdxPhi != indx.phi ||
+                gridInfo.lastIdxLam != indx.lam) {
+                if (!grid->valuesAt(indx.lam, indx.phi, 3, 3,
+                                    idxSampleZ >= 0 ? 3 : 2,
+                                    gridInfo.idxSampleLatLonZ.data(),
+                                    gridInfo.shifts.data())) {
+                    return val;
+                }
+                gridInfo.lastIdxPhi = indx.phi;
+                gridInfo.lastIdxLam = indx.lam;
             }
-            const float *shifts_ptr = shifts;
+            const float *shifts_ptr = gridInfo.shifts.data();
             if (idxSampleZ >= 0) {
                 double latlonz_shift[3][4];
                 for (int j = 0; j <= 2; ++j) {
@@ -441,13 +463,17 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
             val.lam = 0;
             val.phi = 0;
             if (idxSampleZ >= 0) {
-                float shifts[3 * 3];
-                if (!grid->valuesAt(indx.lam, indx.phi, 3, 3, 1, &idxSampleZ,
-                                    shifts)) {
-                    return val;
+                if (gridInfo.lastIdxPhi != indx.phi ||
+                    gridInfo.lastIdxLam != indx.lam) {
+                    if (!grid->valuesAt(indx.lam, indx.phi, 3, 3, 1,
+                                        &idxSampleZ, gridInfo.shifts.data())) {
+                        return val;
+                    }
+                    gridInfo.lastIdxPhi = indx.phi;
+                    gridInfo.lastIdxLam = indx.lam;
                 }
                 double z_shift[3];
-                const float *shifts_ptr = shifts;
+                const float *shifts_ptr = gridInfo.shifts.data();
                 for (int j = 0; j <= 2; ++j) {
                     z_shift[j] = quadraticInterpol(
                         frct.lam, shifts_ptr[0], shifts_ptr[1], shifts_ptr[2]);
