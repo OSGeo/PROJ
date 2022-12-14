@@ -450,6 +450,7 @@ class GTiffGrid : public Grid {
     uint32_t m_blockWidth = 0;
     uint32_t m_blockHeight = 0;
     mutable std::vector<unsigned char> m_buffer{};
+    mutable uint32_t m_bufferBlockId = std::numeric_limits<uint32_t>::max();
     unsigned m_blocksPerRow = 0;
     unsigned m_blocksPerCol = 0;
     unsigned m_blocks = 0;
@@ -685,7 +686,8 @@ bool GTiffGrid::valueAt(uint16_t sample, int x, int yFromBottom,
         blockId += sample * m_blocks;
     }
 
-    const std::vector<unsigned char> *pBuffer = m_cache.get(m_ifdIdx, blockId);
+    const std::vector<unsigned char> *pBuffer =
+        blockId == m_bufferBlockId ? &m_buffer : m_cache.get(m_ifdIdx, blockId);
     if (pBuffer == nullptr) {
         if (TIFFCurrentDirOffset(m_hTIFF) != m_dirOffset &&
             !TIFFSetSubDirectory(m_hTIFF, m_dirOffset)) {
@@ -717,6 +719,7 @@ bool GTiffGrid::valueAt(uint16_t sample, int x, int yFromBottom,
         pBuffer = &m_buffer;
         try {
             m_cache.insert(m_ifdIdx, blockId, m_buffer);
+            m_bufferBlockId = blockId;
         } catch (const std::exception &e) {
             // Should normally not happen
             pj_log(m_ctx, PJ_LOG_ERROR, _("Exception %s"), e.what());
