@@ -311,34 +311,6 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
 
     constexpr double convFactorLatLon = 1. / 3600 / 180 * M_PI;
     if (bilinearInterpolation) {
-        float f00Lon = 0, f00Lat = 0;
-        float f10Lon = 0, f10Lat = 0;
-        float f01Lon = 0, f01Lat = 0;
-        float f11Lon = 0, f11Lat = 0;
-        float f00Z = 0, f01Z = 0, f10Z = 0, f11Z = 0;
-        if (idxSampleLon >= 0 && idxSampleLat >= 0) {
-            if (!grid->valueAt(indx.lam, indx.phi, idxSampleLon, f00Lon) ||
-                !grid->valueAt(indx.lam, indx.phi, idxSampleLat, f00Lat) ||
-                !grid->valueAt(indx.lam + 1, indx.phi, idxSampleLon, f10Lon) ||
-                !grid->valueAt(indx.lam + 1, indx.phi, idxSampleLat, f10Lat) ||
-                !grid->valueAt(indx.lam, indx.phi + 1, idxSampleLon, f01Lon) ||
-                !grid->valueAt(indx.lam, indx.phi + 1, idxSampleLat, f01Lat) ||
-                !grid->valueAt(indx.lam + 1, indx.phi + 1, idxSampleLon,
-                               f11Lon) ||
-                !grid->valueAt(indx.lam + 1, indx.phi + 1, idxSampleLat,
-                               f11Lat)) {
-                return val;
-            }
-        }
-        if (idxSampleZ >= 0) {
-            if (!grid->valueAt(indx.lam, indx.phi, idxSampleZ, f00Z) ||
-                !grid->valueAt(indx.lam + 1, indx.phi, idxSampleZ, f10Z) ||
-                !grid->valueAt(indx.lam, indx.phi + 1, idxSampleZ, f01Z) ||
-                !grid->valueAt(indx.lam + 1, indx.phi + 1, idxSampleZ, f11Z)) {
-                return val;
-            }
-        }
-
         double m10 = frct.lam;
         double m11 = m10;
         double m01 = 1. - frct.lam;
@@ -348,19 +320,44 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
         frct.phi = 1. - frct.phi;
         m00 *= frct.phi;
         m10 *= frct.phi;
-        if (idxSampleLon >= 0) {
-            val.lam =
-                (m00 * f00Lon + m10 * f10Lon + m01 * f01Lon + m11 * f11Lon) *
-                convFactorLatLon;
-            val.phi =
-                (m00 * f00Lat + m10 * f10Lat + m01 * f01Lat + m11 * f11Lat) *
-                convFactorLatLon;
+        if (idxSampleLon >= 0 && idxSampleLat >= 0) {
+            float shifts[2 * 2 * 3];
+            const int idxSampleLonLat[] = {idxSampleLat, idxSampleLon,
+                                           idxSampleZ};
+            if (!grid->valuesAt(indx.lam, indx.phi, 2, 2,
+                                idxSampleZ >= 0 ? 3 : 2, idxSampleLonLat,
+                                shifts)) {
+                return val;
+            }
+            if (idxSampleZ >= 0) {
+                val.phi = (m00 * shifts[0] + m10 * shifts[3] + m01 * shifts[6] +
+                           m11 * shifts[9]) *
+                          convFactorLatLon;
+                val.lam = (m00 * shifts[1] + m10 * shifts[4] + m01 * shifts[7] +
+                           m11 * shifts[10]) *
+                          convFactorLatLon;
+                val.z = m00 * shifts[2] + m10 * shifts[5] + m01 * shifts[8] +
+                        m11 * shifts[11];
+            } else {
+                val.phi = (m00 * shifts[0] + m10 * shifts[2] + m01 * shifts[4] +
+                           m11 * shifts[6]) *
+                          convFactorLatLon;
+                val.lam = (m00 * shifts[1] + m10 * shifts[3] + m01 * shifts[5] +
+                           m11 * shifts[7]) *
+                          convFactorLatLon;
+            }
         } else {
             val.lam = 0;
             val.phi = 0;
-        }
-        if (idxSampleZ >= 0) {
-            val.z = m00 * f00Z + m10 * f10Z + m01 * f01Z + m11 * f11Z;
+            if (idxSampleZ >= 0) {
+                float shifts[2 * 2];
+                if (!grid->valuesAt(indx.lam, indx.phi, 2, 2, 1, &idxSampleZ,
+                                    shifts)) {
+                    return val;
+                }
+                val.z = m00 * shifts[0] + m10 * shifts[1] + m01 * shifts[2] +
+                        m11 * shifts[3];
+            }
         }
     } else // biquadratic
     {
@@ -391,50 +388,74 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
         };
 
         if (idxSampleLon >= 0 && idxSampleLat >= 0) {
-            double lon_shift[3];
-            double lat_shift[3];
-            float lon_shift_y[3] = {0};
-            float lat_shift_y[3] = {0};
-            for (int j = 0; j <= 2; ++j) {
-                for (int i = 0; i <= 2; ++i) {
-                    if (!grid->valueAt(indx.lam + i, indx.phi + j, idxSampleLon,
-                                       lon_shift_y[i]))
-                        return val;
-                    if (!grid->valueAt(indx.lam + i, indx.phi + j, idxSampleLat,
-                                       lat_shift_y[i]))
-                        return val;
-                }
-                lon_shift[j] = quadraticInterpol(
-                    frct.lam, lon_shift_y[0], lon_shift_y[1], lon_shift_y[2]);
-                lat_shift[j] = quadraticInterpol(
-                    frct.lam, lat_shift_y[0], lat_shift_y[1], lat_shift_y[2]);
+            float shifts[3 * 3 * 3 + 1];
+            const int idxSampleLonLat[] = {idxSampleLat, idxSampleLon,
+                                           idxSampleZ};
+            if (!grid->valuesAt(indx.lam, indx.phi, 3, 3,
+                                idxSampleZ >= 0 ? 3 : 2, idxSampleLonLat,
+                                shifts)) {
+                return val;
             }
-            val.lam = quadraticInterpol(frct.phi, lon_shift[0], lon_shift[1],
-                                        lon_shift[2]) *
-                      convFactorLatLon;
-            val.phi = quadraticInterpol(frct.phi, lat_shift[0], lat_shift[1],
-                                        lat_shift[2]) *
-                      convFactorLatLon;
+            const float *shifts_ptr = shifts;
+            if (idxSampleZ >= 0) {
+                double latlonz_shift[3][4];
+                for (int j = 0; j <= 2; ++j) {
+                    latlonz_shift[j][0] = quadraticInterpol(
+                        frct.lam, shifts_ptr[0], shifts_ptr[3], shifts_ptr[6]);
+                    latlonz_shift[j][1] = quadraticInterpol(
+                        frct.lam, shifts_ptr[1], shifts_ptr[4], shifts_ptr[7]);
+                    latlonz_shift[j][2] = quadraticInterpol(
+                        frct.lam, shifts_ptr[2], shifts_ptr[5], shifts_ptr[8]);
+                    shifts_ptr += 9;
+                }
+                val.phi = quadraticInterpol(frct.phi, latlonz_shift[0][0],
+                                            latlonz_shift[1][0],
+                                            latlonz_shift[2][0]) *
+                          convFactorLatLon;
+                val.lam = quadraticInterpol(frct.phi, latlonz_shift[0][1],
+                                            latlonz_shift[1][1],
+                                            latlonz_shift[2][1]) *
+                          convFactorLatLon;
+                val.z =
+                    quadraticInterpol(frct.phi, latlonz_shift[0][2],
+                                      latlonz_shift[1][2], latlonz_shift[2][2]);
+            } else {
+                double latlon_shift[3][2];
+                for (int j = 0; j <= 2; ++j) {
+                    latlon_shift[j][0] = quadraticInterpol(
+                        frct.lam, shifts_ptr[0], shifts_ptr[2], shifts_ptr[4]);
+                    latlon_shift[j][1] = quadraticInterpol(
+                        frct.lam, shifts_ptr[1], shifts_ptr[3], shifts_ptr[5]);
+                    shifts_ptr += 6;
+                }
+                val.phi =
+                    quadraticInterpol(frct.phi, latlon_shift[0][0],
+                                      latlon_shift[1][0], latlon_shift[2][0]) *
+                    convFactorLatLon;
+                val.lam =
+                    quadraticInterpol(frct.phi, latlon_shift[0][1],
+                                      latlon_shift[1][1], latlon_shift[2][1]) *
+                    convFactorLatLon;
+            }
         } else {
             val.lam = 0;
             val.phi = 0;
-        }
-        if (idxSampleZ >= 0) {
-            double z_shift[3];
-            float z_shift_y[3] = {0};
-            for (int j = 0; j <= 2; ++j) {
-                for (int i = 0; i <= 2; ++i) {
-                    if (!grid->valueAt(indx.lam + i, indx.phi + j, idxSampleZ,
-                                       z_shift_y[i])) {
-                        val.lam = val.phi = HUGE_VAL;
-                        return val;
-                    }
+            if (idxSampleZ >= 0) {
+                float shifts[3 * 3];
+                if (!grid->valuesAt(indx.lam, indx.phi, 3, 3, 1, &idxSampleZ,
+                                    shifts)) {
+                    return val;
                 }
-                z_shift[j] = quadraticInterpol(frct.lam, z_shift_y[0],
-                                               z_shift_y[1], z_shift_y[2]);
+                double z_shift[3];
+                const float *shifts_ptr = shifts;
+                for (int j = 0; j <= 2; ++j) {
+                    z_shift[j] = quadraticInterpol(
+                        frct.lam, shifts_ptr[0], shifts_ptr[1], shifts_ptr[2]);
+                    shifts_ptr += 3;
+                }
+                val.z = quadraticInterpol(frct.phi, z_shift[0], z_shift[1],
+                                          z_shift[2]);
             }
-            val.z =
-                quadraticInterpol(frct.phi, z_shift[0], z_shift[1], z_shift[2]);
         }
     }
 
