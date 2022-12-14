@@ -67,6 +67,7 @@ struct gridshiftData {
     bool m_bHasVerticalToVertical = false;
     bool m_bHasGeographicToVertical = false;
     bool m_mainGridTypeIsGeographic3DOffset = false;
+    bool m_skip_z_transform = false;
     std::string m_mainGridType{};
     std::string m_auxGridType{};
     std::string m_interpolation{};
@@ -255,7 +256,7 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
         GridInfo gridInfo;
         gridInfo.idxSampleLat = idxSampleLat;
         gridInfo.idxSampleLon = idxSampleLon;
-        gridInfo.idxSampleZ = idxSampleZ;
+        gridInfo.idxSampleZ = m_skip_z_transform ? -1 : idxSampleZ;
         gridInfo.bilinearInterpolation =
             (interpolation == "bilinear" || grid->width() < 3 ||
              grid->height() < 3);
@@ -764,6 +765,10 @@ PJ *TRANSFORMATION(gridshift, 0) {
             proj_log_error(P, _("Unsupported value for +interpolation."));
             return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
+    }
+
+    if (pj_param(P->ctx, P->params, "tno_z_transform").i) {
+        Q->m_skip_z_transform = true;
     }
 
     return P;

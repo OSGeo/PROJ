@@ -64,3 +64,7 @@ Optional
     Biquadratic is typically used for NADCON5 grids, and is defined in
     `NOAA Technical Memorandum NOS NGS 84 - Biquadratic Interpolation
     <https://geodesy.noaa.gov/library/pdfs/NOAA_TM_NOS_NGS_0084.pdf>`__
+
+.. option:: +no_z_transform
+
+    If specified, vertical coordinate transformation will be skipped.
