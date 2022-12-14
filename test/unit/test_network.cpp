@@ -1109,13 +1109,13 @@ TEST(networking, curl_hgridshift) {
     proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
 
-    // NAD83 to NAD83(HARN) in West-Virginia. Using wvhpgn.tif
-    auto P = proj_create_crs_to_crs(ctx, "EPSG:4269", "EPSG:4152", nullptr);
+    // NTF to RGF93 v1. Using fr_ign_gr3df97a.tif
+    auto P = proj_create_crs_to_crs(ctx, "EPSG:4275", "EPSG:4171", nullptr);
     ASSERT_NE(P, nullptr);
 
     PJ_COORD c;
-    c.xyz.x = 40;  // lat
-    c.xyz.y = -80; // lon
+    c.xyz.x = 49; // lat
+    c.xyz.y = 2;  // lon
     c.xyz.z = 0;
     c = proj_trans(P, PJ_FWD, c);
 
@@ -1124,8 +1124,8 @@ TEST(networking, curl_hgridshift) {
     proj_destroy(P);
     proj_context_destroy(ctx);
 
-    EXPECT_NEAR(c.xyz.x, 39.99999839, 1e-8);
-    EXPECT_NEAR(c.xyz.y, -79.99999807, 1e-8);
+    EXPECT_NEAR(c.xyz.x, 48.9999322600, 1e-8);
+    EXPECT_NEAR(c.xyz.y, 1.9992776848, 1e-8);
     EXPECT_NEAR(c.xyz.z, 0, 1e-2);
 }
 

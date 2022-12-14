@@ -201,6 +201,16 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord) {
     return proj_xyz_dist (org, t);
 }
 
+// Returns true if the passed operation uses NADCON5 grids for NAD83 to NAD83(HARN)
+static bool isSpecialCaseForNAD83_to_NAD83HARN(const PJCoordOperation& op)
+{
+    return op.name.find("NAD83 to NAD83(HARN) (47)") != std::string::npos ||
+           op.name.find("NAD83 to NAD83(HARN) (48)") != std::string::npos ||
+           op.name.find("NAD83 to NAD83(HARN) (49)") != std::string::npos ||
+           op.name.find("NAD83 to NAD83(HARN) (50)") != std::string::npos;
+}
+
+
 /**************************************************************************************/
 int pj_get_suggested_operation(PJ_CONTEXT*,
                                const std::vector<PJCoordOperation>& opList,
@@ -251,7 +261,8 @@ int pj_get_suggested_operation(PJ_CONTEXT*,
                   alt.minxSrc > opList[iBest].minxSrc &&
                   alt.minySrc > opList[iBest].minySrc &&
                   alt.maxxSrc < opList[iBest].maxxSrc &&
-                  alt.maxySrc < opList[iBest].maxySrc)) &&
+                  alt.maxySrc < opList[iBest].maxySrc &&
+                  !isSpecialCaseForNAD83_to_NAD83HARN(opList[iBest]))) &&
                 !alt.isOffshore) ) {
                 iBest = i;
                 bestAccuracy = alt.accuracy;

@@ -1762,6 +1762,48 @@ TEST_F(CApi, proj_create_operations) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_get_suggested_operation_for_NAD83_to_NAD83_HARN) {
+    auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+
+    auto source_crs = proj_create_from_database(
+        m_ctxt, "EPSG", "4269", PJ_CATEGORY_CRS, false, nullptr); // NAD83
+    ASSERT_NE(source_crs, nullptr);
+    ObjectKeeper keeper_source_crs(source_crs);
+
+    auto target_crs = proj_create_from_database(
+        m_ctxt, "EPSG", "4152", PJ_CATEGORY_CRS, false, nullptr); // NAD83(HARN)
+    ASSERT_NE(target_crs, nullptr);
+    ObjectKeeper keeper_target_crs(target_crs);
+
+    proj_operation_factory_context_set_spatial_criterion(
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+    proj_operation_factory_context_set_grid_availability_use(
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+
+    auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
+    ASSERT_NE(res, nullptr);
+    ObjListKeeper keeper_res(res);
+
+    {
+        PJ_COORD coord;
+        coord.xy.x = 40;
+        coord.xy.y = -100;
+        int idx = proj_get_suggested_operation(m_ctxt, res, PJ_FWD, coord);
+        ASSERT_GE(idx, 0);
+        ASSERT_LT(idx, proj_list_get_count(res));
+        auto op = proj_list_get(m_ctxt, res, idx);
+        ASSERT_NE(op, nullptr);
+        ObjectKeeper keeper_op(op);
+        // Transformation for CONUS
+        EXPECT_STREQ(proj_get_name(op), "NAD83 to NAD83(HARN) (47)");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_create_operations_prime_meridian_non_greenwich) {
     auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
     ASSERT_NE(ctxt, nullptr);
