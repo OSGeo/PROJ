@@ -355,12 +355,12 @@ Candidate operations found: 9
 DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast west of 44°W and north of 40°N.
 DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast west of 44°W and north of 40°N.
 DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, United States (USA) - CONUS including EEZ - onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS.
+DERIVED_FROM(EPSG):8555, NAD27 to NAD83 (7), 0.15 m, United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS).
 DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, United States (USA) - Alaska including EEZ.
+DERIVED_FROM(EPSG):8549, NAD27 to NAD83 (8), 0.5 m, United States (USA) - Alaska.
 DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec.
 EPSG:1462, NAD27 to NAD83 (5), 2.0 m, Canada - Quebec.
 EPSG:9111, NAD27 to NAD83 (9), 1.5 m, Canada - Saskatchewan.
-EPSG:8555, NAD27 to NAD83 (7), 0.15 m, United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS).
-EPSG:8549, NAD27 to NAD83 (8), 0.5 m, United States (USA) - Alaska.
 
 Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects
 Candidate operations found: 10
@@ -532,6 +532,61 @@ COORDINATEOPERATION["NAD27 to NAD83 (1)",
 -------------------------------------
 Operation No. 4:
 
+DERIVED_FROM(EPSG):8555, NAD27 to NAD83 (7), 0.15 m, United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS).
+
+PROJ string:
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=gridshift +grids=us_noaa_nadcon5_nad27_nad83_1986_conus.tif
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
+
+WKT2:2019 string:
+COORDINATEOPERATION["NAD27 to NAD83 (7)",
+    SOURCECRS[
+        GEOGCRS["NAD27",
+            DATUM["North American Datum 1927",
+                ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,2],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["geodetic longitude (Lon)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+            ID["EPSG",4267]]],
+    TARGETCRS[
+        GEOGCRS["NAD83",
+            DATUM["North American Datum 1983",
+                ELLIPSOID["GRS 1980",6378137,298.257222101,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,2],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["geodetic longitude (Lon)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+            ID["EPSG",4269]]],
+    METHOD["GENERAL_SHIFT_GTIFF"],
+    PARAMETERFILE["Latitude and longitude difference file","us_noaa_nadcon5_nad27_nad83_1986_conus.tif"],
+    OPERATIONACCURACY[0.15],
+    USAGE[
+        SCOPE["Geodesy."],
+        AREA["United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS)."],
+        BBOX[23.82,-124.79,49.38,-66.91]],
+    ID["DERIVED_FROM(EPSG)",8555],
+    REMARK["NADCON5 method expects longitudes 0-360°; source and target CRS longitudes in range ±180°. Accuracy at 67% confidence level is 0.15m onshore, 1m nearshore and undetermined farther offshore. For application in Gulf of Mexico refer to IOGP report 373-26."]]
+
+-------------------------------------
+Operation No. 5:
+
 DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, United States (USA) - Alaska including EEZ.
 
 PROJ string:
@@ -585,7 +640,62 @@ COORDINATEOPERATION["NAD27 to NAD83 (2)",
     REMARK["Uses NADCON method which expects longitudes positive west; EPSG GeogCRS NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east. May be used as transformation to WGS 84 - see NAD27 to WGS 84 (85) (code 15864)."]]
 
 -------------------------------------
-Operation No. 5:
+Operation No. 6:
+
+DERIVED_FROM(EPSG):8549, NAD27 to NAD83 (8), 0.5 m, United States (USA) - Alaska.
+
+PROJ string:
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=gridshift +grids=us_noaa_nadcon5_nad27_nad83_1986_alaska.tif
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
+
+WKT2:2019 string:
+COORDINATEOPERATION["NAD27 to NAD83 (8)",
+    SOURCECRS[
+        GEOGCRS["NAD27",
+            DATUM["North American Datum 1927",
+                ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,2],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["geodetic longitude (Lon)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+            ID["EPSG",4267]]],
+    TARGETCRS[
+        GEOGCRS["NAD83",
+            DATUM["North American Datum 1983",
+                ELLIPSOID["GRS 1980",6378137,298.257222101,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,2],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["geodetic longitude (Lon)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+            ID["EPSG",4269]]],
+    METHOD["GENERAL_SHIFT_GTIFF"],
+    PARAMETERFILE["Latitude and longitude difference file","us_noaa_nadcon5_nad27_nad83_1986_alaska.tif"],
+    OPERATIONACCURACY[0.5],
+    USAGE[
+        SCOPE["Geodesy."],
+        AREA["United States (USA) - Alaska."],
+        BBOX[51.3,172.42,71.4,-129.99]],
+    ID["DERIVED_FROM(EPSG)",8549],
+    REMARK["Uses NADCON5 method which expects longitudes positive east in range 0-360°; source and target CRSs have longitudes positive east in range -180° to +180°. Accuracy at 67% confidence level is 0.5m onshore, 5m nearshore and undetermined farther offshore."]]
+
+-------------------------------------
+Operation No. 7:
 
 DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec.
 
@@ -640,7 +750,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (6)",
     REMARK["Also distributed with file name QUE27-83.gsb. Replaces NAD27 to NAD83 (5) (code 1462). Uses NT method which expects longitudes positive west; EPSG GeogCRSs NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
 
 -------------------------------------
-Operation No. 6:
+Operation No. 8:
 
 EPSG:1462, NAD27 to NAD83 (5), 2.0 m, Canada - Quebec.
 
@@ -697,7 +807,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (5)",
     REMARK["Densification for Quebec of code 1312. Replaced by NAD27 to NAD83 (6) (code 1573). Uses NT method which expects longitudes positive west; EPSG GeogCRSs NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
 
 -------------------------------------
-Operation No. 7:
+Operation No. 9:
 
 EPSG:9111, NAD27 to NAD83 (9), 1.5 m, Canada - Saskatchewan.
 
@@ -753,7 +863,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (9)",
     ID["EPSG",9111]]
 
 -------------------------------------
-Operation No. 8:
+Operation No. 10:
 
 unknown id, Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, World, has ballpark transformation
 
@@ -804,110 +914,6 @@ COORDINATEOPERATION["Ballpark geographic offset from NAD27 to NAD83",
         SCOPE["unknown"],
         AREA["World"],
         BBOX[-90,-180,90,180]]]
-
--------------------------------------
-Operation No. 9:
-
-EPSG:8555, NAD27 to NAD83 (7), 0.15 m, United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS).
-
-PROJ string:
-
-WKT2:2019 string:
-COORDINATEOPERATION["NAD27 to NAD83 (7)",
-    VERSION["NGS-Usa Conus Nadcon5"],
-    SOURCECRS[
-        GEOGCRS["NAD27",
-            DATUM["North American Datum 1927",
-                ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
-            CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
-                    ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
-                    ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-            ID["EPSG",4267]]],
-    TARGETCRS[
-        GEOGCRS["NAD83",
-            DATUM["North American Datum 1983",
-                ELLIPSOID["GRS 1980",6378137,298.257222101,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
-            CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
-                    ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
-                    ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-            ID["EPSG",4269]]],
-    METHOD["NADCON5 (2D)",
-        ID["EPSG",1074]],
-    PARAMETERFILE["Latitude difference file","nadcon5.nad27.nad83_1986.conus.lat.trn.20160901.b"],
-    PARAMETERFILE["Longitude difference file","nadcon5.nad27.nad83_1986.conus.lon.trn.20160901.b"],
-    OPERATIONACCURACY[0.15],
-    USAGE[
-        SCOPE["Geodesy."],
-        AREA["United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS)."],
-        BBOX[23.82,-124.79,49.38,-66.91]],
-    ID["EPSG",8555],
-    REMARK["NADCON5 method expects longitudes 0-360°; source and target CRS longitudes in range ±180°. Accuracy at 67% confidence level is 0.15m onshore, 1m nearshore and undetermined farther offshore. For application in Gulf of Mexico refer to IOGP report 373-26."]]
-
--------------------------------------
-Operation No. 10:
-
-EPSG:8549, NAD27 to NAD83 (8), 0.5 m, United States (USA) - Alaska.
-
-PROJ string:
-
-WKT2:2019 string:
-COORDINATEOPERATION["NAD27 to NAD83 (8)",
-    VERSION["NGS-Usa AK Nadcon5"],
-    SOURCECRS[
-        GEOGCRS["NAD27",
-            DATUM["North American Datum 1927",
-                ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
-            CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
-                    ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
-                    ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-            ID["EPSG",4267]]],
-    TARGETCRS[
-        GEOGCRS["NAD83",
-            DATUM["North American Datum 1983",
-                ELLIPSOID["GRS 1980",6378137,298.257222101,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
-            CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
-                    ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
-                    ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-            ID["EPSG",4269]]],
-    METHOD["NADCON5 (2D)",
-        ID["EPSG",1074]],
-    PARAMETERFILE["Latitude difference file","nadcon5.nad27.nad83_1986.alaska.lat.trn.20160901.b"],
-    PARAMETERFILE["Longitude difference file","nadcon5.nad27.nad83_1986.alaska.lon.trn.20160901.b"],
-    OPERATIONACCURACY[0.5],
-    USAGE[
-        SCOPE["Geodesy."],
-        AREA["United States (USA) - Alaska."],
-        BBOX[51.3,172.42,71.4,-129.99]],
-    ID["EPSG",8549],
-    REMARK["Uses NADCON5 method which expects longitudes positive east in range 0-360°; source and target CRSs have longitudes positive east in range -180° to +180°. Accuracy at 67% confidence level is 0.5m onshore, 5m nearshore and undetermined farther offshore."]]
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --bbox 8,54.51,15.24,57.8 --summary
 Candidate operations found: 1

@@ -970,6 +970,8 @@ const struct MethodNameCode methodNameCodes[] = {
     METHOD_NAME_CODE(NTV2),
     METHOD_NAME_CODE(NTV1),
     METHOD_NAME_CODE(NADCON),
+    METHOD_NAME_CODE(NADCON5_2D),
+    METHOD_NAME_CODE(NADCON5_3D),
     METHOD_NAME_CODE(VERTCON),
     METHOD_NAME_CODE(GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN),
 };
@@ -1306,6 +1308,18 @@ static const ParamMapping paramLongitudeDifferenceFile = {
 static const ParamMapping *const paramsNADCON[] = {
     &paramLatitudeDifferenceFile, &paramLongitudeDifferenceFile, nullptr};
 
+static const ParamMapping *const paramsNADCON5_2D[] = {
+    &paramLatitudeDifferenceFile, &paramLongitudeDifferenceFile, nullptr};
+
+static const ParamMapping paramEllipsoidalHeightDifference = {
+    EPSG_NAME_PARAMETER_ELLIPSOIDAL_HEIGHT_DIFFERENCE_FILE,
+    EPSG_CODE_PARAMETER_ELLIPSOIDAL_HEIGHT_DIFFERENCE_FILE, nullptr,
+    common::UnitOfMeasure::Type::NONE, nullptr};
+
+static const ParamMapping *const paramsNADCON5_3D[] = {
+    &paramLatitudeDifferenceFile, &paramLongitudeDifferenceFile,
+    &paramEllipsoidalHeightDifference, nullptr};
+
 static const ParamMapping paramVerticalOffsetFile = {
     EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
     EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE, nullptr,
@@ -1486,6 +1500,12 @@ static const MethodMapping otherMethodMappings[] = {
 
     {EPSG_NAME_METHOD_NADCON, EPSG_CODE_METHOD_NADCON, nullptr, nullptr,
      nullptr, paramsNADCON},
+
+    {EPSG_NAME_METHOD_NADCON5_2D, EPSG_CODE_METHOD_NADCON5_2D, nullptr, nullptr,
+     nullptr, paramsNADCON5_2D},
+
+    {EPSG_NAME_METHOD_NADCON5_3D, EPSG_CODE_METHOD_NADCON5_3D, nullptr, nullptr,
+     nullptr, paramsNADCON5_3D},
 
     {EPSG_NAME_METHOD_VERTCON, EPSG_CODE_METHOD_VERTCON, nullptr, nullptr,
      nullptr, paramsVERTCON},
