@@ -140,6 +140,8 @@ static ExtentAndRes globalExtent() {
 
 // ---------------------------------------------------------------------------
 
+static const std::string emptyString;
+
 class NullVerticalShiftGrid : public VerticalShiftGrid {
 
   public:
@@ -150,6 +152,9 @@ class NullVerticalShiftGrid : public VerticalShiftGrid {
     bool isNodata(float, double) const override { return false; }
     void reassign_context(PJ_CONTEXT *) override {}
     bool hasChanged() const override { return false; }
+    const std::string &metadataItem(const std::string &, int) const override {
+        return emptyString;
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -212,6 +217,10 @@ class GTXVerticalShiftGrid : public VerticalShiftGrid {
 
     bool valueAt(int x, int y, float &out) const override;
     bool isNodata(float val, double multiplier) const override;
+
+    const std::string &metadataItem(const std::string &, int) const override {
+        return emptyString;
+    }
 
     static GTXVerticalShiftGrid *open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                                       const std::string &name);
@@ -475,7 +484,8 @@ class GTiffGrid : public Grid {
 
     bool isNodata(float val) const;
 
-    std::string metadataItem(const std::string &key, int sample = -1) const;
+    const std::string &metadataItem(const std::string &key,
+                                    int sample = -1) const override;
 
     uint32_t subfileType() const { return m_subfileType; }
 
@@ -758,10 +768,11 @@ bool GTiffGrid::isNodata(float val) const {
 
 // ---------------------------------------------------------------------------
 
-std::string GTiffGrid::metadataItem(const std::string &key, int sample) const {
+const std::string &GTiffGrid::metadataItem(const std::string &key,
+                                           int sample) const {
     auto iter = m_metadata.find(std::pair<int, std::string>(sample, key));
     if (iter == m_metadata.end()) {
-        return std::string();
+        return emptyString;
     }
     return iter->second;
 }
@@ -1230,8 +1241,14 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
         return;
     }
 
+    const std::string &type = grid->metadataItem("TYPE");
+
     // Fallback to analyzing spatial extents
     for (const auto &candidateParent : topGrids) {
+        if (!type.empty() && candidateParent->metadataItem("TYPE") != type) {
+            continue;
+        }
+
         const auto &candidateParentExtent = candidateParent->extentAndRes();
         if (candidateParentExtent.contains(extent)) {
             static_cast<GridType *>(candidateParent.get())
@@ -1269,6 +1286,11 @@ class GTiffVGrid : public VerticalShiftGrid {
 
     bool isNodata(float val, double /* multiplier */) const override {
         return m_grid->isNodata(val);
+    }
+
+    const std::string &metadataItem(const std::string &key,
+                                    int sample = -1) const override {
+        return m_grid->metadataItem(key, sample);
     }
 
     void insertGrid(PJ_CONTEXT *ctx, std::unique_ptr<GTiffVGrid> &&subgrid);
@@ -1358,7 +1380,7 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
         bool foundDescriptionForAtLeastOneSample = false;
         bool foundDescriptionForShift = false;
         for (int i = 0; i < static_cast<int>(grid->samplesPerPixel()); ++i) {
-            const auto desc = grid->metadataItem("DESCRIPTION", i);
+            const auto &desc = grid->metadataItem("DESCRIPTION", i);
             if (!desc.empty()) {
                 foundDescriptionForAtLeastOneSample = true;
             }
@@ -1394,8 +1416,8 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
             return nullptr;
         }
 
-        const std::string gridName = grid->metadataItem("grid_name");
-        const std::string parentName = grid->metadataItem("parent_grid_name");
+        const std::string &gridName = grid->metadataItem("grid_name");
+        const std::string &parentName = grid->metadataItem("parent_grid_name");
 
         auto vgrid =
             internal::make_unique<GTiffVGrid>(std::move(grid), idxSample);
@@ -1573,6 +1595,10 @@ class NullHorizontalShiftGrid : public HorizontalShiftGrid {
     void reassign_context(PJ_CONTEXT *) override {}
 
     bool hasChanged() const override { return false; }
+
+    const std::string &metadataItem(const std::string &, int) const override {
+        return emptyString;
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1622,6 +1648,10 @@ class NTv1Grid : public HorizontalShiftGrid {
     }
 
     bool hasChanged() const override { return m_fp->hasChanged(); }
+
+    const std::string &metadataItem(const std::string &, int) const override {
+        return emptyString;
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1750,6 +1780,10 @@ class CTable2Grid : public HorizontalShiftGrid {
     }
 
     bool hasChanged() const override { return m_fp->hasChanged(); }
+
+    const std::string &metadataItem(const std::string &, int) const override {
+        return emptyString;
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1887,6 +1921,10 @@ class NTv2Grid : public HorizontalShiftGrid {
 
     bool valueAt(int, int, bool, float &lonShift,
                  float &latShift) const override;
+
+    const std::string &metadataItem(const std::string &, int) const override {
+        return emptyString;
+    }
 
     void setCache(FloatLineCache *cache) { m_cache = cache; }
 
@@ -2191,6 +2229,11 @@ class GTiffHGrid : public HorizontalShiftGrid {
     bool valueAt(int x, int y, bool, float &lonShift,
                  float &latShift) const override;
 
+    const std::string &metadataItem(const std::string &key,
+                                    int sample = -1) const override {
+        return m_grid->metadataItem(key, sample);
+    }
+
     void insertGrid(PJ_CONTEXT *ctx, std::unique_ptr<GTiffHGrid> &&subgrid);
 
     void reassign_context(PJ_CONTEXT *ctx) override {
@@ -2319,7 +2362,7 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
         bool foundDescriptionForLatOffset = false;
         bool foundDescriptionForLonOffset = false;
         for (int i = 0; i < static_cast<int>(grid->samplesPerPixel()); ++i) {
-            const auto desc = grid->metadataItem("DESCRIPTION", i);
+            const auto &desc = grid->metadataItem("DESCRIPTION", i);
             if (!desc.empty()) {
                 foundDescriptionForAtLeastOneSample = true;
             }
@@ -2373,7 +2416,7 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
         }
 
         if (foundDescriptionForLonOffset) {
-            const std::string positiveValue =
+            const std::string &positiveValue =
                 grid->metadataItem("positive_value", idxLonShift);
             if (!positiveValue.empty()) {
                 if (positiveValue == "west") {
@@ -2391,9 +2434,9 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
 
         // Identify their unit
         {
-            const auto unitLatShift =
+            const auto &unitLatShift =
                 grid->metadataItem("UNITTYPE", idxLatShift);
-            const auto unitLonShift =
+            const auto &unitLonShift =
                 grid->metadataItem("UNITTYPE", idxLonShift);
             if (unitLatShift != unitLonShift) {
                 pj_log(ctx, PJ_LOG_ERROR,
@@ -2416,8 +2459,8 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
             }
         }
 
-        const std::string gridName = grid->metadataItem("grid_name");
-        const std::string parentName = grid->metadataItem("parent_grid_name");
+        const std::string &gridName = grid->metadataItem("grid_name");
+        const std::string &parentName = grid->metadataItem("parent_grid_name");
 
         auto hgrid = internal::make_unique<GTiffHGrid>(
             std::move(grid), idxLatShift, idxLonShift, convFactorToRadian,
@@ -2616,7 +2659,7 @@ class GTiffGenericGridShiftSet : public GenericShiftGridSet {
 
 // ---------------------------------------------------------------------------
 
-class GTiffGenericGrid : public GenericShiftGrid {
+class GTiffGenericGrid final : public GenericShiftGrid {
     friend void insertIntoHierarchy<GTiffGenericGrid, GenericShiftGrid>(
         PJ_CONTEXT *ctx, std::unique_ptr<GTiffGenericGrid> &&grid,
         const std::string &gridName, const std::string &parentName,
@@ -2624,6 +2667,9 @@ class GTiffGenericGrid : public GenericShiftGrid {
         std::map<std::string, GTiffGenericGrid *> &mapGrids);
 
     std::unique_ptr<GTiffGrid> m_grid;
+    const GenericShiftGrid *m_firstGrid = nullptr;
+    mutable std::string m_type{};
+    mutable bool m_bTypeSet = false;
 
   public:
     GTiffGenericGrid(std::unique_ptr<GTiffGrid> &&grid);
@@ -2635,16 +2681,32 @@ class GTiffGenericGrid : public GenericShiftGrid {
     int samplesPerPixel() const override { return m_grid->samplesPerPixel(); }
 
     std::string unit(int sample) const override {
-        return m_grid->metadataItem("UNITTYPE", sample);
+        return metadataItem("UNITTYPE", sample);
     }
 
     std::string description(int sample) const override {
-        return m_grid->metadataItem("DESCRIPTION", sample);
+        return metadataItem("DESCRIPTION", sample);
     }
 
-    std::string metadataItem(const std::string &key,
-                             int sample = -1) const override {
-        return m_grid->metadataItem(key, sample);
+    const std::string &metadataItem(const std::string &key,
+                                    int sample = -1) const override {
+        const std::string &ret = m_grid->metadataItem(key, sample);
+        if (ret.empty() && m_firstGrid) {
+            return m_firstGrid->metadataItem(key, sample);
+        }
+        return ret;
+    }
+
+    const std::string &type() const override {
+        if (!m_bTypeSet) {
+            m_bTypeSet = true;
+            m_type = metadataItem("TYPE");
+        }
+        return m_type;
+    }
+
+    void setFirstGrid(const GenericShiftGrid *firstGrid) {
+        m_firstGrid = firstGrid;
     }
 
     void insertGrid(PJ_CONTEXT *ctx,
@@ -2714,14 +2776,16 @@ class NullGenericShiftGrid : public GenericShiftGrid {
     bool isNullGrid() const override { return true; }
     bool valueAt(int, int, int, float &out) const override;
 
+    const std::string &type() const override { return emptyString; }
+
     int samplesPerPixel() const override { return 0; }
 
     std::string unit(int) const override { return std::string(); }
 
     std::string description(int) const override { return std::string(); }
 
-    std::string metadataItem(const std::string &, int) const override {
-        return std::string();
+    const std::string &metadataItem(const std::string &, int) const override {
+        return emptyString;
     }
 
     void reassign_context(PJ_CONTEXT *) override {}
@@ -2774,12 +2838,16 @@ GTiffGenericGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
             }
         }
 
-        const std::string gridName = grid->metadataItem("grid_name");
-        const std::string parentName = grid->metadataItem("parent_grid_name");
+        const std::string &gridName = grid->metadataItem("grid_name");
+        const std::string &parentName = grid->metadataItem("parent_grid_name");
 
-        auto hgrid = internal::make_unique<GTiffGenericGrid>(std::move(grid));
+        auto ggrid = internal::make_unique<GTiffGenericGrid>(std::move(grid));
+        if (!set->m_grids.empty() && ggrid->metadataItem("TYPE").empty() &&
+            !set->m_grids[0]->metadataItem("TYPE").empty()) {
+            ggrid->setFirstGrid(set->m_grids[0].get());
+        }
 
-        insertIntoHierarchy(ctx, std::move(hgrid), gridName, parentName,
+        insertIntoHierarchy(ctx, std::move(ggrid), gridName, parentName,
                             set->m_grids, mapGrids);
     }
     return set;
@@ -2886,6 +2954,25 @@ const GenericShiftGrid *GenericShiftGridSet::gridAt(double x, double y) const {
     for (const auto &grid : m_grids) {
         if (grid->isNullGrid()) {
             return grid.get();
+        }
+        const auto &extent = grid->extentAndRes();
+        if (isPointInExtent(x, y, extent)) {
+            return grid->gridAt(x, y);
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+const GenericShiftGrid *GenericShiftGridSet::gridAt(const std::string &type,
+                                                    double x, double y) const {
+    for (const auto &grid : m_grids) {
+        if (grid->isNullGrid()) {
+            return grid.get();
+        }
+        if (grid->type() != type) {
+            continue;
         }
         const auto &extent = grid->extentAndRes();
         if (isPointInExtent(x, y, extent)) {

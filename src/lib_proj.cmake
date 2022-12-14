@@ -156,6 +156,7 @@ set(SRC_LIBPROJ_CONVERSIONS
 set(SRC_LIBPROJ_TRANSFORMATIONS
   transformations/affine.cpp
   transformations/deformation.cpp
+  transformations/gridshift.cpp
   transformations/helmert.cpp
   transformations/hgridshift.cpp
   transformations/horner.cpp

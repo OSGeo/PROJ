@@ -217,6 +217,21 @@ is an easy way to inspect such grid files:
       as a speed per year for temporal gridshifting.
       Corresponds to PROJ :ref:`hgridshift` method.
 
+    - ``GEOGRAPHIC_3D_OFFSET``: implies the presence of at least 3 samples.
+      The first sample must contain the latitude offset, the second
+      sample must contain the longitude offset and the third one the ellipsoidal
+      height difference. Typically used for NADCON5 grids.
+      Added in PROJ 9.2
+      Corresponds to PROJ :ref:`gridshift` method.
+
+    - ``ELLIPSOIDAL_HEIGHT_OFFSET``: implies the presence of one sample with
+      the ellipsoidal height difference. Generally used in combination with
+      another grid of type ``HORIZONTAL_OFFSET`` to perform Geographic 3D
+      offseting when the horizontal and vertical grids do not have the same
+      resolution, as found in some NADCON5 grids.
+      Added in PROJ 9.2
+      Corresponds to PROJ :ref:`gridshift` method.
+
     - ``VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL``: implies the presence of at least one sample.
       The first sample must contain the vertical adjustment. Must be used when
       the source/interpolation CRS is a Geographic CRS and the target CRS a Vertical CRS.
@@ -253,13 +268,20 @@ is an easy way to inspect such grid files:
 
     Values recognized by PROJ for this Item are currently:
 
-    + ``latitude_offset``: valid for TYPE=HORIZONTAL_OFFSET. Sample values should be
+    + ``latitude_offset``: valid for TYPE=HORIZONTAL_OFFSET or
+      GEOGRAPHIC_3D_OFFSET . Sample values should be
       the value to add a latitude expressed in the CRS encoded in the GeoKeys
       to obtain a latitude value expressed in the target CRS.
 
-    + ``longitude_offset``: valid for TYPE=HORIZONTAL_OFFSET. Sample values should be
+    + ``longitude_offset``: valid for TYPE=HORIZONTAL_OFFSET or
+      GEOGRAPHIC_3D_OFFSET . Sample values should be
       the value to add a longitude expressed in the CRS encoded in the GeoKeys
       to obtain a longitude value expressed in the target CRS.
+
+    + ``ellipsoidal_height_offset``: valid for TYPE=ELLIPSOIDAL_HEIGHT_OFFSET or
+      GEOGRAPHIC_3D_OFFSET . Sample values should be the value to add to the
+      ellipsoidal height of the source CRS to obtain the ellipsoidal height of
+      the target CRS.
 
     + ``geoid_undulation``: valid for TYPE=VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL.
       For a source CRS being a geographic CRS and a target CRS being a vertical CRS,
@@ -414,6 +436,10 @@ is an easy way to inspect such grid files:
     subgrids for this grid (that is grids whose extent is contained in the extent
     of this grid).
     Will be ignored by PROJ (this information can be inferred by the grids extent)
+
+  * The ``interpolation_method`` metadata item may be present to indicate the
+    interpolation method to apply. ``bilinear`` or ``biquadratic`` are supported.
+    If not specified, defaults to ``bilinear``.
 
 Example
 +++++++
@@ -648,5 +674,7 @@ georeferencing is contained within the first 40 KB of the file.
 Revisions
 +++++++++
 
+* v0.3: addition of TYPE=GEOGRAPHIC_3D_OFFSET, ELLIPSOIDAL_HEIGHT_OFFSET and
+        interpolation_method (PROJ 9.2)
 * v0.2: addition of "arc-seconds per year" as a valid unit (PROJ 9.1.1)
 * v0.1: initial version for PROJ 7.0
