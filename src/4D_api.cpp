@@ -258,10 +258,10 @@ int pj_get_suggested_operation(PJ_CONTEXT*,
                  // If two operations have the same accuracy, use the one that
                  // is contained within a larger one
                  (alt.accuracy == bestAccuracy &&
-                  alt.minxSrc > opList[iBest].minxSrc &&
-                  alt.minySrc > opList[iBest].minySrc &&
-                  alt.maxxSrc < opList[iBest].maxxSrc &&
-                  alt.maxySrc < opList[iBest].maxySrc &&
+                  alt.minxSrc >= opList[iBest].minxSrc &&
+                  alt.minySrc >= opList[iBest].minySrc &&
+                  alt.maxxSrc <= opList[iBest].maxxSrc &&
+                  alt.maxySrc <= opList[iBest].maxySrc &&
                   !isSpecialCaseForNAD83_to_NAD83HARN(opList[iBest]))) &&
                 !alt.isOffshore) ) {
                 iBest = i;
