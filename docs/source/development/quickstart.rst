@@ -48,7 +48,7 @@ Next we create the :c:type:`PJ` transformation object ``P`` with the function
 Here we have set up a transformation from geographic coordinates to UTM zone
 32N. In general, this is a transformation between two different coordinate reference systems
 (one of which is here in geographic coordinates).  The related function 
-:c:func:`proj_create` can be used set up transformations that are not available through 
+:c:func:`proj_create` can be used to set up transformations that are not available through 
 the PROJ database, for instance for converting geodetic coordinates to a custom definition
 of a map projection.
 
