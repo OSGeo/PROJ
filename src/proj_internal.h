@@ -815,7 +815,7 @@ void     *free_params (PJ_CONTEXT *ctx, paralist *start, int errlev);
 
 double *pj_enfn(double);
 double  pj_mlfn(double, double, double, const double *);
-double  pj_inv_mlfn(PJ_CONTEXT *, double, double, const double *);
+double  pj_inv_mlfn(double, const double *);
 double  pj_qsfn(double, double, double);
 double  pj_tsfn(double, double, double);
 double  pj_msfn(double, double, double);

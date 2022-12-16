@@ -51,7 +51,7 @@ static PJ_LP eqdc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
         }
         lp.phi = Q->c - Q->rho;
         if (Q->ellips)
-            lp.phi = pj_inv_mlfn(P->ctx, lp.phi, P->es, Q->en);
+            lp.phi = pj_inv_mlfn(lp.phi, Q->en);
         lp.lam = atan2(xy.x, xy.y) / Q->n;
     } else {
         lp.lam = 0.;

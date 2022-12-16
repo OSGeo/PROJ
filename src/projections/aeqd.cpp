@@ -191,8 +191,7 @@ static PJ_LP e_guam_inv(PJ_XY xy, PJ *P) { /* Guam elliptical */
     for (i = 0; i < 3; ++i) {
         t = P->e * sin(lp.phi);
         t = sqrt(1. - t * t);
-        lp.phi = pj_inv_mlfn(P->ctx, Q->M1 + xy.y -
-            x2 * tan(lp.phi) * t, P->es, Q->en);
+        lp.phi = pj_inv_mlfn(Q->M1 + xy.y - x2 * tan(lp.phi) * t, Q->en);
     }
     lp.lam = xy.x * t / cos(lp.phi);
     return lp;
@@ -223,8 +222,7 @@ static PJ_LP aeqd_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
         lp.lam = lon2 * DEG_TO_RAD;
         lp.lam -= P->lam0;
     } else { /* Polar */
-        lp.phi = pj_inv_mlfn(P->ctx, Q->mode == N_POLE ? Q->Mp - c : Q->Mp + c,
-            P->es, Q->en);
+        lp.phi = pj_inv_mlfn(Q->mode == N_POLE ? Q->Mp - c : Q->Mp + c, Q->en);
         lp.lam = atan2(xy.x, Q->mode == N_POLE ? -xy.y : xy.y);
     }
     return lp;
@@ -328,5 +326,3 @@ PJ *PROJECTION(aeqd) {
 
     return P;
 }
-
-
