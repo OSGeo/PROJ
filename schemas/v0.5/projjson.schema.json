@@ -457,7 +457,7 @@
 
     "dynamic_geodetic_reference_frame": {
       "type": "object",
-      "allOf": [{ "$ref": "#/definitions/geodetic_reference_frame" }],
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
       "properties": {
         "type": { "type": "string", "enum": ["DynamicGeodeticReferenceFrame"] },
         "name": {},
@@ -481,7 +481,7 @@
 
     "dynamic_vertical_reference_frame": {
       "type": "object",
-      "allOf": [{ "$ref": "#/definitions/vertical_reference_frame" }],
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
       "properties": {
         "type": { "type": "string", "enum": ["DynamicVerticalReferenceFrame"] },
         "name": {},
