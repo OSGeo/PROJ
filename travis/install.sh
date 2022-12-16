@@ -157,6 +157,10 @@ test_projjson EPSG:32631
 test_projjson EPSG:4326+3855
 test_projjson "+proj=longlat +ellps=GRS80 +nadgrids=@foo +type=crs"
 test_projjson -s EPSG:3111 -t GDA2020
+# Dynamic geographic CRS "WGS 84 (G1762)"
+test_projjson EPSG:9057
+# Dynamic vertical CRS "RH2000 height"
+test_projjson EPSG:5613
 
 validate_json $TRAVIS_BUILD_DIR/schemas/v0.5/examples/point_motion_operation.json
 
