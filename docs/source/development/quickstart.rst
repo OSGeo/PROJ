@@ -46,7 +46,11 @@ Next we create the :c:type:`PJ` transformation object ``P`` with the function
   :dedent: 4
 
 Here we have set up a transformation from geographic coordinates to UTM zone
-32N.
+32N. In general, this is a transform between two different projections
+(one of which is here in geographic coordinates).  The related function 
+:c:func:`proj_create` can be used with a single 
+projection, and can transform from that projection to geographic
+coordinates for the same geodetic datum, and vice versa.
 
 :c:func:`proj_create_crs_to_crs` takes as its arguments:
 
