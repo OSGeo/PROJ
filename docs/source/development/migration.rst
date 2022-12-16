@@ -102,6 +102,7 @@ The same program implemented using PROJ 6:
         return 0;
     }
 
+Further examples of using the PROJ API are in the :doc:`quick start <quickstart>` document.
 
 Function mapping from old to new API
 ###############################################################################
