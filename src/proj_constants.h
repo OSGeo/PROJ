@@ -568,6 +568,11 @@
 
 #define PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF "HORIZONTAL_SHIFT_GTIFF"
 
+#define PROJ_WKT2_NAME_METHOD_GENERAL_SHIFT_GTIFF "GENERAL_SHIFT_GTIFF"
+
+#define PROJ_WKT2_PARAMETER_LATITUDE_LONGITUDE_ELLIPOISDAL_HEIGHT_DIFFERENCE_FILE \
+    "Latitude, longitude and ellipsoidal height difference file"
+
 /* ------------------------------------------------------------------------ */
 
 #define EPSG_CODE_METHOD_VERTCON 9658
@@ -603,6 +608,15 @@
 #define \
     EPSG_NAME_PARAMETER_LONGITUDE_DIFFERENCE_FILE "Longitude difference file"
 #define EPSG_CODE_PARAMETER_LONGITUDE_DIFFERENCE_FILE 8658
+
+#define EPSG_CODE_METHOD_NADCON5_2D 1074
+#define EPSG_NAME_METHOD_NADCON5_2D "NADCON5 (2D)"
+
+#define EPSG_NAME_PARAMETER_ELLIPSOIDAL_HEIGHT_DIFFERENCE_FILE "Ellipsoidal height difference file"
+#define EPSG_CODE_PARAMETER_ELLIPSOIDAL_HEIGHT_DIFFERENCE_FILE 1058
+
+#define EPSG_CODE_METHOD_NADCON5_3D 1075
+#define EPSG_NAME_METHOD_NADCON5_3D "NADCON5 (3D)"
 
 /* ------------------------------------------------------------------------ */
 

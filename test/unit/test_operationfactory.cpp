@@ -6090,11 +6090,11 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
                 "5500"), // NAD83(NSRS2007) + NAVD88 height
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
-        ASSERT_GE(list.size(), 1U);
-        EXPECT_EQ(list[0]->nameStr(),
+        ASSERT_GE(list.size(), 2U);
+        EXPECT_EQ(list[1]->nameStr(),
                   "Inverse of NAD83(NSRS2007) to NAVD88 height (1) + "
                   "NAD83(NSRS2007) to WGS 84 (1)");
-        EXPECT_EQ(list[0]->exportToPROJString(
+        EXPECT_EQ(list[1]->exportToPROJString(
                       PROJStringFormatter::create(
                           PROJStringFormatter::Convention::PROJ_5,
                           authFactory->databaseContext())
@@ -6106,7 +6106,7 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
                   "+multiplier=1 "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
                   "+step +proj=axisswap +order=2,1");
-        EXPECT_EQ(list[0]->remarks(),
+        EXPECT_EQ(list[1]->remarks(),
                   "For NAD83(NSRS2007) to NAVD88 height (1) (EPSG:9173): Uses "
                   "Geoid09 hybrid model. Replaced by 2012 model (CT code 6326)."
                   "\n"
@@ -6138,10 +6138,11 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
         ASSERT_GE(list.size(), 2U);
 
         EXPECT_EQ(list[0]->nameStr(),
-                  "NAD83 to WGS 84 (1) + "
-                  "Inverse of NAD83(NSRS2007) to WGS 84 (1) + "
-                  "Inverse of NAD83(NSRS2007) to NAVD88 height (1) + "
-                  "NAD83(NSRS2007) to WGS 84 (1)");
+                  "NAD83 to NAD83(HARN) (47) + "
+                  "NAD83(HARN) to NAD83(FBN) (1) + "
+                  "Inverse of NAD83(FBN) to NAVD88 height (1) + "
+                  "Inverse of NAD83(HARN) to NAD83(FBN) (1) + "
+                  "NAD83(HARN) to WGS 84 (3)");
         EXPECT_EQ(list[0]->exportToPROJString(
                       PROJStringFormatter::create(
                           PROJStringFormatter::Convention::PROJ_5,
@@ -6150,8 +6151,20 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
                   "+proj=pipeline "
                   "+step +proj=axisswap +order=2,1 "
                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-                  "+step +proj=vgridshift +grids=us_noaa_geoid09_conus.tif "
+                  "+step +proj=gridshift "
+                  "+grids=us_noaa_nadcon5_nad83_1986_nad83_harn_conus.tif "
+                  "+step +proj=gridshift +no_z_transform "
+                  "+grids=us_noaa_nadcon5_nad83_harn_nad83_fbn_conus.tif "
+                  "+step +proj=vgridshift +grids=us_noaa_geoid03_conus.tif "
                   "+multiplier=1 "
+                  "+step +inv +proj=gridshift "
+                  "+grids=us_noaa_nadcon5_nad83_harn_nad83_fbn_conus.tif "
+                  "+step +proj=cart +ellps=GRS80 "
+                  "+step +proj=helmert +x=-0.991 +y=1.9072 +z=0.5129 "
+                  "+rx=-0.0257899075194932 "
+                  "+ry=-0.0096500989602704 +rz=-0.0116599432323421 +s=0 "
+                  "+convention=coordinate_frame "
+                  "+step +inv +proj=cart +ellps=WGS84 "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
                   "+step +proj=axisswap +order=2,1");
     }
@@ -6529,7 +6542,7 @@ TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
                                                                ctxt);
     // The checked value is not that important, but in case this changes,
     // likely due to a EPSG upgrade, worth checking
-    EXPECT_EQ(listCompoundToGeog2D.size(), 142U);
+    EXPECT_EQ(listCompoundToGeog2D.size(), 199U);
 
     auto listGeog2DToCompound =
         CoordinateOperationFactory::create()->createOperations(dst, nnSrc,
@@ -6566,7 +6579,7 @@ TEST(operation, compoundCRS_of_projCRS_to_geogCRS_3D_context) {
     // the vertical transformation are the reverse of each other, and there are
     // not mixes with different alternative operations (like California grid
     // forward and Nevada grid reverse)
-    ASSERT_EQ(list.size(), 14U);
+    ASSERT_EQ(list.size(), 21U);
 
     // Check that unit conversion is OK
     auto op_proj =
@@ -6578,9 +6591,13 @@ TEST(operation, compoundCRS_of_projCRS_to_geogCRS_3D_context) {
               "+lat_1=41.6666666666667 +lat_2=40 +x_0=2000000.0001016 "
               "+y_0=500000.0001016 +ellps=GRS80 "
               "+step +proj=hgridshift +grids=us_noaa_cnhpgn.tif "
+              "+step +proj=gridshift +no_z_transform "
+              "+grids=us_noaa_nadcon5_nad83_harn_nad83_fbn_conus.tif "
               "+step +proj=unitconvert +z_in=us-ft +z_out=m "
-              "+step +proj=vgridshift +grids=us_noaa_geoid09_conus.tif "
+              "+step +proj=vgridshift +grids=us_noaa_geoid03_conus.tif "
               "+multiplier=1 "
+              "+step +inv +proj=gridshift "
+              "+grids=us_noaa_nadcon5_nad83_harn_nad83_fbn_conus.tif "
               "+step +inv +proj=hgridshift +grids=us_noaa_cnhpgn.tif "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");

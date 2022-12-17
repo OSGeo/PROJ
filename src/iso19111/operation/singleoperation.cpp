@@ -1772,15 +1772,30 @@ _getHorizontalShiftGTIFFFilename(const SingleOperation *op, bool allowInverse) {
     const auto &l_method = op->method();
     const auto &methodName = l_method->nameStr();
     if (ci_equal(methodName, PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF) ||
+        ci_equal(methodName, PROJ_WKT2_NAME_METHOD_GENERAL_SHIFT_GTIFF) ||
         (allowInverse &&
          ci_equal(methodName,
-                  INVERSE_OF + PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF))) {
-        const auto &fileParameter = op->parameterValue(
-            EPSG_NAME_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE,
-            EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE);
-        if (fileParameter &&
-            fileParameter->type() == ParameterValue::Type::FILENAME) {
-            return fileParameter->valueFile();
+                  INVERSE_OF + PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF)) ||
+        (allowInverse &&
+         ci_equal(methodName,
+                  INVERSE_OF + PROJ_WKT2_NAME_METHOD_GENERAL_SHIFT_GTIFF))) {
+        {
+            const auto &fileParameter = op->parameterValue(
+                EPSG_NAME_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE,
+                EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE);
+            if (fileParameter &&
+                fileParameter->type() == ParameterValue::Type::FILENAME) {
+                return fileParameter->valueFile();
+            }
+        }
+        {
+            const auto &fileParameter = op->parameterValue(
+                PROJ_WKT2_PARAMETER_LATITUDE_LONGITUDE_ELLIPOISDAL_HEIGHT_DIFFERENCE_FILE,
+                0);
+            if (fileParameter &&
+                fileParameter->type() == ParameterValue::Type::FILENAME) {
+                return fileParameter->valueFile();
+            }
         }
     }
     return nullString;
@@ -2039,7 +2054,9 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
     const auto &NTv1Filename = _getNTv1Filename(this, false);
     const auto &NTv2Filename = _getNTv2Filename(this, false);
     std::string lasFilename;
-    if (methodEPSGCode == EPSG_CODE_METHOD_NADCON) {
+    if (methodEPSGCode == EPSG_CODE_METHOD_NADCON ||
+        methodEPSGCode == EPSG_CODE_METHOD_NADCON5_2D ||
+        methodEPSGCode == EPSG_CODE_METHOD_NADCON5_3D) {
         const auto &latitudeFileParameter =
             parameterValue(EPSG_NAME_PARAMETER_LATITUDE_DIFFERENCE_FILE,
                            EPSG_CODE_PARAMETER_LATITUDE_DIFFERENCE_FILE);
@@ -2083,12 +2100,19 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
         auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
         const auto &l_accuracies = coordinateOperationAccuracies();
         if (projGridFormat == "GTiff") {
-            auto parameters =
-                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
-                    EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE)};
+            auto parameters = std::vector<OperationParameterNNPtr>{
+                methodEPSGCode == EPSG_CODE_METHOD_NADCON5_3D
+                    ? OperationParameter::create(util::PropertyMap().set(
+                          common::IdentifiedObject::NAME_KEY,
+                          PROJ_WKT2_PARAMETER_LATITUDE_LONGITUDE_ELLIPOISDAL_HEIGHT_DIFFERENCE_FILE))
+                    : createOpParamNameEPSGCode(
+                          EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE)};
             auto methodProperties = util::PropertyMap().set(
                 common::IdentifiedObject::NAME_KEY,
-                PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF);
+                (methodEPSGCode == EPSG_CODE_METHOD_NADCON5_2D ||
+                 methodEPSGCode == EPSG_CODE_METHOD_NADCON5_3D)
+                    ? PROJ_WKT2_NAME_METHOD_GENERAL_SHIFT_GTIFF
+                    : PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF);
             auto values = std::vector<ParameterValueNNPtr>{
                 ParameterValue::createFilename(projFilename)};
             if (inverseDirection) {
@@ -3525,7 +3549,17 @@ bool SingleOperation::exportToPROJStringGeneric(
         if (isMethodInverseOf) {
             formatter->startInversion();
         }
-        formatter->addStep("hgridshift");
+        if (methodName.find(PROJ_WKT2_NAME_METHOD_GENERAL_SHIFT_GTIFF) !=
+            std::string::npos) {
+            formatter->addStep("gridshift");
+            if (sourceCRSGeog->coordinateSystem()->axisList().size() == 2 &&
+                parameterValue(
+                    PROJ_WKT2_PARAMETER_LATITUDE_LONGITUDE_ELLIPOISDAL_HEIGHT_DIFFERENCE_FILE,
+                    0) != nullptr) {
+                formatter->addParam("no_z_transform");
+            }
+        } else
+            formatter->addStep("hgridshift");
         formatter->addParam("grids", hGridShiftFilename);
         if (isMethodInverseOf) {
             formatter->stopInversion();

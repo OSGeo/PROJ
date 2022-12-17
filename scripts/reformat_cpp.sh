@@ -42,6 +42,7 @@ for i in "$TOPDIR"/include/proj/*.hpp "$TOPDIR"/include/proj/internal/*.hpp \
          "$TOPDIR"/src/transformations/tinshift_exceptions.hpp \
          "$TOPDIR"/src/transformations/tinshift_impl.hpp \
          "$TOPDIR"/src/transformations/tinshift.cpp \
+         "$TOPDIR"/src/transformations/gridshift.cpp \
          "$TOPDIR"/src/quadtree.hpp \
          ; do
     if ! echo "$i" | grep -q "lru_cache.hpp"; then

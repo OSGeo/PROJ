@@ -27,6 +27,8 @@
 
 #include "proj.h"
 
+#include <stdlib.h> // rand()
+
 #include <chrono>
 #include <cmath> // HUGE_VAL
 #include <cstdlib>
@@ -40,6 +42,7 @@ static void usage()
     printf("                        [(--target-crs|-t) string]\n");
     printf("                        [(--pipeline|-p) string]\n");
     printf("                        [(--loops|-l) number]\n");
+    printf("                        [--noise-x number] [--noise-y number]\n");
     printf("                        coord_comp_1 coord_comp_2 [coord_comp_3] [coord_comp_4]\n");
     printf("\n");
     printf("Both of --source-crs and --target_crs, or --pipeline must be specified.\n");
@@ -56,6 +59,8 @@ int main(int argc, char* argv[])
     int loops = 5 * 1000 * 1000;
     double coord_comp[4] = {0, 0, 0, HUGE_VAL};
     int coord_comp_counter = 0;
+    double noiseX = 0;
+    double noiseY = 0;
     for( int i = 1; i < argc; ++i )
     {
         if( strcmp(argv[i], "--source-crs") == 0 || strcmp(argv[i], "-s") == 0 )
@@ -84,6 +89,20 @@ int main(int argc, char* argv[])
             if( i + 1 >= argc )
                 usage();
             loops = atoi(argv[i+1]);
+            ++i;
+        }
+        else if( strcmp(argv[i], "--noise-x") == 0 )
+        {
+            if( i + 1 >= argc )
+                usage();
+            noiseX = atof(argv[i+1]);
+            ++i;
+        }
+        else if( strcmp(argv[i], "--noise-y") == 0 )
+        {
+            if( i + 1 >= argc )
+                usage();
+            noiseY = atof(argv[i+1]);
             ++i;
         }
         else if( argv[i][0] == '-' && !(argv[i][1] >= '0' && argv[i][1] <= '9') )
@@ -125,6 +144,7 @@ int main(int argc, char* argv[])
     c.v[1] = coord_comp[1];
     c.v[2] = coord_comp[2];
     c.v[3] = coord_comp[3];
+    PJ_COORD c_ori = c;
     auto res = proj_trans(P, PJ_FWD, c);
     if( coord_comp_counter == 2 )
     {
@@ -144,19 +164,41 @@ int main(int argc, char* argv[])
                c.v[0], c.v[1], c.v[2], c.v[3],
                res.v[0], res.v[1], res.v[2], res.v[3]);
     }
+
+    // Start by timing just noise generation
+    double dummy = 0;
+    auto start_noise = std::chrono::system_clock::now();
+    for( int i = 0; i < loops; ++i )
+    {
+        if( noiseX != 0 )
+            c.v[0] = c_ori.v[0] + noiseX * (2 * double(rand()) / RAND_MAX - 1);
+        if( noiseY != 0 )
+            c.v[1] = c_ori.v[1] + noiseY * (2 * double(rand()) / RAND_MAX - 1);
+        dummy += c.v[0];
+        dummy += c.v[1];
+    }
+    auto end_noise = std::chrono::system_clock::now();
+
     auto start = std::chrono::system_clock::now();
     for( int i = 0; i < loops; ++i )
     {
+        if( noiseX != 0 )
+            c.v[0] = c_ori.v[0] + noiseX * (2 * double(rand()) / RAND_MAX - 1);
+        if( noiseY != 0 )
+            c.v[1] = c_ori.v[1] + noiseY * (2 * double(rand()) / RAND_MAX - 1);
+        dummy += c.v[0];
+        dummy += c.v[1];
         proj_trans(P, PJ_FWD, c);
     }
     auto end = std::chrono::system_clock::now();
+
     proj_destroy(P);
     proj_context_destroy(ctxt);
 
-    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>((end - start) - (end_noise - start_noise));
     printf("Duration: %d ms\n", static_cast<int>(elapsed_ms.count()));
     printf("Throughput: %.02f million coordinates/s\n",
-           1e-3 * static_cast<double>(loops) / static_cast<double>(elapsed_ms.count())); 
+           1e-3 * static_cast<double>(loops) / static_cast<double>(elapsed_ms.count()) + dummy * 1e-300); 
 
     return 0;
 }

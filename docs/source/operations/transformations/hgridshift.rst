@@ -43,6 +43,8 @@ about all three formats can be found in the GDAL documentation and/or driver sou
 code. GDAL reads and writes all three formats. Using GDAL for construction of
 new grids is recommended.
 
+To apply as well ellipsoidal height differences sometimes present in some grids
+(such as US NADCON5 grids), use the :ref:`gridshift` method.
 
 Temporal gridshifting
 ################################################################################

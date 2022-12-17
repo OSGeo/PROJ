@@ -1,0 +1,248 @@
+
+-------------------------------------------------------------------------------
+===============================================================================
+Test generalized shift grid method
+===============================================================================
+
+<gie-strict>
+
+-----------------------------
+# Classic lat-lon shift grids
+-----------------------------
+
+# Subset of NTv2_0.gsb
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/test_hgrid_with_subgrid.tif
+-------------------------------------------------------------------------------
+
+accept      179.799         54.5        0
+expect      failure errno coord_transfm_outside_grid
+
+# In subgrid ALbanff, of parent CAwest
+accept     -115.5416667      51.1666667        0
+expect     -115.5427092888   51.1666899972     0
+roundtrip   1
+
+# In subgrid ONtronto, of parent CAeast
+accept     -80.5041667       44.5458333        0
+expect     -80.50401615833   44.5458827236     0
+roundtrip   1
+-------------------------------------------------------------------------------
+
+# Subset of NTv2_0.gsb
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/test_hgrid_with_subgrid_no_grid_name.tif
+-------------------------------------------------------------------------------
+
+# In subgrid ALbanff, of parent CAwest
+accept     -115.5416667      51.1666667        0
+expect     -115.5427092888   51.1666899972     0
+roundtrip   1
+
+# In subgrid ONtronto, of parent CAeast
+accept     -80.5041667       44.5458333        0
+expect     -80.50401615833   44.5458827236     0
+roundtrip   1
+-------------------------------------------------------------------------------
+
+
+
+--------------------
+# Classic geoidgrids
+--------------------
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/us_noaa_geoid06_ak_subset_at_antimeridian.tif
+-------------------------------------------------------------------------------
+tolerance   1 mm
+
+accept      179.99          54.5        0
+expect      179.99          54.5        -2.2226
+roundtrip   1
+
+accept      -179.99         54.5        0
+expect      -179.99         54.5        -2.3488
+roundtrip   1
+
+accept      179.999999      54.5        0
+expect      179.999999      54.5        -2.2872
+roundtrip   1
+
+accept      -179.999999     54.5        0
+expect      -179.999999     54.5        -2.2872
+roundtrip   1
+
+accept      179.8           54.5        0
+expect      179.8           54.5        -0.7011
+roundtrip   1
+
+accept      179.799         54.5        0
+expect      failure errno coord_transfm_outside_grid
+
+accept      180.1833333     54.5        0
+expect      -179.8166667    54.5        -3.1933
+roundtrip   1
+
+accept      -179.8166667    54.5        0
+expect      -179.8166667    54.5        -3.1933
+roundtrip   1
+
+accept      180.184         54.5        0
+expect      failure errno coord_transfm_outside_grid
+
+accept      -179.816        54.5        0
+expect      failure errno coord_transfm_outside_grid
+
+
+----------------------------------------------------------------------
+# Geographic 3D offsets with quadratic interpolation (defined in file)
+----------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/us_noaa_nadcon5_nad83_2007_nad83_2011_conus_extract.tif
+-------------------------------------------------------------------------------
+tolerance   1 mm
+
+# Test point from https://www.ngs.noaa.gov/NCAT, exactly at one grid node
+
+accept      -95.5000000000  37.0000000000  10.000
+expect      -95.4999998219  37.0000000147   9.984
+roundtrip   1
+
+# Test point from https://www.ngs.noaa.gov/NCAT
+# specifically selected to be close to the middle of a pixel
+
+accept      -95.4916666666  37.0083333333  10.000
+expect      -95.4916664889  37.0083333484   9.984
+roundtrip   1
+
+# Test point from https://www.ngs.noaa.gov/NCAT
+# specifically selected to be close to the middle of a pixel (but
+# other side of previous test point)
+
+accept      -95.4916666667  37.0083333334  10.000
+expect      -95.4916664890  37.0083333485   9.984
+roundtrip   1
+
+# Test point at north-east of truncated grid
+
+accept      -95.416667      37.083333       0.000
+expect      -95.4166668251  37.0833330159  -0.0157
+
+# Test point at south-west of truncated grid
+
+accept      -95.58333       36.91667        0.000
+expect      -95.5833298166  36.9166700108  -0.0157
+roundtrip   1
+
+
+
+----------------------------------------------------------------------
+# Geographic 3D offsets, but split in one grid with horizontal offset and
+# another one with ellipsoidal height offset, with quadratic interpolation (defined in file)
+----------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/us_noaa_nadcon5_nad83_2007_nad83_2011_alaska_extract.tif
+-------------------------------------------------------------------------------
+tolerance   1 mm
+
+# Test point from https://www.ngs.noaa.gov/NCAT, exactly at one grid node
+
+accept      -158.0            61.5           10.000
+expect      -157.9999996115   61.499999564    9.987
+roundtrip   1
+
+# Test point from https://www.ngs.noaa.gov/NCAT
+
+accept      -158.1            61.51          10.000
+expect      -158.0999996011   61.5099995458   9.987
+roundtrip   1
+
+
+----------------------------------------------------------------------
+# Combine 2 above type of grids
+----------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/us_noaa_nadcon5_nad83_2007_nad83_2011_conus_extract.tif,tests/us_noaa_nadcon5_nad83_2007_nad83_2011_alaska_extract.tif
+-------------------------------------------------------------------------------
+tolerance   1 mm
+
+# Test point from https://www.ngs.noaa.gov/NCAT, exactly at one grid node
+
+accept      -95.5000000000  37.0000000000  10.000
+expect      -95.4999998219  37.0000000147   9.984
+roundtrip   1
+
+# Test point from https://www.ngs.noaa.gov/NCAT, exactly at one grid node
+
+accept      -158.0            61.5           10.000
+expect      -157.9999996115   61.499999564    9.987
+roundtrip   1
+
+
+----------------------------------------------------------------------
+# Test +no_z_transform
+----------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/us_noaa_nadcon5_nad83_2007_nad83_2011_conus_extract.tif +no_z_transform
+-------------------------------------------------------------------------------
+tolerance   1 mm
+
+accept      -95.5000000000  37.0000000000  10.000
+expect      -95.4999998219  37.0000000147  10.000
+roundtrip   1
+
+------------------------------
+# Test bilinear vs biquadratic
+------------------------------
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/us_noaa_nadcon5_nad83_2007_nad83_2011_conus_extract.tif +interpolation=biquadratic
+-------------------------------------------------------------------------------
+tolerance   0.001 mm
+
+accept      -95.4916666666     37.0083333333    10.000
+expect      -95.49166648893    37.00833334837    9.984340
+roundtrip   1
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/us_noaa_nadcon5_nad83_2007_nad83_2011_conus_extract.tif +interpolation=bilinear
+-------------------------------------------------------------------------------
+tolerance   0.001 mm
+
+accept      -95.4916666666     37.0083333333    10.000
+expect      -95.49166648893    37.00833334838    9.984341
+roundtrip   1
+
+-------------
+# Error cases
+-------------
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/us_noaa_nadcon5_nad83_2007_nad83_2011_conus_extract.tif +interpolation=invalid
+-------------------------------------------------------------------------------
+expect      failure errno invalid_op_illegal_arg_value
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift
+-------------------------------------------------------------------------------
+expect      failure errno invalid_op_missing_arg
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/test_vgrid_unsupported_byte.tif
+-------------------------------------------------------------------------------
+expect      failure errno invalid_op_file_not_found_or_invalid
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/i_do_not_exist.tif
+-------------------------------------------------------------------------------
+expect      failure errno invalid_op_file_not_found_or_invalid
+-------------------------------------------------------------------------------
+
+</gie-strict>

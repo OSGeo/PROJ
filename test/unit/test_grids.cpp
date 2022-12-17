@@ -186,6 +186,35 @@ TEST_F(GridTest, GenericShiftGridSet_gtiff) {
     EXPECT_FALSE(grid->hasChanged());
     float out = -1.0f;
     EXPECT_FALSE(grid->valueAt(0, 0, grid->samplesPerPixel(), out));
+    EXPECT_TRUE(grid->valueAt(0, 0, 0, out));
+    EXPECT_EQ(out, 0.20783890783786773682f);
+    EXPECT_TRUE(grid->valueAt(1, 0, 0, out));
+    EXPECT_EQ(out, 0.22427035868167877197);
+    EXPECT_TRUE(grid->valueAt(0, 1, 0, out));
+    EXPECT_EQ(out, 0.19718019664287567139f);
+    int bandZero = 0;
+    EXPECT_TRUE(grid->valuesAt(0, 0, 1, 1, 1, &bandZero, &out));
+    EXPECT_EQ(out, 0.20783890783786773682f);
+    constexpr int COUNT_X = 2;
+    constexpr int COUNT_Y = 4;
+    constexpr int COUNT_BANDS = 3;
+    float values[COUNT_Y * COUNT_X * COUNT_BANDS];
+    const int bands[] = {0, 1, 2};
+    constexpr int OFFSET_X = 2;
+    constexpr int OFFSET_Y = 1;
+    EXPECT_TRUE(grid->valuesAt(OFFSET_X, OFFSET_Y, COUNT_X, COUNT_Y,
+                               COUNT_BANDS, bands, values));
+    int valuesIdx = 0;
+    for (int y = 0; y < COUNT_Y; ++y) {
+        for (int x = 0; x < COUNT_X; ++x) {
+            for (int band = 0; band < COUNT_BANDS; ++band) {
+                EXPECT_TRUE(
+                    grid->valueAt(OFFSET_X + x, OFFSET_Y + y, band, out));
+                EXPECT_EQ(out, values[valuesIdx]);
+                ++valuesIdx;
+            }
+        }
+    }
     EXPECT_EQ(grid->metadataItem("area_of_use"), "Nordic and Baltic countries");
     EXPECT_EQ(grid->metadataItem("non_existing"), std::string());
     EXPECT_EQ(grid->metadataItem("non_existing", 1), std::string());
@@ -194,6 +223,67 @@ TEST_F(GridTest, GenericShiftGridSet_gtiff) {
     gridSet->reopen(m_ctxt2);
     grid = gridSet->gridAt(21.3333333 / 180 * M_PI, 63.0 / 180 * M_PI);
     EXPECT_NE(grid, nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(GridTest, GenericShiftGridSet_gtiff_valuesAt_tiled_optim) {
+    auto gridSet = NS_PROJ::GenericShiftGridSet::open(
+        m_ctxt, "tests/nkgrf03vel_realigned_extract_tiled_256x256.tif");
+    ASSERT_NE(gridSet, nullptr);
+    ASSERT_EQ(gridSet->gridAt(-100, -100), nullptr);
+    auto grid = gridSet->gridAt(21.3333333 / 180 * M_PI, 63.0 / 180 * M_PI);
+    ASSERT_NE(grid, nullptr);
+    EXPECT_EQ(grid->width(), 5);
+    EXPECT_EQ(grid->height(), 5);
+    EXPECT_EQ(grid->extentAndRes().isGeographic, true);
+    EXPECT_EQ(grid->extentAndRes().west, 21.0 / 180 * M_PI);
+    EXPECT_FALSE(grid->isNullGrid());
+    EXPECT_FALSE(grid->hasChanged());
+    float out = -1.0f;
+    EXPECT_FALSE(grid->valueAt(0, 0, grid->samplesPerPixel(), out));
+    EXPECT_TRUE(grid->valueAt(0, 0, 0, out));
+    EXPECT_EQ(out, 0.20783890783786773682f);
+    EXPECT_TRUE(grid->valueAt(1, 0, 0, out));
+    EXPECT_EQ(out, 0.22427035868167877197);
+    EXPECT_TRUE(grid->valueAt(0, 1, 0, out));
+    EXPECT_EQ(out, 0.19718019664287567139f);
+    int bandZero = 0;
+    EXPECT_TRUE(grid->valuesAt(0, 0, 1, 1, 1, &bandZero, &out));
+    EXPECT_EQ(out, 0.20783890783786773682f);
+    constexpr int COUNT_X = 2;
+    constexpr int COUNT_Y = 4;
+    constexpr int COUNT_BANDS_THREE = 3;
+    float values[COUNT_Y * COUNT_X * COUNT_BANDS_THREE];
+    const int bands[] = {0, 1, 2};
+    constexpr int OFFSET_X = 2;
+    constexpr int OFFSET_Y = 1;
+    EXPECT_TRUE(grid->valuesAt(OFFSET_X, OFFSET_Y, COUNT_X, COUNT_Y,
+                               COUNT_BANDS_THREE, bands, values));
+    for (int y = 0, valuesIdx = 0; y < COUNT_Y; ++y) {
+        for (int x = 0; x < COUNT_X; ++x) {
+            for (int band = 0; band < COUNT_BANDS_THREE; ++band) {
+                EXPECT_TRUE(
+                    grid->valueAt(OFFSET_X + x, OFFSET_Y + y, band, out));
+                EXPECT_EQ(out, values[valuesIdx]);
+                ++valuesIdx;
+            }
+        }
+    }
+
+    constexpr int COUNT_BANDS_TWO = 2;
+    EXPECT_TRUE(grid->valuesAt(OFFSET_X, OFFSET_Y, COUNT_X, COUNT_Y,
+                               COUNT_BANDS_TWO, bands, values));
+    for (int y = 0, valuesIdx = 0; y < COUNT_Y; ++y) {
+        for (int x = 0; x < COUNT_X; ++x) {
+            for (int band = 0; band < COUNT_BANDS_TWO; ++band) {
+                EXPECT_TRUE(
+                    grid->valueAt(OFFSET_X + x, OFFSET_Y + y, band, out));
+                EXPECT_EQ(out, values[valuesIdx]);
+                ++valuesIdx;
+            }
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
