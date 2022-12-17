@@ -115,7 +115,7 @@ static PJ_LP lcca_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
-    lp.phi = pj_inv_mlfn(P->ctx, S + Q->M0, P->es, Q->en);
+    lp.phi = pj_inv_mlfn(S + Q->M0, Q->en);
 
     return lp;
 }

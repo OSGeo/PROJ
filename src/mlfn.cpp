@@ -1,52 +1,87 @@
 #include <math.h>
-
-#include "proj.h"
 #include "proj_internal.h"
-#include "mlfn.hpp"
 
-/* meridional distance for ellipsoid and inverse
-**	8th degree - accurate to < 1e-5 meters when used in conjunction
-**		with typical major axis values.
-**	Inverse determines phi to EPS (1e-11) radians, about 1e-6 seconds.
+/* meridional distance for ellipsoid and inverse using 6th-order expansion in
+** the third flattening n.  This gives full double precision accuracy for |f|
+** <= 1/150.
 */
-#define C00 1.
-#define C02 .25
-#define C04 .046875
-#define C06 .01953125
-#define C08 .01068115234375
-#define C22 .75
-#define C44 .46875
-#define C46 .01302083333333333333
-#define C48 .00712076822916666666
-#define C66 .36458333333333333333
-#define C68 .00569661458333333333
-#define C88 .3076171875
-#define EN_SIZE 5
+
+#define Lmax 6
+
+// Evaluation sum(p[i] * x^i, i, 0, N) via Horner's method.  N.B. p is of
+// length N+1.
+static double polyval(double x, const double p[], int N) {
+    double y = N < 0 ? 0 : p[N];
+    for (; N > 0;) y = y * x + p[--N];
+    return y;
+}
+
+// Evaluate y = sum(c[k] * sin((2*k+2) * zeta), i, 0, K-1)
+static double clenshaw(double szeta, double czeta,
+                       const double c[], int K) {
+    // Approx operation count = (K + 5) mult and (2 * K + 2) add
+    double u0 = 0, u1 = 0,                         // accumulators for sum
+        X = 2 * (czeta - szeta) * (czeta + szeta); // 2 * cos(2*zeta)
+    for (; K > 0;) {
+        double t = X * u0 - u1 + c[--K];
+        u1 = u0; u0 = t;
+    }
+    return 2 * szeta * czeta * u0; // sin(2*zeta) * u0
+}
 
 double *pj_enfn(double es) {
-    double t, *en;
 
-    en = (double *) malloc(EN_SIZE * sizeof (double));
+    // Expansion of (quarter meridian) / ((a+b)/2 * pi/2) as series in n^2; these
+    // coefficients are ( (2*k - 3)!! / (2*k)!! )^2 for k = 0..3
+    static const double coeff_rad[] = {1, 1.0/4, 1.0/64, 1.0/256};
+
+    // Coefficients to convert phi to mu, Eq. A5 in arXiv:2212.05818
+    // with 0 terms dropped
+    static const double coeff_mu_phi[] = {
+        -3.0/2, 9.0/16, -3.0/32,
+        15.0/16, -15.0/32, 135.0/2048,
+        -35.0/48, 105.0/256,
+        315.0/512, -189.0/512,
+        -693.0/1280,
+        1001.0/2048,
+    };
+    // Coefficients to convert mu to phi, Eq. A6 in arXiv:2212.05818
+    // with 0 terms dropped
+    static const double coeff_phi_mu[] = {
+        3.0/2, -27.0/32, 269.0/512,
+        21.0/16, -55.0/32, 6759.0/4096,
+        151.0/96, -417.0/128,
+        1097.0/512, -15543.0/2560,
+        8011.0/2560,
+        293393.0/61440,
+    };
+
+    double n = 1 + sqrt(1 - es); n = es / (n * n);
+    double n2 = n * n, d = n, *en;
+
+    // 2*Lmax for the Fourier coeffs for each direction of conversion + 1 for
+    // overall multiplier.
+    en = (double *) malloc((2*Lmax + 1) * sizeof (double));
     if (nullptr==en)
         return nullptr;
-
-    en[0] = C00 - es * (C02 + es * (C04 + es * (C06 + es * C08)));
-    en[1] = es * (C22 - es * (C04 + es * (C06 + es * C08)));
-    en[2] = (t = es * es) * (C44 - es * (C46 + es * C48));
-    en[3] = (t *= es) * (C66 - es * C68);
-    en[4] = t * es * C88;
-
+    en[0] = polyval(n2, coeff_rad, Lmax/2) / (1 + n);
+    for (int l = 0, o = 0; l < Lmax; ++l) {
+        int m = (Lmax - l - 1) / 2;
+        en[l + 1       ] = d * polyval(n2, coeff_mu_phi + o, m);
+        en[l + 1 + Lmax] = d * polyval(n2, coeff_phi_mu + o, m);
+        d *= n;
+        o += m + 1;
+    }
     return en;
 }
 
 double
 pj_mlfn(double phi, double sphi, double cphi, const double *en) {
-    return inline_pj_mlfn(phi, sphi, cphi, en);
+    return en[0] * (phi + clenshaw(sphi, cphi, en + 1, Lmax));
 }
 
 double
-pj_inv_mlfn(PJ_CONTEXT *ctx, double arg, double es, const double *en) {
-    double sinphi_ignored;
-    double cosphi_ignored;
-    return inline_pj_inv_mlfn(ctx, arg, es, en, &sinphi_ignored, &cosphi_ignored);
+pj_inv_mlfn(double mu, const double *en) {
+    mu /= en[0];
+    return mu + clenshaw(sin(mu), cos(mu), en + 1 + Lmax, Lmax);
 }

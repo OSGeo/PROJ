@@ -68,7 +68,7 @@ static PJ_LP cass_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
     PJ_LP lp = {0.0, 0.0};
     struct cass_data *Q = static_cast<struct cass_data*>(P->opaque);
 
-    const double phi1 = pj_inv_mlfn (P->ctx, Q->m0 + xy.y, P->es, Q->en);
+    const double phi1 = pj_inv_mlfn (Q->m0 + xy.y, Q->en);
     const double tanphi1 = tan (phi1);
     const double T1 = tanphi1*tanphi1;
     const double sinphi1 = sin (phi1);
