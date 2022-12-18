@@ -16,7 +16,7 @@ static double polyval(double x, const double p[], int N) {
     return y;
 }
 
-// Evaluate y = sum(c[k] * sin((2*k+2) * zeta), i, 0, K-1)
+// Evaluate y = sum(c[k] * sin((2*k+2) * zeta), k, 0, K-1)
 static double clenshaw(double szeta, double czeta,
                        const double c[], int K) {
     // Approx operation count = (K + 5) mult and (2 * K + 2) add
