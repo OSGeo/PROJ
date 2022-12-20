@@ -89,7 +89,7 @@ suffix to input values.
 
 Example of use.  The longitude of the central meridian ``+lon_0=90``, can also be expressed more explictly
 with units of decimal degrees as ``+lon_0=90d`` or in radian
-units as ``+lon_0=1.5708r`` (approximately).
+units as ``+lon_0=1.570796r`` (approximately).
 
 
 False Easting/Northing
