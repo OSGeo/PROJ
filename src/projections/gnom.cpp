@@ -173,7 +173,7 @@ static PJ_LP gnom_e_inverse (PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
                   GEOD_REDUCEDLENGTH | GEOD_GEODESICSCALE);
 
     int count = numit_, trip = 0;
-    double lat1, lon1;
+    double lat1 = 0, lon1 = 0;
     while (count--) {
         double m, M;
         geod_genposition(&l, 0, s,
