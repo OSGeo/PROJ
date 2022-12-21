@@ -4,12 +4,21 @@
 Gnomonic
 ********************************************************************************
 
+For a sphere, the gnomonic projection is a projection from the center of
+the sphere onto a plane tangent to the center point of the projection.
+This projects great circles to straight lines.  For an ellipsoid, it is
+the limit of a doubly azimuthal projection, a projection where the
+azimuths from 2 points are preserved, as the two points merge into the
+center point.  In this case, geodesics project to approximately straight
+lines (these are exactly straight if the geodesic includes the center
+point).  For details, see Section 8 of :cite:`Karney2013`.
+
 +---------------------+----------------------------------------------------------+
-| **Classification**  | Pseudocylindrical                                        |
+| **Classification**  | Azimuthal                                                |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical projection                |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
-| **Defined area**    | Global                                                   |
+| **Defined area**    | Within a quarter circumference of the center point       |
 +---------------------+----------------------------------------------------------+
 | **Alias**           | gnom                                                     |
 +---------------------+----------------------------------------------------------+
@@ -26,7 +35,7 @@ Gnomonic
    :align: center
    :alt:   Gnomonic
 
-   proj-string: ``+proj=gnom +lat_0=90 +lon_0=-50``
+   proj-string: ``+proj=gnom +lat_0=90 +lon_0=-50 +R=6.4e6``
 
 Parameters
 ################################################################################
@@ -37,8 +46,10 @@ Parameters
 
 .. include:: ../options/lat_0.rst
 
-.. include:: ../options/R.rst
-
 .. include:: ../options/x_0.rst
 
 .. include:: ../options/y_0.rst
+
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/R.rst
