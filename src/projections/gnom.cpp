@@ -152,7 +152,7 @@ static PJ_XY gnom_e_forward (PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 
 static PJ_LP gnom_e_inverse (PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
-    static const int numit_ = 10;
+    constexpr int numit_ = 10;
     static const double eps_ = 0.01 * sqrt(DBL_EPSILON);
 
     PJ_LP lp = {0.0,0.0};
@@ -161,7 +161,7 @@ static PJ_LP gnom_e_inverse (PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     double
         lat0 = P->phi0 / DEG_TO_RAD,
         lon0 = 0,
-        azi0 = atan2(xy.x, xy.y) / DEG_TO_RAD,
+        azi0 = atan2(xy.x, xy.y) / DEG_TO_RAD, // Clockwise from north
         rho = hypot(xy.x, xy.y),
         s = atan(rho);
     bool little = rho <= 1;
@@ -189,7 +189,8 @@ static PJ_LP gnom_e_inverse (PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
             ++trip;
     }
     if (trip) {
-        lp.phi = lat1 * DEG_TO_RAD; lp.lam = lon1 * DEG_TO_RAD;
+        lp.phi = lat1 * DEG_TO_RAD;
+        lp.lam = lon1 * DEG_TO_RAD;
     } else {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         lp.phi = lp.lam = HUGE_VAL;
