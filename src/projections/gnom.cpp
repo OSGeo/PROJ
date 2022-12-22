@@ -219,7 +219,7 @@ PJ *PROJECTION(gnom) {
         P->inv = gnom_s_inverse;
         P->fwd = gnom_s_forward;
     } else {
-        geod_init(&Q->g, 1, P->es / (1 + sqrt(P->one_es)));
+        geod_init(&Q->g, 1, P->f);
 
         P->inv = gnom_e_inverse;
         P->fwd = gnom_e_forward;

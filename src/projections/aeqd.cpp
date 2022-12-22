@@ -273,7 +273,7 @@ PJ *PROJECTION(aeqd) {
     P->opaque = Q;
     P->destructor = destructor;
 
-    geod_init(&Q->g, 1, P->es / (1 + sqrt(P->one_es)));
+    geod_init(&Q->g, 1, P->f);
 
     if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) {
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
