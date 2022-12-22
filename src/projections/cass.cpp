@@ -131,7 +131,7 @@ PJ *PROJECTION(cass) {
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->destructor = destructor;
 
-    Q->en = pj_enfn (P->es);
+    Q->en = pj_enfn(P->n);
     if (nullptr==Q->en)
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 

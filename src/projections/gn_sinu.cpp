@@ -127,7 +127,7 @@ PJ *PROJECTION(sinu) {
     P->opaque = Q;
     P->destructor = destructor;
 
-    if (!(Q->en = pj_enfn(P->es)))
+    if (!(Q->en = pj_enfn(P->n)))
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     if (P->es != 0.0) {

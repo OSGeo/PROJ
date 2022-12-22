@@ -29,10 +29,10 @@ static double clenshaw(double szeta, double czeta,
     return 2 * szeta * czeta * u0; // sin(2*zeta) * u0
 }
 
-double *pj_enfn(double es) {
+double *pj_enfn(double n) {
 
-    // Expansion of (quarter meridian) / ((a+b)/2 * pi/2) as series in n^2; these
-    // coefficients are ( (2*k - 3)!! / (2*k)!! )^2 for k = 0..3
+    // Expansion of (quarter meridian) / ((a+b)/2 * pi/2) as series in n^2;
+    // these coefficients are ( (2*k - 3)!! / (2*k)!! )^2 for k = 0..3
     static const double coeff_rad[] = {1, 1.0/4, 1.0/64, 1.0/256};
 
     // Coefficients to convert phi to mu, Eq. A5 in arXiv:2212.05818
@@ -56,7 +56,6 @@ double *pj_enfn(double es) {
         293393.0/61440,
     };
 
-    double n = 1 + sqrt(1 - es); n = es / (n * n);
     double n2 = n * n, d = n, *en;
 
     // 2*Lmax for the Fourier coeffs for each direction of conversion + 1 for

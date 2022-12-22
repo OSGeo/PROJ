@@ -297,7 +297,7 @@ PJ *PROJECTION(aeqd) {
         P->inv = aeqd_s_inverse;
         P->fwd = aeqd_s_forward;
     } else {
-        if (!(Q->en = pj_enfn(P->es)))
+        if (!(Q->en = pj_enfn(P->n)))
             return pj_default_destructor (P, 0);
         if (pj_param(P->ctx, P->params, "bguam").i) {
             Q->M1 = pj_mlfn(P->phi0, Q->sinph0, Q->cosph0, Q->en);

@@ -127,7 +127,7 @@ PJ *PROJECTION(bonne) {
     }
 
     if (P->es != 0.0) {
-        Q->en = pj_enfn(P->es);
+        Q->en = pj_enfn(P->n);
         if (nullptr==Q->en)
             return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->am1 = sin(Q->phi1);
