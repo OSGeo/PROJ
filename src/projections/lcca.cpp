@@ -140,7 +140,7 @@ PJ *PROJECTION(lcca) {
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    (Q->en = pj_enfn(P->es));
+    (Q->en = pj_enfn(P->n));
     if (!Q->en)
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 

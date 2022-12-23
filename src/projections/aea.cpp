@@ -190,7 +190,7 @@ static PJ *setup(PJ *P) {
     if( Q->ellips ) {
         double ml1, m1;
 
-        Q->en = pj_enfn(P->es);
+        Q->en = pj_enfn(P->n);
         if (Q->en == nullptr)
             return destructor(P, 0);
         m1 = pj_msfn(sinphi, cosphi, P->es);

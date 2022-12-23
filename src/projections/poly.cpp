@@ -162,7 +162,7 @@ PJ *PROJECTION(poly) {
     P->destructor = destructor;
 
     if (P->es != 0.0) {
-        if (!(Q->en = pj_enfn(P->es)))
+        if (!(Q->en = pj_enfn(P->n)))
             return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->ml0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), Q->en);
         P->inv = poly_e_inverse;

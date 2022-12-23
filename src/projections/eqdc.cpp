@@ -103,7 +103,7 @@ PJ *PROJECTION(eqdc) {
         return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
-    if (!(Q->en = pj_enfn(P->es)))
+    if (!(Q->en = pj_enfn(P->n)))
         return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     sinphi = sin(Q->phi1);

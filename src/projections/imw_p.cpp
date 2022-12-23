@@ -186,7 +186,7 @@ PJ *PROJECTION(imw_p) {
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    if (!(Q->en = pj_enfn(P->es))) return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    if (!(Q->en = pj_enfn(P->n))) return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     if( (err = phi12(P, &del, &sig)) != 0) {
         return destructor(P, err);
     }
