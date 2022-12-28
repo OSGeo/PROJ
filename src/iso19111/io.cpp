@@ -10695,10 +10695,10 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
     const auto mappings = getMappingsFromPROJName(step.name);
     const MethodMapping *mapping = mappings.empty() ? nullptr : mappings[0];
 
+    bool foundStrictlyMatchingMapping = false;
     if (mappings.size() >= 2) {
         // To distinguish for example +ortho from +ortho +f=0
         bool allMappingsHaveAuxParam = true;
-        bool foundStrictlyMatchingMapping = false;
         for (const auto *mappingIter : mappings) {
             if (mappingIter->proj_name_aux == nullptr) {
                 allMappingsHaveAuxParam = false;
@@ -10725,7 +10725,7 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
         }
     }
 
-    if (mapping) {
+    if (mapping && !foundStrictlyMatchingMapping) {
         mapping = selectSphericalOrEllipsoidal(mapping, geodCRS);
     }
 
