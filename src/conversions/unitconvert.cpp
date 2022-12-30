@@ -358,7 +358,8 @@ static void forward_4d(PJ_COORD& coo, PJ *P) {
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
-    coo.xyz = forward_3d(coo.lpz, P);
+    const auto xyz = forward_3d(coo.lpz, P);
+    coo.xyz = xyz;
 
     if (Q->t_in_id >= 0)
         coo.xyzt.t = time_units[Q->t_in_id].t_in( coo.xyzt.t );
@@ -375,7 +376,8 @@ static void reverse_4d(PJ_COORD& coo, PJ *P) {
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
-    coo.lpz = reverse_3d(coo.xyz, P);
+    const auto lpz = reverse_3d(coo.xyz, P);
+    coo.lpz = lpz;
 
     if (Q->t_out_id >= 0)
         coo.xyzt.t = time_units[Q->t_out_id].t_in( coo.xyzt.t );

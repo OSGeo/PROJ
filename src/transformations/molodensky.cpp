@@ -261,7 +261,8 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 
 
 static void forward_4d(PJ_COORD& obs, PJ *P) {
-    obs.xyz = forward_3d(obs.lpz, P);
+    const auto xyz = forward_3d(obs.lpz, P);
+    obs.xyz = xyz;
 }
 
 
@@ -292,7 +293,8 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 
 
 static void reverse_4d(PJ_COORD& obs, PJ *P) {
-    obs.lpz = reverse_3d(obs.xyz, P);
+    const auto lpz = reverse_3d(obs.xyz, P);
+    obs.lpz = lpz;
 }
 
 

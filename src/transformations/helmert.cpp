@@ -450,7 +450,8 @@ static void helmert_forward_4d (PJ_COORD &point, PJ *P) {
         build_rot_matrix(P);
     }
 
-    point.xyz = helmert_forward_3d (point.lpz, P);
+    const auto xyz = helmert_forward_3d (point.lpz, P);
+    point.xyz = xyz;
 }
 
 
@@ -466,7 +467,8 @@ static void helmert_reverse_4d (PJ_COORD& point, PJ *P) {
         build_rot_matrix(P);
     }
 
-    point.lpz = helmert_reverse_3d (point.xyz, P);
+    const auto lpz = helmert_reverse_3d (point.xyz, P);
+    point.lpz = lpz;
 }
 
 /* Arcsecond to radians */
