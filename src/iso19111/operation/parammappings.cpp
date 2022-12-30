@@ -630,13 +630,13 @@ static const MethodMapping projectionMethodMappings[] = {
     {PROJ_WKT2_NAME_METHOD_COMPACT_MILLER, 0, "Compact_Miller", "comill",
      nullptr, paramsLonNatOrigin},
 
-    {EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
-     EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
-     "Cylindrical_Equal_Area", "cea", nullptr, paramsCEA},
-
     {EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA,
      EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA, "Cylindrical_Equal_Area",
      "cea", nullptr, paramsCEA},
+
+    {EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
+     EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
+     "Cylindrical_Equal_Area", "cea", "R_A", paramsCEA},
 
     {EPSG_NAME_METHOD_CASSINI_SOLDNER, EPSG_CODE_METHOD_CASSINI_SOLDNER,
      "Cassini_Soldner", "cass", nullptr, paramsNatOrigin},
@@ -732,7 +732,7 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {EPSG_NAME_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL,
      EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL,
-     "Lambert_Azimuthal_Equal_Area", "laea", nullptr, paramsLaea},
+     "Lambert_Azimuthal_Equal_Area", "laea", "R_A", paramsLaea},
 
     {PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL, 0, "Miller_Cylindrical", "mill",
      "R_A", paramsMiller},
