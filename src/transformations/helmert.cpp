@@ -450,6 +450,9 @@ static void helmert_forward_4d (PJ_COORD &point, PJ *P) {
         build_rot_matrix(P);
     }
 
+    // Assigning in 2 steps avoids cppcheck warning
+    // "Overlapping read/write of union is undefined behavior"
+    // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
     const auto xyz = helmert_forward_3d (point.lpz, P);
     point.xyz = xyz;
 }
@@ -467,6 +470,9 @@ static void helmert_reverse_4d (PJ_COORD& point, PJ *P) {
         build_rot_matrix(P);
     }
 
+    // Assigning in 2 steps avoids cppcheck warning
+    // "Overlapping read/write of union is undefined behavior"
+    // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
     const auto lpz = helmert_reverse_3d (point.xyz, P);
     point.lpz = lpz;
 }
