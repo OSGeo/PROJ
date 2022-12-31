@@ -2,10 +2,11 @@
 
 #include <errno.h>
 #include <math.h>
+#include <float.h>
 
+#include "geodesic.h"
 #include "proj.h"
 #include "proj_internal.h"
-#include <math.h>
 
 PROJ_HEAD(gnom, "Gnomonic") "\n\tAzi, Sph";
 
@@ -25,6 +26,7 @@ struct pj_opaque {
     double  sinph0;
     double  cosph0;
     enum Mode mode;
+    struct geod_geodesic g;
 };
 } // anonymous namespace
 
@@ -122,6 +124,80 @@ static PJ_LP gnom_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
     return lp;
 }
 
+static PJ_XY gnom_e_forward (PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+
+    double
+        lat0 = P->phi0 / DEG_TO_RAD,
+        lon0 = 0,
+        lat1 = lp.phi / DEG_TO_RAD,
+        lon1 = lp.lam / DEG_TO_RAD,
+        azi0, m, M;
+
+    geod_geninverse(&Q->g, lat0, lon0, lat1, lon1,
+                    nullptr, &azi0, nullptr, &m, &M, nullptr, nullptr);
+    if (M <= 0) {
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+        xy.x = xy.y = HUGE_VAL;
+    }
+    else {
+        double rho = m/M;
+        azi0 *= DEG_TO_RAD;
+        xy.x = rho * sin(azi0);
+        xy.y = rho * cos(azi0);
+    }
+    return xy;
+}
+
+
+static PJ_LP gnom_e_inverse (PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
+    constexpr int numit_ = 10;
+    static const double eps_ = 0.01 * sqrt(DBL_EPSILON);
+
+    PJ_LP lp = {0.0,0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+
+    double
+        lat0 = P->phi0 / DEG_TO_RAD,
+        lon0 = 0,
+        azi0 = atan2(xy.x, xy.y) / DEG_TO_RAD, // Clockwise from north
+        rho = hypot(xy.x, xy.y),
+        s = atan(rho);
+    bool little = rho <= 1;
+    if (!little)
+      rho = 1/rho;
+    struct geod_geodesicline l;
+    geod_lineinit(&l, &Q->g, lat0, lon0, azi0,
+                  GEOD_LATITUDE | GEOD_LONGITUDE | GEOD_DISTANCE_IN |
+                  GEOD_REDUCEDLENGTH | GEOD_GEODESICSCALE);
+
+    int count = numit_, trip = 0;
+    double lat1 = 0, lon1 = 0;
+    while (count--) {
+        double m, M;
+        geod_genposition(&l, 0, s,
+                         &lat1, &lon1, nullptr, &s, &m, &M, nullptr, nullptr);
+        if (trip)
+            break;
+        // If little, solve rho(s) = rho with drho(s)/ds = 1/M^2
+        // else solve 1/rho(s) = 1/rho with d(1/rho(s))/ds = -1/m^2
+        double ds = little ? (m - rho * M) * M : (rho * m - M) * m;
+        s -= ds;
+        // Reversed test to allow escape with NaNs
+        if (!(fabs(ds) >= eps_))
+            ++trip;
+    }
+    if (trip) {
+        lp.phi = lat1 * DEG_TO_RAD;
+        lp.lam = lon1 * DEG_TO_RAD;
+    } else {
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+        lp.phi = lp.lam = HUGE_VAL;
+    }
+    return lp;
+}
+
 
 PJ *PROJECTION(gnom) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
@@ -129,18 +205,25 @@ PJ *PROJECTION(gnom) {
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) {
-        Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
-    } else if (fabs(P->phi0) < EPS10) {
-        Q->mode = EQUIT;
-    } else {
-        Q->mode = OBLIQ;
-        Q->sinph0 = sin(P->phi0);
-        Q->cosph0 = cos(P->phi0);
-    }
+    if (P->es == 0) {
+        if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) {
+            Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
+        } else if (fabs(P->phi0) < EPS10) {
+            Q->mode = EQUIT;
+        } else {
+            Q->mode = OBLIQ;
+            Q->sinph0 = sin(P->phi0);
+            Q->cosph0 = cos(P->phi0);
+        }
 
-    P->inv = gnom_s_inverse;
-    P->fwd = gnom_s_forward;
+        P->inv = gnom_s_inverse;
+        P->fwd = gnom_s_forward;
+    } else {
+        geod_init(&Q->g, 1, P->f);
+
+        P->inv = gnom_e_inverse;
+        P->fwd = gnom_e_forward;
+    }
     P->es = 0.;
 
     return P;

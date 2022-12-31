@@ -96,16 +96,16 @@ static PJ_XY aeqd_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  coslam, cosphi, sinphi, rho;
     double azi1, azi2, s12;
-    double lam1, phi1, lam2, phi2;
+    double lat1, lon1, lat2, lon2;
 
     coslam = cos(lp.lam);
-    cosphi = cos(lp.phi);
-    sinphi = sin(lp.phi);
     switch (Q->mode) {
     case N_POLE:
         coslam = - coslam;
         PROJ_FALLTHROUGH;
     case S_POLE:
+        cosphi = cos(lp.phi);
+        sinphi = sin(lp.phi);
         rho = fabs(Q->Mp - pj_mlfn(lp.phi, sinphi, cosphi, Q->en));
         xy.x = rho * sin(lp.lam);
         xy.y = rho * coslam;
@@ -117,15 +117,15 @@ static PJ_XY aeqd_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
             break;
         }
 
-        phi1 = P->phi0 / DEG_TO_RAD;
-        lam1 = P->lam0 / DEG_TO_RAD;
-        phi2 = lp.phi / DEG_TO_RAD;
-        lam2 = (lp.lam+P->lam0) / DEG_TO_RAD;
+        lat1 = P->phi0 / DEG_TO_RAD;
+        lon1 = 0;
+        lat2 = lp.phi / DEG_TO_RAD;
+        lon2 = lp.lam / DEG_TO_RAD;
 
-        geod_inverse(&Q->g, phi1, lam1, phi2, lam2, &s12, &azi1, &azi2);
+        geod_inverse(&Q->g, lat1, lon1, lat2, lon2, &s12, &azi1, &azi2);
         azi1 *= DEG_TO_RAD;
-        xy.x = s12 * sin(azi1) / P->a;
-        xy.y = s12 * cos(azi1) / P->a;
+        xy.x = s12 * sin(azi1);
+        xy.y = s12 * cos(azi1);
         break;
     }
     return xy;
@@ -231,28 +231,23 @@ static PJ_LP e_guam_inv(PJ_XY xy, PJ *P) { /* Guam elliptical */
 static PJ_LP aeqd_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double c;
-    double azi1, azi2, s12, x2, y2, lat1, lon1, lat2, lon2;
+    double azi1, azi2, s12, lat1, lon1, lat2, lon2;
 
-    if ((c = hypot(xy.x, xy.y)) < EPS10) {
+    if ((s12 = hypot(xy.x, xy.y)) < EPS10) {
         lp.phi = P->phi0;
         lp.lam = 0.;
         return (lp);
     }
     if (Q->mode == OBLIQ || Q->mode == EQUIT) {
-
-        x2 = xy.x * P->a;
-        y2 = xy.y * P->a;
         lat1 = P->phi0 / DEG_TO_RAD;
-        lon1 = P->lam0 / DEG_TO_RAD;
-        azi1 = atan2(x2, y2) / DEG_TO_RAD;
-        s12 = sqrt(x2 * x2 + y2 * y2);
+        lon1 = 0;
+        azi1 = atan2(xy.x, xy.y) / DEG_TO_RAD; // Clockwise from north
         geod_direct(&Q->g, lat1, lon1, azi1, s12, &lat2, &lon2, &azi2);
         lp.phi = lat2 * DEG_TO_RAD;
         lp.lam = lon2 * DEG_TO_RAD;
-        lp.lam -= P->lam0;
     } else { /* Polar */
-        lp.phi = pj_inv_mlfn(Q->mode == N_POLE ? Q->Mp - c : Q->Mp + c, Q->en);
+        lp.phi = pj_inv_mlfn(Q->mode == N_POLE ? Q->Mp - s12 : Q->Mp + s12,
+                             Q->en);
         lp.lam = atan2(xy.x, Q->mode == N_POLE ? -xy.y : xy.y);
     }
     return lp;
@@ -308,7 +303,7 @@ PJ *PROJECTION(aeqd) {
     P->opaque = Q;
     P->destructor = destructor;
 
-    geod_init(&Q->g, P->a, P->es / (1 + sqrt(P->one_es)));
+    geod_init(&Q->g, 1, P->f);
 
     if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) {
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;

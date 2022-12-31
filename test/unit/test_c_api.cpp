@@ -6107,12 +6107,26 @@ TEST_F(CApi, proj_trans_bounds_ignore_inf) {
     double out_bottom;
     double out_right;
     double out_top;
+    // Before the ellipsoidal version of the gnomonic projection was
+    // implemented the WGS84 ellipsoid was treated as a sphere of radius
+    // 6378137m and the equator was the "horizon" for the projection with the
+    // south polar aspect.
+    //
+    // The boundary with ndiv = 21 then mapped into a line extending to ymin =
+    // -89178007.2 which was the projection of lat = -90d/(ndiv+1), lon = 180d.
+    //
+    // With the implementation of the ellipsoidal gnonomic projection, the
+    // horizon is now at lat = +0.3035d.
+    //
+    // We move the north edge of the box to lat = -90+4.15*(ndiv+1) = +1.3d.
+    // The northernmost point on the boundary which is within the horizon is
+    // now lat = -90+4.15*ndiv = -2.85d, lon = 180d for which y = -116576598.5.
     int success =
-        proj_trans_bounds(m_ctxt, P, PJ_FWD, -180.0, -90.0, 180.0, 0.0,
+        proj_trans_bounds(m_ctxt, P, PJ_FWD, -180.0, -90.0, 180.0, 1.3,
                           &out_left, &out_bottom, &out_right, &out_top, 21);
     EXPECT_TRUE(success == 1);
     EXPECT_NEAR(out_left, 0, 1);
-    EXPECT_NEAR(out_bottom, -89178008, 1);
+    EXPECT_NEAR(out_bottom, -116576598.5, 1);
     EXPECT_NEAR(out_right, 0, 1);
     EXPECT_NEAR(out_top, 0, 1);
 }
