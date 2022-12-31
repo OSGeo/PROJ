@@ -10017,12 +10017,19 @@ TEST(io, projparse_aeqd_guam) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_cea_spherical) {
-    auto obj = PROJStringParser().createFromPROJString(
-        "+proj=cea +R=6371228 +type=crs");
+    const std::string input(
+        "+proj=cea +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +R=6371228 +units=m "
+        "+no_defs +type=crs");
+    auto obj = PROJStringParser().createFromPROJString(input);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->derivingConversion()->method()->getEPSGCode(),
               EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL);
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        input);
 
     auto crs2 = ProjectedCRS::create(
         PropertyMap(), crs->baseCRS(),
@@ -10041,7 +10048,7 @@ TEST(io, projparse_cea_spherical) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_cea_spherical_on_ellipsoid) {
-    std::string input("+proj=cea +R_A +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+    std::string input("+proj=cea +R_A +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 "
                       "+ellps=WGS84 +units=m +no_defs +type=crs");
     auto obj = PROJStringParser().createFromPROJString(input);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);

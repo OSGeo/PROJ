@@ -3985,8 +3985,10 @@ void Conversion::_exportToPROJString(
                     bAxisSpecFound = true;
                 }
 
-                // No need to add explicit f=0 if the ellipsoid is a sphere
-                if (strcmp(mapping->proj_name_aux, "f=0") == 0) {
+                // No need to add explicit f=0 or R_A if the ellipsoid is a
+                // sphere
+                if (strcmp(mapping->proj_name_aux, "f=0") == 0 ||
+                    strcmp(mapping->proj_name_aux, "R_A") == 0) {
                     crs::CRS *horiz = l_sourceCRS.get();
                     const auto compound =
                         dynamic_cast<const crs::CompoundCRS *>(horiz);
