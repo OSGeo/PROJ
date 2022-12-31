@@ -31,7 +31,7 @@
  * The minor version of the geodesic library.  (This tracks the version of
  * GeographicLib.)
  **********************************************************************/
-#define GEODESIC_VERSION_MINOR 0
+#define GEODESIC_VERSION_MINOR 1
 /**
  * The patch level of the geodesic library.  (This tracks the version of
  * GeographicLib.)

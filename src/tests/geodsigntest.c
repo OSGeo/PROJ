@@ -30,6 +30,19 @@ typedef double T;
 #define nullptr 0
 #endif
 
+#if !defined(OLD_BUGGY_REMQUO)
+/*
+ * glibc prior to version 2.22 had a bug in remquo.  This was reported in 2014
+ * and fixed in 2015.  See
+ * https://sourceware.org/bugzilla/show_bug.cgi?id=17569
+ *
+ * The bug causes some of the tests here to fail.  The failures aren't terribly
+ * serious (just a loss of accuracy).  If you're still using the buggy glibc,
+ * then define OLD_BUGGY_REMQUO to be 1.
+ */
+#define OLD_BUGGY_REMQUO 0
+#endif
+
 static const T wgs84_a = 6378137, wgs84_f = 1/298.257223563; /* WGS84 */
 
 static int equiv(T x, T y) {
@@ -123,7 +136,9 @@ int main() {
   check( geod_AngRound( 90.0       ),  90         );
 
   checksincosd(-  inf,  nan,  nan);
+#if !OLD_BUGGY_REMQUO
   checksincosd(-810.0, -1.0, +0.0);
+#endif
   checksincosd(-720.0, -0.0, +1.0);
   checksincosd(-630.0, +1.0, +0.0);
   checksincosd(-540.0, -0.0, -1.0);
@@ -142,10 +157,13 @@ int main() {
   checksincosd(+540.0, +0.0, -1.0);
   checksincosd(+630.0, -1.0, +0.0);
   checksincosd(+720.0, +0.0, +1.0);
+#if !OLD_BUGGY_REMQUO
   checksincosd(+810.0, +1.0, +0.0);
+#endif
   checksincosd(+  inf,  nan,  nan);
   checksincosd(   nan,  nan,  nan);
 
+#if !OLD_BUGGY_REMQUO
   {
     T s1, c1, s2, c2, s3, c3;
     geod_sincosd(         9.0, &s1, &c1);
@@ -156,6 +174,7 @@ int main() {
       ++n;
     }
   }
+#endif
 
   check( geod_atan2d(+0.0 , -0.0 ), +180 );
   check( geod_atan2d(-0.0 , -0.0 ), -180 );
