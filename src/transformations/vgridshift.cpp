@@ -106,13 +106,22 @@ static void forward_4d(PJ_COORD& coo, PJ *P) {
 
     /* If transformation is not time restricted, we always call it */
     if (Q->t_final==0 || Q->t_epoch==0) {
-        coo.xyz = forward_3d (coo.lpz, P);
+        // Assigning in 2 steps avoids cppcheck warning
+        // "Overlapping read/write of union is undefined behavior"
+        // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+        const auto xyz = forward_3d (coo.lpz, P);
+        coo.xyz = xyz;
         return;
     }
 
     /* Time restricted - only apply transform if within time bracket */
-    if (coo.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
-        coo.xyz = forward_3d (coo.lpz, P);
+    if (coo.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch) {
+        // Assigning in 2 steps avoids cppcheck warning
+        // "Overlapping read/write of union is undefined behavior"
+        // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+        const auto xyz = forward_3d (coo.lpz, P);
+        coo.xyz = xyz;
+    }
 }
 
 static void reverse_4d(PJ_COORD& coo, PJ *P) {
@@ -120,13 +129,22 @@ static void reverse_4d(PJ_COORD& coo, PJ *P) {
 
     /* If transformation is not time restricted, we always call it */
     if (Q->t_final==0 || Q->t_epoch==0) {
-        coo.lpz = reverse_3d (coo.xyz, P);
+        // Assigning in 2 steps avoids cppcheck warning
+        // "Overlapping read/write of union is undefined behavior"
+        // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+        const auto lpz = reverse_3d (coo.xyz, P);
+        coo.lpz = lpz;
         return;
     }
 
     /* Time restricted - only apply transform if within time bracket */
-    if (coo.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
-        coo.lpz = reverse_3d (coo.xyz, P);
+    if (coo.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch) {
+        // Assigning in 2 steps avoids cppcheck warning
+        // "Overlapping read/write of union is undefined behavior"
+        // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+        const auto lpz = reverse_3d (coo.xyz, P);
+        coo.lpz = lpz;
+    }
 }
 
 static PJ *destructor (PJ *P, int errlev) {

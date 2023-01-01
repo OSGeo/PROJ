@@ -215,6 +215,9 @@ static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
 
     point.lp = lp;
+    // Assigning in 2 steps avoids cppcheck warning
+    // "Overlapping read/write of union is undefined behavior"
+    // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
     const auto xyz = forward_3d(point.lpz, P);
     point.xyz = xyz;
 
@@ -227,6 +230,9 @@ static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
 
     point.xy = xy;
     point.xyz.z = 0;
+    // Assigning in 2 steps avoids cppcheck warning
+    // "Overlapping read/write of union is undefined behavior"
+    // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
     const auto lpz = reverse_3d(point.xyz, P);
     point.lpz = lpz;
 
@@ -261,7 +267,11 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 
 
 static void forward_4d(PJ_COORD& obs, PJ *P) {
-    obs.xyz = forward_3d(obs.lpz, P);
+    // Assigning in 2 steps avoids cppcheck warning
+    // "Overlapping read/write of union is undefined behavior"
+    // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+    const auto xyz = forward_3d(obs.lpz, P);
+    obs.xyz = xyz;
 }
 
 
@@ -292,7 +302,11 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 
 
 static void reverse_4d(PJ_COORD& obs, PJ *P) {
-    obs.lpz = reverse_3d(obs.xyz, P);
+    // Assigning in 2 steps avoids cppcheck warning
+    // "Overlapping read/write of union is undefined behavior"
+    // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+    const auto lpz = reverse_3d(obs.xyz, P);
+    obs.lpz = lpz;
 }
 
 

@@ -323,6 +323,10 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     point.lpz = lpz;
 
     /* take care of the horizontal components in the 2D function */
+
+    // Assigning in 2 steps avoids cppcheck warning
+    // "Overlapping read/write of union is undefined behavior"
+    // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
     const auto xy = forward_2d(point.lp, P);
     point.xy = xy;
 
@@ -341,6 +345,10 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     point.xyz = xyz;
 
     /* take care of the horizontal components in the 2D function */
+
+    // Assigning in 2 steps avoids cppcheck warning
+    // "Overlapping read/write of union is undefined behavior"
+    // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
     const auto lp = reverse_2d(point.xy, P);
     point.lp = lp;
 
@@ -358,7 +366,12 @@ static void forward_4d(PJ_COORD& coo, PJ *P) {
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
-    coo.xyz = forward_3d(coo.lpz, P);
+
+    // Assigning in 2 steps avoids cppcheck warning
+    // "Overlapping read/write of union is undefined behavior"
+    // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+    const auto xyz = forward_3d(coo.lpz, P);
+    coo.xyz = xyz;
 
     if (Q->t_in_id >= 0)
         coo.xyzt.t = time_units[Q->t_in_id].t_in( coo.xyzt.t );
@@ -375,7 +388,12 @@ static void reverse_4d(PJ_COORD& coo, PJ *P) {
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
-    coo.lpz = reverse_3d(coo.xyz, P);
+
+    // Assigning in 2 steps avoids cppcheck warning
+    // "Overlapping read/write of union is undefined behavior"
+    // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+    const auto lpz = reverse_3d(coo.xyz, P);
+    coo.lpz = lpz;
 
     if (Q->t_out_id >= 0)
         coo.xyzt.t = time_units[Q->t_out_id].t_in( coo.xyzt.t );
