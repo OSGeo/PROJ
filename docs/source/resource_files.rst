@@ -172,7 +172,7 @@ The ``proj-data`` package is a collection of all the resource files that are
 freely available for use with PROJ. The package is maintained on
 `GitHub <https://github.com/OSGeo/PROJ-data>`_ and the contents of the package
 are show-cased on the `PROJ CDN <https://cdn.proj.org/>`_. The contents of the
-package can be installed using the :program:`projsync` package or by downloading
+package can be installed using the :ref:`projsync` program or by downloading
 the zip archive of the package and unpacking in the :envvar:`PROJ_DATA` directory.
 
 proj-datumgrid
