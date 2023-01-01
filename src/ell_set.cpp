@@ -584,7 +584,7 @@ int pj_calc_ellipsoid_params (PJ *P, double a, double es) {
     /* flattening */
     if (0==P->f)
         P->f  = 1 - cos (P->alpha);   /* = 1 - sqrt (1 - PIN->es); */
-    if (P->f == 1.0) {
+    if (!(P->f >= 0.0 && P->f < 1.0)) {
         proj_log_error(P, _("Invalid eccentricity"));
         proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         return PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE;
