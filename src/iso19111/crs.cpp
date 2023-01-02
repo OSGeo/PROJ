@@ -4829,7 +4829,8 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     }
 
     const bool l_implicitCS = hasImplicitCS();
-    const auto addCRS = [&](const ProjectedCRSNNPtr &crs, const bool eqName) {
+    const auto addCRS = [&](const ProjectedCRSNNPtr &crs, const bool eqName,
+                            bool hasNonMatchingId) {
         const auto &l_unit = cs->axisList()[0]->unit();
         if (_isEquivalentTo(crs.get(),
                             util::IComparable::Criterion::
@@ -4849,7 +4850,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                  util::IComparable::Criterion::EQUIVALENT, dbContext))) {
             if (crs->nameStr() == thisName) {
                 res.clear();
-                res.emplace_back(crs, 100);
+                res.emplace_back(crs, hasNonMatchingId ? 70 : 100);
             } else {
                 res.emplace_back(crs, eqName ? 90 : 70);
             }
@@ -4890,6 +4891,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                        ci_equal(thisName, "unnamed");
         bool foundEquivalentName = false;
 
+        bool hasNonMatchingId = false;
         if (hasCodeCompatibleOfAuthorityFactory(this, authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
@@ -4906,11 +4908,14 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                 EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
                             dbContext);
                         res.emplace_back(crs, match ? 100 : 25);
-                        return res;
+                        if (match) {
+                            return res;
+                        }
                     } catch (const std::exception &) {
                     }
                 }
             }
+            hasNonMatchingId = true;
         } else if (!insignificantName) {
             for (int ipass = 0; ipass < 2; ipass++) {
                 const bool approximateMatch = ipass == 1;
@@ -4926,7 +4931,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                         thisName.c_str(), pairObjName.second.c_str());
                     foundEquivalentName |= eqName;
 
-                    if (addCRS(crsNN, eqName).second == 100) {
+                    if (addCRS(crsNN, eqName, false).second == 100) {
                         return res;
                     }
                 }
@@ -4962,8 +4967,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         // Sort results
         res.sort(lambdaSort);
 
-        if (!hasCodeCompatibleOfAuthorityFactory(this, authorityFactory) &&
-            !foundEquivalentName && (res.empty() || res.front().second < 50)) {
+        if (!foundEquivalentName && (res.empty() || res.front().second < 50)) {
             std::set<std::pair<std::string, std::string>> alreadyKnown;
             for (const auto &pair : res) {
                 const auto &ids = pair.first->identifiers();
@@ -4985,7 +4989,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     continue;
                 }
 
-                addCRS(crs, insignificantName);
+                addCRS(crs, insignificantName, hasNonMatchingId);
             }
 
             res.sort(lambdaSort);
