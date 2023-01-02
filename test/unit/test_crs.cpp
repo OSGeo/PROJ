@@ -2617,7 +2617,9 @@ TEST(crs, projectedCRS_identify_db) {
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factoryEPSG);
-        EXPECT_EQ(res.size(), 0U);
+        EXPECT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
+        EXPECT_EQ(res.front().second, 70);
     }
     {
         // Existing code, but not matching content
@@ -2632,8 +2634,8 @@ TEST(crs, projectedCRS_identify_db) {
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1U);
-        EXPECT_EQ(res.front().first->getEPSGCode(), 32631);
-        EXPECT_EQ(res.front().second, 25);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
+        EXPECT_EQ(res.front().second, 70);
     }
     {
         // Identify by exact name
@@ -3251,6 +3253,32 @@ TEST(crs, projectedCRS_identify_db) {
         ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 8353);
         EXPECT_EQ(res.front().second, 100);
+    }
+    {
+        // Identify from a pseudo WKT ESRI with has an AUTHORITY node that
+        // points to another object.
+        // Cf
+        // https://lists.osgeo.org/pipermail/qgis-user/2023-January/052299.html
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"ETRS_1989_UTM_Zone_32N_6Stellen\","
+            "GEOGCS[\"GCS_ETRS_1989\",DATUM[\"D_ETRS_1989\","
+            "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+            "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+            "PROJECTION[\"Transverse_Mercator\"],"
+            "PARAMETER[\"False_Easting\",500000.0],"
+            "PARAMETER[\"False_Northing\",0.0],"
+            "PARAMETER[\"Central_Meridian\",9.0],"
+            "PARAMETER[\"Scale_Factor\",0.9996],"
+            "PARAMETER[\"Latitude_Of_Origin\",0.0],"
+            "UNIT[\"Meter\",1.0],"
+            "AUTHORITY[\"ESRI\",\"102328\"]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_GE(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 25832);
+        EXPECT_EQ(res.front().second, 70);
     }
 }
 
