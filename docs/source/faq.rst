@@ -23,7 +23,7 @@ separate column.
 
     If your data is stored in a common geodata file format chances are that
     you can use `GDAL <https://gdal.org/>`_ as a frontend to PROJ and transform your data with the
-    :program:`ogr2ogr` application.
+    `ogr2ogr <https://gdal.org/programs/ogr2ogr.html>`__ application.
 
 Can I transform from *abc* to *xyz*?
 --------------------------------------------------------------------------------
@@ -49,8 +49,7 @@ ETRS89/UTM32N (EPSG:25832) and ETRS89/DKTM1 (EPSG:4093):
       +step +proj=tmerc +lat_0=0 +lon_0=9 +k=0.99998 +x_0=200000 +y_0=-5000000
             +ellps=GRS80
 
-See the :program:`projinfo` :ref:`documentation <projinfo>` for more info on
-how to use it.
+See the :program:`projinfo` documentation for more info on how to use it.
 
 Coordinate reference system *xyz* is not in the EPSG registry, what do I do?
 --------------------------------------------------------------------------------
