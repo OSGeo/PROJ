@@ -72,7 +72,7 @@ or PROJJSON string).
 
 It can also be used to query coordinate operations available between two CRS.
 
-The program is named with some reference to the GDAL :program:`gdalsrsinfo` that offers
+The program is named with some reference to the GDAL `gdalsrsinfo <https://gdal.org/programs/gdalsrsinfo.html>`__ utility that offers
 partly similar services.
 
 

@@ -323,7 +323,7 @@ compiler.  For Ubuntu something like the following should work.
     apt-get install gfortran
 
 To compile the program do something like the following to produce the binary
-:program:`htdp` from the source code.
+``htdp`` from the source code.
 
 ::
 
@@ -369,13 +369,13 @@ Usage
 The goal of :file:`crs2crs2grid.py` is to produce a grid shift file for a designated
 region.  The region is defined using the ``-griddef`` switch.  When missing a
 continental US region is used.  The script creates a set of sample points for
-the grid definition, runs :program:`htdp` against it and then parses the
+the grid definition, runs ``htdp`` against it and then parses the
 resulting points and computes a point by point shift to encode into the final
-grid shift file.  By default it is assumed that :program:`htdp` is in the
+grid shift file.  By default it is assumed that ``htdp`` is in the
 executable path.  If not, please provide the path to the executable using the
 ``-htdp`` switch.
 
-The :program:`htdp` program supports transformations between many CRSes and for each (or
+The ``htdp`` program supports transformations between many CRSes and for each (or
 most?) of them you need to provide a date at which the CRS is fixed.  The full
 set of CRS Ids available in the HTDP program are:
 
