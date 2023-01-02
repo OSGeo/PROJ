@@ -13,7 +13,8 @@ Synopsis
 
     | **cs2cs** [**-eEfIlrstvwW** [args]]
     |           [[--area <name_or_code>] | [--bbox <west_long,south_lat,east_long,north_lat>]]
-    |           [--authority <name>] [--no-ballpark] [--accuracy <accuracy>] [--3d]
+    |           [--authority <name>] [--3d]
+    |           [--accuracy <accuracy>] [--only-best] [--no-ballpark]
     |           ([*+opt[=arg]* ...] [+to *+opt[=arg]* ...] | {source_crs} {target_crs})
     |           file ...
 
@@ -165,6 +166,16 @@ The following control parameters can appear in any order:
     `west_long` and `east_long` should be in the [-180,180] range, and
     `south_lat` and `north_lat` in the [-90,90]. `west_long` is generally lower than
     `east_long`, except in the case where the area of interest crosses the antimeridian.
+
+.. option:: --only-best
+
+    .. versionadded:: 9.2.0
+
+    Error out if the best transformation, known of PROJ, and usable by PROJ if
+    all grids known and usable by PROJ were accessible, cannot be used.
+    Best transformation should be understood as the transformation returned by
+    :cpp:func:`proj_get_suggested_operation` if all known grids were
+    accessible (either locally or through network).
 
 .. option:: --no-ballpark
 

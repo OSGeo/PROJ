@@ -594,6 +594,7 @@ struct PJconsts {
     **************************************************************************************/
     std::vector<PJCoordOperation> alternativeCoordinateOperations{};
     int iCurCoordOp = -1;
+    bool errorIfBestTransformationNotAvailable = false;
 
     /*************************************************************************************
 

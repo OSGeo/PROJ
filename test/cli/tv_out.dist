@@ -528,3 +528,18 @@ Test cs2cs -W10
 
 -W argument missing or not in range [0,8]
 program abnormally terminated
+##############################################################
+Test cs2cs --only-best (working)
+49 2 0	48d59'59.756"N	1d59'57.4"E 0.000
+##############################################################
+Test cs2cs --only-best (grid missing)
+Attempt to use coordinate operation Inverse of WGS 84 to EGM2008 height (1) failed. Grid us_nga_egm08_25.tif is not available.
+49 2 0	*	* inf
+##############################################################
+Test cs2cs --only-best (grid missing)
+Attempt to use coordinate operation NAD27 to NAD83 (7) failed. Grid us_noaa_nadcon5_nad27_nad83_1986_conus.tif is not available.
+40 -100 0	*	* inf
+##############################################################
+Test cs2cs --only-best --no-ballpark (grid missing)
+Attempt to use coordinate operation Inverse of WGS 84 to EGM2008 height (1) failed. Grid us_nga_egm08_25.tif is not available.
+49 2 0	*	* inf
