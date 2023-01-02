@@ -348,7 +348,8 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             if( res.xyzt.x != HUGE_VAL ) {
                 return res;
             }
-            else if( P->errorIfBestTransformationNotAvailable ) {
+            else if( P->errorIfBestTransformationNotAvailable ||
+                     P->ctx->warnIfBestTransformationNotAvailable ) {
                 std::string msg("Attempt to use coordinate operation ");
                 msg += alt.name;
                 msg += " failed.";
@@ -367,8 +368,18 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
                         msg += " is not available.";
                     }
                 }
-                pj_log(P->ctx, PJ_LOG_ERROR, msg.c_str());
-                return res;
+                if( P->ctx->warnIfBestTransformationNotAvailable )
+                {
+                    msg += " This might become an error in a future PROJ major release. "
+                           "Set the ONLY_BEST option to YES or NO. "
+                           "This warning will no longer be emitted (for the current context).";
+                    P->ctx->warnIfBestTransformationNotAvailable = false;
+                }
+                pj_log(P->ctx,
+                       P->errorIfBestTransformationNotAvailable ? PJ_LOG_ERROR : PJ_LOG_DEBUG,
+                       msg.c_str());
+                if( P->errorIfBestTransformationNotAvailable )
+                    return res;
             }
             if( iRetry == N_MAX_RETRY ) {
                 break;
@@ -1939,6 +1950,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
                 return nullptr;
             }
         } else if ((value = getOptionValue(*iter, "ONLY_BEST="))) {
+            ctx->warnIfBestTransformationNotAvailable = false;
             if( ci_equal(value, "yes") )
                 errorIfBestTransformationNotAvailable = true;
             else if( ci_equal(value, "no") )
@@ -1996,7 +2008,9 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         ctx, operation_ctx, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
     proj_operation_factory_context_set_grid_availability_use(
         ctx, operation_ctx,
-        (errorIfBestTransformationNotAvailable || proj_context_is_network_enabled(ctx)) ?
+        (errorIfBestTransformationNotAvailable ||
+         ctx->warnIfBestTransformationNotAvailable ||
+         proj_context_is_network_enabled(ctx)) ?
             PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE:
             PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
 
@@ -2018,7 +2032,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     ctx->forceOver = forceOver;
 
     const int old_debug_level = ctx->debug_level;
-    if( errorIfBestTransformationNotAvailable )
+    if( errorIfBestTransformationNotAvailable || ctx->warnIfBestTransformationNotAvailable )
         ctx->debug_level = PJ_LOG_NONE;
     PJ* P = proj_list_get(ctx, op_list, 0);
     ctx->debug_level = old_debug_level;
@@ -2031,7 +2045,8 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         ctx->forceOver = false;
 
         if( P != nullptr &&
-            errorIfBestTransformationNotAvailable &&
+            (errorIfBestTransformationNotAvailable ||
+             ctx->warnIfBestTransformationNotAvailable) &&
             !proj_coordoperation_is_instantiable(ctx, P) )
         {
             std::string msg("Attempt to use coordinate operation ");
@@ -2052,13 +2067,22 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
                     msg += " is not available.";
                 }
             }
-            pj_log(ctx, PJ_LOG_ERROR, msg.c_str());
+            if( ctx->warnIfBestTransformationNotAvailable )
+            {
+                msg += " This might become an error in a future PROJ major release."
+                       "Set the ONLY_BEST option to YES or NO. "
+                       "This warning will no longer be emitted (for the current context).";
+                ctx->warnIfBestTransformationNotAvailable = false;
+            }
+            pj_log(ctx,
+                   errorIfBestTransformationNotAvailable ? PJ_LOG_ERROR : PJ_LOG_DEBUG,
+                   msg.c_str());
         }
 
         return P;
     }
 
-    if( errorIfBestTransformationNotAvailable )
+    if( errorIfBestTransformationNotAvailable || ctx->warnIfBestTransformationNotAvailable )
         ctx->debug_level = PJ_LOG_NONE;
     auto preparedOpList = pj_create_prepared_operations(ctx, source_crs, target_crs,
                                                    op_list);
