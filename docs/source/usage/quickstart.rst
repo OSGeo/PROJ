@@ -35,7 +35,7 @@ utility :program:`proj` we can convert the geodetic coordinates to projected spa
 If called as above :program:`proj` will be in interactive mode, letting you
 type the input data manually and getting a response presented on screen.
 :program:`proj` works as any UNIX filter though, which means that you can also
-pipe data to the utility, for instance by using the :program:`echo` command:
+pipe data to the utility, for instance by using the ``echo`` command:
 
 ::
 
