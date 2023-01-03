@@ -491,7 +491,7 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
 // ---------------------------------------------------------------------------
 
 static PJ_LP normalizeLongitude(const GenericShiftGrid *grid, const PJ_LPZ in,
-                                const osgeo::proj::ExtentAndRes *&extentOut) {
+                                const NS_PROJ::ExtentAndRes *&extentOut) {
     PJ_LP normalized;
     normalized.lam = in.lam;
     normalized.phi = in.phi;
@@ -520,7 +520,7 @@ PJ_LPZ gridshiftData::grid_apply_internal(
         return in;
 
     /* normalized longitude of input */
-    const osgeo::proj::ExtentAndRes *extent;
+    const NS_PROJ::ExtentAndRes *extent;
     PJ_LP normalized_in = normalizeLongitude(grid, in, extent);
 
     PJ_LPZ shift = grid_interpolate(ctx, type, normalized_in, grid);
