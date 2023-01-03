@@ -107,6 +107,9 @@ foreach (PROJECT_VARIANT_NAME IN LISTS PROJECT_LIST)
   # ${CMAKECONFIGSUBDIR} and @PROJECT_ROOT_DIR@ is the relative
   # path to the root from there.  (Note that the whole install tree can
   # be relocated.)
+
+  message(INFO "CMAKECONFIGSUBDIR:  ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_VARIANT_LOWER}")
+  message(INFO "CMAKE_INSTALL_PREFIX:   ${CMAKE_INSTALL_PREFIX}")
   file (RELATIVE_PATH PROJECT_ROOT_DIR
     ${CMAKE_INSTALL_PREFIX}/${CMAKECONFIGSUBDIR} ${CMAKE_INSTALL_PREFIX})
   configure_file (project-config.cmake.in
