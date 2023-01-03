@@ -16,7 +16,7 @@ build:
       - ./docs/rtd/pre_build.sh
       - mkdir -p docs/build
       - doxygen Doxyfile
-      - ./docs/plot.sh
+      - ./docs/rtd/plot.sh
 
   apt_packages:
     - graphviz
