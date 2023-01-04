@@ -206,9 +206,8 @@ can be modified to suit the users needs. See :ref:`projsync` for more options.
 
     As an alternative on systems where network access is disabled, the
     :ref:`proj-data <datumgrid>`
-    package can be downloaded and added to the :envvar:`PROJ_DATA` directory
-    (called ``PROJ_LIB`` before PROJ 9.1)
-
+    package can be downloaded and its content decompressed into one of the
+    directories where PROJ looks for :ref:`resources <resource_files>`
 
 
 
