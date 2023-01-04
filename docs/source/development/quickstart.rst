@@ -197,7 +197,6 @@ objects:
   :lines: 86-87
   :dedent: 4
 
-
 A complete compilable version of the example code can be seen below:
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
@@ -209,5 +208,6 @@ An example illustrating :c:func:`proj_create`:
   
 .. literalinclude:: ../../../examples/proj_create_example.c
   :language: c
+  :linenos:
   :lines: 13-
-  :dedent: 4
+
