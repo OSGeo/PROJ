@@ -189,8 +189,8 @@ geographic) as follows:
   :lines: 82-83
   :dedent: 4
 
-Before ending the program, we need to release the memory allocated to our
-objects:
+Before ending the program, we need to release the memory allocated to
+our objects:
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
