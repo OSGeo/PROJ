@@ -1,6 +1,14 @@
 name: Docker
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+      paths-ignore:
+          - 'docs/**'
+  pull_request:
+      paths-ignore:
+          - 'docs/**'
+  workflow_dispatch:
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
