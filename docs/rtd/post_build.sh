@@ -4,7 +4,7 @@
 mkdir build
 cd build
 
-BUILDDIR="/home/docs/checkouts/readthedocs.org/user_builds/$READTHEDOCS_PROJECT/docs/"
+BUILDDIR="/home/docs/checkouts/readthedocs.org/user_builds/$READTHEDOCS_PROJECT/docs"
 
 echo "updating CPP files and copying schemas for BUILDDIR: $BUILDDIR"
 
