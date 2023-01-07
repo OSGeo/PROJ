@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 
-BUILDDIR="/home/docs/checkouts/readthedocs.org/user_builds/$READTHEDOCS_PROJECT/docs/_build"
+BUILDDIR="/home/docs/checkouts/readthedocs.org/user_builds/$READTHEDOCS_PROJECT/$READTHEDOCS_VERSION/docs/_build"
 
 echo "updating CPP files and copying schemas for BUILDDIR: $BUILDDIR"
 
