@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 
+pwd
 mkdir build
 cd build
 
