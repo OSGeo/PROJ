@@ -1,7 +1,10 @@
 #!/bin/sh
 #
 
-BUILDDIR="/home/docs/checkouts/readthedocs.org/user_builds/$READTHEDOCS_PROJECT/$READTHEDOCS_VERSION/docs"
+BUILDDIR="/home/docs/checkouts/readthedocs.org/user_builds/$READTHEDOCS_PROJECT/checkouts/$READTHEDOCS_VERSION/docs"
+
+pwd
+#/home/docs/checkouts/readthedocs.org/user_builds/osgeo-proj/checkouts/3538
 
 echo "updating CPP files and copying schemas for BUILDDIR: $BUILDDIR"
 
