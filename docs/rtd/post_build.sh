@@ -1,41 +1,20 @@
 #!/bin/sh
 #
 
-BUILDDIR="/home/docs/checkouts/readthedocs.org/user_builds/$READTHEDOCS_PROJECT/checkouts/$READTHEDOCS_VERSION"
+#DOCSDIR="/home/docs/checkouts/readthedocs.org/user_builds/$READTHEDOCS_PROJECT/checkouts/$READTHEDOCS_VERSION/docs"
 
-pwd
-#/home/docs/checkouts/readthedocs.org/user_builds/osgeo-proj/checkouts/3538
-#/home/docs/checkouts/readthedocs.org/user_builds/osgeo-proj/checkouts/3538
+CONTENTLOCATION="../../artifacts/${READTHEDOCS_VERSION}/sphinx"
 
-echo "listing BUILDDIR: $BUILDDIR"
+find ../../artifacts/${READTHEDOCS_VERSION}/sphinx/
 
 
-ls $BUILDDIR
+# content loation from https://github.com/readthedocs/readthedocs.org/issues/9172
 
-find .
+sed "s/io::Convention_/io::Convention/g" < ${CONTENTLOCATION}/development/reference/cpp/io.html | sed "s/>Convention_/>Convention/g" | sed "s/_WKT2/WKT2/g" | sed "s/_WKT1/WKT1/g" > ${CONTENTLOCATION}/development/reference/cpp/io.html.tmp
+mv ${CONTENTLOCATION}/development/reference/cpp/io.html.tmp ${CONTENTLOCATION}/development/reference/cpp/io.html
 
-echo "listing BUILDDIR: $BUILDDIR/docs"
 
-ls $BUILDDIR/docs
-
-echo "listing BUILDDIR: $BUILDDIR/docs/build"
-
-ls $BUILDDIR/docs/build
-
-echo "listing BUILDDIR: $BUILDDIR/docs/build"
-
-ls $BUILDDIR/
-
-BUILDDIR="/home/docs/checkouts/readthedocs.org/user_builds/$READTHEDOCS_PROJECT/$READTHEDOCS_VERSION/docs/build"
-
-ls $BUILDDIR
-
-echo "listing BUILDDIR: $BUILDDIR/docs/build"
-
-ls $BUILDDIR/docs/build
-sed "s/io::Convention_/io::Convention/g" < ${BUILDDIR}/html/development/reference/cpp/io.html | sed "s/>Convention_/>Convention/g" | sed "s/_WKT2/WKT2/g" | sed "s/_WKT1/WKT1/g" > ${BUILDDIR}/html/development/reference/cpp/io.html.tmp
-mv ${BUILDDIR}/html/development/reference/cpp/io.html.tmp ${BUILDDIR}/html/development/reference/cpp/io.html
-cp -r ../schemas ${BUILDDIR}/html/schemas
-cp ../data/triangulation.schema.json ${BUILDDIR}/html/schemas
+cp -r schemas ${CONTENTLOCATION}/schemas
+cp ./data/triangulation.schema.json ${CONTENTLOCATION}/schemas
 
 
