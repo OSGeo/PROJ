@@ -35,11 +35,6 @@ build:
   apt_packages:
     - graphviz
 
-formats:
-  - pdf
-  - epub
-
-
 conda:
   environment: docs/environment.yml
 
