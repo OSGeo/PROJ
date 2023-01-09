@@ -37,7 +37,7 @@ pass a proposal.
 
 List of PSC Members
 -------------------
-(up-to-date as of 2018-06)
+(up-to-date as of 2023-01)
 
 * Kristian Evers `@kbevers <https://github.com/kbevers>`_ (DK) **Chair**
 * Howard Butler `@hobu <https://github.com/hobu>`_ (USA)
@@ -45,6 +45,7 @@ List of PSC Members
 * Thomas Knudsen `@busstoptaktik <https://github.com/busstoptaktik>`_ (DK)
 * Even Rouault `@rouault <https://github.com/rouault>`_ (FR)
 * Kurt Schwehr `@schwehr <https://github.com/schwehr>`_ (USA)
+* Alan Snow `@snowman2 <https://github.com/snowman2>`_ (USA)
 * Frank Warmerdam `@warmerdam <https://github.com/warmerdam>`_ (USA) **Emeritus**
 
 Detailed Process
