@@ -28,9 +28,10 @@ build:
       - ./docs/rtd/pre_build.sh
       - mkdir -p docs/build
       - doxygen Doxyfile
+      - ../scripts/doxygen.sh
       - ./docs/rtd/plot.sh
-#    post_build:
-#      - ./docs/rtd/post_build.sh
+    post_build:
+      - ./docs/rtd/post_build.sh
 
   apt_packages:
     - graphviz

@@ -1,5 +1,5 @@
 #!/bin/sh
-#
+set -x
 
 pwd
 mkdir build
