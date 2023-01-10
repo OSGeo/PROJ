@@ -1,7 +1,7 @@
 #!/bin/sh
 set -x
 
-echo pwd
+echo `pwd`
 mkdir build
 cd build
 
