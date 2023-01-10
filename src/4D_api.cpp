@@ -2232,7 +2232,8 @@ PJ_INFO proj_info (void) {
         }
     }
 
-    free(const_cast<char*>(info.searchpath));
+    if (info.searchpath != empty)
+        free(const_cast<char*>(info.searchpath));
     info.searchpath = buf ? buf : empty;
 
     info.paths = ctx->c_compat_paths;
