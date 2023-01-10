@@ -1,5 +1,5 @@
 #!/bin/sh
-set -x
+set -e
 
 CONDA_PREFIX="/home/docs/checkouts/readthedocs.org/user_builds/$READTHEDOCS_PROJECT/conda/$READTHEDOCS_VERSION"
 

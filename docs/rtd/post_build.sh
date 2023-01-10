@@ -1,5 +1,5 @@
 #!/bin/sh
-set -x
+set -e
 
 # content location from https://github.com/readthedocs/readthedocs.org/issues/9172
 CONTENTLOCATION="../../artifacts/${READTHEDOCS_VERSION}/sphinx"
