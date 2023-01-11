@@ -1935,12 +1935,13 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     if( !ctx ) {
         ctx = pj_get_default_ctx();
     }
+    pj_load_ini(ctx); // to set ctx->errorIfBestTransformationNotAvailableDefault
 
     const char* authority = nullptr;
     double accuracy = -1;
     bool allowBallparkTransformations = true;
     bool forceOver = false;
-    bool errorIfBestTransformationNotAvailable = false;
+    bool errorIfBestTransformationNotAvailable = ctx->errorIfBestTransformationNotAvailableDefault;
     for (auto iter = options; iter && iter[0]; ++iter) {
         const char *value;
         if ((value = getOptionValue(*iter, "AUTHORITY="))) {

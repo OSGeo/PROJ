@@ -178,6 +178,10 @@ The following control parameters can appear in any order:
     available among all relevant for the point to transform, and if all known
     grids required to perform such transformation were accessible (either locally
     or through network).
+    Note that the default value for this option can be also set with the
+    :envvar:`PROJ_ONLY_BEST_DEFAULT` environment variable, or with the
+    ``only_best_default`` setting of :ref:`proj-ini` (:option:`--only-best`
+    when specified overrides such default value).
 
 .. option:: --no-ballpark
 

@@ -1118,6 +1118,25 @@ $EXE --only-best=yes EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
 EOF
 
 echo "##############################################################" >> ${OUT}
+echo "Test cs2cs (grid missing) with PROJ_ONLY_BEST_DEFAULT=YES" >> ${OUT}
+#
+PROJ_ONLY_BEST_DEFAULT=YES $EXE EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
+49 2 0
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs (grid missing) with only_best_default=on in proj.ini" >> ${OUT}
+
+echo "only_best_default=on" > proj.ini
+
+#
+PROJ_DATA=$PWD:$PROJ_DATA $EXE EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
+49 2 0
+EOF
+
+rm proj.ini
+
+echo "##############################################################" >> ${OUT}
 echo "Test cs2cs --only-best (grid missing)" >> ${OUT}
 #
 $EXE --only-best NAD27 NAD83 -E >>${OUT} 2>&1 <<EOF
