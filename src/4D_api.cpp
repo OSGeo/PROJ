@@ -274,6 +274,41 @@ int pj_get_suggested_operation(PJ_CONTEXT*,
 }
 
 /**************************************************************************************/
+static void warnAboutMissingGrid(PJ* P)
+/**************************************************************************************/
+{
+    std::string msg("Attempt to use coordinate operation ");
+    msg += proj_get_name(P);
+    msg += " failed.";
+    int gridUsed = proj_coordoperation_get_grid_used_count(P->ctx, P);
+    for( int i = 0; i < gridUsed; ++i )
+    {
+        const char* gridName = "";
+        int available = FALSE;
+        if( proj_coordoperation_get_grid_used(
+                P->ctx, P, i, &gridName, nullptr, nullptr,
+                nullptr, nullptr, nullptr, &available) &&
+            !available )
+        {
+            msg += " Grid ";
+            msg += gridName;
+            msg += " is not available. "
+                   "Consult https://proj.org/resource_files.html for guidance.";
+        }
+    }
+    if( P->ctx->warnIfBestTransformationNotAvailable )
+    {
+        msg += " This might become an error in a future PROJ major release. "
+               "Set the ONLY_BEST option to YES or NO. "
+               "This warning will no longer be emitted (for the current context).";
+        P->ctx->warnIfBestTransformationNotAvailable = false;
+    }
+    pj_log(P->ctx,
+           P->errorIfBestTransformationNotAvailable ? PJ_LOG_ERROR : PJ_LOG_DEBUG,
+           msg.c_str());
+}
+
+/**************************************************************************************/
 PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
 /***************************************************************************************
 Apply the transformation P to the coordinate coord, preferring the 4D interfaces if
@@ -350,34 +385,7 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             }
             else if( P->errorIfBestTransformationNotAvailable ||
                      P->ctx->warnIfBestTransformationNotAvailable ) {
-                std::string msg("Attempt to use coordinate operation ");
-                msg += alt.name;
-                msg += " failed.";
-                int gridUsed = proj_coordoperation_get_grid_used_count(P->ctx, alt.pj);
-                for( int i = 0; i < gridUsed; ++i )
-                {
-                    const char* gridName = "";
-                    int available = FALSE;
-                    if( proj_coordoperation_get_grid_used(
-                            P->ctx, alt.pj, i, &gridName, nullptr, nullptr,
-                            nullptr, nullptr, nullptr, &available) &&
-                        !available )
-                    {
-                        msg += " Grid ";
-                        msg += gridName;
-                        msg += " is not available.";
-                    }
-                }
-                if( P->ctx->warnIfBestTransformationNotAvailable )
-                {
-                    msg += " This might become an error in a future PROJ major release. "
-                           "Set the ONLY_BEST option to YES or NO. "
-                           "This warning will no longer be emitted (for the current context).";
-                    P->ctx->warnIfBestTransformationNotAvailable = false;
-                }
-                pj_log(P->ctx,
-                       P->errorIfBestTransformationNotAvailable ? PJ_LOG_ERROR : PJ_LOG_DEBUG,
-                       msg.c_str());
+                warnAboutMissingGrid(alt.pj);
                 if( P->errorIfBestTransformationNotAvailable )
                     return res;
             }
@@ -2038,6 +2046,10 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     ctx->debug_level = old_debug_level;
     assert(P);
 
+    if( P != nullptr ) {
+        P->errorIfBestTransformationNotAvailable = errorIfBestTransformationNotAvailable;
+    }
+
     if( P == nullptr || op_count == 1 ||
         proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
         proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS ) {
@@ -2049,34 +2061,11 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
              ctx->warnIfBestTransformationNotAvailable) &&
             !proj_coordoperation_is_instantiable(ctx, P) )
         {
-            std::string msg("Attempt to use coordinate operation ");
-            msg += proj_get_name(P);
-            msg += " failed.";
-            int gridUsed = proj_coordoperation_get_grid_used_count(ctx, P);
-            for( int i = 0; i < gridUsed; ++i )
-            {
-                const char* gridName = "";
-                int available = FALSE;
-                if( proj_coordoperation_get_grid_used(
-                        ctx, P, i, &gridName, nullptr, nullptr,
-                        nullptr, nullptr, nullptr, &available) &&
-                    !available )
-                {
-                    msg += " Grid ";
-                    msg += gridName;
-                    msg += " is not available.";
-                }
+            warnAboutMissingGrid(P);
+            if( errorIfBestTransformationNotAvailable ) {
+                proj_destroy(P);
+                return nullptr;
             }
-            if( ctx->warnIfBestTransformationNotAvailable )
-            {
-                msg += " This might become an error in a future PROJ major release."
-                       "Set the ONLY_BEST option to YES or NO. "
-                       "This warning will no longer be emitted (for the current context).";
-                ctx->warnIfBestTransformationNotAvailable = false;
-            }
-            pj_log(ctx,
-                   errorIfBestTransformationNotAvailable ? PJ_LOG_ERROR : PJ_LOG_DEBUG,
-                   msg.c_str());
         }
 
         return P;
@@ -2097,6 +2086,10 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         return nullptr;
     }
 
+    for( auto& op: preparedOpList ) {
+        op.pj->errorIfBestTransformationNotAvailable = errorIfBestTransformationNotAvailable;
+    }
+
     // If there's finally juste a single result, return it directly
     if( preparedOpList.size() == 1 )
     {
@@ -2106,7 +2099,6 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         return retP;
     }
 
-    P->errorIfBestTransformationNotAvailable = errorIfBestTransformationNotAvailable;
     P->alternativeCoordinateOperations = std::move(preparedOpList);
     // The returned P is rather dummy
     P->descr = "Set of coordinate operations";
