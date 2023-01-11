@@ -7571,12 +7571,12 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
 BaseObjectNNPtr createFromUserInput(const std::string &text, PJ_CONTEXT *ctx) {
     DatabaseContextPtr dbContext;
     try {
-        if (ctx != nullptr && ctx->cpp_context) {
+        if (ctx != nullptr) {
             // Only connect to proj.db if needed
             if (text.find("proj=") == std::string::npos ||
                 text.find("init=") != std::string::npos) {
                 dbContext =
-                    ctx->cpp_context->getDatabaseContext().as_nullable();
+                    ctx->get_cpp_context()->getDatabaseContext().as_nullable();
             }
         }
     } catch (const std::exception &) {
@@ -9915,7 +9915,16 @@ PrimeMeridianNNPtr PROJStringParser::Private::buildPrimeMeridian(Step &step) {
 // ---------------------------------------------------------------------------
 
 std::string PROJStringParser::Private::guessBodyName(double a) {
-    return Ellipsoid::guessBodyName(dbContext_, a);
+
+    auto ret = Ellipsoid::guessBodyName(dbContext_, a);
+    if (ret == "Non-Earth body" && dbContext_ == nullptr && ctx_ != nullptr) {
+        dbContext_ =
+            ctx_->get_cpp_context()->getDatabaseContext().as_nullable();
+        if (dbContext_) {
+            ret = Ellipsoid::guessBodyName(dbContext_, a);
+        }
+    }
+    return ret;
 }
 
 // ---------------------------------------------------------------------------
