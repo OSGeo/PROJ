@@ -13,7 +13,8 @@ Synopsis
 
     | **cs2cs** [**-eEfIlrstvwW** [args]]
     |           [[--area <name_or_code>] | [--bbox <west_long,south_lat,east_long,north_lat>]]
-    |           [--authority <name>] [--no-ballpark] [--accuracy <accuracy>] [--3d]
+    |           [--authority <name>] [--3d]
+    |           [--accuracy <accuracy>] [--only-best[=yes|=no]] [--no-ballpark]
     |           ([*+opt[=arg]* ...] [+to *+opt[=arg]* ...] | {source_crs} {target_crs})
     |           file ...
 
@@ -166,6 +167,23 @@ The following control parameters can appear in any order:
     `south_lat` and `north_lat` in the [-90,90]. `west_long` is generally lower than
     `east_long`, except in the case where the area of interest crosses the antimeridian.
 
+.. option:: --only-best[=yes|=no]
+
+    .. versionadded:: 9.2.0
+
+    Force `cs2cs` to only use the best transformation known by PROJ.
+    `cs2cs` will return an error if a grid needed for the best transformation is missing.
+    
+    Best transformation should be understood as the most accurate transformation
+    available among all relevant for the point to transform, and if all known
+    grids required to perform such transformation were accessible (either locally
+    or through network).
+    
+    Note that the default value for this option can be also set with the
+    :envvar:`PROJ_ONLY_BEST_DEFAULT` environment variable, or with the
+    ``only_best_default`` setting of :ref:`proj-ini` (:option:`--only-best`
+    when specified overrides such default value).
+
 .. option:: --no-ballpark
 
     .. versionadded:: 8.0.0
@@ -284,12 +302,42 @@ The x-y output data will appear as three lines of:
 
 ::
 
-    1402285.98  5076292.42 0.00
+    1402285.93  5076292.58 0.00
 
-.. note::
 
-    To get those exact values, you have need to have all current grids installed
-    locally or use networking capabilities mentioned above.
+To get those exact values, you have need to have all current grids installed
+(in that instance the NADCON5 :file:`us_noaa_nadcon5_nad27_nad83_1986_conus.tif` grid)
+locally or use networking capabilities mentioned above.
+
+To make sure you will get the optimal result, you may add :option:`--only-best`.
+Assuming the above mentionned grid is *not* available,
+
+::
+
+    echo -111.5 45.25919444444 | cs2cs --only-best +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27
+
+would return:
+
+::
+
+    Attempt to use coordinate operation axis order change (2D) + Inverse of NAD27 to NAD83 (7) + axis order change (2D) + UTM zone 10N failed. Grid us_noaa_nadcon5_nad27_nad83_1986_conus.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+    *   * inf
+
+Otherwise, if you don't have the grid available and you don't specify :option:`--only-best`:
+
+::
+
+    echo -111.5 45.25919444444 | cs2cs --only-best +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27
+
+would return:
+
+::
+
+    1402224.57  5076275.42 0.00
+
+which is the result when the NAD27 and NAD83 datums are dealt as identical,
+which is an approximation at a level of several tens of metres.
+
 
 Using EPSG CRS codes
 --------------------

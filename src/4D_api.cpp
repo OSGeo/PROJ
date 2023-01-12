@@ -274,6 +274,42 @@ int pj_get_suggested_operation(PJ_CONTEXT*,
 }
 
 /**************************************************************************************/
+static void warnAboutMissingGrid(PJ* P)
+/**************************************************************************************/
+{
+    std::string msg("Attempt to use coordinate operation ");
+    msg += proj_get_name(P);
+    msg += " failed.";
+    int gridUsed = proj_coordoperation_get_grid_used_count(P->ctx, P);
+    for( int i = 0; i < gridUsed; ++i )
+    {
+        const char* gridName = "";
+        int available = FALSE;
+        if( proj_coordoperation_get_grid_used(
+                P->ctx, P, i, &gridName, nullptr, nullptr,
+                nullptr, nullptr, nullptr, &available) &&
+            !available )
+        {
+            msg += " Grid ";
+            msg += gridName;
+            msg += " is not available. "
+                   "Consult https://proj.org/resource_files.html for guidance.";
+        }
+    }
+    if( !P->errorIfBestTransformationNotAvailable &&
+        P->warnIfBestTransformationNotAvailable )
+    {
+        msg += " This might become an error in a future PROJ major release. "
+               "Set the ONLY_BEST option to YES or NO. "
+               "This warning will no longer be emitted (for the current transformation instance).";
+        P->warnIfBestTransformationNotAvailable = false;
+    }
+    pj_log(P->ctx,
+           P->errorIfBestTransformationNotAvailable ? PJ_LOG_ERROR : PJ_LOG_DEBUG,
+           msg.c_str());
+}
+
+/**************************************************************************************/
 PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
 /***************************************************************************************
 Apply the transformation P to the coordinate coord, preferring the 4D interfaces if
@@ -347,6 +383,12 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             }
             if( res.xyzt.x != HUGE_VAL ) {
                 return res;
+            }
+            else if( P->errorIfBestTransformationNotAvailable ||
+                     P->warnIfBestTransformationNotAvailable ) {
+                warnAboutMissingGrid(alt.pj);
+                if( P->errorIfBestTransformationNotAvailable )
+                    return res;
             }
             if( iRetry == N_MAX_RETRY ) {
                 break;
@@ -1894,11 +1936,14 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     if( !ctx ) {
         ctx = pj_get_default_ctx();
     }
+    pj_load_ini(ctx); // to set ctx->errorIfBestTransformationNotAvailableDefault
 
     const char* authority = nullptr;
     double accuracy = -1;
     bool allowBallparkTransformations = true;
     bool forceOver = false;
+    bool warnIfBestTransformationNotAvailable = ctx->warnIfBestTransformationNotAvailableDefault;
+    bool errorIfBestTransformationNotAvailable = ctx->errorIfBestTransformationNotAvailableDefault;
     for (auto iter = options; iter && iter[0]; ++iter) {
         const char *value;
         if ((value = getOptionValue(*iter, "AUTHORITY="))) {
@@ -1913,6 +1958,17 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
             else {
                 ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR,
                             "Invalid value for ALLOW_BALLPARK option.");
+                return nullptr;
+            }
+        } else if ((value = getOptionValue(*iter, "ONLY_BEST="))) {
+            warnIfBestTransformationNotAvailable = false;
+            if( ci_equal(value, "yes") )
+                errorIfBestTransformationNotAvailable = true;
+            else if( ci_equal(value, "no") )
+                errorIfBestTransformationNotAvailable = false;
+            else {
+                ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR,
+                            "Invalid value for ONLY_BEST option.");
                 return nullptr;
             }
         }
@@ -1963,7 +2019,9 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         ctx, operation_ctx, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
     proj_operation_factory_context_set_grid_availability_use(
         ctx, operation_ctx,
-        proj_context_is_network_enabled(ctx) ?
+        (errorIfBestTransformationNotAvailable ||
+         warnIfBestTransformationNotAvailable ||
+         proj_context_is_network_enabled(ctx)) ?
             PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE:
             PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
 
@@ -1984,19 +2042,47 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
 
     ctx->forceOver = forceOver;
 
+    const int old_debug_level = ctx->debug_level;
+    if( errorIfBestTransformationNotAvailable || warnIfBestTransformationNotAvailable )
+        ctx->debug_level = PJ_LOG_NONE;
     PJ* P = proj_list_get(ctx, op_list, 0);
+    ctx->debug_level = old_debug_level;
     assert(P);
+
+    if( P != nullptr ) {
+        P->errorIfBestTransformationNotAvailable = errorIfBestTransformationNotAvailable;
+        P->warnIfBestTransformationNotAvailable = warnIfBestTransformationNotAvailable;
+    }
 
     if( P == nullptr || op_count == 1 ||
         proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
         proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS ) {
         proj_list_destroy(op_list);
         ctx->forceOver = false;
+
+        if( P != nullptr &&
+            (errorIfBestTransformationNotAvailable ||
+             warnIfBestTransformationNotAvailable) &&
+            !proj_coordoperation_is_instantiable(ctx, P) )
+        {
+            warnAboutMissingGrid(P);
+            if( errorIfBestTransformationNotAvailable ) {
+                proj_destroy(P);
+                return nullptr;
+            }
+        }
+
+        if( P != nullptr ) {
+            P->over = forceOver;
+        }
         return P;
     }
 
+    if( errorIfBestTransformationNotAvailable || warnIfBestTransformationNotAvailable )
+        ctx->debug_level = PJ_LOG_NONE;
     auto preparedOpList = pj_create_prepared_operations(ctx, source_crs, target_crs,
                                                    op_list);
+    ctx->debug_level = old_debug_level;
 
     ctx->forceOver = false;
     proj_list_destroy(op_list);
@@ -2005,6 +2091,12 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     {
         proj_destroy(P);
         return nullptr;
+    }
+
+    for( auto& op: preparedOpList ) {
+        op.pj->over = forceOver;
+        op.pj->errorIfBestTransformationNotAvailable = errorIfBestTransformationNotAvailable;
+        op.pj->warnIfBestTransformationNotAvailable = warnIfBestTransformationNotAvailable;
     }
 
     // If there's finally juste a single result, return it directly
@@ -2019,6 +2111,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     P->alternativeCoordinateOperations = std::move(preparedOpList);
     // The returned P is rather dummy
     P->descr = "Set of coordinate operations";
+    P->over = forceOver;
     P->iso_obj = nullptr;
     P->fwd = nullptr;
     P->inv = nullptr;

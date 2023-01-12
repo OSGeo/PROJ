@@ -1819,6 +1819,17 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
         ctx->ca_bundle_path = ca_bundle_path;
     }
 
+    // Load default value for errorIfBestTransformationNotAvailableDefault
+    // from environment first
+    const char *proj_only_best_default = getenv("PROJ_ONLY_BEST_DEFAULT");
+    if (proj_only_best_default && proj_only_best_default[0] != '\0') {
+        ctx->warnIfBestTransformationNotAvailableDefault = false;
+        ctx->errorIfBestTransformationNotAvailableDefault =
+            ci_equal(proj_only_best_default, "ON") ||
+            ci_equal(proj_only_best_default, "YES") ||
+            ci_equal(proj_only_best_default, "TRUE");
+    }
+
     ctx->iniFileLoaded = true;
     auto file = std::unique_ptr<NS_PROJ::File>(
         reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
@@ -1878,6 +1889,13 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
                 }
             } else if (ca_bundle_path == nullptr && key == "ca_bundle_path") {
                 ctx->ca_bundle_path = value;
+            } else if (proj_only_best_default == nullptr &&
+                       key == "only_best_default") {
+                ctx->warnIfBestTransformationNotAvailableDefault = false;
+                ctx->errorIfBestTransformationNotAvailableDefault =
+                    ci_equal(value, "ON") ||
+                    ci_equal(value, "YES") ||
+                    ci_equal(value, "TRUE");
             }
         }
 

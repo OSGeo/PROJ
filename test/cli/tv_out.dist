@@ -528,3 +528,40 @@ Test cs2cs -W10
 
 -W argument missing or not in range [0,8]
 program abnormally terminated
+##############################################################
+Test cs2cs --only-best (working)
+49 2 0	48d59'59.756"N	1d59'57.4"E 0.000
+##############################################################
+Test cs2cs (grid missing)
+49 2 0	49dN	2dE 0.000
+##############################################################
+Test cs2cs --only-best=no  (grid missing)
+49 2 0	49dN	2dE 0.000
+##############################################################
+Test cs2cs --only-best (grid missing)
+Attempt to use coordinate operation Inverse of WGS 84 to EGM2008 height (1) failed. Grid us_nga_egm08_25.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+49 2 0	*	* inf
+##############################################################
+Test cs2cs --only-best=yes (grid missing)
+Attempt to use coordinate operation Inverse of WGS 84 to EGM2008 height (1) failed. Grid us_nga_egm08_25.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+49 2 0	*	* inf
+##############################################################
+Test cs2cs (grid missing) with PROJ_ONLY_BEST_DEFAULT=YES
+Attempt to use coordinate operation Inverse of WGS 84 to EGM2008 height (1) failed. Grid us_nga_egm08_25.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+49 2 0	*	* inf
+##############################################################
+Test cs2cs (grid missing) with only_best_default=on in proj.ini
+Attempt to use coordinate operation Inverse of WGS 84 to EGM2008 height (1) failed. Grid us_nga_egm08_25.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+49 2 0	*	* inf
+##############################################################
+Test cs2cs --only-best (grid missing)
+Attempt to use coordinate operation NAD27 to NAD83 (7) failed. Grid us_noaa_nadcon5_nad27_nad83_1986_conus.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+40 -100 0	*	* inf
+##############################################################
+Test cs2cs --only-best --no-ballpark (grid missing)
+Attempt to use coordinate operation Inverse of WGS 84 to EGM2008 height (1) failed. Grid us_nga_egm08_25.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+Rel. 9.2.0, March 1st, 2023
+<cs2cs>: 
+cannot initialize transformation
+cause: File not found or invalid
+program abnormally terminated
