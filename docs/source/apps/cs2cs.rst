@@ -171,13 +171,14 @@ The following control parameters can appear in any order:
 
     .. versionadded:: 9.2.0
 
-    If set to yes, error out if the best transformation, known of PROJ, and
-    usable by PROJ if all grids known and usable by PROJ were accessible,
-    cannot be used.
+    Force `cs2cs` to only use the best transformation known by PROJ.
+    `cs2cs` will return an error if a grid needed for the best transformation is missing.
+    
     Best transformation should be understood as the most accurate transformation
     available among all relevant for the point to transform, and if all known
     grids required to perform such transformation were accessible (either locally
     or through network).
+    
     Note that the default value for this option can be also set with the
     :envvar:`PROJ_ONLY_BEST_DEFAULT` environment variable, or with the
     ``only_best_default`` setting of :ref:`proj-ini` (:option:`--only-best`
