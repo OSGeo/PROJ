@@ -1942,7 +1942,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     double accuracy = -1;
     bool allowBallparkTransformations = true;
     bool forceOver = false;
-    bool warnIfBestTransformationNotAvailable = true;
+    bool warnIfBestTransformationNotAvailable = ctx->warnIfBestTransformationNotAvailableDefault;
     bool errorIfBestTransformationNotAvailable = ctx->errorIfBestTransformationNotAvailableDefault;
     for (auto iter = options; iter && iter[0]; ++iter) {
         const char *value;

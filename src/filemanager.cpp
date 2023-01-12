@@ -1823,6 +1823,7 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
     // from environment first
     const char *proj_only_best_default = getenv("PROJ_ONLY_BEST_DEFAULT");
     if (proj_only_best_default && proj_only_best_default[0] != '\0') {
+        ctx->warnIfBestTransformationNotAvailableDefault = false;
         ctx->errorIfBestTransformationNotAvailableDefault =
             ci_equal(proj_only_best_default, "ON") ||
             ci_equal(proj_only_best_default, "YES") ||
@@ -1890,6 +1891,7 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
                 ctx->ca_bundle_path = value;
             } else if (proj_only_best_default == nullptr &&
                        key == "only_best_default") {
+                ctx->warnIfBestTransformationNotAvailableDefault = false;
                 ctx->errorIfBestTransformationNotAvailableDefault =
                     ci_equal(value, "ON") ||
                     ci_equal(value, "YES") ||

@@ -151,6 +151,7 @@ pj_ctx::pj_ctx(const pj_ctx& other) :
     last_errno(0),
     debug_level(other.debug_level),
     errorIfBestTransformationNotAvailableDefault(other.errorIfBestTransformationNotAvailableDefault),
+    warnIfBestTransformationNotAvailableDefault(other.warnIfBestTransformationNotAvailableDefault),
     logger(other.logger),
     logger_app_data(other.logger_app_data),
     cpp_context(other.cpp_context ? other.cpp_context->clone(this) : nullptr),

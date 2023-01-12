@@ -697,6 +697,7 @@ struct pj_ctx{
     int     last_errno = 0;
     int     debug_level = PJ_LOG_ERROR;
     bool errorIfBestTransformationNotAvailableDefault = false;
+    bool warnIfBestTransformationNotAvailableDefault = true;
     void    (*logger)(void *, int, const char *) = nullptr;
     void    *logger_app_data = nullptr;
     struct projCppContext* cpp_context = nullptr; /* internal context for C++ code */
