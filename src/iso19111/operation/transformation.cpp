@@ -733,8 +733,9 @@ static TransformationNNPtr createFifteenParamsTransform(
  * the sign of
  * the rotation terms is inverted.
  *
- * This method is defined as [EPSG:1053]
- * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1053)
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_1053/index.html">
+ * EPSG:1053</a>.
  *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
@@ -809,8 +810,9 @@ TransformationNNPtr Transformation::createTimeDependentPositionVector(
  * of
  * the rotation terms is inverted.
  *
- * This method is defined as [EPSG:1056]
- * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1056)
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_1056/index.html">
+ * EPSG:1056</a>.
  *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
@@ -916,8 +918,9 @@ static TransformationNNPtr _createMolodensky(
  *
  * @see createAbridgedMolodensky() for a related method.
  *
- * This method is defined as [EPSG:9604]
- * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9604)
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_9604/index.html">
+ * EPSG:9604</a>.
  *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
@@ -952,8 +955,9 @@ TransformationNNPtr Transformation::createMolodensky(
  *
  * @see createdMolodensky() for a related method.
  *
- * This method is defined as [EPSG:9605]
- * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9605)
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_9605/index.html">
+ * EPSG:9605</a>.
  *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
@@ -1147,9 +1151,10 @@ buildAccuracyZero() {
 
 /** \brief Instantiate a transformation with method Longitude rotation
  *
- * This method is defined as [EPSG:9601]
- * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9601)
- * *
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_9601/index.html">
+ * EPSG:9601</a>.
+ *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
  * @param sourceCRSIn Source CRS.
@@ -1173,9 +1178,10 @@ TransformationNNPtr Transformation::createLongitudeRotation(
 
 /** \brief Instantiate a transformation with method Geographic 2D offsets
  *
- * This method is defined as [EPSG:9619]
- * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9619)
- * *
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_9619/index.html">
+ * EPSG:9619</a>.
+ *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
  * @param sourceCRSIn Source CRS.
@@ -1203,9 +1209,10 @@ TransformationNNPtr Transformation::createGeographic2DOffsets(
 
 /** \brief Instantiate a transformation with method Geographic 3D offsets
  *
- * This method is defined as [EPSG:9660]
- * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9660)
- * *
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_9660/index.html">
+ * EPSG:9660</a>.
+ *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
  * @param sourceCRSIn Source CRS.
@@ -1237,9 +1244,10 @@ TransformationNNPtr Transformation::createGeographic3DOffsets(
  * height
  * offsets
  *
- * This method is defined as [EPSG:9618]
- * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9618)
- * *
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_9618/index.html">
+ * EPSG:9618</a>.
+ *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
  * @param sourceCRSIn Source CRS.
@@ -1270,9 +1278,10 @@ TransformationNNPtr Transformation::createGeographic2DWithHeightOffsets(
 
 /** \brief Instantiate a transformation with method Vertical Offset.
  *
- * This method is defined as [EPSG:9616]
- * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9616)
- * *
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_9616/index.html">
+ * EPSG:9616</a>.
+ *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
  * @param sourceCRSIn Source CRS.
@@ -1297,8 +1306,9 @@ TransformationNNPtr Transformation::createVerticalOffset(
 /** \brief Instantiate a transformation based on the Change of Vertical Unit
  * method.
  *
- * This method is defined as [EPSG:1069]
- * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1069)
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_1069/index.html">
+ * EPSG:1069</a> [DEPRECATED].
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
