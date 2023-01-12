@@ -2069,6 +2069,9 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
             }
         }
 
+        if( P != nullptr ) {
+            P->over = forceOver;
+        }
         return P;
     }
 
@@ -2088,6 +2091,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     }
 
     for( auto& op: preparedOpList ) {
+        op.pj->over = forceOver;
         op.pj->errorIfBestTransformationNotAvailable = errorIfBestTransformationNotAvailable;
     }
 
@@ -2103,6 +2107,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     P->alternativeCoordinateOperations = std::move(preparedOpList);
     // The returned P is rather dummy
     P->descr = "Set of coordinate operations";
+    P->over = forceOver;
     P->iso_obj = nullptr;
     P->fwd = nullptr;
     P->inv = nullptr;
