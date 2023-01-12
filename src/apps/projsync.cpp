@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
     file.reset();
 
     if (listFiles) {
-        std::cout << "filename,source_id,area_of_use,file_size" << std::endl;
+        std::cout << "filename,area_of_use,source_id,file_size" << std::endl;
     }
 
     std::string proj_data_version_str;
