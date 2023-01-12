@@ -1,6 +1,12 @@
 name: Windows build
 
-on: [push, pull_request]
+on:
+  push:
+      paths-ignore:
+          - 'docs/**'
+  pull_request:
+      paths-ignore:
+          - 'docs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
