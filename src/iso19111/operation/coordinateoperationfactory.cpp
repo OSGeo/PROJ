@@ -4049,9 +4049,28 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
 
     if (geodSrc->ellipsoid()->celestialBody() !=
         geodDst->ellipsoid()->celestialBody()) {
-        throw util::UnsupportedOperationException(
-            "Source and target ellipsoid do not belong to the same "
-            "celestial body");
+        const char *envVarVal = getenv("PROJ_IGNORE_CELESTIAL_BODY");
+        if (envVarVal == nullptr) {
+            std::string osMsg(
+                "Source and target ellipsoid do not belong to the same "
+                "celestial body (");
+            osMsg += geodSrc->ellipsoid()->celestialBody();
+            osMsg += " vs ";
+            osMsg += geodDst->ellipsoid()->celestialBody();
+            osMsg += "). You may override this check by setting the "
+                     "PROJ_IGNORE_CELESTIAL_BODY environment variable to YES.";
+            throw util::UnsupportedOperationException(osMsg.c_str());
+        } else if (ci_equal(envVarVal, "NO") || ci_equal(envVarVal, "FALSE") ||
+                   ci_equal(envVarVal, "OFF")) {
+            std::string osMsg(
+                "Source and target ellipsoid do not belong to the same "
+                "celestial body (");
+            osMsg += geodSrc->ellipsoid()->celestialBody();
+            osMsg += " vs ";
+            osMsg += geodDst->ellipsoid()->celestialBody();
+            osMsg += ").";
+            throw util::UnsupportedOperationException(osMsg.c_str());
+        }
     }
 
     auto geogSrc = dynamic_cast<const crs::GeographicCRS *>(geodSrc);

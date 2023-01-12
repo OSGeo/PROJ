@@ -933,6 +933,12 @@ $EXE EPSG:32631 EPSG:4326 -E >> ${OUT} <<EOF
 400000 5000000 0
 EOF
 
+echo  "##############################################################" >> ${OUT}
+echo  "Check we allow ellipsoids up to a 0.59% relative difference in size" >> ${OUT}
+
+$EXE +proj=longlat +R=3376200 +to IAU_2015:49935 -E >> ${OUT} <<EOF
+0 -90
+EOF
 
 echo  "##############################################################" >> ${OUT}
 echo  "Test EPSG:4896 to EPSG:7930" >> ${OUT}

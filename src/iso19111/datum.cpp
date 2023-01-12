@@ -1111,7 +1111,10 @@ bool Ellipsoid::_isEquivalentTo(const util::IComparable *other,
 
 std::string Ellipsoid::guessBodyName(const io::DatabaseContextPtr &dbContext,
                                      double a) {
-    constexpr double relError = 0.005;
+    // Mars (2015) - Sphere uses R=3396190
+    // and Mars polar radius (as used by HIRISE JPEG2000) is 3376200m
+    // which is a 0.59% relative difference.
+    constexpr double relError = 0.007;
     constexpr double earthMeanRadius = 6375000.0;
     if (std::fabs(a - earthMeanRadius) < relError * earthMeanRadius) {
         return Ellipsoid::EARTH;
