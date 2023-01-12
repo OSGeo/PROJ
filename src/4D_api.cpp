@@ -296,12 +296,13 @@ static void warnAboutMissingGrid(PJ* P)
                    "Consult https://proj.org/resource_files.html for guidance.";
         }
     }
-    if( P->ctx->warnIfBestTransformationNotAvailable )
+    if( !P->errorIfBestTransformationNotAvailable &&
+        P->warnIfBestTransformationNotAvailable )
     {
         msg += " This might become an error in a future PROJ major release. "
                "Set the ONLY_BEST option to YES or NO. "
-               "This warning will no longer be emitted (for the current context).";
-        P->ctx->warnIfBestTransformationNotAvailable = false;
+               "This warning will no longer be emitted (for the current transformation instance).";
+        P->warnIfBestTransformationNotAvailable = false;
     }
     pj_log(P->ctx,
            P->errorIfBestTransformationNotAvailable ? PJ_LOG_ERROR : PJ_LOG_DEBUG,
@@ -384,7 +385,7 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
                 return res;
             }
             else if( P->errorIfBestTransformationNotAvailable ||
-                     P->ctx->warnIfBestTransformationNotAvailable ) {
+                     P->warnIfBestTransformationNotAvailable ) {
                 warnAboutMissingGrid(alt.pj);
                 if( P->errorIfBestTransformationNotAvailable )
                     return res;
@@ -1941,6 +1942,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     double accuracy = -1;
     bool allowBallparkTransformations = true;
     bool forceOver = false;
+    bool warnIfBestTransformationNotAvailable = true;
     bool errorIfBestTransformationNotAvailable = ctx->errorIfBestTransformationNotAvailableDefault;
     for (auto iter = options; iter && iter[0]; ++iter) {
         const char *value;
@@ -1959,7 +1961,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
                 return nullptr;
             }
         } else if ((value = getOptionValue(*iter, "ONLY_BEST="))) {
-            ctx->warnIfBestTransformationNotAvailable = false;
+            warnIfBestTransformationNotAvailable = false;
             if( ci_equal(value, "yes") )
                 errorIfBestTransformationNotAvailable = true;
             else if( ci_equal(value, "no") )
@@ -2018,7 +2020,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     proj_operation_factory_context_set_grid_availability_use(
         ctx, operation_ctx,
         (errorIfBestTransformationNotAvailable ||
-         ctx->warnIfBestTransformationNotAvailable ||
+         warnIfBestTransformationNotAvailable ||
          proj_context_is_network_enabled(ctx)) ?
             PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE:
             PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
@@ -2041,7 +2043,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     ctx->forceOver = forceOver;
 
     const int old_debug_level = ctx->debug_level;
-    if( errorIfBestTransformationNotAvailable || ctx->warnIfBestTransformationNotAvailable )
+    if( errorIfBestTransformationNotAvailable || warnIfBestTransformationNotAvailable )
         ctx->debug_level = PJ_LOG_NONE;
     PJ* P = proj_list_get(ctx, op_list, 0);
     ctx->debug_level = old_debug_level;
@@ -2049,6 +2051,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
 
     if( P != nullptr ) {
         P->errorIfBestTransformationNotAvailable = errorIfBestTransformationNotAvailable;
+        P->warnIfBestTransformationNotAvailable = warnIfBestTransformationNotAvailable;
     }
 
     if( P == nullptr || op_count == 1 ||
@@ -2059,7 +2062,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
 
         if( P != nullptr &&
             (errorIfBestTransformationNotAvailable ||
-             ctx->warnIfBestTransformationNotAvailable) &&
+             warnIfBestTransformationNotAvailable) &&
             !proj_coordoperation_is_instantiable(ctx, P) )
         {
             warnAboutMissingGrid(P);
@@ -2075,7 +2078,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         return P;
     }
 
-    if( errorIfBestTransformationNotAvailable || ctx->warnIfBestTransformationNotAvailable )
+    if( errorIfBestTransformationNotAvailable || warnIfBestTransformationNotAvailable )
         ctx->debug_level = PJ_LOG_NONE;
     auto preparedOpList = pj_create_prepared_operations(ctx, source_crs, target_crs,
                                                    op_list);
@@ -2093,6 +2096,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     for( auto& op: preparedOpList ) {
         op.pj->over = forceOver;
         op.pj->errorIfBestTransformationNotAvailable = errorIfBestTransformationNotAvailable;
+        op.pj->warnIfBestTransformationNotAvailable = warnIfBestTransformationNotAvailable;
     }
 
     // If there's finally juste a single result, return it directly
