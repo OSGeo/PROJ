@@ -98,6 +98,7 @@ install_manifest.txt
 # docs
 /docs/.doxygen_up_to_date
 /docs/build
+/docs/plot/images
 /latex
 
 # m4
