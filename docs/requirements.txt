@@ -1,0 +1,6 @@
+sphinx==4.5.0
+breathe
+sphinxcontrib-bibtex
+sphinx_rtd_theme
+sphinxcontrib-spelling
+pybtex

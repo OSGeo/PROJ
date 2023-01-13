@@ -15,7 +15,6 @@ Current Release
 
 * **2021-09-01** `proj-8.1.1.tar.gz`_ (`md5`_)
 * **2021-07-01** `proj-data-1.7.tar.gz`_
-* **PDF Manual** `proj.pdf`_
 
 .. note::
 
@@ -137,4 +136,3 @@ Past Releases
 .. _`proj-datumgrid-oceania-1.1.zip`: https://download.osgeo.org/proj/proj-datumgrid-oceania-1.1.zip
 .. _`proj-datumgrid-oceania-1.2.zip`: https://download.osgeo.org/proj/proj-datumgrid-oceania-1.2.zip
 .. _`proj-datumgrid-world-1.0.zip`: https://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip
-.. _`proj.pdf`: https://raw.githubusercontent.com/OSGeo/PROJ/gh-pages/proj.pdf
