@@ -1893,8 +1893,7 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
                        key == "only_best_default") {
                 ctx->warnIfBestTransformationNotAvailableDefault = false;
                 ctx->errorIfBestTransformationNotAvailableDefault =
-                    ci_equal(value, "ON") ||
-                    ci_equal(value, "YES") ||
+                    ci_equal(value, "ON") || ci_equal(value, "YES") ||
                     ci_equal(value, "TRUE");
             }
         }
