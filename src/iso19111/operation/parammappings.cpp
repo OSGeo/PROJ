@@ -573,6 +573,12 @@ static const MethodMapping projectionMethodMappings[] = {
     {PROJ_WKT2_NAME_METHOD_TWO_POINT_EQUIDISTANT, 0, "Two_Point_Equidistant",
      "tpeqd", nullptr, paramsTPEQD},
 
+    {EPSG_NAME_METHOD_TUNISIA_MINING_GRID, EPSG_CODE_METHOD_TUNISIA_MINING_GRID,
+     "Tunisia_Mining_Grid", nullptr,
+     nullptr, // no proj equivalent
+     paramsTMG},
+
+    // Deprecated. Use EPSG_NAME_METHOD_TUNISIA_MINING_GRID instead
     {EPSG_NAME_METHOD_TUNISIA_MAPPING_GRID,
      EPSG_CODE_METHOD_TUNISIA_MAPPING_GRID, "Tunisia_Mapping_Grid", nullptr,
      nullptr, // no proj equivalent
@@ -898,7 +904,7 @@ const struct MethodNameCode methodNameCodes[] = {
     METHOD_NAME_CODE(TRANSVERSE_MERCATOR_SOUTH_ORIENTATED),
     METHOD_NAME_CODE(LAMBERT_CONIC_CONFORMAL_1SP),
     METHOD_NAME_CODE(NZMG),
-    METHOD_NAME_CODE(TUNISIA_MAPPING_GRID),
+    METHOD_NAME_CODE(TUNISIA_MINING_GRID),
     METHOD_NAME_CODE(ALBERS_EQUAL_AREA),
     METHOD_NAME_CODE(LAMBERT_CONIC_CONFORMAL_2SP),
     METHOD_NAME_CODE(LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM),

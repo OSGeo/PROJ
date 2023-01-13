@@ -484,13 +484,43 @@ Conversion::createTwoPointEquidistant(const util::PropertyMap &properties,
  * @param falseEasting See \ref false_easting
  * @param falseNorthing See \ref false_northing
  * @return a new Conversion.
+ * @deprecated. Use createTunisiaMiningGrid() instead
  */
 ConversionNNPtr Conversion::createTunisiaMappingGrid(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
     return create(
-        properties, EPSG_CODE_METHOD_TUNISIA_MAPPING_GRID,
+        properties, EPSG_CODE_METHOD_TUNISIA_MINING_GRID,
+        createParams(centerLat, centerLong, falseEasting, falseNorthing));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a conversion based on the Tunisia Mining Grid projection
+ * method.
+ *
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_9816/index.html">
+ * EPSG:9816</a>.
+ *
+ * \note There is currently no implementation of the method formulas in PROJ.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ * @since 9.2
+ */
+ConversionNNPtr Conversion::createTunisiaMiningGrid(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    return create(
+        properties, EPSG_CODE_METHOD_TUNISIA_MINING_GRID,
         createParams(centerLat, centerLong, falseEasting, falseNorthing));
 }
 
@@ -1629,9 +1659,10 @@ ConversionNNPtr Conversion::createMercatorVariantA(
  * <a href="../../../operations/projections/merc.html">
  * Mercator (variant B)</a> projection method.
  *
- * This is the B variant, also known as Mercator (2SP), defined with the latitude
- * of the first standard parallel (the second standard parallel is implicitly
- * the opposite value). The latitude of natural origin is fixed to zero.
+ * This is the B variant, also known as Mercator (2SP), defined with the
+ * latitude of the first standard parallel (the second standard parallel is
+ * implicitly the opposite value). The latitude of natural origin is fixed to
+ * zero.
  *
  * This method is defined as
  * <a href="https://epsg.org/coord-operation-method_9805/index.html">

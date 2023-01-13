@@ -945,6 +945,11 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
         const common::Angle &centerLong, const common::Length &falseEasting,
         const common::Length &falseNorthing);
 
+    PROJ_DLL static ConversionNNPtr createTunisiaMiningGrid(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
     PROJ_DLL static ConversionNNPtr
     createAlbersEqualArea(const util::PropertyMap &properties,
                           const common::Angle &latitudeFalseOrigin,

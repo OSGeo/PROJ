@@ -2648,7 +2648,7 @@ TEST_F(CApi, proj_create_projections) {
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_create_conversion_tunisia_mapping_grid(
+        auto projCRS = proj_create_conversion_tunisia_mining_grid(
             m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
