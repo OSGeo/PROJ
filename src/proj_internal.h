@@ -744,13 +744,6 @@ struct pj_ctx{
     static pj_ctx createDefault();
 };
 
-/* Generate pj_list external or make list from include file */
-#ifndef PJ_DATUMS_
-C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[];
-#endif
-
-
-
 
 
 #ifdef PJ_LIB_
@@ -842,7 +835,7 @@ void  *pj_gauss_ini(double, double, double *,double *);
 PJ_LP     pj_gauss(PJ_CONTEXT *, PJ_LP, const void *);
 PJ_LP     pj_inv_gauss(PJ_CONTEXT *, PJ_LP, const void *);
 
-struct PJ_DATUMS           PROJ_DLL *pj_get_datums_ref( void );
+const struct PJ_DATUMS           PROJ_DLL *pj_get_datums_ref( void );
 
 PJ *pj_new(void);
 PJ *pj_default_destructor (PJ *P, int errlev);

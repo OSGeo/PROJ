@@ -36,8 +36,6 @@
 #include "proj_config.h"
 #include "proj_internal.h"
 
-#define PJ_STRTOD_WORK_BUFFER_SIZE 64
-
 /************************************************************************/
 /*                              pj_atof()                               */
 /************************************************************************/
@@ -49,7 +47,7 @@
  * by nptr to double floating point representation. The behavior is the
  * same as
  *
- *   pj_strtod(nptr, (char **)NULL);
+ *   pj_strtod(nptr, nullptr);
  *
  * This function does the same as standard atof(3), but does not take
  * locale in account. That means, the decimal delimiter is always '.'
@@ -69,8 +67,7 @@ double pj_atof( const char* nptr )
 /*                     replace_point_by_locale_point()               */
 /************************************************************************/
 
-static char* replace_point_by_locale_point(const char* pszNumber, char point,
-                                              char* pszWorkBuffer)
+static char* replace_point_by_locale_point(const char* pszNumber, char point)
 {
 #if !defined(HAVE_LOCALECONV)
 
@@ -92,23 +89,19 @@ static char* replace_point_by_locale_point(const char* pszNumber, char point,
         const char* pszPoint = strchr(pszNumber, point);
         if (pszPoint)
         {
-            char* pszNew;
-            if( strlen(pszNumber) < PJ_STRTOD_WORK_BUFFER_SIZE )
-            {
-                strcpy(pszWorkBuffer, pszNumber);
-                pszNew = pszWorkBuffer;
-            }
-            else {
-                pszNew = pj_strdup(pszNumber);
-                if (!pszNew)
-                    return NULL;
-            }
+            char* pszNew = pj_strdup(pszNumber);
+            if (!pszNew)
+                return nullptr;
             pszNew[pszPoint - pszNumber] = byPoint;
             return pszNew;
         }
     }
+
+    return nullptr;
+
 #else
-    struct lconv *poLconv = localeconv();
+
+    const struct lconv *poLconv = localeconv();
     if ( poLconv
          && poLconv->decimal_point
          && poLconv->decimal_point[0] != '\0' )
@@ -121,17 +114,9 @@ static char* replace_point_by_locale_point(const char* pszNumber, char point,
             const char* pszPoint = strchr(pszNumber, point);
             if (pszPoint || pszLocalePoint)
             {
-                char* pszNew;
-                if( strlen(pszNumber) < PJ_STRTOD_WORK_BUFFER_SIZE )
-                {
-                    strcpy(pszWorkBuffer, pszNumber);
-                    pszNew = pszWorkBuffer;
-                }
-                else {
-                    pszNew = pj_strdup(pszNumber);
-                    if (!pszNew)
-                        return nullptr;
-                }
+                char* pszNew = pj_strdup(pszNumber);
+                if (!pszNew)
+                    return nullptr;
                 if( pszLocalePoint )
                     pszNew[pszLocalePoint - pszNumber] = ' ';
                 if( pszPoint )
@@ -140,8 +125,10 @@ static char* replace_point_by_locale_point(const char* pszNumber, char point,
             }
         }
     }
+
+    return nullptr;
+
 #endif
-    return (char*) pszNumber;
 }
 
 /************************************************************************/
@@ -167,25 +154,32 @@ double pj_strtod( const char *nptr, char **endptr )
 {
 /* -------------------------------------------------------------------- */
 /*  We are implementing a simple method here: copy the input string     */
-/*  into the temporary buffer, replace the specified decimal delimiter  */
-/*  with the one, taken from locale settings and use standard strtod()  */
+/*  into the temporary buffer, replace the specified decimal delimiter (.)  */
+/*  with the one taken from locale settings (ex ',') and then use standard strtod()  */
 /*  on that buffer.                                                     */
 /* -------------------------------------------------------------------- */
-    double      dfValue;
-    int         nError;
-    char        szWorkBuffer[PJ_STRTOD_WORK_BUFFER_SIZE];
+    char *pszNumber = replace_point_by_locale_point( nptr, '.' );
+    if ( pszNumber )
+    {
+        char *pszNumberEnd;
+        double dfValue = strtod( pszNumber, &pszNumberEnd );
 
-    char*       pszNumber = replace_point_by_locale_point(nptr, '.', szWorkBuffer);
+        int nError = errno;
 
-    dfValue = strtod( pszNumber, endptr );
-    nError = errno;
+        if ( endptr )
+        {
+            ptrdiff_t offset = pszNumberEnd - pszNumber;
+            *endptr = const_cast<char*>( nptr + offset );
+        }
 
-    if ( endptr )
-        *endptr = (char *)nptr + (*endptr - pszNumber);
-
-    if (pszNumber != (char*) nptr && pszNumber != szWorkBuffer )
         free( pszNumber );
 
-    errno = nError;
-    return dfValue;
+        errno = nError;
+
+        return dfValue;
+    }
+    else
+    {
+        return strtod( nptr, endptr );
+    }
 }
