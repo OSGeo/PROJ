@@ -1,0 +1,22 @@
+name: proj
+channels:
+  - conda-forge
+dependencies:
+  - descartes
+  - doxygen < 1.9
+  - geojson
+  - matplotlib
+  - shapely < 1.8
+  - libcxx
+  - libsqlite
+  - sqlite
+  - compilers
+  - cmake
+  - ninja
+  - pip
+  - pip:
+    - breathe
+    - pybtex
+    - sphinx-rtd-theme
+    - sphinxcontrib-bibtex
+    - sphinxcontrib-spelling
