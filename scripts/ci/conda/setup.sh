@@ -14,6 +14,7 @@ source:
   git_rev: ${GITHUB_SHA}
   url:
   sha256:
+  patches:
 
 build:
   number: 2112
