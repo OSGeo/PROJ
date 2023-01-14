@@ -32,9 +32,6 @@ html: .doxygen_up_to_date
 	# Undoes the hack done in scripts/doxygen.sh
 	@sed "s/io::Convention_/io::Convention/g" < $(BUILDDIR)/html/development/reference/cpp/io.html | sed "s/>Convention_/>Convention/g" | sed "s/_WKT2/WKT2/g" | sed "s/_WKT1/WKT1/g" > $(BUILDDIR)/html/development/reference/cpp/io.html.tmp
 	@mv $(BUILDDIR)/html/development/reference/cpp/io.html.tmp $(BUILDDIR)/html/development/reference/cpp/io.html
-	# Undoes the hacks of scripts/generate_breathe_friendly_general_doc.py
-	@sed "s/<em class=\"property\">namespace <\/em>//g" < $(BUILDDIR)/html/development/reference/cpp/cpp_general.html > $(BUILDDIR)/html/development/reference/cpp/cpp_general.html.tmp
-	@mv $(BUILDDIR)/html/development/reference/cpp/cpp_general.html.tmp $(BUILDDIR)/html/development/reference/cpp/cpp_general.html
 	@cp -r ../schemas $(BUILDDIR)/html/schemas
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

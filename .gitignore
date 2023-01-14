@@ -96,9 +96,9 @@ install_manifest.txt
 /data/for_tests/
 
 # docs
-tmp_breathe
 /docs/.doxygen_up_to_date
 /docs/build
+/docs/plot/images
 /latex
 
 # m4
