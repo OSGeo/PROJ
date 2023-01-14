@@ -24,7 +24,6 @@ Current Release
 * **2020-03-01** `proj-datumgrid-north-america-1.4.zip`_
 * **2020-03-01** `proj-datumgrid-oceania-1.2.zip`_
 * **2019-03-01** `proj-datumgrid-world-1.0.zip`_
-* **PDF Manual** `proj.pdf`_
 
 .. note::
 
@@ -113,4 +112,3 @@ Past Releases
 .. _`proj-datumgrid-oceania-1.1.zip`: https://download.osgeo.org/proj/proj-datumgrid-oceania-1.1.zip
 .. _`proj-datumgrid-oceania-1.2.zip`: https://download.osgeo.org/proj/proj-datumgrid-oceania-1.2.zip
 .. _`proj-datumgrid-world-1.0.zip`: https://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip
-.. _`proj.pdf`: https://raw.githubusercontent.com/OSGeo/PROJ/gh-pages/proj.pdf
