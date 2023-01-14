@@ -1629,9 +1629,10 @@ ConversionNNPtr Conversion::createMercatorVariantA(
  * <a href="../../../operations/projections/merc.html">
  * Mercator (variant B)</a> projection method.
  *
- * This is the B variant, also known as Mercator (2SP), defined with the latitude
- * of the first standard parallel (the second standard parallel is implicitly
- * the opposite value). The latitude of natural origin is fixed to zero.
+ * This is the B variant, also known as Mercator (2SP), defined with the
+ * latitude of the first standard parallel (the second standard parallel is
+ * implicitly the opposite value). The latitude of natural origin is fixed to
+ * zero.
  *
  * This method is defined as
  * <a href="https://epsg.org/coord-operation-method_9805/index.html">

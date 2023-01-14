@@ -41,6 +41,7 @@
 #include "proj/io.hpp"
 #include "proj/util.hpp"
 
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -51,6 +52,30 @@ using namespace osgeo::proj::cs;
 using namespace osgeo::proj::datum;
 using namespace osgeo::proj::io;
 using namespace osgeo::proj::util;
+
+namespace {
+struct ObjectKeeper {
+    PJ *m_obj = nullptr;
+    explicit ObjectKeeper(PJ *obj) : m_obj(obj) {}
+    ~ObjectKeeper() { proj_destroy(m_obj); }
+    void clear() {
+        proj_destroy(m_obj);
+        m_obj = nullptr;
+    }
+
+    ObjectKeeper(const ObjectKeeper &) = delete;
+    ObjectKeeper &operator=(const ObjectKeeper &) = delete;
+};
+
+struct PjContextKeeper {
+    PJ_CONTEXT *m_ctxt = nullptr;
+    explicit PjContextKeeper(PJ_CONTEXT *ctxt) : m_ctxt(ctxt) {}
+    ~PjContextKeeper() { proj_context_destroy(m_ctxt); }
+
+    PjContextKeeper(const PjContextKeeper &) = delete;
+    PjContextKeeper &operator=(const PjContextKeeper &) = delete;
+};
+} // namespace
 
 // ---------------------------------------------------------------------------
 
@@ -71,6 +96,17 @@ TEST(coordinateMetadata, static_crs) {
     EXPECT_TRUE(coordinateMetadataFromWkt->crs()->isEquivalentTo(
         GeographicCRS::EPSG_4326.get()));
     EXPECT_FALSE(coordinateMetadataFromWkt->coordinateEpoch().has_value());
+
+    auto ctxt = proj_context_create();
+    PjContextKeeper ctxtKeeper(ctxt);
+    auto pjObj = proj_create(ctxt, wkt.c_str());
+    ObjectKeeper objKeeper(pjObj);
+    ASSERT_TRUE(pjObj != nullptr);
+    EXPECT_EQ(proj_get_type(pjObj), PJ_TYPE_COORDINATE_METADATA);
+    EXPECT_TRUE(std::isnan(proj_coordinate_metadata_get_epoch(ctxt, pjObj)));
+    auto pjObj2 = proj_get_source_crs(ctxt, pjObj);
+    ObjectKeeper objKeeper2(pjObj2);
+    EXPECT_TRUE(pjObj2 != nullptr);
 
     auto projjson =
         coordinateMetadata->exportToJSON(JSONFormatter::create(nullptr).get());
@@ -110,6 +146,14 @@ TEST(coordinateMetadata, dynamic_crs) {
     EXPECT_TRUE(coordinateMetadataFromWkt->coordinateEpoch().has_value());
     EXPECT_NEAR(coordinateMetadataFromWkt->coordinateEpochAsDecimalYear(),
                 2023.5, 1e-10);
+
+    auto ctxt = proj_context_create();
+    PjContextKeeper ctxtKeeper(ctxt);
+    auto pjObj = proj_create(ctxt, wkt.c_str());
+    ObjectKeeper objKeeper(pjObj);
+    ASSERT_TRUE(pjObj != nullptr);
+    EXPECT_EQ(proj_get_type(pjObj), PJ_TYPE_COORDINATE_METADATA);
+    EXPECT_NEAR(proj_coordinate_metadata_get_epoch(ctxt, pjObj), 2023.5, 1e-10);
 
     auto projjson =
         coordinateMetadata->exportToJSON(JSONFormatter::create(nullptr).get());

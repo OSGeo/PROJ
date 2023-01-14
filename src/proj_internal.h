@@ -576,7 +576,7 @@ struct PJconsts {
      ISO-19111 interface
     **************************************************************************************/
 
-    NS_PROJ::common::IdentifiedObjectPtr iso_obj{};
+    NS_PROJ::util::BaseObjectPtr iso_obj{};
     bool                                 iso_obj_is_coordinate_operation = false;
 
     // cached results

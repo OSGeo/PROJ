@@ -2369,10 +2369,12 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
     if (pj_param(P->ctx, P->params, "tproj").i)
         pjinfo.id = pj_param(P->ctx, P->params, "sproj").s;
 
+    pjinfo.description = P->descr;
     if( P->iso_obj ) {
-        pjinfo.description = P->iso_obj->nameStr().c_str();
-    } else {
-        pjinfo.description = P->descr;
+        auto identifiedObj = dynamic_cast<NS_PROJ::common::IdentifiedObject*>(P->iso_obj.get());
+        if( identifiedObj ) {
+            pjinfo.description = identifiedObj->nameStr().c_str();
+        }
     }
 
     // accuracy
