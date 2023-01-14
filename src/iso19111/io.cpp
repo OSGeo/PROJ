@@ -7547,12 +7547,19 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                            usePROJ4InitRules, ctx);
             auto crs = nn_dynamic_pointer_cast<CRS>(obj);
             if (crs) {
+                double epoch;
                 try {
-                    const double epoch =
-                        c_locale_stod(text.substr(nonSpacePos));
-                    return CoordinateMetadata::create(NN_NO_CHECK(crs), epoch);
+                    epoch = c_locale_stod(text.substr(nonSpacePos));
                 } catch (const std::exception &) {
                     throw ParsingException("non-numeric value after @");
+                }
+                try {
+                    return CoordinateMetadata::create(NN_NO_CHECK(crs), epoch);
+                } catch (const std::exception &e) {
+                    throw ParsingException(
+                        std::string(
+                            "CoordinateMetadata::create() failed with: ") +
+                        e.what());
                 }
             }
         }

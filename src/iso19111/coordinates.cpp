@@ -86,8 +86,15 @@ CoordinateMetadata::~CoordinateMetadata() = default;
 /** \brief Instantiate a CoordinateMetadata from a static CRS.
  * @param crsIn a static CRS
  * @return new CoordinateMetadata.
+ * @throw util::Exception if crsIn is a dynamic CRS.
  */
 CoordinateMetadataNNPtr CoordinateMetadata::create(const crs::CRSNNPtr &crsIn) {
+
+    if (crsIn->isDynamic(/*considerWGS84AsDynamic=*/false)) {
+        throw util::Exception(
+            "Coordinate epoch should be provided for a dynamic CRS");
+    }
+
     auto coordinateMetadata(
         CoordinateMetadata::nn_make_shared<CoordinateMetadata>(crsIn));
     coordinateMetadata->assignSelf(coordinateMetadata);
@@ -102,9 +109,16 @@ CoordinateMetadataNNPtr CoordinateMetadata::create(const crs::CRSNNPtr &crsIn) {
  * @param crsIn a dynamic CRS
  * @param coordinateEpochIn coordinate epoch expressed in decimal year.
  * @return new CoordinateMetadata.
+ * @throw util::Exception if crsIn is a static CRS.
  */
 CoordinateMetadataNNPtr CoordinateMetadata::create(const crs::CRSNNPtr &crsIn,
                                                    double coordinateEpochIn) {
+
+    if (!crsIn->isDynamic(/*considerWGS84AsDynamic=*/true)) {
+        throw util::Exception(
+            "Coordinate epoch should not be provided for a static CRS");
+    }
+
     auto coordinateMetadata(
         CoordinateMetadata::nn_make_shared<CoordinateMetadata>(
             crsIn, coordinateEpochIn));

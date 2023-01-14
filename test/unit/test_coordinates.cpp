@@ -39,6 +39,7 @@
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
 #include "proj/io.hpp"
+#include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
 #include <cmath>
@@ -51,6 +52,7 @@ using namespace osgeo::proj::crs;
 using namespace osgeo::proj::cs;
 using namespace osgeo::proj::datum;
 using namespace osgeo::proj::io;
+using namespace osgeo::proj::metadata;
 using namespace osgeo::proj::util;
 
 namespace {
@@ -79,12 +81,37 @@ struct PjContextKeeper {
 
 // ---------------------------------------------------------------------------
 
+static VerticalCRSNNPtr createVerticalCRS() {
+    PropertyMap propertiesVDatum;
+    propertiesVDatum.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 5101)
+        .set(IdentifiedObject::NAME_KEY, "Ordnance Datum Newlyn");
+    auto vdatum = VerticalReferenceFrame::create(propertiesVDatum);
+    PropertyMap propertiesCRS;
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 5701)
+        .set(IdentifiedObject::NAME_KEY, "ODN height");
+    return VerticalCRS::create(
+        propertiesCRS, vdatum,
+        VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(coordinateMetadata, static_crs) {
     auto coordinateMetadata =
         CoordinateMetadata::create(GeographicCRS::EPSG_4326);
     EXPECT_TRUE(coordinateMetadata->crs()->isEquivalentTo(
         GeographicCRS::EPSG_4326.get()));
     EXPECT_FALSE(coordinateMetadata->coordinateEpoch().has_value());
+
+    // We tolerate coordinate epochs for EPSG:4326
+    EXPECT_NO_THROW(
+        CoordinateMetadata::create(GeographicCRS::EPSG_4326, 2025.0));
+
+    // A coordinate epoch should NOT be provided
+    EXPECT_THROW(CoordinateMetadata::create(createVerticalCRS(), 2025.0),
+                 Exception);
 
     WKTFormatterNNPtr f(
         WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
@@ -135,6 +162,9 @@ TEST(coordinateMetadata, dynamic_crs) {
     EXPECT_TRUE(coordinateMetadata->coordinateEpoch().has_value());
     EXPECT_NEAR(coordinateMetadata->coordinateEpochAsDecimalYear(), 2023.5,
                 1e-10);
+
+    // A coordinate epoch should be provided
+    EXPECT_THROW(CoordinateMetadata::create(crs), Exception);
 
     WKTFormatterNNPtr f(
         WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));

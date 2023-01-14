@@ -12124,6 +12124,10 @@ TEST(io, createFromUserInput) {
     // Invalid CoordinateMetadata
     EXPECT_THROW(createFromUserInput("@2025", dbContext), ParsingException);
 
+    // Invalid CoordinateMetadata: static CRS not allowed
+    EXPECT_THROW(createFromUserInput("RGF93@2025", dbContext),
+                 ParsingException);
+
     {
         auto obj = createFromUserInput("ITRF2014@2025.1", dbContext);
         auto coordinateMetadata =
