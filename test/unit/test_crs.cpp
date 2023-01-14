@@ -7173,3 +7173,48 @@ TEST(crs, projected_is_equivalent_to_with_proj4_extension) {
     EXPECT_FALSE(crs1->isEquivalentTo(crsDifferent.get(),
                                       IComparable::Criterion::EQUIVALENT));
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, is_dynamic) {
+
+    EXPECT_FALSE(GeographicCRS::EPSG_4326->isDynamic());
+    EXPECT_TRUE(
+        GeographicCRS::EPSG_4326->isDynamic(/*considerWGS84AsDynamic=*/true));
+
+    {
+        auto factory =
+            AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        auto crs = factory->createCoordinateReferenceSystem("4326");
+        EXPECT_FALSE(crs->isDynamic());
+        EXPECT_TRUE(crs->isDynamic(/*considerWGS84AsDynamic=*/true));
+    }
+
+    {
+        auto drf = DynamicGeodeticReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "test"),
+            Ellipsoid::WGS84, optional<std::string>("My anchor"),
+            PrimeMeridian::GREENWICH, Measure(2018.5, UnitOfMeasure::YEAR),
+            optional<std::string>("My model"));
+        auto crs = GeographicCRS::create(
+            PropertyMap(), drf,
+            EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+        EXPECT_TRUE(crs->isDynamic());
+    }
+
+    EXPECT_FALSE(createVerticalCRS()->isDynamic());
+
+    {
+        auto drf = DynamicVerticalReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "test"),
+            optional<std::string>("My anchor"), optional<RealizationMethod>(),
+            Measure(2018.5, UnitOfMeasure::YEAR),
+            optional<std::string>("My model"));
+        auto crs = VerticalCRS::create(
+            PropertyMap(), drf,
+            VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+        EXPECT_TRUE(crs->isDynamic());
+    }
+
+    EXPECT_FALSE(createCompoundCRS()->isDynamic());
+}
