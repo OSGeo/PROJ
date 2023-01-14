@@ -47,6 +47,7 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#include "proj/coordinates.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -78,6 +79,7 @@
 // clang-format on
 
 using namespace NS_PROJ::common;
+using namespace NS_PROJ::coordinates;
 using namespace NS_PROJ::crs;
 using namespace NS_PROJ::cs;
 using namespace NS_PROJ::datum;
@@ -1476,6 +1478,8 @@ struct WKTParser::Private {
 
     ConcatenatedOperationNNPtr
     buildConcatenatedOperation(const WKTNodeNNPtr &node);
+
+    CoordinateMetadataNNPtr buildCoordinateMetadata(const WKTNodeNNPtr &node);
 };
 //! @endcond
 
@@ -5214,6 +5218,40 @@ WKTParser::Private::buildDerivedProjectedCRS(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+CoordinateMetadataNNPtr
+WKTParser::Private::buildCoordinateMetadata(const WKTNodeNNPtr &node) {
+    const auto *nodeP = node->GP();
+
+    const auto &l_children = nodeP->children();
+    if (l_children.empty()) {
+        ThrowNotEnoughChildren(WKTConstants::COORDINATEMETADATA);
+    }
+
+    auto crs = buildCRS(l_children[0]);
+    if (!crs) {
+        throw ParsingException("Invalid content in CRS node");
+    }
+
+    auto &epochNode = nodeP->lookForChild(WKTConstants::EPOCH);
+    if (!isNull(epochNode)) {
+        const auto &epochChildren = epochNode->GP()->children();
+        if (epochChildren.empty()) {
+            ThrowMissing(WKTConstants::EPOCH);
+        }
+        try {
+            const double coordinateEpoch = asDouble(epochChildren[0]);
+            return CoordinateMetadata::create(NN_NO_CHECK(crs),
+                                              coordinateEpoch);
+        } catch (const std::exception &) {
+            throw ParsingException("Invalid EPOCH node");
+        }
+    }
+
+    return CoordinateMetadata::create(NN_NO_CHECK(crs));
+}
+
+// ---------------------------------------------------------------------------
+
 static bool isGeodeticCRS(const std::string &name) {
     return ci_equal(name, WKTConstants::GEODCRS) ||       // WKT2
            ci_equal(name, WKTConstants::GEODETICCRS) ||   // WKT2
@@ -5444,6 +5482,11 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
             NN_NO_CHECK(buildId(node, false, false)));
     }
 
+    if (ci_equal(name, WKTConstants::COORDINATEMETADATA)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            buildCoordinateMetadata(node));
+    }
+
     throw ParsingException(concat("unhandled keyword: ", name));
 }
 
@@ -5490,6 +5533,7 @@ class JSONParser {
     BoundCRSNNPtr buildBoundCRS(const json &j);
     TransformationNNPtr buildTransformation(const json &j);
     ConcatenatedOperationNNPtr buildConcatenatedOperation(const json &j);
+    CoordinateMetadataNNPtr buildCoordinateMetadata(const json &j);
 
     void buildGeodeticDatumOrDatumEnsemble(const json &j,
                                            GeodeticReferenceFramePtr &datum,
@@ -6021,6 +6065,9 @@ BaseObjectNNPtr JSONParser::create(const json &j)
     if (type == "ConcatenatedOperation") {
         return buildConcatenatedOperation(j);
     }
+    if (type == "CoordinateMetadata") {
+        return buildCoordinateMetadata(j);
+    }
     if (type == "Axis") {
         return buildAxis(j);
     }
@@ -6393,6 +6440,23 @@ JSONParser::buildConcatenatedOperation(const json &j) {
         throw ParsingException(
             std::string("Cannot build concatenated operation: ") + e.what());
     }
+}
+
+// ---------------------------------------------------------------------------
+
+CoordinateMetadataNNPtr JSONParser::buildCoordinateMetadata(const json &j) {
+
+    auto crs = buildCRS(getObject(j, "crs"));
+    if (j.contains("coordinateEpoch")) {
+        auto jCoordinateEpoch = j["coordinateEpoch"];
+        if (jCoordinateEpoch.is_number()) {
+            return CoordinateMetadata::create(crs,
+                                              jCoordinateEpoch.get<double>());
+        }
+        throw ParsingException(
+            "Unexpected type for value of \"coordinateEpoch\"");
+    }
+    return CoordinateMetadata::create(crs);
 }
 
 // ---------------------------------------------------------------------------

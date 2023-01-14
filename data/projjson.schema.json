@@ -11,7 +11,8 @@
     { "$ref": "#/definitions/ellipsoid" },
     { "$ref": "#/definitions/prime_meridian" },
     { "$ref": "#/definitions/single_operation" },
-    { "$ref": "#/definitions/concatenated_operation" }
+    { "$ref": "#/definitions/concatenated_operation" },
+    { "$ref": "#/definitions/coordinate_metadata" }
   ],
 
   "definitions": {
@@ -205,6 +206,18 @@
       "allOf": [
         { "$ref": "#/definitions/id_ids_mutually_exclusive" }
       ],
+      "additionalProperties": false
+    },
+
+    "coordinate_metadata": {
+      "type": "object",
+      "properties": {
+        "$schema" : { "type": "string" },
+        "type": { "type": "string", "enum": ["CoordinateMetadata"] },
+        "crs": { "$ref": "#/definitions/crs" },
+        "coordinateEpoch": { "type": "number" }
+      },
+      "required" : [ "crs" ],
       "additionalProperties": false
     },
 

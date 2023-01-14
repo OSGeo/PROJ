@@ -173,6 +173,7 @@ set(SRC_LIBPROJ_ISO19111
   iso19111/util.cpp
   iso19111/metadata.cpp
   iso19111/common.cpp
+  iso19111/coordinates.cpp
   iso19111/crs.cpp
   iso19111/datum.cpp
   iso19111/coordinatesystem.cpp

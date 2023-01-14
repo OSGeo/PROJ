@@ -51,7 +51,7 @@ in the WKT2:2019 specification also apply, as supplement to the JSON schema cons
 History of the schema
 ---------------------
 
-* v0.6: additional optional "source_crs" property in "abridged_transformation". Implemented in PROJ 9.2
+* v0.6: additional optional "source_crs" property in "abridged_transformation". Added CoordinateMeta. Implemented in PROJ 9.2
 * v0.5:
     - Implemented in PROJ 9.1:
         + add "meridian" member in Axis object type.
