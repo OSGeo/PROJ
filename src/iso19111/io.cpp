@@ -7535,6 +7535,29 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         }
     }
 
+    // Parse strings like "ITRF2014 @ 2025.0"
+    const auto posAt = text.find('@');
+    if (posAt != std::string::npos) {
+        std::string leftPart = text.substr(0, posAt);
+        while (!leftPart.empty() && leftPart.back() == ' ')
+            leftPart.resize(leftPart.size() - 1);
+        const auto nonSpacePos = text.find_first_not_of(' ', posAt + 1);
+        if (nonSpacePos != std::string::npos) {
+            auto obj = createFromUserInput(leftPart, dbContext,
+                                           usePROJ4InitRules, ctx);
+            auto crs = nn_dynamic_pointer_cast<CRS>(obj);
+            if (crs) {
+                try {
+                    const double epoch =
+                        c_locale_stod(text.substr(nonSpacePos));
+                    return CoordinateMetadata::create(NN_NO_CHECK(crs), epoch);
+                } catch (const std::exception &) {
+                    throw ParsingException("non-numeric value after @");
+                }
+            }
+        }
+    }
+
     throw ParsingException("unrecognized format / unknown name");
 }
 //! @endcond
@@ -7566,12 +7589,15 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  *      e.g.
  * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
  * <li>OGC URL for a single CRS. e.g.
- * "http://www.opengis.net/def/crs/EPSG/0/4326</li> <li>OGC URL for a compound
+ * "http://www.opengis.net/def/crs/EPSG/0/4326"</li>
+ * <li>OGC URL for a compound
  * CRS. e.g
  * "http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/def/crs/EPSG/0/4326&2=http://www.opengis.net/def/crs/EPSG/0/3855"</li>
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
+ * <li>a CRS name and a coordinate epoch, separated with '@'. For example
+ *     "ITRF2014@2025.0". (added in PROJ 9.2)</li>
  * <li>a compound CRS made from two object names separated with " + ".
  *     e.g. "WGS 84 + EGM96 height"</li>
  * <li>PROJJSON string</li>

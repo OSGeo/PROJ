@@ -33,6 +33,7 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#include "proj/coordinates.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -47,6 +48,7 @@
 #include <string>
 
 using namespace osgeo::proj::common;
+using namespace osgeo::proj::coordinates;
 using namespace osgeo::proj::crs;
 using namespace osgeo::proj::cs;
 using namespace osgeo::proj::datum;
@@ -12105,6 +12107,39 @@ TEST(io, createFromUserInput) {
 
     // Missing space, dash: OK
     EXPECT_NO_THROW(createFromUserInput("WGS84 PseudoMercator", dbContext));
+
+    // Invalid CoordinateMetadata
+    EXPECT_THROW(createFromUserInput("@", dbContext), ParsingException);
+
+    // Invalid CoordinateMetadata
+    EXPECT_THROW(createFromUserInput("ITRF2014@", dbContext), ParsingException);
+
+    // Invalid CoordinateMetadata
+    EXPECT_THROW(createFromUserInput("ITRF2014@foo", dbContext),
+                 ParsingException);
+
+    // Invalid CoordinateMetadata
+    EXPECT_THROW(createFromUserInput("foo@2025", dbContext), ParsingException);
+
+    // Invalid CoordinateMetadata
+    EXPECT_THROW(createFromUserInput("@2025", dbContext), ParsingException);
+
+    {
+        auto obj = createFromUserInput("ITRF2014@2025.1", dbContext);
+        auto coordinateMetadata =
+            nn_dynamic_pointer_cast<CoordinateMetadata>(obj);
+        ASSERT_TRUE(coordinateMetadata != nullptr);
+        EXPECT_EQ(coordinateMetadata->coordinateEpochAsDecimalYear(), 2025.1);
+    }
+
+    {
+        // Allow spaces before and after @
+        auto obj = createFromUserInput("ITRF2014 @ 2025.1", dbContext);
+        auto coordinateMetadata =
+            nn_dynamic_pointer_cast<CoordinateMetadata>(obj);
+        ASSERT_TRUE(coordinateMetadata != nullptr);
+        EXPECT_EQ(coordinateMetadata->coordinateEpochAsDecimalYear(), 2025.1);
+    }
 }
 
 // ---------------------------------------------------------------------------
