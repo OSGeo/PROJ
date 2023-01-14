@@ -614,6 +614,7 @@ osgeo::proj::operation::Conversion::createWagnerV(osgeo::proj::util::PropertyMap
 osgeo::proj::operation::Conversion::identify() const
 osgeo::proj::operation::Conversion::inverse() const
 osgeo::proj::operation::Conversion::isUTM(int&, bool&) const
+osgeo::proj::operation::CoordinateOperationContext::clone() const
 osgeo::proj::operation::CoordinateOperationContext::~CoordinateOperationContext()
 osgeo::proj::operation::CoordinateOperationContext::create(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&, double)
 osgeo::proj::operation::CoordinateOperationContext::getAllowBallparkTransformations() const
@@ -625,7 +626,9 @@ osgeo::proj::operation::CoordinateOperationContext::getDiscardSuperseded() const
 osgeo::proj::operation::CoordinateOperationContext::getGridAvailabilityUse() const
 osgeo::proj::operation::CoordinateOperationContext::getIntermediateCRS() const
 osgeo::proj::operation::CoordinateOperationContext::getSourceAndTargetCRSExtentUse() const
+osgeo::proj::operation::CoordinateOperationContext::getSourceCoordinateEpoch() const
 osgeo::proj::operation::CoordinateOperationContext::getSpatialCriterion() const
+osgeo::proj::operation::CoordinateOperationContext::getTargetCoordinateEpoch() const
 osgeo::proj::operation::CoordinateOperationContext::getUsePROJAlternativeGridNames() const
 osgeo::proj::operation::CoordinateOperationContext::setAllowBallparkTransformations(bool)
 osgeo::proj::operation::CoordinateOperationContext::setAllowUseIntermediateCRS(osgeo::proj::operation::CoordinateOperationContext::IntermediateCRSUse)
@@ -635,13 +638,17 @@ osgeo::proj::operation::CoordinateOperationContext::setDiscardSuperseded(bool)
 osgeo::proj::operation::CoordinateOperationContext::setGridAvailabilityUse(osgeo::proj::operation::CoordinateOperationContext::GridAvailabilityUse)
 osgeo::proj::operation::CoordinateOperationContext::setIntermediateCRS(std::vector<std::pair<std::string, std::string>, std::allocator<std::pair<std::string, std::string> > > const&)
 osgeo::proj::operation::CoordinateOperationContext::setSourceAndTargetCRSExtentUse(osgeo::proj::operation::CoordinateOperationContext::SourceTargetCRSExtentUse)
+osgeo::proj::operation::CoordinateOperationContext::setSourceCoordinateEpoch(osgeo::proj::util::optional<osgeo::proj::common::DataEpoch> const&)
 osgeo::proj::operation::CoordinateOperationContext::setSpatialCriterion(osgeo::proj::operation::CoordinateOperationContext::SpatialCriterion)
+osgeo::proj::operation::CoordinateOperationContext::setTargetCoordinateEpoch(osgeo::proj::util::optional<osgeo::proj::common::DataEpoch> const&)
 osgeo::proj::operation::CoordinateOperationContext::setUsePROJAlternativeGridNames(bool)
 osgeo::proj::operation::CoordinateOperation::~CoordinateOperation()
 osgeo::proj::operation::CoordinateOperation::coordinateOperationAccuracies() const
 osgeo::proj::operation::CoordinateOperationFactory::~CoordinateOperationFactory()
 osgeo::proj::operation::CoordinateOperationFactory::create()
 osgeo::proj::operation::CoordinateOperationFactory::createOperation(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&) const
+osgeo::proj::operation::CoordinateOperationFactory::createOperations(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::coordinates::CoordinateMetadata> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::operation::CoordinateOperationContext, std::default_delete<osgeo::proj::operation::CoordinateOperationContext> > > const&) const
+osgeo::proj::operation::CoordinateOperationFactory::createOperations(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::coordinates::CoordinateMetadata> > const&, dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::operation::CoordinateOperationContext, std::default_delete<osgeo::proj::operation::CoordinateOperationContext> > > const&) const
 osgeo::proj::operation::CoordinateOperationFactory::createOperations(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::operation::CoordinateOperationContext, std::default_delete<osgeo::proj::operation::CoordinateOperationContext> > > const&) const
 osgeo::proj::operation::CoordinateOperation::hasBallparkTransformation() const
 osgeo::proj::operation::CoordinateOperation::interpolationCRS() const

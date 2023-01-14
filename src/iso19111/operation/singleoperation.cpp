@@ -200,7 +200,7 @@ const crs::CRSPtr &CoordinateOperation::interpolationCRS() const {
  */
 const util::optional<common::DataEpoch> &
 CoordinateOperation::sourceCoordinateEpoch() const {
-    return d->sourceCoordinateEpoch_;
+    return *(d->sourceCoordinateEpoch_);
 }
 
 // ---------------------------------------------------------------------------
@@ -211,7 +211,7 @@ CoordinateOperation::sourceCoordinateEpoch() const {
  */
 const util::optional<common::DataEpoch> &
 CoordinateOperation::targetCoordinateEpoch() const {
-    return d->targetCoordinateEpoch_;
+    return *(d->targetCoordinateEpoch_);
 }
 
 // ---------------------------------------------------------------------------
@@ -256,6 +256,22 @@ void CoordinateOperation::setCRSs(const CoordinateOperation *in,
             setCRSs(nn_sourceCRS, nn_targetCRS, in->interpolationCRS());
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperation::setSourceCoordinateEpoch(
+    const util::optional<common::DataEpoch> &epoch) {
+    d->sourceCoordinateEpoch_ =
+        std::make_shared<util::optional<common::DataEpoch>>(epoch);
+}
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperation::setTargetCoordinateEpoch(
+    const util::optional<common::DataEpoch> &epoch) {
+    d->targetCoordinateEpoch_ =
+        std::make_shared<util::optional<common::DataEpoch>>(epoch);
 }
 
 // ---------------------------------------------------------------------------

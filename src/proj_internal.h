@@ -578,6 +578,8 @@ struct PJconsts {
 
     NS_PROJ::util::BaseObjectPtr iso_obj{};
     bool                                 iso_obj_is_coordinate_operation = false;
+    double coordinateEpoch = 0;
+    bool   hasCoordinateEpoch = false;
 
     // cached results
     mutable std::string lastWKT{};
