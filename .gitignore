@@ -95,9 +95,10 @@ install_manifest.txt
 /data/tv_out
 
 # docs
-tmp_breathe
 /docs/.doxygen_up_to_date
 /docs/build
+/docs/plot/images
+/latex
 
 # m4
 m4/libtool.m4

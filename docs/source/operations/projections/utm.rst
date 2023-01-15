@@ -37,7 +37,7 @@ to which specific parameters, such as central meridians, have been applied.
 The Earth is divided into 60 zones each generally 6° wide in longitude.
 Bounding meridians are evenly divisible by 6°, and zones are
 numbered from 1 to 60 proceeding east from the 180th meridian from Greenwich
-with minor exceptions [Snyder1987]_.
+with minor exceptions :cite:`Snyder1987`.
 
 Usage
 #####
