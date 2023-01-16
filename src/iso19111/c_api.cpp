@@ -5046,13 +5046,49 @@ PJ *proj_create_conversion_two_point_equidistant(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a ProjectedCRS with a conversion based on the Tunisia
- * Mapping Grid projection method.
+ * Mining Grid projection method.
  *
- * See osgeo::proj::operation::Conversion::createTunisiaMappingGrid().
+ * See osgeo::proj::operation::Conversion::createTunisiaMiningGrid().
  *
  * Linear parameters are expressed in (linear_unit_name,
  * linear_unit_conv_factor).
  * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
+ *
+ * @deprecated. Replaced by proj_create_conversion_tunisia_mining_grid
+ */
+PJ *proj_create_conversion_tunisia_mining_grid(
+    PJ_CONTEXT *ctx, double center_lat, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
+    SANITIZE_CTX(ctx);
+    try {
+        UnitOfMeasure linearUnit(
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
+        UnitOfMeasure angUnit(
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
+        auto conv = Conversion::createTunisiaMiningGrid(
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
+        return proj_create_conversion(ctx, conv);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Tunisia
+ * Mining Grid projection method.
+ *
+ * See osgeo::proj::operation::Conversion::createTunisiaMiningGrid().
+ *
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
+ *
+ * @since 9.2
  */
 PJ *proj_create_conversion_tunisia_mapping_grid(
     PJ_CONTEXT *ctx, double center_lat, double center_long,
@@ -5065,7 +5101,7 @@ PJ *proj_create_conversion_tunisia_mapping_grid(
             createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
             createAngularUnit(ang_unit_name, ang_unit_conv_factor));
-        auto conv = Conversion::createTunisiaMappingGrid(
+        auto conv = Conversion::createTunisiaMiningGrid(
             PropertyMap(), Angle(center_lat, angUnit),
             Angle(center_long, angUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));

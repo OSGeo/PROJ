@@ -1455,7 +1455,7 @@ TEST(operation, tped_export) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, tmg_export) {
-    auto conv = Conversion::createTunisiaMappingGrid(
+    auto conv = Conversion::createTunisiaMiningGrid(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
     EXPECT_TRUE(conv->validateParameters().empty());
 
@@ -1463,8 +1463,8 @@ TEST(operation, tmg_export) {
                  FormattingException);
 
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
-              "CONVERSION[\"Tunisia Mapping Grid\",\n"
-              "    METHOD[\"Tunisia Mapping Grid\",\n"
+              "CONVERSION[\"Tunisia Mining Grid\",\n"
+              "    METHOD[\"Tunisia Mining Grid\",\n"
               "        ID[\"EPSG\",9816]],\n"
               "    PARAMETER[\"Latitude of false origin\",1,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
@@ -1482,7 +1482,7 @@ TEST(operation, tmg_export) {
     EXPECT_EQ(
         conv->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
-        "PROJECTION[\"Tunisia_Mapping_Grid\"],\n"
+        "PROJECTION[\"Tunisia_Mining_Grid\"],\n"
         "PARAMETER[\"latitude_of_origin\",1],\n"
         "PARAMETER[\"central_meridian\",2],\n"
         "PARAMETER[\"false_easting\",3],\n"

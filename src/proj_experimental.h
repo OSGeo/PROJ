@@ -401,6 +401,15 @@ PJ PROJ_DLL *proj_create_conversion_tunisia_mapping_grid(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
+PJ PROJ_DLL *proj_create_conversion_tunisia_mining_grid(
+    PJ_CONTEXT *ctx,
+    double center_lat,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
+
 PJ PROJ_DLL *proj_create_conversion_albers_equal_area(
     PJ_CONTEXT *ctx,
     double latitude_false_origin,
