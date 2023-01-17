@@ -108,18 +108,18 @@ struct Grid : public GridPrototype {
         return true;
     }
 
-    bool getLonLatOffset(int ix, int iy, double &lonOffsetRadian,
-                         double &latOffsetRadian) const {
+    bool getLongLatOffset(int ix, int iy, double &longOffsetRadian,
+                          double &latOffsetRadian) const {
         if (!checkHorizontal(STR_DEGREE)) {
             return false;
         }
-        float lonOffsetDeg;
+        float longOffsetDeg;
         float latOffsetDeg;
-        if (!realGrid->valueAt(ix, iy, sampleX, lonOffsetDeg) ||
+        if (!realGrid->valueAt(ix, iy, sampleX, longOffsetDeg) ||
             !realGrid->valueAt(ix, iy, sampleY, latOffsetDeg)) {
             return false;
         }
-        lonOffsetRadian = lonOffsetDeg * DEG_TO_RAD;
+        longOffsetRadian = longOffsetDeg * DEG_TO_RAD;
         latOffsetRadian = latOffsetDeg * DEG_TO_RAD;
         return true;
     }
@@ -184,9 +184,9 @@ struct Grid : public GridPrototype {
         return ret;
     }
 
-    bool getLonLatZOffset(int ix, int iy, double &lonOffsetRadian,
-                          double &latOffsetRadian, double &zOffset) const {
-        return getLonLatOffset(ix, iy, lonOffsetRadian, latOffsetRadian) &&
+    bool getLongLatZOffset(int ix, int iy, double &longOffsetRadian,
+                           double &latOffsetRadian, double &zOffset) const {
+        return getLongLatOffset(ix, iy, longOffsetRadian, latOffsetRadian) &&
                getZOffset(ix, iy, zOffset);
     }
 

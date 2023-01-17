@@ -35,7 +35,7 @@ Bug fixes
 
 * Implement ``Geographic/Vertical Offset`` conversions (`#3413 <https://github.com/OSGeo/PROJ/issues/3413>`_)
 
-* ``vandg`` projection: handle ``+over`` to extend the validity domain outside of ``|lon|>180deg`` (`#3427 <https://github.com/OSGeo/PROJ/issues/3427>`_)
+* ``vandg`` projection: handle ``+over`` to extend the validity domain outside of ``|long|>180deg`` (`#3427 <https://github.com/OSGeo/PROJ/issues/3427>`_)
 
 * ``eqdc`` projection: avoid floating point division by zero in non-nominal case (`#3415 <https://github.com/OSGeo/PROJ/issues/3415>`_)
 
@@ -193,7 +193,7 @@ Bug fixes
 
 * ``unitconvert``: round to nearest date when converting to yyyymmdd (`#3111 <https://github.com/OSGeo/PROJ/issues/3111>`_)
 
-* Fix comparison of GeodeticRefrenceFrame vs DynamicGeodeticReferenceFrame (`#3120 <https://github.com/OSGeo/PROJ/issues/3120>`_)
+* Fix comparison of GeodeticReferenceFrame vs DynamicGeodeticReferenceFrame (`#3120 <https://github.com/OSGeo/PROJ/issues/3120>`_)
 
 * :cpp:func:`createOperations`: fix transformation involving CompoundCRS, ToWGS84
   and PROJ4_GRIDS (`#3124 <https://github.com/OSGeo/PROJ/issues/3124>`_)
@@ -412,7 +412,7 @@ Bug fixes
 
 * Detect ESRI WKT better in certain circumstances (`#2823 <https://github.com/OSGEO/PROJ/issues/2823>`_)
 
-* Fix performance issue on pipeline instanciation of huge (broken)
+* Fix performance issue on pipeline instantiation of huge (broken)
   pipelines (`#2824 <https://github.com/OSGEO/PROJ/issues/2824>`_)
 
 * Make sure to re-order projection parameters according to their canonical
@@ -423,7 +423,7 @@ Bug fixes
 * Fix error in implementation of Inverse ellipsoidal orthographic projection
   that cause convergence to sometimes fail (`#2853 <https://github.com/OSGEO/PROJ/issues/2853>`_)
 
-* Fix handling of edge-case coordinates in invers ortho ellipsoidal
+* Fix handling of edge-case coordinates in inverse ortho ellipsoidal
   oblique (`#2855 <https://github.com/OSGEO/PROJ/issues/2855>`_)
 
 * :c:func:`proj_normalize_for_visualization()`: set input and output units when there
@@ -485,7 +485,7 @@ Bug Fixes
 * Make sure that :c:func:`proj_crs_promote_to_3D` returns a derived CRS (`#2806 <https://github.com/OSGeo/PROJ/issues/2806>`_)
 
 * :cpp:func:`createOperations`: fix missing deg<-->rad conversion when transforming with a
-  CRS that has a fallback-to-PROJ4-string behaviour and is a BoundCRS of a
+  CRS that has a fallback-to-PROJ4-string behavior and is a BoundCRS of a
   GeographicCRS (`#2808 <https://github.com/OSGeo/PROJ/issues/2808>`_)
 
 * WKT2 import/export: preserve PROJ.4 CRS extension string in REMARKS[] (`#2812 <https://github.com/OSGeo/PROJ/issues/2812>`_)
@@ -595,7 +595,7 @@ Bug fixes
   code) (`#2661 <https://github.com/OSGeo/PROJ/issues/2661>`_)
 
 * :cpp:func:`createOperation()`: make sure no to discard deprecated operations if the
-  replacement uses an unknow grid (`#2623 <https://github.com/OSGeo/PROJ/issues/2623>`_)
+  replacement uses an unknown grid (`#2623 <https://github.com/OSGeo/PROJ/issues/2623>`_)
 
 * Fix build on Solaris 11.4 (`#2621 <https://github.com/OSGeo/PROJ/issues/2621>`_)
 

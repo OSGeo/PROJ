@@ -1187,14 +1187,14 @@ TransformationNNPtr Transformation::createLongitudeRotation(
  * @param sourceCRSIn Source CRS.
  * @param targetCRSIn Target CRS.
  * @param offsetLat Latitude offset to add.
- * @param offsetLon Longitude offset to add.
+ * @param offsetLong Longitude offset to add.
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new Transformation.
  */
 TransformationNNPtr Transformation::createGeographic2DOffsets(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
     const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
-    const common::Angle &offsetLon,
+    const common::Angle &offsetLong,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     return create(
         properties, sourceCRSIn, targetCRSIn, nullptr,
@@ -1202,7 +1202,7 @@ TransformationNNPtr Transformation::createGeographic2DOffsets(
         VectorOfParameters{
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LATITUDE_OFFSET),
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET)},
-        VectorOfValues{offsetLat, offsetLon}, accuracies);
+        VectorOfValues{offsetLat, offsetLong}, accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -1218,7 +1218,7 @@ TransformationNNPtr Transformation::createGeographic2DOffsets(
  * @param sourceCRSIn Source CRS.
  * @param targetCRSIn Target CRS.
  * @param offsetLat Latitude offset to add.
- * @param offsetLon Longitude offset to add.
+ * @param offsetLong Longitude offset to add.
  * @param offsetHeight Height offset to add.
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new Transformation.
@@ -1226,7 +1226,7 @@ TransformationNNPtr Transformation::createGeographic2DOffsets(
 TransformationNNPtr Transformation::createGeographic3DOffsets(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
     const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
-    const common::Angle &offsetLon, const common::Length &offsetHeight,
+    const common::Angle &offsetLong, const common::Length &offsetHeight,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     return create(
         properties, sourceCRSIn, targetCRSIn, nullptr,
@@ -1235,7 +1235,7 @@ TransformationNNPtr Transformation::createGeographic3DOffsets(
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LATITUDE_OFFSET),
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET),
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_VERTICAL_OFFSET)},
-        VectorOfValues{offsetLat, offsetLon, offsetHeight}, accuracies);
+        VectorOfValues{offsetLat, offsetLong, offsetHeight}, accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -1253,7 +1253,7 @@ TransformationNNPtr Transformation::createGeographic3DOffsets(
  * @param sourceCRSIn Source CRS.
  * @param targetCRSIn Target CRS.
  * @param offsetLat Latitude offset to add.
- * @param offsetLon Longitude offset to add.
+ * @param offsetLong Longitude offset to add.
  * @param offsetHeight Geoid undulation to add.
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new Transformation.
@@ -1261,7 +1261,7 @@ TransformationNNPtr Transformation::createGeographic3DOffsets(
 TransformationNNPtr Transformation::createGeographic2DWithHeightOffsets(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
     const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
-    const common::Angle &offsetLon, const common::Length &offsetHeight,
+    const common::Angle &offsetLong, const common::Length &offsetHeight,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     return create(
         properties, sourceCRSIn, targetCRSIn, nullptr,
@@ -1271,7 +1271,7 @@ TransformationNNPtr Transformation::createGeographic2DWithHeightOffsets(
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LATITUDE_OFFSET),
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET),
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_GEOID_UNDULATION)},
-        VectorOfValues{offsetLat, offsetLon, offsetHeight}, accuracies);
+        VectorOfValues{offsetLat, offsetLong, offsetHeight}, accuracies);
 }
 
 // ---------------------------------------------------------------------------

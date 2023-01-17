@@ -45,7 +45,7 @@
 
 /* in radians */
 #define ISEA_STD_LAT 1.01722196792335072101
-#define ISEA_STD_LON .19634954084936207740
+#define ISEA_STD_LONG .19634954084936207740
 
 namespace { // anonymous namespace
 struct hex {
@@ -165,7 +165,7 @@ struct isea_pt {
 
 namespace { // anonymous namespace
 struct isea_geo {
-    double lon, lat;
+    double longitude, lat;
 };
 } // anonymous namespace
 
@@ -255,9 +255,9 @@ static double az_adjustment(int triangle)
 
     /* TODO looks like the adjustment is always either 0 or 180 */
     /* at least if you pick your vertex carefully */
-    adj = atan2(cos(v.lat) * sin(v.lon - c.lon),
+    adj = atan2(cos(v.lat) * sin(v.longitude - c.longitude),
             cos(c.lat) * sin(v.lat)
-            - sin(c.lat) * cos(v.lat) * cos(v.lon - c.lon));
+            - sin(c.lat) * cos(v.lat) * cos(v.longitude - c.longitude));
     return adj;
 }
 
@@ -368,13 +368,13 @@ static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
 
         /* step 1 */
         z = acos(sin(center.lat) * sin(ll->lat)
-             + cos(center.lat) * cos(ll->lat) * cos(ll->lon - center.lon));
+             + cos(center.lat) * cos(ll->lat) * cos(ll->longitude - center.longitude));
         /* not on this triangle */
         if (z > g + 0.000005) { /* TODO DBL_EPSILON */
             continue;
         }
 
-        Az = sph_azimuth(center.lon, center.lat, ll->lon, ll->lat);
+        Az = sph_azimuth(center.longitude, center.lat, ll->longitude, ll->lat);
 
         /* step 2 */
 
@@ -478,7 +478,7 @@ static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
      */
 
     fprintf(stderr, "impossible transform: %f %f is not on any triangle\n",
-            PJ_TODEG(ll->lon), PJ_TODEG(ll->lat));
+            PJ_TODEG(ll->longitude), PJ_TODEG(ll->lat));
 
     exit(EXIT_FAILURE);
 }
@@ -511,9 +511,9 @@ static struct isea_geo snyder_ctran(struct isea_geo * np, struct isea_geo * pt)
     double          cos_p, sin_a;
 
     phi = pt->lat;
-    lambda = pt->lon;
+    lambda = pt->longitude;
     alpha = np->lat;
-    beta = np->lon;
+    beta = np->longitude;
     lambda0 = beta;
 
     cos_p = cos(phi);
@@ -541,7 +541,7 @@ static struct isea_geo snyder_ctran(struct isea_geo * np, struct isea_geo * pt)
     phip = asin(sin_phip);
 
     npt.lat = phip;
-    npt.lon = lambdap;
+    npt.longitude = lambdap;
 
     return npt;
 }
@@ -551,23 +551,23 @@ static struct isea_geo isea_ctran(struct isea_geo * np, struct isea_geo * pt,
 {
     struct isea_geo npt;
 
-    np->lon += M_PI;
+    np->longitude += M_PI;
     npt = snyder_ctran(np, pt);
-    np->lon -= M_PI;
+    np->longitude -= M_PI;
 
-    npt.lon -= (M_PI - lon0 + np->lon);
+    npt.longitude -= (M_PI - lon0 + np->longitude);
 
     /*
      * snyder is down tri 3, isea is along side of tri1 from vertex 0 to
      * vertex 1 these are 180 degrees apart
      */
-    npt.lon += M_PI;
+    npt.longitude += M_PI;
     /* normalize longitude */
-    npt.lon = fmod(npt.lon, 2 * M_PI);
-    while (npt.lon > M_PI)
-        npt.lon -= 2 * M_PI;
-    while (npt.lon < -M_PI)
-        npt.lon += 2 * M_PI;
+    npt.longitude = fmod(npt.longitude, 2 * M_PI);
+    while (npt.longitude > M_PI)
+        npt.longitude -= 2 * M_PI;
+    while (npt.longitude < -M_PI)
+        npt.longitude += 2 * M_PI;
 
     return npt;
 }
@@ -581,7 +581,7 @@ static int isea_grid_init(struct isea_dgg * g)
 
     g->polyhedron = 20;
     g->o_lat = ISEA_STD_LAT;
-    g->o_lon = ISEA_STD_LON;
+    g->o_lon = ISEA_STD_LONG;
     g->o_az = 0.0;
     g->aperture = 4;
     g->resolution = 6;
@@ -596,7 +596,7 @@ static void isea_orient_isea(struct isea_dgg * g)
     if (!g)
         return;
     g->o_lat = ISEA_STD_LAT;
-    g->o_lon = ISEA_STD_LON;
+    g->o_lon = ISEA_STD_LONG;
     g->o_az = 0.0;
 }
 
@@ -616,7 +616,7 @@ static int isea_transform(struct isea_dgg * g, struct isea_geo * in,
     int             tri;
 
     pole.lat = g->o_lat;
-    pole.lon = g->o_lon;
+    pole.longitude = g->o_lon;
 
     i = isea_ctran(&pole, in, g->o_az);
 
@@ -1016,7 +1016,7 @@ static PJ_XY isea_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
     struct isea_pt out;
     struct isea_geo in;
 
-    in.lon = lp.lam;
+    in.longitude = lp.lam;
     in.lat = lp.phi;
 
     try {

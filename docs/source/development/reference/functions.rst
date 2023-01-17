@@ -290,7 +290,7 @@ Coordinate transformation
 
     .. versionadded:: 9.1.0
 
-    Return the operation used during the last invokation of proj_trans().
+    Return the operation used during the last invocation of proj_trans().
     This is especially useful when P has been created with proj_create_crs_to_crs()
     and has several alternative operations.
     The returned object must be freed with proj_destroy().

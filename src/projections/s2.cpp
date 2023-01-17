@@ -280,7 +280,7 @@ inline bool UVtoSphereXYZ(int face, double u, double v, PJ_XYZ* xyz) {
 // ============================================
 static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double lat, lon;
+    double lat;
 
     /* Convert the geodetic latitude to a geocentric latitude.
      * This corresponds to the shift from the ellipsoid to the sphere
@@ -290,17 +290,16 @@ static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
     } else {
         lat = lp.phi;
     }
-    lon = lp.lam;
 
-    // Convert the lat/lon to x,y,z on the unit sphere
+    // Convert the lat/long to x,y,z on the unit sphere
     double x, y, z;
     double sinlat, coslat;
     double sinlon, coslon;
 
     sinlat = sin(lat);
     coslat = cos(lat);
-    sinlon = sin(lon);
-    coslon = cos(lon);
+    sinlon = sin(lp.lam);
+    coslon = cos(lp.lam);
     x = coslat * coslon;
     y = coslat * sinlon;
     z = sinlat;

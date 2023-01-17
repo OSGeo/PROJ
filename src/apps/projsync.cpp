@@ -362,7 +362,7 @@ int main(int argc, char *argv[]) {
                                           << " as it is only useful starting "
                                              "with PROJ-data "
                                           << version_added
-                                          << " and we are targetting "
+                                          << " and we are targeting "
                                           << proj_data_version_str << std::endl;
                             }
                             continue;
@@ -390,7 +390,7 @@ int main(int argc, char *argv[]) {
                                           << " as it is no longer useful "
                                              "starting with PROJ-data "
                                           << version_removed
-                                          << " and we are targetting "
+                                          << " and we are targeting "
                                           << proj_data_version_str << std::endl;
                             }
                             continue;

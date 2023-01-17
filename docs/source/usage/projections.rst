@@ -69,7 +69,7 @@ parameter.
 Input units for parameters that can be understood to be either decimal degrees or
 radians are interpreted to be decimal degrees by convention.
 
-Explict specification of input units can be accomplished by adding the appropriate
+Explicit specification of input units can be accomplished by adding the appropriate
 suffix to input values.
 
 
@@ -87,7 +87,7 @@ suffix to input values.
     | R              |                     |
     +----------------+---------------------+
 
-Example of use.  The longitude of the central meridian ``+lon_0=90``, can also be expressed more explictly
+Example of use.  The longitude of the central meridian ``+lon_0=90``, can also be expressed more explicitly
 with units of decimal degrees as ``+lon_0=90d`` or in radian
 units as ``+lon_0=1.570796r`` (approximately).
 

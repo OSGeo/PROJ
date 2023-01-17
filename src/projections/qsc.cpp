@@ -108,8 +108,8 @@ static double qsc_fwd_equat_face_theta(double phi, double y, double x, enum Area
 }
 
 /* Helper function: shift the longitude. */
-static double qsc_shift_lon_origin(double lon, double offset) {
-    double slon = lon + offset;
+static double qsc_shift_longitude_origin(double longitude, double offset) {
+    double slon = longitude + offset;
     if (slon < -M_PI) {
         slon += M_TWOPI;
     } else if (slon > +M_PI) {
@@ -122,7 +122,7 @@ static double qsc_shift_lon_origin(double lon, double offset) {
 static PJ_XY qsc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double lat, lon;
+    double lat, longitude;
     double theta, phi;
     double t, mu; /* nu; */
     enum Area area;
@@ -136,41 +136,41 @@ static PJ_XY qsc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward 
         lat = lp.phi;
     }
 
-    /* Convert the input lat, lon into theta, phi as used by QSC.
+    /* Convert the input lat, longitude into theta, phi as used by QSC.
      * This depends on the cube face and the area on it.
      * For the top and bottom face, we can compute theta and phi
      * directly from phi, lam. For the other faces, we must use
      * unit sphere cartesian coordinates as an intermediate step. */
-    lon = lp.lam;
+    longitude = lp.lam;
     if (Q->face == FACE_TOP) {
         phi = M_HALFPI - lat;
-        if (lon >= M_FORTPI && lon <= M_HALFPI + M_FORTPI) {
+        if (longitude >= M_FORTPI && longitude <= M_HALFPI + M_FORTPI) {
             area = AREA_0;
-            theta = lon - M_HALFPI;
-        } else if (lon > M_HALFPI + M_FORTPI || lon <= -(M_HALFPI + M_FORTPI)) {
+            theta = longitude - M_HALFPI;
+        } else if (longitude > M_HALFPI + M_FORTPI || longitude <= -(M_HALFPI + M_FORTPI)) {
             area = AREA_1;
-            theta = (lon > 0.0 ? lon - M_PI : lon + M_PI);
-        } else if (lon > -(M_HALFPI + M_FORTPI) && lon <= -M_FORTPI) {
+            theta = (longitude > 0.0 ? longitude - M_PI : longitude + M_PI);
+        } else if (longitude > -(M_HALFPI + M_FORTPI) && longitude <= -M_FORTPI) {
             area = AREA_2;
-            theta = lon + M_HALFPI;
+            theta = longitude + M_HALFPI;
         } else {
             area = AREA_3;
-            theta = lon;
+            theta = longitude;
         }
     } else if (Q->face == FACE_BOTTOM) {
         phi = M_HALFPI + lat;
-        if (lon >= M_FORTPI && lon <= M_HALFPI + M_FORTPI) {
+        if (longitude >= M_FORTPI && longitude <= M_HALFPI + M_FORTPI) {
             area = AREA_0;
-            theta = -lon + M_HALFPI;
-        } else if (lon < M_FORTPI && lon >= -M_FORTPI) {
+            theta = -longitude + M_HALFPI;
+        } else if (longitude < M_FORTPI && longitude >= -M_FORTPI) {
             area = AREA_1;
-            theta = -lon;
-        } else if (lon < -M_FORTPI && lon >= -(M_HALFPI + M_FORTPI)) {
+            theta = -longitude;
+        } else if (longitude < -M_FORTPI && longitude >= -(M_HALFPI + M_FORTPI)) {
             area = AREA_2;
-            theta = -lon - M_HALFPI;
+            theta = -longitude - M_HALFPI;
         } else {
             area = AREA_3;
-            theta = (lon > 0.0 ? -lon + M_PI : -lon - M_PI);
+            theta = (longitude > 0.0 ? -longitude + M_PI : -longitude - M_PI);
         }
     } else {
         double q, r, s;
@@ -178,16 +178,16 @@ static PJ_XY qsc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward 
         double sinlon, coslon;
 
         if (Q->face == FACE_RIGHT) {
-            lon = qsc_shift_lon_origin(lon, +M_HALFPI);
+            longitude = qsc_shift_longitude_origin(longitude, +M_HALFPI);
         } else if (Q->face == FACE_BACK) {
-            lon = qsc_shift_lon_origin(lon, +M_PI);
+            longitude = qsc_shift_longitude_origin(longitude, +M_PI);
         } else if (Q->face == FACE_LEFT) {
-            lon = qsc_shift_lon_origin(lon, -M_HALFPI);
+            longitude = qsc_shift_longitude_origin(longitude, -M_HALFPI);
         }
         sinlat = sin(lat);
         coslat = cos(lat);
-        sinlon = sin(lon);
-        coslon = cos(lon);
+        sinlon = sin(longitude);
+        coslon = cos(longitude);
         q = coslat * coslon;
         r = coslat * sinlon;
         s = sinlat;
@@ -351,11 +351,11 @@ static PJ_LP qsc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse 
         lp.phi = acos(-s) - M_HALFPI;
         lp.lam = atan2(r, q);
         if (Q->face == FACE_RIGHT) {
-            lp.lam = qsc_shift_lon_origin(lp.lam, -M_HALFPI);
+            lp.lam = qsc_shift_longitude_origin(lp.lam, -M_HALFPI);
         } else if (Q->face == FACE_BACK) {
-            lp.lam = qsc_shift_lon_origin(lp.lam, -M_PI);
+            lp.lam = qsc_shift_longitude_origin(lp.lam, -M_PI);
         } else if (Q->face == FACE_LEFT) {
-            lp.lam = qsc_shift_lon_origin(lp.lam, +M_HALFPI);
+            lp.lam = qsc_shift_longitude_origin(lp.lam, +M_HALFPI);
         }
     }
 

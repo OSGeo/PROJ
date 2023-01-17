@@ -47,7 +47,7 @@ The figure depicts some commonly sampled locations from line 40 to line 156.7 an
 Usage
 ###############################################################################
 
-A typical forward CalCOFI projection would be from lon/lat coordinates on the
+A typical forward CalCOFI projection would be from long/lat coordinates on the
 Clark 1866 ellipsoid.
 For example::
 
@@ -59,7 +59,7 @@ Output of the above command::
 
     -121.15 34.15   80.00   60.00
 
-The reverse projection from line/station coordinates to lon/lat would be entered
+The reverse projection from line/station coordinates to long/lat would be entered
 as::
 
     proj +proj=calcofi +ellps=clrk66 -I -E -f "%.2f" <<EOF

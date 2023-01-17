@@ -1916,7 +1916,7 @@ TEST(wkt_parse, wkt1_hotine_oblique_mercator_with_rectified_grid_angle) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
-    // Check that we have not overriden rectified_grid_angle
+    // Check that we have not overridden rectified_grid_angle
     auto got_wkt = crs->exportToWKT(
         WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
     EXPECT_TRUE(got_wkt.find("PARAMETER[\"rectified_grid_angle\",-23]") !=
@@ -1948,7 +1948,7 @@ TEST(wkt_parse,
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
-    // Check that we have not overriden rectified_grid_angle
+    // Check that we have not overridden rectified_grid_angle
     auto got_wkt = crs->exportToWKT(
         WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
     EXPECT_TRUE(got_wkt.find("PARAMETER[\"rectified_grid_angle\",0]") !=

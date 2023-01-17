@@ -1384,15 +1384,15 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     PROJ_DLL static ConversionNNPtr
     createGeographic2DOffsets(const util::PropertyMap &properties,
                               const common::Angle &offsetLat,
-                              const common::Angle &offsetLon);
+                              const common::Angle &offsetLong);
 
     PROJ_DLL static ConversionNNPtr createGeographic3DOffsets(
         const util::PropertyMap &properties, const common::Angle &offsetLat,
-        const common::Angle &offsetLon, const common::Length &offsetHeight);
+        const common::Angle &offsetLong, const common::Length &offsetHeight);
 
     PROJ_DLL static ConversionNNPtr createGeographic2DWithHeightOffsets(
         const util::PropertyMap &properties, const common::Angle &offsetLat,
-        const common::Angle &offsetLon, const common::Length &offsetHeight);
+        const common::Angle &offsetLong, const common::Length &offsetHeight);
 
     PROJ_DLL static ConversionNNPtr
     createVerticalOffset(const util::PropertyMap &properties,
@@ -1588,19 +1588,19 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_DLL static TransformationNNPtr createGeographic2DOffsets(
         const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
         const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
-        const common::Angle &offsetLon,
+        const common::Angle &offsetLong,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
     PROJ_DLL static TransformationNNPtr createGeographic3DOffsets(
         const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
         const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
-        const common::Angle &offsetLon, const common::Length &offsetHeight,
+        const common::Angle &offsetLong, const common::Length &offsetHeight,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
     PROJ_DLL static TransformationNNPtr createGeographic2DWithHeightOffsets(
         const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
         const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
-        const common::Angle &offsetLon, const common::Length &offsetHeight,
+        const common::Angle &offsetLong, const common::Length &offsetHeight,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
     PROJ_DLL static TransformationNNPtr createVerticalOffset(

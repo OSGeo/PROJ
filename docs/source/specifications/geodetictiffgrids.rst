@@ -227,7 +227,7 @@ is an easy way to inspect such grid files:
     - ``ELLIPSOIDAL_HEIGHT_OFFSET``: implies the presence of one sample with
       the ellipsoidal height difference. Generally used in combination with
       another grid of type ``HORIZONTAL_OFFSET`` to perform Geographic 3D
-      offseting when the horizontal and vertical grids do not have the same
+      offsetting when the horizontal and vertical grids do not have the same
       resolution, as found in some NADCON5 grids.
       Added in PROJ 9.2
       Corresponds to PROJ :ref:`gridshift` method.

@@ -69,7 +69,7 @@ the build process using generators, including Unix Makefiles and Ninja among
 other command-based and IDE tools. The CMake software has been under active
 development since its origins in 2000. The CMake language is carefully
 developed with backwards-compatible policies that aim to provide consistent
-behaviour across different versions. CMake is currently the preferred build
+behavior across different versions. CMake is currently the preferred build
 tool for PROJ for the following reasons:
 
 - It has existed in the PROJ code base since 2014, and is familiar to active

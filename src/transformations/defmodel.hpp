@@ -476,9 +476,9 @@ struct GridPrototype {
     int height = 0;
 
     // cppcheck-suppress functionStatic
-    bool getLonLatOffset(int /*ix*/, int /*iy*/, double & /*lonOffsetRadian*/,
-                         double & /*latOffsetRadian*/) const {
-        throw UnimplementedException("getLonLatOffset unimplemented");
+    bool getLongLatOffset(int /*ix*/, int /*iy*/, double & /*longOffsetRadian*/,
+                          double & /*latOffsetRadian*/) const {
+        throw UnimplementedException("getLongLatOffset unimplemented");
     }
 
     // cppcheck-suppress functionStatic
@@ -494,12 +494,13 @@ struct GridPrototype {
     }
 
     // cppcheck-suppress functionStatic
-    bool getLonLatZOffset(int /*ix*/, int /*iy*/, double & /*lonOffsetRadian*/,
-                          double & /*latOffsetRadian*/,
-                          double & /*zOffset*/) const {
-        throw UnimplementedException("getLonLatZOffset unimplemented");
+    bool getLongLatZOffset(int /*ix*/, int /*iy*/,
+                           double & /*longOffsetRadian*/,
+                           double & /*latOffsetRadian*/,
+                           double & /*zOffset*/) const {
+        throw UnimplementedException("getLongLatZOffset unimplemented");
 #if 0
-        return getLonLatOffset(ix, iy, lonOffsetRadian, latOffsetRadian) &&
+        return getLongLatOffset(ix, iy, longOffsetRadian, latOffsetRadian) &&
                getZOffset(ix, iy, zOffset);
 #endif
     }

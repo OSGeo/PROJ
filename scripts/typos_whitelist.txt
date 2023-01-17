@@ -25,3 +25,89 @@ operation  proj=latlong geoidgrids=egm96_15.gtx  axis=dne ellps=GRS80
 it (neither in current documentation, nor in `historic one <https://web.archive.org/web/20160601000000*/http://trac.osgeo.org/proj/wiki/GenParms>`_).
 `Deformation model master file <https://github.com/linz/deformation-model-format>`_
 of a Deformation Model <https://github.com/linz/deformation-model-format/blob/master/doc/JsonGeotiffDeformationModelFormat_20200501.pdf>`__
+    return strcmp(abbrev, "lon") == 0 || strcmp(abbrev, "Lon") == 0;
+  projections/som.cpp
+PROJ_HEAD(som, "Space Oblique Mercator")
+    static const std::string lon;
+        } else if (abbreviation == AxisAbbreviation::lon) {
+            abbreviation = AxisAbbreviation::lon;
+                                        : isGeographic ? AxisAbbreviation::lon
+                    : isGeographic ? AxisAbbreviation::lon : std::string(),
+const std::string AxisAbbreviation::lon("lon");
+                  AxisAbbreviation::lon, AxisDirection::EAST, unit);
+static const ParamMapping paramLonCentreLonCenterLonc = {
+    &paramLonCentreLonCenterLonc,
+ * This implements the Space Oblique Mercator (SOM) projection, used by the
+ * This code was originally developed for the Landsat SOM projection with the
+ * For the MISR path based SOM projection, the code is identical to that of Landsat
+ * SOM with the following parameter changes:
+ * For the generic SOM projection, the code is identical to the above for MISR
+PJ *PROJECTION(som) {
+operation +proj=som   +ellps=GRS80 +inc_angle=1.7157253262878522r +ps_rev=0.06866666666666667 +asc_lon=2.2298420007209447r
+operation +proj=som   +R=6400000 +inc_angle=1.7157253262878522r +ps_rev=0.06866666666666667 +asc_lon=2.2298420007209447r
+operation +proj=som   +ellps=GRS80 +inc_angle=98.30382 +ps_rev=0.06866666666666667 +asc_lon=127.7605356226
+operation +proj=som   +R=6400000 +inc_angle=98.30382 +ps_rev=0.06866666666666667 +asc_lon=127.7605356226
+        "  AXIS[\"Geodetic longitude (Lon)\",east,"
+        "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "            \"abbreviation\": \"lon\",\n"
+        "          \"abbreviation\": \"Lon\",\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+       "            AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "              \"abbreviation\": \"Lon\",\n"
+        "                \"abbreviation\": \"Lon\",\n"
+        "    AXIS[\"(lon)\",east,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        EXPECT_EQ(tolower(cs->axisList()[1]->abbreviation()), "lon");
+        EXPECT_EQ(cs->axisList()[0]->abbreviation(), "lon");
+        "AXIS[\"Lat\",north],AXIS[\"Lon\",east],"
+        "        AXIS[\"longitude (lon)\",east],\n"
+        "        AXIS[\"(lon)\",east],\n"
+    EXPECT_EQ(cs->axisList()[1]->abbreviation(), "lon");
+        "    VERSION[\"ENRD-Shn Hel\"],\n"
+        "                        AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                            AXIS[\"geodetic longitude (Lon)\",east,\n"
+                     "AXIS[\"geodetic longitude (Lon)\",east,"
+                  "        AXIS[\"geodetic longitude (Lon)\",east],\n"
+                "        \"abbreviation\": \"Lon\",\n"
+                "            \"abbreviation\": \"Lon\",\n"
+        "          \"abbreviation\": \"lon\",\n"
+                "        \"abbreviation\": \"lon\",\n"
+                "      \"abbreviation\": \"Lon\",\n"
+    EXPECT_EQ(std::string(abbrev), "lon");
+        "        AXIS[\"geodetic longitude (Lon)\",east,"
+    EXPECT_EQ(axisList[1]->abbreviation(), "Lon");
+               "                AXIS[\"geodetic longitude (Lon)\",east],\n"
+export NOT_A_TRANSFORMATION='GEOGCRS["WGS 84",DATUM["World Geodetic System 1984 (G2139)",ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]]],CS[ellipsoidal,2],AXIS["geodetic latitude (Lat)",north,ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic longitude (Lon)",east,ANGLEUNIT["degree",0.0174532925199433]]]'
+        AXIS["geodetic longitude (Lon)",east,
+        "abbreviation": "Lon",
+        "filename": "som.png",
+        "name": "som",
+        "projstring": "+proj=som +inc_angle=98.303820000243860022 +ps_rev=0.06866666666666667 +asc_lon=64.412896137498847793",
+- `Land Information New Zealand (LINZ) <https://www.linz.govt.nz/>`_
+        Z_{dest} = Z_{src} + \left( dh + slope_{lat} * {\rho}_0 * (\phi - {\phi}_0) + slope_{lon} * {\nu}_0 * (\lambda - {\lambda}_0) * cos(\phi) \right)
+* :math:`dh`, :math:`slope_{lat}` and :math:`slope_{lon}` are the above mentioned parameters
+        Z_{src} = Z_{dest} - \left( dh + slope_{lat} * {\rho}_0 * (\phi - {\phi}_0) + slope_{lon} * {\nu}_0 * (\lambda - {\lambda}_0) * cos(\phi) \r
+        Z_{src} = Z_{dest} - \left( dh + slope_{lat} * {\rho}_0 * (\phi - {\phi}_0) + slope_{lon} * {\nu}_0 * (\lambda - {\lambda}_0) * cos(\phi) \right)
+Space oblique for LANDSAT is a specialization of :doc:`Space Oblique Mercator<som>`
+#. :doc:`Space Oblique Mercator Projection<som>`
+Space Oblique Mercator (SOM)
+The Space Oblique Mercator (SOM) projection is a generalization 
+The Space Oblique Mercator (SOM) projection is a generalization of the Oblique
+representing satellite remote sensing data. In response, SOM was specifically
+| **Alias**           | som                                                      |
+.. figure:: ./images/som.png
+   :alt:   Space Oblique Mercator (SOM)
+   proj-string: ``+proj=som +inc_angle=98.303820000243860022 +ps_rev=0.06866666666666667 +asc_lon=64.412896137498847793``
+   proj-string: ``+proj=som +inc_angle=1.7157253262878522r +ps_rev=0.06866666666666667 +asc_lon=1.1242171183417042r``
+Space oblique for MISR is a specialization of :doc:`Space Oblique Mercator<som>`
+   som
+          "value": "nadcon5.nad27.nad83_1986.alaska.lon.trn.20160901.b",
+    set HEL="60.171  24.938"
+    export HEL="60.171  24.938"
+    echo %HEL% %TAL% | geod -I +ellps=GRS80
+    echo %HEL% %TAL% | geod -I -f "%.12f" +ellps=GRS80
+    echo %HEL%  -172.370214337896    41244.25 | geod -f "%.12f" +ellps=GRS80
+    echo %HEL% | %utm35%
+    set HEL=60.171  24.938
+NOTE: This is Windows syntax - Unix users use $HEL, etc.
+ * https://github.com/Unidata/netcdf-java/blob/3ce72c0cd167609ed8c69152bb4a004d1daa9273/cdm/core/src/main/java/ucar/unidata/geoloc/projection/RotatedLatLon.java

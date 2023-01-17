@@ -81,7 +81,7 @@ member, the ``type`` may be omitted. However, the value of the ``datum`` object 
 a GeographicCRS the ``type`` should be specified, as it can be either a GeodeticReferenceFrame
 or a DynamicGeodeticReferenceFrame.
 More formally, the ``type`` should be specified if the JSON schema specifies alternative
-types for the value of a member using the oneOf constrct and those alternative
+types for the value of a member using the oneOf construct and those alternative
 types have a ``type`` member. Otherwise it may be omitted.
 
 High level objects
@@ -169,7 +169,7 @@ of a "object usage" class. An object usage has the following optional members:
   The coordinates are expressed in a unspecified datum, with the longitudes
   relative to the international reference meridian.
 - ``remarks``: (optional) value of type string with an informative text that does
-  not modify the definining parameters of the object. e.g "Use NTv2 file for better accuracy"
+  not modify the defining parameters of the object. e.g "Use NTv2 file for better accuracy"
 - ``id`` (mutually exclusive with ``ids``): (optional) Identifier of the object, as defined in :ref:`identifiers`
 - ``ids`` (mutually exclusive with ``id``): (optional) Identifiers of the object, as defined in :ref:`identifiers`
 
@@ -479,7 +479,7 @@ of the PROJ software version 9.0.0
 .. note::
 
     PROJ versions prior to PROJ 8.0.0 used versions of the EPSG dataset that
-    did not have the datum ensemble concept. Consquently they used a ``datum``
+    did not have the datum ensemble concept. Consequently they used a ``datum``
     member instead of a ``datum_ensemble``. The number of elements in the
     datum ensemble may also vary over time when new realizations of WGS 84 are
     added to the ensemble.
@@ -1085,7 +1085,7 @@ PROJJSON extensions
 
 This specification allows a Bound CRS to be used wherever a CRS object is allowed
 in the OGC Topic 2 abstract specification / ISO-19111:2019. In particular,
-the members of a coumpound CRS can be a Bound CRS in this specification, whereas
+the members of a compound CRS can be a Bound CRS in this specification, whereas
 OGC Topic 2 abstract specification restricts it to single CRS. A Bound CRS can
 also be used as the source or target of a coordinate operation.
 
