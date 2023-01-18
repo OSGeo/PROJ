@@ -677,8 +677,7 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
                 return nullptr;
             }
         }
-        auto obj = nn_dynamic_pointer_cast<IdentifiedObject>(
-            parser.createFromWKT(wkt));
+        auto obj = parser.createFromWKT(wkt);
 
         std::vector<std::string> warningsFromParsing;
         if (out_grammar_errors) {
@@ -696,7 +695,7 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
             }
         }
 
-        if (obj && out_warnings) {
+        if (out_warnings) {
             auto derivedCRS = dynamic_cast<const crs::DerivedCRS *>(obj.get());
             if (derivedCRS) {
                 auto warnings =
@@ -718,9 +717,7 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
             }
         }
 
-        if (obj) {
-            return pj_obj_create(ctx, NN_NO_CHECK(obj));
-        }
+        return pj_obj_create(ctx, NN_NO_CHECK(obj));
     } catch (const std::exception &e) {
         if (out_grammar_errors) {
             std::list<std::string> exc{e.what()};

@@ -932,7 +932,8 @@ TEST_F(CApi, proj_get_type) {
         auto obj = proj_create_from_wkt(m_ctxt, "AUTHORITY[\"EPSG\", 4326]",
                                         nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
-        ASSERT_EQ(obj, nullptr);
+        ASSERT_NE(obj, nullptr);
+        EXPECT_EQ(proj_get_type(obj), PJ_TYPE_UNKNOWN);
     }
 }
 
