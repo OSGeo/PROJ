@@ -4707,6 +4707,46 @@ TEST_F(CApi, proj_create_crs_to_crs_from_pj_ballpark_filter) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_create_crs_to_crs_coordinate_metadata_in_src) {
+
+    auto P =
+        proj_create_crs_to_crs(m_ctxt, "ITRF2014@2025.0", "GDA2020", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+
+    PJ_COORD coord;
+    coord.xyzt.x = -30;
+    coord.xyzt.y = 130;
+    coord.xyzt.z = 0;
+    coord.xyzt.t = HUGE_VAL;
+
+    coord = proj_trans(P, PJ_FWD, coord);
+    EXPECT_NEAR(coord.xyzt.x, -30.0000026655, 1e-10);
+    EXPECT_NEAR(coord.xyzt.y, 129.9999983712, 1e-10);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_crs_to_crs_coordinate_metadata_in_target) {
+
+    auto P =
+        proj_create_crs_to_crs(m_ctxt, "GDA2020", "ITRF2014@2025.0", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+
+    PJ_COORD coord;
+    coord.xyzt.x = -30.0000026655;
+    coord.xyzt.y = 129.9999983712;
+    coord.xyzt.z = 0;
+    coord.xyzt.t = HUGE_VAL;
+
+    coord = proj_trans(P, PJ_FWD, coord);
+    EXPECT_NEAR(coord.xyzt.x, -30, 1e-10);
+    EXPECT_NEAR(coord.xyzt.y, 130, 1e-10);
+}
+
+// ---------------------------------------------------------------------------
+
 static void
 check_axis_is_latitude(PJ_CONTEXT *ctx, PJ *cs, int axis_number,
                        const char *unit_name = "degree",

@@ -32,6 +32,7 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#include "proj/coordinates.hpp"
 #include "proj/crs.hpp"
 #include "proj/io.hpp"
 #include "proj/metadata.hpp"
@@ -167,6 +168,13 @@ struct CoordinateOperationContext::Private {
         intermediateCRSAuthCodes_{};
     bool discardSuperseded_ = true;
     bool allowBallpark_ = true;
+    std::shared_ptr<util::optional<common::DataEpoch>> sourceCoordinateEpoch_{
+        std::make_shared<util::optional<common::DataEpoch>>()};
+    std::shared_ptr<util::optional<common::DataEpoch>> targetCoordinateEpoch_{
+        std::make_shared<util::optional<common::DataEpoch>>()};
+
+    Private() = default;
+    Private(const Private &) = default;
 };
 //! @endcond
 
@@ -180,6 +188,12 @@ CoordinateOperationContext::~CoordinateOperationContext() = default;
 
 CoordinateOperationContext::CoordinateOperationContext()
     : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+CoordinateOperationContext::CoordinateOperationContext(
+    const CoordinateOperationContext &other)
+    : d(internal::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
@@ -429,6 +443,46 @@ CoordinateOperationContext::getIntermediateCRS() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set the source coordinate epoch.
+ */
+void CoordinateOperationContext::setSourceCoordinateEpoch(
+    const util::optional<common::DataEpoch> &epoch) {
+
+    d->sourceCoordinateEpoch_ =
+        std::make_shared<util::optional<common::DataEpoch>>(epoch);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the source coordinate epoch.
+ */
+const util::optional<common::DataEpoch> &
+CoordinateOperationContext::getSourceCoordinateEpoch() const {
+    return *(d->sourceCoordinateEpoch_);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set the target coordinate epoch.
+ */
+void CoordinateOperationContext::setTargetCoordinateEpoch(
+    const util::optional<common::DataEpoch> &epoch) {
+
+    d->targetCoordinateEpoch_ =
+        std::make_shared<util::optional<common::DataEpoch>>(epoch);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the target coordinate epoch.
+ */
+const util::optional<common::DataEpoch> &
+CoordinateOperationContext::getTargetCoordinateEpoch() const {
+    return *(d->targetCoordinateEpoch_);
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Creates a context for a coordinate operation.
  *
  * If a non null authorityFactory is provided, the resulting context should
@@ -460,6 +514,19 @@ CoordinateOperationContextNNPtr CoordinateOperationContext::create(
     ctxt->d->extent_ = extent;
     ctxt->d->accuracy_ = accuracy;
     return ctxt;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Clone a coordinate operation context.
+ *
+ * @return a new context.
+ * @since 9.2
+ */
+CoordinateOperationContextNNPtr CoordinateOperationContext::clone() const {
+    return NN_NO_CHECK(
+        CoordinateOperationContext::make_unique<CoordinateOperationContext>(
+            *this));
 }
 
 // ---------------------------------------------------------------------------
@@ -6250,10 +6317,69 @@ CoordinateOperationFactory::createOperations(
         }
     }
 
-    return filterAndSort(Private::createOperations(l_resolvedSourceCRS,
-                                                   l_resolvedTargetCRS,
-                                                   contextPrivate),
-                         context, sourceCRSExtent, targetCRSExtent);
+    auto resFiltered = filterAndSort(
+        Private::createOperations(l_resolvedSourceCRS, l_resolvedTargetCRS,
+                                  contextPrivate),
+        context, sourceCRSExtent, targetCRSExtent);
+    if (context->getSourceCoordinateEpoch().has_value() ||
+        context->getTargetCoordinateEpoch().has_value()) {
+        std::vector<CoordinateOperationNNPtr> res;
+        res.reserve(resFiltered.size());
+        for (const auto &op : resFiltered) {
+            auto opClone = op->shallowClone();
+            opClone->setSourceCoordinateEpoch(
+                context->getSourceCoordinateEpoch());
+            opClone->setTargetCoordinateEpoch(
+                context->getTargetCoordinateEpoch());
+            res.emplace_back(opClone);
+        }
+        return res;
+    }
+    return resFiltered;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Find a list of CoordinateOperation from a source coordinate metadata
+ * to targetCRS.
+ * @param sourceCoordinateMetadata source CoordinateMetadata.
+ * @param targetCRS target CRS.
+ * @param context Search context.
+ * @return a list
+ * @since 9.2
+ */
+std::vector<CoordinateOperationNNPtr>
+CoordinateOperationFactory::createOperations(
+    const coordinates::CoordinateMetadataNNPtr &sourceCoordinateMetadata,
+    const crs::CRSNNPtr &targetCRS,
+    const CoordinateOperationContextNNPtr &context) const {
+    auto newContext = context->clone();
+    newContext->setSourceCoordinateEpoch(
+        sourceCoordinateMetadata->coordinateEpoch());
+    return createOperations(sourceCoordinateMetadata->crs(), targetCRS,
+                            newContext);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Find a list of CoordinateOperation from a source CRS to a target
+ * coordinate metadata.
+ * @param sourceCRS source CRS.
+ * @param targetCoordinateMetadata target CoordinateMetadata.
+ * @param context Search context.
+ * @return a list
+ * @since 9.2
+ */
+std::vector<CoordinateOperationNNPtr>
+CoordinateOperationFactory::createOperations(
+    const crs::CRSNNPtr &sourceCRS,
+    const coordinates::CoordinateMetadataNNPtr &targetCoordinateMetadata,
+    const CoordinateOperationContextNNPtr &context) const {
+    auto newContext = context->clone();
+    newContext->setTargetCoordinateEpoch(
+        targetCoordinateMetadata->coordinateEpoch());
+    return createOperations(sourceCRS, targetCoordinateMetadata->crs(),
+                            newContext);
 }
 
 // ---------------------------------------------------------------------------

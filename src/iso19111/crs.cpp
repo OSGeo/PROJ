@@ -179,6 +179,51 @@ const BoundCRSPtr &CRS::canonicalBoundCRS() PROJ_PURE_DEFN {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether a CRS is a dynamic CRS.
+ *
+ * A dynamic CRS is a CRS that contains a geodetic CRS whose geodetic reference
+ * frame is dynamic, or a vertical CRS whose vertical reference frame is
+ * dynamic.
+ * @param considerWGS84AsDynamic set to true to consider the WGS 84 / EPSG:6326
+ *                               datum ensemble as dynamic.
+ * @since 9.2
+ */
+bool CRS::isDynamic(bool considerWGS84AsDynamic) const {
+
+    if (auto raw = extractGeodeticCRSRaw()) {
+        const auto &l_datum = raw->datum();
+        if (l_datum) {
+            if (dynamic_cast<datum::DynamicGeodeticReferenceFrame *>(
+                    l_datum.get())) {
+                return true;
+            }
+            if (considerWGS84AsDynamic &&
+                l_datum->nameStr() == "World Geodetic System 1984") {
+                return true;
+            }
+        }
+        if (considerWGS84AsDynamic) {
+            const auto &l_datumEnsemble = raw->datumEnsemble();
+            if (l_datumEnsemble && l_datumEnsemble->nameStr() ==
+                                       "World Geodetic System 1984 ensemble") {
+                return true;
+            }
+        }
+    }
+
+    if (auto vertCRS = extractVerticalCRS()) {
+        const auto &l_datum = vertCRS->datum();
+        if (l_datum && dynamic_cast<datum::DynamicVerticalReferenceFrame *>(
+                           l_datum.get())) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the GeodeticCRS of the CRS.
  *
  * Returns the GeodeticCRS contained in a CRS. This works currently with

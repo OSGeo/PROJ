@@ -139,6 +139,9 @@ paragraph for more details.
         - more generally any string accepted by :c:func:`proj_create` representing
           a CRS
 
+    Starting with PROJ 9.2, source_crs or target_crs can be a CoordinateMetadata
+    with an associated coordinate epoch (but only one of them, not both).
+
     An "area of use" can be specified in area. When it is supplied, the more
     accurate transformation between two given systems can be chosen.
 
@@ -164,9 +167,9 @@ paragraph for more details.
 
     :param ctx: Threading context.
     :type ctx: :c:type:`PJ_CONTEXT` *
-    :param `source_crs`: Source CRS.
+    :param `source_crs`: Source CRS or CoordinateMetadata.
     :type `source_crs`: `const char*`
-    :param `target_crs`: Destination SRS.
+    :param `target_crs`: Destination SRS or CoordinateMetadata
     :type `target_crs`: `const char*`
     :param `area`: Descriptor of the desired area for the transformation.
     :type `area`: :c:type:`PJ_AREA` *
@@ -181,6 +184,9 @@ paragraph for more details.
 
     This is the same as :c:func:`proj_create_crs_to_crs` except that the source and
     target CRS are passed as PJ* objects which must be of the CRS variety.
+
+    Starting with PROJ 9.2, source_crs or target_crs can be a CoordinateMetadata
+    with an associated coordinate epoch (but only one of them, not both).
 
     :param `options`: a list of NUL terminated options, or NULL.
 

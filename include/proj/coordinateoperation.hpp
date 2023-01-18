@@ -49,6 +49,12 @@ class DerivedCRS;
 class ProjectedCRS;
 } // namespace crs
 
+namespace coordinates {
+class CoordinateMetadata;
+using CoordinateMetadataPtr = std::shared_ptr<CoordinateMetadata>;
+using CoordinateMetadataNNPtr = util::nn<CoordinateMetadataPtr>;
+} // namespace coordinates
+
 /** osgeo.proj.operation namespace
 
   \brief Coordinate operations (relationship between any two coordinate
@@ -192,6 +198,11 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     void setAccuracies(
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
     PROJ_INTERNAL void setHasBallparkTransformation(bool b);
+
+    PROJ_INTERNAL void
+    setSourceCoordinateEpoch(const util::optional<common::DataEpoch> &epoch);
+    PROJ_INTERNAL void
+    setTargetCoordinateEpoch(const util::optional<common::DataEpoch> &epoch);
 
     PROJ_INTERNAL void
     setProperties(const util::PropertyMap
@@ -1904,12 +1915,28 @@ class PROJ_GCC_DLL CoordinateOperationContext {
     PROJ_DLL const std::vector<std::pair<std::string, std::string>> &
     getIntermediateCRS() const;
 
+    PROJ_DLL void
+    setSourceCoordinateEpoch(const util::optional<common::DataEpoch> &epoch);
+
+    PROJ_DLL const util::optional<common::DataEpoch> &
+    getSourceCoordinateEpoch() const;
+
+    PROJ_DLL void
+    setTargetCoordinateEpoch(const util::optional<common::DataEpoch> &epoch);
+
+    PROJ_DLL const util::optional<common::DataEpoch> &
+    getTargetCoordinateEpoch() const;
+
     PROJ_DLL static CoordinateOperationContextNNPtr
     create(const io::AuthorityFactoryPtr &authorityFactory,
            const metadata::ExtentPtr &extent, double accuracy);
 
+    PROJ_DLL CoordinateOperationContextNNPtr clone() const;
+
   protected:
     PROJ_INTERNAL CoordinateOperationContext();
+    PROJ_INTERNAL
+    CoordinateOperationContext(const CoordinateOperationContext &);
     INLINED_MAKE_UNIQUE
 
   private:
@@ -1946,6 +1973,16 @@ class PROJ_GCC_DLL CoordinateOperationFactory {
     createOperations(const crs::CRSNNPtr &sourceCRS,
                      const crs::CRSNNPtr &targetCRS,
                      const CoordinateOperationContextNNPtr &context) const;
+
+    PROJ_DLL std::vector<CoordinateOperationNNPtr> createOperations(
+        const coordinates::CoordinateMetadataNNPtr &sourceCoordinateMetadata,
+        const crs::CRSNNPtr &targetCRS,
+        const CoordinateOperationContextNNPtr &context) const;
+
+    PROJ_DLL std::vector<CoordinateOperationNNPtr> createOperations(
+        const crs::CRSNNPtr &sourceCRS,
+        const coordinates::CoordinateMetadataNNPtr &targetCoordinateMetadata,
+        const CoordinateOperationContextNNPtr &context) const;
 
     PROJ_DLL static CoordinateOperationFactoryNNPtr create();
 

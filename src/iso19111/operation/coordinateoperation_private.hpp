@@ -47,8 +47,10 @@ struct CoordinateOperation::Private {
     std::weak_ptr<crs::CRS> sourceCRSWeak_{};
     std::weak_ptr<crs::CRS> targetCRSWeak_{};
     crs::CRSPtr interpolationCRS_{};
-    util::optional<common::DataEpoch> sourceCoordinateEpoch_{};
-    util::optional<common::DataEpoch> targetCoordinateEpoch_{};
+    std::shared_ptr<util::optional<common::DataEpoch>> sourceCoordinateEpoch_{
+        std::make_shared<util::optional<common::DataEpoch>>()};
+    std::shared_ptr<util::optional<common::DataEpoch>> targetCoordinateEpoch_{
+        std::make_shared<util::optional<common::DataEpoch>>()};
     bool hasBallparkTransformation_ = false;
 
     // do not set this for a ProjectedCRS.definingConversion

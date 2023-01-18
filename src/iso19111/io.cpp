@@ -47,6 +47,7 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#include "proj/coordinates.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -78,6 +79,7 @@
 // clang-format on
 
 using namespace NS_PROJ::common;
+using namespace NS_PROJ::coordinates;
 using namespace NS_PROJ::crs;
 using namespace NS_PROJ::cs;
 using namespace NS_PROJ::datum;
@@ -1476,6 +1478,8 @@ struct WKTParser::Private {
 
     ConcatenatedOperationNNPtr
     buildConcatenatedOperation(const WKTNodeNNPtr &node);
+
+    CoordinateMetadataNNPtr buildCoordinateMetadata(const WKTNodeNNPtr &node);
 };
 //! @endcond
 
@@ -5214,6 +5218,40 @@ WKTParser::Private::buildDerivedProjectedCRS(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+CoordinateMetadataNNPtr
+WKTParser::Private::buildCoordinateMetadata(const WKTNodeNNPtr &node) {
+    const auto *nodeP = node->GP();
+
+    const auto &l_children = nodeP->children();
+    if (l_children.empty()) {
+        ThrowNotEnoughChildren(WKTConstants::COORDINATEMETADATA);
+    }
+
+    auto crs = buildCRS(l_children[0]);
+    if (!crs) {
+        throw ParsingException("Invalid content in CRS node");
+    }
+
+    auto &epochNode = nodeP->lookForChild(WKTConstants::EPOCH);
+    if (!isNull(epochNode)) {
+        const auto &epochChildren = epochNode->GP()->children();
+        if (epochChildren.empty()) {
+            ThrowMissing(WKTConstants::EPOCH);
+        }
+        try {
+            const double coordinateEpoch = asDouble(epochChildren[0]);
+            return CoordinateMetadata::create(NN_NO_CHECK(crs),
+                                              coordinateEpoch);
+        } catch (const std::exception &) {
+            throw ParsingException("Invalid EPOCH node");
+        }
+    }
+
+    return CoordinateMetadata::create(NN_NO_CHECK(crs));
+}
+
+// ---------------------------------------------------------------------------
+
 static bool isGeodeticCRS(const std::string &name) {
     return ci_equal(name, WKTConstants::GEODCRS) ||       // WKT2
            ci_equal(name, WKTConstants::GEODETICCRS) ||   // WKT2
@@ -5444,6 +5482,11 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
             NN_NO_CHECK(buildId(node, false, false)));
     }
 
+    if (ci_equal(name, WKTConstants::COORDINATEMETADATA)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            buildCoordinateMetadata(node));
+    }
+
     throw ParsingException(concat("unhandled keyword: ", name));
 }
 
@@ -5490,6 +5533,7 @@ class JSONParser {
     BoundCRSNNPtr buildBoundCRS(const json &j);
     TransformationNNPtr buildTransformation(const json &j);
     ConcatenatedOperationNNPtr buildConcatenatedOperation(const json &j);
+    CoordinateMetadataNNPtr buildCoordinateMetadata(const json &j);
 
     void buildGeodeticDatumOrDatumEnsemble(const json &j,
                                            GeodeticReferenceFramePtr &datum,
@@ -6021,6 +6065,9 @@ BaseObjectNNPtr JSONParser::create(const json &j)
     if (type == "ConcatenatedOperation") {
         return buildConcatenatedOperation(j);
     }
+    if (type == "CoordinateMetadata") {
+        return buildCoordinateMetadata(j);
+    }
     if (type == "Axis") {
         return buildAxis(j);
     }
@@ -6393,6 +6440,23 @@ JSONParser::buildConcatenatedOperation(const json &j) {
         throw ParsingException(
             std::string("Cannot build concatenated operation: ") + e.what());
     }
+}
+
+// ---------------------------------------------------------------------------
+
+CoordinateMetadataNNPtr JSONParser::buildCoordinateMetadata(const json &j) {
+
+    auto crs = buildCRS(getObject(j, "crs"));
+    if (j.contains("coordinateEpoch")) {
+        auto jCoordinateEpoch = j["coordinateEpoch"];
+        if (jCoordinateEpoch.is_number()) {
+            return CoordinateMetadata::create(crs,
+                                              jCoordinateEpoch.get<double>());
+        }
+        throw ParsingException(
+            "Unexpected type for value of \"coordinateEpoch\"");
+    }
+    return CoordinateMetadata::create(crs);
 }
 
 // ---------------------------------------------------------------------------
@@ -7471,6 +7535,36 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         }
     }
 
+    // Parse strings like "ITRF2014 @ 2025.0"
+    const auto posAt = text.find('@');
+    if (posAt != std::string::npos) {
+        std::string leftPart = text.substr(0, posAt);
+        while (!leftPart.empty() && leftPart.back() == ' ')
+            leftPart.resize(leftPart.size() - 1);
+        const auto nonSpacePos = text.find_first_not_of(' ', posAt + 1);
+        if (nonSpacePos != std::string::npos) {
+            auto obj = createFromUserInput(leftPart, dbContext,
+                                           usePROJ4InitRules, ctx);
+            auto crs = nn_dynamic_pointer_cast<CRS>(obj);
+            if (crs) {
+                double epoch;
+                try {
+                    epoch = c_locale_stod(text.substr(nonSpacePos));
+                } catch (const std::exception &) {
+                    throw ParsingException("non-numeric value after @");
+                }
+                try {
+                    return CoordinateMetadata::create(NN_NO_CHECK(crs), epoch);
+                } catch (const std::exception &e) {
+                    throw ParsingException(
+                        std::string(
+                            "CoordinateMetadata::create() failed with: ") +
+                        e.what());
+                }
+            }
+        }
+    }
+
     throw ParsingException("unrecognized format / unknown name");
 }
 //! @endcond
@@ -7502,12 +7596,15 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  *      e.g.
  * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
  * <li>OGC URL for a single CRS. e.g.
- * "http://www.opengis.net/def/crs/EPSG/0/4326</li> <li>OGC URL for a compound
+ * "http://www.opengis.net/def/crs/EPSG/0/4326"</li>
+ * <li>OGC URL for a compound
  * CRS. e.g
  * "http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/def/crs/EPSG/0/4326&2=http://www.opengis.net/def/crs/EPSG/0/3855"</li>
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
+ * <li>a CRS name and a coordinate epoch, separated with '@'. For example
+ *     "ITRF2014@2025.0". (added in PROJ 9.2)</li>
  * <li>a compound CRS made from two object names separated with " + ".
  *     e.g. "WGS 84 + EGM96 height"</li>
  * <li>PROJJSON string</li>

@@ -33,6 +33,7 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#include "proj/coordinates.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -47,6 +48,7 @@
 #include <string>
 
 using namespace osgeo::proj::common;
+using namespace osgeo::proj::coordinates;
 using namespace osgeo::proj::crs;
 using namespace osgeo::proj::cs;
 using namespace osgeo::proj::datum;
@@ -8495,6 +8497,73 @@ TEST(wkt_parse, invalid_DerivedTemporalCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, invalid_CoordinateMetadata) {
+    EXPECT_THROW(WKTParser().createFromWKT("COORDINATEMETADATA[]"),
+                 ParsingException);
+
+    EXPECT_THROW(WKTParser().createFromWKT("COORDINATEMETADATA[ELLIPSOID[\"GRS "
+                                           "1980\",6378137,298.257222101]]"),
+                 ParsingException);
+
+    // Empty epoch
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "COORDINATEMETADATA[\n"
+            "    GEOGCRS[\"ITRF2014\",\n"
+            "        DYNAMIC[\n"
+            "            FRAMEEPOCH[2010]],\n"
+            "        DATUM[\"International Terrestrial Reference Frame "
+            "2014\",\n"
+            "            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+            "                LENGTHUNIT[\"metre\",1]]],\n"
+            "        PRIMEM[\"Greenwich\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "        CS[ellipsoidal,2],\n"
+            "            AXIS[\"geodetic latitude (Lat)\",north,\n"
+            "                ORDER[1],\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "            AXIS[\"geodetic longitude (Lon)\",east,\n"
+            "                ORDER[2],\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "        USAGE[\n"
+            "            SCOPE[\"Geodesy.\"],\n"
+            "            AREA[\"World.\"],\n"
+            "            BBOX[-90,-180,90,180]],\n"
+            "        ID[\"EPSG\",9000]],\n"
+            "    EPOCH[]]"),
+        ParsingException);
+
+    // Invalid epoch
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "COORDINATEMETADATA[\n"
+            "    GEOGCRS[\"ITRF2014\",\n"
+            "        DYNAMIC[\n"
+            "            FRAMEEPOCH[2010]],\n"
+            "        DATUM[\"International Terrestrial Reference Frame "
+            "2014\",\n"
+            "            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+            "                LENGTHUNIT[\"metre\",1]]],\n"
+            "        PRIMEM[\"Greenwich\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "        CS[ellipsoidal,2],\n"
+            "            AXIS[\"geodetic latitude (Lat)\",north,\n"
+            "                ORDER[1],\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "            AXIS[\"geodetic longitude (Lon)\",east,\n"
+            "                ORDER[2],\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "        USAGE[\n"
+            "            SCOPE[\"Geodesy.\"],\n"
+            "            AREA[\"World.\"],\n"
+            "            BBOX[-90,-180,90,180]],\n"
+            "        ID[\"EPSG\",9000]],\n"
+            "    EPOCH[invalid]]"),
+        ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projstringformatter) {
 
     {
@@ -12038,6 +12107,43 @@ TEST(io, createFromUserInput) {
 
     // Missing space, dash: OK
     EXPECT_NO_THROW(createFromUserInput("WGS84 PseudoMercator", dbContext));
+
+    // Invalid CoordinateMetadata
+    EXPECT_THROW(createFromUserInput("@", dbContext), ParsingException);
+
+    // Invalid CoordinateMetadata
+    EXPECT_THROW(createFromUserInput("ITRF2014@", dbContext), ParsingException);
+
+    // Invalid CoordinateMetadata
+    EXPECT_THROW(createFromUserInput("ITRF2014@foo", dbContext),
+                 ParsingException);
+
+    // Invalid CoordinateMetadata
+    EXPECT_THROW(createFromUserInput("foo@2025", dbContext), ParsingException);
+
+    // Invalid CoordinateMetadata
+    EXPECT_THROW(createFromUserInput("@2025", dbContext), ParsingException);
+
+    // Invalid CoordinateMetadata: static CRS not allowed
+    EXPECT_THROW(createFromUserInput("RGF93@2025", dbContext),
+                 ParsingException);
+
+    {
+        auto obj = createFromUserInput("ITRF2014@2025.1", dbContext);
+        auto coordinateMetadata =
+            nn_dynamic_pointer_cast<CoordinateMetadata>(obj);
+        ASSERT_TRUE(coordinateMetadata != nullptr);
+        EXPECT_EQ(coordinateMetadata->coordinateEpochAsDecimalYear(), 2025.1);
+    }
+
+    {
+        // Allow spaces before and after @
+        auto obj = createFromUserInput("ITRF2014 @ 2025.1", dbContext);
+        auto coordinateMetadata =
+            nn_dynamic_pointer_cast<CoordinateMetadata>(obj);
+        ASSERT_TRUE(coordinateMetadata != nullptr);
+        EXPECT_EQ(coordinateMetadata->coordinateEpochAsDecimalYear(), 2025.1);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -15810,6 +15916,73 @@ TEST(json_export, coordinate_system_id) {
     ASSERT_TRUE(cs != nullptr);
     EXPECT_EQ(cs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, invalid_CoordinateMetadata) {
+    {
+        auto json = "{\n"
+                    "  \"$schema\": \"foo\",\n"
+                    "  \"type\": \"CoordinateMetadata\"\n"
+                    "}";
+        EXPECT_THROW(createFromUserInput(json, nullptr), ParsingException);
+    }
+
+    {
+        auto json = "{\n"
+                    "  \"$schema\": \"foo\",\n"
+                    "  \"type\": \"CoordinateMetadata\",\n"
+                    "  \"crs\": \"not quite a CRS...\"\n"
+                    "}";
+        EXPECT_THROW(createFromUserInput(json, nullptr), ParsingException);
+    }
+
+    {
+        auto json = "{\n"
+                    "  \"$schema\": "
+                    "\"https://proj.org/schemas/v0.6/projjson.schema.json\",\n"
+                    "  \"type\": \"CoordinateMetadata\",\n"
+                    "  \"crs\": {\n"
+                    "    \"type\": \"GeographicCRS\",\n"
+                    "    \"name\": \"ITRF2014\",\n"
+                    "    \"datum\": {\n"
+                    "      \"type\": \"DynamicGeodeticReferenceFrame\",\n"
+                    "      \"name\": \"International Terrestrial Reference "
+                    "Frame 2014\",\n"
+                    "      \"frame_reference_epoch\": 2010,\n"
+                    "      \"ellipsoid\": {\n"
+                    "        \"name\": \"GRS 1980\",\n"
+                    "        \"semi_major_axis\": 6378137,\n"
+                    "        \"inverse_flattening\": 298.257222101\n"
+                    "      }\n"
+                    "    },\n"
+                    "    \"coordinate_system\": {\n"
+                    "      \"subtype\": \"ellipsoidal\",\n"
+                    "      \"axis\": [\n"
+                    "        {\n"
+                    "          \"name\": \"Geodetic latitude\",\n"
+                    "          \"abbreviation\": \"Lat\",\n"
+                    "          \"direction\": \"north\",\n"
+                    "          \"unit\": \"degree\"\n"
+                    "        },\n"
+                    "        {\n"
+                    "          \"name\": \"Geodetic longitude\",\n"
+                    "          \"abbreviation\": \"Lon\",\n"
+                    "          \"direction\": \"east\",\n"
+                    "          \"unit\": \"degree\"\n"
+                    "        }\n"
+                    "      ]\n"
+                    "    },\n"
+                    "    \"id\": {\n"
+                    "      \"authority\": \"EPSG\",\n"
+                    "      \"code\": 9000\n"
+                    "    }\n"
+                    "  },\n"
+                    "  \"coordinateEpoch\": \"this should be a number\"\n"
+                    "}";
+        EXPECT_THROW(createFromUserInput(json, nullptr), ParsingException);
+    }
 }
 
 // ---------------------------------------------------------------------------

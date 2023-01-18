@@ -96,6 +96,7 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
 
     // Non-standard
 
+    PROJ_DLL bool isDynamic(bool considerWGS84AsDynamic = false) const;
     PROJ_DLL GeodeticCRSPtr extractGeodeticCRS() const;
     PROJ_DLL GeographicCRSPtr extractGeographicCRS() const;
     PROJ_DLL VerticalCRSPtr extractVerticalCRS() const;

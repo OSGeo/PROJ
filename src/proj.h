@@ -805,6 +805,8 @@ typedef enum
     PJ_TYPE_PARAMETRIC_DATUM,
 
     PJ_TYPE_DERIVED_PROJECTED_CRS,
+
+    PJ_TYPE_COORDINATE_METADATA,
 } PJ_TYPE;
 
 /** Comparison criterion. */
@@ -1514,6 +1516,8 @@ int PROJ_DLL proj_concatoperation_get_step_count(PJ_CONTEXT *ctx,
 PJ PROJ_DLL *proj_concatoperation_get_step(PJ_CONTEXT *ctx,
                                            const PJ *concatoperation,
                                            int i_step);
+
+double PROJ_DLL proj_coordinate_metadata_get_epoch(PJ_CONTEXT *ctx, const PJ *obj);
 
 /**@}*/
 

@@ -374,6 +374,8 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
                 P->iCurCoordOp = iBest;
             }
             PJ_COORD res = coord;
+            if( alt.pj->hasCoordinateEpoch )
+                coord.xyzt.t = alt.pj->coordinateEpoch;
             if( direction == PJ_FWD )
                 pj_fwd4d( res, alt.pj );
             else
@@ -439,6 +441,8 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
     }
 
     P->iCurCoordOp = 0; // dummy value, to be used by proj_trans_get_last_used_operation()
+    if( P->hasCoordinateEpoch )
+        coord.xyzt.t = P->coordinateEpoch;
     if (direction == PJ_FWD)
         pj_fwd4d (coord, P);
     else
@@ -1691,9 +1695,29 @@ static PJ* add_coord_op_to_list(
     return op;
 }
 
+namespace {
+struct ObjectKeeper {
+    PJ *m_obj = nullptr;
+    explicit ObjectKeeper(PJ *obj) : m_obj(obj) {}
+    ~ObjectKeeper() { proj_destroy(m_obj); }
+    ObjectKeeper(const ObjectKeeper &) = delete;
+    ObjectKeeper& operator=(const ObjectKeeper &) = delete;
+};
+} // namespace
+
 /*****************************************************************************/
 static PJ* create_operation_to_geog_crs(PJ_CONTEXT* ctx, const PJ* crs) {
 /*****************************************************************************/
+
+    std::unique_ptr<ObjectKeeper> keeper;
+    if( proj_get_type(crs) == PJ_TYPE_COORDINATE_METADATA ) {
+        auto tmp = proj_get_source_crs(ctx, crs);
+        assert(tmp);
+        keeper.reset(new ObjectKeeper(tmp));
+        crs = tmp;
+    }
+    (void)keeper;
+
     // Create a geographic 2D long-lat degrees CRS that is related to the
     // CRS
     auto geodetic_crs = proj_crs_get_geodetic_crs(ctx, crs);
@@ -2369,10 +2393,12 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
     if (pj_param(P->ctx, P->params, "tproj").i)
         pjinfo.id = pj_param(P->ctx, P->params, "sproj").s;
 
+    pjinfo.description = P->descr;
     if( P->iso_obj ) {
-        pjinfo.description = P->iso_obj->nameStr().c_str();
-    } else {
-        pjinfo.description = P->descr;
+        auto identifiedObj = dynamic_cast<NS_PROJ::common::IdentifiedObject*>(P->iso_obj.get());
+        if( identifiedObj ) {
+            pjinfo.description = identifiedObj->nameStr().c_str();
+        }
     }
 
     // accuracy
