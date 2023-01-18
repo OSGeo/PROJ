@@ -8900,9 +8900,11 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
                             std::swap(maxxDst, maxyDst);
                         }
                     }
+                    ctx->forceOver = alt.pj->over;
                     auto pjNormalized =
                         pj_obj_create(ctx, co->normalizeForVisualization());
                     pjNormalized->over = alt.pj->over;
+                    ctx->forceOver = false;
                     pjNew->alternativeCoordinateOperations.emplace_back(
                         alt.idxInOriginalList, minxSrc, minySrc, maxxSrc,
                         maxySrc, minxDst, minyDst, maxxDst, maxyDst,
@@ -8912,6 +8914,7 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
             }
             return pjNew.release();
         } catch (const std::exception &e) {
+            ctx->forceOver = false;
             proj_log_debug(ctx, __FUNCTION__, e.what());
             return nullptr;
         }
@@ -8936,10 +8939,13 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
         return nullptr;
     }
     try {
+        ctx->forceOver = obj->over;
         auto pjNormalized = pj_obj_create(ctx, co->normalizeForVisualization());
         pjNormalized->over = obj->over;
+        ctx->forceOver = false;
         return pjNormalized;
     } catch (const std::exception &e) {
+        ctx->forceOver = false;
         proj_log_debug(ctx, __FUNCTION__, e.what());
         return nullptr;
     }

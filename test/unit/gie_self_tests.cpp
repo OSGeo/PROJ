@@ -1148,6 +1148,15 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
 
         auto Pnormalized = proj_normalize_for_visualization(ctx, P);
         ASSERT_TRUE(Pnormalized->over);
+
+        PJ_COORD input_over_normalized;
+        input_over_normalized.xyz.x = -220; // Long in deg
+        input_over_normalized.xyz.y = 0;    // Lat in deg
+        input_over_normalized.xyz.z = 0;
+        auto output_over_normalized =
+            proj_trans(Pnormalized, PJ_FWD, input_over_normalized);
+        EXPECT_NEAR(output_over_normalized.xyz.x, -24490287.974520184, 1e-8);
+
         proj_destroy(Pnormalized);
 
         proj_destroy(P);
@@ -1246,6 +1255,16 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         for (const auto &op : Pnormalized->alternativeCoordinateOperations) {
             ASSERT_TRUE(op.pj->over);
         }
+
+        PJ_COORD input_over_normalized;
+        input_over_normalized.xyz.x = -220; // Long in deg
+        input_over_normalized.xyz.y = 0;    // Lat in deg
+        input_over_normalized.xyz.z = 0;
+        auto output_over_normalized =
+            proj_trans(Pnormalized, PJ_FWD, input_over_normalized);
+        EXPECT_NEAR(output_over_normalized.xyz.x, 4980122.749364435, 1e-8);
+        EXPECT_NEAR(output_over_normalized.xyz.y, 14467212.882603768, 1e-8);
+
         proj_destroy(Pnormalized);
 
         proj_destroy(P);
