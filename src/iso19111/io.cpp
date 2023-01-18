@@ -6766,8 +6766,34 @@ static CRSNNPtr importFromCRSURL(const std::string &text,
 
     const auto &auth_name = parts[1];
     const auto &code = parts[3];
-    auto factoryCRS = AuthorityFactory::create(dbContext, auth_name);
-    return factoryCRS->createCoordinateReferenceSystem(code, true);
+    try {
+        auto factoryCRS = AuthorityFactory::create(dbContext, auth_name);
+        return factoryCRS->createCoordinateReferenceSystem(code, true);
+    } catch (...) {
+        const auto &version = parts[2];
+        if (version.empty() || version == "0") {
+            const auto authoritiesFromAuthName =
+                dbContext->getVersionedAuthoritiesFromName(auth_name);
+            for (const auto &authNameVersioned : authoritiesFromAuthName) {
+                try {
+                    auto factoryCRS =
+                        AuthorityFactory::create(dbContext, authNameVersioned);
+                    return factoryCRS->createCoordinateReferenceSystem(code,
+                                                                       true);
+                } catch (...) {
+                }
+            }
+            throw;
+        }
+        std::string authNameWithVersion;
+        if (!dbContext->getVersionedAuthority(auth_name, version,
+                                              authNameWithVersion)) {
+            throw;
+        }
+        auto factoryCRS =
+            AuthorityFactory::create(dbContext, authNameWithVersion);
+        return factoryCRS->createCoordinateReferenceSystem(code, true);
+    }
 }
 
 // ---------------------------------------------------------------------------

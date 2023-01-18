@@ -12052,6 +12052,23 @@ TEST(io, createFromUserInput_ogc_crs_url) {
         ASSERT_TRUE(crs != nullptr);
     }
 
+    {
+        auto obj = createFromUserInput(
+            "http://www.opengis.net/def/crs/IAU/2015/49900", dbContext);
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+    }
+
+    {
+        // Not sure if this is intended to be valid (version=0), but let's
+        // immitate the logic of EPSG, this will use the latest version of IAU
+        // (if/when there will be several of them)
+        auto obj = createFromUserInput(
+            "http://www.opengis.net/def/crs/IAU/0/49900", dbContext);
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+    }
+
     EXPECT_THROW(
         createFromUserInput("http://www.opengis.net/def/crs", dbContext),
         ParsingException);
@@ -12063,6 +12080,11 @@ TEST(io, createFromUserInput_ogc_crs_url) {
     EXPECT_THROW(createFromUserInput(
                      "http://www.opengis.net/def/crs/EPSG/0/XXXX", dbContext),
                  NoSuchAuthorityCodeException);
+
+    EXPECT_THROW(
+        createFromUserInput("http://www.opengis.net/def/crs/IAU/2015/invalid",
+                            dbContext),
+        NoSuchAuthorityCodeException);
 
     {
         auto obj = createFromUserInput(
