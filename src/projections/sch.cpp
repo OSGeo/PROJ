@@ -75,14 +75,14 @@ static PJ_LPZ sch_inverse3d(PJ_XYZ xyz, PJ *P) {
     xyz.y += Q->xyzoff[1];
     xyz.z += Q->xyzoff[2];
 
-    /* Convert geocentric coordinates to lat lon */
+    /* Convert geocentric coordinates to lat long */
     return Q->cart->inv3d (xyz, Q->cart);
 }
 
 static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
-    /* Convert lat lon to geocentric coordinates */
+    /* Convert lat long to geocentric coordinates */
     PJ_XYZ xyz  =  Q->cart->fwd3d (lpz, Q->cart);
 
     /* Adjust for offset */
@@ -97,7 +97,7 @@ static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
         Q->transMat[2] * xyz.x + Q->transMat[5] * xyz.y + Q->transMat[8] * xyz.z
     };
 
-    /* Convert to local lat,lon */
+    /* Convert to local lat,long */
     lpz  =  Q->cart_sph->inv3d (xyz, Q->cart_sph);
 
     /* Scale by radius */

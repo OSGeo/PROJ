@@ -9,7 +9,7 @@
 # based on the from the original libproj test. Note that
 # Peirce_q distances include considerable distortion away
 # from axes, a feature of the projection to allow
-# tesselation but means that there is no uniform scale
+# tessellation but means that there is no uniform scale
 # across the coordinate space, so tolerance can be high.
 ------------------------------------------------------------
 

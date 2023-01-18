@@ -157,7 +157,7 @@ all classes, except the CoordinateOperation class that point to CRS for
 sourceCRS and targetCRS members, whereas DerivedCRS point to a Conversion
 instance (which derives from CoordinateOperation). This issue was detected in
 the ISO-19111 standard. The solution adopted here is to use std::weak_ptr
-in the CoordinateOperation class to avoid the cycle. This design artefact is
+in the CoordinateOperation class to avoid the cycle. This design artifact is
 transparent to users.
 
 Another important design point is that all ISO19111 objects are immutable after
@@ -636,7 +636,7 @@ Impacted files
 --------------
 
 New files (excluding makefile.am, CMakeLists.txt and other build infrastructure
-artefacts):
+artifacts):
 
     * include/proj/: Public installed C++ headers
         - `common.hpp`_: declarations of osgeo::proj::common namespace.

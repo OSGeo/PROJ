@@ -26,7 +26,7 @@ Exercise 2: Use the Transverse Mercator to model the UTM projection
 ----------------------------------------------------------------------
 
 The backbone of the UTM projection is a Transverse Mercator projection. In
-this exercise we will model the behaviour of the UTM projection using the
+this exercise we will model the behavior of the UTM projection using the
 Transverse Mercator.
 
 
@@ -67,7 +67,7 @@ faster, less accurate transverse mercator algorithm.
 We will try to determine the approximate roundtrip accuracy of the +approx
 algorithm several UTM zones away from the actual zone for the given coordinate.
 For all the exercises below the aim is to find the lowest tolerance for each
-roundtrip test. You can of course make alle tests pass by setting a tolerance of
+roundtrip test. You can of course make all tests pass by setting a tolerance of
 1000 km - that's not the point: How low can you go?
 
 After you have answered all exercise 3 questions below, based on your findings

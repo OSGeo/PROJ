@@ -171,7 +171,7 @@ fallback_strategy
   specified triangles. This item is available for ``format_version`` >= 1.1.
   Possible values are ``none``, ``nearest_side`` and ``nearest_centroid``. The
   default is ``none`` and signifies, that points that fall outside the
-  specified triangles are not transformed. This is also the behaviour for
+  specified triangles are not transformed. This is also the behavior for
   ``format_version`` before 1.1. If ``fallback_strategy`` is set to
   ``nearest_side``, then points that do not fall into any triangle are 
   transformed according to the triangle closest to them by euclidean distance.

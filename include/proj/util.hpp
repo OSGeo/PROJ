@@ -33,7 +33,7 @@
 #error Must have C++11 or newer.
 #endif
 
-// windows.h can confict with Criterion::STRICT
+// windows.h can conflict with Criterion::STRICT
 #ifdef STRICT
 #undef STRICT
 #endif

@@ -1804,11 +1804,11 @@ void DatabaseContext::Private::identify(const DatabaseContextNNPtr &dbContext,
                     return;
                 }
                 if (authName == metadata::Identifier::EPSG && code == "6422") {
-                    // preferred coordinate system for geographic lat, lon
+                    // preferred coordinate system for geographic lat, long
                     return;
                 }
                 if (authName == metadata::Identifier::EPSG && code == "6423") {
-                    // preferred coordinate system for geographic lat, lon, h
+                    // preferred coordinate system for geographic lat, long, h
                     return;
                 }
             }

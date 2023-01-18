@@ -108,7 +108,7 @@ static PJ_LP vandg_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     if ((t - TOL) <= 1.) {
         d = t > 1. ? (d > 0. ? 0. : M_PI) : acos(d); // 3*theta1 (29-17)
         if( r > PISQ ) {
-            // This code path is triggered for coordinates generated in the forward path when |lon|>180deg and +over
+            // This code path is triggered for coordinates generated in the forward path when |long|>180deg and +over
             d = M_TWOPI - d;
         }
         // (29-18) but change pi/3 to 4*pi/3 to flip sign of cos

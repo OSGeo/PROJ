@@ -5941,7 +5941,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 createOpsInTwoSteps(opsSrcToIntermGeog, opsGeogToTarget);
             }
         }
-        // Symetrical situation with the promoted-to-3D target geographic CRS
+        // Symmetrical situation with the promoted-to-3D target geographic CRS
         else if (!dstGeog->identifiers().empty() &&
                  intermGeogDst->identifiers().empty() &&
                  !intermGeogSrc->identifiers().empty() &&

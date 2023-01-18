@@ -54,7 +54,7 @@ static double get_forward_offset(const PJ* P, double phi, double lam)
 
 static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     PJ_XYZ xyz;
-    // We need to add lam0 (+lon_0) since it is substracted in fwd_prepare(),
+    // We need to add lam0 (+lon_0) since it is subtracted in fwd_prepare(),
     // which is desirable for map projections, but not
     // for that method which modifies only the Z component.
     xyz.x = lpz.lam + P->lam0;

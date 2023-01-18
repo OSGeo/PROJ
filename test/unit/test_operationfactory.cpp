@@ -8659,7 +8659,7 @@ TEST_F(derivedGeographicCRS_with_to_wgs84_to_geographicCRS, src_from_proj) {
 TEST_F(derivedGeographicCRS_with_to_wgs84_to_geographicCRS, src_from_wkt2) {
     // Same as above, but testing with a WKT CRS source
     // The subtle difference is that the base CRS of the DerivedGeographicCRS
-    // will have a lat, lon axis order
+    // will have a lat, long axis order
     auto objSrcProj = PROJStringParser().createFromPROJString(
         "+proj=ob_tran +o_proj=latlon +lat_0=0 +lon_0=180 +o_lat_p=18.0 "
         "+o_lon_p=-200.0 +ellps=WGS84 +towgs84=1,2,3 +over +type=crs");

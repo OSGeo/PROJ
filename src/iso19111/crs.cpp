@@ -618,7 +618,7 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                     ->createOperations(NN_NO_CHECK(geodCRS), hubCRS, ctxt);
             CRSPtr candidateBoundCRS;
             int candidateCount = 0;
-            bool candidateHasExactlyMachingExtent = false;
+            bool candidateHasExactlyMatchingExtent = false;
             for (const auto &op : list) {
                 auto transf =
                     util::nn_dynamic_pointer_cast<operation::Transformation>(
@@ -638,16 +638,16 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                         extentResolved->contains(NN_NO_CHECK(opExtent));
                     if (candidateBoundCRS) {
                         if (exactlyMatchingExtent &&
-                            !candidateHasExactlyMachingExtent) {
+                            !candidateHasExactlyMatchingExtent) {
                             candidateBoundCRS = nullptr;
                         } else if (exactlyMatchingExtent ==
-                                   candidateHasExactlyMachingExtent) {
+                                   candidateHasExactlyMatchingExtent) {
                             candidateCount++;
                         }
                     }
                     if (candidateBoundCRS == nullptr) {
                         candidateCount = 1;
-                        candidateHasExactlyMachingExtent =
+                        candidateHasExactlyMatchingExtent =
                             exactlyMatchingExtent;
                         candidateBoundCRS =
                             BoundCRS::create(thisAsCRS, hubCRS,
@@ -695,17 +695,17 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                                             NN_NO_CHECK(opExtent));
                                     if (candidateBoundCRS) {
                                         if (exactlyMatchingExtent &&
-                                            !candidateHasExactlyMachingExtent) {
+                                            !candidateHasExactlyMatchingExtent) {
                                             candidateBoundCRS = nullptr;
                                         } else if (
                                             exactlyMatchingExtent ==
-                                            candidateHasExactlyMachingExtent) {
+                                            candidateHasExactlyMatchingExtent) {
                                             candidateCount++;
                                         }
                                     }
                                     if (candidateBoundCRS == nullptr) {
                                         candidateCount = 1;
-                                        candidateHasExactlyMachingExtent =
+                                        candidateHasExactlyMatchingExtent =
                                             exactlyMatchingExtent;
                                         candidateBoundCRS =
                                             BoundCRS::create(
@@ -4283,7 +4283,7 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         if (!isWKT2 && !l_identifiers.empty() &&
             *(l_identifiers[0]->codeSpace()) == "ESRI") {
             try {
-                // If the id of the objet is in the ESRI namespace, then
+                // If the id of the object is in the ESRI namespace, then
                 // try to find the full ESRI WKT from the database
                 const auto definition = dbContext->getTextDefinition(
                     "projected_crs", "ESRI", l_identifiers[0]->code());

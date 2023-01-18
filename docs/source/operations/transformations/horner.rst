@@ -236,7 +236,7 @@ Optional
 
     Coordinate of origin for the inverse mapping.
     Without this option iterative polynomial evaluation is used for
-    the inverse tranformation.
+    the inverse transformation.
 
 .. option:: +inv_u=<u_11,u_12,...,u_ij,..,u_mn>
 
@@ -245,7 +245,7 @@ Optional
     Coefficients for the inverse transformation i.e. latitude to northing
     as described in :eq:`real_poly`. Only applies for real polynomials.
     Without this option iterative polynomial evaluation is used for
-    the inverse tranformation.
+    the inverse transformation.
 
 .. option:: +inv_v=<v_11,v_12,...,v_ij,..,v_mn>
 
@@ -254,7 +254,7 @@ Optional
     Coefficients for the inverse transformation i.e. longitude to easting
     as described in :eq:`real_poly`. Only applies for real polynomials.
     Without this option iterative polynomial evaluation is used for
-    the inverse tranformation.
+    the inverse transformation.
 
 .. option:: +inv_c=<c_1,c_2,...,c_N>
 
@@ -263,7 +263,7 @@ Optional
     Coefficients for the complex inverse transformation
     as described in :eq:`complex_poly`. Only applies for complex polynomials.
     Without this option iterative polynomial evaluation is used for
-    the inverse tranformation.
+    the inverse transformation.
 
 .. option:: +range=<value>
 

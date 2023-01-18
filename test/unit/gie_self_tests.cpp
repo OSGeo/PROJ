@@ -1055,12 +1055,12 @@ TEST(gie, proj_trans_generic) {
         "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
         "+step +proj=axisswap +order=2,1");
     double lat = -60;
-    double lon = 120;
-    proj_trans_generic(P, PJ_FWD, &lat, sizeof(double), 1, &lon, sizeof(double),
-                       1, nullptr, 0, 0, nullptr, 0, 0);
+    double longitude = 120;
+    proj_trans_generic(P, PJ_FWD, &lat, sizeof(double), 1, &longitude,
+                       sizeof(double), 1, nullptr, 0, 0, nullptr, 0, 0);
     // Should be a no-op when the time is unknown (or equal to 2020)
     EXPECT_NEAR(lat, -60, 1e-9);
-    EXPECT_NEAR(lon, 120, 1e-9);
+    EXPECT_NEAR(longitude, 120, 1e-9);
 
     proj_destroy(P);
 }

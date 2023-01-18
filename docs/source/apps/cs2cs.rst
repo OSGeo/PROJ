@@ -310,7 +310,7 @@ To get those exact values, you have need to have all current grids installed
 locally or use networking capabilities mentioned above.
 
 To make sure you will get the optimal result, you may add :option:`--only-best`.
-Assuming the above mentionned grid is *not* available,
+Assuming the above mentioned grid is *not* available,
 
 ::
 

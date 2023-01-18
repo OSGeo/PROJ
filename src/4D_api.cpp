@@ -338,7 +338,7 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             P->alternativeCoordinateOperations.size());
 
         // We may need several attempts. For example the point at
-        // lon=-111.5 lat=45.26 falls into the bounding box of the Canadian
+        // long=-111.5 lat=45.26 falls into the bounding box of the Canadian
         // ntv2_0.gsb grid, except that it is not in any of the subgrids, being
         // in the US. We thus need another retry that will select the conus
         // grid.
@@ -449,7 +449,7 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
 /*****************************************************************************/
 PJ* proj_trans_get_last_used_operation(PJ* P)
 /******************************************************************************
-    Return the operation used during the last invokation of proj_trans().
+    Return the operation used during the last invocation of proj_trans().
     This is especially useful when P has been created with proj_create_crs_to_crs()
     and has several alternative operations.
     The returned object must be freed with proj_destroy().

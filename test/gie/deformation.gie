@@ -5,7 +5,7 @@ For all the deformation tests the alaska and egm96_15.gtx grids are used even
 though they are not parts of a deformation model, they are in the proper format
 and for testing purposes it doesn't really matter all that much...
 
-The input coordinate is located at lon=60, lam=-160 - somewhere in Alaska.
+The input coordinate is located at long=60, lam=-160 - somewhere in Alaska.
 
 ===============================================================================
 
