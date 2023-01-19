@@ -246,6 +246,7 @@ osgeo::proj::cs::VerticalCS::createGravityRelatedHeight(osgeo::proj::common::Uni
 osgeo::proj::cs::VerticalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
 osgeo::proj::cs::VerticalCS::~VerticalCS()
 osgeo::proj::datum::Datum::anchorDefinition() const
+osgeo::proj::datum::Datum::anchorEpoch() const
 osgeo::proj::datum::Datum::conventionalRS() const
 osgeo::proj::datum::Datum::~Datum()
 osgeo::proj::datum::DatumEnsemble::asDatum(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
@@ -279,6 +280,7 @@ osgeo::proj::datum::Ellipsoid::squaredEccentricity() const
 osgeo::proj::datum::EngineeringDatum::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::util::optional<std::string> const&)
 osgeo::proj::datum::EngineeringDatum::~EngineeringDatum()
 osgeo::proj::datum::GeodeticReferenceFrame::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::Ellipsoid> > const&, osgeo::proj::util::optional<std::string> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::PrimeMeridian> > const&)
+osgeo::proj::datum::GeodeticReferenceFrame::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::Ellipsoid> > const&, osgeo::proj::util::optional<std::string> const&, osgeo::proj::util::optional<osgeo::proj::common::Measure> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::PrimeMeridian> > const&)
 osgeo::proj::datum::GeodeticReferenceFrame::ellipsoid() const
 osgeo::proj::datum::GeodeticReferenceFrame::~GeodeticReferenceFrame()
 osgeo::proj::datum::GeodeticReferenceFrame::hasEquivalentNameToUsingAlias(osgeo::proj::common::IdentifiedObject const*, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
@@ -294,6 +296,7 @@ osgeo::proj::datum::TemporalDatum::calendar() const
 osgeo::proj::datum::TemporalDatum::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::DateTime const&, std::string const&)
 osgeo::proj::datum::TemporalDatum::~TemporalDatum()
 osgeo::proj::datum::TemporalDatum::temporalOrigin() const
+osgeo::proj::datum::VerticalReferenceFrame::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::util::optional<std::string> const&, osgeo::proj::util::optional<osgeo::proj::common::Measure> const&, osgeo::proj::util::optional<osgeo::proj::datum::RealizationMethod> const&)
 osgeo::proj::datum::VerticalReferenceFrame::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::util::optional<std::string> const&, osgeo::proj::util::optional<osgeo::proj::datum::RealizationMethod> const&)
 osgeo::proj::datum::VerticalReferenceFrame::realizationMethod() const
 osgeo::proj::datum::VerticalReferenceFrame::~VerticalReferenceFrame()

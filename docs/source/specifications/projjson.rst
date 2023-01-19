@@ -51,7 +51,11 @@ in the WKT2:2019 specification also apply, as supplement to the JSON schema cons
 History of the schema
 ---------------------
 
-* v0.6: additional optional "source_crs" property in "abridged_transformation". Added CoordinateMeta. Implemented in PROJ 9.2
+* v0.6:
+     - Implemented in PROJ 9.2
+     - Additional optional "source_crs" property in "abridged_transformation".
+     - Added CoordinateMetadata
+     - Added "datum_epoch" property to GeodeticReferenceFrame and VerticalReferenceFrame
 * v0.5:
     - Implemented in PROJ 9.1:
         + add "meridian" member in Axis object type.

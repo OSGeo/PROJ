@@ -89,6 +89,8 @@ static util::PropertyMap createMapNameEPSGCode(const char *name, int code) {
 //! @cond Doxygen_Suppress
 struct Datum::Private {
     util::optional<std::string> anchorDefinition{};
+    std::shared_ptr<util::optional<common::Measure>> anchorEpoch =
+        std::make_shared<util::optional<common::Measure>>();
     util::optional<common::DateTime> publicationDate{};
     common::IdentifiedObjectPtr conventionalRS{};
 
@@ -96,7 +98,13 @@ struct Datum::Private {
     void exportAnchorDefinition(io::WKTFormatter *formatter) const;
 
     // cppcheck-suppress functionStatic
+    void exportAnchorEpoch(io::WKTFormatter *formatter) const;
+
+    // cppcheck-suppress functionStatic
     void exportAnchorDefinition(io::JSONFormatter *formatter) const;
+
+    // cppcheck-suppress functionStatic
+    void exportAnchorEpoch(io::JSONFormatter *formatter) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -111,12 +119,33 @@ void Datum::Private::exportAnchorDefinition(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+void Datum::Private::exportAnchorEpoch(io::WKTFormatter *formatter) const {
+    if (anchorEpoch->has_value()) {
+        formatter->startNode(io::WKTConstants::ANCHOREPOCH, false);
+        formatter->add(
+            (*anchorEpoch)->convertToUnit(common::UnitOfMeasure::YEAR));
+        formatter->endNode();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 void Datum::Private::exportAnchorDefinition(
     io::JSONFormatter *formatter) const {
     if (anchorDefinition) {
         auto writer = formatter->writer();
         writer->AddObjKey("anchor");
         writer->Add(*anchorDefinition);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void Datum::Private::exportAnchorEpoch(io::JSONFormatter *formatter) const {
+    if (anchorEpoch->has_value()) {
+        auto writer = formatter->writer();
+        writer->AddObjKey("anchor_epoch");
+        writer->Add((*anchorEpoch)->convertToUnit(common::UnitOfMeasure::YEAR));
     }
 }
 
@@ -167,6 +196,25 @@ const util::optional<std::string> &Datum::anchorDefinition() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the anchor epoch.
+ *
+ * Epoch at which a static reference frame matches a dynamic reference frame
+ * from which it has been derived.
+ *
+ * Note: Not to be confused with the frame reference epoch of dynamic geodetic
+ * and dynamic vertical reference frames. Nor with the epoch at which a
+ * reference frame is defined to be aligned with another reference frame;
+ * this information should be included in the datum anchor definition.
+ *
+ * @return the anchor epoch, or empty.
+ * @since 9.2
+ */
+const util::optional<common::Measure> &Datum::anchorEpoch() const {
+    return *(d->anchorEpoch);
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the date on which the datum definition was published.
  *
  * \note Departure from \ref ISO_19111_2019 : we return a DateTime instead of
@@ -197,6 +245,13 @@ const common::IdentifiedObjectPtr &Datum::conventionalRS() const {
 
 void Datum::setAnchor(const util::optional<std::string> &anchor) {
     d->anchorDefinition = anchor;
+}
+
+// ---------------------------------------------------------------------------
+
+void Datum::setAnchorEpoch(const util::optional<common::Measure> &anchorEpoch) {
+    d->anchorEpoch =
+        std::make_shared<util::optional<common::Measure>>(anchorEpoch);
 }
 
 // ---------------------------------------------------------------------------
@@ -1190,6 +1245,7 @@ GeodeticReferenceFrame::primeMeridian() PROJ_PURE_DEFN {
 const EllipsoidNNPtr &GeodeticReferenceFrame::ellipsoid() PROJ_PURE_DEFN {
     return d->ellipsoid_;
 }
+
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a GeodeticReferenceFrame
@@ -1210,6 +1266,33 @@ GeodeticReferenceFrame::create(const util::PropertyMap &properties,
         GeodeticReferenceFrame::nn_make_shared<GeodeticReferenceFrame>(
             ellipsoid, primeMeridian));
     grf->setAnchor(anchor);
+    grf->setProperties(properties);
+    return grf;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a GeodeticReferenceFrame
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param ellipsoid the Ellipsoid.
+ * @param anchor the anchor definition, or empty.
+ * @param anchorEpoch the anchor epoch, or empty.
+ * @param primeMeridian the PrimeMeridian.
+ * @return new GeodeticReferenceFrame.
+ * @since 9.2
+ */
+GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::create(
+    const util::PropertyMap &properties, const EllipsoidNNPtr &ellipsoid,
+    const util::optional<std::string> &anchor,
+    const util::optional<common::Measure> &anchorEpoch,
+    const PrimeMeridianNNPtr &primeMeridian) {
+    GeodeticReferenceFrameNNPtr grf(
+        GeodeticReferenceFrame::nn_make_shared<GeodeticReferenceFrame>(
+            ellipsoid, primeMeridian));
+    grf->setAnchor(anchor);
+    grf->setAnchorEpoch(anchorEpoch);
     grf->setProperties(properties);
     return grf;
 }
@@ -1333,6 +1416,9 @@ void GeodeticReferenceFrame::_exportToWKT(
     ellipsoid()->_exportToWKT(formatter);
     if (isWKT2) {
         Datum::getPrivate()->exportAnchorDefinition(formatter);
+        if (formatter->use2019Keywords()) {
+            Datum::getPrivate()->exportAnchorEpoch(formatter);
+        }
     } else {
         const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
         if (TOWGS84Params.size() == 7) {
@@ -1387,6 +1473,7 @@ void GeodeticReferenceFrame::_exportToJSON(
     }
 
     Datum::getPrivate()->exportAnchorDefinition(formatter);
+    Datum::getPrivate()->exportAnchorEpoch(formatter);
 
     if (dynamicGRF) {
         writer->AddObjKey("frame_reference_epoch");
@@ -2010,6 +2097,32 @@ VerticalReferenceFrameNNPtr VerticalReferenceFrame::create(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a VerticalReferenceFrame
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param anchor the anchor definition, or empty.
+ * @param anchorEpoch the anchor epoch, or empty.
+ * @param realizationMethodIn the realization method, or empty.
+ * @return new VerticalReferenceFrame.
+ * @since 9.2
+ */
+VerticalReferenceFrameNNPtr VerticalReferenceFrame::create(
+    const util::PropertyMap &properties,
+    const util::optional<std::string> &anchor,
+    const util::optional<common::Measure> &anchorEpoch,
+    const util::optional<RealizationMethod> &realizationMethodIn) {
+    auto rf(VerticalReferenceFrame::nn_make_shared<VerticalReferenceFrame>(
+        realizationMethodIn));
+    rf->setAnchor(anchor);
+    rf->setAnchorEpoch(anchorEpoch);
+    rf->setProperties(properties);
+    properties.getStringValue("VERT_DATUM_TYPE", rf->d->wkt1DatumType_);
+    return rf;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 const std::string &VerticalReferenceFrame::getWKT1DatumType() const {
     return d->wkt1DatumType_;
@@ -2063,6 +2176,9 @@ void VerticalReferenceFrame::_exportToWKT(
     }
     if (isWKT2) {
         Datum::getPrivate()->exportAnchorDefinition(formatter);
+        if (formatter->use2019Keywords()) {
+            Datum::getPrivate()->exportAnchorEpoch(formatter);
+        }
     } else if (!formatter->useESRIDialect()) {
         formatter->add(d->wkt1DatumType_);
         const auto &extension = formatter->getVDatumExtension();
@@ -2102,6 +2218,7 @@ void VerticalReferenceFrame::_exportToJSON(
     }
 
     Datum::getPrivate()->exportAnchorDefinition(formatter);
+    Datum::getPrivate()->exportAnchorEpoch(formatter);
 
     if (dynamicGRF) {
         writer->AddObjKey("frame_reference_epoch");

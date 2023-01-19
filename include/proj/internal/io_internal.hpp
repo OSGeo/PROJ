@@ -86,6 +86,7 @@ class WKTConstants {
     static const std::string MERIDIAN;
     static const std::string ORDER;
     static const std::string ANCHOR;
+    static const std::string ANCHOREPOCH; // WKT2-2019
     static const std::string CONVERSION;
     static const std::string METHOD;
     static const std::string REMARK;

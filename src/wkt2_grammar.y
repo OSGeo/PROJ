@@ -61,6 +61,7 @@
 %token T_BEARING                "BEARING";
 %token T_ORDER                  "ORDER";
 %token T_ANCHOR                 "ANCHOR";
+%token T_ANCHOREPOCH            "ANCHOREPOCH";
 %token T_CONVERSION             "CONVERSION";
 %token T_METHOD                 "METHOD";
 %token T_REMARK                 "REMARK";
@@ -973,17 +974,21 @@ geodetic_reference_frame_with_opt_pm:
 
 geodetic_reference_frame_without_pm: geodetic_reference_frame_keyword
                           left_delimiter datum_name wkt_separator ellipsoid
-                          opt_separator_datum_anchor_identifier_list
+                          opt_separator_datum_anchor_anchor_epoch_identifier_list
                           right_delimiter
 
 geodetic_reference_frame_keyword: T_DATUM | T_TRF | T_GEODETICDATUM
 
 datum_name: quoted_latin_text
 
-opt_separator_datum_anchor_identifier_list:
+opt_separator_datum_anchor_anchor_epoch_identifier_list:
     | wkt_separator datum_anchor
+    | wkt_separator datum_anchor_epoch
+    | wkt_separator datum_anchor wkt_separator datum_anchor_epoch
     | wkt_separator identifier opt_separator_identifier_list
+    | wkt_separator datum_anchor_epoch wkt_separator identifier opt_separator_identifier_list
     | wkt_separator datum_anchor wkt_separator identifier opt_separator_identifier_list
+    | wkt_separator datum_anchor wkt_separator datum_anchor_epoch wkt_separator identifier opt_separator_identifier_list
 
 datum_anchor: datum_anchor_keyword left_delimiter
               datum_anchor_description right_delimiter
@@ -991,6 +996,13 @@ datum_anchor: datum_anchor_keyword left_delimiter
 datum_anchor_keyword: T_ANCHOR
 
 datum_anchor_description: quoted_latin_text
+
+datum_anchor_epoch: datum_anchor_epoch_keyword left_delimiter
+                    anchor_epoch right_delimiter
+
+datum_anchor_epoch_keyword: T_ANCHOREPOCH
+
+anchor_epoch: unsigned_integer | unsigned_integer period | unsigned_integer period unsigned_integer
 
 // Projected CRS
 
@@ -1135,7 +1147,7 @@ vertical_crs_keyword: T_VERTCRS | T_VERTICALCRS
 
 vertical_reference_frame: vertical_reference_frame_keyword left_delimiter
                           datum_name
-                          opt_separator_datum_anchor_identifier_list
+                          opt_separator_datum_anchor_anchor_epoch_identifier_list
                           right_delimiter
 
 vertical_reference_frame_keyword: T_VDATUM | T_VRF | T_VERTICALDATUM
@@ -1154,6 +1166,11 @@ engineering_datum: engineering_datum_keyword left_delimiter datum_name
                    right_delimiter
 
 engineering_datum_keyword: T_EDATUM | T_ENGINEERINGDATUM
+
+opt_separator_datum_anchor_identifier_list:
+    | wkt_separator datum_anchor
+    | wkt_separator identifier opt_separator_identifier_list
+    | wkt_separator datum_anchor wkt_separator identifier opt_separator_identifier_list
 
 // Parametric CRS
 

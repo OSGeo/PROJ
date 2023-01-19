@@ -1339,6 +1339,8 @@ struct WKTParser::Private {
 
     static optional<std::string> getAnchor(const WKTNodeNNPtr &node);
 
+    static optional<common::Measure> getAnchorEpoch(const WKTNodeNNPtr &node);
+
     static void parseDynamic(const WKTNodeNNPtr &dynamicNode,
                              double &frameReferenceEpoch,
                              util::optional<std::string> &modelName);
@@ -2209,6 +2211,23 @@ optional<std::string> WKTParser::Private::getAnchor(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+optional<common::Measure>
+WKTParser::Private::getAnchorEpoch(const WKTNodeNNPtr &node) {
+
+    auto &anchorEpochNode = node->GP()->lookForChild(WKTConstants::ANCHOREPOCH);
+    if (anchorEpochNode->GP()->childrenSize() == 1) {
+        try {
+            double value = asDouble(anchorEpochNode->GP()->children()[0]);
+            return optional<common::Measure>(
+                common::Measure(value, common::UnitOfMeasure::YEAR));
+        } catch (const std::exception &e) {
+            throw buildRethrow(__FUNCTION__, e);
+        }
+    }
+    return optional<common::Measure>();
+}
+// ---------------------------------------------------------------------------
+
 static const PrimeMeridianNNPtr &
 fixupPrimeMeridan(const EllipsoidNNPtr &ellipsoid,
                   const PrimeMeridianNNPtr &pm) {
@@ -2441,8 +2460,9 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             modelName);
     }
 
-    return GeodeticReferenceFrame::create(
-        properties, ellipsoid, getAnchor(node), primeMeridianModified);
+    return GeodeticReferenceFrame::create(properties, ellipsoid,
+                                          getAnchor(node), getAnchorEpoch(node),
+                                          primeMeridianModified);
 }
 
 // ---------------------------------------------------------------------------
@@ -4500,7 +4520,8 @@ VerticalReferenceFrameNNPtr WKTParser::Private::buildVerticalReferenceFrame(
         }
     }
 
-    return VerticalReferenceFrame::create(props, getAnchor(node));
+    return VerticalReferenceFrame::create(props, getAnchor(node),
+                                          getAnchorEpoch(node));
 }
 
 // ---------------------------------------------------------------------------
@@ -5545,6 +5566,14 @@ class JSONParser {
             anchor = getString(j, "anchor");
         }
         return anchor;
+    }
+
+    static util::optional<common::Measure> getAnchorEpoch(const json &j) {
+        if (j.contains("anchor_epoch")) {
+            return util::optional<common::Measure>(common::Measure(
+                getNumber(j, "anchor_epoch"), common::UnitOfMeasure::YEAR));
+        }
+        return util::optional<common::Measure>();
     }
 
     EngineeringDatumNNPtr buildEngineeringDatum(const json &j) {
@@ -6662,8 +6691,9 @@ JSONParser::buildGeodeticReferenceFrame(const json &j) {
     auto pm = j.contains("prime_meridian")
                   ? buildPrimeMeridian(getObject(j, "prime_meridian"))
                   : PrimeMeridian::GREENWICH;
-    return GeodeticReferenceFrame::create(
-        buildProperties(j), buildEllipsoid(ellipsoidJ), getAnchor(j), pm);
+    return GeodeticReferenceFrame::create(buildProperties(j),
+                                          buildEllipsoid(ellipsoidJ),
+                                          getAnchor(j), getAnchorEpoch(j), pm);
 }
 
 // ---------------------------------------------------------------------------
@@ -6692,7 +6722,8 @@ JSONParser::buildDynamicGeodeticReferenceFrame(const json &j) {
 
 VerticalReferenceFrameNNPtr
 JSONParser::buildVerticalReferenceFrame(const json &j) {
-    return VerticalReferenceFrame::create(buildProperties(j), getAnchor(j));
+    return VerticalReferenceFrame::create(buildProperties(j), getAnchor(j),
+                                          getAnchorEpoch(j));
 }
 
 // ---------------------------------------------------------------------------

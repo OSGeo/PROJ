@@ -188,6 +188,24 @@ TEST(wkt_parse, datum_with_ANCHOR) {
     auto anchor = datum->anchorDefinition();
     EXPECT_TRUE(anchor.has_value());
     EXPECT_EQ(*anchor, "My anchor");
+    EXPECT_FALSE(datum->anchorEpoch().has_value());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, datum_with_ANCHOREPOCH) {
+    auto obj = WKTParser().createFromWKT(
+        "DATUM[\"my_datum\",\n"
+        "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",7030]],\n"
+        "    ANCHOREPOCH[2002.5]]");
+    auto datum = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(datum != nullptr);
+    auto anchorEpoch = datum->anchorEpoch();
+    EXPECT_TRUE(anchorEpoch.has_value());
+    ASSERT_EQ(anchorEpoch->convertToUnit(UnitOfMeasure::YEAR), 2002.5);
+    EXPECT_FALSE(datum->anchorDefinition().has_value());
 }
 
 // ---------------------------------------------------------------------------
@@ -2708,6 +2726,20 @@ TEST(wkt_parse, vdatum_with_ANCHOR) {
     auto anchor = datum->anchorDefinition();
     EXPECT_TRUE(anchor.has_value());
     EXPECT_EQ(*anchor, "my anchor");
+    EXPECT_FALSE(datum->anchorEpoch().has_value());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, vdatum_with_ANCHOREPOCH) {
+    auto obj = WKTParser().createFromWKT("VDATUM[\"my_datum\",\n"
+                                         "    ANCHOREPOCH[2002.5]]");
+    auto datum = nn_dynamic_pointer_cast<VerticalReferenceFrame>(obj);
+    ASSERT_TRUE(datum != nullptr);
+    auto anchorEpoch = datum->anchorEpoch();
+    EXPECT_TRUE(anchorEpoch.has_value());
+    ASSERT_EQ(anchorEpoch->convertToUnit(UnitOfMeasure::YEAR), 2002.5);
+    EXPECT_FALSE(datum->anchorDefinition().has_value());
 }
 
 // ---------------------------------------------------------------------------
@@ -12775,6 +12807,27 @@ TEST(json_import, geodetic_reference_frame_with_explicit_prime_meridian) {
 
 // ---------------------------------------------------------------------------
 
+TEST(json_import, geodetic_reference_frame_with_anchor_epoch) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"GeodeticReferenceFrame\",\n"
+                "  \"name\": \"my_name\",\n"
+                "  \"anchor_epoch\": 2002.5,\n"
+                "  \"ellipsoid\": {\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"semi_major_axis\": 6378137,\n"
+                "    \"inverse_flattening\": 298.257223563\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto grf = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(grf != nullptr);
+    EXPECT_EQ(grf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(json_import,
      dynamic_geodetic_reference_frame_with_implicit_prime_meridian) {
     auto json = "{\n"
@@ -15106,6 +15159,23 @@ TEST(json_import, vertical_crs_with_geoid_model_and_interpolation_crs) {
     auto vcrs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
     ASSERT_TRUE(vcrs != nullptr);
     EXPECT_EQ(vcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, vertical_reference_frame_with_anchor_epoch) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"VerticalReferenceFrame\",\n"
+                "  \"name\": \"my_name\",\n"
+                "  \"anchor\": \"my_anchor_definition\",\n"
+                "  \"anchor_epoch\": 2002.5\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto vrf = nn_dynamic_pointer_cast<VerticalReferenceFrame>(obj);
+    ASSERT_TRUE(vrf != nullptr);
+    EXPECT_EQ(vrf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
 }
 
