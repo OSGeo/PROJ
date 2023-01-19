@@ -140,6 +140,9 @@ class WKTConstants {
     static const std::string GEOIDMODEL;         // WKT2-2019
     static const std::string COORDINATEMETADATA; // WKT2-2019
     static const std::string EPOCH;              // WKT2-2019
+    static const std::string AXISMINVALUE;       // WKT2-2019
+    static const std::string AXISMAXVALUE;       // WKT2-2019
+    static const std::string RANGEMEANING;       // WKT2-2019
 
     // WKT2 alternate (longer or shorter)
     static const std::string GEODETICCRS;

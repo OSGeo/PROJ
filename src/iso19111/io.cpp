@@ -2657,9 +2657,60 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
 
     auto &meridianNode = nodeP->lookForChild(WKTConstants::MERIDIAN);
 
+    util::optional<double> minVal;
+    auto &axisMinValueNode = nodeP->lookForChild(WKTConstants::AXISMINVALUE);
+    if (!isNull(axisMinValueNode)) {
+        const auto &axisMinValueNodeChildren =
+            axisMinValueNode->GP()->children();
+        if (axisMinValueNodeChildren.size() != 1) {
+            ThrowNotEnoughChildren(WKTConstants::AXISMINVALUE);
+        }
+        const auto &val = axisMinValueNodeChildren[0];
+        try {
+            minVal = asDouble(val);
+        } catch (const std::exception &) {
+            throw ParsingException(concat(
+                "buildAxis: invalid AXISMINVALUE value: ", val->GP()->value()));
+        }
+    }
+
+    util::optional<double> maxVal;
+    auto &axisMaxValueNode = nodeP->lookForChild(WKTConstants::AXISMAXVALUE);
+    if (!isNull(axisMaxValueNode)) {
+        const auto &axisMaxValueNodeChildren =
+            axisMaxValueNode->GP()->children();
+        if (axisMaxValueNodeChildren.size() != 1) {
+            ThrowNotEnoughChildren(WKTConstants::AXISMAXVALUE);
+        }
+        const auto &val = axisMaxValueNodeChildren[0];
+        try {
+            maxVal = asDouble(val);
+        } catch (const std::exception &) {
+            throw ParsingException(concat(
+                "buildAxis: invalid AXISMAXVALUE value: ", val->GP()->value()));
+        }
+    }
+
+    util::optional<RangeMeaning> rangeMeaning;
+    auto &rangeMeaningNode = nodeP->lookForChild(WKTConstants::RANGEMEANING);
+    if (!isNull(rangeMeaningNode)) {
+        const auto &rangeMeaningNodeChildren =
+            rangeMeaningNode->GP()->children();
+        if (rangeMeaningNodeChildren.size() != 1) {
+            ThrowNotEnoughChildren(WKTConstants::RANGEMEANING);
+        }
+        const std::string &val = rangeMeaningNodeChildren[0]->GP()->value();
+        const RangeMeaning *meaning = RangeMeaning::valueOf(val);
+        if (meaning == nullptr) {
+            throw ParsingException(
+                concat("buildAxis: invalid RANGEMEANING value: ", val));
+        }
+        rangeMeaning = util::optional<RangeMeaning>(*meaning);
+    }
+
     return CoordinateSystemAxis::create(
         buildProperties(node).set(IdentifiedObject::NAME_KEY, axisName),
-        abbreviation, *direction, unit,
+        abbreviation, *direction, unit, minVal, maxVal, rangeMeaning,
         !isNull(meridianNode) ? buildMeridian(meridianNode).as_nullable()
                               : nullptr);
 }
@@ -6519,8 +6570,31 @@ CoordinateSystemAxisNNPtr JSONParser::buildAxis(const json &j) {
     auto meridian = j.contains("meridian")
                         ? buildMeridian(getObject(j, "meridian")).as_nullable()
                         : nullptr;
+
+    util::optional<double> minVal;
+    if (j.contains("minimum_value")) {
+        minVal = getNumber(j, "minimum_value");
+    }
+
+    util::optional<double> maxVal;
+    if (j.contains("maximum_value")) {
+        maxVal = getNumber(j, "maximum_value");
+    }
+
+    util::optional<RangeMeaning> rangeMeaning;
+    if (j.contains("range_meaning")) {
+        const auto val = getString(j, "range_meaning");
+        const RangeMeaning *meaning = RangeMeaning::valueOf(val);
+        if (meaning == nullptr) {
+            throw ParsingException(
+                concat("buildAxis: invalid range_meaning value: ", val));
+        }
+        rangeMeaning = util::optional<RangeMeaning>(*meaning);
+    }
+
     return CoordinateSystemAxis::create(buildProperties(j), abbreviation,
-                                        *direction, unit, meridian);
+                                        *direction, unit, minVal, maxVal,
+                                        rangeMeaning, meridian);
 }
 
 // ---------------------------------------------------------------------------

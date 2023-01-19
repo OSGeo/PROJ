@@ -281,6 +281,9 @@ DEFINE_WKT_CONSTANT(VERSION);
 DEFINE_WKT_CONSTANT(GEOIDMODEL);
 DEFINE_WKT_CONSTANT(COORDINATEMETADATA);
 DEFINE_WKT_CONSTANT(EPOCH);
+DEFINE_WKT_CONSTANT(AXISMINVALUE);
+DEFINE_WKT_CONSTANT(AXISMAXVALUE);
+DEFINE_WKT_CONSTANT(RANGEMEANING);
 
 DEFINE_WKT_CONSTANT(GEODETICCRS);
 DEFINE_WKT_CONSTANT(GEODETICDATUM);
@@ -524,6 +527,17 @@ const AxisDirection AxisDirection::PAST("past");
 
 /** Axis positive direction is unspecified. */
 const AxisDirection AxisDirection::UNSPECIFIED("unspecified");
+
+// ---------------------------------------------------------------------------
+
+std::map<std::string, const RangeMeaning *> RangeMeaning::registry;
+
+/** any value between and including minimumValue and maximumValue is valid. */
+const RangeMeaning RangeMeaning::EXACT("exact");
+
+/** Axis is continuous with values wrapping around at the minimumValue and
+ * maximumValue */
+const RangeMeaning RangeMeaning::WRAPAROUND("wraparound");
 
 // ---------------------------------------------------------------------------
 

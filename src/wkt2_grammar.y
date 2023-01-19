@@ -117,6 +117,11 @@
 %token T_COORDINATEMETADATA     "COORDINATEMETADATA"
 %token T_POINTMOTIONOPERATION   "POINTMOTIONOPERATION"
 %token T_VERSION                "VERSION"
+%token T_AXISMINVALUE           "AXISMINVALUE"
+%token T_AXISMAXVALUE           "AXISMAXVALUE"
+%token T_RANGEMEANING           "RANGEMEANING"
+%token T_exact                  "exact"
+%token T_wraparound             "wraparound"
 
 /* WKT2 alternate (longer or shorter) */
 %token T_GEODETICCRS            "GEODETICCRS";
@@ -674,10 +679,10 @@ axis_direction_except_n_s_cw_ccw_opt_axis_spatial_unit_identifier_list:
 
 axis_direction_except_n_s_cw_ccw_opt_axis_spatial_unit_identifier_list_options:
     identifier opt_separator_identifier_list
-    | axis_order opt_separator_identifier_list
-    | axis_order wkt_separator spatial_unit opt_separator_identifier_list
-    | spatial_unit opt_separator_identifier_list
-
+    | axis_range_opt_separator_identifier_list
+    | axis_order opt_separator_axis_range_opt_separator_identifier_list
+    | axis_order wkt_separator spatial_unit opt_separator_axis_range_opt_separator_identifier_list
+    | spatial_unit opt_separator_axis_range_opt_separator_identifier_list
 
 
 axis_direction_opt_axis_order_identifier_list:
@@ -709,7 +714,8 @@ axis_direction_except_n_s_cw_ccw_opt_axis_identifier_list:
 
 axis_direction_except_n_s_cw_ccw_opt_axis_identifier_list_options:
     identifier opt_separator_identifier_list
-    | axis_order opt_separator_identifier_list
+    | axis_order opt_separator_axis_range_opt_separator_identifier_list
+    | axis_range_opt_separator_identifier_list
 
 
 
@@ -719,9 +725,10 @@ opt_separator_axis_time_unit_identifier_list:
 
 axis_direction_except_n_s_cw_ccw_opt_axis_time_unit_identifier_list_options:
     identifier opt_separator_identifier_list
-    | axis_order opt_separator_identifier_list
-    | axis_order wkt_separator time_unit opt_separator_identifier_list
-    | time_unit opt_separator_identifier_list
+    | axis_range_opt_separator_identifier_list
+    | axis_order opt_separator_axis_range_opt_separator_identifier_list
+    | axis_order wkt_separator time_unit opt_separator_axis_range_opt_separator_identifier_list
+    | time_unit opt_separator_axis_range_opt_separator_identifier_list
 
 axis_direction_except_n_s_cw_ccw:
                   T_NORTHNORTHEAST
@@ -773,6 +780,28 @@ bearing_keyword: T_BEARING
 axis_order: axis_order_keyword left_delimiter unsigned_integer right_delimiter
 
 axis_order_keyword: T_ORDER
+
+axis_range_opt_separator_identifier_list:
+      axis_minimum_value opt_separator_identifier_list
+    | axis_maximum_value opt_separator_identifier_list
+    | axis_minimum_value wkt_separator axis_maximum_value opt_separator_identifier_list
+    | axis_minimum_value wkt_separator axis_maximum_value wkt_separator axis_range_meaning opt_separator_identifier_list
+
+opt_separator_axis_range_opt_separator_identifier_list:
+    | wkt_separator axis_minimum_value opt_separator_identifier_list
+    | wkt_separator axis_maximum_value opt_separator_identifier_list
+    | wkt_separator axis_minimum_value wkt_separator axis_maximum_value opt_separator_identifier_list
+    | wkt_separator axis_minimum_value wkt_separator axis_maximum_value wkt_separator axis_range_meaning opt_separator_identifier_list
+
+axis_minimum_value: axis_minimum_value_keyword left_delimiter number right_delimiter
+axis_minimum_value_keyword: T_AXISMINVALUE
+
+axis_maximum_value: axis_maximum_value_keyword left_delimiter number right_delimiter
+axis_maximum_value_keyword: T_AXISMAXVALUE
+
+axis_range_meaning: axis_range_meaning_keyword left_delimiter axis_range_meaning_value right_delimiter
+axis_range_meaning_keyword: T_RANGEMEANING
+axis_range_meaning_value: T_exact | T_wraparound
 
 cs_unit: unit
 

@@ -92,6 +92,9 @@
                                  "unspecified" ] },
         "meridian": { "$ref": "#/definitions/meridian" },
         "unit": { "$ref": "#/definitions/unit" },
+        "minimum_value": { "type": "number" },
+        "maximum_value": { "type": "number" },
+        "range_meaning": { "type": "string", "enum": [ "exact", "wraparound"] },
         "id": { "$ref": "#/definitions/id" },
         "ids": { "$ref": "#/definitions/ids" }
       },

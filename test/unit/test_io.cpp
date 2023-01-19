@@ -2424,6 +2424,57 @@ TEST(wkt_parse, cs_with_multiple_ID) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, cs_with_AXISMINVAL_AXISMAXVAL_RANGEMEANING) {
+    auto wkt = "PROJCRS[\"dummy\",\n"
+               "    BASEGEOGCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1,\n"
+               "                    ID[\"EPSG\",9001]]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8901]]],\n"
+               "    CONVERSION[\"dummy\",\n"
+               "        METHOD[\"dummy\"],\n"
+               "        PARAMETER[\"dummy\",1]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"latitude\",north,\n"
+               "            ORDER[1],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        AXIS[\"longitude\",east,\n"
+               "            ORDER[2],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            AXISMINVALUE[0],\n"
+               "            AXISMAXVALUE[360],\n"
+               "            RANGEMEANING[wraparound]]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 2U);
+    {
+        auto axis = crs->coordinateSystem()->axisList()[0];
+        EXPECT_FALSE(axis->minimumValue().has_value());
+        EXPECT_FALSE(axis->maximumValue().has_value());
+        EXPECT_FALSE(axis->rangeMeaning().has_value());
+    }
+    {
+        auto axis = crs->coordinateSystem()->axisList()[1];
+        ASSERT_TRUE(axis->minimumValue().has_value());
+        EXPECT_EQ(*axis->minimumValue(), 0);
+        ASSERT_TRUE(axis->maximumValue().has_value());
+        EXPECT_EQ(*axis->maximumValue(), 360);
+        ASSERT_TRUE(axis->rangeMeaning().has_value());
+        EXPECT_EQ(axis->rangeMeaning()->toString(), "wraparound");
+    }
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, vertcrs_WKT2) {
     auto wkt = "VERTCRS[\"ODN height\",\n"
                "    VDATUM[\"Ordnance Datum Newlyn\"],\n"
@@ -12710,6 +12761,27 @@ TEST(json_import, axis_with_meridian_with_unit) {
                 "    }\n"
                 "  },\n"
                 "  \"unit\": \"metre\"\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto axis = nn_dynamic_pointer_cast<CoordinateSystemAxis>(obj);
+    ASSERT_TRUE(axis != nullptr);
+    EXPECT_EQ(axis->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, axis_with_minimum_value_maximum_value_range_meaning) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"Axis\",\n"
+                "  \"name\": \"Longitude\",\n"
+                "  \"abbreviation\": \"lon\",\n"
+                "  \"direction\": \"east\",\n"
+                "  \"unit\": \"degree\",\n"
+                "  \"minimum_value\": 0,\n"
+                "  \"maximum_value\": 360,\n"
+                "  \"range_meaning\": \"wraparound\"\n"
                 "}";
     auto obj = createFromUserInput(json, nullptr);
     auto axis = nn_dynamic_pointer_cast<CoordinateSystemAxis>(obj);
