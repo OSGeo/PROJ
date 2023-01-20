@@ -1098,5 +1098,3 @@ Reference implementation
 ------------------------
 
 PROJJSON is available as input and output of the `PROJ <https://proj.org>`_ software since PROJ 6.2.
-
-The current version is the PROJJSON schema is 0.4.
