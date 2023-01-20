@@ -1092,10 +1092,7 @@ also be used as the source or target of a coordinate operation.
 PROJJSON omissions
 ++++++++++++++++++
 
-This specification does not define an encoding for:
-
-- triaxial ellipsoid (``TRIAXIAL`` WKT keyword)
-- coordinate metadata (``COORDINATEMETADATA`` WKT keyword)
+This specification does not define an encoding for triaxial ellipsoid (``TRIAXIAL`` WKT keyword)
 
 Reference implementation
 ------------------------
