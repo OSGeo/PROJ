@@ -28,9 +28,9 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','6874','Tananarive (Paris) to
 INSERT INTO "usage" VALUES('EPSG','9803','concatenated_operation','EPSG','6874','EPSG','3273','EPSG','1043');
 INSERT INTO "concatenated_operation" VALUES('EPSG','7811','NTF (Paris) to RGF93 v1 (2)','Second step is an emulation (using the NTv2 method) of the geocentric interpolation method described in CT code 9337. Note that the grid file parameters are of opposite sign.','EPSG','4807','EPSG','4171',1.0,'IOGP-Fra NTv2',0);
 INSERT INTO "usage" VALUES('EPSG','10276','concatenated_operation','EPSG','7811','EPSG','3694','EPSG','1041');
-INSERT INTO "concatenated_operation" VALUES('EPSG','7965','Poolbeg height (ft(Br36)) to Malin Head height (1)','','EPSG','5754','EPSG','5731',0.1,'1',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','7965','Poolbeg height (ft(Br36)) to Malin Head height (1)','','EPSG','5754','EPSG','5731',0.1,'EPSG-Ire',0);
 INSERT INTO "usage" VALUES('EPSG','10349','concatenated_operation','EPSG','7965','EPSG','1305','EPSG','1059');
-INSERT INTO "concatenated_operation" VALUES('EPSG','7967','Poolbeg height (ft(Br36)) to Belfast height (1)','','EPSG','5754','EPSG','5732',0.1,'1',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','7967','Poolbeg height (ft(Br36)) to Belfast height (1)','','EPSG','5754','EPSG','5732',0.1,'EPSG-Ire',0);
 INSERT INTO "usage" VALUES('EPSG','10351','concatenated_operation','EPSG','7967','EPSG','2530','EPSG','1059');
 INSERT INTO "concatenated_operation" VALUES('EPSG','7973','NGVD29 height (ftUS) to NAVD88 height (1)','','EPSG','5702','EPSG','5703',0.02,'IOGP - US Conus W',0);
 INSERT INTO "usage" VALUES('EPSG','10356','concatenated_operation','EPSG','7973','EPSG','2950','EPSG','1099');
