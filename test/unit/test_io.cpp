@@ -12434,7 +12434,7 @@ TEST(io, createFromUserInput_ogc_crs_url) {
 
     {
         // Not sure if this is intended to be valid (version=0), but let's
-        // immitate the logic of EPSG, this will use the latest version of IAU
+        // imitate the logic of EPSG, this will use the latest version of IAU
         // (if/when there will be several of them)
         auto obj = createFromUserInput(
             "http://www.opengis.net/def/crs/IAU/0/49900", dbContext);

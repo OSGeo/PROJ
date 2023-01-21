@@ -111,3 +111,4 @@ Space oblique for MISR is a specialization of :doc:`Space Oblique Mercator<som>`
     set HEL=60.171  24.938
 NOTE: This is Windows syntax - Unix users use $HEL, etc.
  * https://github.com/Unidata/netcdf-java/blob/3ce72c0cd167609ed8c69152bb4a004d1daa9273/cdm/core/src/main/java/ucar/unidata/geoloc/projection/RotatedLatLon.java
+                "  \"abbreviation\": \"lon\",\n"

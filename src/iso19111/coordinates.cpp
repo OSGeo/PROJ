@@ -103,7 +103,7 @@ CoordinateMetadataNNPtr CoordinateMetadata::create(const crs::CRSNNPtr &crsIn) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instantiate a CoordinateMetadata from a dyanmic CRS and an associated
+/** \brief Instantiate a CoordinateMetadata from a dynamic CRS and an associated
  * coordinate epoch.
  *
  * @param crsIn a dynamic CRS
