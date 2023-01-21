@@ -820,7 +820,6 @@ double  pj_tsfn(double, double, double);
 double  pj_msfn(double, double, double);
 double  PROJ_DLL pj_phi2(PJ_CONTEXT *, const double, const double);
 double  pj_sinhpsi2tanphi(PJ_CONTEXT *, const double, const double);
-double  pj_qsfn_(double, PJ *);
 double *pj_authset(double);
 double  pj_authlat(double, double *);
 
