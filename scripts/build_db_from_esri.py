@@ -555,6 +555,17 @@ def import_geogcs():
             authority = row[idx_authority]
             esri_name = row[idx_name]
 
+            if code == latestWkid and authority.upper() == 'ESRI':
+                cursor.execute(
+                    "SELECT name FROM geodetic_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
+                src_row = cursor.fetchone()
+                if src_row:
+                    src_name = src_row[0]
+                    modified_epsg_name = src_name.replace(' ', '_')
+                    if modified_epsg_name.upper() == esri_name.upper() or modified_epsg_name.upper() + "_3D" == esri_name.upper() or modified_epsg_name.upper() + "_(3D)" == esri_name.upper():
+                        print("GeogCRS ESRI:%s (%s) has the same name as EPSG:%s. Fixing authority to be EPSG" % (latestWkid, esri_name, latestWkid))
+                        authority = "EPSG"
+
             if authority == 'EPSG':
 
                 map_geogcs_esri_name_to_auth_code[esri_name] = [
@@ -1259,6 +1270,17 @@ def import_projcs():
             authority = row[idx_authority]
             esri_name = row[idx_name]
 
+            if code == latestWkid and authority.upper() == 'ESRI':
+                cursor.execute(
+                    "SELECT name FROM projected_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
+                src_row = cursor.fetchone()
+                if src_row:
+                    src_name = src_row[0]
+                    modified_epsg_name = src_name.replace(' / ', '_').replace(' ', '_')
+                    if modified_epsg_name.upper() == esri_name.upper() or modified_epsg_name.upper() + "_3D" == esri_name.upper() or modified_epsg_name.upper() + "_(3D)" == esri_name.upper():
+                        print("ProjCRS ESRI:%s (%s) has the same name as EPSG:%s. Fixing authority to be EPSG" % (latestWkid, esri_name, latestWkid))
+                        authority = "EPSG"
+
             if authority == 'EPSG':
 
                 map_projcs_esri_name_to_auth_code[esri_name] = [
@@ -1599,6 +1621,17 @@ def import_vertcs():
             authority = row[idx_authority]
             esri_name = row[idx_name]
 
+            if code == latestWkid and authority.upper() == 'ESRI':
+                cursor.execute(
+                    "SELECT name FROM vertical_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
+                src_row = cursor.fetchone()
+                if src_row:
+                    src_name = src_row[0]
+                    modified_epsg_name = src_name.replace(' ', '_')
+                    if modified_epsg_name.upper() == esri_name.upper():
+                        print("VertCRS ESRI:%s (%s) has the same name as EPSG:%s. Fixing authority to be EPSG" % (latestWkid, esri_name, latestWkid))
+                        authority = "EPSG"
+
             if authority == 'EPSG':
 
                 map_vertcs_esri_name_to_auth_code[esri_name] = [
@@ -1692,9 +1725,11 @@ def import_vertcs():
 
                 assert not set(k for k in parsed_wkt2['VERTCRS'][1].keys() if k not in ('CS','AXIS','VDATUM','DATUM')), 'Unhandled parameter in VERTCRS: {}'.format(list(parsed_wkt2['VERTCRS'][1].keys()))
                 assert parsed_wkt2['VERTCRS'][1]['CS'] == ['vertical', '1'], 'Unhandled vertcrs CS: {}'.format(parsed_wkt2['VERTCRS'][1]['CS'])
-                assert parsed_wkt2['VERTCRS'][1]['AXIS'][:2] == ['Gravity-related height (H)', 'up'], 'Unhandled vertcrs AXIS: {}'.format(parsed_wkt2['VERTCRS'][1]['AXIS'])
+                axis = parsed_wkt2['VERTCRS'][1]['AXIS']
+                is_ellipsoidal_height = (axis[:2] == ['Ellipsoidal height (h)', 'up'])
+                assert axis[:2] == ['Gravity-related height (H)', 'up'] or is_ellipsoidal_height, 'Unhandled vertcrs AXIS: {}'.format(axis)
 
-                vertical_unit = parsed_wkt2['VERTCRS'][1]['AXIS'][2]['UNIT_NAME']
+                vertical_unit = axis[2]['UNIT_NAME']
                 cs_auth = 'EPSG'
                 if vertical_unit == 'Meter':
                     cs_code = 6499
@@ -1705,7 +1740,7 @@ def import_vertcs():
                 else:
                     assert False, ('unknown coordinate system for %s' %
                                    str(row))
-                if not is_vdatum:
+                if is_ellipsoidal_height or not is_vdatum:
                     assert cs_code == 6499
                     cs_auth = 'ESRI'
                     cs_code = 'ELLPS_HEIGHT_METRE'
