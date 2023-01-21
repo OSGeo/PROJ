@@ -210,6 +210,28 @@ TEST(wkt_parse, datum_with_ANCHOREPOCH) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, datum_with_invalid_ANCHOREPOCH) {
+    auto wkt = "DATUM[\"my_datum\",\n"
+               "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "        LENGTHUNIT[\"metre\",1],\n"
+               "        ID[\"EPSG\",7030]],\n"
+               "    ANCHOREPOCH[invalid]]";
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, datum_with_invalid_ANCHOREPOCH_too_many_children) {
+    auto wkt = "DATUM[\"my_datum\",\n"
+               "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "        LENGTHUNIT[\"metre\",1],\n"
+               "        ID[\"EPSG\",7030]],\n"
+               "    ANCHOREPOCH[2002.5,invalid]]";
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, datum_with_pm) {
     const char *wkt =
         "DATUM[\"Nouvelle Triangulation Francaise (Paris)\",\n"
@@ -2471,6 +2493,166 @@ TEST(wkt_parse, cs_with_AXISMINVAL_AXISMAXVAL_RANGEMEANING) {
         crs->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, cs_with_invalid_AXISMINVAL_string) {
+    auto wkt = "PROJCRS[\"dummy\",\n"
+               "    BASEGEOGCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1,\n"
+               "                    ID[\"EPSG\",9001]]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8901]]],\n"
+               "    CONVERSION[\"dummy\",\n"
+               "        METHOD[\"dummy\"],\n"
+               "        PARAMETER[\"dummy\",1]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"latitude\",north,\n"
+               "            ORDER[1],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        AXIS[\"longitude\",east,\n"
+               "            ORDER[2],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            AXISMINVALUE[invalid]]]";
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, cs_with_invalid_AXISMINVAL_too_many_children) {
+    auto wkt = "PROJCRS[\"dummy\",\n"
+               "    BASEGEOGCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1,\n"
+               "                    ID[\"EPSG\",9001]]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8901]]],\n"
+               "    CONVERSION[\"dummy\",\n"
+               "        METHOD[\"dummy\"],\n"
+               "        PARAMETER[\"dummy\",1]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"latitude\",north,\n"
+               "            ORDER[1],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        AXIS[\"longitude\",east,\n"
+               "            ORDER[2],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            AXISMINVALUE[1,2]]]";
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, cs_with_invalid_AXISMAXVAL_string) {
+    auto wkt = "PROJCRS[\"dummy\",\n"
+               "    BASEGEOGCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1,\n"
+               "                    ID[\"EPSG\",9001]]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8901]]],\n"
+               "    CONVERSION[\"dummy\",\n"
+               "        METHOD[\"dummy\"],\n"
+               "        PARAMETER[\"dummy\",1]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"latitude\",north,\n"
+               "            ORDER[1],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        AXIS[\"longitude\",east,\n"
+               "            ORDER[2],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            AXISMAXVALUE[invalid]]]";
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, cs_with_invalid_AXISMAXVAL_too_many_children) {
+    auto wkt = "PROJCRS[\"dummy\",\n"
+               "    BASEGEOGCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1,\n"
+               "                    ID[\"EPSG\",9001]]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8901]]],\n"
+               "    CONVERSION[\"dummy\",\n"
+               "        METHOD[\"dummy\"],\n"
+               "        PARAMETER[\"dummy\",1]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"latitude\",north,\n"
+               "            ORDER[1],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        AXIS[\"longitude\",east,\n"
+               "            ORDER[2],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            AXISMAXVALUE[1,2]]]";
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, cs_with_invalid_RANGEMEANING) {
+    auto wkt = "PROJCRS[\"dummy\",\n"
+               "    BASEGEOGCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1,\n"
+               "                    ID[\"EPSG\",9001]]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8901]]],\n"
+               "    CONVERSION[\"dummy\",\n"
+               "        METHOD[\"dummy\"],\n"
+               "        PARAMETER[\"dummy\",1]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"latitude\",north,\n"
+               "            ORDER[1],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        AXIS[\"longitude\",east,\n"
+               "            ORDER[2],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            AXISMINVALUE[0],\n"
+               "            AXISMAXVALUE[360],\n"
+               "            RANGEMEANING[invalid]]]";
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, cs_with_invalid_RANGEMEANING_too_many_children) {
+    auto wkt = "PROJCRS[\"dummy\",\n"
+               "    BASEGEOGCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1,\n"
+               "                    ID[\"EPSG\",9001]]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8901]]],\n"
+               "    CONVERSION[\"dummy\",\n"
+               "        METHOD[\"dummy\"],\n"
+               "        PARAMETER[\"dummy\",1]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"latitude\",north,\n"
+               "            ORDER[1],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        AXIS[\"longitude\",east,\n"
+               "            ORDER[2],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            AXISMINVALUE[0],\n"
+               "            AXISMAXVALUE[360],\n"
+               "            RANGEMEANING[exact,unexpected_value]]]";
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -12792,6 +12974,66 @@ TEST(json_import, axis_with_minimum_value_maximum_value_range_meaning) {
 
 // ---------------------------------------------------------------------------
 
+TEST(json_import, axis_with_invalid_minimum_value) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"Axis\",\n"
+                "  \"name\": \"Longitude\",\n"
+                "  \"abbreviation\": \"lon\",\n"
+                "  \"direction\": \"east\",\n"
+                "  \"unit\": \"degree\",\n"
+                "  \"minimum_value\": \"invalid\"\n"
+                "}";
+    EXPECT_THROW(createFromUserInput(json, nullptr), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, axis_with_invalid_maximum_value) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"Axis\",\n"
+                "  \"name\": \"Longitude\",\n"
+                "  \"abbreviation\": \"lon\",\n"
+                "  \"direction\": \"east\",\n"
+                "  \"unit\": \"degree\",\n"
+                "  \"maximum_value\": \"invalid\"\n"
+                "}";
+    EXPECT_THROW(createFromUserInput(json, nullptr), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, axis_with_invalid_range_meaning_str) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"Axis\",\n"
+                "  \"name\": \"Longitude\",\n"
+                "  \"abbreviation\": \"lon\",\n"
+                "  \"direction\": \"east\",\n"
+                "  \"unit\": \"degree\",\n"
+                "  \"range_meaning\": \"invalid\"\n"
+                "}";
+    EXPECT_THROW(createFromUserInput(json, nullptr), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, axis_with_invalid_range_meaning_number) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"Axis\",\n"
+                "  \"name\": \"Longitude\",\n"
+                "  \"abbreviation\": \"lon\",\n"
+                "  \"direction\": \"east\",\n"
+                "  \"unit\": \"degree\",\n"
+                "  \"range_meaning\": 1\n"
+                "}";
+    EXPECT_THROW(createFromUserInput(json, nullptr), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(json_import, prime_meridian) {
     auto json = "{\n"
                 "  \"$schema\": \"foo\",\n"
@@ -12896,6 +13138,23 @@ TEST(json_import, geodetic_reference_frame_with_anchor_epoch) {
     ASSERT_TRUE(grf != nullptr);
     EXPECT_EQ(grf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, geodetic_reference_frame_with_invalid_anchor_epoch) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"GeodeticReferenceFrame\",\n"
+                "  \"name\": \"my_name\",\n"
+                "  \"anchor_epoch\": \"invalid\",\n"
+                "  \"ellipsoid\": {\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"semi_major_axis\": 6378137,\n"
+                "    \"inverse_flattening\": 298.257223563\n"
+                "  }\n"
+                "}";
+    EXPECT_THROW(createFromUserInput(json, nullptr), ParsingException);
 }
 
 // ---------------------------------------------------------------------------
