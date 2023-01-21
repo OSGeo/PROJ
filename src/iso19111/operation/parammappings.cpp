@@ -945,6 +945,7 @@ const struct MethodNameCode methodNameCodes[] = {
     // Transformations
     METHOD_NAME_CODE(LONGITUDE_ROTATION),
     METHOD_NAME_CODE(AFFINE_PARAMETRIC_TRANSFORMATION),
+    METHOD_NAME_CODE(SIMILARITY_TRANSFORMATION),
     METHOD_NAME_CODE(COORDINATE_FRAME_GEOCENTRIC),
     METHOD_NAME_CODE(COORDINATE_FRAME_GEOGRAPHIC_2D),
     METHOD_NAME_CODE(COORDINATE_FRAME_GEOGRAPHIC_3D),
@@ -1111,6 +1112,31 @@ static const ParamMapping paramB2 = {
 
 static const ParamMapping *const paramsAffineParametricTransformation[] = {
     &paramA0, &paramA1, &paramA2, &paramB0, &paramB1, &paramB2, nullptr};
+
+static const ParamMapping paramOrdinate1EvalPointTargetCRS = {
+    EPSG_NAME_PARAMETER_ORDINATE_1_EVAL_POINT_TARGET_CRS,
+    EPSG_CODE_PARAMETER_ORDINATE_1_EVAL_POINT_TARGET_CRS, nullptr,
+    common::UnitOfMeasure::Type::UNKNOWN, nullptr};
+
+static const ParamMapping paramOrdinate2EvalPointTargetCRS = {
+    EPSG_NAME_PARAMETER_ORDINATE_2_EVAL_POINT_TARGET_CRS,
+    EPSG_CODE_PARAMETER_ORDINATE_2_EVAL_POINT_TARGET_CRS, nullptr,
+    common::UnitOfMeasure::Type::UNKNOWN, nullptr};
+
+static const ParamMapping paramScaleFactorForSourceCRSAxes = {
+    EPSG_NAME_PARAMETER_SCALE_FACTOR_FOR_SOURCE_CRS_AXES,
+    EPSG_CODE_PARAMETER_SCALE_FACTOR_FOR_SOURCE_CRS_AXES, nullptr,
+    common::UnitOfMeasure::Type::SCALE, nullptr};
+
+static const ParamMapping paramRotationAngleOfSourceCRSAxes = {
+    EPSG_NAME_PARAMETER_ROTATION_ANGLE_OF_SOURCE_CRS_AXES,
+    EPSG_CODE_PARAMETER_ROTATION_ANGLE_OF_SOURCE_CRS_AXES, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping *const paramsSimilarityTransformation[] = {
+    &paramOrdinate1EvalPointTargetCRS, &paramOrdinate2EvalPointTargetCRS,
+    &paramScaleFactorForSourceCRSAxes, &paramRotationAngleOfSourceCRSAxes,
+    nullptr};
 
 static const ParamMapping paramXTranslation = {
     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
@@ -1392,6 +1418,10 @@ static const MethodMapping otherMethodMappings[] = {
     {EPSG_NAME_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION,
      EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION, nullptr, nullptr,
      nullptr, paramsAffineParametricTransformation},
+
+    {EPSG_NAME_METHOD_SIMILARITY_TRANSFORMATION,
+     EPSG_CODE_METHOD_SIMILARITY_TRANSFORMATION, nullptr, nullptr, nullptr,
+     paramsSimilarityTransformation},
 
     {PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION, 0, nullptr, nullptr,
      nullptr, paramsPoleRotationGRIBConvention},

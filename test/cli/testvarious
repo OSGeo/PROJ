@@ -1156,6 +1156,20 @@ $EXE --only-best --no-ballpark EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
 49 2 0
 EOF
 
+echo "##############################################################" >> ${OUT}
+echo "Test Similarity Transformation (example from EPSG Guidance Note 7.2)" >> ${OUT}
+#
+$EXE -d 3 EPSG:23031 EPSG:25831 -E >>${OUT} 2>&1 <<EOF
+300000 4500000
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test inverse of Similarity Transformation (example from EPSG Guidance Note 7.2)" >> ${OUT}
+#
+$EXE -d 3 EPSG:25831 EPSG:23031 -E >>${OUT} 2>&1 <<EOF
+299905.060 4499796.515
+EOF
+
 
 # Done!
 # do 'diff' with distribution results

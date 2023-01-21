@@ -3580,6 +3580,8 @@ void Conversion::_exportToPROJString(
         methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT_NO_CONV_FACTOR;
     const bool isAffineParametric =
         methodEPSGCode == EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION;
+    const bool isSimilarity =
+        methodEPSGCode == EPSG_CODE_METHOD_SIMILARITY_TRANSFORMATION;
     const bool isGeographicGeocentric =
         methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC;
     const bool isGeographicOffsets =
@@ -3589,7 +3591,7 @@ void Conversion::_exportToPROJString(
     const bool isHeightDepthReversal =
         methodEPSGCode == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL;
     const bool applySourceCRSModifiers =
-        !isZUnitConversion && !isAffineParametric &&
+        !isZUnitConversion && !isAffineParametric && !isSimilarity &&
         !isAxisOrderReversal(methodEPSGCode) && !isGeographicGeocentric &&
         !isGeographicOffsets && !isHeightDepthReversal;
     bool applyTargetCRSModifiers = applySourceCRSModifiers;
