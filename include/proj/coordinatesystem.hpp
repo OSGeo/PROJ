@@ -582,6 +582,56 @@ class PROJ_GCC_DLL CartesianCS final : public CoordinateSystem {
 
 // ---------------------------------------------------------------------------
 
+class AffineCS;
+/** Shared pointer of AffineCS. */
+using AffineCSPtr = std::shared_ptr<AffineCS>;
+/** Non-null shared pointer of AffineCS. */
+using AffineCSNNPtr = util::nn<AffineCSPtr>;
+
+/** \brief A two- or three-dimensional coordinate system in Euclidean space
+ * with straight axes that are not necessarily orthogonal.
+ *
+ * \remark Implements AffineCS from \ref ISO_19111_2019
+ * \since 9.2
+ */
+class PROJ_GCC_DLL AffineCS final : public CoordinateSystem {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~AffineCS() override;
+    //! @endcond
+
+    PROJ_DLL static AffineCSNNPtr
+    create(const util::PropertyMap &properties,
+           const CoordinateSystemAxisNNPtr &axis1,
+           const CoordinateSystemAxisNNPtr &axis2);
+    PROJ_DLL static AffineCSNNPtr
+    create(const util::PropertyMap &properties,
+           const CoordinateSystemAxisNNPtr &axis1,
+           const CoordinateSystemAxisNNPtr &axis2,
+           const CoordinateSystemAxisNNPtr &axis3);
+
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL AffineCSNNPtr
+        alterUnit(const common::UnitOfMeasure &unit) const;
+
+    //! @endcond
+
+  protected:
+    PROJ_INTERNAL explicit AffineCS(
+        const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
+    INLINED_MAKE_SHARED
+
+    PROJ_INTERNAL std::string getWKT2Type(bool) const override {
+        return "affine";
+    }
+
+  private:
+    AffineCS(const AffineCS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
 class OrdinalCS;
 /** Shared pointer of OrdinalCS. */
 using OrdinalCSPtr = std::shared_ptr<OrdinalCS>;

@@ -198,6 +198,9 @@ osgeo::proj::crs::VerticalCRS::geoidModel() const
 osgeo::proj::crs::VerticalCRS::identify(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&) const
 osgeo::proj::crs::VerticalCRS::velocityModel() const
 osgeo::proj::crs::VerticalCRS::~VerticalCRS()
+osgeo::proj::cs::AffineCS::~AffineCS()
+osgeo::proj::cs::AffineCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::AffineCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
 osgeo::proj::cs::AxisDirection::valueOf(std::string const&)
 osgeo::proj::cs::CartesianCS::~CartesianCS()
 osgeo::proj::cs::CartesianCS::createEastingNorthing(osgeo::proj::common::UnitOfMeasure const&)

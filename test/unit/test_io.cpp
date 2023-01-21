@@ -2979,6 +2979,30 @@ TEST(wkt_parse, vdatum_with_ANCHOREPOCH) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, engineeringCRS_WKT2_affine_CS) {
+
+    auto wkt = "ENGCRS[\"Engineering CRS\",\n"
+               "    EDATUM[\"Engineering datum\"],\n"
+               "    CS[affine,2],\n"
+               "        AXIS[\"(E)\",east,\n"
+               "            ORDER[1],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]],\n"
+               "        AXIS[\"(N)\",north,\n"
+               "            ORDER[2],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2).get()),
+              wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, COMPOUNDCRS) {
     auto obj = WKTParser().createFromWKT(
         "COMPOUNDCRS[\"horizontal + vertical\",\n"
@@ -15595,6 +15619,43 @@ TEST(json_import, engineering_crs) {
     auto datum_obj = createFromUserInput(datum_json, nullptr);
     auto datum_got = nn_dynamic_pointer_cast<EngineeringDatum>(datum_obj);
     ASSERT_TRUE(datum_got != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, engineering_crs_affine_CS) {
+
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"EngineeringCRS\",\n"
+                "  \"name\": \"myEngCRS\",\n"
+                "  \"datum\": {\n"
+                "    \"name\": \"myEngDatum\"\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"affine\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Easting\",\n"
+                "        \"abbreviation\": \"E\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Northing\",\n"
+                "        \"abbreviation\": \"N\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
