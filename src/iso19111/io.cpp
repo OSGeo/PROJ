@@ -2634,9 +2634,6 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
         direction = &AxisDirection::GEOCENTRIC_Z;
     } else if (dirString == AxisDirectionWKT1::OTHER.toString()) {
         direction = &AxisDirection::UNSPECIFIED;
-    } else if (!direction &&
-               AxisDirectionWKT1::valueOf(toupper(dirString)) != nullptr) {
-        direction = AxisDirection::valueOf(tolower(dirString));
     }
 
     if (!direction) {
