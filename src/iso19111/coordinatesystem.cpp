@@ -173,10 +173,10 @@ struct CoordinateSystemAxis::Private {
     std::string abbreviation{};
     const AxisDirection *direction = &(AxisDirection::UNSPECIFIED);
     common::UnitOfMeasure unit{};
+    util::optional<RangeMeaning> rangeMeaning = util::optional<RangeMeaning>();
     util::optional<double> minimumValue{};
     util::optional<double> maximumValue{};
     MeridianPtr meridian{};
-    // TODO rangeMeaning
 };
 //! @endcond
 
@@ -273,6 +273,18 @@ CoordinateSystemAxis::maximumValue() PROJ_PURE_DEFN {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the range meaning
+ *
+ * @return the range meaning, or empty.
+ * @since 9.2
+ */
+const util::optional<RangeMeaning> &
+CoordinateSystemAxis::rangeMeaning() PROJ_PURE_DEFN {
+    return d->rangeMeaning;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the meridian that the axis follows from the pole, for a
  * coordinate
  * reference system centered on a pole.
@@ -306,6 +318,43 @@ CoordinateSystemAxisNNPtr CoordinateSystemAxis::create(
     csa->d->abbreviation = abbreviationIn;
     csa->d->direction = &directionIn;
     csa->d->unit = unitIn;
+    csa->d->meridian = meridianIn;
+    return csa;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a CoordinateSystemAxis.
+ *
+ * @param properties See \ref general_properties. The name should generally be
+ * defined.
+ * @param abbreviationIn Axis abbreviation (might be empty)
+ * @param directionIn Axis direction
+ * @param unitIn Axis unit
+ * @param minimumValueIn Minimum value along axis
+ * @param maximumValueIn Maximum value along axis
+ * @param rangeMeaningIn Range Meaning
+ * @param meridianIn The meridian that the axis follows from the pole, for a
+ * coordinate
+ * reference system centered on a pole, or nullptr
+ * @return a new CoordinateSystemAxis.
+ * @since 9.2
+ */
+CoordinateSystemAxisNNPtr CoordinateSystemAxis::create(
+    const util::PropertyMap &properties, const std::string &abbreviationIn,
+    const AxisDirection &directionIn, const common::UnitOfMeasure &unitIn,
+    const util::optional<double> &minimumValueIn,
+    const util::optional<double> &maximumValueIn,
+    const util::optional<RangeMeaning> &rangeMeaningIn,
+    const MeridianPtr &meridianIn) {
+    auto csa(CoordinateSystemAxis::nn_make_shared<CoordinateSystemAxis>());
+    csa->setProperties(properties);
+    csa->d->abbreviation = abbreviationIn;
+    csa->d->direction = &directionIn;
+    csa->d->unit = unitIn;
+    csa->d->minimumValue = minimumValueIn;
+    csa->d->maximumValue = maximumValueIn;
+    csa->d->rangeMeaning = rangeMeaningIn;
     csa->d->meridian = meridianIn;
     return csa;
 }
@@ -413,6 +462,24 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
         unit().type() != common::UnitOfMeasure::Type::NONE) {
         unit()._exportToWKT(formatter);
     }
+    if (isWKT2 && formatter->use2019Keywords()) {
+        if (d->minimumValue.has_value()) {
+            formatter->startNode(io::WKTConstants::AXISMINVALUE, false);
+            formatter->add(*(d->minimumValue));
+            formatter->endNode();
+        }
+        if (d->maximumValue.has_value()) {
+            formatter->startNode(io::WKTConstants::AXISMAXVALUE, false);
+            formatter->add(*(d->maximumValue));
+            formatter->endNode();
+        }
+        if (d->minimumValue.has_value() && d->maximumValue.has_value() &&
+            d->rangeMeaning.has_value()) {
+            formatter->startNode(io::WKTConstants::RANGEMEANING, false);
+            formatter->add(d->rangeMeaning->toString());
+            formatter->endNode();
+        }
+    }
     if (formatter->outputId()) {
         formatID(formatter);
     }
@@ -454,6 +521,22 @@ void CoordinateSystemAxis::_exportToJSON(
     } else if (l_unit.type() != common::UnitOfMeasure::Type::NONE) {
         writer->AddObjKey("unit");
         l_unit._exportToJSON(formatter);
+    }
+
+    if (d->minimumValue.has_value()) {
+        writer->AddObjKey("minimum_value");
+        writer->Add(*(d->minimumValue));
+    }
+
+    if (d->maximumValue.has_value()) {
+        writer->AddObjKey("maximum_value");
+        writer->Add(*(d->maximumValue));
+    }
+
+    if (d->minimumValue.has_value() && d->maximumValue.has_value() &&
+        d->rangeMeaning.has_value()) {
+        writer->AddObjKey("range_meaning");
+        writer->Add(d->rangeMeaning->toString());
     }
 
     if (formatter->outputId()) {
@@ -1282,6 +1365,28 @@ AxisDirection::AxisDirection(const std::string &nameIn) : CodeList(nameIn) {
 //! @cond Doxygen_Suppress
 const AxisDirection *
 AxisDirection::valueOf(const std::string &nameIn) noexcept {
+    auto iter = registry.find(nameIn);
+    if (iter == registry.end())
+        return nullptr;
+    return iter->second;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+RangeMeaning::RangeMeaning(const std::string &nameIn) : CodeList(nameIn) {
+    assert(registry.find(nameIn) == registry.end());
+    registry[nameIn] = this;
+}
+
+// ---------------------------------------------------------------------------
+
+RangeMeaning::RangeMeaning() : CodeList(std::string()) {}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+const RangeMeaning *RangeMeaning::valueOf(const std::string &nameIn) noexcept {
     auto iter = registry.find(nameIn);
     if (iter == registry.end())
         return nullptr;

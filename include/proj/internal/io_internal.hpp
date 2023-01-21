@@ -86,6 +86,7 @@ class WKTConstants {
     static const std::string MERIDIAN;
     static const std::string ORDER;
     static const std::string ANCHOR;
+    static const std::string ANCHOREPOCH; // WKT2-2019
     static const std::string CONVERSION;
     static const std::string METHOD;
     static const std::string REMARK;
@@ -139,6 +140,9 @@ class WKTConstants {
     static const std::string GEOIDMODEL;         // WKT2-2019
     static const std::string COORDINATEMETADATA; // WKT2-2019
     static const std::string EPOCH;              // WKT2-2019
+    static const std::string AXISMINVALUE;       // WKT2-2019
+    static const std::string AXISMAXVALUE;       // WKT2-2019
+    static const std::string RANGEMEANING;       // WKT2-2019
 
     // WKT2 alternate (longer or shorter)
     static const std::string GEODETICCRS;

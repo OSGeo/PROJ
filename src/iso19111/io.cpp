@@ -1339,6 +1339,8 @@ struct WKTParser::Private {
 
     static optional<std::string> getAnchor(const WKTNodeNNPtr &node);
 
+    static optional<common::Measure> getAnchorEpoch(const WKTNodeNNPtr &node);
+
     static void parseDynamic(const WKTNodeNNPtr &dynamicNode,
                              double &frameReferenceEpoch,
                              util::optional<std::string> &modelName);
@@ -2209,6 +2211,23 @@ optional<std::string> WKTParser::Private::getAnchor(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+optional<common::Measure>
+WKTParser::Private::getAnchorEpoch(const WKTNodeNNPtr &node) {
+
+    auto &anchorEpochNode = node->GP()->lookForChild(WKTConstants::ANCHOREPOCH);
+    if (anchorEpochNode->GP()->childrenSize() == 1) {
+        try {
+            double value = asDouble(anchorEpochNode->GP()->children()[0]);
+            return optional<common::Measure>(
+                common::Measure(value, common::UnitOfMeasure::YEAR));
+        } catch (const std::exception &e) {
+            throw buildRethrow(__FUNCTION__, e);
+        }
+    }
+    return optional<common::Measure>();
+}
+// ---------------------------------------------------------------------------
+
 static const PrimeMeridianNNPtr &
 fixupPrimeMeridan(const EllipsoidNNPtr &ellipsoid,
                   const PrimeMeridianNNPtr &pm) {
@@ -2441,8 +2460,9 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             modelName);
     }
 
-    return GeodeticReferenceFrame::create(
-        properties, ellipsoid, getAnchor(node), primeMeridianModified);
+    return GeodeticReferenceFrame::create(properties, ellipsoid,
+                                          getAnchor(node), getAnchorEpoch(node),
+                                          primeMeridianModified);
 }
 
 // ---------------------------------------------------------------------------
@@ -2637,9 +2657,60 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
 
     auto &meridianNode = nodeP->lookForChild(WKTConstants::MERIDIAN);
 
+    util::optional<double> minVal;
+    auto &axisMinValueNode = nodeP->lookForChild(WKTConstants::AXISMINVALUE);
+    if (!isNull(axisMinValueNode)) {
+        const auto &axisMinValueNodeChildren =
+            axisMinValueNode->GP()->children();
+        if (axisMinValueNodeChildren.size() != 1) {
+            ThrowNotEnoughChildren(WKTConstants::AXISMINVALUE);
+        }
+        const auto &val = axisMinValueNodeChildren[0];
+        try {
+            minVal = asDouble(val);
+        } catch (const std::exception &) {
+            throw ParsingException(concat(
+                "buildAxis: invalid AXISMINVALUE value: ", val->GP()->value()));
+        }
+    }
+
+    util::optional<double> maxVal;
+    auto &axisMaxValueNode = nodeP->lookForChild(WKTConstants::AXISMAXVALUE);
+    if (!isNull(axisMaxValueNode)) {
+        const auto &axisMaxValueNodeChildren =
+            axisMaxValueNode->GP()->children();
+        if (axisMaxValueNodeChildren.size() != 1) {
+            ThrowNotEnoughChildren(WKTConstants::AXISMAXVALUE);
+        }
+        const auto &val = axisMaxValueNodeChildren[0];
+        try {
+            maxVal = asDouble(val);
+        } catch (const std::exception &) {
+            throw ParsingException(concat(
+                "buildAxis: invalid AXISMAXVALUE value: ", val->GP()->value()));
+        }
+    }
+
+    util::optional<RangeMeaning> rangeMeaning;
+    auto &rangeMeaningNode = nodeP->lookForChild(WKTConstants::RANGEMEANING);
+    if (!isNull(rangeMeaningNode)) {
+        const auto &rangeMeaningNodeChildren =
+            rangeMeaningNode->GP()->children();
+        if (rangeMeaningNodeChildren.size() != 1) {
+            ThrowNotEnoughChildren(WKTConstants::RANGEMEANING);
+        }
+        const std::string &val = rangeMeaningNodeChildren[0]->GP()->value();
+        const RangeMeaning *meaning = RangeMeaning::valueOf(val);
+        if (meaning == nullptr) {
+            throw ParsingException(
+                concat("buildAxis: invalid RANGEMEANING value: ", val));
+        }
+        rangeMeaning = util::optional<RangeMeaning>(*meaning);
+    }
+
     return CoordinateSystemAxis::create(
         buildProperties(node).set(IdentifiedObject::NAME_KEY, axisName),
-        abbreviation, *direction, unit,
+        abbreviation, *direction, unit, minVal, maxVal, rangeMeaning,
         !isNull(meridianNode) ? buildMeridian(meridianNode).as_nullable()
                               : nullptr);
 }
@@ -4500,7 +4571,8 @@ VerticalReferenceFrameNNPtr WKTParser::Private::buildVerticalReferenceFrame(
         }
     }
 
-    return VerticalReferenceFrame::create(props, getAnchor(node));
+    return VerticalReferenceFrame::create(props, getAnchor(node),
+                                          getAnchorEpoch(node));
 }
 
 // ---------------------------------------------------------------------------
@@ -5547,6 +5619,14 @@ class JSONParser {
         return anchor;
     }
 
+    static util::optional<common::Measure> getAnchorEpoch(const json &j) {
+        if (j.contains("anchor_epoch")) {
+            return util::optional<common::Measure>(common::Measure(
+                getNumber(j, "anchor_epoch"), common::UnitOfMeasure::YEAR));
+        }
+        return util::optional<common::Measure>();
+    }
+
     EngineeringDatumNNPtr buildEngineeringDatum(const json &j) {
         return EngineeringDatum::create(buildProperties(j), getAnchor(j));
     }
@@ -6490,8 +6570,31 @@ CoordinateSystemAxisNNPtr JSONParser::buildAxis(const json &j) {
     auto meridian = j.contains("meridian")
                         ? buildMeridian(getObject(j, "meridian")).as_nullable()
                         : nullptr;
+
+    util::optional<double> minVal;
+    if (j.contains("minimum_value")) {
+        minVal = getNumber(j, "minimum_value");
+    }
+
+    util::optional<double> maxVal;
+    if (j.contains("maximum_value")) {
+        maxVal = getNumber(j, "maximum_value");
+    }
+
+    util::optional<RangeMeaning> rangeMeaning;
+    if (j.contains("range_meaning")) {
+        const auto val = getString(j, "range_meaning");
+        const RangeMeaning *meaning = RangeMeaning::valueOf(val);
+        if (meaning == nullptr) {
+            throw ParsingException(
+                concat("buildAxis: invalid range_meaning value: ", val));
+        }
+        rangeMeaning = util::optional<RangeMeaning>(*meaning);
+    }
+
     return CoordinateSystemAxis::create(buildProperties(j), abbreviation,
-                                        *direction, unit, meridian);
+                                        *direction, unit, minVal, maxVal,
+                                        rangeMeaning, meridian);
 }
 
 // ---------------------------------------------------------------------------
@@ -6662,8 +6765,9 @@ JSONParser::buildGeodeticReferenceFrame(const json &j) {
     auto pm = j.contains("prime_meridian")
                   ? buildPrimeMeridian(getObject(j, "prime_meridian"))
                   : PrimeMeridian::GREENWICH;
-    return GeodeticReferenceFrame::create(
-        buildProperties(j), buildEllipsoid(ellipsoidJ), getAnchor(j), pm);
+    return GeodeticReferenceFrame::create(buildProperties(j),
+                                          buildEllipsoid(ellipsoidJ),
+                                          getAnchor(j), getAnchorEpoch(j), pm);
 }
 
 // ---------------------------------------------------------------------------
@@ -6692,7 +6796,8 @@ JSONParser::buildDynamicGeodeticReferenceFrame(const json &j) {
 
 VerticalReferenceFrameNNPtr
 JSONParser::buildVerticalReferenceFrame(const json &j) {
-    return VerticalReferenceFrame::create(buildProperties(j), getAnchor(j));
+    return VerticalReferenceFrame::create(buildProperties(j), getAnchor(j),
+                                          getAnchorEpoch(j));
 }
 
 // ---------------------------------------------------------------------------

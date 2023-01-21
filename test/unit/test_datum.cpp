@@ -248,6 +248,10 @@ TEST(datum, datum_with_ANCHOR) {
         Ellipsoid::WGS84, optional<std::string>("My anchor"),
         PrimeMeridian::GREENWICH);
 
+    ASSERT_TRUE(datum->anchorDefinition());
+    EXPECT_EQ(*datum->anchorDefinition(), "My anchor");
+    ASSERT_FALSE(datum->anchorEpoch());
+
     auto expected = "DATUM[\"WGS_1984 with anchor\",\n"
                     "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
                     "        LENGTHUNIT[\"metre\",1],\n"
@@ -255,6 +259,32 @@ TEST(datum, datum_with_ANCHOR) {
                     "    ANCHOR[\"My anchor\"]]";
 
     EXPECT_EQ(datum->exportToWKT(WKTFormatter::create().get()), expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, datum_with_ANCHOREPOCH) {
+    auto datum = GeodeticReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "my_datum"),
+        Ellipsoid::WGS84, optional<std::string>(),
+        optional<Measure>(Measure(2002.5, UnitOfMeasure::YEAR)),
+        PrimeMeridian::GREENWICH);
+
+    ASSERT_FALSE(datum->anchorDefinition());
+    ASSERT_TRUE(datum->anchorEpoch());
+    EXPECT_NEAR(datum->anchorEpoch()->convertToUnit(UnitOfMeasure::YEAR),
+                2002.5, 1e-8);
+
+    auto expected = "DATUM[\"my_datum\",\n"
+                    "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+                    "        LENGTHUNIT[\"metre\",1],\n"
+                    "        ID[\"EPSG\",7030]],\n"
+                    "    ANCHOREPOCH[2002.5]]";
+
+    EXPECT_EQ(
+        datum->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        expected);
 }
 
 // ---------------------------------------------------------------------------
