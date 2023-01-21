@@ -1356,8 +1356,9 @@ ParametricCS::create(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 AxisDirection::AxisDirection(const std::string &nameIn) : CodeList(nameIn) {
-    assert(registry.find(nameIn) == registry.end());
-    registry[nameIn] = this;
+    auto lowerName = tolower(nameIn);
+    assert(registry.find(lowerName) == registry.end());
+    registry[lowerName] = this;
 }
 
 // ---------------------------------------------------------------------------
@@ -1365,7 +1366,7 @@ AxisDirection::AxisDirection(const std::string &nameIn) : CodeList(nameIn) {
 //! @cond Doxygen_Suppress
 const AxisDirection *
 AxisDirection::valueOf(const std::string &nameIn) noexcept {
-    auto iter = registry.find(nameIn);
+    auto iter = registry.find(tolower(nameIn));
     if (iter == registry.end())
         return nullptr;
     return iter->second;
@@ -1375,8 +1376,9 @@ AxisDirection::valueOf(const std::string &nameIn) noexcept {
 // ---------------------------------------------------------------------------
 
 RangeMeaning::RangeMeaning(const std::string &nameIn) : CodeList(nameIn) {
-    assert(registry.find(nameIn) == registry.end());
-    registry[nameIn] = this;
+    auto lowerName = tolower(nameIn);
+    assert(registry.find(lowerName) == registry.end());
+    registry[lowerName] = this;
 }
 
 // ---------------------------------------------------------------------------
@@ -1387,7 +1389,7 @@ RangeMeaning::RangeMeaning() : CodeList(std::string()) {}
 
 //! @cond Doxygen_Suppress
 const RangeMeaning *RangeMeaning::valueOf(const std::string &nameIn) noexcept {
-    auto iter = registry.find(nameIn);
+    auto iter = registry.find(tolower(nameIn));
     if (iter == registry.end())
         return nullptr;
     return iter->second;
@@ -1399,14 +1401,15 @@ const RangeMeaning *RangeMeaning::valueOf(const std::string &nameIn) noexcept {
 
 AxisDirectionWKT1::AxisDirectionWKT1(const std::string &nameIn)
     : CodeList(nameIn) {
-    assert(registry.find(nameIn) == registry.end());
-    registry[nameIn] = this;
+    auto lowerName = tolower(nameIn);
+    assert(registry.find(lowerName) == registry.end());
+    registry[lowerName] = this;
 }
 
 // ---------------------------------------------------------------------------
 
 const AxisDirectionWKT1 *AxisDirectionWKT1::valueOf(const std::string &nameIn) {
-    auto iter = registry.find(nameIn);
+    auto iter = registry.find(tolower(nameIn));
     if (iter == registry.end())
         return nullptr;
     return iter->second;

@@ -1039,7 +1039,8 @@ TEST(wkt_parse, wkt2_geocentric) {
                "            ID[\"EPSG\",9122]],\n"
                "        ID[\"EPSG\",8901]],\n"
                "    CS[Cartesian,3],\n"
-               "        AXIS[\"(X)\",geocentricX,\n"
+               // nominal value is 'geocentricX' with g lower case.
+               "        AXIS[\"(X)\",GeocentricX,\n"
                "            ORDER[1],\n"
                "            LENGTHUNIT[\"metre\",1,\n"
                "                ID[\"EPSG\",9001]]],\n"
@@ -2468,7 +2469,8 @@ TEST(wkt_parse, cs_with_AXISMINVAL_AXISMAXVAL_RANGEMEANING) {
                "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
                "            AXISMINVALUE[0],\n"
                "            AXISMAXVALUE[360],\n"
-               "            RANGEMEANING[wraparound]]]";
+               // nominal value is 'wraparound' lower case
+               "            RANGEMEANING[wrapAround]]]";
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -2492,7 +2494,7 @@ TEST(wkt_parse, cs_with_AXISMINVAL_AXISMAXVAL_RANGEMEANING) {
     EXPECT_EQ(
         crs->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
-        wkt);
+        replaceAll(wkt, "wrapAround", "wraparound"));
 }
 
 // ---------------------------------------------------------------------------
