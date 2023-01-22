@@ -92,7 +92,7 @@ Parameters
 Mathematical definition
 #######################
 
-The formulas describing the Transverse Mercator are all taken from Evenden's [Evenden2005]_.
+The formulas describing the Transverse Mercator are all taken from :cite:`Evenden2005`.
 
 :math:`\phi_0` is the latitude of origin that match the center of the map. It can be set with ``+lat_0``.
 

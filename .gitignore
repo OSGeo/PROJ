@@ -41,9 +41,11 @@ test-driver
 /DartConfiguration.tcl
 /Testing
 
-# html
+# docs
 /html/dl
 /html/robots.txt
+/docs/plot/images
+/latex
 
 # m4
 /m4/libtool.m4
