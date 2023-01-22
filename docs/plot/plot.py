@@ -1,5 +1,6 @@
+#!/usr/bin/env python3
 '''
-Plot map data in different projections supported by PROJ.4
+Plot map data in different projections supported by PROJ.
 
 Call with:
 
@@ -41,28 +42,31 @@ or "line". The rest of the inputs are fairly free form.
 Change PROJ to path on your local system before running the script.
 '''
 
-from __future__ import print_function
-from __future__ import division
-
+import argparse
 import os
-import os.path
+import shutil
 import sys
 import json
 import subprocess
 import functools
+from pathlib import Path
 
+import geojson
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-import fiona
-from shapely.geometry import Polygon
-from shapely.geometry import MultiPolygon
+from shapely.geometry import MultiPolygon, Polygon, box as Box
 from shapely.geometry import shape
 from shapely.ops import transform
 from descartes import PolygonPatch
 
-PROJ = '../../src/proj'
-PROJ_LIB = '../../data'
+PROJ_COMMAND = os.environ.get('PROJ_EXE', '../../src/proj')
+if not os.path.exists(PROJ_COMMAND):
+    PROJ = shutil.which('proj')
+    if PROJ is None:
+        raise ValueError("specify PROJ_EXE or modify PATH to find proj")
+else:
+    PROJ = PROJ_COMMAND
+PROJ_LIB = os.environ.get('PROJ_LIB', '../../data')
 
 LINE_LOW = 'data/coastline.geojson'
 LINE_MED = 'data/coastline50.geojson'
@@ -160,9 +164,9 @@ def project(coordinates, proj_string, in_radians=False):
     try:
         proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                 env={'PROJ_LIB': os.path.abspath(PROJ_LIB)})
-    except FileNotFoundError:
-        print("'proj' binary not found, please update PROJ constant in plot.py "
-              "to point to your local 'proj' binary")
+    except FileNotFoundError as e:
+        print("'proj' binary not found, set the PROJ_EXE environment variable "
+              "to point to your local 'proj' binary --%s--" % e)
         exit(1)
 
     stdout, _ = proc.communicate(coordinates.tobytes(order='C'))
@@ -223,7 +227,10 @@ def resample_polygon(polygon):
     '''
     Use interp_coords() to resample (multi)polygons.
     '''
-    xy = polygon.exterior.coords.xy
+    try:
+        xy = polygon.exterior.coords.xy
+    except AttributeError: #no xy's
+        return polygon
     ext = interp_coords(xy, 2)
     # interiors
     rings = []
@@ -232,27 +239,46 @@ def resample_polygon(polygon):
     return Polygon(ext, rings)
 
 
+def plot_with_interruptions(axes, x, y, delta_cut=1e100, **kwargs):
+    """
+    Plot x/y with proper splitting for interrupted projections.
+    """
+    _x = np.atleast_1d(x)
+    _y = np.atleast_1d(y)
+
+    dx = np.nan_to_num(_x[1: ]) - np.nan_to_num(_x[0: -1])
+    dy = np.nan_to_num(_y[1: ]) - np.nan_to_num(_y[0: -1])
+    split, = ((np.abs(dx) > delta_cut) | (np.abs(dy) > delta_cut)).nonzero()
+    split = np.append(split, _x.size - 1)
+    split += 1
+
+    last_part = 0
+    for part in split:
+        axes.plot(x[last_part: part],
+                  y[last_part: part],
+                  **kwargs)
+        last_part = part
+
+
 def plotproj(plotdef, data, outdir):
     '''
     Plot map.
     '''
     axes = plt.axes()
 
-    bounds = (plotdef['lonmin'], plotdef['latmin'], plotdef['lonmax'], plotdef['latmax'])
-    for geom in data.filter(bbox=bounds):
-        temp_pol = shape(geom['geometry'])
+    box = Box(
+        plotdef['lonmin'], plotdef['latmin'],
+        plotdef['lonmax'], plotdef['latmax'])
+    for feat in data["features"]:
+        geom = shape(feat["geometry"])
+        if not geom.intersects(box):
+            continue
 
-        box = Polygon([
-            (plotdef['lonmin'], plotdef['latmin']),
-            (plotdef['lonmin'], plotdef['latmax']),
-            (plotdef['lonmax'], plotdef['latmax']),
-            (plotdef['lonmax'], plotdef['latmin']),
-        ])
-        temp_pol = temp_pol.intersection(box)
+        temp_pol = geom.intersection(box)
 
         if plotdef['type'] == 'poly':
             if isinstance(temp_pol, MultiPolygon):
-                polys = [resample_polygon(polygon) for polygon in temp_pol]
+                polys = [resample_polygon(polygon) for polygon in temp_pol.geoms]
                 pol = MultiPolygon(polys)
             else:
                 pol = resample_polygon(temp_pol)
@@ -263,11 +289,15 @@ def plotproj(plotdef, data, outdir):
         proj_geom = transform(trans, pol)
 
         if plotdef['type'] == 'poly':
-            patch = PolygonPatch(proj_geom, fc=COLOR_LAND, zorder=0)
-            axes.add_patch(patch)
+            try:
+                patch = PolygonPatch(proj_geom, fc=COLOR_LAND, zorder=0)
+                axes.add_patch(patch)
+            except TypeError:
+                pass
         else:
             x, y = proj_geom.xy
-            axes.plot(x, y, color=COLOR_COAST, linewidth=0.5)
+            plot_with_interruptions(axes, x, y, color=COLOR_COAST, linewidth=0.5,
+                                    delta_cut=plotdef.get('delta_cut', 1e100))
 
     # Plot frame
     frame = [
@@ -278,7 +308,8 @@ def plotproj(plotdef, data, outdir):
         line = project(line, plotdef['projstring'])
         x = line[:, 0]
         y = line[:, 1]
-        axes.plot(x, y, '-k')
+        plot_with_interruptions(axes, x, y, color='black', linestyle='-',
+                                delta_cut=plotdef.get('delta_cut', 1e6))
 
     graticule = build_graticule(
         plotdef['lonmin'],
@@ -292,7 +323,28 @@ def plotproj(plotdef, data, outdir):
         feature = project(feature, plotdef['projstring'])
         x = feature[:, 0]
         y = feature[:, 1]
-        axes.plot(x, y, color=COLOR_GRAT, linewidth=0.4)
+        plot_with_interruptions(axes, x, y, color=COLOR_GRAT, linewidth=0.4,
+                                delta_cut=plotdef.get('delta_cut', 1e6))
+
+    # Plot interrupted boundaries if necessary
+    interrupted_lines = []
+    if 'top_interrupted_lons' in plotdef:
+        for lon in plotdef['top_interrupted_lons']:
+            for delta in [-0.0001, 0.0001]:
+                merid = meridian(lon + delta, 0.0, plotdef['latmax'])
+                interrupted_lines.append(project(merid, plotdef['projstring']))
+
+    if 'bottom_interrupted_lons' in plotdef:
+        for lon in plotdef['bottom_interrupted_lons']:
+            for delta in [-0.0001, 0.0001]:
+                merid = meridian(lon + delta, plotdef['latmin'], 0)
+                interrupted_lines.append(project(merid, plotdef['projstring']))
+
+    for line in interrupted_lines:
+        x = line[:, 0]
+        y = line[:, 1]
+        plot_with_interruptions(axes, x, y, color=COLOR_GRAT, linewidth=0.4,
+                                delta_cut=plotdef.get('delta_cut', 1e100))
 
     # Switch off the axis lines...
     plt.axis('off')
@@ -311,9 +363,12 @@ def plotproj(plotdef, data, outdir):
     # Make sure the plot is not stretched
     axes.set_aspect('equal')
 
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-    plt.savefig(outdir + '/' + plotdef['filename'],
+    outdir = Path(outdir)
+    if not outdir.exists():
+        outdir.mkdir(parents=True)
+    if not outdir.is_dir():
+        raise OSError("outdir is not a directory")
+    plt.savefig(outdir / plotdef['filename'],
                 dpi=400,
                 bbox_inches='tight')
 
@@ -323,35 +378,21 @@ def plotproj(plotdef, data, outdir):
     plt.close()
 
 
-def main():
+def main(plotdefs, outdir, plots=[]):
     '''
     Main function of plotting script.
 
     Parses json-file with plot setups and runs the plotting
     for each plot setup.
     '''
+    plotdefs = json.loads(Path(plotdefs).read_text())
 
     data = {
-        ('line', 'low'): fiona.open(LINE_LOW),
-        ('line', 'med'): fiona.open(LINE_MED),
-        ('poly', 'low'): fiona.open(POLY_LOW),
-        ('poly', 'med'): fiona.open(POLY_MED),
+        ('line', 'low'): geojson.loads(Path(LINE_LOW).read_text()),
+        ('line', 'med'): geojson.loads(Path(LINE_MED).read_text()),
+        ('poly', 'low'): geojson.loads(Path(POLY_LOW).read_text()),
+        ('poly', 'med'): geojson.loads(Path(POLY_MED).read_text()),
     }
-
-    if os.path.exists(sys.argv[1]):
-        # first argument is the JSON plot definition setup file
-        with open(sys.argv[1]) as plotsetup:
-            plotdefs = json.load(plotsetup)
-    else:
-        raise ValueError('No plot definition file entered')
-
-    plots = []
-    # second argument is the output dir
-    outdir = sys.argv[2]
-
-    # subsecond arguments are (optional) names of plot in plotdef.json
-    if len(sys.argv) > 3:
-        plots = sys.argv[3:len(sys.argv)]
 
     for i, plotdef in enumerate(plotdefs):
         if plots != [] and plotdef['name'] not in plots:
@@ -364,9 +405,20 @@ def main():
 
         plotproj(plotdef, data[(plotdef['type'], plotdef['res'])], outdir)
 
-    for key in data:
-        data[key].close()
-
 
 if __name__ == "__main__":
-    sys.exit(main())
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument(
+        'plotdefs',
+        help='A JSON file with setup for each auto-generated plot')
+    parser.add_argument(
+        'outdir',
+        help='Directory to put the plots in.')
+    parser.add_argument(
+        'plots', nargs='*',
+        help='A list of plot names within the plotdefs file. '
+        'More than one plotname can be given at once.')
+    args = parser.parse_args()
+    sys.exit(main(**vars(args)))
