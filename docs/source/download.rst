@@ -18,7 +18,6 @@ Current Release
 * **2018-09-15** `proj-datumgrid-europe-1.1.zip`_
 * **2018-09-15** `proj-datumgrid-north-america-1.1.zip`_
 * **2018-03-01** `proj-datumgrid-oceania-1.0.zip`_
-* **PDF Manual** `proj.pdf`_
 
 Past Releases
 --------------------------------------------------------------------------------
@@ -51,4 +50,3 @@ Past Releases
 .. _`proj-datumgrid-north-america-1.1.zip`: http://download.osgeo.org/proj/proj-datumgrid-north-america-1.1.zip
 .. _`proj-datumgrid-oceania-1.0.zip`: http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip
 .. _`md5`: http://download.osgeo.org/proj/proj-5.2.0.tar.gz.md5
-.. _`proj.pdf`: https://raw.githubusercontent.com/OSGeo/proj.4/gh-pages/proj.pdf
