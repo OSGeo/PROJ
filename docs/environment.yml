@@ -1,0 +1,13 @@
+name: proj
+channels:
+  - conda-forge
+dependencies:
+  - descartes
+  - geojson
+  - matplotlib
+  - shapely < 1.8
+  - pip
+  - pip:
+    - Jinja2 < 3.1
+    - sphinx < 3
+    - sphinx-rtd-theme < 1.0
