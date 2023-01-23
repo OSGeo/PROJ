@@ -11,6 +11,7 @@ PROJ project or using the library in their own software.
 .. toctree::
    :maxdepth: 1
 
+   dev_practices
    quickstart
    transformations
    errorhandling
