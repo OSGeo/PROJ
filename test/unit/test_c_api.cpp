@@ -2359,6 +2359,46 @@ TEST_F(CApi, proj_identify) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_get_domain_count) {
+
+    auto crs = proj_create_from_database(m_ctxt, "EPSG", "6316",
+                                         PJ_CATEGORY_CRS, false, nullptr);
+    ASSERT_NE(crs, nullptr);
+    ObjectKeeper keeper(crs);
+    EXPECT_EQ(proj_get_domain_count(crs), 2);
+
+    const char *name = nullptr;
+    EXPECT_TRUE(proj_get_area_of_use_ex(m_ctxt, crs, 0, nullptr, nullptr,
+                                        nullptr, nullptr, &name));
+    ASSERT_TRUE(name != nullptr);
+    EXPECT_EQ(std::string(name),
+              "Bosnia and Herzegovina - east of 19°30'E; Kosovo; Montenegro - "
+              "east of 19°30'E; Serbia - between 19°30'E and 22°30'E.");
+
+    const char *scope = proj_get_scope_ex(crs, 0);
+    ASSERT_TRUE(scope != nullptr);
+    EXPECT_STREQ(scope, "Cadastre, engineering survey, topographic mapping "
+                        "(large and medium scale).");
+
+    EXPECT_TRUE(proj_get_area_of_use_ex(m_ctxt, crs, 1, nullptr, nullptr,
+                                        nullptr, nullptr, &name));
+    ASSERT_TRUE(name != nullptr);
+    EXPECT_EQ(std::string(name), "North Macedonia.");
+
+    scope = proj_get_scope_ex(crs, 1);
+    ASSERT_TRUE(scope != nullptr);
+    EXPECT_STREQ(scope, "Cadastre.");
+
+    EXPECT_FALSE(proj_get_area_of_use_ex(m_ctxt, crs, -1, nullptr, nullptr,
+                                         nullptr, nullptr, &name));
+    EXPECT_FALSE(proj_get_area_of_use_ex(m_ctxt, crs, 2, nullptr, nullptr,
+                                         nullptr, nullptr, &name));
+    EXPECT_EQ(proj_get_scope_ex(crs, -1), nullptr);
+    EXPECT_EQ(proj_get_scope_ex(crs, 2), nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_get_area_of_use) {
     {
         auto crs = proj_create_from_database(m_ctxt, "EPSG", "4326",
