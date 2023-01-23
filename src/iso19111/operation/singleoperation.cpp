@@ -2883,6 +2883,36 @@ bool SingleOperation::exportToPROJStringGeneric(
         return true;
     }
 
+    if (methodEPSGCode == EPSG_CODE_METHOD_SIMILARITY_TRANSFORMATION) {
+        const double XT0 =
+            parameterValueMeasure(
+                EPSG_CODE_PARAMETER_ORDINATE_1_EVAL_POINT_TARGET_CRS)
+                .value();
+        const double YT0 =
+            parameterValueMeasure(
+                EPSG_CODE_PARAMETER_ORDINATE_2_EVAL_POINT_TARGET_CRS)
+                .value();
+        const double M =
+            parameterValueMeasure(
+                EPSG_CODE_PARAMETER_SCALE_FACTOR_FOR_SOURCE_CRS_AXES)
+                .value();
+        const double q = parameterValueNumeric(
+            EPSG_CODE_PARAMETER_ROTATION_ANGLE_OF_SOURCE_CRS_AXES,
+            common::UnitOfMeasure::RADIAN);
+
+        // Do not mess with axis unit and order for that transformation
+
+        formatter->addStep("affine");
+        formatter->addParam("xoff", XT0);
+        formatter->addParam("s11", M * cos(q));
+        formatter->addParam("s12", M * sin(q));
+        formatter->addParam("yoff", YT0);
+        formatter->addParam("s21", -M * sin(q));
+        formatter->addParam("s22", M * cos(q));
+
+        return true;
+    }
+
     if (isAxisOrderReversal(methodEPSGCode)) {
         formatter->addStep("axisswap");
         formatter->addParam("order", "2,1");

@@ -22,6 +22,32 @@ x,y,z coordinates, and translation and scaling on the temporal coordinate.
 By default, the parameters are set for an identity transforms. The transformation
 is reversible unless the determinant of the sji matrix is 0, or `tscale` is 0
 
+This can be used to implement:
+
+- EPSG "Affine parametric transformation" of code 9624 by setting `A0`, `A1`, `A2`,
+  `B0`, `B1`, `B2` EPSG parameters to respectively `xoff`, `s11`, `s12`, `yoff`,
+  `s21`, `s21` PROJ parameters.
+
+- EPSG "Similarity transformation" of code 9621 by setting:
+
+    * xoff to :math:`X_{T0}`
+    * yoff to :math:`Y_{T0}`
+    * s11 to :math:`M \cos \theta`
+    * s12 to :math:`M \sin \theta`
+    * s21 to :math:`-M \sin \theta`
+    * s22 to :math:`M \cos \theta`
+
+  where:
+
+    * :math:`X_{T0}` is the first ordinate of the origin point of the source
+      CRS expressed in the target CRS.
+    * :math:`Y_{T0}` is the second ordinate of the origin point of the source
+      CRS expressed in the target CRS.
+    * :math:`M` is the multiplication factor applied to coordinates in the
+      source CRS to obtain the correct scale of the target CRS.
+    * :math:`\theta` is the angle about which the axes of the source CRS need to
+      be rotated to coincide with the axes of the target CRS, counter-clockwise
+      being positive
 
 Parameters
 ################################################################################

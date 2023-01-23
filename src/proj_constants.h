@@ -705,6 +705,28 @@
 
 /* ------------------------------------------------------------------------ */
 
+#define EPSG_CODE_METHOD_SIMILARITY_TRANSFORMATION 9621
+#define EPSG_NAME_METHOD_SIMILARITY_TRANSFORMATION \
+    "Similarity transformation"
+
+#define EPSG_NAME_PARAMETER_ORDINATE_1_EVAL_POINT_TARGET_CRS \
+    "Ordinate 1 of evaluation point in target CRS"
+#define EPSG_CODE_PARAMETER_ORDINATE_1_EVAL_POINT_TARGET_CRS 8621
+
+#define EPSG_NAME_PARAMETER_ORDINATE_2_EVAL_POINT_TARGET_CRS \
+    "Ordinate 2 of evaluation point in target CRS"
+#define EPSG_CODE_PARAMETER_ORDINATE_2_EVAL_POINT_TARGET_CRS 8622
+
+#define EPSG_NAME_PARAMETER_SCALE_FACTOR_FOR_SOURCE_CRS_AXES \
+    "Scale factor for source CRS axes"
+#define EPSG_CODE_PARAMETER_SCALE_FACTOR_FOR_SOURCE_CRS_AXES 1061
+
+#define EPSG_NAME_PARAMETER_ROTATION_ANGLE_OF_SOURCE_CRS_AXES \
+    "Rotation angle of source CRS axes"
+#define EPSG_CODE_PARAMETER_ROTATION_ANGLE_OF_SOURCE_CRS_AXES 8614
+
+/* ------------------------------------------------------------------------ */
+
 #define EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_2D 9843
 #define EPSG_NAME_METHOD_AXIS_ORDER_REVERSAL_2D "Axis Order Reversal (2D)"
 

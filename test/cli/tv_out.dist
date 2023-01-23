@@ -568,3 +568,9 @@ Rel. 9.2.0, March 1st, 2023
 cannot initialize transformation
 cause: File not found or invalid
 program abnormally terminated
+##############################################################
+Test Similarity Transformation (example from EPSG Guidance Note 7.2)
+300000 4500000	299905.060	4499796.515 0.000
+##############################################################
+Test inverse of Similarity Transformation (example from EPSG Guidance Note 7.2)
+299905.060 4499796.515	300000.000	4500000.000 0.000
