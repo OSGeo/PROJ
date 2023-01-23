@@ -237,6 +237,7 @@
                               "vertical",
                               "ordinal",
                               "parametric",
+                              "affine",
                               "TemporalDateTime",
                               "TemporalCount",
                               "TemporalMeasure"]  },

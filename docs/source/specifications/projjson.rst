@@ -57,6 +57,7 @@ History of the schema
      - Added CoordinateMetadata
      - Added "datum_epoch" property to GeodeticReferenceFrame and VerticalReferenceFrame
      - Added "minimum_value", "maximum_value" and "range_meaning" properties to Axis
+     - Added "affine" in the CoordinateSystem.subtype enumeration.
 * v0.5:
     - Implemented in PROJ 9.1:
         + add "meridian" member in Axis object type.

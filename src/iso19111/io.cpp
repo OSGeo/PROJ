@@ -2940,7 +2940,8 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                   : ci_equal(csType, "parametric")
                         ? UnitOfMeasure::Type::PARAMETRIC
                         : ci_equal(csType, "Cartesian") ||
-                                  ci_equal(csType, "vertical")
+                                  ci_equal(csType, "vertical") ||
+                                  ci_equal(csType, "affine")
                               ? UnitOfMeasure::Type::LINEAR
                               : (ci_equal(csType, "temporal") ||
                                  ci_equal(csType, "TemporalDateTime") ||
@@ -2971,6 +2972,13 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         } else if (axisCount == 3) {
             return CartesianCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
+        }
+    } else if (ci_equal(csType, "affine")) {
+        if (axisCount == 2) {
+            return AffineCS::create(csMap, axisList[0], axisList[1]);
+        } else if (axisCount == 3) {
+            return AffineCS::create(csMap, axisList[0], axisList[1],
+                                    axisList[2]);
         }
     } else if (ci_equal(csType, "vertical")) {
         if (axisCount == 1) {
@@ -6632,6 +6640,16 @@ CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
         if (axisCount == 3) {
             return CartesianCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
+        }
+        throw ParsingException("Expected 2 or 3 axis");
+    }
+    if (subtype == "affine") {
+        if (axisCount == 2) {
+            return AffineCS::create(csMap, axisList[0], axisList[1]);
+        }
+        if (axisCount == 3) {
+            return AffineCS::create(csMap, axisList[0], axisList[1],
+                                    axisList[2]);
         }
         throw ParsingException("Expected 2 or 3 axis");
     }

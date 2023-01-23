@@ -1289,6 +1289,73 @@ CartesianCS::alterUnit(const common::UnitOfMeasure &unit) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+AffineCS::~AffineCS() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+AffineCS::AffineCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn)
+    : CoordinateSystem(axisIn) {}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a AffineCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axis1 The first axis.
+ * @param axis2 The second axis.
+ * @return a new AffineCS.
+ */
+AffineCSNNPtr AffineCS::create(const util::PropertyMap &properties,
+                               const CoordinateSystemAxisNNPtr &axis1,
+                               const CoordinateSystemAxisNNPtr &axis2) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis1, axis2};
+    auto cs(AffineCS::nn_make_shared<AffineCS>(axis));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a AffineCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axis1 The first axis.
+ * @param axis2 The second axis.
+ * @param axis3 The third axis.
+ * @return a new AffineCS.
+ */
+AffineCSNNPtr AffineCS::create(const util::PropertyMap &properties,
+                               const CoordinateSystemAxisNNPtr &axis1,
+                               const CoordinateSystemAxisNNPtr &axis2,
+                               const CoordinateSystemAxisNNPtr &axis3) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis1, axis2, axis3};
+    auto cs(AffineCS::nn_make_shared<AffineCS>(axis));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+AffineCSNNPtr AffineCS::alterUnit(const common::UnitOfMeasure &unit) const {
+    const auto &l_axisList = CoordinateSystem::getPrivate()->axisList;
+    if (l_axisList.size() == 2) {
+        return AffineCS::create(util::PropertyMap(),
+                                l_axisList[0]->alterUnit(unit),
+                                l_axisList[1]->alterUnit(unit));
+    } else {
+        assert(l_axisList.size() == 3);
+        return AffineCS::create(
+            util::PropertyMap(), l_axisList[0]->alterUnit(unit),
+            l_axisList[1]->alterUnit(unit), l_axisList[2]->alterUnit(unit));
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 OrdinalCS::~OrdinalCS() = default;
 //! @endcond
 
