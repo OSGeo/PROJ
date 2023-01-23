@@ -41,25 +41,24 @@ PROJ_HEAD(natearth, "Natural Earth") "\n\tPCyl, Sph";
 /* Not sure at all of the appropriate number for MAX_ITER... */
 #define MAX_ITER 100
 
-
-static PJ_XY natearth_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
-    PJ_XY xy = {0.0,0.0};
+static PJ_XY natearth_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     double phi2, phi4;
-    (void) P;
+    (void)P;
 
     phi2 = lp.phi * lp.phi;
     phi4 = phi2 * phi2;
-    xy.x = lp.lam * (A0 + phi2 * (A1 + phi2 * (A2 + phi4 * phi2 * (A3 + phi2 * A4))));
+    xy.x = lp.lam *
+           (A0 + phi2 * (A1 + phi2 * (A2 + phi4 * phi2 * (A3 + phi2 * A4))));
     xy.y = lp.phi * (B0 + phi2 * (B1 + phi4 * (B2 + B3 * phi2 + B4 * phi4)));
     return xy;
 }
 
-
-static PJ_LP natearth_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
-    PJ_LP lp = {0.0,0.0};
+static PJ_LP natearth_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
     double yc, y2, y4, f, fder;
     int i;
-    (void) P;
+    (void)P;
 
     /* make sure y is inside valid range */
     if (xy.y > MAX_Y) {
@@ -70,7 +69,7 @@ static PJ_LP natearth_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inv
 
     /* latitude */
     yc = xy.y;
-    for (i = MAX_ITER; i ; --i) { /* Newton-Raphson */
+    for (i = MAX_ITER; i; --i) { /* Newton-Raphson */
         y2 = yc * yc;
         y4 = y2 * y2;
         f = (yc * (B0 + y2 * (B1 + y4 * (B2 + B3 * y2 + B4 * y4)))) - xy.y;
@@ -81,17 +80,18 @@ static PJ_LP natearth_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inv
             break;
         }
     }
-    if( i == 0 )
-        proj_context_errno_set( P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN );
+    if (i == 0)
+        proj_context_errno_set(
+            P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
     lp.phi = yc;
 
     /* longitude */
     y2 = yc * yc;
-    lp.lam = xy.x / (A0 + y2 * (A1 + y2 * (A2 + y2 * y2 * y2 * (A3 + y2 * A4))));
+    lp.lam =
+        xy.x / (A0 + y2 * (A1 + y2 * (A2 + y2 * y2 * y2 * (A3 + y2 * A4))));
 
     return lp;
 }
-
 
 PJ *PROJECTION(natearth) {
     P->es = 0;

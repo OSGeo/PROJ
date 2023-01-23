@@ -10,53 +10,52 @@
 namespace { // anonymous namespace
 struct pj_opaque {
     struct PJconsts *link;
-    double  lamp;
-    double  cphip, sphip;
+    double lamp;
+    double cphip, sphip;
 };
 } // anonymous namespace
 
-PROJ_HEAD(ob_tran, "General Oblique Transformation") "\n\tMisc Sph"
-"\n\to_proj= plus parameters for projection"
-"\n\to_lat_p= o_lon_p= (new pole) or"
-"\n\to_alpha= o_lon_c= o_lat_c= or"
-"\n\to_lon_1= o_lat_1= o_lon_2= o_lat_2=";
+PROJ_HEAD(ob_tran, "General Oblique Transformation")
+"\n\tMisc Sph"
+    "\n\to_proj= plus parameters for projection"
+    "\n\to_lat_p= o_lon_p= (new pole) or"
+    "\n\to_alpha= o_lon_c= o_lat_c= or"
+    "\n\to_lon_1= o_lat_1= o_lon_2= o_lat_2=";
 
 #define TOL 1e-10
 
-
-static PJ_XY o_forward(PJ_LP lp, PJ *P) {             /* spheroid */
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_XY o_forward(PJ_LP lp, PJ *P) { /* spheroid */
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double coslam, sinphi, cosphi;
 
     coslam = cos(lp.lam);
     sinphi = sin(lp.phi);
     cosphi = cos(lp.phi);
     /* Formula (5-8b) of Snyder's "Map projections: a working manual" */
-    lp.lam = adjlon(aatan2(cosphi * sin(lp.lam), Q->sphip * cosphi * coslam +
-        Q->cphip * sinphi) + Q->lamp);
+    lp.lam = adjlon(aatan2(cosphi * sin(lp.lam),
+                           Q->sphip * cosphi * coslam + Q->cphip * sinphi) +
+                    Q->lamp);
     /* Formula (5-7) */
-    lp.phi = aasin(P->ctx,Q->sphip * sinphi - Q->cphip * cosphi * coslam);
+    lp.phi = aasin(P->ctx, Q->sphip * sinphi - Q->cphip * cosphi * coslam);
 
     return Q->link->fwd(lp, Q->link);
 }
 
-
-static PJ_XY t_forward(PJ_LP lp, PJ *P) {             /* spheroid */
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_XY t_forward(PJ_LP lp, PJ *P) { /* spheroid */
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double cosphi, coslam;
 
     cosphi = cos(lp.phi);
     coslam = cos(lp.lam);
     lp.lam = adjlon(aatan2(cosphi * sin(lp.lam), sin(lp.phi)) + Q->lamp);
-    lp.phi = aasin(P->ctx, - cosphi * coslam);
+    lp.phi = aasin(P->ctx, -cosphi * coslam);
 
     return Q->link->fwd(lp, Q->link);
 }
 
+static PJ_LP o_inverse(PJ_XY xy, PJ *P) { /* spheroid */
 
-static PJ_LP o_inverse(PJ_XY xy, PJ *P) {             /* spheroid */
-
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double coslam, sinphi, cosphi;
 
     PJ_LP lp = Q->link->inv(xy, Q->link);
@@ -66,45 +65,41 @@ static PJ_LP o_inverse(PJ_XY xy, PJ *P) {             /* spheroid */
         sinphi = sin(lp.phi);
         cosphi = cos(lp.phi);
         /* Formula (5-9) */
-        lp.phi = aasin(P->ctx,Q->sphip * sinphi + Q->cphip * cosphi * coslam);
+        lp.phi = aasin(P->ctx, Q->sphip * sinphi + Q->cphip * cosphi * coslam);
         /* Formula (5-10b) */
-        lp.lam = aatan2(cosphi * sin(lp.lam), Q->sphip * cosphi * coslam -
-            Q->cphip * sinphi);
+        lp.lam = aatan2(cosphi * sin(lp.lam),
+                        Q->sphip * cosphi * coslam - Q->cphip * sinphi);
     }
     return lp;
 }
 
+static PJ_LP t_inverse(PJ_XY xy, PJ *P) { /* spheroid */
 
-static PJ_LP t_inverse(PJ_XY xy, PJ *P) {             /* spheroid */
-
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double cosphi, t;
 
     PJ_LP lp = Q->link->inv(xy, Q->link);
     if (lp.lam != HUGE_VAL) {
         cosphi = cos(lp.phi);
         t = lp.lam - Q->lamp;
-        lp.lam = aatan2(cosphi * sin(t), - sin(lp.phi));
-        lp.phi = aasin(P->ctx,cosphi * cos(t));
+        lp.lam = aatan2(cosphi * sin(t), -sin(lp.phi));
+        lp.phi = aasin(P->ctx, cosphi * cos(t));
     }
     return lp;
 }
 
-
 static PJ *destructor(PJ *P, int errlev) {
-    if (nullptr==P)
+    if (nullptr == P)
         return nullptr;
-    if (nullptr==P->opaque)
-        return pj_default_destructor (P, errlev);
+    if (nullptr == P->opaque)
+        return pj_default_destructor(P, errlev);
 
-    if (static_cast<struct pj_opaque*>(P->opaque)->link)
-        static_cast<struct pj_opaque*>(P->opaque)->link->destructor (static_cast<struct pj_opaque*>(P->opaque)->link, errlev);
+    if (static_cast<struct pj_opaque *>(P->opaque)->link)
+        static_cast<struct pj_opaque *>(P->opaque)->link->destructor(
+            static_cast<struct pj_opaque *>(P->opaque)->link, errlev);
 
     return pj_default_destructor(P, errlev);
 }
-
-
-
 
 /***********************************************************************
 
@@ -122,46 +117,48 @@ keep memory allocations more localized.
 
 ***********************************************************************/
 
-typedef struct {int argc; char **argv;} ARGS;
+typedef struct {
+    int argc;
+    char **argv;
+} ARGS;
 
 /* count the number of args in the linked list <params> */
-static size_t paralist_params_argc (paralist *params) {
+static size_t paralist_params_argc(paralist *params) {
     size_t argc = 0;
     for (; params != nullptr; params = params->next)
         argc++;
     return argc;
 }
 
-
 /* turn paralist into argc/argv style argument list */
-static ARGS ob_tran_target_params (paralist *params) {
+static ARGS ob_tran_target_params(paralist *params) {
     int i = 0;
     ARGS args = {0, nullptr};
-    size_t argc = paralist_params_argc (params);
+    size_t argc = paralist_params_argc(params);
     if (argc < 2)
         return args;
 
     /* all args except the proj=ob_tran */
-    args.argv = static_cast<char**>(calloc (argc - 1, sizeof (char *)));
-    if (nullptr==args.argv)
+    args.argv = static_cast<char **>(calloc(argc - 1, sizeof(char *)));
+    if (nullptr == args.argv)
         return args;
 
     /* Copy all args *except* the proj=ob_tran or inv arg to the argv array */
-    for (i = 0;  params != nullptr;  params = params->next) {
-        if (0==strcmp (params->param, "proj=ob_tran") ||
-            0==strcmp (params->param, "inv") )
+    for (i = 0; params != nullptr; params = params->next) {
+        if (0 == strcmp(params->param, "proj=ob_tran") ||
+            0 == strcmp(params->param, "inv"))
             continue;
         args.argv[i++] = params->param;
     }
     args.argc = i;
 
     /* Then convert the o_proj=xxx element to proj=xxx */
-    for (i = 0;   i < args.argc;   i++) {
-        if (0!=strncmp (args.argv[i], "o_proj=", 7))
+    for (i = 0; i < args.argc; i++) {
+        if (0 != strncmp(args.argv[i], "o_proj=", 7))
             continue;
         args.argv[i] += 2;
-        if (strcmp(args.argv[i], "proj=ob_tran") == 0 ) {
-            free (args.argv);
+        if (strcmp(args.argv[i], "proj=ob_tran") == 0) {
+            free(args.argv);
             args.argc = 0;
             args.argv = nullptr;
         }
@@ -171,39 +168,36 @@ static ARGS ob_tran_target_params (paralist *params) {
     return args;
 }
 
-
-
 PJ *PROJECTION(ob_tran) {
     double phip;
     ARGS args;
     PJ *R; /* projection to rotate */
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
         return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     P->opaque = Q;
     P->destructor = destructor;
 
     /* get name of projection to be translated */
-    if (pj_param(P->ctx, P->params, "so_proj").s == nullptr)
-    {
+    if (pj_param(P->ctx, P->params, "so_proj").s == nullptr) {
         proj_log_error(P, _("Missing parameter: o_proj"));
         return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     /* Create the target projection object to rotate */
-    args = ob_tran_target_params (P->params);
+    args = ob_tran_target_params(P->params);
     /* avoid endless recursion */
-    if (args.argv == nullptr ) {
+    if (args.argv == nullptr) {
         proj_log_error(P, _("Failed to find projection to be rotated"));
         return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
-    R = proj_create_argv (P->ctx, args.argc, args.argv);
-    free (args.argv);
+    R = proj_create_argv(P->ctx, args.argc, args.argv);
+    free(args.argv);
 
-    if (nullptr==R)
-    {
+    if (nullptr == R) {
         proj_log_error(P, _("Projection to be rotated is unknown"));
         return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
@@ -212,19 +206,20 @@ PJ *PROJECTION(ob_tran) {
     if (pj_param(P->ctx, P->params, "to_alpha").i) {
         double lamc, phic, alpha;
 
-        lamc    = pj_param(P->ctx, P->params, "ro_lon_c").f;
-        phic    = pj_param(P->ctx, P->params, "ro_lat_c").f;
-        alpha   = pj_param(P->ctx, P->params, "ro_alpha").f;
+        lamc = pj_param(P->ctx, P->params, "ro_lon_c").f;
+        phic = pj_param(P->ctx, P->params, "ro_lat_c").f;
+        alpha = pj_param(P->ctx, P->params, "ro_alpha").f;
 
-        if (fabs(fabs(phic) - M_HALFPI) <= TOL)
-        {
-            proj_log_error(P, _("Invalid value for lat_c: |lat_c| should be < 90°"));
+        if (fabs(fabs(phic) - M_HALFPI) <= TOL) {
+            proj_log_error(
+                P, _("Invalid value for lat_c: |lat_c| should be < 90°"));
             return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
 
         Q->lamp = lamc + aatan2(-cos(alpha), -sin(alpha) * sin(phic));
-        phip = aasin(P->ctx,cos(phic) * sin(alpha));
-    } else if (pj_param(P->ctx, P->params, "to_lat_p").i) { /* specified new pole */
+        phip = aasin(P->ctx, cos(phic) * sin(alpha));
+    } else if (pj_param(P->ctx, P->params, "to_lat_p")
+                   .i) { /* specified new pole */
         Q->lamp = pj_param(P->ctx, P->params, "ro_lon_p").f;
         phip = pj_param(P->ctx, P->params, "ro_lat_p").f;
     } else { /* specified new "equator" points */
@@ -236,31 +231,32 @@ PJ *PROJECTION(ob_tran) {
         phi2 = pj_param(P->ctx, P->params, "ro_lat_2").f;
         con = fabs(phi1);
 
-        if (fabs(phi1) > M_HALFPI - TOL)
-        {
-            proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be < 90°"));
+        if (fabs(phi1) > M_HALFPI - TOL) {
+            proj_log_error(
+                P, _("Invalid value for lat_1: |lat_1| should be < 90°"));
             return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
-        if (fabs(phi2) > M_HALFPI - TOL)
-        {
-            proj_log_error(P, _("Invalid value for lat_2: |lat_2| should be < 90°"));
+        if (fabs(phi2) > M_HALFPI - TOL) {
+            proj_log_error(
+                P, _("Invalid value for lat_2: |lat_2| should be < 90°"));
             return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
-        if (fabs(phi1 - phi2) < TOL)
-        {
-            proj_log_error(P, _("Invalid value for lat_1 and lat_2: lat_1 should be different from lat_2"));
+        if (fabs(phi1 - phi2) < TOL) {
+            proj_log_error(
+                P, _("Invalid value for lat_1 and lat_2: lat_1 should be "
+                     "different from lat_2"));
             return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
-        if (con < TOL)
-        {
-            proj_log_error(P, _("Invalid value for lat_1: lat_1 should be different from zero"));
+        if (con < TOL) {
+            proj_log_error(P, _("Invalid value for lat_1: lat_1 should be "
+                                "different from zero"));
             return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
 
         Q->lamp = atan2(cos(phi1) * sin(phi2) * cos(lam1) -
-            sin(phi1) * cos(phi2) * cos(lam2),
-            sin(phi1) * cos(phi2) * sin(lam2) -
-            cos(phi1) * sin(phi2) * sin(lam1));
+                            sin(phi1) * cos(phi2) * cos(lam2),
+                        sin(phi1) * cos(phi2) * sin(lam2) -
+                            cos(phi1) * sin(phi2) * sin(lam1));
         phip = atan(-cos(Q->lamp - lam1) / tan(phi1));
     }
 
@@ -274,11 +270,11 @@ PJ *PROJECTION(ob_tran) {
         P->inv = Q->link->inv ? t_inverse : nullptr;
     }
 
-    /* Support some rather speculative test cases, where the rotated projection */
+    /* Support some rather speculative test cases, where the rotated projection
+     */
     /* is actually latlong. We do not want scaling in that case... */
-    if (Q->link->right==PJ_IO_UNITS_RADIANS)
+    if (Q->link->right == PJ_IO_UNITS_RADIANS)
         P->right = PJ_IO_UNITS_WHATEVER;
-
 
     return P;
 }

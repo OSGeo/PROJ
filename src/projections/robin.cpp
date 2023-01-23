@@ -5,8 +5,8 @@
 
 PROJ_HEAD(robin, "Robinson") "\n\tPCyl, Sph";
 
-#define V(C,z) (C.c0 + z * (C.c1 + z * (C.c2 + z * C.c3)))
-#define DV(C,z) (C.c1 + 2 * z * C.c2 + z * z * 3. * C.c3)
+#define V(C, z) (C.c0 + z * (C.c1 + z * (C.c2 + z * C.c3)))
+#define DV(C, z) (C.c1 + 2 * z * C.c2 + z * z * 3. * C.c3)
 
 /*
 note: following terms based upon 5 deg. intervals in degrees.
@@ -42,8 +42,7 @@ static const struct COEFS X[] = {
     {0.6732f, -0.00986209f, -0.000199569f, 1.91974e-05f},
     {0.6213f, -0.010418f, 8.83923e-05f, 6.24051e-06f},
     {0.5722f, -0.00906601f, 0.000182f, 6.24051e-06f},
-    {0.5322f, -0.00677797f, 0.000275608f, 6.24051e-06f}
-};
+    {0.5322f, -0.00677797f, 0.000275608f, 6.24051e-06f}};
 
 static const struct COEFS Y[] = {
     {-5.20417e-18f, 0.0124f, 1.21431e-18f, -8.45284e-11f},
@@ -64,43 +63,43 @@ static const struct COEFS Y[] = {
     {0.8936f, 0.00969686f, -6.4636e-05f, -8.547e-06f},
     {0.9394f, 0.00840947f, -0.000192841f, -4.2106e-06f},
     {0.9761f, 0.00616527f, -0.000256f, -4.2106e-06f},
-    {1.0f, 0.00328947f, -0.000319159f, -4.2106e-06f}
-};
+    {1.0f, 0.00328947f, -0.000319159f, -4.2106e-06f}};
 
 #define FXC 0.8487
 #define FYC 1.3523
-#define C1  11.45915590261646417544
+#define C1 11.45915590261646417544
 #define RC1 0.08726646259971647884
-#define NODES   18
-#define ONEEPS  1.000001
+#define NODES 18
+#define ONEEPS 1.000001
 #define EPS 1e-10
 /* Not sure at all of the appropriate number for MAX_ITER... */
 #define MAX_ITER 100
 
-static PJ_XY robin_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
-    PJ_XY xy = {0.0,0.0};
+static PJ_XY robin_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     long i;
     double dphi;
-    (void) P;
+    (void)P;
 
     dphi = fabs(lp.phi);
     i = isnan(lp.phi) ? -1 : lround(floor(dphi * C1 + 1e-15));
-    if( i < 0 ){
+    if (i < 0) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
-    if (i >= NODES) i = NODES;
+    if (i >= NODES)
+        i = NODES;
     dphi = RAD_TO_DEG * (dphi - RC1 * i);
     xy.x = V(X[i], dphi) * FXC * lp.lam;
     xy.y = V(Y[i], dphi) * FYC;
-    if (lp.phi < 0.) xy.y = -xy.y;
+    if (lp.phi < 0.)
+        xy.y = -xy.y;
 
     return xy;
 }
 
-
-static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
-    PJ_LP lp = {0.0,0.0};
+static PJ_LP robin_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
     double t;
     struct COEFS T;
     int iters;
@@ -111,45 +110,48 @@ static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         if (lp.phi > ONEEPS) {
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
-        }
-        else {
+        } else {
             lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
             lp.lam /= X[NODES].c0;
         }
     } else { /* general problem */
         /* in Y space, reduce to table interval */
         long i = isnan(lp.phi) ? -1 : lround(floor(lp.phi * NODES));
-        if( i < 0 || i >= NODES ) {
+        if (i < 0 || i >= NODES) {
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
         }
         for (;;) {
-            if (Y[i].c0 > lp.phi) --i;
-            else if (Y[i+1].c0 <= lp.phi) ++i;
-            else break;
+            if (Y[i].c0 > lp.phi)
+                --i;
+            else if (Y[i + 1].c0 <= lp.phi)
+                ++i;
+            else
+                break;
         }
         T = Y[i];
         /* first guess, linear interp */
-        t = 5. * (lp.phi - T.c0)/(Y[i+1].c0 - T.c0);
-        for (iters = MAX_ITER; iters ; --iters) { /* Newton-Raphson */
-            const double t1 = (V(T,t) - lp.phi) / DV(T,t);
+        t = 5. * (lp.phi - T.c0) / (Y[i + 1].c0 - T.c0);
+        for (iters = MAX_ITER; iters; --iters) { /* Newton-Raphson */
+            const double t1 = (V(T, t) - lp.phi) / DV(T, t);
             t -= t1;
             if (fabs(t1) < EPS)
                 break;
         }
-        if( iters == 0 )
-            proj_context_errno_set( P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN );
+        if (iters == 0)
+            proj_context_errno_set(
+                P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         lp.phi = (5 * i + t) * DEG_TO_RAD;
-        if (xy.y < 0.) lp.phi = -lp.phi;
+        if (xy.y < 0.)
+            lp.phi = -lp.phi;
         lp.lam /= V(X[i], t);
-        if( fabs(lp.lam) > M_PI ) {
+        if (fabs(lp.lam) > M_PI) {
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             lp = proj_coord_error().lp;
         }
     }
     return lp;
 }
-
 
 PJ *PROJECTION(robin) {
     P->es = 0.;
@@ -158,4 +160,3 @@ PJ *PROJECTION(robin) {
 
     return P;
 }
-

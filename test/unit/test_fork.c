@@ -32,33 +32,30 @@
 
 #ifdef PROJ_HAS_PTHREADS
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "proj.h"
 
-int main()
-{
-    PJ_CONTEXT* ctxt = proj_context_create();
-    PJ_CONTEXT* ctxt2 = proj_context_create();
+int main() {
+    PJ_CONTEXT *ctxt = proj_context_create();
+    PJ_CONTEXT *ctxt2 = proj_context_create();
 
     /* Cause database initialization */
     {
-        PJ* P = proj_create(ctxt, "EPSG:4326");
-        if( P == NULL )
-        {
+        PJ *P = proj_create(ctxt, "EPSG:4326");
+        if (P == NULL) {
             proj_context_destroy(ctxt);
             return 1;
         }
         proj_destroy(P);
     }
     {
-        PJ* P = proj_create(ctxt2, "EPSG:4326");
-        if( P == NULL )
-        {
+        PJ *P = proj_create(ctxt2, "EPSG:4326");
+        if (P == NULL) {
             proj_context_destroy(ctxt);
             proj_context_destroy(ctxt2);
             return 1;
@@ -66,40 +63,34 @@ int main()
         proj_destroy(P);
     }
 
-    for(int iters = 0; iters < 100; ++iters )
-    {
+    for (int iters = 0; iters < 100; ++iters) {
         pid_t children[4];
-        for( int i = 0; i< 4; i++ )
-        {
+        for (int i = 0; i < 4; i++) {
             children[i] = fork();
-            if( children[i] < 0 )
-            {
+            if (children[i] < 0) {
                 fprintf(stderr, "fork() failed\n");
                 return 1;
             }
-            if( children[i] == 0 )
-            {
+            if (children[i] == 0) {
                 {
-                    PJ* P = proj_create(ctxt, "EPSG:3067");
-                    if( P == NULL )
+                    PJ *P = proj_create(ctxt, "EPSG:3067");
+                    if (P == NULL)
                         _exit(1);
                     proj_destroy(P);
                 }
                 {
-                    PJ* P = proj_create(ctxt2, "EPSG:32631");
-                    if( P == NULL )
+                    PJ *P = proj_create(ctxt2, "EPSG:32631");
+                    if (P == NULL)
                         _exit(1);
                     proj_destroy(P);
                 }
                 _exit(0);
             }
         }
-        for( int i = 0; i< 4; i++ )
-        {
+        for (int i = 0; i < 4; i++) {
             int status = 0;
             waitpid(children[i], &status, 0);
-            if( status != 0 )
-            {
+            if (status != 0) {
                 fprintf(stderr, "Error in child\n");
                 return 1;
             }
@@ -114,9 +105,6 @@ int main()
 
 #else
 
-int main()
-{
-    return 0;
-}
+int main() { return 0; }
 
 #endif

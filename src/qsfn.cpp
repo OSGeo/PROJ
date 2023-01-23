@@ -1,9 +1,9 @@
 /* determine small q */
-#include <math.h>
 #include "proj.h"
 #include "proj_internal.h"
+#include <math.h>
 
-# define EPSILON 1.0e-7
+#define EPSILON 1.0e-7
 
 double pj_qsfn(double sinphi, double e, double one_es) {
     double con, div1, div2;
@@ -17,7 +17,7 @@ double pj_qsfn(double sinphi, double e, double one_es) {
         if (div1 == 0.0 || div2 == 0.0)
             return HUGE_VAL;
 
-        return (one_es * (sinphi / div1 - (.5 / e) * log ((1. - con) / div2 )));
+        return (one_es * (sinphi / div1 - (.5 / e) * log((1. - con) / div2)));
     } else
         return (sinphi + sinphi);
 }

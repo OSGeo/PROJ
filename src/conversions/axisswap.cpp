@@ -71,12 +71,10 @@ struct pj_opaque {
 };
 } // anonymous namespace
 
-static int sign(int x) {
-    return (x > 0) - (x < 0);
-}
+static int sign(int x) { return (x > 0) - (x < 0); }
 
 static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
     PJ_XY xy;
 
     double in[2] = {lp.lam, lp.phi};
@@ -86,7 +84,7 @@ static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
 }
 
 static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
     unsigned int i;
     PJ_COORD out, in;
 
@@ -94,14 +92,14 @@ static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
     in.v[1] = xy.y;
     out = proj_coord_error();
 
-    for (i=0; i<2; i++)
+    for (i = 0; i < 2; i++)
         out.v[Q->axis[i]] = in.v[i] * Q->sign[i];
 
     return out.lp;
 }
 
 static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
     unsigned int i;
     PJ_COORD out, in;
 
@@ -110,14 +108,14 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     in.v[2] = lpz.z;
     out = proj_coord_error();
 
-    for (i=0; i<3; i++)
+    for (i = 0; i < 3; i++)
         out.v[i] = in.v[Q->axis[i]] * Q->sign[i];
 
     return out.xyz;
 }
 
 static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
     unsigned int i;
     PJ_COORD in, out;
 
@@ -126,142 +124,145 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     in.v[1] = xyz.y;
     in.v[2] = xyz.z;
 
-    for (i=0; i<3; i++)
+    for (i = 0; i < 3; i++)
         out.v[Q->axis[i]] = in.v[i] * Q->sign[i];
 
     return out.lpz;
 }
 
-static void swap_xy_4d(PJ_COORD& coo, PJ *) {
+static void swap_xy_4d(PJ_COORD &coo, PJ *) {
     std::swap(coo.xyzt.x, coo.xyzt.y);
 }
 
-
-static void forward_4d(PJ_COORD& coo, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+static void forward_4d(PJ_COORD &coo, PJ *P) {
+    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
     unsigned int i;
     PJ_COORD out;
 
-    for (i=0; i<4; i++)
+    for (i = 0; i < 4; i++)
         out.v[i] = coo.v[Q->axis[i]] * Q->sign[i];
     coo = out;
 }
 
-
-static void reverse_4d(PJ_COORD& coo, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+static void reverse_4d(PJ_COORD &coo, PJ *P) {
+    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
     unsigned int i;
     PJ_COORD out;
 
-    for (i=0; i<4; i++)
+    for (i = 0; i < 4; i++)
         out.v[Q->axis[i]] = coo.v[i] * Q->sign[i];
 
     coo = out;
 }
 
-
 /***********************************************************************/
-PJ *CONVERSION(axisswap,0) {
-/***********************************************************************/
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
+PJ *CONVERSION(axisswap, 0) {
+    /***********************************************************************/
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
     char *s;
     unsigned int i, j, n = 0;
 
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
-    P->opaque = (void *) Q;
-
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    P->opaque = (void *)Q;
 
     /* +order and +axis are mutually exclusive */
-    if ( !pj_param_exists(P->params, "order") == !pj_param_exists(P->params, "axis") )
-    {
-        proj_log_error(P, _("order and axis parameters are mutually exclusive."));
-        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS);
+    if (!pj_param_exists(P->params, "order") ==
+        !pj_param_exists(P->params, "axis")) {
+        proj_log_error(P,
+                       _("order and axis parameters are mutually exclusive."));
+        return pj_default_destructor(
+            P, PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS);
     }
 
-    /* fill axis list with indices from 4-7 to simplify duplicate search further down */
-    for (i=0; i<4; i++) {
-        Q->axis[i] = i+4;
+    /* fill axis list with indices from 4-7 to simplify duplicate search further
+     * down */
+    for (i = 0; i < 4; i++) {
+        Q->axis[i] = i + 4;
         Q->sign[i] = 1;
     }
 
     /* if the "order" parameter is used */
-    if ( pj_param_exists(P->params, "order") ) {
+    if (pj_param_exists(P->params, "order")) {
         /* read axis order */
         char *order = pj_param(P->ctx, P->params, "sorder").s;
 
         /* check that all characters are valid */
-        for (i=0; i<strlen(order); i++)
+        for (i = 0; i < strlen(order); i++)
             if (strchr("1234-,", order[i]) == nullptr) {
                 proj_log_error(P, _("unknown axis '%c'"), order[i]);
-                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+                return pj_default_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
 
         /* read axes numbers and signs */
         s = order;
         n = 0;
-        while ( *s != '\0' && n < 4 ) {
-            Q->axis[n] = abs(atoi(s))-1;
+        while (*s != '\0' && n < 4) {
+            Q->axis[n] = abs(atoi(s)) - 1;
             if (Q->axis[n] > 3) {
                 proj_log_error(P, _("invalid axis '%d'"), Q->axis[n]);
-                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+                return pj_default_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
             Q->sign[n++] = sign(atoi(s));
-            while ( *s != '\0' && *s != ',' )
+            while (*s != '\0' && *s != ',')
                 s++;
-            if ( *s == ',' )
+            if (*s == ',')
                 s++;
         }
     }
 
     /* if the "axis" parameter is used */
-    if ( pj_param_exists(P->params, "axis") ) {
+    if (pj_param_exists(P->params, "axis")) {
         /* parse the classic PROJ.4 enu axis specification */
-        for (i=0; i < 3; i++) {
-            switch(P->axis[i]) {
-                case 'w':
-                    Q->sign[i] = -1;
-                    Q->axis[i] = 0;
-                    break;
-                case 'e':
-                    Q->sign[i] = 1;
-                    Q->axis[i] = 0;
-                    break;
-                case 's':
-                    Q->sign[i] = -1;
-                    Q->axis[i] = 1;
-                    break;
-                case 'n':
-                    Q->sign[i] = 1;
-                    Q->axis[i] = 1;
-                    break;
-                case 'd':
-                    Q->sign[i] = -1;
-                    Q->axis[i] = 2;
-                    break;
-                case 'u':
-                    Q->sign[i] = 1;
-                    Q->axis[i] = 2;
-                    break;
-                default:
-                    proj_log_error(P, _("unknown axis '%c'"), P->axis[i]);
-                    return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        for (i = 0; i < 3; i++) {
+            switch (P->axis[i]) {
+            case 'w':
+                Q->sign[i] = -1;
+                Q->axis[i] = 0;
+                break;
+            case 'e':
+                Q->sign[i] = 1;
+                Q->axis[i] = 0;
+                break;
+            case 's':
+                Q->sign[i] = -1;
+                Q->axis[i] = 1;
+                break;
+            case 'n':
+                Q->sign[i] = 1;
+                Q->axis[i] = 1;
+                break;
+            case 'd':
+                Q->sign[i] = -1;
+                Q->axis[i] = 2;
+                break;
+            case 'u':
+                Q->sign[i] = 1;
+                Q->axis[i] = 2;
+                break;
+            default:
+                proj_log_error(P, _("unknown axis '%c'"), P->axis[i]);
+                return pj_default_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
         n = 3;
     }
 
     /* check for duplicate axes */
-    for (i=0; i<4; i++)
-        for (j=0; j<4; j++) {
-            if (i==j)
+    for (i = 0; i < 4; i++)
+        for (j = 0; j < 4; j++) {
+            if (i == j)
                 continue;
             if (Q->axis[i] == Q->axis[j]) {
                 proj_log_error(P, _("swapaxis: duplicate axes specified"));
-                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+                return pj_default_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
-
 
     /* only map fwd/inv functions that are possible with the given axis setup */
     if (n == 4) {
@@ -269,23 +270,19 @@ PJ *CONVERSION(axisswap,0) {
         P->inv4d = reverse_4d;
     }
     if (n == 3 && Q->axis[0] < 3 && Q->axis[1] < 3 && Q->axis[2] < 3) {
-        P->fwd3d  = forward_3d;
-        P->inv3d  = reverse_3d;
+        P->fwd3d = forward_3d;
+        P->inv3d = reverse_3d;
     }
     if (n == 2) {
-        if( Q->axis[0] == 1 && Q->sign[0] == 1 &&
-            Q->axis[1] == 0 && Q->sign[1] == 1 )
-        {
+        if (Q->axis[0] == 1 && Q->sign[0] == 1 && Q->axis[1] == 0 &&
+            Q->sign[1] == 1) {
             P->fwd4d = swap_xy_4d;
             P->inv4d = swap_xy_4d;
-        }
-        else if( Q->axis[0] < 2 && Q->axis[1] < 2 )
-        {
-            P->fwd    = forward_2d;
-            P->inv    = reverse_2d;
+        } else if (Q->axis[0] < 2 && Q->axis[1] < 2) {
+            P->fwd = forward_2d;
+            P->inv = reverse_2d;
         }
     }
-
 
     if (P->fwd4d == nullptr && P->fwd3d == nullptr && P->fwd == nullptr) {
         proj_log_error(P, _("swapaxis: bad axis order"));
@@ -293,21 +290,20 @@ PJ *CONVERSION(axisswap,0) {
     }
 
     if (pj_param(P->ctx, P->params, "tangularunits").i) {
-        P->left  = PJ_IO_UNITS_RADIANS;
+        P->left = PJ_IO_UNITS_RADIANS;
         P->right = PJ_IO_UNITS_RADIANS;
     } else {
-        P->left  = PJ_IO_UNITS_WHATEVER;
+        P->left = PJ_IO_UNITS_WHATEVER;
         P->right = PJ_IO_UNITS_WHATEVER;
     }
-
 
     /* Preparation and finalization steps are skipped, since the reason   */
     /* d'etre of axisswap is to bring input coordinates in line with the  */
     /* the internally expected order (ENU), such that handling of offsets */
     /* etc. can be done correctly in a later step of a pipeline */
-    P->skip_fwd_prepare  = 1;
+    P->skip_fwd_prepare = 1;
     P->skip_fwd_finalize = 1;
-    P->skip_inv_prepare  = 1;
+    P->skip_inv_prepare = 1;
     P->skip_inv_finalize = 1;
 
     return P;

@@ -62,68 +62,64 @@ struct pj_opaque_molodensky {
     double dz;
     double da;
     double df;
-    int    abridged;
+    int abridged;
 };
 } // anonymous namespace
 
+static double RN(double a, double es, double phi) {
+    /**********************************************************
+        N(phi) - prime vertical radius of curvature
+        -------------------------------------------
 
-static double RN (double a, double es, double phi) {
-/**********************************************************
-    N(phi) - prime vertical radius of curvature
-    -------------------------------------------
+        This is basically the same function as in PJ_cart.c
+        should probably be refactored into it's own file at some
+        point.
 
-    This is basically the same function as in PJ_cart.c
-    should probably be refactored into it's own file at some
-    point.
-
-**********************************************************/
+    **********************************************************/
     double s = sin(phi);
-    if (es==0)
+    if (es == 0)
         return a;
 
-    return a / sqrt (1 - es*s*s);
+    return a / sqrt(1 - es * s * s);
 }
 
+static double RM(double a, double es, double phi) {
+    /**********************************************************
+        M(phi) - Meridian radius of curvature
+        -------------------------------------
 
-static double RM (double a, double es, double phi) {
-/**********************************************************
-    M(phi) - Meridian radius of curvature
-    -------------------------------------
+        Source:
 
-    Source:
+            E.J Krakiwsky & D.B. Thomson, 1974,
+            GEODETIC POSITION COMPUTATIONS,
 
-        E.J Krakiwsky & D.B. Thomson, 1974,
-        GEODETIC POSITION COMPUTATIONS,
+            Fredericton NB, Canada:
+            University of New Brunswick,
+            Department of Geodesy and Geomatics Engineering,
+            Lecture Notes No. 39,
+            99 pp.
 
-        Fredericton NB, Canada:
-        University of New Brunswick,
-        Department of Geodesy and Geomatics Engineering,
-        Lecture Notes No. 39,
-        99 pp.
+            http://www2.unb.ca/gge/Pubs/LN39.pdf
 
-        http://www2.unb.ca/gge/Pubs/LN39.pdf
-
-**********************************************************/
+    **********************************************************/
     double s = sin(phi);
-    if (es==0)
+    if (es == 0)
         return a;
 
     /* eq. 13a */
     if (phi == 0)
-        return a * (1-es);
+        return a * (1 - es);
 
     /* eq. 13b */
     if (fabs(phi) == M_PI_2)
-        return a / sqrt(1-es);
+        return a / sqrt(1 - es);
 
     /* eq. 13 */
-    return (a * (1 - es) ) / pow(1 - es*s*s, 1.5);
-
+    return (a * (1 - es)) / pow(1 - es * s * s, 1.5);
 }
 
-
 static PJ_LPZ calc_standard_params(PJ_LPZ lpz, PJ *P) {
-    struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
+    struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *)P->opaque;
     double dphi, dlam, dh;
 
     /* sines and cosines */
@@ -139,40 +135,40 @@ static PJ_LPZ calc_standard_params(PJ_LPZ lpz, PJ *P) {
 
     /* ellipsoid radii of curvature */
     double rho = RM(a, P->es, lpz.phi);
-    double nu  = RN(a, P->es, lpz.phi);
+    double nu = RN(a, P->es, lpz.phi);
 
     /* delta phi */
-    dphi  = (-dx*sphi*clam) - (dy*sphi*slam) + (dz*cphi)
-            + ((nu * P->es * sphi * cphi * da) / a)
-            + (sphi*cphi * ( rho/(1-f) + nu*(1-f))*df);
+    dphi = (-dx * sphi * clam) - (dy * sphi * slam) + (dz * cphi) +
+           ((nu * P->es * sphi * cphi * da) / a) +
+           (sphi * cphi * (rho / (1 - f) + nu * (1 - f)) * df);
     const double dphi_denom = rho + lpz.z;
-    if( dphi_denom == 0.0 ) {
+    if (dphi_denom == 0.0) {
         lpz.lam = HUGE_VAL;
         return lpz;
     }
     dphi /= dphi_denom;
 
     /* delta lambda */
-    const double dlam_denom = (nu+lpz.z)*cphi;
-    if( dlam_denom == 0.0 ) {
+    const double dlam_denom = (nu + lpz.z) * cphi;
+    if (dlam_denom == 0.0) {
         lpz.lam = HUGE_VAL;
         return lpz;
     }
-    dlam = (-dx*slam + dy*clam) / dlam_denom;
+    dlam = (-dx * slam + dy * clam) / dlam_denom;
 
     /* delta h */
-    dh = dx*cphi*clam + dy*cphi*slam + dz*sphi - (a/nu)*da + nu*(1-f)*sphi*sphi*df;
+    dh = dx * cphi * clam + dy * cphi * slam + dz * sphi - (a / nu) * da +
+         nu * (1 - f) * sphi * sphi * df;
 
     lpz.phi = dphi;
     lpz.lam = dlam;
-    lpz.z   = dh;
+    lpz.z = dh;
 
     return lpz;
 }
 
-
 static PJ_LPZ calc_abridged_params(PJ_LPZ lpz, PJ *P) {
-    struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
+    struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *)P->opaque;
     double dphi, dlam, dh;
 
     /* sines and cosines */
@@ -184,35 +180,36 @@ static PJ_LPZ calc_abridged_params(PJ_LPZ lpz, PJ *P) {
     /* ellipsoid parameters and differences */
     double dx = Q->dx, dy = Q->dy, dz = Q->dz;
     double da = Q->da, df = Q->df;
-    double adffda = (P->a*df + P->f*da);
+    double adffda = (P->a * df + P->f * da);
 
     /* delta phi */
-    dphi = -dx*sphi*clam - dy*sphi*slam + dz*cphi + adffda*sin(2*lpz.phi);
+    dphi = -dx * sphi * clam - dy * sphi * slam + dz * cphi +
+           adffda * sin(2 * lpz.phi);
     dphi /= RM(P->a, P->es, lpz.phi);
 
     /* delta lambda */
-    dlam = -dx*slam + dy*clam;
-    const double dlam_denom = RN(P->a, P->es, lpz.phi)*cphi;
-    if( dlam_denom == 0.0 ) {
+    dlam = -dx * slam + dy * clam;
+    const double dlam_denom = RN(P->a, P->es, lpz.phi) * cphi;
+    if (dlam_denom == 0.0) {
         lpz.lam = HUGE_VAL;
         return lpz;
     }
     dlam /= dlam_denom;
 
     /* delta h */
-    dh = dx*cphi*clam + dy*cphi*slam + dz*sphi - da + adffda*sphi*sphi;
+    dh = dx * cphi * clam + dy * cphi * slam + dz * sphi - da +
+         adffda * sphi * sphi;
 
     /* offset coordinate */
     lpz.phi = dphi;
     lpz.lam = dlam;
-    lpz.z   = dh;
+    lpz.z = dh;
 
     return lpz;
 }
 
-
 static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
-    PJ_COORD point = {{0,0,0,0}};
+    PJ_COORD point = {{0, 0, 0, 0}};
 
     point.lp = lp;
     // Assigning in 2 steps avoids cppcheck warning
@@ -224,9 +221,8 @@ static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
     return point.xy;
 }
 
-
 static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
-    PJ_COORD point = {{0,0,0,0}};
+    PJ_COORD point = {{0, 0, 0, 0}};
 
     point.xy = xy;
     point.xyz.z = 0;
@@ -239,10 +235,9 @@ static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
     return point.lp;
 }
 
-
 static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
-    struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
-    PJ_COORD point = {{0,0,0,0}};
+    struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *)P->opaque;
+    PJ_COORD point = {{0, 0, 0, 0}};
 
     point.lpz = lpz;
 
@@ -252,7 +247,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     } else {
         lpz = calc_standard_params(lpz, P);
     }
-    if( lpz.lam == HUGE_VAL ) {
+    if (lpz.lam == HUGE_VAL) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error().xyz;
     }
@@ -260,13 +255,12 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     /* offset coordinate */
     point.lpz.phi += lpz.phi;
     point.lpz.lam += lpz.lam;
-    point.lpz.z   += lpz.z;
+    point.lpz.z += lpz.z;
 
     return point.xyz;
 }
 
-
-static void forward_4d(PJ_COORD& obs, PJ *P) {
+static void forward_4d(PJ_COORD &obs, PJ *P) {
     // Assigning in 2 steps avoids cppcheck warning
     // "Overlapping read/write of union is undefined behavior"
     // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
@@ -274,10 +268,9 @@ static void forward_4d(PJ_COORD& obs, PJ *P) {
     obs.xyz = xyz;
 }
 
-
 static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
-    struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
-    PJ_COORD point = {{0,0,0,0}};
+    struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *)P->opaque;
+    PJ_COORD point = {{0, 0, 0, 0}};
     PJ_LPZ lpz;
 
     /* calculate parameters depending on the mode we are in */
@@ -287,7 +280,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     else
         lpz = calc_standard_params(point.lpz, P);
 
-    if( lpz.lam == HUGE_VAL ) {
+    if (lpz.lam == HUGE_VAL) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error().lpz;
     }
@@ -295,13 +288,12 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     /* offset coordinate */
     point.lpz.phi -= lpz.phi;
     point.lpz.lam -= lpz.lam;
-    point.lpz.z   -= lpz.z;
+    point.lpz.z -= lpz.z;
 
     return point.lpz;
 }
 
-
-static void reverse_4d(PJ_COORD& obs, PJ *P) {
+static void reverse_4d(PJ_COORD &obs, PJ *P) {
     // Assigning in 2 steps avoids cppcheck warning
     // "Overlapping read/write of union is undefined behavior"
     // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
@@ -309,56 +301,51 @@ static void reverse_4d(PJ_COORD& obs, PJ *P) {
     obs.lpz = lpz;
 }
 
-
-PJ *TRANSFORMATION(molodensky,1) {
-    struct pj_opaque_molodensky *Q = static_cast<struct pj_opaque_molodensky*>(calloc(1, sizeof(struct pj_opaque_molodensky)));
-    if (nullptr==Q)
+PJ *TRANSFORMATION(molodensky, 1) {
+    struct pj_opaque_molodensky *Q = static_cast<struct pj_opaque_molodensky *>(
+        calloc(1, sizeof(struct pj_opaque_molodensky)));
+    if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
-    P->opaque = (void *) Q;
+    P->opaque = (void *)Q;
 
     P->fwd4d = forward_4d;
     P->inv4d = reverse_4d;
-    P->fwd3d  = forward_3d;
-    P->inv3d  = reverse_3d;
-    P->fwd    = forward_2d;
-    P->inv    = reverse_2d;
+    P->fwd3d = forward_3d;
+    P->inv3d = reverse_3d;
+    P->fwd = forward_2d;
+    P->inv = reverse_2d;
 
-    P->left   = PJ_IO_UNITS_RADIANS;
-    P->right  = PJ_IO_UNITS_RADIANS;
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
 
     /* read args */
-    if (!pj_param(P->ctx, P->params, "tdx").i)
-    {
-        proj_log_error (P, _("missing dx"));
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    if (!pj_param(P->ctx, P->params, "tdx").i) {
+        proj_log_error(P, _("missing dx"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     Q->dx = pj_param(P->ctx, P->params, "ddx").f;
 
-    if (!pj_param(P->ctx, P->params, "tdy").i)
-    {
-        proj_log_error (P, _("missing dy"));
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    if (!pj_param(P->ctx, P->params, "tdy").i) {
+        proj_log_error(P, _("missing dy"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     Q->dy = pj_param(P->ctx, P->params, "ddy").f;
 
-    if (!pj_param(P->ctx, P->params, "tdz").i)
-    {
-        proj_log_error (P, _("missing dz"));
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    if (!pj_param(P->ctx, P->params, "tdz").i) {
+        proj_log_error(P, _("missing dz"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     Q->dz = pj_param(P->ctx, P->params, "ddz").f;
 
-    if (!pj_param(P->ctx, P->params, "tda").i)
-    {
-        proj_log_error (P, _("missing da"));
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    if (!pj_param(P->ctx, P->params, "tda").i) {
+        proj_log_error(P, _("missing da"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     Q->da = pj_param(P->ctx, P->params, "dda").f;
 
-    if (!pj_param(P->ctx, P->params, "tdf").i)
-    {
-        proj_log_error (P, _("missing df"));
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    if (!pj_param(P->ctx, P->params, "tdf").i) {
+        proj_log_error(P, _("missing df"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     Q->df = pj_param(P->ctx, P->params, "ddf").f;
 

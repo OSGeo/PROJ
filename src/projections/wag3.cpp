@@ -12,38 +12,39 @@ PROJ_HEAD(wag3, "Wagner III") "\n\tPCyl, Sph\n\tlat_ts=";
 
 namespace { // anonymous namespace
 struct pj_opaque {
-	double	C_x;
+    double C_x;
 };
 } // anonymous namespace
 
-
-static PJ_XY wag3_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
-    PJ_XY xy = {0.0,0.0};
-	xy.x = static_cast<struct pj_opaque*>(P->opaque)->C_x * lp.lam * cos(TWOTHIRD * lp.phi);
-	xy.y = lp.phi;
-	return xy;
+static PJ_XY wag3_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
+    xy.x = static_cast<struct pj_opaque *>(P->opaque)->C_x * lp.lam *
+           cos(TWOTHIRD * lp.phi);
+    xy.y = lp.phi;
+    return xy;
 }
 
-
-static PJ_LP wag3_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
-    PJ_LP lp = {0.0,0.0};
-	lp.phi = xy.y;
-	lp.lam = xy.x / (static_cast<struct pj_opaque*>(P->opaque)->C_x * cos(TWOTHIRD * lp.phi));
-	return lp;
+static PJ_LP wag3_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
+    lp.phi = xy.y;
+    lp.lam = xy.x / (static_cast<struct pj_opaque *>(P->opaque)->C_x *
+                     cos(TWOTHIRD * lp.phi));
+    return lp;
 }
-
 
 PJ *PROJECTION(wag3) {
-	double ts;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
+    double ts;
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     P->opaque = Q;
 
-	ts = pj_param (P->ctx, P->params, "rlat_ts").f;
-	static_cast<struct pj_opaque*>(P->opaque)->C_x = cos (ts) / cos (2.*ts/3.);
-	P->es = 0.;
+    ts = pj_param(P->ctx, P->params, "rlat_ts").f;
+    static_cast<struct pj_opaque *>(P->opaque)->C_x =
+        cos(ts) / cos(2. * ts / 3.);
+    P->es = 0.;
     P->inv = wag3_s_inverse;
     P->fwd = wag3_s_forward;
 

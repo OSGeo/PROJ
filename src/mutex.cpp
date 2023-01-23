@@ -38,10 +38,7 @@ static std::recursive_mutex core_lock;
 /*      Acquire the PROJ.4 lock.                                        */
 /************************************************************************/
 
-void pj_acquire_lock()
-{
-    core_lock.lock();
-}
+void pj_acquire_lock() { core_lock.lock(); }
 
 /************************************************************************/
 /*                          pj_release_lock()                           */
@@ -49,7 +46,4 @@ void pj_acquire_lock()
 /*      Release the PROJ.4 lock.                                        */
 /************************************************************************/
 
-void pj_release_lock()
-{
-    core_lock.unlock();
-}
+void pj_release_lock() { core_lock.unlock(); }

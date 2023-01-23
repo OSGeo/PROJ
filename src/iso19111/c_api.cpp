@@ -60,8 +60,8 @@
 #include "proj_internal.h"
 #include "proj_experimental.h"
 // clang-format on
-#include "proj_constants.h"
 #include "geodesic.h"
+#include "proj_constants.h"
 
 using namespace NS_PROJ::common;
 using namespace NS_PROJ::coordinates;
@@ -9224,7 +9224,7 @@ PJ *proj_concatoperation_get_step(PJ_CONTEXT *ctx, const PJ *concatoperation,
 struct PJ_INSERT_SESSION {
     //! @cond Doxygen_Suppress
     PJ_CONTEXT *ctx = nullptr;
-    //! @endcond
+    //!  @endcond
 };
 
 // ---------------------------------------------------------------------------

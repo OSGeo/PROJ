@@ -43,112 +43,113 @@ struct pj_opaque {
 } // anonymous namespace
 PROJ_HEAD(rouss, "Roussilhe Stereographic") "\n\tAzi, Ell";
 
-
-static PJ_XY rouss_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    PJ_XY xy = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_XY rouss_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double s, al, cp, sp, al2, s2;
 
     cp = cos(lp.phi);
     sp = sin(lp.phi);
-    s = proj_mdist(lp.phi, sp, cp,  Q->en) - Q->s0;
+    s = proj_mdist(lp.phi, sp, cp, Q->en) - Q->s0;
     s2 = s * s;
     al = lp.lam * cp / sqrt(1. - P->es * sp * sp);
     al2 = al * al;
-    xy.x = P->k0 * al*(1.+s2*(Q->A1+s2*Q->A4)-al2*(Q->A2+s*Q->A3+s2*Q->A5
-                +al2*Q->A6));
-    xy.y = P->k0 * (al2*(Q->B1+al2*Q->B4)+
-        s*(1.+al2*(Q->B3-al2*Q->B6)+s2*(Q->B2+s2*Q->B8)+
-        s*al2*(Q->B5+s*Q->B7)));
+    xy.x = P->k0 * al *
+           (1. + s2 * (Q->A1 + s2 * Q->A4) -
+            al2 * (Q->A2 + s * Q->A3 + s2 * Q->A5 + al2 * Q->A6));
+    xy.y = P->k0 *
+           (al2 * (Q->B1 + al2 * Q->B4) +
+            s * (1. + al2 * (Q->B3 - al2 * Q->B6) + s2 * (Q->B2 + s2 * Q->B8) +
+                 s * al2 * (Q->B5 + s * Q->B7)));
 
     return xy;
 }
 
-
-static PJ_LP rouss_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    PJ_LP lp = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_LP rouss_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double s, al, x = xy.x / P->k0, y = xy.y / P->k0, x2, y2;
 
     x2 = x * x;
     y2 = y * y;
-    al = x*(1.-Q->C1*y2+x2*(Q->C2+Q->C3*y-Q->C4*x2+Q->C5*y2-Q->C7*x2*y)
-        +y2*(Q->C6*y2-Q->C8*x2*y));
-    s = Q->s0 + y*(1.+y2*(-Q->D2+Q->D8*y2))+
-        x2*(-Q->D1+y*(-Q->D3+y*(-Q->D5+y*(-Q->D7+y*Q->D11)))+
-        x2*(Q->D4+y*(Q->D6+y*Q->D10)-x2*Q->D9));
-    lp.phi=proj_inv_mdist(P->ctx, s, Q->en);
+    al = x *
+         (1. - Q->C1 * y2 +
+          x2 * (Q->C2 + Q->C3 * y - Q->C4 * x2 + Q->C5 * y2 - Q->C7 * x2 * y) +
+          y2 * (Q->C6 * y2 - Q->C8 * x2 * y));
+    s = Q->s0 + y * (1. + y2 * (-Q->D2 + Q->D8 * y2)) +
+        x2 * (-Q->D1 + y * (-Q->D3 + y * (-Q->D5 + y * (-Q->D7 + y * Q->D11))) +
+              x2 * (Q->D4 + y * (Q->D6 + y * Q->D10) - x2 * Q->D9));
+    lp.phi = proj_inv_mdist(P->ctx, s, Q->en);
     s = sin(lp.phi);
-    lp.lam=al * sqrt(1. - P->es * s * s)/cos(lp.phi);
+    lp.lam = al * sqrt(1. - P->es * s * s) / cos(lp.phi);
 
     return lp;
 }
 
-
-static PJ *destructor (PJ *P, int errlev) {
-    if (nullptr==P)
+static PJ *destructor(PJ *P, int errlev) {
+    if (nullptr == P)
         return nullptr;
 
-    if (nullptr==P->opaque)
-        return pj_default_destructor (P, errlev);
+    if (nullptr == P->opaque)
+        return pj_default_destructor(P, errlev);
 
-    if (static_cast<struct pj_opaque*>(P->opaque)->en)
-        free (static_cast<struct pj_opaque*>(P->opaque)->en);
+    if (static_cast<struct pj_opaque *>(P->opaque)->en)
+        free(static_cast<struct pj_opaque *>(P->opaque)->en);
 
-    return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 }
-
 
 PJ *PROJECTION(rouss) {
     double N0, es2, t, t2, R_R0_2, R_R0_4;
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     if (!((Q->en = proj_mdist_ini(P->es))))
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     es2 = sin(P->phi0);
     Q->s0 = proj_mdist(P->phi0, es2, cos(P->phi0), Q->en);
     t = 1. - (es2 = P->es * es2 * es2);
-    N0 = 1./sqrt(t);
+    N0 = 1. / sqrt(t);
     R_R0_2 = t * t / P->one_es;
     R_R0_4 = R_R0_2 * R_R0_2;
     t = tan(P->phi0);
     t2 = t * t;
     Q->C1 = Q->A1 = R_R0_2 / 4.;
     Q->C2 = Q->A2 = R_R0_2 * (2 * t2 - 1. - 2. * es2) / 12.;
-    Q->A3 = R_R0_2 * t * (1. + 4. * t2)/ ( 12. * N0);
+    Q->A3 = R_R0_2 * t * (1. + 4. * t2) / (12. * N0);
     Q->A4 = R_R0_4 / 24.;
-    Q->A5 = R_R0_4 * ( -1. + t2 * (11. + 12. * t2))/24.;
-    Q->A6 = R_R0_4 * ( -2. + t2 * (11. - 2. * t2))/240.;
+    Q->A5 = R_R0_4 * (-1. + t2 * (11. + 12. * t2)) / 24.;
+    Q->A6 = R_R0_4 * (-2. + t2 * (11. - 2. * t2)) / 240.;
     Q->B1 = t / (2. * N0);
     Q->B2 = R_R0_2 / 12.;
-    Q->B3 = R_R0_2 * (1. + 2. * t2 - 2. * es2)/4.;
-    Q->B4 = R_R0_2 * t * (2. - t2)/(24. * N0);
-    Q->B5 = R_R0_2 * t * (5. + 4.* t2)/(8. * N0);
-    Q->B6 = R_R0_4 * (-2. + t2 * (-5. + 6. * t2))/48.;
-    Q->B7 = R_R0_4 * (5. + t2 * (19. + 12. * t2))/24.;
+    Q->B3 = R_R0_2 * (1. + 2. * t2 - 2. * es2) / 4.;
+    Q->B4 = R_R0_2 * t * (2. - t2) / (24. * N0);
+    Q->B5 = R_R0_2 * t * (5. + 4. * t2) / (8. * N0);
+    Q->B6 = R_R0_4 * (-2. + t2 * (-5. + 6. * t2)) / 48.;
+    Q->B7 = R_R0_4 * (5. + t2 * (19. + 12. * t2)) / 24.;
     Q->B8 = R_R0_4 / 120.;
-    Q->C3 = R_R0_2 * t * (1. + t2)/(3. * N0);
-    Q->C4 = R_R0_4 * (-3. + t2 * (34. + 22. * t2))/240.;
-    Q->C5 = R_R0_4 * (4. + t2 * (13. + 12. * t2))/24.;
+    Q->C3 = R_R0_2 * t * (1. + t2) / (3. * N0);
+    Q->C4 = R_R0_4 * (-3. + t2 * (34. + 22. * t2)) / 240.;
+    Q->C5 = R_R0_4 * (4. + t2 * (13. + 12. * t2)) / 24.;
     Q->C6 = R_R0_4 / 16.;
-    Q->C7 = R_R0_4 * t * (11. + t2 * (33. + t2 * 16.))/(48. * N0);
-    Q->C8 = R_R0_4 * t * (1. + t2 * 4.)/(36. * N0);
+    Q->C7 = R_R0_4 * t * (11. + t2 * (33. + t2 * 16.)) / (48. * N0);
+    Q->C8 = R_R0_4 * t * (1. + t2 * 4.) / (36. * N0);
     Q->D1 = t / (2. * N0);
     Q->D2 = R_R0_2 / 12.;
     Q->D3 = R_R0_2 * (2 * t2 + 1. - 2. * es2) / 4.;
-    Q->D4 = R_R0_2 * t * (1. + t2)/(8. * N0);
-    Q->D5 = R_R0_2 * t * (1. + t2 * 2.)/(4. * N0);
-    Q->D6 = R_R0_4 * (1. + t2 * (6. + t2 * 6.))/16.;
-    Q->D7 = R_R0_4 * t2 * (3. + t2 * 4.)/8.;
+    Q->D4 = R_R0_2 * t * (1. + t2) / (8. * N0);
+    Q->D5 = R_R0_2 * t * (1. + t2 * 2.) / (4. * N0);
+    Q->D6 = R_R0_4 * (1. + t2 * (6. + t2 * 6.)) / 16.;
+    Q->D7 = R_R0_4 * t2 * (3. + t2 * 4.) / 8.;
     Q->D8 = R_R0_4 / 80.;
-    Q->D9 = R_R0_4 * t * (-21. + t2 * (178. - t2 * 26.))/720.;
-    Q->D10 = R_R0_4 * t * (29. + t2 * (86. + t2 * 48.))/(96. * N0);
-    Q->D11 = R_R0_4 * t * (37. + t2 * 44.)/(96. * N0);
+    Q->D9 = R_R0_4 * t * (-21. + t2 * (178. - t2 * 26.)) / 720.;
+    Q->D10 = R_R0_4 * t * (29. + t2 * (86. + t2 * 48.)) / (96. * N0);
+    Q->D11 = R_R0_4 * t * (37. + t2 * 44.) / (96. * N0);
 
     P->fwd = rouss_e_forward;
     P->inv = rouss_e_inverse;

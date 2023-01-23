@@ -36,10 +36,10 @@
 
     Thomas Knudsen, 2016-10-30/2017-07-06
 *******************************************************************************/
-#include <stdio.h>
 #include <proj.h>
+#include <stdio.h>
 
-int main (void) {
+int main(void) {
     PJ_CONTEXT *C;
     PJ *P;
     PJ *norm;
@@ -49,10 +49,9 @@ int main (void) {
     /* use PJ objects from only one thread                          */
     C = proj_context_create();
 
-    P = proj_create_crs_to_crs (C,
-                                "EPSG:4326",
-                                "+proj=utm +zone=32 +datum=WGS84", /* or EPSG:32632 */
-                                NULL);
+    P = proj_create_crs_to_crs(
+        C, "EPSG:4326", "+proj=utm +zone=32 +datum=WGS84", /* or EPSG:32632 */
+        NULL);
 
     if (0 == P) {
         fprintf(stderr, "Failed to create transformation object.\n");
@@ -72,7 +71,8 @@ int main (void) {
 
     /* a coordinate union representing Copenhagen: 55d N, 12d E    */
     /* Given that we have used proj_normalize_for_visualization(), the order of
-    /* coordinates is longitude, latitude, and values are expressed in degrees. */
+    /* coordinates is longitude, latitude, and values are expressed in degrees.
+  */
     a = proj_coord(12, 55, 0, 0);
 
     /* transform to UTM zone 32, then back to geographical */

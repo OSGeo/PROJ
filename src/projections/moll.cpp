@@ -10,25 +10,23 @@ PROJ_HEAD(moll, "Mollweide") "\n\tPCyl, Sph";
 PROJ_HEAD(wag4, "Wagner IV") "\n\tPCyl, Sph";
 PROJ_HEAD(wag5, "Wagner V") "\n\tPCyl, Sph";
 
-#define MAX_ITER    30
-#define LOOP_TOL    1e-7
+#define MAX_ITER 30
+#define LOOP_TOL 1e-7
 
 namespace { // anonymous namespace
 struct pj_opaque {
-    double  C_x, C_y, C_p;
+    double C_x, C_y, C_p;
 };
 } // anonymous namespace
 
-
-static PJ_XY moll_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
-    PJ_XY xy = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_XY moll_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     int i;
 
     const double k = Q->C_p * sin(lp.phi);
-    for (i = MAX_ITER; i ; --i) {
-        const double V = (lp.phi + sin(lp.phi) - k) /
-                            (1. + cos(lp.phi));
+    for (i = MAX_ITER; i; --i) {
+        const double V = (lp.phi + sin(lp.phi) - k) / (1. + cos(lp.phi));
         lp.phi -= V;
         if (fabs(V) < LOOP_TOL)
             break;
@@ -42,24 +40,22 @@ static PJ_XY moll_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
     return xy;
 }
 
-
-static PJ_LP moll_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
-    PJ_LP lp = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_LP moll_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     lp.phi = aasin(P->ctx, xy.y / Q->C_y);
     lp.lam = xy.x / (Q->C_x * cos(lp.phi));
-        if (fabs(lp.lam) < M_PI) {
-            lp.phi += lp.phi;
-            lp.phi = aasin(P->ctx, (lp.phi + sin(lp.phi)) / Q->C_p);
-        } else {
-            lp.lam = lp.phi = HUGE_VAL;
-        }
+    if (fabs(lp.lam) < M_PI) {
+        lp.phi += lp.phi;
+        lp.phi = aasin(P->ctx, (lp.phi + sin(lp.phi)) / Q->C_p);
+    } else {
+        lp.lam = lp.phi = HUGE_VAL;
+    }
     return lp;
 }
 
-
-static PJ * setup(PJ *P, double p) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ *setup(PJ *P, double p) {
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double r, sp, p2 = p + p;
 
     P->es = 0;
@@ -75,30 +71,31 @@ static PJ * setup(PJ *P, double p) {
     return P;
 }
 
-
 PJ *PROJECTION(moll) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     return setup(P, M_HALFPI);
 }
 
-
 PJ *PROJECTION(wag4) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    return setup(P, M_PI/3.);
+    return setup(P, M_PI / 3.);
 }
 
 PJ *PROJECTION(wag5) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     P->es = 0;

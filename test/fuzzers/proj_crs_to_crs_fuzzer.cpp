@@ -28,43 +28,39 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 #include "proj.h"
 
 /* Standalone build:
-g++ -g -std=c++11 proj_crs_to_crs_fuzzer.cpp -o proj_crs_to_crs_fuzzer -fvisibility=hidden -DSTANDALONE ../../build/lib/libproj.a -lpthread -lsqlite3 -I../../src -I../../include
+g++ -g -std=c++11 proj_crs_to_crs_fuzzer.cpp -o proj_crs_to_crs_fuzzer
+-fvisibility=hidden -DSTANDALONE ../../build/lib/libproj.a -lpthread -lsqlite3
+-I../../src -I../../include
 */
 
-extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv);
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv);
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len);
 
-int LLVMFuzzerInitialize(int* /*argc*/, char*** argv)
-{
-    const char* argv0 = (*argv)[0];
-    char* path = strdup(argv0);
-    char* lastslash = strrchr(path, '/');
-    if( lastslash )
-    {
+int LLVMFuzzerInitialize(int * /*argc*/, char ***argv) {
+    const char *argv0 = (*argv)[0];
+    char *path = strdup(argv0);
+    char *lastslash = strrchr(path, '/');
+    if (lastslash) {
         *lastslash = '\0';
         setenv("PROJ_DATA", path, 1);
-    }
-    else
-    {
+    } else {
         setenv("PROJ_DATA", ".", 1);
     }
     free(path);
     return 0;
 }
 
-int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
-{
-    if( len > 1000 )
-    {
+int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len) {
+    if (len > 1000) {
 #ifdef STANDALONE
         fprintf(stderr, "Input too large\n");
 #endif
@@ -73,18 +69,17 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
 
     /* We expect the blob to be 2 lines: */
     /* source_string\ndestination_string */
-    char* buf_dup = (char*)malloc(len+1);
+    char *buf_dup = (char *)malloc(len + 1);
     memcpy(buf_dup, buf, len);
     buf_dup[len] = 0;
-    char* first_line = buf_dup;
-    char* first_newline = strchr(first_line, '\n');
-    if( !first_newline )
-    {
+    char *first_line = buf_dup;
+    char *first_newline = strchr(first_line, '\n');
+    if (!first_newline) {
         free(buf_dup);
         return 0;
     }
     first_newline[0] = 0;
-    char* second_line = first_newline + 1;
+    char *second_line = first_newline + 1;
 
 #ifdef STANDALONE
     fprintf(stderr, "src=%s\n", first_line);
@@ -101,26 +96,22 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
 
 #ifdef STANDALONE
 
-int main(int argc, char* argv[])
-{
-    if( argc < 2 )
-    {
-        const char str[] =
-            "+proj=longlat +datum=WGS84 +nodefs\n+proj=longlat +datum=WGS84 +nodefs";
-        int ret = LLVMFuzzerTestOneInput((const uint8_t*)(str), sizeof(str) - 1);
-        if( ret )
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        const char str[] = "+proj=longlat +datum=WGS84 +nodefs\n+proj=longlat "
+                           "+datum=WGS84 +nodefs";
+        int ret =
+            LLVMFuzzerTestOneInput((const uint8_t *)(str), sizeof(str) - 1);
+        if (ret)
             return ret;
 
         return 0;
-    }
-    else
-    {
+    } else {
         int nRet = 0;
-        void* buf = NULL;
+        void *buf = NULL;
         int nLen = 0;
-        FILE* f = fopen(argv[1], "rb");
-        if( !f )
-        {
+        FILE *f = fopen(argv[1], "rb");
+        if (!f) {
             fprintf(stderr, "%s does not exist.\n", argv[1]);
             exit(1);
         }
@@ -128,15 +119,14 @@ int main(int argc, char* argv[])
         nLen = (int)ftell(f);
         fseek(f, 0, SEEK_SET);
         buf = malloc(nLen);
-        if( !buf )
-        {
+        if (!buf) {
             fprintf(stderr, "malloc failed.\n");
             fclose(f);
             exit(1);
         }
         fread(buf, nLen, 1, f);
         fclose(f);
-        nRet = LLVMFuzzerTestOneInput((const uint8_t*)(buf), nLen);
+        nRet = LLVMFuzzerTestOneInput((const uint8_t *)(buf), nLen);
         free(buf);
         return nRet;
     }

@@ -7,7 +7,7 @@
 #include "proj_internal.h"
 
 PROJ_HEAD(col_urban, "Colombia Urban")
-    "\n\tMisc\n\th_0=";
+"\n\tMisc\n\th_0=";
 
 // Notations and formulas taken from IOGP Publication 373-7-2 -
 // Geomatics Guidance Note number 7, part 2 - March 2020
@@ -15,7 +15,7 @@ PROJ_HEAD(col_urban, "Colombia Urban")
 namespace { // anonymous namespace
 
 struct pj_opaque {
-    double h0; // height of projection origin, divided by semi-major axis (a)
+    double h0;   // height of projection origin, divided by semi-major axis (a)
     double rho0; // adimensional value, contrary to Guidance note 7.2
     double A;
     double B; // adimensional value, contrary to Guidance note 7.2
@@ -24,9 +24,9 @@ struct pj_opaque {
 };
 } // anonymous namespace
 
-static PJ_XY col_urban_forward (PJ_LP lp, PJ *P) {
+static PJ_XY col_urban_forward(PJ_LP lp, PJ *P) {
     PJ_XY xy;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
 
     const double cosphi = cos(lp.phi);
     const double sinphi = sin(lp.phi);
@@ -34,16 +34,18 @@ static PJ_XY col_urban_forward (PJ_LP lp, PJ *P) {
     const double lam_nu_cosphi = lp.lam * nu * cosphi;
     xy.x = Q->A * lam_nu_cosphi;
     const double sinphi_m = sin(0.5 * (lp.phi + P->phi0));
-    const double rho_m = (1 - P->es) / pow(1 - P->es * sinphi_m * sinphi_m, 1.5);
+    const double rho_m =
+        (1 - P->es) / pow(1 - P->es * sinphi_m * sinphi_m, 1.5);
     const double G = 1 + Q->h0 / rho_m;
-    xy.y = G * Q->rho0 * ((lp.phi - P->phi0) + Q->B * lam_nu_cosphi * lam_nu_cosphi);
+    xy.y = G * Q->rho0 *
+           ((lp.phi - P->phi0) + Q->B * lam_nu_cosphi * lam_nu_cosphi);
 
     return xy;
 }
 
-static PJ_LP col_urban_inverse (PJ_XY xy, PJ *P) {
+static PJ_LP col_urban_inverse(PJ_XY xy, PJ *P) {
     PJ_LP lp;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
 
     lp.phi = P->phi0 + xy.y / Q->D - Q->B * (xy.x / Q->C) * (xy.x / Q->C);
     const double sinphi = sin(lp.phi);
@@ -54,9 +56,10 @@ static PJ_LP col_urban_inverse (PJ_XY xy, PJ *P) {
 }
 
 PJ *PROJECTION(col_urban) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     const double h0_unscaled = pj_param(P->ctx, P->params, "dh_0").f;

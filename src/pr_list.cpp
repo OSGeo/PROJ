@@ -8,45 +8,44 @@
 #include "proj_internal.h"
 
 #define LINE_LEN 72
-	static int
-pr_list(PJ *P, int not_used) {
-	paralist *t;
-	int l, n = 1, flag = 0;
+static int pr_list(PJ *P, int not_used) {
+    paralist *t;
+    int l, n = 1, flag = 0;
 
-	(void)putchar('#');
-	for (t = P->params; t; t = t->next)
-		if ((!not_used && t->used) || (not_used && !t->used)) {
-			l = (int)strlen(t->param) + 1;
-			if (n + l > LINE_LEN) {
-				(void)fputs("\n#", stdout);
-				n = 2;
-			}
-			(void)putchar(' ');
-			if (*(t->param) != '+')
-				(void)putchar('+');
-			(void)fputs(t->param, stdout);
-			n += l;
-		} else
-			flag = 1;
-	if (n > 1)
-		(void)putchar('\n');
-	return flag;
+    (void)putchar('#');
+    for (t = P->params; t; t = t->next)
+        if ((!not_used && t->used) || (not_used && !t->used)) {
+            l = (int)strlen(t->param) + 1;
+            if (n + l > LINE_LEN) {
+                (void)fputs("\n#", stdout);
+                n = 2;
+            }
+            (void)putchar(' ');
+            if (*(t->param) != '+')
+                (void)putchar('+');
+            (void)fputs(t->param, stdout);
+            n += l;
+        } else
+            flag = 1;
+    if (n > 1)
+        (void)putchar('\n');
+    return flag;
 }
-	void /* print link list of projection parameters */
+void /* print link list of projection parameters */
 pj_pr_list(PJ *P) {
-	char const *s;
+    char const *s;
 
-	(void)putchar('#');
-	for (s = P->descr; *s ; ++s) {
-		(void)putchar(*s);
-		if (*s == '\n')
-			(void)putchar('#');
-	}
-	(void)putchar('\n');
-	if (pr_list(P, 0)) {
-		(void)fputs("#--- following specified but NOT used\n", stdout);
-		(void)pr_list(P, 1);
-	}
+    (void)putchar('#');
+    for (s = P->descr; *s; ++s) {
+        (void)putchar(*s);
+        if (*s == '\n')
+            (void)putchar('#');
+    }
+    (void)putchar('\n');
+    if (pr_list(P, 0)) {
+        (void)fputs("#--- following specified but NOT used\n", stdout);
+        (void)pr_list(P, 1);
+    }
 }
 
 /************************************************************************/
@@ -57,48 +56,45 @@ pj_pr_list(PJ *P) {
 /*      +init= calls and +datum= definitions would be expanded.         */
 /************************************************************************/
 
-char *pj_get_def( PJ *P, int options )
+char *pj_get_def(PJ *P, int options)
 
 {
     paralist *t;
     int l;
     char *definition;
     size_t def_max = 10;
-    (void) options;
+    (void)options;
 
-    definition = (char *) malloc(def_max);
+    definition = (char *)malloc(def_max);
     if (!definition)
         return nullptr;
     definition[0] = '\0';
 
-    for (t = P->params; t; t = t->next)
-    {
+    for (t = P->params; t; t = t->next) {
         /* skip unused parameters ... mostly appended defaults and stuff */
         if (!t->used)
             continue;
 
         /* grow the resulting string if needed */
         l = (int)strlen(t->param) + 1;
-        if( strlen(definition) + l + 5 > def_max )
-        {
+        if (strlen(definition) + l + 5 > def_max) {
             char *def2;
 
             def_max = def_max * 2 + l + 5;
-            def2 = (char *) malloc(def_max);
+            def2 = (char *)malloc(def_max);
             if (def2) {
-                strcpy( def2, definition );
-                free( definition );
+                strcpy(def2, definition);
+                free(definition);
                 definition = def2;
-            }
-            else {
-                free( definition );
+            } else {
+                free(definition);
                 return nullptr;
             }
         }
 
         /* append this parameter */
-        strcat( definition, " +" );
-        strcat( definition, t->param );
+        strcat(definition, " +");
+        strcat(definition, t->param);
     }
 
     return definition;

@@ -5,9 +5,8 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-PROJ_HEAD(calcofi,
-    "Cal Coop Ocean Fish Invest Lines/Stations") "\n\tCyl, Sph&Ell";
-
+PROJ_HEAD(calcofi, "Cal Coop Ocean Fish Invest Lines/Stations")
+"\n\tCyl, Sph&Ell";
 
 /* Conversions for the California Cooperative Oceanic Fisheries Investigations
 Line/Station coordinate system following the algorithm of:
@@ -21,21 +20,19 @@ Station == 1/15 of a degree at O.
 By convention, CalCOFI Line/Station conversions use Clarke 1866 but we use
 whatever ellipsoid is provided. */
 
-
 #define EPS10 1.e-10
 #define DEG_TO_LINE 5
 #define DEG_TO_STATION 15
 #define LINE_TO_RAD 0.0034906585039886592
 #define STATION_TO_RAD 0.0011635528346628863
-#define PT_O_LINE 80 /* reference point O is at line 80,  */
-#define PT_O_STATION 60 /* station 60,  */
+#define PT_O_LINE 80                    /* reference point O is at line 80,  */
+#define PT_O_STATION 60                 /* station 60,  */
 #define PT_O_LAMBDA -2.1144663887911301 /* long -121.15 and */
-#define PT_O_PHI 0.59602993955606354 /* lat 34.15 */
+#define PT_O_PHI 0.59602993955606354    /* lat 34.15 */
 #define ROTATION_ANGLE 0.52359877559829882 /*CalCOFI angle of 30 deg in rad */
 
-
-static PJ_XY calcofi_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    PJ_XY xy = {0.0,0.0};
+static PJ_XY calcofi_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     double oy; /* pt O y value in Mercator */
     double l1; /* l1 and l2 are distances calculated using trig that sum
                to the east/west distance between point O and point xy */
@@ -55,19 +52,18 @@ static PJ_XY calcofi_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forw
     l2 = -xy.x - l1 + PT_O_LAMBDA;
     ry = l2 * cos(ROTATION_ANGLE) * sin(ROTATION_ANGLE) + xy.y;
     ry = pj_phi2(P->ctx, exp(-ry), P->e); /*inverse Mercator*/
-    xy.x = PT_O_LINE - RAD_TO_DEG *
-        (ry - PT_O_PHI) * DEG_TO_LINE / cos(ROTATION_ANGLE);
-    xy.y = PT_O_STATION + RAD_TO_DEG *
-        (ry - lp.phi) * DEG_TO_STATION / sin(ROTATION_ANGLE);
+    xy.x = PT_O_LINE -
+           RAD_TO_DEG * (ry - PT_O_PHI) * DEG_TO_LINE / cos(ROTATION_ANGLE);
+    xy.y = PT_O_STATION +
+           RAD_TO_DEG * (ry - lp.phi) * DEG_TO_STATION / sin(ROTATION_ANGLE);
     /* set a = 1, x0 = 0, and y0 = 0 so that no further unit adjustments
     are done */
 
     return xy;
 }
 
-
-static PJ_XY calcofi_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
-    PJ_XY xy = {0.0,0.0};
+static PJ_XY calcofi_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     double oy;
     double l1;
     double l2;
@@ -83,17 +79,16 @@ static PJ_XY calcofi_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forw
     l2 = -xy.x - l1 + PT_O_LAMBDA;
     ry = l2 * cos(ROTATION_ANGLE) * sin(ROTATION_ANGLE) + xy.y;
     ry = M_HALFPI - 2. * atan(exp(-ry));
-    xy.x = PT_O_LINE - RAD_TO_DEG *
-        (ry - PT_O_PHI) * DEG_TO_LINE / cos(ROTATION_ANGLE);
-    xy.y = PT_O_STATION + RAD_TO_DEG *
-        (ry - lp.phi) * DEG_TO_STATION / sin(ROTATION_ANGLE);
+    xy.x = PT_O_LINE -
+           RAD_TO_DEG * (ry - PT_O_PHI) * DEG_TO_LINE / cos(ROTATION_ANGLE);
+    xy.y = PT_O_STATION +
+           RAD_TO_DEG * (ry - lp.phi) * DEG_TO_STATION / sin(ROTATION_ANGLE);
 
     return xy;
 }
 
-
-static PJ_LP calcofi_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    PJ_LP lp = {0.0,0.0};
+static PJ_LP calcofi_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
     double ry;     /* y value of point r */
     double oymctr; /* Mercator-transformed y value of point O */
     double rymctr; /* Mercator-transformed ry */
@@ -101,8 +96,7 @@ static PJ_LP calcofi_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inve
     double l1;
     double l2;
 
-    ry = PT_O_PHI - LINE_TO_RAD * (xy.x - PT_O_LINE) *
-        cos(ROTATION_ANGLE);
+    ry = PT_O_PHI - LINE_TO_RAD * (xy.x - PT_O_LINE) * cos(ROTATION_ANGLE);
     lp.phi = ry - STATION_TO_RAD * (xy.y - PT_O_STATION) * sin(ROTATION_ANGLE);
     oymctr = -log(pj_tsfn(PT_O_PHI, sin(PT_O_PHI), P->e));
     rymctr = -log(pj_tsfn(ry, sin(ry), P->e));
@@ -114,19 +108,17 @@ static PJ_LP calcofi_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inve
     return lp;
 }
 
-
-static PJ_LP calcofi_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
-    PJ_LP lp = {0.0,0.0};
+static PJ_LP calcofi_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
     double ry;
     double oymctr;
     double rymctr;
     double xymctr;
     double l1;
     double l2;
-    (void) P;
+    (void)P;
 
-    ry = PT_O_PHI - LINE_TO_RAD * (xy.x - PT_O_LINE) *
-        cos(ROTATION_ANGLE);
+    ry = PT_O_PHI - LINE_TO_RAD * (xy.x - PT_O_LINE) * cos(ROTATION_ANGLE);
     lp.phi = ry - STATION_TO_RAD * (xy.y - PT_O_STATION) * sin(ROTATION_ANGLE);
     oymctr = log(tan(M_FORTPI + .5 * PT_O_PHI));
     rymctr = log(tan(M_FORTPI + .5 * ry));
@@ -137,7 +129,6 @@ static PJ_LP calcofi_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inve
 
     return lp;
 }
-
 
 PJ *PROJECTION(calcofi) {
     P->opaque = nullptr;

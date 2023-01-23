@@ -8,12 +8,11 @@
 PROJ_HEAD(collg, "Collignon") "\n\tPCyl, Sph";
 #define FXC 1.12837916709551257390
 #define FYC 1.77245385090551602729
-#define ONEEPS  1.0000001
+#define ONEEPS 1.0000001
 
-
-static PJ_XY collg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
-    PJ_XY xy = {0.0,0.0};
-    (void) P;
+static PJ_XY collg_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
+    (void)P;
     xy.y = 1. - sin(lp.phi);
     if (xy.y <= 0.)
         xy.y = 0.;
@@ -24,9 +23,8 @@ static PJ_XY collg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
     return (xy);
 }
 
-
-static PJ_LP collg_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
-    PJ_LP lp = {0.0,0.0};
+static PJ_LP collg_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
     lp.phi = xy.y / FYC - 1.;
     lp.phi = 1. - lp.phi * lp.phi;
     if (fabs(lp.phi) < 1.)
@@ -45,7 +43,6 @@ static PJ_LP collg_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         lp.lam = xy.x / (FXC * sqrt(lp.lam));
     return (lp);
 }
-
 
 PJ *PROJECTION(collg) {
     P->es = 0.0;

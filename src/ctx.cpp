@@ -34,22 +34,22 @@
 
 #include <new>
 
-#include "proj_experimental.h"
-#include "proj_internal.h"
 #include "filemanager.hpp"
 #include "proj/internal/io_internal.hpp"
+#include "proj_experimental.h"
+#include "proj_internal.h"
 
 /************************************************************************/
 /*                             pj_get_ctx()                             */
 /************************************************************************/
 
-PJ_CONTEXT* pj_get_ctx( PJ *pj )
+PJ_CONTEXT *pj_get_ctx(PJ *pj)
 
 {
-    if (nullptr==pj)
-        return pj_get_default_ctx ();
-    if (nullptr==pj->ctx)
-        return pj_get_default_ctx ();
+    if (nullptr == pj)
+        return pj_get_default_ctx();
+    if (nullptr == pj->ctx)
+        return pj_get_default_ctx();
     return pj->ctx;
 }
 
@@ -64,38 +64,32 @@ PJ_CONTEXT* pj_get_ctx( PJ *pj )
  * the user may want to assign another thread-specific context to the
  * object.
  */
-void proj_assign_context( PJ* pj, PJ_CONTEXT *ctx )
-{
-    if (pj==nullptr)
+void proj_assign_context(PJ *pj, PJ_CONTEXT *ctx) {
+    if (pj == nullptr)
         return;
     pj->ctx = ctx;
-    if( pj->reassign_context )
-    {
+    if (pj->reassign_context) {
         pj->reassign_context(pj, ctx);
     }
-    for( const auto &alt: pj->alternativeCoordinateOperations )
-    {
+    for (const auto &alt : pj->alternativeCoordinateOperations) {
         proj_assign_context(alt.pj, ctx);
     }
-
 }
 
 /************************************************************************/
 /*                          createDefault()                             */
 /************************************************************************/
 
-pj_ctx pj_ctx::createDefault()
-{
+pj_ctx pj_ctx::createDefault() {
     pj_ctx ctx;
     ctx.debug_level = PJ_LOG_ERROR;
     ctx.logger = pj_stderr_logger;
     NS_PROJ::FileManager::fillDefaultNetworkInterface(&ctx);
 
-    const char* projDebug = getenv("PROJ_DEBUG");
-    if( projDebug != nullptr )
-    {
+    const char *projDebug = getenv("PROJ_DEBUG");
+    if (projDebug != nullptr) {
         const int debugLevel = atoi(projDebug);
-        if( debugLevel >= -PJ_LOG_TRACE )
+        if (debugLevel >= -PJ_LOG_TRACE)
             ctx.debug_level = debugLevel;
         else
             ctx.debug_level = PJ_LOG_TRACE;
@@ -108,8 +102,7 @@ pj_ctx pj_ctx::createDefault()
 /*                           get_cpp_context()                            */
 /**************************************************************************/
 
-projCppContext* pj_ctx::get_cpp_context()
-{
+projCppContext *pj_ctx::get_cpp_context() {
     if (cpp_context == nullptr) {
         cpp_context = new projCppContext(this);
     }
@@ -120,14 +113,13 @@ projCppContext* pj_ctx::get_cpp_context()
 /*                           set_search_paths()                         */
 /************************************************************************/
 
-void pj_ctx::set_search_paths(const std::vector<std::string>& search_paths_in )
-{
+void pj_ctx::set_search_paths(const std::vector<std::string> &search_paths_in) {
     search_paths = search_paths_in;
     delete[] c_compat_paths;
     c_compat_paths = nullptr;
-    if( !search_paths.empty() ) {
-        c_compat_paths = new const char*[search_paths.size()];
-        for( size_t i = 0; i < search_paths.size(); ++i ) {
+    if (!search_paths.empty()) {
+        c_compat_paths = new const char *[search_paths.size()];
+        for (size_t i = 0; i < search_paths.size(); ++i) {
             c_compat_paths[i] = search_paths[i].c_str();
         }
     }
@@ -137,8 +129,7 @@ void pj_ctx::set_search_paths(const std::vector<std::string>& search_paths_in )
 /*                           set_ca_bundle_path()                         */
 /**************************************************************************/
 
-void pj_ctx::set_ca_bundle_path(const std::string& ca_bundle_path_in)
-{
+void pj_ctx::set_ca_bundle_path(const std::string &ca_bundle_path_in) {
     ca_bundle_path = ca_bundle_path_in;
 }
 
@@ -146,35 +137,31 @@ void pj_ctx::set_ca_bundle_path(const std::string& ca_bundle_path_in)
 /*                  pj_ctx(const pj_ctx& other)                         */
 /************************************************************************/
 
-pj_ctx::pj_ctx(const pj_ctx& other) :
-    lastFullErrorMessage(std::string()),
-    last_errno(0),
-    debug_level(other.debug_level),
-    errorIfBestTransformationNotAvailableDefault(other.errorIfBestTransformationNotAvailableDefault),
-    warnIfBestTransformationNotAvailableDefault(other.warnIfBestTransformationNotAvailableDefault),
-    logger(other.logger),
-    logger_app_data(other.logger_app_data),
-    cpp_context(other.cpp_context ? other.cpp_context->clone(this) : nullptr),
-    use_proj4_init_rules(other.use_proj4_init_rules),
-    forceOver(other.forceOver),
-    epsg_file_exists(other.epsg_file_exists),
-    env_var_proj_data(other.env_var_proj_data),
-    file_finder(other.file_finder),
-    file_finder_user_data(other.file_finder_user_data),
-    defer_grid_opening(false),
-    custom_sqlite3_vfs_name(other.custom_sqlite3_vfs_name),
-    user_writable_directory(other.user_writable_directory),
-    // BEGIN ini file settings
-    iniFileLoaded(other.iniFileLoaded),
-    endpoint(other.endpoint),
-    networking(other.networking),
-    ca_bundle_path(other.ca_bundle_path),
-    gridChunkCache(other.gridChunkCache),
-    defaultTmercAlgo(other.defaultTmercAlgo),
-    // END ini file settings
-    projStringParserCreateFromPROJStringRecursionCounter(0),
-    pipelineInitRecursiongCounter(0)
-{
+pj_ctx::pj_ctx(const pj_ctx &other)
+    : lastFullErrorMessage(std::string()), last_errno(0),
+      debug_level(other.debug_level),
+      errorIfBestTransformationNotAvailableDefault(
+          other.errorIfBestTransformationNotAvailableDefault),
+      warnIfBestTransformationNotAvailableDefault(
+          other.warnIfBestTransformationNotAvailableDefault),
+      logger(other.logger), logger_app_data(other.logger_app_data),
+      cpp_context(other.cpp_context ? other.cpp_context->clone(this) : nullptr),
+      use_proj4_init_rules(other.use_proj4_init_rules),
+      forceOver(other.forceOver), epsg_file_exists(other.epsg_file_exists),
+      env_var_proj_data(other.env_var_proj_data),
+      file_finder(other.file_finder),
+      file_finder_user_data(other.file_finder_user_data),
+      defer_grid_opening(false),
+      custom_sqlite3_vfs_name(other.custom_sqlite3_vfs_name),
+      user_writable_directory(other.user_writable_directory),
+      // BEGIN ini file settings
+      iniFileLoaded(other.iniFileLoaded), endpoint(other.endpoint),
+      networking(other.networking), ca_bundle_path(other.ca_bundle_path),
+      gridChunkCache(other.gridChunkCache),
+      defaultTmercAlgo(other.defaultTmercAlgo),
+      // END ini file settings
+      projStringParserCreateFromPROJStringRecursionCounter(0),
+      pipelineInitRecursiongCounter(0) {
     set_search_paths(other.search_paths);
 }
 
@@ -182,7 +169,7 @@ pj_ctx::pj_ctx(const pj_ctx& other) :
 /*                         pj_get_default_ctx()                         */
 /************************************************************************/
 
-PJ_CONTEXT* pj_get_default_ctx()
+PJ_CONTEXT *pj_get_default_ctx()
 
 {
     // C++11 rules guarantee a thread-safe instantiation.
@@ -194,8 +181,7 @@ PJ_CONTEXT* pj_get_default_ctx()
 /*                            ~pj_ctx()                              */
 /************************************************************************/
 
-pj_ctx::~pj_ctx()
-{
+pj_ctx::~pj_ctx() {
     delete[] c_compat_paths;
     proj_context_delete_cpp_context(cpp_context);
 }
@@ -205,12 +191,9 @@ pj_ctx::~pj_ctx()
 /*           Create a new context based on a custom context             */
 /************************************************************************/
 
-PJ_CONTEXT* proj_context_clone (PJ_CONTEXT *ctx)
-{
-    if (nullptr==ctx)
+PJ_CONTEXT *proj_context_clone(PJ_CONTEXT *ctx) {
+    if (nullptr == ctx)
         return proj_context_create();
 
     return new (std::nothrow) pj_ctx(*ctx);
 }
-
-

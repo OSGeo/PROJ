@@ -8,30 +8,30 @@ extern "C" {
 #endif
 
 #ifndef GEOD_IN_GEOD_SET
-#  define GEOD_EXTERN extern
+#define GEOD_EXTERN extern
 #else
-#  define GEOD_EXTERN
+#define GEOD_EXTERN
 #endif
 
 GEOD_EXTERN struct geodesic {
-  double A, FLAT, LAM1, PHI1, ALPHA12, LAM2, PHI2, ALPHA21, DIST;
+    double A, FLAT, LAM1, PHI1, ALPHA12, LAM2, PHI2, ALPHA21, DIST;
 } GEODESIC;
 
-# define geod_a	GEODESIC.A
-# define geod_f	GEODESIC.FLAT
-# define lam1	GEODESIC.LAM1
-# define phi1	GEODESIC.PHI1
-# define al12	GEODESIC.ALPHA12
-# define lam2	GEODESIC.LAM2
-# define phi2	GEODESIC.PHI2
-# define al21	GEODESIC.ALPHA21
-# define geod_S	GEODESIC.DIST
-    
+#define geod_a GEODESIC.A
+#define geod_f GEODESIC.FLAT
+#define lam1 GEODESIC.LAM1
+#define phi1 GEODESIC.PHI1
+#define al12 GEODESIC.ALPHA12
+#define lam2 GEODESIC.LAM2
+#define phi2 GEODESIC.PHI2
+#define al21 GEODESIC.ALPHA21
+#define geod_S GEODESIC.DIST
+
 GEOD_EXTERN struct geod_geodesic GlobalGeodesic;
 GEOD_EXTERN struct geod_geodesicline GlobalGeodesicLine;
 GEOD_EXTERN int n_alpha, n_S;
 GEOD_EXTERN double to_meter, fr_meter, del_alpha;
-	
+
 void geod_set(int, char **);
 void geod_ini(void);
 void geod_pre(void);

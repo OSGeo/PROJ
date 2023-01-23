@@ -5159,8 +5159,8 @@ WKTParser::Private::buildEngineeringCRSFromLocalCS(const WKTNodeNNPtr &node) {
         !isNull(datumNode)
             ? buildProperties(datumNode)
             :
-            // In theory OGC 01-009 mandates LOCAL_DATUM, but GDAL has a
-            // tradition of emitting just LOCAL_CS["foo"]
+            // In theory OGC 01-009 mandates LOCAL_DATUM, but GDAL
+            // has a tradition of emitting just LOCAL_CS["foo"]
             []() {
                 PropertyMap map;
                 map.set(IdentifiedObject::NAME_KEY,

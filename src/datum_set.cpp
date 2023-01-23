@@ -44,62 +44,60 @@ int pj_datum_set(PJ_CONTEXT *ctx, paralist *pl, PJ *projdef)
 
     projdef->datum_type = PJD_UNKNOWN;
 
-/* -------------------------------------------------------------------- */
-/*      Is there a datum definition in the parameters list?  If so,     */
-/*      add the defining values to the parameter list.  Note that       */
-/*      this will append the ellipse definition as well as the          */
-/*      towgs84= and related parameters.  It should also be pointed     */
-/*      out that the addition is permanent rather than temporary        */
-/*      like most other keyword expansion so that the ellipse           */
-/*      definition will last into the pj_ell_set() function called      */
-/*      after this one.                                                 */
-/* -------------------------------------------------------------------- */
-    if( (name = pj_param(ctx, pl,"sdatum").s) != nullptr )
-    {
+    /* -------------------------------------------------------------------- */
+    /*      Is there a datum definition in the parameters list?  If so,     */
+    /*      add the defining values to the parameter list.  Note that       */
+    /*      this will append the ellipse definition as well as the          */
+    /*      towgs84= and related parameters.  It should also be pointed     */
+    /*      out that the addition is permanent rather than temporary        */
+    /*      like most other keyword expansion so that the ellipse           */
+    /*      definition will last into the pj_ell_set() function called      */
+    /*      after this one.                                                 */
+    /* -------------------------------------------------------------------- */
+    if ((name = pj_param(ctx, pl, "sdatum").s) != nullptr) {
         paralist *curr;
         const char *s;
         int i;
 
         /* find the end of the list, so we can add to it */
-        for (curr = pl; curr && curr->next ; curr = curr->next) {}
+        for (curr = pl; curr && curr->next; curr = curr->next) {
+        }
 
         /* cannot happen in practice, but makes static analyzers happy */
-        if( !curr ) return -1;
+        if (!curr)
+            return -1;
 
         /* find the datum definition */
-        const struct PJ_DATUMS * pj_datums = pj_get_datums_ref();
-        for (i = 0; (s = pj_datums[i].id) && strcmp(name, s) ; ++i) {}
+        const struct PJ_DATUMS *pj_datums = pj_get_datums_ref();
+        for (i = 0; (s = pj_datums[i].id) && strcmp(name, s); ++i) {
+        }
 
         if (!s) {
-            pj_log (ctx, PJ_LOG_ERROR, _("Unknown value for datum"));
+            pj_log(ctx, PJ_LOG_ERROR, _("Unknown value for datum"));
             proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             return 1;
         }
 
-        if( pj_datums[i].ellipse_id && strlen(pj_datums[i].ellipse_id) > 0 )
-        {
-            char	entry[100];
-            
-            strcpy( entry, "ellps=" );
-            strncpy( entry + strlen(entry), pj_datums[i].ellipse_id,
-                     sizeof(entry) - 1 - strlen(entry) );
-            entry[ sizeof(entry) - 1 ] = '\0';
+        if (pj_datums[i].ellipse_id && strlen(pj_datums[i].ellipse_id) > 0) {
+            char entry[100];
+
+            strcpy(entry, "ellps=");
+            strncpy(entry + strlen(entry), pj_datums[i].ellipse_id,
+                    sizeof(entry) - 1 - strlen(entry));
+            entry[sizeof(entry) - 1] = '\0';
 
             auto param = pj_mkparam(entry);
-            if (nullptr == param)
-            {
+            if (nullptr == param) {
                 proj_context_errno_set(ctx, PROJ_ERR_OTHER /*ENOMEM*/);
                 return 1;
             }
             curr->next = param;
             curr = param;
         }
-        
-        if( pj_datums[i].defn && strlen(pj_datums[i].defn) > 0 )
-        {
+
+        if (pj_datums[i].defn && strlen(pj_datums[i].defn) > 0) {
             auto param = pj_mkparam(pj_datums[i].defn);
-            if (nullptr == param)
-            {
+            if (nullptr == param) {
                 proj_context_errno_set(ctx, PROJ_ERR_OTHER /*ENOMEM*/);
                 return 1;
             }
@@ -108,43 +106,39 @@ int pj_datum_set(PJ_CONTEXT *ctx, paralist *pl, PJ *projdef)
         }
     }
 
-/* -------------------------------------------------------------------- */
-/*      Check for nadgrids parameter.                                   */
-/* -------------------------------------------------------------------- */
-    nadgrids = pj_param(ctx, pl,"snadgrids").s;
-    if( nadgrids != nullptr )
-    {
+    /* -------------------------------------------------------------------- */
+    /*      Check for nadgrids parameter.                                   */
+    /* -------------------------------------------------------------------- */
+    nadgrids = pj_param(ctx, pl, "snadgrids").s;
+    if (nadgrids != nullptr) {
         /* We don't actually save the value separately.  It will continue
            to exist int he param list for use in pj_apply_gridshift.c */
 
         projdef->datum_type = PJD_GRIDSHIFT;
     }
 
-/* -------------------------------------------------------------------- */
-/*      Check for towgs84 parameter.                                    */
-/* -------------------------------------------------------------------- */
-    else if( (towgs84 = pj_param(ctx, pl,"stowgs84").s) != nullptr )
-    {
-        int    parm_count = 0;
+    /* -------------------------------------------------------------------- */
+    /*      Check for towgs84 parameter.                                    */
+    /* -------------------------------------------------------------------- */
+    else if ((towgs84 = pj_param(ctx, pl, "stowgs84").s) != nullptr) {
+        int parm_count = 0;
         const char *s;
 
-        memset( projdef->datum_params, 0, sizeof(double) * 7);
+        memset(projdef->datum_params, 0, sizeof(double) * 7);
 
         /* parse out the parameters */
-        for( s = towgs84; *s != '\0' && parm_count < 7; ) 
-        {
+        for (s = towgs84; *s != '\0' && parm_count < 7;) {
             projdef->datum_params[parm_count++] = pj_atof(s);
-            while( *s != '\0' && *s != ',' )
+            while (*s != '\0' && *s != ',')
                 s++;
-            if( *s == ',' )
+            if (*s == ',')
                 s++;
         }
 
-        if( projdef->datum_params[3] != 0.0 
-            || projdef->datum_params[4] != 0.0 
-            || projdef->datum_params[5] != 0.0 
-            || projdef->datum_params[6] != 0.0 )
-        {
+        if (projdef->datum_params[3] != 0.0 ||
+            projdef->datum_params[4] != 0.0 ||
+            projdef->datum_params[5] != 0.0 ||
+            projdef->datum_params[6] != 0.0) {
             projdef->datum_type = PJD_7PARAM;
 
             /* transform from arc seconds to radians */
@@ -152,13 +146,12 @@ int pj_datum_set(PJ_CONTEXT *ctx, paralist *pl, PJ *projdef)
             projdef->datum_params[4] *= SEC_TO_RAD;
             projdef->datum_params[5] *= SEC_TO_RAD;
             /* transform from parts per million to scaling factor */
-            projdef->datum_params[6] = 
-                (projdef->datum_params[6]/1000000.0) + 1;
-        }
-        else 
+            projdef->datum_params[6] =
+                (projdef->datum_params[6] / 1000000.0) + 1;
+        } else
             projdef->datum_type = PJD_3PARAM;
 
-        /* Note that pj_init() will later switch datum_type to 
+        /* Note that pj_init() will later switch datum_type to
            PJD_WGS84 if shifts are all zero, and ellipsoid is WGS84 or GRS80 */
     }
 
