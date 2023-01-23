@@ -664,19 +664,16 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
             CRSPtr candidateBoundCRS;
             int candidateCount = 0;
             bool candidateHasExactlyMatchingExtent = false;
-            for (const auto &op : list) {
-                auto transf =
-                    util::nn_dynamic_pointer_cast<operation::Transformation>(
-                        op);
-                if (transf && !starts_with(transf->nameStr(), "Ballpark geo")) {
+
+            const auto takeIntoAccountCandidate =
+                [&](const operation::TransformationNNPtr &transf) {
                     try {
                         transf->getTOWGS84Parameters();
                     } catch (const std::exception &) {
-                        continue;
+                        return;
                     }
                     bool unused = false;
-                    auto opExtent =
-                        getExtent(NN_NO_CHECK(transf), false, unused);
+                    auto opExtent = getExtent(transf, false, unused);
                     const bool exactlyMatchingExtent =
                         opExtent && extentResolved &&
                         opExtent->contains(NN_NO_CHECK(extentResolved)) &&
@@ -695,10 +692,17 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                         candidateHasExactlyMatchingExtent =
                             exactlyMatchingExtent;
                         candidateBoundCRS =
-                            BoundCRS::create(thisAsCRS, hubCRS,
-                                             NN_NO_CHECK(transf))
+                            BoundCRS::create(thisAsCRS, hubCRS, transf)
                                 .as_nullable();
                     }
+                };
+
+            for (const auto &op : list) {
+                auto transf =
+                    util::nn_dynamic_pointer_cast<operation::Transformation>(
+                        op);
+                if (transf && !starts_with(transf->nameStr(), "Ballpark geo")) {
+                    takeIntoAccountCandidate(NN_NO_CHECK(transf));
                 } else {
                     auto concatenated =
                         dynamic_cast<const operation::ConcatenatedOperation *>(
@@ -724,40 +728,8 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                                     operation::Transformation>(subops[1]);
                                 if (transf && !starts_with(transf->nameStr(),
                                                            "Ballpark geo")) {
-                                    try {
-                                        transf->getTOWGS84Parameters();
-                                    } catch (const std::exception &) {
-                                        continue;
-                                    }
-                                    bool unused = false;
-                                    auto opExtent = getExtent(
-                                        NN_NO_CHECK(transf), false, unused);
-                                    const bool exactlyMatchingExtent =
-                                        opExtent && extentResolved &&
-                                        opExtent->contains(
-                                            NN_NO_CHECK(extentResolved)) &&
-                                        extentResolved->contains(
-                                            NN_NO_CHECK(opExtent));
-                                    if (candidateBoundCRS) {
-                                        if (exactlyMatchingExtent &&
-                                            !candidateHasExactlyMatchingExtent) {
-                                            candidateBoundCRS = nullptr;
-                                        } else if (
-                                            exactlyMatchingExtent ==
-                                            candidateHasExactlyMatchingExtent) {
-                                            candidateCount++;
-                                        }
-                                    }
-                                    if (candidateBoundCRS == nullptr) {
-                                        candidateCount = 1;
-                                        candidateHasExactlyMatchingExtent =
-                                            exactlyMatchingExtent;
-                                        candidateBoundCRS =
-                                            BoundCRS::create(
-                                                thisAsCRS, hubCRS,
-                                                NN_NO_CHECK(transf))
-                                                .as_nullable();
-                                    }
+                                    takeIntoAccountCandidate(
+                                        NN_NO_CHECK(transf));
                                 }
                             }
                         }
