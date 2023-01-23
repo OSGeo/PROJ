@@ -1179,10 +1179,23 @@ const char PROJ_DLL* proj_get_id_code(const PJ *obj, int index);
 
 const char PROJ_DLL* proj_get_remarks(const PJ *obj);
 
+int PROJ_DLL proj_get_domain_count(const PJ *obj);
+
 const char PROJ_DLL* proj_get_scope(const PJ *obj);
+
+const char PROJ_DLL* proj_get_scope_ex(const PJ *obj, int domainIdx);
 
 int PROJ_DLL proj_get_area_of_use(PJ_CONTEXT *ctx,
                                       const PJ *obj,
+                                      double* out_west_lon_degree,
+                                      double* out_south_lat_degree,
+                                      double* out_east_lon_degree,
+                                      double* out_north_lat_degree,
+                                      const char **out_area_name);
+
+int PROJ_DLL proj_get_area_of_use_ex(PJ_CONTEXT *ctx,
+                                      const PJ *obj,
+                                      int domainIdx,
                                       double* out_west_lon_degree,
                                       double* out_south_lat_degree,
                                       double* out_east_lon_degree,
