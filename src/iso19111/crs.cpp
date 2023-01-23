@@ -549,6 +549,13 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
     const auto &l_domains = domains();
     metadata::ExtentPtr extent;
     if (!l_domains.empty()) {
+        if (l_domains.size() > 1) {
+            // If there are several domains of validity, then it is extremely
+            // unlikely, we could get a single transformation valid for all.
+            // At least, in the current state of the code of createOperations()
+            // which returns a single extent, this can't happen.
+            return thisAsCRS;
+        }
         extent = l_domains[0]->domainOfValidity();
     }
 
@@ -663,7 +670,6 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                     ->createOperations(NN_NO_CHECK(geodCRS), hubCRS, ctxt);
             CRSPtr candidateBoundCRS;
             int candidateCount = 0;
-            bool candidateHasExactlyMatchingExtent = false;
 
             const auto takeIntoAccountCandidate =
                 [&](const operation::TransformationNNPtr &transf) {
@@ -672,25 +678,9 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                     } catch (const std::exception &) {
                         return;
                     }
-                    bool unused = false;
-                    auto opExtent = getExtent(transf, false, unused);
-                    const bool exactlyMatchingExtent =
-                        opExtent && extentResolved &&
-                        opExtent->contains(NN_NO_CHECK(extentResolved)) &&
-                        extentResolved->contains(NN_NO_CHECK(opExtent));
-                    if (candidateBoundCRS) {
-                        if (exactlyMatchingExtent &&
-                            !candidateHasExactlyMatchingExtent) {
-                            candidateBoundCRS = nullptr;
-                        } else if (exactlyMatchingExtent ==
-                                   candidateHasExactlyMatchingExtent) {
-                            candidateCount++;
-                        }
-                    }
+                    candidateCount++;
                     if (candidateBoundCRS == nullptr) {
                         candidateCount = 1;
-                        candidateHasExactlyMatchingExtent =
-                            exactlyMatchingExtent;
                         candidateBoundCRS =
                             BoundCRS::create(thisAsCRS, hubCRS, transf)
                                 .as_nullable();

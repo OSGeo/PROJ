@@ -6416,6 +6416,16 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                       CoordinateOperationContext::IntermediateCRSUse::NEVER),
                   crs_5340);
     }
+    {
+        // "MGI 1901 / Balkans zone 7": it has 2 area of validity, one
+        // for Bosnia and Herzegovina/Kosovo/Montenegro/Serbia and another
+        // one for North macedonie
+        auto crs_6316 = factory->createCoordinateReferenceSystem("6316");
+        EXPECT_EQ(crs_6316->createBoundCRSToWGS84IfPossible(
+                      dbContext,
+                      CoordinateOperationContext::IntermediateCRSUse::NEVER),
+                  crs_6316);
+    }
 
     // Check that we get the same result from an EPSG code and a CRS created
     // from its WKT1 representation.
