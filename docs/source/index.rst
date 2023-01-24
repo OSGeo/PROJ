@@ -10,11 +10,9 @@ a C API for software developers to include coordinate transformation in their
 own software. PROJ is maintained on `GitHub <http://github.com/OSGeo/proj.4/>`_.
 
 
-Documentation
-=================
-
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
+   :hidden:
 
    usage/index
    operations/index
@@ -28,14 +26,9 @@ Documentation
    license
    references
 
-Mailing List
-================================================================================
-
 The PROJ mailing list can be found at http://lists.maptools.org/mailman/listinfo/proj
 
-Indices and tables
-==================
+.. only:: html
 
-* :ref:`genindex`
-* :ref:`search`
+    See also :ref:`genindex`
 

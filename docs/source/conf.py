@@ -14,7 +14,6 @@
 
 import sys
 import os
-import datetime
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -49,8 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PROJ.4'
-now = datetime.datetime.now()
-copyright = u'1983-{0}'.format(now.year)
+copyright = u'1983-2018'
 author = u'Gerald Evenden, Frank Warmerdam, and others'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -58,7 +56,7 @@ author = u'Gerald Evenden, Frank Warmerdam, and others'
 # built documents.
 #
 # The short X.Y version.
-version = u'5.0.1'
+version = u'5.0'
 # The full version, including alpha/beta/rc tags.
 release = u'5.0.1'
 
@@ -71,7 +69,7 @@ release = u'5.0.1'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
-#today = ''
+today = 'April 2018'
 # Else, today_fmt is used as the format for a strftime call.
 #today_fmt = '%B %d, %Y'
 
@@ -96,6 +94,9 @@ exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
+
+# Specify default language for syntax highlighting.
+highlight_language = 'none'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -227,7 +228,7 @@ preamble = r"""
   \DeclareUnicodeCharacter{2032}{$'$}% prime
 \fi
 
-\usepackage[notbib]{tocbibind}
+\usepackage[notbib,notindex]{tocbibind}
 """
 
 latex_elements = {
@@ -250,7 +251,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'proj4.tex', u'PROJ.4 Documentation',
-     u'Gerald Evenden', 'manual'),
+     author, 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
