@@ -32,7 +32,7 @@ build:
       - ./docs/rtd/post_build.sh
 
   apt_packages:
-    - graphviz
+    - tree
 
 formats:
   - pdf
