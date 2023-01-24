@@ -15,12 +15,12 @@ esac
 
 TOPDIR="$(readlink -f $SCRIPT_DIR/..)"
 
-if ! (clang-format --version 2>/dev/null | grep 10 >/dev/null); then
-    echo "clang-format 10 not available. Running it from a Docker image";
-    docker build -t proj_clang_format -f "$TOPDIR"/scripts/proj_clang_format/Dockerfile "$TOPDIR"/scripts/proj_clang_format
+if ! (clang-format --version 2>/dev/null | grep 15 >/dev/null); then
+    echo "clang-format 15 not available. Running it from a Docker image";
+    docker pull silkeh/clang:15-bullseye
     UID=$(id -u "${USER}")
     GID=$(id -g "${USER}")
-    exec docker run --rm -u "$UID:$GID" -v "$TOPDIR":"$TOPDIR" proj_clang_format "$TOPDIR"/scripts/reformat_cpp.sh
+    exec docker run --rm -u "$UID:$GID" -v "$TOPDIR":"$TOPDIR" silkeh/clang:15-bullseye "$TOPDIR"/scripts/reformat_cpp.sh
 fi
 
 for i in `find "$TOPDIR" -name "*.h" -o -name "*.hpp" -o -name "*.cpp" -o -name "*.c"`; do
