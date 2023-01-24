@@ -15,7 +15,7 @@ esac
 
 TOPDIR="$(readlink -f $SCRIPT_DIR/..)"
 
-if ! (clang-format --version 2>/dev/null | grep 15 >/dev/null); then
+if ! (clang-format-15 --version 2>/dev/null); then
     echo "clang-format 15 not available. Running it from a Docker image";
     docker pull silkeh/clang:15-bullseye
     UID=$(id -u "${USER}")

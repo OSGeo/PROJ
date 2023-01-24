@@ -6,7 +6,7 @@ if test $(basename $1) = "nn.hpp"; then
     exit 0
 fi
 
-clang-format -style="{BasedOnStyle: llvm, IndentWidth: 4}"  $1 > $1.reformatted
+clang-format-15 -style="{BasedOnStyle: llvm, IndentWidth: 4}"  $1 > $1.reformatted
 if diff -u $1.reformatted $1; then
     # No reformatting: remove temporary file
     rm $1.reformatted
