@@ -21,4 +21,3 @@ dependencies:
     - sphinx < 3
     - sphinx-rtd-theme < 1.0
     - sphinxcontrib-bibtex
-    - sphinxcontrib-spelling
