@@ -43,12 +43,12 @@
 .. [Evenden1995] G. I. Evenden, 1995,
    `Cartograpic Projection Procedures for the UNIX Environment -
    A User's Manual
-   <https://github.com/OSGeo/proj.4/blob/master/docs/old/proj_4_3_12.pdf>`_.
+   <https://github.com/OSGeo/proj.4/blob/5.1/docs/old/proj_4_3_12.pdf>`_.
 
 .. [Evenden2005] G. I. Evenden, 2005,
    `libproj4: A Comprehensive Library of Cartographic Projection Functions
    (Preliminary Draft)
-   <https://github.com/OSGeo/proj.4/blob/master/docs/old/libproj.pdf>`_.
+   <https://github.com/OSGeo/proj.4/blob/5.1/docs/old/libproj.pdf>`_.
 
 .. [EversKnudsen2017] K. Evers and T. Knudsen, 2017,
     `Transformation pipelines for PROJ.4

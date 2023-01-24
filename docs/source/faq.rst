@@ -307,14 +307,14 @@ Output of above command:
 What options does PROJ allow for the shape of the Earth (geodesy)?
 --------------------------------------------------------------------------------
 
-See https://github.com/OSGeo/proj.4/blob/master/src/pj_ellps.c
+See https://github.com/OSGeo/proj.4/blob/5.1/src/pj_ellps.c
 for possible ellipse options. For example, putting ``+ellps=WGS84`` uses
 the ``WGS84`` Earth shape.
 
 What if I want a spherical Earth?
 --------------------------------------------------------------------------------
 
-Use ``+ellps=sphere``.  See https://github.com/OSGeo/proj.4/blob/master/src/pj_ellps.c
+Use ``+ellps=sphere``.  See https://github.com/OSGeo/proj.4/blob/5.1/src/pj_ellps.c
 for the radius used in this case.
 
 How do I change the radius of the Earth?  How do I use PROJ for work on Mars?
