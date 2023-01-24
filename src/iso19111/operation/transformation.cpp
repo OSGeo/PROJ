@@ -535,11 +535,10 @@ TransformationNNPtr Transformation::createGeocentricTranslations(
         properties, sourceCRSIn, targetCRSIn, nullptr,
         createMethodMapNameEPSGCode(useOperationMethodEPSGCodeIfPresent(
             properties,
-            isGeocentric
-                ? EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC
-                : isGeog2D
-                      ? EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D
-                      : EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D)),
+            isGeocentric ? EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC
+            : isGeog2D
+                ? EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D
+                : EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D)),
         VectorOfParameters{
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION),
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION),
@@ -594,10 +593,9 @@ TransformationNNPtr Transformation::createPositionVector(
         properties,
         createMethodMapNameEPSGCode(useOperationMethodEPSGCodeIfPresent(
             properties,
-            isGeocentric
-                ? EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC
-                : isGeog2D ? EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D
-                           : EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D)),
+            isGeocentric ? EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC
+            : isGeog2D   ? EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D
+                         : EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D)),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXArcSecond, rotationYArcSecond,
         rotationZArcSecond, scaleDifferencePPM, accuracies);
@@ -644,10 +642,9 @@ TransformationNNPtr Transformation::createCoordinateFrameRotation(
         properties,
         createMethodMapNameEPSGCode(useOperationMethodEPSGCodeIfPresent(
             properties,
-            isGeocentric
-                ? EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC
-                : isGeog2D ? EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D
-                           : EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D)),
+            isGeocentric ? EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC
+            : isGeog2D   ? EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D
+                         : EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D)),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXArcSecond, rotationYArcSecond,
         rotationZArcSecond, scaleDifferencePPM, accuracies);
@@ -791,9 +788,9 @@ TransformationNNPtr Transformation::createTimeDependentPositionVector(
             properties,
             isGeocentric
                 ? EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC
-                : isGeog2D
-                      ? EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D
-                      : EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D)),
+            : isGeog2D
+                ? EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D
+                : EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D)),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXArcSecond, rotationYArcSecond,
         rotationZArcSecond, scaleDifferencePPM, rateTranslationX,
@@ -870,9 +867,9 @@ TransformationNNPtr Transformation::createTimeDependentCoordinateFrameRotation(
             properties,
             isGeocentric
                 ? EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC
-                : isGeog2D
-                      ? EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D
-                      : EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D)),
+            : isGeog2D
+                ? EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D
+                : EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D)),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXArcSecond, rotationYArcSecond,
         rotationZArcSecond, scaleDifferencePPM, rateTranslationX,

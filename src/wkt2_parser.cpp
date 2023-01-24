@@ -75,7 +75,9 @@ typedef struct {
 } wkt2_tokens;
 
 #define PAIR(X)                                                                \
-    { #X, T_##X }
+    {                                                                          \
+#X, T_##X                                                              \
+    }
 
 static const wkt2_tokens tokens[] = {
     PAIR(PARAMETER),

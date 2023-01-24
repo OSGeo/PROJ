@@ -122,7 +122,9 @@ static PJ_LP ortho_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             break;
         }
         lp.lam = (xy.y == 0. && (Q->mode == OBLIQ || Q->mode == EQUIT))
-                     ? (xy.x == 0. ? 0. : xy.x < 0. ? -M_HALFPI : M_HALFPI)
+                     ? (xy.x == 0.  ? 0.
+                        : xy.x < 0. ? -M_HALFPI
+                                    : M_HALFPI)
                      : atan2(xy.x, xy.y);
     }
     return lp;

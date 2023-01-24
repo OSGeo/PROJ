@@ -73,7 +73,9 @@ typedef struct {
 } osr_cs_wkt_tokens;
 
 #define PAIR(X)                                                                \
-    { #X, T_##X }
+    {                                                                          \
+#X, T_##X                                                              \
+    }
 
 static const osr_cs_wkt_tokens tokens[] = {
     PAIR(PARAM_MT),       PAIR(PARAMETER),  PAIR(CONCAT_MT),   PAIR(INVERSE_MT),

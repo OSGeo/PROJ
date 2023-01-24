@@ -681,9 +681,9 @@ PJ *TRANSFORMATION(helmert, 0) {
                        Q->opk.k / ARCSEC_TO_RAD);
         proj_log_trace(P, "s=  %8.5f  exact=%d%s", Q->scale, Q->exact,
                        Q->no_rotation ? ""
-                                      : Q->is_position_vector
-                                            ? "  convention=position_vector"
-                                            : "  convention=coordinate_frame");
+                       : Q->is_position_vector
+                           ? "  convention=position_vector"
+                           : "  convention=coordinate_frame");
         proj_log_trace(P, "dx= %8.5f  dy= %8.5f  dz= %8.5f", Q->dxyz.x,
                        Q->dxyz.y, Q->dxyz.z);
         proj_log_trace(P, "drx=%8.5f  dry=%8.5f  drz=%8.5f", Q->dopk.o,

@@ -10195,14 +10195,13 @@ TEST(io, projparse_longlat_axisswap) {
                 ASSERT_TRUE(op != nullptr);
                 EXPECT_EQ(
                     op->exportToPROJString(PROJStringFormatter::create().get()),
-                    (atoi(order1) == 2 && atoi(order2) == 1)
-                        ? "+proj=noop"
-                        : (atoi(order1) == 2 && atoi(order2) == -1)
-                              ? "+proj=axisswap +order=1,-2"
-                              : "+proj=pipeline +step +proj=axisswap "
-                                "+order=2,1 "
-                                "+step +proj=axisswap +order=" +
-                                    std::string(order1) + "," + order2);
+                    (atoi(order1) == 2 && atoi(order2) == 1) ? "+proj=noop"
+                    : (atoi(order1) == 2 && atoi(order2) == -1)
+                        ? "+proj=axisswap +order=1,-2"
+                        : "+proj=pipeline +step +proj=axisswap "
+                          "+order=2,1 "
+                          "+step +proj=axisswap +order=" +
+                              std::string(order1) + "," + order2);
             }
         }
     }

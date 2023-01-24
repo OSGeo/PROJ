@@ -3340,15 +3340,13 @@ static UnitOfMeasure createLinearUnit(const char *name, double convFactor,
 static UnitOfMeasure createAngularUnit(const char *name, double convFactor,
                                        const char *unit_auth_name = nullptr,
                                        const char *unit_code = nullptr) {
-    return name ? (ci_equal(name, "degree")
-                       ? UnitOfMeasure::DEGREE
-                       : ci_equal(name, "grad")
-                             ? UnitOfMeasure::GRAD
-                             : UnitOfMeasure(name, convFactor,
-                                             UnitOfMeasure::Type::ANGULAR,
-                                             unit_auth_name ? unit_auth_name
-                                                            : "",
-                                             unit_code ? unit_code : ""))
+    return name ? (ci_equal(name, "degree") ? UnitOfMeasure::DEGREE
+                   : ci_equal(name, "grad")
+                       ? UnitOfMeasure::GRAD
+                       : UnitOfMeasure(name, convFactor,
+                                       UnitOfMeasure::Type::ANGULAR,
+                                       unit_auth_name ? unit_auth_name : "",
+                                       unit_code ? unit_code : ""))
                 : UnitOfMeasure::DEGREE;
 }
 
@@ -3373,14 +3371,12 @@ static GeodeticReferenceFrameNNPtr createGeodeticReferenceFrame(
     auto pm = PrimeMeridian::create(
         PropertyMap().set(
             common::IdentifiedObject::NAME_KEY,
-            prime_meridian_name
-                ? prime_meridian_name
-                : prime_meridian_offset == 0.0
-                      ? (ellps->celestialBody() == Ellipsoid::EARTH
-                             ? PrimeMeridian::GREENWICH->nameStr().c_str()
-                             : PrimeMeridian::REFERENCE_MERIDIAN->nameStr()
-                                   .c_str())
-                      : "unnamed"),
+            prime_meridian_name ? prime_meridian_name
+            : prime_meridian_offset == 0.0
+                ? (ellps->celestialBody() == Ellipsoid::EARTH
+                       ? PrimeMeridian::GREENWICH->nameStr().c_str()
+                       : PrimeMeridian::REFERENCE_MERIDIAN->nameStr().c_str())
+                : "unnamed"),
         Angle(prime_meridian_offset, angUnit));
 
     std::string datumName(datum_name ? datum_name : "unnamed");
@@ -4403,12 +4399,12 @@ static void setSingleOperationElements(
             params[i].unit_type == PJ_UT_ANGULAR
                 ? createAngularUnit(params[i].unit_name,
                                     params[i].unit_conv_factor)
-                : params[i].unit_type == PJ_UT_LINEAR
-                      ? createLinearUnit(params[i].unit_name,
-                                         params[i].unit_conv_factor)
-                      : UnitOfMeasure(params[i].unit_name ? params[i].unit_name
-                                                          : "unnamed",
-                                      params[i].unit_conv_factor, unit_type));
+            : params[i].unit_type == PJ_UT_LINEAR
+                ? createLinearUnit(params[i].unit_name,
+                                   params[i].unit_conv_factor)
+                : UnitOfMeasure(params[i].unit_name ? params[i].unit_name
+                                                    : "unnamed",
+                                params[i].unit_conv_factor, unit_type));
         values.emplace_back(ParameterValue::create(measure));
     }
 }
@@ -4655,13 +4651,12 @@ static CoordinateSystemAxisNNPtr createAxis(const PJ_AXIS_DESCRIPTION &axis) {
         unit_type = UnitOfMeasure::Type::PARAMETRIC;
         break;
     }
-    auto unit =
-        axis.unit_type == PJ_UT_ANGULAR
-            ? createAngularUnit(axis.unit_name, axis.unit_conv_factor)
-            : axis.unit_type == PJ_UT_LINEAR
-                  ? createLinearUnit(axis.unit_name, axis.unit_conv_factor)
-                  : UnitOfMeasure(axis.unit_name ? axis.unit_name : "unnamed",
-                                  axis.unit_conv_factor, unit_type);
+    auto unit = axis.unit_type == PJ_UT_ANGULAR
+                    ? createAngularUnit(axis.unit_name, axis.unit_conv_factor)
+                : axis.unit_type == PJ_UT_LINEAR
+                    ? createLinearUnit(axis.unit_name, axis.unit_conv_factor)
+                    : UnitOfMeasure(axis.unit_name ? axis.unit_name : "unnamed",
+                                    axis.unit_conv_factor, unit_type);
 
     return CoordinateSystemAxis::create(
         createPropertyMapName(axis.name),
@@ -8418,20 +8413,19 @@ proj_create_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
     try {
         auto factory = CoordinateOperationFactory::create();
         std::vector<IdentifiedObjectNNPtr> objects;
-        auto ops =
-            sourceCoordinateMetadata != nullptr
-                ? factory->createOperations(
-                      NN_NO_CHECK(sourceCoordinateMetadata),
-                      NN_NO_CHECK(targetCRS),
-                      operationContext->operationContext)
-                : targetCoordinateMetadata != nullptr
-                      ? factory->createOperations(
-                            NN_NO_CHECK(sourceCRS),
-                            NN_NO_CHECK(targetCoordinateMetadata),
-                            operationContext->operationContext)
-                      : factory->createOperations(
-                            NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS),
-                            operationContext->operationContext);
+        auto ops = sourceCoordinateMetadata != nullptr
+                       ? factory->createOperations(
+                             NN_NO_CHECK(sourceCoordinateMetadata),
+                             NN_NO_CHECK(targetCRS),
+                             operationContext->operationContext)
+                   : targetCoordinateMetadata != nullptr
+                       ? factory->createOperations(
+                             NN_NO_CHECK(sourceCRS),
+                             NN_NO_CHECK(targetCoordinateMetadata),
+                             operationContext->operationContext)
+                       : factory->createOperations(
+                             NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS),
+                             operationContext->operationContext);
         for (const auto &op : ops) {
             objects.emplace_back(op);
         }
