@@ -32,7 +32,13 @@ build:
       - ./docs/rtd/post_build.sh
 
   apt_packages:
-    - tree
+    - cmake
+    - ninja-build
+    - g++
+    - sqlite3
+    - libsqlite3-dev
+    - libtiff-dev
+    - libcurl4-openssl-dev
 
 formats:
   - pdf
