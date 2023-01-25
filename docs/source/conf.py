@@ -177,7 +177,6 @@ html_context = {
     'theme_vcs_pageview_mode': 'edit',
     'github_user': 'OSGeo',
     'github_repo': 'PROJ',
-    # TODO: edit when switching active branch
     'github_version': '/6.2/docs/source/',
 }
 
