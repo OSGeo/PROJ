@@ -1,10 +1,8 @@
 #!/bin/sh
 set -e
 
-CONDA_PREFIX="/home/docs/checkouts/readthedocs.org/user_builds/$READTHEDOCS_PROJECT/conda/$READTHEDOCS_VERSION"
-
-export PATH="$CONDA_PREFIX/bin:$PATH"
-export PROJ_DATA="$CONDA_PREFIX/share/proj"
+export PATH="$HOME/.local/bin:$PATH"
+export PROJ_DATA="$HOME/.local/share/proj"
 
 cd docs/plot
 python plot.py plotdefs.json images
