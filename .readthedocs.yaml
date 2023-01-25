@@ -19,7 +19,7 @@ build:
       # If there are no changes (git diff exits with 0) we force the command to return with 183.
       # This is a special exit code on Read the Docs that will cancel the build immediately.
       - |
-        if [ "$READTHEDOCS_VERSION_TYPE" = "external" ] && git diff --quiet origin/main -- docs/ .readthedocs.yaml;
+        if [ "$READTHEDOCS_VERSION_TYPE" = "external" ] && git diff --quiet origin/7.0 -- docs/ .readthedocs.yaml;
         then
           exit 183;
         fi
@@ -32,7 +32,13 @@ build:
       - ./docs/rtd/post_build.sh
 
   apt_packages:
-    - graphviz
+    - cmake
+    - ninja-build
+    - g++
+    - sqlite3
+    - libsqlite3-dev
+    - libtiff-dev
+    - libcurl4-openssl-dev
 
 formats:
   - pdf
