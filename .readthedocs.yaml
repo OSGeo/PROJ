@@ -19,11 +19,11 @@ build:
       # If there are no changes (git diff exits with 0) we force the command to return with 183.
       # This is a special exit code on Read the Docs that will cancel the build immediately.
       - |
-        if [ "$READTHEDOCS_VERSION_TYPE" = "external" ] && git diff --quiet origin/main -- docs/ .readthedocs.yaml;
+        if [ "$READTHEDOCS_VERSION_TYPE" = "external" ] && git diff --quiet origin/9.0 -- docs/ .readthedocs.yaml;
         then
           exit 183;
         fi
-      - (git --no-pager log --pretty="tformat:%s -- %b" -1 | grep -viq "skip ci") || exit 183
+      - (git --no-pager log --pretty="tformat:%s -- %b" -1 | grep -viqP "skip ci|ci skip") || exit 183
     pre_build:
       - ./docs/rtd/pre_build.sh
       - ./scripts/doxygen.sh
