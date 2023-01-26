@@ -2172,8 +2172,8 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                              ? ((formatter->use2019Keywords() && isGeographic)
                                     ? io::WKTConstants::GEOGCRS
                                     : io::WKTConstants::GEODCRS)
-                             : isGeocentric() ? io::WKTConstants::GEOCCS
-                                              : io::WKTConstants::GEOGCS,
+                         : isGeocentric() ? io::WKTConstants::GEOCCS
+                                          : io::WKTConstants::GEOGCS,
                          !l_identifiers.empty());
 
     if (isESRIExport) {
@@ -3483,9 +3483,9 @@ VerticalCRS::datumNonNull(const io::DatabaseContextPtr &dbContext) const {
 void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(isWKT2 ? io::WKTConstants::VERTCRS
-                                : formatter->useESRIDialect()
-                                      ? io::WKTConstants::VERTCS
-                                      : io::WKTConstants::VERT_CS,
+                         : formatter->useESRIDialect()
+                             ? io::WKTConstants::VERTCS
+                             : io::WKTConstants::VERT_CS,
                          !identifiers().empty());
 
     auto l_name = nameStr();
@@ -4766,10 +4766,10 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
     auto computeConfidence = [&thisName](const std::string &crsName) {
         return crsName == thisName ? 100
-                                   : metadata::Identifier::isEquivalentName(
-                                         crsName.c_str(), thisName.c_str())
-                                         ? 90
-                                         : 70;
+               : metadata::Identifier::isEquivalentName(crsName.c_str(),
+                                                        thisName.c_str())
+                   ? 90
+                   : 70;
     };
 
     const auto &conv = derivingConversionRef();
@@ -5617,7 +5617,8 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 res.emplace_back(
                     newCRS,
                     std::min(thisName == newCRS->nameStr() ? 100
-                                                           : eqName ? 90 : 70,
+                             : eqName                      ? 90
+                                                           : 70,
                              std::min(candidatesHorizCRS.front().second,
                                       candidatesVertCRS.front().second)));
             }

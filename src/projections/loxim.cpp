@@ -18,10 +18,9 @@ struct pj_opaque {
 };
 } // anonymous namespace
 
-
-static PJ_XY loxim_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
-    PJ_XY xy = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_XY loxim_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
 
     xy.y = lp.phi - Q->phi1;
     if (fabs(xy.y) < EPS)
@@ -31,15 +30,14 @@ static PJ_XY loxim_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         if (fabs(xy.x) < EPS || fabs(fabs(xy.x) - M_HALFPI) < EPS)
             xy.x = 0.;
         else
-            xy.x = lp.lam * xy.y / log( tan(xy.x) / Q->tanphi1 );
+            xy.x = lp.lam * xy.y / log(tan(xy.x) / Q->tanphi1);
     }
     return xy;
 }
 
-
-static PJ_LP loxim_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
-    PJ_LP lp = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_LP loxim_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
 
     lp.phi = xy.y + Q->phi1;
     if (fabs(xy.y) < EPS) {
@@ -49,23 +47,23 @@ static PJ_LP loxim_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         if (fabs(lp.lam) < EPS || fabs(fabs(lp.lam) - M_HALFPI) < EPS)
             lp.lam = 0.;
         else
-            lp.lam = xy.x * log( tan(lp.lam) / Q->tanphi1 ) / xy.y ;
+            lp.lam = xy.x * log(tan(lp.lam) / Q->tanphi1) / xy.y;
     }
     return lp;
 }
 
-
 PJ *PROJECTION(loxim) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     Q->cosphi1 = cos(Q->phi1);
-    if (Q->cosphi1 < EPS)
-    {
-        proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be < 90°"));
+    if (Q->cosphi1 < EPS) {
+        proj_log_error(P,
+                       _("Invalid value for lat_1: |lat_1| should be < 90°"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
@@ -75,5 +73,5 @@ PJ *PROJECTION(loxim) {
     P->fwd = loxim_s_forward;
     P->es = 0.;
 
-   return P;
+    return P;
 }

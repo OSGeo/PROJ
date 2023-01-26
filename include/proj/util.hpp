@@ -130,11 +130,11 @@ namespace proj {}
 // to be able to call make_shared on a protected/private constructor
 #define INLINED_MAKE_SHARED                                                    \
     template <typename T, typename... Args>                                    \
-    static std::shared_ptr<T> make_shared(Args &&... args) {                   \
+    static std::shared_ptr<T> make_shared(Args &&...args) {                    \
         return std::shared_ptr<T>(new T(std::forward<Args>(args)...));         \
     }                                                                          \
     template <typename T, typename... Args>                                    \
-    static util::nn_shared_ptr<T> nn_make_shared(Args &&... args) {            \
+    static util::nn_shared_ptr<T> nn_make_shared(Args &&...args) {             \
         return util::nn_shared_ptr<T>(                                         \
             util::i_promise_i_checked_for_null,                                \
             std::shared_ptr<T>(new T(std::forward<Args>(args)...)));           \
@@ -144,7 +144,7 @@ namespace proj {}
 // to be able to call make_unique on a protected/private constructor
 #define INLINED_MAKE_UNIQUE                                                    \
     template <typename T, typename... Args>                                    \
-    static std::unique_ptr<T> make_unique(Args &&... args) {                   \
+    static std::unique_ptr<T> make_unique(Args &&...args) {                    \
         return std::unique_ptr<T>(new T(std::forward<Args>(args)...));         \
     }
 

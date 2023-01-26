@@ -2023,26 +2023,20 @@ TEST(operation, eckert_export) {
 
     for (int i = 1; i <= 6; i++) {
         auto conv =
-            (i == 1)
-                ? Conversion::createEckertI(PropertyMap(), Angle(1), Length(2),
-                                            Length(3))
-                : (i == 2)
-                      ? Conversion::createEckertII(PropertyMap(), Angle(1),
+            (i == 1)   ? Conversion::createEckertI(PropertyMap(), Angle(1),
                                                    Length(2), Length(3))
-                      : (i == 3)
-                            ? Conversion::createEckertIII(
-                                  PropertyMap(), Angle(1), Length(2), Length(3))
-                            : (i == 4) ? Conversion::createEckertIV(
-                                             PropertyMap(), Angle(1), Length(2),
-                                             Length(3))
-                                       : (i == 5) ? Conversion::createEckertV(
-                                                        PropertyMap(), Angle(1),
-                                                        Length(2), Length(3))
-                                                  :
+            : (i == 2) ? Conversion::createEckertII(PropertyMap(), Angle(1),
+                                                    Length(2), Length(3))
+            : (i == 3) ? Conversion::createEckertIII(PropertyMap(), Angle(1),
+                                                     Length(2), Length(3))
+            : (i == 4) ? Conversion::createEckertIV(PropertyMap(), Angle(1),
+                                                    Length(2), Length(3))
+            : (i == 5) ? Conversion::createEckertV(PropertyMap(), Angle(1),
+                                                   Length(2), Length(3))
+                       :
 
-                                                  Conversion::createEckertVI(
-                                                      PropertyMap(), Angle(1),
-                                                      Length(2), Length(3));
+                       Conversion::createEckertVI(PropertyMap(), Angle(1),
+                                                  Length(2), Length(3));
 
         EXPECT_TRUE(conv->validateParameters().empty());
 
@@ -3885,28 +3879,22 @@ TEST(operation, wagner_export) {
         if (i == 3)
             continue;
         auto conv =
-            (i == 1)
-                ? Conversion::createWagnerI(PropertyMap(), Angle(1), Length(2),
-                                            Length(3))
-                : (i == 2)
-                      ? Conversion::createWagnerII(PropertyMap(), Angle(1),
+            (i == 1)   ? Conversion::createWagnerI(PropertyMap(), Angle(1),
                                                    Length(2), Length(3))
-                      : (i == 4)
-                            ? Conversion::createWagnerIV(
-                                  PropertyMap(), Angle(1), Length(2), Length(3))
-                            : (i == 5) ? Conversion::createWagnerV(
-                                             PropertyMap(), Angle(1), Length(2),
-                                             Length(3))
-                                       : (i == 6) ?
+            : (i == 2) ? Conversion::createWagnerII(PropertyMap(), Angle(1),
+                                                    Length(2), Length(3))
+            : (i == 4) ? Conversion::createWagnerIV(PropertyMap(), Angle(1),
+                                                    Length(2), Length(3))
+            : (i == 5) ? Conversion::createWagnerV(PropertyMap(), Angle(1),
+                                                   Length(2), Length(3))
+            : (i == 6) ?
 
-                                                  Conversion::createWagnerVI(
-                                                      PropertyMap(), Angle(1),
-                                                      Length(2), Length(3))
-                                                  :
+                       Conversion::createWagnerVI(PropertyMap(), Angle(1),
+                                                  Length(2), Length(3))
+                       :
 
-                                                  Conversion::createWagnerVII(
-                                                      PropertyMap(), Angle(1),
-                                                      Length(2), Length(3));
+                       Conversion::createWagnerVII(PropertyMap(), Angle(1),
+                                                   Length(2), Length(3));
         EXPECT_TRUE(conv->validateParameters().empty());
 
         EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),

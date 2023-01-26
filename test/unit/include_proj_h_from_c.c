@@ -29,7 +29,4 @@
 #include "proj.h"
 #include "proj_experimental.h"
 
-int main()
-{
-    return 0;
-}
+int main() { return 0; }

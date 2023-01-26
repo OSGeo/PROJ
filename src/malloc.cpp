@@ -51,46 +51,41 @@
 
 #include "proj/internal/io_internal.hpp"
 
+#include "filemanager.hpp"
+#include "grids.hpp"
 #include "proj.h"
 #include "proj_internal.h"
-#include "grids.hpp"
-#include "filemanager.hpp"
 
 using namespace NS_PROJ;
-
 
 /**********************************************************************/
 char *pj_strdup(const char *str)
 /**********************************************************************/
 {
     size_t len = strlen(str) + 1;
-    char *dup = static_cast<char*>(malloc(len));
+    char *dup = static_cast<char *>(malloc(len));
     if (dup)
         memcpy(dup, str, len);
     return dup;
 }
 
-
 /*****************************************************************************/
-void *free_params (PJ_CONTEXT *ctx, paralist *start, int errlev) {
-/*****************************************************************************
-    Companion to pj_default_destructor (below). Deallocates a linked list
-    of "+proj=xxx" initialization parameters.
+void *free_params(PJ_CONTEXT *ctx, paralist *start, int errlev) {
+    /*****************************************************************************
+        Companion to pj_default_destructor (below). Deallocates a linked list
+        of "+proj=xxx" initialization parameters.
 
-    Also called from pj_init_ctx when encountering errors before the PJ
-    proper is allocated.
-******************************************************************************/
+        Also called from pj_init_ctx when encountering errors before the PJ
+        proper is allocated.
+    ******************************************************************************/
     paralist *t, *n;
     for (t = start; t; t = n) {
         n = t->next;
         free(t);
     }
-    proj_context_errno_set (ctx, errlev);
-    return (void *) nullptr;
+    proj_context_errno_set(ctx, errlev);
+    return (void *)nullptr;
 }
-
-
-
 
 /************************************************************************/
 /*                         proj_destroy()                               */
@@ -103,54 +98,52 @@ void *free_params (PJ_CONTEXT *ctx, paralist *start, int errlev) {
 /************************************************************************/
 
 PJ *proj_destroy(PJ *P) {
-    if (nullptr==P || !P->destructor)
+    if (nullptr == P || !P->destructor)
         return nullptr;
     /* free projection parameters - all the hard work is done by */
     /* pj_default_destructor, which is supposed */
     /* to be called as the last step of the local destructor     */
     /* pointed to by P->destructor. In most cases,               */
     /* pj_default_destructor actually *is* what is pointed to    */
-    P->destructor (P, proj_errno(P));
+    P->destructor(P, proj_errno(P));
     return nullptr;
 }
 
 /*****************************************************************************/
 // cppcheck-suppress uninitMemberVar
-PJconsts::PJconsts(): destructor(pj_default_destructor) {}
+PJconsts::PJconsts() : destructor(pj_default_destructor) {}
 /*****************************************************************************/
 
 /*****************************************************************************/
 PJ *pj_new() {
-/*****************************************************************************/
-    return new(std::nothrow) PJ();
+    /*****************************************************************************/
+    return new (std::nothrow) PJ();
 }
 
-
 /*****************************************************************************/
-PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
-/*****************************************************************************
-    Does memory deallocation for "plain" PJ objects, i.e. that vast majority
-    of PJs where the opaque object does not contain any additionally
-    allocated memory below the P->opaque level.
-******************************************************************************/
+PJ *pj_default_destructor(PJ *P, int errlev) { /* Destructor */
+    /*****************************************************************************
+        Does memory deallocation for "plain" PJ objects, i.e. that vast majority
+        of PJs where the opaque object does not contain any additionally
+        allocated memory below the P->opaque level.
+    ******************************************************************************/
 
     /* Even if P==0, we set the errlev on pj_error and the default context   */
     /* Note that both, in the multithreaded case, may then contain undefined */
     /* values. This is expected behavior. For MT have one ctx per thread    */
-    if (0!=errlev)
-        proj_context_errno_set (pj_get_ctx(P), errlev);
+    if (0 != errlev)
+        proj_context_errno_set(pj_get_ctx(P), errlev);
 
-    if (nullptr==P)
+    if (nullptr == P)
         return nullptr;
-
 
     free(P->def_size);
     free(P->def_shape);
     free(P->def_spherification);
     free(P->def_ellps);
 
-    delete static_cast<ListOfHGrids*>(P->hgrids_legacy);
-    delete static_cast<ListOfVGrids*>(P->vgrids_legacy);
+    delete static_cast<ListOfHGrids *>(P->hgrids_legacy);
+    delete static_cast<ListOfVGrids *>(P->vgrids_legacy);
 
     /* We used to call free( P->catalog ), but this will leak */
     /* memory. The safe way to clear catalog and grid is to call */
@@ -159,41 +152,41 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
     /* that */
 
     /* free the interface to Charles Karney's geodesic library */
-    free( P->geod );
+    free(P->geod);
 
     /* free parameter list elements */
-    free_params (pj_get_ctx(P), P->params, errlev);
-    free (P->def_full);
+    free_params(pj_get_ctx(P), P->params, errlev);
+    free(P->def_full);
 
     /* free the cs2cs emulation elements */
-    proj_destroy (P->axisswap);
-    proj_destroy (P->helmert);
-    proj_destroy (P->cart);
-    proj_destroy (P->cart_wgs84);
-    proj_destroy (P->hgridshift);
-    proj_destroy (P->vgridshift);
+    proj_destroy(P->axisswap);
+    proj_destroy(P->helmert);
+    proj_destroy(P->cart);
+    proj_destroy(P->cart_wgs84);
+    proj_destroy(P->hgridshift);
+    proj_destroy(P->vgridshift);
 
-    free (static_cast<struct pj_opaque*>(P->opaque));
+    free(static_cast<struct pj_opaque *>(P->opaque));
     delete P;
     return nullptr;
 }
 
 /*****************************************************************************/
 void proj_cleanup() {
-/*****************************************************************************/
+    /*****************************************************************************/
 
-  // Close the database context of the default PJ_CONTEXT
-  auto ctx = pj_get_default_ctx();
-  ctx->iniFileLoaded = false;
-  auto cpp_context = ctx->cpp_context;
-  if( cpp_context ) {
-      cpp_context->closeDb();
-  }
+    // Close the database context of the default PJ_CONTEXT
+    auto ctx = pj_get_default_ctx();
+    ctx->iniFileLoaded = false;
+    auto cpp_context = ctx->cpp_context;
+    if (cpp_context) {
+        cpp_context->closeDb();
+    }
 
-  pj_clear_initcache();
-  FileManager::clearMemoryCache();
-  pj_clear_hgridshift_knowngrids_cache();
-  pj_clear_vgridshift_knowngrids_cache();
-  pj_clear_gridshift_knowngrids_cache();
-  pj_clear_sqlite_cache();
+    pj_clear_initcache();
+    FileManager::clearMemoryCache();
+    pj_clear_hgridshift_knowngrids_cache();
+    pj_clear_vgridshift_knowngrids_cache();
+    pj_clear_gridshift_knowngrids_cache();
+    pj_clear_sqlite_cache();
 }

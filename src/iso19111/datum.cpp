@@ -2137,9 +2137,9 @@ void VerticalReferenceFrame::_exportToWKT(
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(isWKT2 ? io::WKTConstants::VDATUM
-                                : formatter->useESRIDialect()
-                                      ? io::WKTConstants::VDATUM
-                                      : io::WKTConstants::VERT_DATUM,
+                         : formatter->useESRIDialect()
+                             ? io::WKTConstants::VDATUM
+                             : io::WKTConstants::VERT_DATUM,
                          !identifiers().empty());
     auto l_name = nameStr();
     if (!l_name.empty()) {

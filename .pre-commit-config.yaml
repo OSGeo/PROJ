@@ -1,0 +1,22 @@
+repos:
+    -   repo: https://github.com/pre-commit/mirrors-clang-format
+        rev: 'v15.0.4'
+        hooks:
+        -   id: clang-format
+            exclude: >
+              (?x)^(
+                data/|
+                schemas/|
+                docs/|
+                include/proj/nn.hpp|
+                include/proj/internal/lru_cache.hpp|
+                include/proj/internal/vendor/nlohmann/json.hpp|
+                src/wkt1_generated_parser.c|
+                src/wkt1_generated_parser.h|
+                src/wkt2_generated_parser.c|
+                src/wkt2_generated_parser.h|
+                src/geodesic.c|
+                src/geodesic.h|
+                src/tests/geodtest.c|
+                src/tests/geodsigntest.c
+              )

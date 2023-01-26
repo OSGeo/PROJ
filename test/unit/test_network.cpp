@@ -1816,11 +1816,10 @@ TEST(networking, file_api) {
                       PROJ_OPEN_ACCESS access,
                       void *user_data) -> PROJ_FILE_HANDLE * {
         static_cast<UserData *>(user_data)->in_open = true;
-        return reinterpret_cast<PROJ_FILE_HANDLE *>(fopen(
-            filename,
-            access == PROJ_OPEN_ACCESS_READ_ONLY
-                ? "rb"
-                : access == PROJ_OPEN_ACCESS_READ_UPDATE ? "r+b" : "w+b"));
+        return reinterpret_cast<PROJ_FILE_HANDLE *>(
+            fopen(filename, access == PROJ_OPEN_ACCESS_READ_ONLY     ? "rb"
+                            : access == PROJ_OPEN_ACCESS_READ_UPDATE ? "r+b"
+                                                                     : "w+b"));
     };
     api.read_cbk = [](PJ_CONTEXT *, PROJ_FILE_HANDLE *handle, void *buffer,
                       size_t sizeBytes, void *user_data) -> size_t {

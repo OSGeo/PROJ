@@ -37,61 +37,65 @@
 #include <cmath>
 #include <cstdlib>
 
-static ::testing::AssertionResult ComparePROJString(const char* m_expr,
-                                                    const char* n_expr,
-                                                    const std::string& m,
-                                                    const std::string& n) {
-    //if (m == n) return ::testing::AssertionSuccess();
+static ::testing::AssertionResult ComparePROJString(const char *m_expr,
+                                                    const char *n_expr,
+                                                    const std::string &m,
+                                                    const std::string &n) {
+    // if (m == n) return ::testing::AssertionSuccess();
     auto mTokens = osgeo::proj::internal::split(m, ' ');
     auto nTokens = osgeo::proj::internal::split(n, ' ');
-    if( mTokens.size() == nTokens.size() )
-    {
+    if (mTokens.size() == nTokens.size()) {
         bool success = true;
-        for( size_t i = 0; i < mTokens.size(); i++ )
-        {
+        for (size_t i = 0; i < mTokens.size(); i++) {
             auto mSubTokens = osgeo::proj::internal::split(mTokens[i], '=');
             auto nSubTokens = osgeo::proj::internal::split(nTokens[i], '=');
-            if( mSubTokens.size() != nSubTokens.size() ) {
+            if (mSubTokens.size() != nSubTokens.size()) {
                 success = false;
                 break;
             }
-            if( mSubTokens.size() == 2 && nSubTokens.size() == 2 ) {
-                if( mSubTokens[0] != nSubTokens[0] ) {
+            if (mSubTokens.size() == 2 && nSubTokens.size() == 2) {
+                if (mSubTokens[0] != nSubTokens[0]) {
                     success = false;
                     break;
                 }
                 double mValue = 0.0;
                 bool mIsDouble = false;
                 try {
-                    mValue = osgeo::proj::internal::c_locale_stod(mSubTokens[1]);
+                    mValue =
+                        osgeo::proj::internal::c_locale_stod(mSubTokens[1]);
                     mIsDouble = true;
-                } catch( const std::exception &) {}
+                } catch (const std::exception &) {
+                }
                 double nValue = 0.0;
                 bool nIsDouble = false;
                 try {
-                    nValue = osgeo::proj::internal::c_locale_stod(nSubTokens[1]);
+                    nValue =
+                        osgeo::proj::internal::c_locale_stod(nSubTokens[1]);
                     nIsDouble = true;
-                } catch( const std::exception &) {}
-                if( mIsDouble != nIsDouble ) {
+                } catch (const std::exception &) {
+                }
+                if (mIsDouble != nIsDouble) {
                     success = false;
                     break;
                 }
-                if( mIsDouble ) {
-                    success = std::abs(mValue - nValue) <= 1e-14 * std::abs(mValue);
+                if (mIsDouble) {
+                    success =
+                        std::abs(mValue - nValue) <= 1e-14 * std::abs(mValue);
                 } else {
                     success = mSubTokens[1] == nSubTokens[1];
                 }
-                if( !success ) {
+                if (!success) {
                     break;
                 }
             }
         }
 
-        if( success ) {
+        if (success) {
             return ::testing::AssertionSuccess();
         }
     }
 
-    return ::testing::AssertionFailure() << m_expr << " and " << n_expr
-        << " (" << m << " and " << n << ") are different";
+    return ::testing::AssertionFailure()
+           << m_expr << " and " << n_expr << " (" << m << " and " << n
+           << ") are different";
 }

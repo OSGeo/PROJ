@@ -597,7 +597,7 @@ class PROJ_GCC_DLL IJSONExportable {
         PROJ_INTERNAL virtual void
         _exportToJSON(
             JSONFormatter *formatter) const = 0; // throw(FormattingException)
-    //! @endcond
+                                                 //! @endcond
 };
 
 // ---------------------------------------------------------------------------
@@ -650,7 +650,7 @@ class PROJ_GCC_DLL IWKTExportable {
         PROJ_INTERNAL virtual void
         _exportToWKT(
             WKTFormatter *formatter) const = 0; // throw(FormattingException)
-    //! @endcond
+                                                //! @endcond
 };
 
 // ---------------------------------------------------------------------------
@@ -716,7 +716,7 @@ class PROJ_GCC_DLL IPROJStringExportable {
         PROJ_INTERNAL virtual void
         _exportToPROJString(PROJStringFormatter *formatter)
             const = 0; // throw(FormattingException)
-    //! @endcond
+                       //! @endcond
 };
 
 // ---------------------------------------------------------------------------

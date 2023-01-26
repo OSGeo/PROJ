@@ -17,31 +17,28 @@ struct pj_opaque {
 };
 } // anonymous namespace
 
-
-static PJ_XY eck3_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
-    PJ_XY xy = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_XY eck3_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
 
     xy.y = Q->C_y * lp.phi;
     xy.x = Q->C_x * lp.lam * (Q->A + asqrt(1. - Q->B * lp.phi * lp.phi));
     return xy;
 }
 
-
-static PJ_LP eck3_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
-    PJ_LP lp = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_LP eck3_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double denominator;
 
     lp.phi = xy.y / Q->C_y;
     denominator = (Q->C_x * (Q->A + asqrt(1. - Q->B * lp.phi * lp.phi)));
-    if ( denominator == 0.0)
+    if (denominator == 0.0)
         lp.lam = HUGE_VAL;
     else
         lp.lam = xy.x / denominator;
     return lp;
 }
-
 
 static PJ *setup(PJ *P) {
     P->es = 0.;
@@ -50,11 +47,11 @@ static PJ *setup(PJ *P) {
     return P;
 }
 
-
 PJ *PROJECTION(eck3) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->C_x = 0.42223820031577120149;
@@ -65,11 +62,11 @@ PJ *PROJECTION(eck3) {
     return setup(P);
 }
 
-
 PJ *PROJECTION(kav7) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     /* Defined twice in original code - Using 0.866...,
@@ -83,11 +80,11 @@ PJ *PROJECTION(kav7) {
     return setup(P);
 }
 
-
 PJ *PROJECTION(wag6) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->C_x = 0.94745;
@@ -98,11 +95,11 @@ PJ *PROJECTION(wag6) {
     return setup(P);
 }
 
-
 PJ *PROJECTION(putp1) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->C_x = 1.89490;

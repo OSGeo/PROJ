@@ -13,39 +13,47 @@ case $SCRIPT_DIR in
         ;;
 esac
 
-TOPDIR="$SCRIPT_DIR/.."
+TOPDIR="$(readlink -f $SCRIPT_DIR/..)"
 
-if ! (clang-format --version 2>/dev/null | grep 10 >/dev/null); then
-    echo "clang-format 10 not available. Running it from a Docker image";
-    docker build -t proj_clang_format -f "$TOPDIR"/scripts/proj_clang_format/Dockerfile "$TOPDIR"/scripts/proj_clang_format
+if ! (clang-format-15 --version 2>/dev/null); then
+    echo "clang-format 15 not available. Running it from a Docker image";
+    docker pull silkeh/clang:15-bullseye
     UID=$(id -u "${USER}")
     GID=$(id -g "${USER}")
-    exec docker run --rm -u "$UID:$GID" -v "$TOPDIR":"$TOPDIR" proj_clang_format "$TOPDIR"/scripts/reformat_cpp.sh
+    exec docker run --rm -u "$UID:$GID" -v "$TOPDIR":"$TOPDIR" silkeh/clang:15-bullseye "$TOPDIR"/scripts/reformat_cpp.sh
 fi
 
-for i in "$TOPDIR"/include/proj/*.hpp "$TOPDIR"/include/proj/internal/*.hpp \
-         "$TOPDIR"/src/iso19111/*.cpp \
-         "$TOPDIR"/src/iso19111/operation/*.cpp \
-         "$TOPDIR"/src/iso19111/operation/*.hpp \
-         "$TOPDIR"/test/unit/*.cpp \
-         "$TOPDIR"/src/apps/projinfo.cpp "$TOPDIR"/src/apps/projsync.cpp \
-         "$TOPDIR"/src/tracing.cpp "$TOPDIR"/src/grids.hpp "$TOPDIR"/src/grids.cpp \
-         "$TOPDIR"/src/filemanager.hpp "$TOPDIR"/src/filemanager.cpp \
-         "$TOPDIR"/src/networkfilemanager.cpp \
-         "$TOPDIR"/src/sqlite3_utils.hpp "$TOPDIR"/src/sqlite3_utils.cpp \
-         "$TOPDIR"/src/generic_inverse.cpp \
-         "$TOPDIR"/src/transformations/defmodel.hpp \
-         "$TOPDIR"/src/transformations/defmodel_exceptions.hpp \
-         "$TOPDIR"/src/transformations/defmodel_impl.hpp \
-         "$TOPDIR"/src/transformations/defmodel.cpp \
-         "$TOPDIR"/src/transformations/tinshift.hpp \
-         "$TOPDIR"/src/transformations/tinshift_exceptions.hpp \
-         "$TOPDIR"/src/transformations/tinshift_impl.hpp \
-         "$TOPDIR"/src/transformations/tinshift.cpp \
-         "$TOPDIR"/src/transformations/gridshift.cpp \
-         "$TOPDIR"/src/quadtree.hpp \
-         ; do
-    if ! echo "$i" | grep -q "lru_cache.hpp"; then
-        "$SCRIPT_DIR"/reformat.sh "$i";
+for i in `find "$TOPDIR" -name "*.h" -o -name "*.hpp" -o -name "*.cpp" -o -name "*.c"`; do
+    if echo "$i" | grep -q "lru_cache.hpp"; then
+        continue
     fi
+    if echo "$i" | grep -q "json.hpp"; then
+        continue
+    fi
+    if echo "$i" | grep -q "generated"; then
+        continue
+    fi
+    if echo "$i" | grep -q "geodesic"; then
+        continue
+    fi
+    if echo "$i" | grep -q "geodtest"; then
+        continue
+    fi
+    if echo "$i" | grep -q "geodsigntest"; then
+        continue
+    fi
+    if echo "$i" | grep -q "nn.hpp"; then
+        continue
+    fi
+    if echo "$i" | grep -q "googletest-src"; then
+        continue
+    fi
+    if echo "$i" | grep -q "/build"; then
+        continue
+    fi
+    if echo "$i" | grep -q "fix_typos"; then
+        continue
+    fi
+    echo "reformat.sh $i"
+    "$SCRIPT_DIR"/reformat.sh "$i"
 done

@@ -2,12 +2,12 @@
 
 #include <errno.h>
 #include <mutex>
-#include <string.h>
 #include <stddef.h>
+#include <string.h>
 #include <time.h>
 
-#include "proj_internal.h"
 #include "grids.hpp"
+#include "proj_internal.h"
 
 PROJ_HEAD(hgridshift, "Horizontal grid shift");
 
@@ -26,14 +26,14 @@ struct hgridshiftData {
 } // anonymous namespace
 
 static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
-    auto Q = static_cast<hgridshiftData*>(P->opaque);
-    PJ_COORD point = {{0,0,0,0}};
+    auto Q = static_cast<hgridshiftData *>(P->opaque);
+    PJ_COORD point = {{0, 0, 0, 0}};
     point.lpz = lpz;
 
-    if ( Q->defer_grid_opening ) {
+    if (Q->defer_grid_opening) {
         Q->defer_grid_opening = false;
         Q->grids = pj_hgrid_init(P, "grids");
-        if ( proj_errno(P) ) {
+        if (proj_errno(P)) {
             return proj_coord_error().xyz;
         }
     }
@@ -47,16 +47,15 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     return point.xyz;
 }
 
-
 static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
-    auto Q = static_cast<hgridshiftData*>(P->opaque);
-    PJ_COORD point = {{0,0,0,0}};
+    auto Q = static_cast<hgridshiftData *>(P->opaque);
+    PJ_COORD point = {{0, 0, 0, 0}};
     point.xyz = xyz;
 
-    if ( Q->defer_grid_opening ) {
+    if (Q->defer_grid_opening) {
         Q->defer_grid_opening = false;
         Q->grids = pj_hgrid_init(P, "grids");
-        if ( proj_errno(P) ) {
+        if (proj_errno(P)) {
             return proj_coord_error().lpz;
         }
     }
@@ -70,15 +69,16 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     return point.lpz;
 }
 
-static void forward_4d(PJ_COORD& coo, PJ *P) {
-    struct hgridshiftData *Q = (struct hgridshiftData *) P->opaque;
+static void forward_4d(PJ_COORD &coo, PJ *P) {
+    struct hgridshiftData *Q = (struct hgridshiftData *)P->opaque;
 
     /* If transformation is not time restricted, we always call it */
-    if (Q->t_final==0 || Q->t_epoch==0) {
+    if (Q->t_final == 0 || Q->t_epoch == 0) {
         // Assigning in 2 steps avoids cppcheck warning
         // "Overlapping read/write of union is undefined behavior"
-        // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-        const auto xyz = forward_3d (coo.lpz, P);
+        // Cf
+        // https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+        const auto xyz = forward_3d(coo.lpz, P);
         coo.xyz = xyz;
         return;
     }
@@ -87,21 +87,23 @@ static void forward_4d(PJ_COORD& coo, PJ *P) {
     if (coo.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch) {
         // Assigning in 2 steps avoids cppcheck warning
         // "Overlapping read/write of union is undefined behavior"
-        // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-        const auto xyz = forward_3d (coo.lpz, P);
+        // Cf
+        // https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+        const auto xyz = forward_3d(coo.lpz, P);
         coo.xyz = xyz;
     }
 }
 
-static void reverse_4d(PJ_COORD& coo, PJ *P) {
-    struct hgridshiftData *Q = (struct hgridshiftData *) P->opaque;
+static void reverse_4d(PJ_COORD &coo, PJ *P) {
+    struct hgridshiftData *Q = (struct hgridshiftData *)P->opaque;
 
     /* If transformation is not time restricted, we always call it */
-    if (Q->t_final==0 || Q->t_epoch==0) {
+    if (Q->t_final == 0 || Q->t_epoch == 0) {
         // Assigning in 2 steps avoids cppcheck warning
         // "Overlapping read/write of union is undefined behavior"
-        // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-        const auto lpz = reverse_3d (coo.xyz, P);
+        // Cf
+        // https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+        const auto lpz = reverse_3d(coo.xyz, P);
         coo.lpz = lpz;
         return;
     }
@@ -110,88 +112,88 @@ static void reverse_4d(PJ_COORD& coo, PJ *P) {
     if (coo.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch) {
         // Assigning in 2 steps avoids cppcheck warning
         // "Overlapping read/write of union is undefined behavior"
-        // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-        const auto lpz = reverse_3d (coo.xyz, P);
+        // Cf
+        // https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
+        const auto lpz = reverse_3d(coo.xyz, P);
         coo.lpz = lpz;
     }
 }
 
-static PJ *destructor (PJ *P, int errlev) {
-    if (nullptr==P)
+static PJ *destructor(PJ *P, int errlev) {
+    if (nullptr == P)
         return nullptr;
 
-    delete static_cast<struct hgridshiftData*>(P->opaque);
+    delete static_cast<struct hgridshiftData *>(P->opaque);
     P->opaque = nullptr;
 
     return pj_default_destructor(P, errlev);
 }
 
-static void reassign_context( PJ* P, PJ_CONTEXT* ctx )
-{
-    auto Q = (struct hgridshiftData *) P->opaque;
-    for( auto& grid: Q->grids ) {
+static void reassign_context(PJ *P, PJ_CONTEXT *ctx) {
+    auto Q = (struct hgridshiftData *)P->opaque;
+    for (auto &grid : Q->grids) {
         grid->reassign_context(ctx);
     }
 }
 
-PJ *TRANSFORMATION(hgridshift,0) {
+PJ *TRANSFORMATION(hgridshift, 0) {
     auto Q = new hgridshiftData;
-    P->opaque = (void *) Q;
+    P->opaque = (void *)Q;
     P->destructor = destructor;
     P->reassign_context = reassign_context;
 
-    P->fwd4d  = forward_4d;
-    P->inv4d  = reverse_4d;
-    P->fwd3d  = forward_3d;
-    P->inv3d  = reverse_3d;
-    P->fwd    = nullptr;
-    P->inv    = nullptr;
+    P->fwd4d = forward_4d;
+    P->inv4d = reverse_4d;
+    P->fwd3d = forward_3d;
+    P->inv3d = reverse_3d;
+    P->fwd = nullptr;
+    P->inv = nullptr;
 
-    P->left  = PJ_IO_UNITS_RADIANS;
+    P->left = PJ_IO_UNITS_RADIANS;
     P->right = PJ_IO_UNITS_RADIANS;
 
-    if (0==pj_param(P->ctx, P->params, "tgrids").i) {
+    if (0 == pj_param(P->ctx, P->params, "tgrids").i) {
         proj_log_error(P, _("+grids parameter missing."));
-        return destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     /* TODO: Refactor into shared function that can be used  */
     /*       by both vgridshift and hgridshift               */
     if (pj_param(P->ctx, P->params, "tt_final").i) {
-        Q->t_final = pj_param (P->ctx, P->params, "dt_final").f;
+        Q->t_final = pj_param(P->ctx, P->params, "dt_final").f;
         if (Q->t_final == 0) {
             /* a number wasn't passed to +t_final, let's see if it was "now" */
             /* and set the time accordingly.                                 */
             if (!strcmp("now", pj_param(P->ctx, P->params, "st_final").s)) {
-                    time_t now;
-                    struct tm *date;
-                    time(&now);
-                    date = localtime(&now);
-                    Q->t_final = 1900.0 + date->tm_year + date->tm_yday/365.0;
+                time_t now;
+                struct tm *date;
+                time(&now);
+                date = localtime(&now);
+                Q->t_final = 1900.0 + date->tm_year + date->tm_yday / 365.0;
             }
         }
     }
 
     if (pj_param(P->ctx, P->params, "tt_epoch").i)
-        Q->t_epoch = pj_param (P->ctx, P->params, "dt_epoch").f;
+        Q->t_epoch = pj_param(P->ctx, P->params, "dt_epoch").f;
 
-    if( P->ctx->defer_grid_opening ) {
+    if (P->ctx->defer_grid_opening) {
         Q->defer_grid_opening = true;
-    }
-    else {
+    } else {
         const char *gridnames = pj_param(P->ctx, P->params, "sgrids").s;
         gMutex.lock();
-        const bool isKnownGrid = gKnownGrids.find(gridnames) != gKnownGrids.end();
+        const bool isKnownGrid =
+            gKnownGrids.find(gridnames) != gKnownGrids.end();
         gMutex.unlock();
-        if( isKnownGrid ) {
+        if (isKnownGrid) {
             Q->defer_grid_opening = true;
-        }
-        else {
+        } else {
             Q->grids = pj_hgrid_init(P, "grids");
             /* Was gridlist compiled properly? */
-            if ( proj_errno(P) ) {
+            if (proj_errno(P)) {
                 proj_log_error(P, _("could not find required grid(s)."));
-                return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+                return destructor(
+                    P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
             }
 
             gMutex.lock();

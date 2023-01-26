@@ -2087,10 +2087,9 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
             lasFilename = latitudeFileParameter->valueFile();
         }
     }
-    const auto &horizontalGridName =
-        !NTv1Filename.empty()
-            ? NTv1Filename
-            : !NTv2Filename.empty() ? NTv2Filename : lasFilename;
+    const auto &horizontalGridName = !NTv1Filename.empty()   ? NTv1Filename
+                                     : !NTv2Filename.empty() ? NTv2Filename
+                                                             : lasFilename;
     const auto l_interpolationCRS = interpolationCRS();
 
     if (!horizontalGridName.empty() && databaseContext->lookForGridAlternative(
@@ -3562,12 +3561,11 @@ bool SingleOperation::exportToPROJStringGeneric(
     const auto &CTABLE2Filename = _getCTABLE2Filename(this, true);
     const auto &HorizontalShiftGTIFFFilename =
         _getHorizontalShiftGTIFFFilename(this, true);
-    const auto &hGridShiftFilename =
-        !HorizontalShiftGTIFFFilename.empty()
-            ? HorizontalShiftGTIFFFilename
-            : !NTv1Filename.empty()
-                  ? NTv1Filename
-                  : !NTv2Filename.empty() ? NTv2Filename : CTABLE2Filename;
+    const auto &hGridShiftFilename = !HorizontalShiftGTIFFFilename.empty()
+                                         ? HorizontalShiftGTIFFFilename
+                                     : !NTv1Filename.empty() ? NTv1Filename
+                                     : !NTv2Filename.empty() ? NTv2Filename
+                                                             : CTABLE2Filename;
     if (!hGridShiftFilename.empty()) {
         auto l_sourceCRS = sourceCRS();
         auto sourceCRSGeog =

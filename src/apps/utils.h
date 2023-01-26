@@ -26,4 +26,4 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-bool validate_form_string_for_numbers(const char* formatString);
+bool validate_form_string_for_numbers(const char *formatString);

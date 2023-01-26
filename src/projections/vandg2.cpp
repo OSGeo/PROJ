@@ -15,12 +15,11 @@ struct pj_opaque {
 PROJ_HEAD(vandg2, "van der Grinten II") "\n\tMisc Sph, no inv";
 PROJ_HEAD(vandg3, "van der Grinten III") "\n\tMisc Sph, no inv";
 
-#define TOL    1e-10
+#define TOL 1e-10
 
-
-static PJ_XY vandg2_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
-    PJ_XY xy = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_XY vandg2_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double x1, at, bt, ct;
 
     bt = fabs(M_TWO_D_PI * lp.phi);
@@ -40,22 +39,24 @@ static PJ_XY vandg2_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwa
             xy.y = M_PI * x1;
         } else {
             x1 = (ct * sqrt(1. + at * at) - at * ct * ct) /
-                (1. + at * at * bt * bt);
+                 (1. + at * at * bt * bt);
             xy.x = M_PI * x1;
             xy.y = M_PI * sqrt(1. - x1 * (x1 + 2. * at) + TOL);
         }
-        if ( lp.lam < 0.) xy.x = -xy.x;
-        if ( lp.phi < 0.) xy.y = -xy.y;
+        if (lp.lam < 0.)
+            xy.x = -xy.x;
+        if (lp.phi < 0.)
+            xy.y = -xy.y;
     }
 
     return xy;
 }
 
-
 PJ *PROJECTION(vandg2) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->vdg3 = 0;
@@ -65,9 +66,10 @@ PJ *PROJECTION(vandg2) {
 }
 
 PJ *PROJECTION(vandg3) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->vdg3 = 1;

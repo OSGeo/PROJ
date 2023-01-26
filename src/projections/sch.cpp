@@ -2,12 +2,14 @@
  * Project:  SCH Coordinate system
  * Purpose:  Implementation of SCH Coordinate system
  * References :
- *      1. Hensley. Scott. SCH Coordinates and various transformations. June 15, 2000.
- *      2. Buckley, Sean Monroe. Radar interferometry measurement of land subsidence. 2000..
- *         PhD Thesis. UT Austin. (Appendix)
- *      3. Hensley, Scott, Elaine Chapin, and T. Michel. "Improved processing of AIRSAR
- *         data based on the GeoSAR processor." Airsar earth science and applications
- *         workshop, March. 2002. (http://airsar.jpl.nasa.gov/documents/workshop2002/papers/T3.pdf)
+ *      1. Hensley. Scott. SCH Coordinates and various transformations. June 15,
+ *2000.
+ *      2. Buckley, Sean Monroe. Radar interferometry measurement of land
+ *subsidence. 2000.. PhD Thesis. UT Austin. (Appendix)
+ *      3. Hensley, Scott, Elaine Chapin, and T. Michel. "Improved processing of
+ *AIRSAR data based on the GeoSAR processor." Airsar earth science and
+ *applications workshop, March. 2002.
+ *(http://airsar.jpl.nasa.gov/documents/workshop2002/papers/T3.pdf)
  *
  * Author:   Piyush Agram (piyush.agram@jpl.nasa.gov)
  * Copyright (c) 2015 California Institute of Technology.
@@ -15,11 +17,12 @@
  *
  * NOTE:  The SCH coordinate system is a sensor aligned coordinate system
  * developed at JPL for radar mapping missions. Details pertaining to the
- * coordinate system have been release in the public domain (see references above).
- * This code is an independent implementation of the SCH coordinate system
- * that conforms to the PROJ.4 conventions and uses the details presented in these
- * publicly released documents. All credit for the development of the coordinate
- * system and its use should be directed towards the original developers at JPL.
+ * coordinate system have been release in the public domain (see references
+ *above). This code is an independent implementation of the SCH coordinate
+ *system that conforms to the PROJ.4 conventions and uses the details presented
+ *in these publicly released documents. All credit for the development of the
+ *coordinate system and its use should be directed towards the original
+ *developers at JPL.
  ******************************************************************************
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -47,28 +50,30 @@ struct pj_opaque {
     double transMat[9];
     double xyzoff[3];
     double rcurv;
-    PJ* cart;
-    PJ* cart_sph;
+    PJ *cart;
+    PJ *cart_sph;
 };
 } // anonymous namespace
 
-PROJ_HEAD(sch, "Spherical Cross-track Height") "\n\tMisc\n\tplat_0= plon_0= phdg_0= [h_0=]";
+PROJ_HEAD(sch, "Spherical Cross-track Height")
+"\n\tMisc\n\tplat_0= plon_0= phdg_0= [h_0=]";
 
 static PJ_LPZ sch_inverse3d(PJ_XYZ xyz, PJ *P) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
 
     PJ_LPZ lpz;
     lpz.lam = xyz.x * (P->a / Q->rcurv);
     lpz.phi = xyz.y * (P->a / Q->rcurv);
     lpz.z = xyz.z;
-    xyz  =  Q->cart_sph->fwd3d (lpz, Q->cart_sph);
+    xyz = Q->cart_sph->fwd3d(lpz, Q->cart_sph);
 
     /* Apply rotation */
-    xyz = {
-        Q->transMat[0] * xyz.x + Q->transMat[1] * xyz.y + Q->transMat[2] * xyz.z,
-        Q->transMat[3] * xyz.x + Q->transMat[4] * xyz.y + Q->transMat[5] * xyz.z,
-        Q->transMat[6] * xyz.x + Q->transMat[7] * xyz.y + Q->transMat[8] * xyz.z
-    };
+    xyz = {Q->transMat[0] * xyz.x + Q->transMat[1] * xyz.y +
+               Q->transMat[2] * xyz.z,
+           Q->transMat[3] * xyz.x + Q->transMat[4] * xyz.y +
+               Q->transMat[5] * xyz.z,
+           Q->transMat[6] * xyz.x + Q->transMat[7] * xyz.y +
+               Q->transMat[8] * xyz.z};
 
     /* Apply offset */
     xyz.x += Q->xyzoff[0];
@@ -76,14 +81,14 @@ static PJ_LPZ sch_inverse3d(PJ_XYZ xyz, PJ *P) {
     xyz.z += Q->xyzoff[2];
 
     /* Convert geocentric coordinates to lat long */
-    return Q->cart->inv3d (xyz, Q->cart);
+    return Q->cart->inv3d(xyz, Q->cart);
 }
 
 static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
 
     /* Convert lat long to geocentric coordinates */
-    PJ_XYZ xyz  =  Q->cart->fwd3d (lpz, Q->cart);
+    PJ_XYZ xyz = Q->cart->fwd3d(lpz, Q->cart);
 
     /* Adjust for offset */
     xyz.x -= Q->xyzoff[0];
@@ -91,14 +96,15 @@ static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
     xyz.z -= Q->xyzoff[2];
 
     /* Apply rotation */
-    xyz = {
-        Q->transMat[0] * xyz.x + Q->transMat[3] * xyz.y + Q->transMat[6] * xyz.z,
-        Q->transMat[1] * xyz.x + Q->transMat[4] * xyz.y + Q->transMat[7] * xyz.z,
-        Q->transMat[2] * xyz.x + Q->transMat[5] * xyz.y + Q->transMat[8] * xyz.z
-    };
+    xyz = {Q->transMat[0] * xyz.x + Q->transMat[3] * xyz.y +
+               Q->transMat[6] * xyz.z,
+           Q->transMat[1] * xyz.x + Q->transMat[4] * xyz.y +
+               Q->transMat[7] * xyz.z,
+           Q->transMat[2] * xyz.x + Q->transMat[5] * xyz.y +
+               Q->transMat[8] * xyz.z};
 
     /* Convert to local lat,long */
-    lpz  =  Q->cart_sph->inv3d (xyz, Q->cart_sph);
+    lpz = Q->cart_sph->inv3d(xyz, Q->cart_sph);
 
     /* Scale by radius */
     xyz.x = lpz.lam * (Q->rcurv / P->a);
@@ -108,24 +114,23 @@ static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
     return xyz;
 }
 
-static PJ *destructor (PJ *P, int errlev) {
-    if (nullptr==P)
+static PJ *destructor(PJ *P, int errlev) {
+    if (nullptr == P)
         return nullptr;
 
-    auto Q = static_cast<struct pj_opaque*>(P->opaque);
-    if( Q )
-    {
+    auto Q = static_cast<struct pj_opaque *>(P->opaque);
+    if (Q) {
         if (Q->cart)
-            Q->cart->destructor (Q->cart, errlev);
+            Q->cart->destructor(Q->cart, errlev);
         if (Q->cart_sph)
-            Q->cart_sph->destructor (Q->cart_sph, errlev);
+            Q->cart_sph->destructor(Q->cart_sph, errlev);
     }
 
     return pj_default_destructor(P, errlev);
 }
 
 static PJ *setup(PJ *P) { /* general initialization */
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
 
     /* Setup original geocentric system */
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
@@ -134,7 +139,7 @@ static PJ *setup(PJ *P) { /* general initialization */
         return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     /* inherit ellipsoid definition from P to Q->cart */
-    pj_inherit_ellipsoid_def (P, Q->cart);
+    pj_inherit_ellipsoid_def(P, Q->cart);
 
     const double clt = cos(Q->plat);
     const double slt = sin(Q->plat);
@@ -143,13 +148,14 @@ static PJ *setup(PJ *P) { /* general initialization */
 
     /* Estimate the radius of curvature for given peg */
     const double temp = sqrt(1.0 - (P->es) * slt * slt);
-    const double reast = (P->a)/temp;
-    const double rnorth = (P->a) * (1.0 - (P->es))/pow(temp,3);
+    const double reast = (P->a) / temp;
+    const double rnorth = (P->a) * (1.0 - (P->es)) / pow(temp, 3);
 
     const double chdg = cos(Q->phdg);
     const double shdg = sin(Q->phdg);
 
-    Q->rcurv = Q->h0 + (reast*rnorth)/(reast * chdg * chdg + rnorth * shdg * shdg);
+    Q->rcurv =
+        Q->h0 + (reast * rnorth) / (reast * chdg * chdg + rnorth * shdg * shdg);
 
     /* Set up local sphere at the given peg point */
     Q->cart_sph = proj_create(P->ctx, "+proj=cart +a=1");
@@ -159,22 +165,22 @@ static PJ *setup(PJ *P) { /* general initialization */
 
     /* Set up the transformation matrices */
     Q->transMat[0] = clt * clo;
-    Q->transMat[1] = -shdg*slo - slt*clo * chdg;
-    Q->transMat[2] =  slo*chdg - slt*clo*shdg;
-    Q->transMat[3] =  clt*slo;
-    Q->transMat[4] =  clo*shdg - slt*slo*chdg;
-    Q->transMat[5] = -clo*chdg - slt*slo*shdg;
-    Q->transMat[6] =  slt;
-    Q->transMat[7] =  clt*chdg;
-    Q->transMat[8] =  clt*shdg;
+    Q->transMat[1] = -shdg * slo - slt * clo * chdg;
+    Q->transMat[2] = slo * chdg - slt * clo * shdg;
+    Q->transMat[3] = clt * slo;
+    Q->transMat[4] = clo * shdg - slt * slo * chdg;
+    Q->transMat[5] = -clo * chdg - slt * slo * shdg;
+    Q->transMat[6] = slt;
+    Q->transMat[7] = clt * chdg;
+    Q->transMat[8] = clt * shdg;
 
     PJ_LPZ lpz;
     lpz.lam = Q->plon;
     lpz.phi = Q->plat;
     lpz.z = Q->h0;
-    PJ_XYZ xyz  =  Q->cart->fwd3d (lpz, Q->cart);
+    PJ_XYZ xyz = Q->cart->fwd3d(lpz, Q->cart);
     Q->xyzoff[0] = xyz.x - (Q->rcurv) * clt * clo;
-    Q->xyzoff[1] = xyz.y- (Q->rcurv) * clt * slo;
+    Q->xyzoff[1] = xyz.y - (Q->rcurv) * clt * slo;
     Q->xyzoff[2] = xyz.z - (Q->rcurv) * slt;
 
     P->fwd3d = sch_forward3d;
@@ -182,10 +188,10 @@ static PJ *setup(PJ *P) { /* general initialization */
     return P;
 }
 
-
 PJ *PROJECTION(sch) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
@@ -216,11 +222,9 @@ PJ *PROJECTION(sch) {
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
-
     /* Check if average height was defined - If so read it in */
     if (pj_param(P->ctx, P->params, "th_0").i)
         Q->h0 = pj_param(P->ctx, P->params, "dh_0").f;
-
 
     return setup(P);
 }

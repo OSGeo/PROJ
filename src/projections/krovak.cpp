@@ -1,4 +1,4 @@
- /*
+/*
  * Project:  PROJ
  * Purpose:  Implementation of the krovak (Krovak) projection.
  *           Definition: http://www.ihsenergy.com/epsg/guid7.html#1.4.3
@@ -86,8 +86,9 @@
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl, Ell";
 
 #define EPS 1e-15
-#define UQ  1.04216856380474   /* DU(2, 59, 42, 42.69689) */
-#define S0  1.37008346281555   /* Latitude of pseudo standard parallel 78deg 30'00" N */
+#define UQ 1.04216856380474 /* DU(2, 59, 42, 42.69689) */
+#define S0                                                                     \
+    1.37008346281555 /* Latitude of pseudo standard parallel 78deg 30'00" N */
 /* Not sure at all of the appropriate number for MAX_ITER... */
 #define MAX_ITER 100
 
@@ -102,22 +103,22 @@ struct pj_opaque {
 };
 } // anonymous namespace
 
-
-static PJ_XY krovak_e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal, forward */
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    PJ_XY xy = {0.0,0.0};
+static PJ_XY krovak_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    PJ_XY xy = {0.0, 0.0};
 
     double gfi, u, deltav, s, d, eps, rho;
 
-    gfi = pow ( (1. + P->e * sin(lp.phi)) / (1. - P->e * sin(lp.phi)), Q->alpha * P->e / 2.);
+    gfi = pow((1. + P->e * sin(lp.phi)) / (1. - P->e * sin(lp.phi)),
+              Q->alpha * P->e / 2.);
 
-    u = 2. * (atan(Q->k * pow( tan(lp.phi / 2. + M_PI_4), Q->alpha) / gfi)-M_PI_4);
+    u = 2. *
+        (atan(Q->k * pow(tan(lp.phi / 2. + M_PI_4), Q->alpha) / gfi) - M_PI_4);
     deltav = -lp.lam * Q->alpha;
 
     s = asin(cos(Q->ad) * sin(u) + sin(Q->ad) * cos(u) * cos(deltav));
-    const double cos_s =  cos(s);
-    if( cos_s < 1e-12 )
-    {
+    const double cos_s = cos(s);
+    if (cos_s < 1e-12) {
         xy.x = 0;
         xy.y = 0;
         return xy;
@@ -125,7 +126,8 @@ static PJ_XY krovak_e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal,
     d = asin(cos(u) * sin(deltav) / cos_s);
 
     eps = Q->n * d;
-    rho = Q->rho0 * pow(tan(S0 / 2. + M_PI_4) , Q->n) / pow(tan(s / 2. + M_PI_4) , Q->n);
+    rho = Q->rho0 * pow(tan(S0 / 2. + M_PI_4), Q->n) /
+          pow(tan(s / 2. + M_PI_4), Q->n);
 
     xy.y = rho * cos(eps);
     xy.x = rho * sin(eps);
@@ -136,10 +138,9 @@ static PJ_XY krovak_e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal,
     return xy;
 }
 
-
-static PJ_LP krovak_e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal, inverse */
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    PJ_LP lp = {0.0,0.0};
+static PJ_LP krovak_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    PJ_LP lp = {0.0, 0.0};
 
     double u, deltav, s, d, eps, rho, fi1, xy0;
     int i;
@@ -155,11 +156,11 @@ static PJ_LP krovak_e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal,
     eps = atan2(xy.y, xy.x);
 
     d = eps / sin(S0);
-    if( rho == 0.0 ) {
+    if (rho == 0.0) {
         s = M_PI_2;
-    }
-    else {
-        s = 2. * (atan(  pow(Q->rho0 / rho, 1. / Q->n) * tan(S0 / 2. + M_PI_4)) - M_PI_4);
+    } else {
+        s = 2. * (atan(pow(Q->rho0 / rho, 1. / Q->n) * tan(S0 / 2. + M_PI_4)) -
+                  M_PI_4);
     }
 
     u = asin(cos(Q->ad) * sin(s) - sin(Q->ad) * cos(s) * cos(d));
@@ -170,30 +171,32 @@ static PJ_LP krovak_e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal,
     /* ITERATION FOR lp.phi */
     fi1 = u;
 
-    for (i = MAX_ITER; i ; --i) {
-        lp.phi = 2. * ( atan( pow( Q->k, -1. / Q->alpha)  *
-                              pow( tan(u / 2. + M_PI_4) , 1. / Q->alpha)  *
-                              pow( (1. + P->e * sin(fi1)) / (1. - P->e * sin(fi1)) , P->e / 2.)
-                            )  - M_PI_4);
+    for (i = MAX_ITER; i; --i) {
+        lp.phi = 2. * (atan(pow(Q->k, -1. / Q->alpha) *
+                            pow(tan(u / 2. + M_PI_4), 1. / Q->alpha) *
+                            pow((1. + P->e * sin(fi1)) / (1. - P->e * sin(fi1)),
+                                P->e / 2.)) -
+                       M_PI_4);
 
         if (fabs(fi1 - lp.phi) < EPS)
             break;
         fi1 = lp.phi;
     }
-    if( i == 0 )
-        proj_context_errno_set( P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN );
+    if (i == 0)
+        proj_context_errno_set(
+            P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
 
-   lp.lam -= P->lam0;
+    lp.lam -= P->lam0;
 
-   return lp;
+    return lp;
 }
-
 
 PJ *PROJECTION(krovak) {
     double u0, n0, g;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     /* we want Bessel as fixed ellipsoid */
@@ -203,32 +206,35 @@ PJ *PROJECTION(krovak) {
 
     /* if latitude of projection center is not set, use 49d30'N */
     if (!pj_param(P->ctx, P->params, "tlat_0").i)
-            P->phi0 = 0.863937979737193;
+        P->phi0 = 0.863937979737193;
 
     /* if center long is not set use 42d30'E of Ferro - 17d40' for Ferro */
     /* that will correspond to using longitudes relative to greenwich    */
     /* as input and output, instead of lat/long relative to Ferro */
     if (!pj_param(P->ctx, P->params, "tlon_0").i)
-            P->lam0 = 0.7417649320975901 - 0.308341501185665;
+        P->lam0 = 0.7417649320975901 - 0.308341501185665;
 
     /* if scale not set default to 0.9999 */
-    if (!pj_param(P->ctx, P->params, "tk").i && !pj_param(P->ctx, P->params, "tk_0").i)
+    if (!pj_param(P->ctx, P->params, "tk").i &&
+        !pj_param(P->ctx, P->params, "tk_0").i)
         P->k0 = 0.9999;
 
     Q->czech = 1;
-    if( !pj_param(P->ctx, P->params, "tczech").i )
+    if (!pj_param(P->ctx, P->params, "tczech").i)
         Q->czech = -1;
 
     /* Set up shared parameters between forward and inverse */
     Q->alpha = sqrt(1. + (P->es * pow(cos(P->phi0), 4)) / (1. - P->es));
     u0 = asin(sin(P->phi0) / Q->alpha);
-    g = pow( (1. + P->e * sin(P->phi0)) / (1. - P->e * sin(P->phi0)) , Q->alpha * P->e / 2. );
+    g = pow((1. + P->e * sin(P->phi0)) / (1. - P->e * sin(P->phi0)),
+            Q->alpha * P->e / 2.);
     double tan_half_phi0_plus_pi_4 = tan(P->phi0 / 2. + M_PI_4);
-    if( tan_half_phi0_plus_pi_4 == 0.0 ) {
-        proj_log_error(P, _("Invalid value for lat_0: lat_0 + PI/4 should be different from 0"));
+    if (tan_half_phi0_plus_pi_4 == 0.0) {
+        proj_log_error(P, _("Invalid value for lat_0: lat_0 + PI/4 should be "
+                            "different from 0"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
-    Q->k = tan( u0 / 2. + M_PI_4) / pow  (tan_half_phi0_plus_pi_4 , Q->alpha) * g;
+    Q->k = tan(u0 / 2. + M_PI_4) / pow(tan_half_phi0_plus_pi_4, Q->alpha) * g;
     n0 = sqrt(1. - P->es) / (1. - P->es * pow(sin(P->phi0), 2));
     Q->n = sin(S0);
     Q->rho0 = P->k0 * n0 / tan(S0);

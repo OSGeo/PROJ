@@ -51,14 +51,14 @@
 
 /* enable predefined math constants M_* for MS Visual Studio */
 #if defined(_MSC_VER) || defined(_WIN32)
-#  ifndef _USE_MATH_DEFINES
-#     define _USE_MATH_DEFINES
-#  endif
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
 #endif
 
-#include <errno.h>
 #include <cmath>
 #include <cstdint>
+#include <errno.h>
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -66,17 +66,21 @@
 /* The six cube faces. */
 namespace { // anonymous namespace
 enum Face {
-    FACE_FRONT  = 0,
-    FACE_RIGHT  = 1,
-    FACE_TOP    = 2,
-    FACE_BACK   = 3,
-    FACE_LEFT   = 4,
+    FACE_FRONT = 0,
+    FACE_RIGHT = 1,
+    FACE_TOP = 2,
+    FACE_BACK = 3,
+    FACE_LEFT = 4,
     FACE_BOTTOM = 5
 };
 } // anonymous namespace
 
-enum S2ProjectionType {Linear, Quadratic, Tangent, NoUVtoST};
-static std::map<std::string, S2ProjectionType> stringToS2ProjectionType { {"linear", Linear}, {"quadratic", Quadratic}, {"tangent", Tangent}, {"none", NoUVtoST} };
+enum S2ProjectionType { Linear, Quadratic, Tangent, NoUVtoST };
+static std::map<std::string, S2ProjectionType> stringToS2ProjectionType{
+    {"linear", Linear},
+    {"quadratic", Quadratic},
+    {"tangent", Tangent},
+    {"none", NoUVtoST}};
 
 namespace { // anonymous namespace
 struct pj_opaque {
@@ -92,12 +96,7 @@ PROJ_HEAD(s2, "S2") "\n\tMisc, Sph&Ell";
 /* The four areas on a cube face. AREA_0 is the area of definition,
  * the other three areas are counted counterclockwise. */
 namespace { // anonymous namespace
-enum Area {
-    AREA_0 = 0,
-    AREA_1 = 1,
-    AREA_2 = 2,
-    AREA_3 = 3
-};
+enum Area { AREA_0 = 0, AREA_1 = 1, AREA_2 = 2, AREA_3 = 3 };
 } // anonymous namespace
 
 // =================================================
@@ -105,19 +104,17 @@ enum Area {
 //                  S2 Math Util
 //
 // =================================================
-static PJ_XYZ Abs(const PJ_XYZ& p) {
+static PJ_XYZ Abs(const PJ_XYZ &p) {
     return {std::fabs(p.x), std::fabs(p.y), std::fabs(p.z)};
 }
 // return the index of the largest component (fabs)
-static int LargestAbsComponent(const PJ_XYZ& p) {
+static int LargestAbsComponent(const PJ_XYZ &p) {
     PJ_XYZ temp = Abs(p);
-    return temp.x > temp.y ?
-             temp.x > temp.z ? 0 : 2 :
-             temp.y > temp.z ? 1 : 2;
+    return temp.x > temp.y ? temp.x > temp.z ? 0 : 2 : temp.y > temp.z ? 1 : 2;
 }
 
 // =================================================
-// 
+//
 //              S2 Projection Functions
 //
 // =================================================
@@ -129,148 +126,208 @@ static int LargestAbsComponent(const PJ_XYZ& p) {
 // tangents that are slightly below and slightly above 1.0 when rounded to
 // the nearest double-precision result.
 static double STtoUV(double s, S2ProjectionType s2_projection) {
-    switch(s2_projection) {
-        case Linear:
-            return 2 * s - 1;
-            break;
-        case Quadratic:
-            if (s >= 0.5) return (1/3.) * (4*s*s - 1);
-            else return (1/3.) * (1 - 4*(1-s)*(1-s));
-            break;
-        case Tangent:
-            s = std::tan(M_PI_2 * s - M_PI_4);
-            return s + (1.0 / static_cast<double>(static_cast<std::int64_t>(1) << 53)) * s;
-            break;
-        default:
-            return s;
+    switch (s2_projection) {
+    case Linear:
+        return 2 * s - 1;
+        break;
+    case Quadratic:
+        if (s >= 0.5)
+            return (1 / 3.) * (4 * s * s - 1);
+        else
+            return (1 / 3.) * (1 - 4 * (1 - s) * (1 - s));
+        break;
+    case Tangent:
+        s = std::tan(M_PI_2 * s - M_PI_4);
+        return s +
+               (1.0 / static_cast<double>(static_cast<std::int64_t>(1) << 53)) *
+                   s;
+        break;
+    default:
+        return s;
     }
 }
 
 static double UVtoST(double u, S2ProjectionType s2_projection) {
-    switch(s2_projection) {
-        case Linear:
-            return 0.5 * (u + 1);
-            break;
-        case Quadratic:
-            if (u >= 0) return 0.5 * std::sqrt(1 + 3*u);
-            else        return 1 - 0.5 * std::sqrt(1 - 3*u);
-            break;
-        case Tangent:
-        {
-            volatile double a = std::atan(u);
-            return (2 * M_1_PI) * (a + M_PI_4);
-        }
-            break;
-        default:
-            return u;
+    switch (s2_projection) {
+    case Linear:
+        return 0.5 * (u + 1);
+        break;
+    case Quadratic:
+        if (u >= 0)
+            return 0.5 * std::sqrt(1 + 3 * u);
+        else
+            return 1 - 0.5 * std::sqrt(1 - 3 * u);
+        break;
+    case Tangent: {
+        volatile double a = std::atan(u);
+        return (2 * M_1_PI) * (a + M_PI_4);
+    } break;
+    default:
+        return u;
     }
 }
 
 inline PJ_XYZ FaceUVtoXYZ(int face, double u, double v) {
     switch (face) {
-        case 0:  return { 1,  u,  v};
-        case 1:  return {-u,  1,  v};
-        case 2:  return {-u, -v,  1};
-        case 3:  return {-1, -v, -u};
-        case 4:  return { v, -1, -u};
-        default: return { v,  u, -1};
+    case 0:
+        return {1, u, v};
+    case 1:
+        return {-u, 1, v};
+    case 2:
+        return {-u, -v, 1};
+    case 3:
+        return {-1, -v, -u};
+    case 4:
+        return {v, -1, -u};
+    default:
+        return {v, u, -1};
     }
 }
 
-inline PJ_XYZ FaceUVtoXYZ(int face, const PJ_XY& uv) {
+inline PJ_XYZ FaceUVtoXYZ(int face, const PJ_XY &uv) {
     return FaceUVtoXYZ(face, uv.x, uv.y);
 }
 
-inline void ValidFaceXYZtoUV(int face, const PJ_XYZ& p,
-                             double* pu, double* pv) {
+inline void ValidFaceXYZtoUV(int face, const PJ_XYZ &p, double *pu,
+                             double *pv) {
     switch (face) {
-        case 0:  *pu =  p.y / p.x; *pv =  p.z / p.x; break;
-        case 1:  *pu = -p.x / p.y; *pv =  p.z / p.y; break;
-        case 2:  *pu = -p.x / p.z; *pv = -p.y / p.z; break;
-        case 3:  *pu =  p.z / p.x; *pv =  p.y / p.x; break;
-        case 4:  *pu =  p.z / p.y; *pv = -p.x / p.y; break;
-        default: *pu = -p.y / p.z; *pv = -p.x / p.z; break;
+    case 0:
+        *pu = p.y / p.x;
+        *pv = p.z / p.x;
+        break;
+    case 1:
+        *pu = -p.x / p.y;
+        *pv = p.z / p.y;
+        break;
+    case 2:
+        *pu = -p.x / p.z;
+        *pv = -p.y / p.z;
+        break;
+    case 3:
+        *pu = p.z / p.x;
+        *pv = p.y / p.x;
+        break;
+    case 4:
+        *pu = p.z / p.y;
+        *pv = -p.x / p.y;
+        break;
+    default:
+        *pu = -p.y / p.z;
+        *pv = -p.x / p.z;
+        break;
     }
 }
 
-inline void ValidFaceXYZtoUV(int face, const PJ_XYZ& p, PJ_XY* puv) {
+inline void ValidFaceXYZtoUV(int face, const PJ_XYZ &p, PJ_XY *puv) {
     ValidFaceXYZtoUV(face, p, &(*puv).x, &(*puv).y);
 }
 
-inline int GetFace(const PJ_XYZ& p) {
+inline int GetFace(const PJ_XYZ &p) {
     int face = LargestAbsComponent(p);
     double pFace;
     switch (face) {
-        case 0:  pFace = p.x; break;
-        case 1:  pFace = p.y; break;
-        default: pFace = p.z; break;
+    case 0:
+        pFace = p.x;
+        break;
+    case 1:
+        pFace = p.y;
+        break;
+    default:
+        pFace = p.z;
+        break;
     }
-    if (pFace < 0) face += 3;
+    if (pFace < 0)
+        face += 3;
     return face;
 }
 
-inline int XYZtoFaceUV(const PJ_XYZ& p, double* pu, double* pv) {
+inline int XYZtoFaceUV(const PJ_XYZ &p, double *pu, double *pv) {
     int face = GetFace(p);
     ValidFaceXYZtoUV(face, p, pu, pv);
     return face;
 }
 
-inline int XYZtoFaceUV(const PJ_XYZ& p, PJ_XY* puv) {
+inline int XYZtoFaceUV(const PJ_XYZ &p, PJ_XY *puv) {
     return XYZtoFaceUV(p, &(*puv).x, &(*puv).y);
 }
 
-inline bool FaceXYZtoUV(int face, const PJ_XYZ& p,
-                        double* pu, double* pv) {
+inline bool FaceXYZtoUV(int face, const PJ_XYZ &p, double *pu, double *pv) {
     double pFace;
-    switch(face) {
-        case 0:  pFace = p.x; break;
-        case 1:  pFace = p.y; break;
-        case 2:  pFace = p.z; break;
-        case 3:  pFace = p.x; break;
-        case 4:  pFace = p.y; break;
-        default: pFace = p.z; break;
+    switch (face) {
+    case 0:
+        pFace = p.x;
+        break;
+    case 1:
+        pFace = p.y;
+        break;
+    case 2:
+        pFace = p.z;
+        break;
+    case 3:
+        pFace = p.x;
+        break;
+    case 4:
+        pFace = p.y;
+        break;
+    default:
+        pFace = p.z;
+        break;
     }
     if (face < 3) {
-        if (pFace <= 0) return false;
+        if (pFace <= 0)
+            return false;
     } else {
-        if (pFace >= 0) return false;
+        if (pFace >= 0)
+            return false;
     }
     ValidFaceXYZtoUV(face, p, pu, pv);
     return true;
 }
 
-inline bool FaceXYZtoUV(int face, const PJ_XYZ& p, PJ_XY* puv) {
+inline bool FaceXYZtoUV(int face, const PJ_XYZ &p, PJ_XY *puv) {
     return FaceXYZtoUV(face, p, &(*puv).x, &(*puv).y);
 }
 
 // This function inverts ValidFaceXYZtoUV()
-inline bool UVtoSphereXYZ(int face, double u, double v, PJ_XYZ* xyz) {
-	double major_coord = 1 / sqrt(1 + u*u + v*v);
-	double minor_coord_1 = u*major_coord;
-	double minor_coord_2 = v*major_coord;
+inline bool UVtoSphereXYZ(int face, double u, double v, PJ_XYZ *xyz) {
+    double major_coord = 1 / sqrt(1 + u * u + v * v);
+    double minor_coord_1 = u * major_coord;
+    double minor_coord_2 = v * major_coord;
 
-	switch(face) {
-		case 0: xyz->x = major_coord;
-			xyz->y = minor_coord_1;
-			xyz->z = minor_coord_2; break;
-		case 1: xyz->x = -minor_coord_1;
-			xyz->y = major_coord;
-			xyz->z = minor_coord_2; break;
-		case 2: xyz->x = -minor_coord_1;
-			xyz->y = -minor_coord_2;
-			xyz->z = major_coord; break;
-		case 3: xyz->x = -major_coord;
-			xyz->y = -minor_coord_2;
-			xyz->z = -minor_coord_1; break;
-		case 4: xyz->x = minor_coord_2;
-			xyz->y = -major_coord;
-			xyz->z = -minor_coord_1; break;
-		default:xyz->x = minor_coord_2;
-			xyz->y = minor_coord_1;
-			xyz->z = -major_coord; break;
-	}
+    switch (face) {
+    case 0:
+        xyz->x = major_coord;
+        xyz->y = minor_coord_1;
+        xyz->z = minor_coord_2;
+        break;
+    case 1:
+        xyz->x = -minor_coord_1;
+        xyz->y = major_coord;
+        xyz->z = minor_coord_2;
+        break;
+    case 2:
+        xyz->x = -minor_coord_1;
+        xyz->y = -minor_coord_2;
+        xyz->z = major_coord;
+        break;
+    case 3:
+        xyz->x = -major_coord;
+        xyz->y = -minor_coord_2;
+        xyz->z = -minor_coord_1;
+        break;
+    case 4:
+        xyz->x = minor_coord_2;
+        xyz->y = -major_coord;
+        xyz->z = -minor_coord_1;
+        break;
+    default:
+        xyz->x = minor_coord_2;
+        xyz->y = minor_coord_1;
+        xyz->z = -major_coord;
+        break;
+    }
 
-	return true;
+    return true;
 }
 
 // ============================================
@@ -278,8 +335,8 @@ inline bool UVtoSphereXYZ(int face, double u, double v, PJ_XYZ* xyz) {
 //      The Forward and Inverse Functions
 //
 // ============================================
-static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_XY s2_forward(PJ_LP lp, PJ *P) {
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double lat;
 
     /* Convert the geodetic latitude to a geocentric latitude.
@@ -304,7 +361,7 @@ static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
     y = coslat * sinlon;
     z = sinlat;
 
-    PJ_XYZ spherePoint {x, y, z};
+    PJ_XYZ spherePoint{x, y, z};
     PJ_XY uvCoords;
 
     ValidFaceXYZtoUV(Q->face, spherePoint, &uvCoords.x, &uvCoords.y);
@@ -313,9 +370,9 @@ static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
     return {s, t};
 }
 
-static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {     
-    PJ_LP lp = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_LP s2_inverse(PJ_XY xy, PJ *P) {
+    PJ_LP lp = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
 
     // Do the S2 projections to get from s,t to u,v to x,y,z
     double u = STtoUV(xy.x, Q->UVtoST);
@@ -330,7 +387,7 @@ static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {
     // Get the spherical angles from the x y z
     lp.phi = acos(-s) - M_HALFPI;
     lp.lam = atan2(r, q);
-    
+
     /* Apply the shift from the sphere to the ellipsoid as described
      * in [LK12]. */
     if (P->es != 0.0) {
@@ -349,9 +406,10 @@ static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {
 }
 
 PJ *PROJECTION(s2) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     /* Determine which UVtoST function is to be used */
@@ -359,12 +417,15 @@ PJ *PROJECTION(s2) {
     if (nullptr != maybeUVtoST.s) {
         try {
             Q->UVtoST = stringToS2ProjectionType.at(maybeUVtoST.s);
-        } catch (const std::out_of_range&) {
-            proj_log_error(P, _("Invalid value for s2 parameter: should be linear, quadratic, tangent, or none."));
-            return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
-	}
+        } catch (const std::out_of_range &) {
+            proj_log_error(
+                P, _("Invalid value for s2 parameter: should be linear, "
+                     "quadratic, tangent, or none."));
+            return pj_default_destructor(P,
+                                         PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
     } else {
-	    Q->UVtoST = Quadratic;
+        Q->UVtoST = Quadratic;
     }
 
     P->left = PJ_IO_UNITS_RADIANS;

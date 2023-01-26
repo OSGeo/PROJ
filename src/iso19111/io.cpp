@@ -2933,22 +2933,18 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
     }
 
     const auto unitType =
-        ci_equal(csType, "ellipsoidal")
-            ? UnitOfMeasure::Type::ANGULAR
-            : ci_equal(csType, "ordinal")
-                  ? UnitOfMeasure::Type::NONE
-                  : ci_equal(csType, "parametric")
-                        ? UnitOfMeasure::Type::PARAMETRIC
-                        : ci_equal(csType, "Cartesian") ||
-                                  ci_equal(csType, "vertical") ||
-                                  ci_equal(csType, "affine")
-                              ? UnitOfMeasure::Type::LINEAR
-                              : (ci_equal(csType, "temporal") ||
-                                 ci_equal(csType, "TemporalDateTime") ||
-                                 ci_equal(csType, "TemporalCount") ||
-                                 ci_equal(csType, "TemporalMeasure"))
-                                    ? UnitOfMeasure::Type::TIME
-                                    : UnitOfMeasure::Type::UNKNOWN;
+        ci_equal(csType, "ellipsoidal")  ? UnitOfMeasure::Type::ANGULAR
+        : ci_equal(csType, "ordinal")    ? UnitOfMeasure::Type::NONE
+        : ci_equal(csType, "parametric") ? UnitOfMeasure::Type::PARAMETRIC
+        : ci_equal(csType, "Cartesian") || ci_equal(csType, "vertical") ||
+                ci_equal(csType, "affine")
+            ? UnitOfMeasure::Type::LINEAR
+        : (ci_equal(csType, "temporal") ||
+           ci_equal(csType, "TemporalDateTime") ||
+           ci_equal(csType, "TemporalCount") ||
+           ci_equal(csType, "TemporalMeasure"))
+            ? UnitOfMeasure::Type::TIME
+            : UnitOfMeasure::Type::UNKNOWN;
     UnitOfMeasure unit = buildUnitInSubNode(parentNode, unitType);
 
     std::vector<CoordinateSystemAxisNNPtr> axisList;
@@ -4731,10 +4727,9 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
                                ->nameStr())
                       .set("VERT_DATUM_TYPE", "2002"))
                   .as_nullable()
-            : !isNull(vdatumNode)
-                  ? buildVerticalReferenceFrame(vdatumNode, dynamicNode)
-                        .as_nullable()
-                  : nullptr;
+        : !isNull(vdatumNode)
+            ? buildVerticalReferenceFrame(vdatumNode, dynamicNode).as_nullable()
+            : nullptr;
     auto datumEnsemble =
         !isNull(ensembleNode)
             ? buildDatumEnsemble(ensembleNode, nullptr, false).as_nullable()
@@ -5159,8 +5154,8 @@ WKTParser::Private::buildEngineeringCRSFromLocalCS(const WKTNodeNNPtr &node) {
         !isNull(datumNode)
             ? buildProperties(datumNode)
             :
-            // In theory OGC 01-009 mandates LOCAL_DATUM, but GDAL has a
-            // tradition of emitting just LOCAL_CS["foo"]
+            // In theory OGC 01-009 mandates LOCAL_DATUM, but GDAL
+            // has a tradition of emitting just LOCAL_CS["foo"]
             []() {
                 PropertyMap map;
                 map.set(IdentifiedObject::NAME_KEY,
@@ -10505,19 +10500,17 @@ PROJStringParser::Private::processAxisSwap(Step &step,
 
     const bool isGeographic = unit.type() == UnitOfMeasure::Type::ANGULAR;
     const bool isSpherical = isGeographic && hasParamValue(step, "geoc");
-    const auto &eastName =
-        isSpherical ? "Planetocentric longitude"
-                    : isGeographic ? AxisName::Longitude : AxisName::Easting;
-    const auto &eastAbbev = isSpherical ? "V"
-                                        : isGeographic ? AxisAbbreviation::lon
-                                                       : AxisAbbreviation::E;
-    const auto &eastDir = isGeographic
-                              ? AxisDirection::EAST
-                              : (axisType == AxisType::NORTH_POLE)
-                                    ? AxisDirection::SOUTH
-                                    : (axisType == AxisType::SOUTH_POLE)
-                                          ? AxisDirection::NORTH
-                                          : AxisDirection::EAST;
+    const auto &eastName = isSpherical    ? "Planetocentric longitude"
+                           : isGeographic ? AxisName::Longitude
+                                          : AxisName::Easting;
+    const auto &eastAbbev = isSpherical    ? "V"
+                            : isGeographic ? AxisAbbreviation::lon
+                                           : AxisAbbreviation::E;
+    const auto &eastDir =
+        isGeographic                         ? AxisDirection::EAST
+        : (axisType == AxisType::NORTH_POLE) ? AxisDirection::SOUTH
+        : (axisType == AxisType::SOUTH_POLE) ? AxisDirection::NORTH
+                                             : AxisDirection::EAST;
     CoordinateSystemAxisNNPtr east = createAxis(
         eastName, eastAbbev, eastDir, unit,
         (!isGeographic &&
@@ -10525,44 +10518,44 @@ PROJStringParser::Private::processAxisSwap(Step &step,
             ? Meridian::create(Angle(90, UnitOfMeasure::DEGREE)).as_nullable()
             : nullMeridian);
 
-    const auto &northName =
-        isSpherical ? "Planetocentric latitude"
-                    : isGeographic ? AxisName::Latitude : AxisName::Northing;
-    const auto &northAbbev = isSpherical ? "U"
-                                         : isGeographic ? AxisAbbreviation::lat
-                                                        : AxisAbbreviation::N;
-    const auto &northDir = isGeographic
-                               ? AxisDirection::NORTH
-                               : (axisType == AxisType::NORTH_POLE)
-                                     ? AxisDirection::SOUTH
-                                     /*: (axisType == AxisType::SOUTH_POLE)
-                                           ? AxisDirection::NORTH*/
-                                     : AxisDirection::NORTH;
+    const auto &northName = isSpherical    ? "Planetocentric latitude"
+                            : isGeographic ? AxisName::Latitude
+                                           : AxisName::Northing;
+    const auto &northAbbev = isSpherical    ? "U"
+                             : isGeographic ? AxisAbbreviation::lat
+                                            : AxisAbbreviation::N;
+    const auto &northDir = isGeographic ? AxisDirection::NORTH
+                           : (axisType == AxisType::NORTH_POLE)
+                               ? AxisDirection::SOUTH
+                               /*: (axisType == AxisType::SOUTH_POLE)
+                                     ? AxisDirection::NORTH*/
+                               : AxisDirection::NORTH;
     CoordinateSystemAxisNNPtr north = createAxis(
         northName, northAbbev, northDir, unit,
-        isGeographic
-            ? nullMeridian
-            : (axisType == AxisType::NORTH_POLE)
-                  ? Meridian::create(Angle(180, UnitOfMeasure::DEGREE))
-                        .as_nullable()
-                  : (axisType == AxisType::SOUTH_POLE)
-                        ? Meridian::create(Angle(0, UnitOfMeasure::DEGREE))
-                              .as_nullable()
-                        : nullMeridian);
+        isGeographic ? nullMeridian
+        : (axisType == AxisType::NORTH_POLE)
+            ? Meridian::create(Angle(180, UnitOfMeasure::DEGREE)).as_nullable()
+        : (axisType == AxisType::SOUTH_POLE)
+            ? Meridian::create(Angle(0, UnitOfMeasure::DEGREE)).as_nullable()
+            : nullMeridian);
 
-    CoordinateSystemAxisNNPtr west = createAxis(
-        isSpherical ? "Planetocentric longitude"
-                    : isGeographic ? AxisName::Longitude : AxisName::Westing,
-        isSpherical ? "V"
-                    : isGeographic ? AxisAbbreviation::lon : std::string(),
-        AxisDirection::WEST, unit);
+    CoordinateSystemAxisNNPtr west =
+        createAxis(isSpherical    ? "Planetocentric longitude"
+                   : isGeographic ? AxisName::Longitude
+                                  : AxisName::Westing,
+                   isSpherical    ? "V"
+                   : isGeographic ? AxisAbbreviation::lon
+                                  : std::string(),
+                   AxisDirection::WEST, unit);
 
-    CoordinateSystemAxisNNPtr south = createAxis(
-        isSpherical ? "Planetocentric latitude"
-                    : isGeographic ? AxisName::Latitude : AxisName::Southing,
-        isSpherical ? "U"
-                    : isGeographic ? AxisAbbreviation::lat : std::string(),
-        AxisDirection::SOUTH, unit);
+    CoordinateSystemAxisNNPtr south =
+        createAxis(isSpherical    ? "Planetocentric latitude"
+                   : isGeographic ? AxisName::Latitude
+                                  : AxisName::Southing,
+                   isSpherical    ? "U"
+                   : isGeographic ? AxisAbbreviation::lat
+                                  : std::string(),
+                   AxisDirection::SOUTH, unit);
 
     std::vector<CoordinateSystemAxisNNPtr> axis{east, north};
 
@@ -11201,10 +11194,9 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
             const auto *param = mapping->params[i];
             std::string proj_name(param->proj_name ? param->proj_name : "");
             const std::string *paramValue =
-                (proj_name == "k" || proj_name == "k_0")
-                    ? &getParamValueK(step)
-                    : !proj_name.empty() ? &getParamValue(step, proj_name)
-                                         : &emptyString;
+                (proj_name == "k" || proj_name == "k_0") ? &getParamValueK(step)
+                : !proj_name.empty() ? &getParamValue(step, proj_name)
+                                     : &emptyString;
             double value = 0;
             if (!paramValue->empty()) {
                 bool hasError = false;
@@ -11291,15 +11283,14 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
             if (std::fabs(valRounded - std::round(valRounded)) < 1e-8) {
                 valRounded = std::round(valRounded);
             }
-            values.push_back(ParameterValue::create(Measure(
-                valRounded,
-                param->unit_type == UnitOfMeasure::Type::ANGULAR
-                    ? UnitOfMeasure::DEGREE
-                    : param->unit_type == UnitOfMeasure::Type::LINEAR
-                          ? unit
-                          : param->unit_type == UnitOfMeasure::Type::SCALE
-                                ? UnitOfMeasure::SCALE_UNITY
-                                : UnitOfMeasure::NONE)));
+            values.push_back(ParameterValue::create(
+                Measure(valRounded,
+                        param->unit_type == UnitOfMeasure::Type::ANGULAR
+                            ? UnitOfMeasure::DEGREE
+                        : param->unit_type == UnitOfMeasure::Type::LINEAR ? unit
+                        : param->unit_type == UnitOfMeasure::Type::SCALE
+                            ? UnitOfMeasure::SCALE_UNITY
+                            : UnitOfMeasure::NONE)));
         }
 
         if (step.name == "tmerc" && hasParamValue(step, "approx")) {

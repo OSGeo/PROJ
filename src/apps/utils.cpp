@@ -30,28 +30,27 @@
 
 #include <string.h>
 
-bool validate_form_string_for_numbers(const char* formatString) {
+bool validate_form_string_for_numbers(const char *formatString) {
     /* Only accepts '%[+]?[number]?[.]?[number]?[e|E|f|F|g|G]' */
     bool valid = true;
-    if( formatString[0] != '%' )
+    if (formatString[0] != '%')
         valid = false;
     else {
         auto oformLen = strlen(formatString);
-        for( int i = 1; i < static_cast<int>(oformLen) - 1; i++ ) {
-            if( !(formatString[i] == '.' ||
-                    formatString[i] == '+' || 
-                    (formatString[i] >= '0' && formatString[i] <= '9')) ) {
+        for (int i = 1; i < static_cast<int>(oformLen) - 1; i++) {
+            if (!(formatString[i] == '.' || formatString[i] == '+' ||
+                  (formatString[i] >= '0' && formatString[i] <= '9'))) {
                 valid = false;
                 break;
             }
         }
-        if( valid ) {
-            valid = formatString[oformLen-1] == 'e' ||
-                        formatString[oformLen-1] == 'E' ||
-                        formatString[oformLen-1] == 'f' ||
-                        formatString[oformLen-1] == 'F' ||
-                        formatString[oformLen-1] == 'g' ||
-                        formatString[oformLen-1] == 'G';
+        if (valid) {
+            valid = formatString[oformLen - 1] == 'e' ||
+                    formatString[oformLen - 1] == 'E' ||
+                    formatString[oformLen - 1] == 'f' ||
+                    formatString[oformLen - 1] == 'F' ||
+                    formatString[oformLen - 1] == 'g' ||
+                    formatString[oformLen - 1] == 'G';
         }
     }
     return valid;

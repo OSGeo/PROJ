@@ -32,25 +32,25 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-PROJ_HEAD(geocent, "Geocentric")  "\n\t";
+PROJ_HEAD(geocent, "Geocentric") "\n\t";
 
 static PJ_XY forward(PJ_LP lp, PJ *P) {
-    PJ_XY xy = {0.0,0.0};
-    (void) P;
+    PJ_XY xy = {0.0, 0.0};
+    (void)P;
     xy.x = lp.lam;
     xy.y = lp.phi;
     return xy;
 }
 
 static PJ_LP inverse(PJ_XY xy, PJ *P) {
-    PJ_LP lp = {0.0,0.0};
-    (void) P;
+    PJ_LP lp = {0.0, 0.0};
+    (void)P;
     lp.phi = xy.y;
     lp.lam = xy.x;
     return lp;
 }
 
-PJ *CONVERSION (geocent, 0) {
+PJ *CONVERSION(geocent, 0) {
     P->is_geocent = 1;
     P->x0 = 0.0;
     P->y0 = 0.0;
@@ -61,4 +61,3 @@ PJ *CONVERSION (geocent, 0) {
 
     return P;
 }
-

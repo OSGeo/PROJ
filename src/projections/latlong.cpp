@@ -31,59 +31,50 @@
 #define PJ_LIB_
 #include "proj_internal.h"
 
-PROJ_HEAD(lonlat, "Lat/long (Geodetic)")  "\n\t";
-PROJ_HEAD(latlon, "Lat/long (Geodetic alias)")  "\n\t";
-PROJ_HEAD(latlong, "Lat/long (Geodetic alias)")  "\n\t";
-PROJ_HEAD(longlat, "Lat/long (Geodetic alias)")  "\n\t";
+PROJ_HEAD(lonlat, "Lat/long (Geodetic)") "\n\t";
+PROJ_HEAD(latlon, "Lat/long (Geodetic alias)") "\n\t";
+PROJ_HEAD(latlong, "Lat/long (Geodetic alias)") "\n\t";
+PROJ_HEAD(longlat, "Lat/long (Geodetic alias)") "\n\t";
 
-
- static PJ_XY latlong_forward(PJ_LP lp, PJ *P) {
-    PJ_XY xy = {0.0,0.0};
-    (void) P;
+static PJ_XY latlong_forward(PJ_LP lp, PJ *P) {
+    PJ_XY xy = {0.0, 0.0};
+    (void)P;
     xy.x = lp.lam;
     xy.y = lp.phi;
     return xy;
 }
 
-
 static PJ_LP latlong_inverse(PJ_XY xy, PJ *P) {
-    PJ_LP lp = {0.0,0.0};
-    (void) P;
+    PJ_LP lp = {0.0, 0.0};
+    (void)P;
     lp.phi = xy.y;
     lp.lam = xy.x;
     return lp;
 }
 
-
- static PJ_XYZ latlong_forward_3d (PJ_LPZ lpz, PJ *P) {
-    PJ_XYZ xyz = {0,0,0};
-    (void) P;
+static PJ_XYZ latlong_forward_3d(PJ_LPZ lpz, PJ *P) {
+    PJ_XYZ xyz = {0, 0, 0};
+    (void)P;
     xyz.x = lpz.lam;
     xyz.y = lpz.phi;
     xyz.z = lpz.z;
     return xyz;
 }
 
-
-static PJ_LPZ latlong_inverse_3d (PJ_XYZ xyz, PJ *P) {
-    PJ_LPZ lpz = {0,0,0};
-    (void) P;
+static PJ_LPZ latlong_inverse_3d(PJ_XYZ xyz, PJ *P) {
+    PJ_LPZ lpz = {0, 0, 0};
+    (void)P;
     lpz.lam = xyz.x;
     lpz.phi = xyz.y;
-    lpz.z   = xyz.z;
+    lpz.z = xyz.z;
     return lpz;
 }
 
-static void latlong_forward_4d (PJ_COORD&, PJ *) {
-}
+static void latlong_forward_4d(PJ_COORD &, PJ *) {}
 
+static void latlong_inverse_4d(PJ_COORD &, PJ *) {}
 
-static void latlong_inverse_4d (PJ_COORD&, PJ *) {
-}
-
-
-
-static PJ *latlong_setup (PJ *P) {
+static PJ *latlong_setup(PJ *P) {
     P->is_latlong = 1;
     P->x0 = 0;
     P->y0 = 0;
@@ -98,22 +89,10 @@ static PJ *latlong_setup (PJ *P) {
     return P;
 }
 
-PJ *PROJECTION(latlong) {
-    return latlong_setup (P);
-}
+PJ *PROJECTION(latlong) { return latlong_setup(P); }
 
+PJ *PROJECTION(longlat) { return latlong_setup(P); }
 
-PJ *PROJECTION(longlat) {
-    return latlong_setup (P);
-}
+PJ *PROJECTION(latlon) { return latlong_setup(P); }
 
-
-PJ *PROJECTION(latlon) {
-    return latlong_setup (P);
-}
-
-
-PJ *PROJECTION(lonlat) {
-    return latlong_setup (P);
-}
-
+PJ *PROJECTION(lonlat) { return latlong_setup(P); }

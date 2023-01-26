@@ -15,10 +15,11 @@
  */
 
 /*
- * The Patterson Cylindrical projection was designed by Tom Patterson, US National
- * Park Service, in 2014, using Flex Projector. The polynomial equations for the
- * projection were developed by Bojan Savric, Oregon State University, in
- * collaboration with Tom Patterson and Bernhard Jenny, Oregon State University.
+ * The Patterson Cylindrical projection was designed by Tom Patterson, US
+ * National Park Service, in 2014, using Flex Projector. The polynomial
+ * equations for the projection were developed by Bojan Savric, Oregon State
+ * University, in collaboration with Tom Patterson and Bernhard Jenny, Oregon
+ * State University.
  *
  * Java reference algorithm implemented by Bojan Savric in Java Map Projection
  * Library (a Java port of PROJ.4) in the file PattersonProjection.java.
@@ -60,11 +61,10 @@ PROJ_HEAD(patterson, "Patterson Cylindrical") "\n\tCyl";
 /* Not sure at all of the appropriate number for MAX_ITER... */
 #define MAX_ITER 100
 
-
-static PJ_XY patterson_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
-    PJ_XY xy = {0.0,0.0};
+static PJ_XY patterson_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     double phi2;
-    (void) P;
+    (void)P;
 
     phi2 = lp.phi * lp.phi;
     xy.x = lp.lam;
@@ -73,12 +73,11 @@ static PJ_XY patterson_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, fo
     return xy;
 }
 
-
-static PJ_LP patterson_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
-    PJ_LP lp = {0.0,0.0};
+static PJ_LP patterson_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
     double yc;
     int i;
-    (void) P;
+    (void)P;
 
     yc = xy.y;
 
@@ -89,9 +88,10 @@ static PJ_LP patterson_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, in
         xy.y = -MAX_Y;
     }
 
-    for (i = MAX_ITER; i ; --i) { /* Newton-Raphson */
+    for (i = MAX_ITER; i; --i) { /* Newton-Raphson */
         const double y2 = yc * yc;
-        const double f = (yc * (K1 + y2 * y2 * (K2 + y2 * (K3 + K4 * y2)))) - xy.y;
+        const double f =
+            (yc * (K1 + y2 * y2 * (K2 + y2 * (K3 + K4 * y2)))) - xy.y;
         const double fder = C1 + y2 * y2 * (C2 + y2 * (C3 + C4 * y2));
         const double tol = f / fder;
         yc -= tol;
@@ -99,8 +99,9 @@ static PJ_LP patterson_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, in
             break;
         }
     }
-    if( i == 0 )
-        proj_context_errno_set( P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN );
+    if (i == 0)
+        proj_context_errno_set(
+            P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
     lp.phi = yc;
 
     /* longitude */
@@ -108,7 +109,6 @@ static PJ_LP patterson_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, in
 
     return lp;
 }
-
 
 PJ *PROJECTION(patterson) {
     P->es = 0.;

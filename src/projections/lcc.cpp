@@ -1,11 +1,11 @@
 #define PJ_LIB_
-#include <errno.h>
 #include "proj.h"
 #include "proj_internal.h"
+#include <errno.h>
 #include <math.h>
 
 PROJ_HEAD(lcc, "Lambert Conformal Conic")
-    "\n\tConic, Sph&Ell\n\tlat_1= and lat_2= or lat_0, k_0=";
+"\n\tConic, Sph&Ell\n\tlat_1= and lat_2= or lat_0, k_0=";
 
 #define EPS10 1.e-10
 
@@ -19,10 +19,9 @@ struct pj_opaque {
 };
 } // anonymous namespace
 
-
-static PJ_XY lcc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY lcc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0., 0.};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double rho;
 
     if (fabs(fabs(lp.phi) - M_HALFPI) < EPS10) {
@@ -32,9 +31,9 @@ static PJ_XY lcc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward 
         }
         rho = 0.;
     } else {
-        rho = Q->c * (P->es != 0. ?
-                      pow(pj_tsfn(lp.phi, sin(lp.phi), P->e), Q->n) :
-                      pow(tan(M_FORTPI + .5 * lp.phi), -Q->n));
+        rho =
+            Q->c * (P->es != 0. ? pow(pj_tsfn(lp.phi, sin(lp.phi), P->e), Q->n)
+                                : pow(tan(M_FORTPI + .5 * lp.phi), -Q->n));
     }
     lp.lam *= Q->n;
     xy.x = P->k0 * (rho * sin(lp.lam));
@@ -42,10 +41,9 @@ static PJ_XY lcc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward 
     return xy;
 }
 
-
-static PJ_LP lcc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP lcc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0., 0.};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double rho;
 
     xy.x /= P->k0;
@@ -60,14 +58,15 @@ static PJ_LP lcc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse 
             xy.y = -xy.y;
         }
         if (P->es != 0.) {
-            lp.phi = pj_phi2(P->ctx, pow(rho / Q->c, 1./Q->n), P->e);
+            lp.phi = pj_phi2(P->ctx, pow(rho / Q->c, 1. / Q->n), P->e);
             if (lp.phi == HUGE_VAL) {
-                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+                proj_errno_set(
+                    P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return lp;
             }
 
         } else
-            lp.phi = 2. * atan(pow(Q->c / rho, 1./Q->n)) - M_HALFPI;
+            lp.phi = 2. * atan(pow(Q->c / rho, 1. / Q->n)) - M_HALFPI;
         lp.lam = atan2(xy.x, xy.y) / Q->n;
     } else {
         lp.lam = 0.;
@@ -76,11 +75,11 @@ static PJ_LP lcc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse 
     return lp;
 }
 
-
 PJ *PROJECTION(lcc) {
     double cosphi, sinphi;
     int secant;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc(1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
 
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
@@ -95,21 +94,23 @@ PJ *PROJECTION(lcc) {
             P->phi0 = Q->phi1;
     }
 
-    if (fabs(Q->phi1 + Q->phi2) < EPS10)
-    {
-        proj_log_error(P, _("Invalid value for lat_1 and lat_2: |lat_1 + lat_2| should be > 0"));
+    if (fabs(Q->phi1 + Q->phi2) < EPS10) {
+        proj_log_error(P, _("Invalid value for lat_1 and lat_2: |lat_1 + "
+                            "lat_2| should be > 0"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     Q->n = sinphi = sin(Q->phi1);
     cosphi = cos(Q->phi1);
 
-    if( fabs(cosphi) < EPS10 || fabs(Q->phi1) >= M_PI_2 ) {
-        proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be < 90°"));
+    if (fabs(cosphi) < EPS10 || fabs(Q->phi1) >= M_PI_2) {
+        proj_log_error(P,
+                       _("Invalid value for lat_1: |lat_1| should be < 90°"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
-    if( fabs(cos(Q->phi2)) < EPS10 || fabs(Q->phi2) >= M_PI_2 ) {
-        proj_log_error(P, _("Invalid value for lat_2: |lat_2| should be < 90°"));
+    if (fabs(cos(Q->phi2)) < EPS10 || fabs(Q->phi2) >= M_PI_2) {
+        proj_log_error(P,
+                       _("Invalid value for lat_2: |lat_2| should be < 90°"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
@@ -125,35 +126,42 @@ PJ *PROJECTION(lcc) {
             if (Q->n == 0) {
                 // Not quite, but es is very close to 1...
                 proj_log_error(P, _("Invalid value for eccentricity"));
-                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+                return pj_default_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
             const double ml2 = pj_tsfn(Q->phi2, sinphi, P->e);
             const double denom = log(ml1 / ml2);
-            if( denom == 0 ) {
+            if (denom == 0) {
                 // Not quite, but es is very close to 1...
                 proj_log_error(P, _("Invalid value for eccentricity"));
-                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+                return pj_default_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
             Q->n /= denom;
         }
         Q->rho0 = m1 * pow(ml1, -Q->n) / Q->n;
         Q->c = Q->rho0;
-        Q->rho0 *= (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) ? 0. :
-            pow(pj_tsfn(P->phi0, sin(P->phi0), P->e), Q->n);
+        Q->rho0 *= (fabs(fabs(P->phi0) - M_HALFPI) < EPS10)
+                       ? 0.
+                       : pow(pj_tsfn(P->phi0, sin(P->phi0), P->e), Q->n);
     } else {
         if (secant)
-            Q->n = log(cosphi / cos(Q->phi2)) /
-               log(tan(M_FORTPI + .5 * Q->phi2) /
-               tan(M_FORTPI + .5 * Q->phi1));
-        if( Q->n == 0 ) {
+            Q->n =
+                log(cosphi / cos(Q->phi2)) / log(tan(M_FORTPI + .5 * Q->phi2) /
+                                                 tan(M_FORTPI + .5 * Q->phi1));
+        if (Q->n == 0) {
             // Likely reason is that phi1 / phi2 are too close to zero.
             // Can be reproduced with +proj=lcc +a=1 +lat_2=.0000001
-            proj_log_error(P, _("Invalid value for lat_1 and lat_2: |lat_1 + lat_2| should be > 0"));
-            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            proj_log_error(
+                P, _("Invalid value for lat_1 and lat_2: |lat_1 + lat_2| "
+                     "should be > 0"));
+            return pj_default_destructor(P,
+                                         PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
         Q->c = cosphi * pow(tan(M_FORTPI + .5 * Q->phi1), Q->n) / Q->n;
-        Q->rho0 = (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) ? 0. :
-            Q->c * pow(tan(M_FORTPI + .5 * P->phi0), -Q->n);
+        Q->rho0 = (fabs(fabs(P->phi0) - M_HALFPI) < EPS10)
+                      ? 0.
+                      : Q->c * pow(tan(M_FORTPI + .5 * P->phi0), -Q->n);
     }
 
     P->inv = lcc_e_inverse;

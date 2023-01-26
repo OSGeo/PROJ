@@ -73,23 +73,19 @@ typedef struct {
 } osr_cs_wkt_tokens;
 
 #define PAIR(X)                                                                \
-    { #X, T_##X }
+    {                                                                          \
+#X, T_##X                                                              \
+    }
 
 static const osr_cs_wkt_tokens tokens[] = {
-    PAIR(PARAM_MT),       PAIR(PARAMETER),  PAIR(CONCAT_MT),  PAIR(INVERSE_MT),
+    PAIR(PARAM_MT),       PAIR(PARAMETER),  PAIR(CONCAT_MT),   PAIR(INVERSE_MT),
     PAIR(PASSTHROUGH_MT),
 
-    PAIR(PROJCS),         PAIR(PROJECTION), PAIR(GEOGCS),     PAIR(DATUM),
-    PAIR(SPHEROID),       PAIR(PRIMEM),     PAIR(UNIT),       PAIR(GEOCCS),
-    PAIR(AUTHORITY),
-    PAIR(VERT_CS),
-    PAIR(VERTCS),
-    PAIR(VERT_DATUM),
-    PAIR(VDATUM),
-    PAIR(COMPD_CS),
-    PAIR(AXIS),           PAIR(TOWGS84),    PAIR(FITTED_CS),  PAIR(LOCAL_CS),
-    PAIR(LOCAL_DATUM),
-    PAIR(LINUNIT),
+    PAIR(PROJCS),         PAIR(PROJECTION), PAIR(GEOGCS),      PAIR(DATUM),
+    PAIR(SPHEROID),       PAIR(PRIMEM),     PAIR(UNIT),        PAIR(GEOCCS),
+    PAIR(AUTHORITY),      PAIR(VERT_CS),    PAIR(VERTCS),      PAIR(VERT_DATUM),
+    PAIR(VDATUM),         PAIR(COMPD_CS),   PAIR(AXIS),        PAIR(TOWGS84),
+    PAIR(FITTED_CS),      PAIR(LOCAL_CS),   PAIR(LOCAL_DATUM), PAIR(LINUNIT),
 
     PAIR(EXTENSION)};
 

@@ -1,25 +1,25 @@
 /************************************************************************
-* Copyright (c) 2022, Even Rouault <even.rouault at spatialys.com>
-*
-* Permission is hereby granted, free of charge, to any person obtaining a
-* copy of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense,
-* and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-* DEALINGS IN THE SOFTWARE.
-*
-***********************************************************************/
+ * Copyright (c) 2022, Even Rouault <even.rouault at spatialys.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ *
+ ***********************************************************************/
 #define PJ_LIB_
 
 #include <errno.h>
@@ -29,7 +29,7 @@
 #include "proj_internal.h"
 
 PROJ_HEAD(vertoffset, "Vertical Offset and Slope")
-    "\n\tTransformation"
+"\n\tTransformation"
     "\n\tlat_0= lon_0= dh= slope_lat= slope_lon=";
 
 namespace { // anonymous namespace
@@ -42,13 +42,13 @@ struct pj_opaque_vertoffset {
 };
 } // anonymous namespace
 
-// Cf EPSG Dataset coordinate operation method code 1046 "Vertical Offset and Slope"
+// Cf EPSG Dataset coordinate operation method code 1046 "Vertical Offset and
+// Slope"
 
-static double get_forward_offset(const PJ* P, double phi, double lam)
-{
-    const struct pj_opaque_vertoffset *Q = (const struct pj_opaque_vertoffset *) P->opaque;
-    return Q->zoff +
-           Q->slope_lat * Q->rho0 * (phi - P->phi0) +
+static double get_forward_offset(const PJ *P, double phi, double lam) {
+    const struct pj_opaque_vertoffset *Q =
+        (const struct pj_opaque_vertoffset *)P->opaque;
+    return Q->zoff + Q->slope_lat * Q->rho0 * (phi - P->phi0) +
            Q->slope_lon * Q->nu0 * lam * cos(phi);
 }
 
@@ -62,7 +62,6 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     xyz.z = lpz.z + get_forward_offset(P, lpz.phi, lpz.lam);
     return xyz;
 }
-
 
 static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     PJ_LPZ lpz;
@@ -78,18 +77,18 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 /* Arcsecond to radians */
 #define ARCSEC_TO_RAD (DEG_TO_RAD / 3600.0)
 
-
-PJ *TRANSFORMATION(vertoffset,1) {
-    struct pj_opaque_vertoffset *Q = static_cast<struct pj_opaque_vertoffset *>(calloc(1, sizeof(struct pj_opaque_vertoffset)));
-    if (nullptr==Q)
+PJ *TRANSFORMATION(vertoffset, 1) {
+    struct pj_opaque_vertoffset *Q = static_cast<struct pj_opaque_vertoffset *>(
+        calloc(1, sizeof(struct pj_opaque_vertoffset)));
+    if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
-    P->opaque = (void *) Q;
+    P->opaque = (void *)Q;
 
-    P->fwd3d  = forward_3d;
-    P->inv3d  = reverse_3d;
+    P->fwd3d = forward_3d;
+    P->inv3d = reverse_3d;
 
-    P->left   = PJ_IO_UNITS_RADIANS;
-    P->right  = PJ_IO_UNITS_RADIANS;
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
 
     /* read args */
     Q->slope_lon = pj_param(P->ctx, P->params, "dslope_lon").f * ARCSEC_TO_RAD;
@@ -97,8 +96,9 @@ PJ *TRANSFORMATION(vertoffset,1) {
     Q->zoff = pj_param(P->ctx, P->params, "ddh").f;
     const double sinlat0 = sin(P->phi0);
     const double oneMinusEsSinlat0Square = 1 - P->es * (sinlat0 * sinlat0);
-    Q->rho0 = P->a * (1 - P->es) / (oneMinusEsSinlat0Square * sqrt(oneMinusEsSinlat0Square));
-    Q->nu0  = P->a / sqrt(oneMinusEsSinlat0Square);
+    Q->rho0 = P->a * (1 - P->es) /
+              (oneMinusEsSinlat0Square * sqrt(oneMinusEsSinlat0Square));
+    Q->nu0 = P->a / sqrt(oneMinusEsSinlat0Square);
 
     return P;
 }

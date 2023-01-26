@@ -1,5 +1,6 @@
 #ifdef DO_PJ_LIST_ID
-static const char PJ_LIST_H_ID[] = "@(#)pj_list.h	4.5	95/08/09	GIE	REL";
+static const char PJ_LIST_H_ID[] =
+    "@(#)pj_list.h	4.5	95/08/09	GIE	REL";
 #endif
 /* Full list of current projections for Tue Jan 11 12:27:04 EST 1994
 **
@@ -23,7 +24,7 @@ PROJ_HEAD(bipc, "Bipolar conic of western hemisphere")
 PROJ_HEAD(boggs, "Boggs Eumorphic")
 PROJ_HEAD(bonne, "Bonne (Werner lat_1=90)")
 PROJ_HEAD(calcofi, "Cal Coop Ocean Fish Invest Lines/Stations")
-PROJ_HEAD(cart,    "Geodetic/cartesian conversions")
+PROJ_HEAD(cart, "Geodetic/cartesian conversions")
 PROJ_HEAD(cass, "Cassini")
 PROJ_HEAD(cc, "Central Cylindrical")
 PROJ_HEAD(ccon, "Central Conic")
@@ -46,7 +47,7 @@ PROJ_HEAD(eqearth, "Equal Earth")
 PROJ_HEAD(eqc, "Equidistant Cylindrical (Plate Carree)")
 PROJ_HEAD(eqdc, "Equidistant Conic")
 PROJ_HEAD(euler, "Euler")
-PROJ_HEAD(etmerc, "Extended Transverse Mercator" )
+PROJ_HEAD(etmerc, "Extended Transverse Mercator")
 PROJ_HEAD(fahey, "Fahey")
 PROJ_HEAD(fouc, "Foucaut")
 PROJ_HEAD(fouc_s, "Foucaut Sinusoidal")
@@ -67,11 +68,11 @@ PROJ_HEAD(hammer, "Hammer & Eckert-Greifendorff")
 PROJ_HEAD(hatano, "Hatano Asymmetrical Equal Area")
 PROJ_HEAD(healpix, "HEALPix")
 PROJ_HEAD(rhealpix, "rHEALPix")
-PROJ_HEAD(helmert,   "3- and 7-parameter Helmert shift")
+PROJ_HEAD(helmert, "3- and 7-parameter Helmert shift")
 PROJ_HEAD(hgridshift, "Horizontal grid shift")
-PROJ_HEAD(horner,    "Horner polynomial evaluation")
-PROJ_HEAD(igh,  "Interrupted Goode Homolosine")
-PROJ_HEAD(igh_o,  "Interrupted Goode Homolosine Oceanic View")
+PROJ_HEAD(horner, "Horner polynomial evaluation")
+PROJ_HEAD(igh, "Interrupted Goode Homolosine")
+PROJ_HEAD(igh_o, "Interrupted Goode Homolosine Oceanic View")
 PROJ_HEAD(imoll, "Interrupted Mollweide")
 PROJ_HEAD(imoll_o, "Interrupted Mollweide Oceanic View")
 PROJ_HEAD(imw_p, "International Map of the World Polyconic")
@@ -104,7 +105,8 @@ PROJ_HEAD(mil_os, "Miller Oblated Stereographic")
 PROJ_HEAD(mill, "Miller Cylindrical")
 PROJ_HEAD(misrsom, "Space oblique for MISR")
 PROJ_HEAD(moll, "Mollweide")
-PROJ_HEAD(molobadekas, "Molodensky-Badekas transform") /* implemented in PJ_helmert.c */
+PROJ_HEAD(molobadekas,
+          "Molodensky-Badekas transform") /* implemented in PJ_helmert.c */
 PROJ_HEAD(molodensky, "Molodensky transform")
 PROJ_HEAD(murd1, "Murdoch I")
 PROJ_HEAD(murd2, "Murdoch II")
@@ -152,7 +154,8 @@ PROJ_HEAD(som, "Space Oblique Mercator")
 PROJ_HEAD(somerc, "Swiss. Obl. Mercator")
 PROJ_HEAD(stere, "Stereographic")
 PROJ_HEAD(sterea, "Oblique Stereographic Alternative")
-PROJ_HEAD(gstmerc, "Gauss-Schreiber Transverse Mercator (aka Gauss-Laborde Reunion)")
+PROJ_HEAD(gstmerc,
+          "Gauss-Schreiber Transverse Mercator (aka Gauss-Laborde Reunion)")
 PROJ_HEAD(tcc, "Transverse Central Cylindrical")
 PROJ_HEAD(tcea, "Transverse Cylindrical Equal Area")
 PROJ_HEAD(times, "Times Projection")

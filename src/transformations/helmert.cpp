@@ -57,17 +57,15 @@ Last update: 2018-10-26
 PROJ_HEAD(helmert, "3(6)-, 4(8)- and 7(14)-parameter Helmert shift");
 PROJ_HEAD(molobadekas, "Molodensky-Badekas transformation");
 
-static PJ_XYZ helmert_forward_3d (PJ_LPZ lpz, PJ *P);
-static PJ_LPZ helmert_reverse_3d (PJ_XYZ xyz, PJ *P);
-
-
+static PJ_XYZ helmert_forward_3d(PJ_LPZ lpz, PJ *P);
+static PJ_LPZ helmert_reverse_3d(PJ_XYZ xyz, PJ *P);
 
 /***********************************************************************/
 namespace { // anonymous namespace
 struct pj_opaque_helmert {
-/************************************************************************
-    Projection specific elements for the "helmert" PJ object
-************************************************************************/
+    /************************************************************************
+        Projection specific elements for the "helmert" PJ object
+    ************************************************************************/
     PJ_XYZ xyz;
     PJ_XYZ xyz_0;
     PJ_XYZ dxyz;
@@ -88,8 +86,8 @@ struct pj_opaque_helmert {
 };
 } // anonymous namespace
 
-
-/* Make the maths of the rotation operations somewhat more readable and textbook like */
+/* Make the maths of the rotation operations somewhat more readable and textbook
+ * like */
 #define R00 (Q->R[0][0])
 #define R01 (Q->R[0][1])
 #define R02 (Q->R[0][2])
@@ -104,31 +102,32 @@ struct pj_opaque_helmert {
 
 /**************************************************************************/
 static void update_parameters(PJ *P) {
-/***************************************************************************
+    /***************************************************************************
 
-    Update transformation parameters.
-    ---------------------------------
+        Update transformation parameters.
+        ---------------------------------
 
-    The 14-parameter Helmert transformation is at it's core the same as the
-    7-parameter transformation, since the transformation parameters are
-    projected forward or backwards in time via the rate of changes of the
-    parameters. The transformation parameters are calculated for a specific
-    epoch before the actual Helmert transformation is carried out.
+        The 14-parameter Helmert transformation is at it's core the same as the
+        7-parameter transformation, since the transformation parameters are
+        projected forward or backwards in time via the rate of changes of the
+        parameters. The transformation parameters are calculated for a specific
+        epoch before the actual Helmert transformation is carried out.
 
-    The transformation parameters are updated with the following equation [0]:
+        The transformation parameters are updated with the following equation
+    [0]:
 
-                      .
-    P(t) = P(EPOCH) + P * (t - EPOCH)
+                          .
+        P(t) = P(EPOCH) + P * (t - EPOCH)
 
-                                                              .
-    where EPOCH is the epoch indicated in the above table and P is the rate
-    of that parameter.
+                                                                  .
+        where EPOCH is the epoch indicated in the above table and P is the rate
+        of that parameter.
 
-    [0] http://itrf.ign.fr/doc_ITRF/Transfo-ITRF2008_ITRFs.txt
+        [0] http://itrf.ign.fr/doc_ITRF/Transfo-ITRF2008_ITRFs.txt
 
-*******************************************************************************/
+    *******************************************************************************/
 
-    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *)P->opaque;
     double dt = Q->t_obs - Q->t_epoch;
 
     Q->xyz.x = Q->xyz_0.x + Q->dxyz.x * dt;
@@ -145,12 +144,14 @@ static void update_parameters(PJ *P) {
 
     /* debugging output */
     if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
-        proj_log_trace(P, "Transformation parameters for observation "
-                       "t_obs=%g (t_epoch=%g):", Q->t_obs, Q->t_epoch);
+        proj_log_trace(P,
+                       "Transformation parameters for observation "
+                       "t_obs=%g (t_epoch=%g):",
+                       Q->t_obs, Q->t_epoch);
         proj_log_trace(P, "x: %g", Q->xyz.x);
         proj_log_trace(P, "y: %g", Q->xyz.y);
         proj_log_trace(P, "z: %g", Q->xyz.z);
-        proj_log_trace(P, "s: %g", Q->scale*1e-6);
+        proj_log_trace(P, "s: %g", Q->scale * 1e-6);
         proj_log_trace(P, "rx: %g", Q->opk.o);
         proj_log_trace(P, "ry: %g", Q->opk.p);
         proj_log_trace(P, "rz: %g", Q->opk.k);
@@ -160,76 +161,77 @@ static void update_parameters(PJ *P) {
 
 /**************************************************************************/
 static void build_rot_matrix(PJ *P) {
-/***************************************************************************
+    /***************************************************************************
 
-    Build rotation matrix.
-    ----------------------
+        Build rotation matrix.
+        ----------------------
 
-    Here we rename rotation indices from omega, phi, kappa (opk), to
-    fi (i.e. phi), theta, psi (ftp), in order to reduce the mental agility
-    needed to implement the expression for the rotation matrix derived over
-    at https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions
-    The relevant section is Euler angles ( z-’-x" intrinsic) -> Rotation matrix
+        Here we rename rotation indices from omega, phi, kappa (opk), to
+        fi (i.e. phi), theta, psi (ftp), in order to reduce the mental agility
+        needed to implement the expression for the rotation matrix derived over
+        at https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions
+        The relevant section is Euler angles ( z-’-x" intrinsic) -> Rotation
+    matrix
 
-    By default small angle approximations are used:
-    The matrix elements are approximated by expanding the trigonometric
-    functions to linear order (i.e. cos(x) = 1, sin(x) = x), and discarding
-    products of second order.
+        By default small angle approximations are used:
+        The matrix elements are approximated by expanding the trigonometric
+        functions to linear order (i.e. cos(x) = 1, sin(x) = x), and discarding
+        products of second order.
 
-    This was a useful hack when calculating by hand was the only option,
-    but in general, today, should be avoided because:
+        This was a useful hack when calculating by hand was the only option,
+        but in general, today, should be avoided because:
 
-    1. It does not save much computation time, as the rotation matrix
-       is built only once and probably used many times (except when
-       transforming spatio-temporal coordinates).
+        1. It does not save much computation time, as the rotation matrix
+           is built only once and probably used many times (except when
+           transforming spatio-temporal coordinates).
 
-    2. The error induced may be too large for ultra high accuracy
-       applications: the Earth is huge and the linear error is
-       approximately the angular error multiplied by the Earth radius.
+        2. The error induced may be too large for ultra high accuracy
+           applications: the Earth is huge and the linear error is
+           approximately the angular error multiplied by the Earth radius.
 
-    However, in many cases the approximation is necessary, since it has
-    been used historically: Rotation angles from older published datum
-    shifts may actually be a least squares fit to the linearized rotation
-    approximation, hence not being strictly valid for deriving the exact
-    rotation matrix. In fact, most publicly available transformation
-    parameters are based on the approximate Helmert transform, which is why
-    we use that as the default setting, even though it is more correct to
-    use the exact form of the equations.
+        However, in many cases the approximation is necessary, since it has
+        been used historically: Rotation angles from older published datum
+        shifts may actually be a least squares fit to the linearized rotation
+        approximation, hence not being strictly valid for deriving the exact
+        rotation matrix. In fact, most publicly available transformation
+        parameters are based on the approximate Helmert transform, which is why
+        we use that as the default setting, even though it is more correct to
+        use the exact form of the equations.
 
-    So in order to fit historically derived coordinates, the access to
-    the approximate rotation matrix is necessary - at least in principle.
+        So in order to fit historically derived coordinates, the access to
+        the approximate rotation matrix is necessary - at least in principle.
 
-    Also, when using any published datum transformation information, one
-    should always check which convention (exact or approximate rotation
-    matrix) is expected, and whether the induced error for selecting
-    the opposite convention is acceptable (which it often is).
+        Also, when using any published datum transformation information, one
+        should always check which convention (exact or approximate rotation
+        matrix) is expected, and whether the induced error for selecting
+        the opposite convention is acceptable (which it often is).
 
 
-    Sign conventions
-    ----------------
+        Sign conventions
+        ----------------
 
-    Take care: Two different sign conventions exist for the rotation terms.
+        Take care: Two different sign conventions exist for the rotation terms.
 
-    Conceptually they relate to whether we rotate the coordinate system
-    or the "position vector" (the vector going from the coordinate system
-    origin to the point being transformed, i.e. the point coordinates
-    interpreted as vector coordinates).
+        Conceptually they relate to whether we rotate the coordinate system
+        or the "position vector" (the vector going from the coordinate system
+        origin to the point being transformed, i.e. the point coordinates
+        interpreted as vector coordinates).
 
-    Switching between the "position vector" and "coordinate system"
-    conventions is simply a matter of switching the sign of the rotation
-    angles, which algebraically also translates into a transposition of
-    the rotation matrix.
+        Switching between the "position vector" and "coordinate system"
+        conventions is simply a matter of switching the sign of the rotation
+        angles, which algebraically also translates into a transposition of
+        the rotation matrix.
 
-    Hence, as geodetic constants should preferably be referred to exactly
-    as published, the "convention" option provides the ability to switch
-    between the conventions.
+        Hence, as geodetic constants should preferably be referred to exactly
+        as published, the "convention" option provides the ability to switch
+        between the conventions.
 
-***************************************************************************/
-    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
+    ***************************************************************************/
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *)P->opaque;
 
-    double  f,  t,  p;    /* phi/fi , theta, psi  */
-    double cf, ct, cp;    /* cos (fi, theta, psi) */
-    double sf, st, sp;    /* sin (fi, theta, psi) */
+    double f, t, p;    /* phi/fi , theta, psi  */
+    double cf, ct, cp; /* cos (fi, theta, psi) */
+    double sf, st, sp; /* sin (fi, theta, psi) */
 
     /* rename   (omega, phi, kappa)   to   (fi, theta, psi)   */
     f = Q->opk.o;
@@ -237,7 +239,8 @@ static void build_rot_matrix(PJ *P) {
     p = Q->opk.k;
 
     /* Those equations are given assuming coordinate frame convention. */
-    /* For the position vector convention, we transpose the matrix just after. */
+    /* For the position vector convention, we transpose the matrix just after.
+     */
     if (Q->exact) {
         cf = cos(f);
         sf = sin(f);
@@ -246,32 +249,30 @@ static void build_rot_matrix(PJ *P) {
         cp = cos(p);
         sp = sin(p);
 
+        R00 = ct * cp;
+        R01 = cf * sp + sf * st * cp;
+        R02 = sf * sp - cf * st * cp;
 
-        R00 = ct*cp;
-        R01 = cf*sp + sf*st*cp;
-        R02 = sf*sp - cf*st*cp;
+        R10 = -ct * sp;
+        R11 = cf * cp - sf * st * sp;
+        R12 = sf * cp + cf * st * sp;
 
-        R10 = -ct*sp;
-        R11 =  cf*cp - sf*st*sp;
-        R12 =  sf*cp + cf*st*sp;
-
-        R20 =  st;
-        R21 = -sf*ct;
-        R22 =  cf*ct;
-    } else{
-        R00 =  1;
-        R01 =  p;
+        R20 = st;
+        R21 = -sf * ct;
+        R22 = cf * ct;
+    } else {
+        R00 = 1;
+        R01 = p;
         R02 = -t;
 
         R10 = -p;
-        R11 =  1;
-        R12 =  f;
+        R11 = 1;
+        R12 = f;
 
-        R20 =  t;
+        R20 = t;
         R21 = -f;
-        R22 =  1;
+        R22 = 1;
     }
-
 
     /*
         For comparison: Description from Engsager/Poder implementation
@@ -299,12 +300,17 @@ static void build_rot_matrix(PJ *P) {
         trp->scale = 1.0 + scale;
     */
 
-
     if (Q->is_position_vector) {
         double r;
-        r = R01;    R01 = R10;    R10 = r;
-        r = R02;    R02 = R20;    R20 = r;
-        r = R12;    R12 = R21;    R21 = r;
+        r = R01;
+        R01 = R10;
+        R10 = r;
+        r = R02;
+        R02 = R20;
+        R20 = r;
+        r = R12;
+        R12 = R21;
+        R21 = r;
     }
 
     /* some debugging output */
@@ -316,14 +322,11 @@ static void build_rot_matrix(PJ *P) {
     }
 }
 
-
-
-
 /***********************************************************************/
-static PJ_XY helmert_forward (PJ_LP lp, PJ *P) {
-/***********************************************************************/
-    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    PJ_COORD point = {{0,0,0,0}};
+static PJ_XY helmert_forward(PJ_LP lp, PJ *P) {
+    /***********************************************************************/
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *)P->opaque;
+    PJ_COORD point = {{0, 0, 0, 0}};
     double x, y, cr, sr;
     point.lp = lp;
 
@@ -332,18 +335,17 @@ static PJ_XY helmert_forward (PJ_LP lp, PJ *P) {
     x = point.xy.x;
     y = point.xy.y;
 
-    point.xy.x =  cr*x + sr*y + Q->xyz_0.x;
-    point.xy.y = -sr*x + cr*y + Q->xyz_0.y;
+    point.xy.x = cr * x + sr * y + Q->xyz_0.x;
+    point.xy.y = -sr * x + cr * y + Q->xyz_0.y;
 
     return point.xy;
 }
 
-
 /***********************************************************************/
-static PJ_LP helmert_reverse (PJ_XY xy, PJ *P) {
-/***********************************************************************/
-    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    PJ_COORD point = {{0,0,0,0}};
+static PJ_LP helmert_reverse(PJ_XY xy, PJ *P) {
+    /***********************************************************************/
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *)P->opaque;
+    PJ_COORD point = {{0, 0, 0, 0}};
     double x, y, sr, cr;
     point.xy = xy;
 
@@ -352,18 +354,17 @@ static PJ_LP helmert_reverse (PJ_XY xy, PJ *P) {
     x = point.xy.x - Q->xyz_0.x;
     y = point.xy.y - Q->xyz_0.y;
 
-    point.xy.x =  x*cr - y*sr;
-    point.xy.y =  x*sr + y*cr;
+    point.xy.x = x * cr - y * sr;
+    point.xy.y = x * sr + y * cr;
 
     return point.lp;
 }
 
-
 /***********************************************************************/
-static PJ_XYZ helmert_forward_3d (PJ_LPZ lpz, PJ *P) {
-/***********************************************************************/
-    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    PJ_COORD point = {{0,0,0,0}};
+static PJ_XYZ helmert_forward_3d(PJ_LPZ lpz, PJ *P) {
+    /***********************************************************************/
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *)P->opaque;
+    PJ_COORD point = {{0, 0, 0, 0}};
     double X, Y, Z, scale;
 
     point.lpz = lpz;
@@ -377,7 +378,7 @@ static PJ_XYZ helmert_forward_3d (PJ_LPZ lpz, PJ *P) {
     if (Q->no_rotation && Q->scale == 0) {
         point.xyz.x = lpz.lam + Q->xyz.x;
         point.xyz.y = lpz.phi + Q->xyz.y;
-        point.xyz.z = lpz.z   + Q->xyz.z;
+        point.xyz.z = lpz.z + Q->xyz.z;
         return point.xyz;
     }
 
@@ -387,24 +388,23 @@ static PJ_XYZ helmert_forward_3d (PJ_LPZ lpz, PJ *P) {
     Y = lpz.phi - Q->refp.y;
     Z = lpz.z - Q->refp.z;
 
+    point.xyz.x = scale * (R00 * X + R01 * Y + R02 * Z);
+    point.xyz.y = scale * (R10 * X + R11 * Y + R12 * Z);
+    point.xyz.z = scale * (R20 * X + R21 * Y + R22 * Z);
 
-    point.xyz.x = scale * ( R00 * X  +   R01 * Y   +   R02 * Z);
-    point.xyz.y = scale * ( R10 * X  +   R11 * Y   +   R12 * Z);
-    point.xyz.z = scale * ( R20 * X  +   R21 * Y   +   R22 * Z);
-
-    point.xyz.x += Q->xyz.x; /* for Molodensky-Badekas, Q->xyz already incorporates the Q->refp offset */
+    point.xyz.x += Q->xyz.x; /* for Molodensky-Badekas, Q->xyz already
+                                incorporates the Q->refp offset */
     point.xyz.y += Q->xyz.y;
     point.xyz.z += Q->xyz.z;
 
     return point.xyz;
 }
 
-
 /***********************************************************************/
-static PJ_LPZ helmert_reverse_3d (PJ_XYZ xyz, PJ *P) {
-/***********************************************************************/
-    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    PJ_COORD point = {{0,0,0,0}};
+static PJ_LPZ helmert_reverse_3d(PJ_XYZ xyz, PJ *P) {
+    /***********************************************************************/
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *)P->opaque;
+    PJ_COORD point = {{0, 0, 0, 0}};
     double X, Y, Z, scale;
 
     point.xyz = xyz;
@@ -416,9 +416,9 @@ static PJ_LPZ helmert_reverse_3d (PJ_XYZ xyz, PJ *P) {
     }
 
     if (Q->no_rotation && Q->scale == 0) {
-        point.xyz.x  =  xyz.x - Q->xyz.x;
-        point.xyz.y  =  xyz.y - Q->xyz.y;
-        point.xyz.z  =  xyz.z - Q->xyz.z;
+        point.xyz.x = xyz.x - Q->xyz.x;
+        point.xyz.y = xyz.y - Q->xyz.y;
+        point.xyz.z = xyz.z - Q->xyz.z;
         return point.lpz;
     }
 
@@ -430,16 +430,15 @@ static PJ_LPZ helmert_reverse_3d (PJ_XYZ xyz, PJ *P) {
     Z = (xyz.z - Q->xyz.z) / scale;
 
     /* Inverse rotation through transpose multiplication */
-    point.xyz.x  =  ( R00 * X   +   R10 * Y   +   R20 * Z) + Q->refp.x;
-    point.xyz.y  =  ( R01 * X   +   R11 * Y   +   R21 * Z) + Q->refp.y;
-    point.xyz.z  =  ( R02 * X   +   R12 * Y   +   R22 * Z) + Q->refp.z;
+    point.xyz.x = (R00 * X + R10 * Y + R20 * Z) + Q->refp.x;
+    point.xyz.y = (R01 * X + R11 * Y + R21 * Z) + Q->refp.y;
+    point.xyz.z = (R02 * X + R12 * Y + R22 * Z) + Q->refp.z;
 
     return point.lpz;
 }
 
-
-static void helmert_forward_4d (PJ_COORD &point, PJ *P) {
-    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
+static void helmert_forward_4d(PJ_COORD &point, PJ *P) {
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *)P->opaque;
 
     /* We only need to rebuild the rotation matrix if the
      * observation time is different from the last call */
@@ -453,13 +452,12 @@ static void helmert_forward_4d (PJ_COORD &point, PJ *P) {
     // Assigning in 2 steps avoids cppcheck warning
     // "Overlapping read/write of union is undefined behavior"
     // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-    const auto xyz = helmert_forward_3d (point.lpz, P);
+    const auto xyz = helmert_forward_3d(point.lpz, P);
     point.xyz = xyz;
 }
 
-
-static void helmert_reverse_4d (PJ_COORD& point, PJ *P) {
-    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
+static void helmert_reverse_4d(PJ_COORD &point, PJ *P) {
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *)P->opaque;
 
     /* We only need to rebuild the rotation matrix if the
      * observation time is different from the last call */
@@ -473,82 +471,82 @@ static void helmert_reverse_4d (PJ_COORD& point, PJ *P) {
     // Assigning in 2 steps avoids cppcheck warning
     // "Overlapping read/write of union is undefined behavior"
     // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-    const auto lpz = helmert_reverse_3d (point.xyz, P);
+    const auto lpz = helmert_reverse_3d(point.xyz, P);
     point.lpz = lpz;
 }
 
 /* Arcsecond to radians */
 #define ARCSEC_TO_RAD (DEG_TO_RAD / 3600.0)
 
-
-static PJ* init_helmert_six_parameters(PJ* P) {
-    struct pj_opaque_helmert *Q = static_cast<struct pj_opaque_helmert*>(calloc (1, sizeof (struct pj_opaque_helmert)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
-    P->opaque = (void *) Q;
+static PJ *init_helmert_six_parameters(PJ *P) {
+    struct pj_opaque_helmert *Q = static_cast<struct pj_opaque_helmert *>(
+        calloc(1, sizeof(struct pj_opaque_helmert)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    P->opaque = (void *)Q;
 
     /* In most cases, we work on 3D cartesian coordinates */
-    P->left  = PJ_IO_UNITS_CARTESIAN;
+    P->left = PJ_IO_UNITS_CARTESIAN;
     P->right = PJ_IO_UNITS_CARTESIAN;
 
     /* Translations */
-    if (pj_param (P->ctx, P->params, "tx").i)
-        Q->xyz_0.x = pj_param (P->ctx, P->params, "dx").f;
+    if (pj_param(P->ctx, P->params, "tx").i)
+        Q->xyz_0.x = pj_param(P->ctx, P->params, "dx").f;
 
-    if (pj_param (P->ctx, P->params, "ty").i)
-        Q->xyz_0.y = pj_param (P->ctx, P->params, "dy").f;
+    if (pj_param(P->ctx, P->params, "ty").i)
+        Q->xyz_0.y = pj_param(P->ctx, P->params, "dy").f;
 
-    if (pj_param (P->ctx, P->params, "tz").i)
-        Q->xyz_0.z = pj_param (P->ctx, P->params, "dz").f;
+    if (pj_param(P->ctx, P->params, "tz").i)
+        Q->xyz_0.z = pj_param(P->ctx, P->params, "dz").f;
 
     /* Rotations */
-    if (pj_param (P->ctx, P->params, "trx").i)
-        Q->opk_0.o = pj_param (P->ctx, P->params, "drx").f * ARCSEC_TO_RAD;
+    if (pj_param(P->ctx, P->params, "trx").i)
+        Q->opk_0.o = pj_param(P->ctx, P->params, "drx").f * ARCSEC_TO_RAD;
 
-    if (pj_param (P->ctx, P->params, "try").i)
-        Q->opk_0.p = pj_param (P->ctx, P->params, "dry").f * ARCSEC_TO_RAD;
+    if (pj_param(P->ctx, P->params, "try").i)
+        Q->opk_0.p = pj_param(P->ctx, P->params, "dry").f * ARCSEC_TO_RAD;
 
-    if (pj_param (P->ctx, P->params, "trz").i)
-        Q->opk_0.k = pj_param (P->ctx, P->params, "drz").f * ARCSEC_TO_RAD;
+    if (pj_param(P->ctx, P->params, "trz").i)
+        Q->opk_0.k = pj_param(P->ctx, P->params, "drz").f * ARCSEC_TO_RAD;
 
     /* Use small angle approximations? */
-    if (pj_param (P->ctx, P->params, "bexact").i)
+    if (pj_param(P->ctx, P->params, "bexact").i)
         Q->exact = 1;
 
     return P;
 }
 
-
-static PJ* read_convention(PJ* P) {
+static PJ *read_convention(PJ *P) {
 
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *)P->opaque;
 
     /* In case there are rotational terms, we require an explicit convention
      * to be provided. */
     if (!Q->no_rotation) {
-        const char* convention = pj_param (P->ctx, P->params, "sconvention").s;
-        if( !convention ) {
-            proj_log_error (P, _("helmert: missing 'convention' argument"));
-            return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        const char *convention = pj_param(P->ctx, P->params, "sconvention").s;
+        if (!convention) {
+            proj_log_error(P, _("helmert: missing 'convention' argument"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
         }
-        if( strcmp(convention, "position_vector") == 0 ) {
+        if (strcmp(convention, "position_vector") == 0) {
             Q->is_position_vector = 1;
-        }
-        else if( strcmp(convention, "coordinate_frame") == 0 ) {
+        } else if (strcmp(convention, "coordinate_frame") == 0) {
             Q->is_position_vector = 0;
-        }
-        else {
-            proj_log_error (P, _("helmert: invalid value for 'convention' argument"));
-            return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        } else {
+            proj_log_error(
+                P, _("helmert: invalid value for 'convention' argument"));
+            return pj_default_destructor(P,
+                                         PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
 
         /* historically towgs84 in PROJ has always been using position_vector
          * convention. Accepting coordinate_frame would be confusing. */
-        if (pj_param_exists (P->params, "towgs84")) {
-            if( !Q->is_position_vector ) {
-                proj_log_error (P, _("helmert: towgs84 should only be used with "
-                                "convention=position_vector"));
-                return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        if (pj_param_exists(P->params, "towgs84")) {
+            if (!Q->is_position_vector) {
+                proj_log_error(P, _("helmert: towgs84 should only be used with "
+                                    "convention=position_vector"));
+                return pj_default_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
     }
@@ -556,43 +554,42 @@ static PJ* read_convention(PJ* P) {
     return P;
 }
 
-
 /***********************************************************************/
 PJ *TRANSFORMATION(helmert, 0) {
-/***********************************************************************/
+    /***********************************************************************/
 
     struct pj_opaque_helmert *Q;
 
-    if( !init_helmert_six_parameters(P) ) {
+    if (!init_helmert_six_parameters(P)) {
         return nullptr;
     }
 
     /* In the 2D case, the coordinates are projected */
-    if (pj_param_exists (P->params, "theta")) {
-        P->left  = PJ_IO_UNITS_PROJECTED;
+    if (pj_param_exists(P->params, "theta")) {
+        P->left = PJ_IO_UNITS_PROJECTED;
         P->right = PJ_IO_UNITS_PROJECTED;
-        P->fwd    = helmert_forward;
-        P->inv    = helmert_reverse;
+        P->fwd = helmert_forward;
+        P->inv = helmert_reverse;
     }
 
-    P->fwd4d  = helmert_forward_4d;
-    P->inv4d  = helmert_reverse_4d;
-    P->fwd3d  = helmert_forward_3d;
-    P->inv3d  = helmert_reverse_3d;
+    P->fwd4d = helmert_forward_4d;
+    P->inv4d = helmert_reverse_4d;
+    P->fwd3d = helmert_forward_3d;
+    P->inv3d = helmert_reverse_3d;
 
     Q = (struct pj_opaque_helmert *)P->opaque;
 
     /* Detect obsolete transpose flag and error out if found */
-    if (pj_param (P->ctx, P->params, "ttranspose").i) {
-        proj_log_error (P, _("helmert: 'transpose' argument is no longer valid. "
-                        "Use convention=position_vector/coordinate_frame"));
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    if (pj_param(P->ctx, P->params, "ttranspose").i) {
+        proj_log_error(P, _("helmert: 'transpose' argument is no longer valid. "
+                            "Use convention=position_vector/coordinate_frame"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     /* Support the classic PROJ towgs84 parameter, but allow later overrides.*/
     /* Note that if towgs84 is specified, the datum_params array is set up   */
     /* for us automagically by the pj_datum_set call in pj_init_ctx */
-    if (pj_param_exists (P->params, "towgs84")) {
+    if (pj_param_exists(P->params, "towgs84")) {
         Q->xyz_0.x = P->datum_params[0];
         Q->xyz_0.y = P->datum_params[1];
         Q->xyz_0.z = P->datum_params[2];
@@ -602,91 +599,95 @@ PJ *TRANSFORMATION(helmert, 0) {
         Q->opk_0.k = P->datum_params[5];
 
         /* We must undo conversion to absolute scale from pj_datum_set */
-        if (0==P->datum_params[6])
+        if (0 == P->datum_params[6])
             Q->scale_0 = 0;
         else
             Q->scale_0 = (P->datum_params[6] - 1) * 1e6;
     }
 
-    if (pj_param (P->ctx, P->params, "ttheta").i) {
-        Q->theta_0 = pj_param (P->ctx, P->params, "dtheta").f * ARCSEC_TO_RAD;
+    if (pj_param(P->ctx, P->params, "ttheta").i) {
+        Q->theta_0 = pj_param(P->ctx, P->params, "dtheta").f * ARCSEC_TO_RAD;
         Q->fourparam = 1;
         Q->scale_0 = 1.0; /* default scale for the 4-param shift */
     }
 
     /* Scale */
-    if (pj_param (P->ctx, P->params, "ts").i) {
-        Q->scale_0 = pj_param (P->ctx, P->params, "ds").f;
-        if( Q->scale_0 <= -1.0e6 )
-        {
-            proj_log_error (P, _("helmert: invalid value for s."));
-            return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    if (pj_param(P->ctx, P->params, "ts").i) {
+        Q->scale_0 = pj_param(P->ctx, P->params, "ds").f;
+        if (Q->scale_0 <= -1.0e6) {
+            proj_log_error(P, _("helmert: invalid value for s."));
+            return pj_default_destructor(P,
+                                         PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
-        if (pj_param (P->ctx, P->params, "ttheta").i && Q->scale_0 == 0.0)
-        {
-            proj_log_error (P, _("helmert: invalid value for s."));
-            return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        if (pj_param(P->ctx, P->params, "ttheta").i && Q->scale_0 == 0.0) {
+            proj_log_error(P, _("helmert: invalid value for s."));
+            return pj_default_destructor(P,
+                                         PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
     }
 
     /* Translation rates */
     if (pj_param(P->ctx, P->params, "tdx").i)
-        Q->dxyz.x = pj_param (P->ctx, P->params, "ddx").f;
+        Q->dxyz.x = pj_param(P->ctx, P->params, "ddx").f;
 
     if (pj_param(P->ctx, P->params, "tdy").i)
-        Q->dxyz.y = pj_param (P->ctx, P->params, "ddy").f;
+        Q->dxyz.y = pj_param(P->ctx, P->params, "ddy").f;
 
     if (pj_param(P->ctx, P->params, "tdz").i)
-        Q->dxyz.z = pj_param (P->ctx, P->params, "ddz").f;
+        Q->dxyz.z = pj_param(P->ctx, P->params, "ddz").f;
 
     /* Rotations rates */
-    if (pj_param (P->ctx, P->params, "tdrx").i)
-        Q->dopk.o = pj_param (P->ctx, P->params, "ddrx").f * ARCSEC_TO_RAD;
+    if (pj_param(P->ctx, P->params, "tdrx").i)
+        Q->dopk.o = pj_param(P->ctx, P->params, "ddrx").f * ARCSEC_TO_RAD;
 
-    if (pj_param (P->ctx, P->params, "tdry").i)
-        Q->dopk.p = pj_param (P->ctx, P->params, "ddry").f * ARCSEC_TO_RAD;
+    if (pj_param(P->ctx, P->params, "tdry").i)
+        Q->dopk.p = pj_param(P->ctx, P->params, "ddry").f * ARCSEC_TO_RAD;
 
-    if (pj_param (P->ctx, P->params, "tdrz").i)
-        Q->dopk.k = pj_param (P->ctx, P->params, "ddrz").f * ARCSEC_TO_RAD;
+    if (pj_param(P->ctx, P->params, "tdrz").i)
+        Q->dopk.k = pj_param(P->ctx, P->params, "ddrz").f * ARCSEC_TO_RAD;
 
-    if (pj_param (P->ctx, P->params, "tdtheta").i)
-        Q->dtheta = pj_param (P->ctx, P->params, "ddtheta").f * ARCSEC_TO_RAD;
+    if (pj_param(P->ctx, P->params, "tdtheta").i)
+        Q->dtheta = pj_param(P->ctx, P->params, "ddtheta").f * ARCSEC_TO_RAD;
 
     /* Scale rate */
-    if (pj_param (P->ctx, P->params, "tds").i)
-        Q->dscale = pj_param (P->ctx, P->params, "dds").f;
-
+    if (pj_param(P->ctx, P->params, "tds").i)
+        Q->dscale = pj_param(P->ctx, P->params, "dds").f;
 
     /* Epoch */
     if (pj_param(P->ctx, P->params, "tt_epoch").i)
-        Q->t_epoch = pj_param (P->ctx, P->params, "dt_epoch").f;
+        Q->t_epoch = pj_param(P->ctx, P->params, "dt_epoch").f;
 
-    Q->xyz    =  Q->xyz_0;
-    Q->opk    =  Q->opk_0;
-    Q->scale  =  Q->scale_0;
-    Q->theta  =  Q->theta_0;
+    Q->xyz = Q->xyz_0;
+    Q->opk = Q->opk_0;
+    Q->scale = Q->scale_0;
+    Q->theta = Q->theta_0;
 
-    if ((Q->opk.o==0)  && (Q->opk.p==0)  && (Q->opk.k==0) &&
-        (Q->dopk.o==0) && (Q->dopk.p==0) && (Q->dopk.k==0)) {
+    if ((Q->opk.o == 0) && (Q->opk.p == 0) && (Q->opk.k == 0) &&
+        (Q->dopk.o == 0) && (Q->dopk.p == 0) && (Q->dopk.k == 0)) {
         Q->no_rotation = 1;
     }
 
-    if( !read_convention(P) ) {
+    if (!read_convention(P)) {
         return nullptr;
     }
 
     /* Let's help with debugging */
     if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
         proj_log_trace(P, "Helmert parameters:");
-        proj_log_trace(P, "x=  %8.5f  y=  %8.5f  z=  %8.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
+        proj_log_trace(P, "x=  %8.5f  y=  %8.5f  z=  %8.5f", Q->xyz.x, Q->xyz.y,
+                       Q->xyz.z);
         proj_log_trace(P, "rx= %8.5f  ry= %8.5f  rz= %8.5f",
-                Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD, Q->opk.k / ARCSEC_TO_RAD);
+                       Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD,
+                       Q->opk.k / ARCSEC_TO_RAD);
         proj_log_trace(P, "s=  %8.5f  exact=%d%s", Q->scale, Q->exact,
-                       Q->no_rotation ? "" :
-                       Q->is_position_vector ? "  convention=position_vector" :
-                       "  convention=coordinate_frame");
-        proj_log_trace(P, "dx= %8.5f  dy= %8.5f  dz= %8.5f",   Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
-        proj_log_trace(P, "drx=%8.5f  dry=%8.5f  drz=%8.5f",   Q->dopk.o, Q->dopk.p, Q->dopk.k);
+                       Q->no_rotation ? ""
+                       : Q->is_position_vector
+                           ? "  convention=position_vector"
+                           : "  convention=coordinate_frame");
+        proj_log_trace(P, "dx= %8.5f  dy= %8.5f  dz= %8.5f", Q->dxyz.x,
+                       Q->dxyz.y, Q->dxyz.z);
+        proj_log_trace(P, "drx=%8.5f  dry=%8.5f  drz=%8.5f", Q->dopk.o,
+                       Q->dopk.p, Q->dopk.k);
         proj_log_trace(P, "ds= %8.5f  t_epoch=%8.5f", Q->dscale, Q->t_epoch);
     }
 
@@ -696,63 +697,64 @@ PJ *TRANSFORMATION(helmert, 0) {
     return P;
 }
 
-
 /***********************************************************************/
 PJ *TRANSFORMATION(molobadekas, 0) {
-/***********************************************************************/
+    /***********************************************************************/
 
     struct pj_opaque_helmert *Q;
 
-    if( !init_helmert_six_parameters(P) ) {
+    if (!init_helmert_six_parameters(P)) {
         return nullptr;
     }
 
-    P->fwd3d  = helmert_forward_3d;
-    P->inv3d  = helmert_reverse_3d;
+    P->fwd3d = helmert_forward_3d;
+    P->inv3d = helmert_reverse_3d;
 
     Q = (struct pj_opaque_helmert *)P->opaque;
 
     /* Scale */
-    if (pj_param (P->ctx, P->params, "ts").i) {
-        Q->scale_0 = pj_param (P->ctx, P->params, "ds").f;
+    if (pj_param(P->ctx, P->params, "ts").i) {
+        Q->scale_0 = pj_param(P->ctx, P->params, "ds").f;
     }
 
-    Q->opk    =  Q->opk_0;
-    Q->scale  =  Q->scale_0;
+    Q->opk = Q->opk_0;
+    Q->scale = Q->scale_0;
 
-    if( !read_convention(P) ) {
+    if (!read_convention(P)) {
         return nullptr;
     }
 
     /* Reference point */
-    if (pj_param (P->ctx, P->params, "tpx").i)
-        Q->refp.x = pj_param (P->ctx, P->params, "dpx").f;
+    if (pj_param(P->ctx, P->params, "tpx").i)
+        Q->refp.x = pj_param(P->ctx, P->params, "dpx").f;
 
-    if (pj_param (P->ctx, P->params, "tpy").i)
-        Q->refp.y = pj_param (P->ctx, P->params, "dpy").f;
+    if (pj_param(P->ctx, P->params, "tpy").i)
+        Q->refp.y = pj_param(P->ctx, P->params, "dpy").f;
 
-    if (pj_param (P->ctx, P->params, "tpz").i)
-        Q->refp.z = pj_param (P->ctx, P->params, "dpz").f;
-
+    if (pj_param(P->ctx, P->params, "tpz").i)
+        Q->refp.z = pj_param(P->ctx, P->params, "dpz").f;
 
     /* Let's help with debugging */
     if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
         proj_log_trace(P, "Molodensky-Badekas parameters:");
-        proj_log_trace(P, "x=  %8.5f  y=  %8.5f  z=  %8.5f", Q->xyz_0.x, Q->xyz_0.y, Q->xyz_0.z);
+        proj_log_trace(P, "x=  %8.5f  y=  %8.5f  z=  %8.5f", Q->xyz_0.x,
+                       Q->xyz_0.y, Q->xyz_0.z);
         proj_log_trace(P, "rx= %8.5f  ry= %8.5f  rz= %8.5f",
-                Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD, Q->opk.k / ARCSEC_TO_RAD);
+                       Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD,
+                       Q->opk.k / ARCSEC_TO_RAD);
         proj_log_trace(P, "s=  %8.5f  exact=%d%s", Q->scale, Q->exact,
-                       Q->is_position_vector ? "  convention=position_vector" :
-                       "  convention=coordinate_frame");
-        proj_log_trace(P, "px= %8.5f  py= %8.5f  pz= %8.5f",   Q->refp.x, Q->refp.y, Q->refp.z);
+                       Q->is_position_vector ? "  convention=position_vector"
+                                             : "  convention=coordinate_frame");
+        proj_log_trace(P, "px= %8.5f  py= %8.5f  pz= %8.5f", Q->refp.x,
+                       Q->refp.y, Q->refp.z);
     }
 
     /* as an optimization, we incorporate the refp in the translation terms */
-    Q->xyz_0.x +=  Q->refp.x;
-    Q->xyz_0.y +=  Q->refp.y;
-    Q->xyz_0.z +=  Q->refp.z;
+    Q->xyz_0.x += Q->refp.x;
+    Q->xyz_0.y += Q->refp.y;
+    Q->xyz_0.z += Q->refp.z;
 
-    Q->xyz    =  Q->xyz_0;
+    Q->xyz = Q->xyz_0;
 
     build_rot_matrix(P);
 

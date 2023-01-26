@@ -6,29 +6,33 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-typedef struct { double r, Az; } VECT;
+typedef struct {
+    double r, Az;
+} VECT;
 namespace { // anonymous namespace
 struct pj_opaque {
     struct { /* control point data */
         double phi, lam;
         double cosphi, sinphi;
         VECT v;
-        PJ_XY  p;
+        PJ_XY p;
     } c[3];
     PJ_XY p;
     double beta_0, beta_1, beta_2;
 };
 } // anonymous namespace
 
-PROJ_HEAD(chamb, "Chamberlin Trimetric") "\n\tMisc Sph, no inv"
-"\n\tlat_1= lon_1= lat_2= lon_2= lat_3= lon_3=";
+PROJ_HEAD(chamb, "Chamberlin Trimetric")
+"\n\tMisc Sph, no inv"
+    "\n\tlat_1= lon_1= lat_2= lon_2= lat_3= lon_3=";
 
 #include <stdio.h>
 #define THIRD 0.333333333333333333
 #define TOL 1e-9
 
 /* distance and azimuth from point 1 to point 2 */
-static VECT vect(PJ_CONTEXT *ctx, double dphi, double c1, double s1, double c2, double s2, double dlam) {
+static VECT vect(PJ_CONTEXT *ctx, double dphi, double c1, double s1, double c2,
+                 double s2, double dlam) {
     VECT v;
     double cdl, dp, dl;
 
@@ -38,7 +42,7 @@ static VECT vect(PJ_CONTEXT *ctx, double dphi, double c1, double s1, double c2, 
     else { /* more accurate for smaller distances */
         dp = sin(.5 * dphi);
         dl = sin(.5 * dlam);
-        v.r = 2. * aasin(ctx,sqrt(dp * dp + c1 * c2 * dl * dl));
+        v.r = 2. * aasin(ctx, sqrt(dp * dp + c1 * c2 * dl * dl));
     }
     if (fabs(v.r) > TOL)
         v.Az = atan2(c2 * sin(dlam), c1 * s2 - s1 * c2 * cdl);
@@ -48,14 +52,13 @@ static VECT vect(PJ_CONTEXT *ctx, double dphi, double c1, double s1, double c2, 
 }
 
 /* law of cosines */
-static double lc(PJ_CONTEXT *ctx, double b,double c,double a) {
+static double lc(PJ_CONTEXT *ctx, double b, double c, double a) {
     return aacos(ctx, .5 * (b * b + c * c - a * a) / (b * c));
 }
 
-
-static PJ_XY chamb_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY chamb_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double sinphi, cosphi, a;
     VECT v[3];
     int i, j;
@@ -63,8 +66,8 @@ static PJ_XY chamb_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
     sinphi = sin(lp.phi);
     cosphi = cos(lp.phi);
     for (i = 0; i < 3; ++i) { /* dist/azimiths from control */
-        v[i] = vect(P->ctx, lp.phi - Q->c[i].phi, Q->c[i].cosphi, Q->c[i].sinphi,
-            cosphi, sinphi, lp.lam - Q->c[i].lam);
+        v[i] = vect(P->ctx, lp.phi - Q->c[i].phi, Q->c[i].cosphi,
+                    Q->c[i].sinphi, cosphi, sinphi, lp.lam - Q->c[i].lam);
         if (v[i].r == 0.0)
             break;
         v[i].Az = adjlon(v[i].Az - Q->c[i].v.Az);
@@ -75,10 +78,10 @@ static PJ_XY chamb_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         xy = Q->p;
         for (i = 0; i < 3; ++i) {
             j = i == 2 ? 0 : i + 1;
-            a = lc(P->ctx,Q->c[i].v.r, v[i].r, v[j].r);
+            a = lc(P->ctx, Q->c[i].v.r, v[i].r, v[j].r);
             if (v[i].Az < 0.)
                 a = -a;
-            if (! i) { /* coord comp unique to each arc */
+            if (!i) { /* coord comp unique to each arc */
                 xy.x += v[i].r * cos(a);
                 xy.y -= v[i].r * sin(a);
             } else if (i == 1) {
@@ -97,21 +100,19 @@ static PJ_XY chamb_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
     return xy;
 }
 
-
-
 PJ *PROJECTION(chamb) {
     int i, j;
     char line[10];
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-
     for (i = 0; i < 3; ++i) { /* get control point locations */
-        (void)snprintf(line, sizeof(line), "rlat_%d", i+1);
+        (void)snprintf(line, sizeof(line), "rlat_%d", i + 1);
         Q->c[i].phi = pj_param(P->ctx, P->params, line).f;
-        (void)snprintf(line, sizeof(line), "rlon_%d", i+1);
+        (void)snprintf(line, sizeof(line), "rlon_%d", i + 1);
         Q->c[i].lam = pj_param(P->ctx, P->params, line).f;
         Q->c[i].lam = adjlon(Q->c[i].lam - P->lam0);
         Q->c[i].cosphi = cos(Q->c[i].phi);
@@ -119,17 +120,20 @@ PJ *PROJECTION(chamb) {
     }
     for (i = 0; i < 3; ++i) { /* inter ctl pt. distances and azimuths */
         j = i == 2 ? 0 : i + 1;
-        Q->c[i].v = vect(P->ctx,Q->c[j].phi - Q->c[i].phi, Q->c[i].cosphi, Q->c[i].sinphi,
-            Q->c[j].cosphi, Q->c[j].sinphi, Q->c[j].lam - Q->c[i].lam);
-        if (Q->c[i].v.r == 0.0)
-        {
-            proj_log_error(P, _("Invalid value for control points: they should be distinct"));
-            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        Q->c[i].v = vect(P->ctx, Q->c[j].phi - Q->c[i].phi, Q->c[i].cosphi,
+                         Q->c[i].sinphi, Q->c[j].cosphi, Q->c[j].sinphi,
+                         Q->c[j].lam - Q->c[i].lam);
+        if (Q->c[i].v.r == 0.0) {
+            proj_log_error(
+                P,
+                _("Invalid value for control points: they should be distinct"));
+            return pj_default_destructor(P,
+                                         PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
         /* co-linearity problem ignored for now */
     }
-    Q->beta_0 = lc(P->ctx,Q->c[0].v.r, Q->c[2].v.r, Q->c[1].v.r);
-    Q->beta_1 = lc(P->ctx,Q->c[0].v.r, Q->c[1].v.r, Q->c[2].v.r);
+    Q->beta_0 = lc(P->ctx, Q->c[0].v.r, Q->c[2].v.r, Q->c[1].v.r);
+    Q->beta_1 = lc(P->ctx, Q->c[0].v.r, Q->c[1].v.r, Q->c[2].v.r);
     Q->beta_2 = M_PI - Q->beta_0;
     Q->c[0].p.y = Q->c[2].v.r * sin(Q->beta_0);
     Q->c[1].p.y = Q->c[0].p.y;
