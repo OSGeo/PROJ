@@ -1041,6 +1041,71 @@ TEST(gie, proj_create_crs_to_crs_with_area_large) {
 
 // ---------------------------------------------------------------------------
 
+TEST(gie, proj_create_crs_to_crs_with_longitude_outside_minus_180_180) {
+
+    // Test bugfix for https://github.com/OSGeo/PROJ/issues/3594
+    auto P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4277", "EPSG:4326",
+                                    nullptr);
+    ASSERT_TRUE(P != nullptr);
+    PJ_COORD c;
+
+    c.xyzt.x = 50;       // Lat in deg
+    c.xyzt.y = -2 + 360; // Long in deg
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
+    c = proj_trans(P, PJ_FWD, c);
+    EXPECT_NEAR(c.xy.x, 50.00065628, 1e-8);
+    EXPECT_NEAR(c.xy.y, -2.00133989, 1e-8);
+
+    c.xyzt.x = 50;       // Lat in deg
+    c.xyzt.y = -2 - 360; // Long in deg
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
+    c = proj_trans(P, PJ_FWD, c);
+    EXPECT_NEAR(c.xy.x, 50.00065628, 1e-8);
+    EXPECT_NEAR(c.xy.y, -2.00133989, 1e-8);
+
+    c.xyzt.x = 50.00065628;       // Lat in deg
+    c.xyzt.y = -2.00133989 + 360; // Long in deg
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
+    c = proj_trans(P, PJ_INV, c);
+    EXPECT_NEAR(c.xy.x, 50, 1e-8);
+    EXPECT_NEAR(c.xy.y, -2, 1e-8);
+
+    c.xyzt.x = 50.00065628;       // Lat in deg
+    c.xyzt.y = -2.00133989 - 360; // Long in deg
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
+    c = proj_trans(P, PJ_INV, c);
+    EXPECT_NEAR(c.xy.x, 50, 1e-8);
+    EXPECT_NEAR(c.xy.y, -2, 1e-8);
+
+    auto Pnormalized = proj_normalize_for_visualization(PJ_DEFAULT_CTX, P);
+
+    c.xyzt.x = -2 + 360; // Long in deg
+    c.xyzt.y = 50;       // Lat in deg
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
+    c = proj_trans(Pnormalized, PJ_FWD, c);
+    EXPECT_NEAR(c.xy.x, -2.00133989, 1e-8);
+    EXPECT_NEAR(c.xy.y, 50.00065628, 1e-8);
+
+    c.xyzt.x = -2.00133989 + 360; // Long in deg
+    c.xyzt.y = 50.00065628;       // Lat in deg
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
+    c = proj_trans(Pnormalized, PJ_INV, c);
+    EXPECT_NEAR(c.xy.x, -2, 1e-8);
+    EXPECT_NEAR(c.xy.y, 50, 1e-8);
+
+    proj_destroy(Pnormalized);
+
+    proj_destroy(P);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(gie, proj_trans_generic) {
     // GDA2020 to WGS84 (G1762)
     auto P = proj_create(
