@@ -312,17 +312,16 @@ struct PJCoordOperation {
     std::string name{};
     double accuracy = -1.0;
     bool isOffshore = false;
+    bool srcIsLonLatDegree = false;
+    bool srcIsLatLonDegree = false;
+    bool dstIsLonLatDegree = false;
+    bool dstIsLatLonDegree = false;
 
     PJCoordOperation(int idxInOriginalListIn, double minxSrcIn,
                      double minySrcIn, double maxxSrcIn, double maxySrcIn,
                      double minxDstIn, double minyDstIn, double maxxDstIn,
                      double maxyDstIn, PJ *pjIn, const std::string &nameIn,
-                     double accuracyIn, bool isOffshoreIn)
-        : idxInOriginalList(idxInOriginalListIn), minxSrc(minxSrcIn),
-          minySrc(minySrcIn), maxxSrc(maxxSrcIn), maxySrc(maxySrcIn),
-          minxDst(minxDstIn), minyDst(minyDstIn), maxxDst(maxxDstIn),
-          maxyDst(maxyDstIn), pj(pjIn), name(nameIn), accuracy(accuracyIn),
-          isOffshore(isOffshoreIn) {}
+                     double accuracyIn, bool isOffshoreIn);
 
     PJCoordOperation(const PJCoordOperation &) = delete;
 
@@ -333,7 +332,11 @@ struct PJCoordOperation {
           minyDst(other.minyDst), maxxDst(other.maxxDst),
           maxyDst(other.maxyDst), pj(proj_clone(ctx, other.pj)),
           name(std::move(other.name)), accuracy(other.accuracy),
-          isOffshore(other.isOffshore) {}
+          isOffshore(other.isOffshore),
+          srcIsLonLatDegree(other.srcIsLonLatDegree),
+          srcIsLatLonDegree(other.srcIsLatLonDegree),
+          dstIsLonLatDegree(other.dstIsLonLatDegree),
+          dstIsLatLonDegree(other.dstIsLatLonDegree) {}
 
     PJCoordOperation(PJCoordOperation &&other)
         : idxInOriginalList(other.idxInOriginalList), minxSrc(other.minxSrc),
@@ -341,7 +344,11 @@ struct PJCoordOperation {
           maxySrc(other.maxySrc), minxDst(other.minxDst),
           minyDst(other.minyDst), maxxDst(other.maxxDst),
           maxyDst(other.maxyDst), name(std::move(other.name)),
-          accuracy(other.accuracy), isOffshore(other.isOffshore) {
+          accuracy(other.accuracy), isOffshore(other.isOffshore),
+          srcIsLonLatDegree(other.srcIsLonLatDegree),
+          srcIsLatLonDegree(other.srcIsLatLonDegree),
+          dstIsLonLatDegree(other.dstIsLonLatDegree),
+          dstIsLatLonDegree(other.dstIsLatLonDegree) {
         pj = other.pj;
         other.pj = nullptr;
     }

@@ -213,6 +213,19 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
                                PJ_COORD coord)
 /**************************************************************************************/
 {
+    const auto normalizeLongitude = [](double x) {
+        if (x > 180.0) {
+            x -= 360.0;
+            if (x > 180.0)
+                x = fmod(x + 180.0, 360.0) - 180.0;
+        } else if (x < -180.0) {
+            x += 360.0;
+            if (x < -180.0)
+                x = fmod(x + 180.0, 360.0) - 180.0;
+        }
+        return x;
+    };
+
     // Select the operations that match the area of use
     // and has the best accuracy.
     int iBest = -1;
@@ -228,11 +241,39 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
             if (coord.xyzt.x >= alt.minxSrc && coord.xyzt.y >= alt.minySrc &&
                 coord.xyzt.x <= alt.maxxSrc && coord.xyzt.y <= alt.maxySrc) {
                 spatialCriterionOK = true;
+            } else if (alt.srcIsLonLatDegree && coord.xyzt.y >= alt.minySrc &&
+                       coord.xyzt.y <= alt.maxySrc) {
+                const double normalizedLon = normalizeLongitude(coord.xyzt.x);
+                if (normalizedLon >= alt.minxSrc &&
+                    normalizedLon <= alt.maxxSrc) {
+                    spatialCriterionOK = true;
+                }
+            } else if (alt.srcIsLatLonDegree && coord.xyzt.x >= alt.minxSrc &&
+                       coord.xyzt.x <= alt.maxxSrc) {
+                const double normalizedLon = normalizeLongitude(coord.xyzt.y);
+                if (normalizedLon >= alt.minySrc &&
+                    normalizedLon <= alt.maxySrc) {
+                    spatialCriterionOK = true;
+                }
             }
         } else {
             if (coord.xyzt.x >= alt.minxDst && coord.xyzt.y >= alt.minyDst &&
                 coord.xyzt.x <= alt.maxxDst && coord.xyzt.y <= alt.maxyDst) {
                 spatialCriterionOK = true;
+            } else if (alt.dstIsLonLatDegree && coord.xyzt.y >= alt.minyDst &&
+                       coord.xyzt.y <= alt.maxyDst) {
+                const double normalizedLon = normalizeLongitude(coord.xyzt.x);
+                if (normalizedLon >= alt.minxDst &&
+                    normalizedLon <= alt.maxxDst) {
+                    spatialCriterionOK = true;
+                }
+            } else if (alt.dstIsLatLonDegree && coord.xyzt.x >= alt.minxDst &&
+                       coord.xyzt.x <= alt.maxxDst) {
+                const double normalizedLon = normalizeLongitude(coord.xyzt.y);
+                if (normalizedLon >= alt.minyDst &&
+                    normalizedLon <= alt.maxyDst) {
+                    spatialCriterionOK = true;
+                }
             }
         }
 
@@ -2589,3 +2630,58 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
 
     return factors;
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+PJCoordOperation::PJCoordOperation(int idxInOriginalListIn, double minxSrcIn,
+                                   double minySrcIn, double maxxSrcIn,
+                                   double maxySrcIn, double minxDstIn,
+                                   double minyDstIn, double maxxDstIn,
+                                   double maxyDstIn, PJ *pjIn,
+                                   const std::string &nameIn, double accuracyIn,
+                                   bool isOffshoreIn)
+    : idxInOriginalList(idxInOriginalListIn), minxSrc(minxSrcIn),
+      minySrc(minySrcIn), maxxSrc(maxxSrcIn), maxySrc(maxySrcIn),
+      minxDst(minxDstIn), minyDst(minyDstIn), maxxDst(maxxDstIn),
+      maxyDst(maxyDstIn), pj(pjIn), name(nameIn), accuracy(accuracyIn),
+      isOffshore(isOffshoreIn) {
+
+    const auto IsLonLatOrLatLon = [](const PJ *crs, bool &isLonLatDegreeOut,
+                                     bool &isLatLonDegreeOut) {
+        const auto eType = proj_get_type(crs);
+        if (eType == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
+            eType == PJ_TYPE_GEOGRAPHIC_3D_CRS) {
+            const auto cs = proj_crs_get_coordinate_system(crs->ctx, crs);
+            const char *direction = "";
+            double conv_factor = 0;
+            constexpr double EPS = 1e-14;
+            if (proj_cs_get_axis_info(crs->ctx, cs, 0, nullptr, nullptr,
+                                      &direction, &conv_factor, nullptr,
+                                      nullptr, nullptr) &&
+                ci_equal(direction, "East")) {
+                isLonLatDegreeOut = fabs(conv_factor - M_PI / 180) < EPS;
+            } else if (proj_cs_get_axis_info(crs->ctx, cs, 1, nullptr, nullptr,
+                                             &direction, &conv_factor, nullptr,
+                                             nullptr, nullptr) &&
+                       ci_equal(direction, "East")) {
+                isLatLonDegreeOut = fabs(conv_factor - M_PI / 180) < EPS;
+            }
+            proj_destroy(cs);
+        }
+    };
+
+    const auto source = proj_get_source_crs(pj->ctx, pj);
+    if (source) {
+        IsLonLatOrLatLon(source, srcIsLonLatDegree, srcIsLatLonDegree);
+        proj_destroy(source);
+    }
+
+    const auto target = proj_get_target_crs(pj->ctx, pj);
+    if (target) {
+        IsLonLatOrLatLon(target, dstIsLonLatDegree, dstIsLatLonDegree);
+        proj_destroy(target);
+    }
+}
+
+//! @endcond
