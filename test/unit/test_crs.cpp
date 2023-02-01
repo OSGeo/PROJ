@@ -7010,6 +7010,34 @@ TEST(crs, normalizeForVisualization_derivedprojected_operation) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, normalizeForVisualization_bound) {
+
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+
+    // NTF (Paris)
+    auto crs_4807 = factory->createCoordinateReferenceSystem("4807");
+    auto bound = crs_4807->createBoundCRSToWGS84IfPossible(
+        dbContext, CoordinateOperationContext::IntermediateCRSUse::NEVER);
+    EXPECT_NE(crs_4807, bound);
+
+    auto normalizedCrsAsBound =
+        nn_dynamic_pointer_cast<BoundCRS>(bound->normalizeForVisualization());
+    ASSERT_TRUE(normalizedCrsAsBound != nullptr);
+
+    auto singleCrs =
+        nn_dynamic_pointer_cast<SingleCRS>(normalizedCrsAsBound->baseCRS());
+    ASSERT_TRUE(singleCrs != nullptr);
+    const auto &normalizedAxisList = singleCrs->coordinateSystem()->axisList();
+    ASSERT_EQ(normalizedAxisList.size(), 2U);
+    EXPECT_EQ(normalizedAxisList[0]->direction(),
+              osgeo::proj::cs::AxisDirection::EAST);
+    EXPECT_EQ(normalizedAxisList[1]->direction(),
+              osgeo::proj::cs::AxisDirection::NORTH);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, normalizeForVisualization_derivedprojected) {
 
     auto crs = createDerivedProjectedCRSNorthingEasting();

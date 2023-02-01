@@ -1169,6 +1169,12 @@ CRSNNPtr CRS::normalizeForVisualization() const {
         }
     }
 
+    if (const BoundCRS *boundCRS = dynamic_cast<const BoundCRS *>(this)) {
+        auto baseNormCRS = boundCRS->baseCRS()->normalizeForVisualization();
+        return BoundCRS::create(baseNormCRS, boundCRS->hubCRS(),
+                                boundCRS->transformation());
+    }
+
     return NN_NO_CHECK(
         std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
 }
