@@ -7010,6 +7010,58 @@ TEST(crs, normalizeForVisualization_derivedprojected_operation) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, normalizeForVisualization_bound) {
+
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+
+    // NTF (Paris)
+    const auto crs_4807 = factory->createCoordinateReferenceSystem("4807");
+    const auto bound = crs_4807->createBoundCRSToWGS84IfPossible(
+        dbContext, CoordinateOperationContext::IntermediateCRSUse::NEVER);
+    EXPECT_NE(crs_4807, bound);
+
+    std::string normalized_proj_string =
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 +step "
+        "+proj=cart +ellps=WGS84 +step +proj=helmert +x=168 +y=60 +z=-320 "
+        "+step +inv +proj=cart +ellps=clrk80ign +step +proj=pop +v_3 +step "
+        "+proj=longlat +ellps=clrk80ign +pm=paris +step +proj=unitconvert "
+        "+xy_in=rad +xy_out=grad";
+    auto orig_proj_string =
+        normalized_proj_string + " +step +proj=axisswap +order=2,1";
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::EPSG_4326, bound);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              orig_proj_string);
+
+    const auto normalizedCrs = bound->normalizeForVisualization();
+    auto normalizedCrsAsBound =
+        nn_dynamic_pointer_cast<BoundCRS>(normalizedCrs);
+    ASSERT_TRUE(normalizedCrsAsBound != nullptr);
+
+    auto singleCrs =
+        nn_dynamic_pointer_cast<SingleCRS>(normalizedCrsAsBound->baseCRS());
+    ASSERT_TRUE(singleCrs != nullptr);
+    const auto &normalizedAxisList = singleCrs->coordinateSystem()->axisList();
+    ASSERT_EQ(normalizedAxisList.size(), 2U);
+    EXPECT_EQ(normalizedAxisList[0]->direction(),
+              osgeo::proj::cs::AxisDirection::EAST);
+    EXPECT_EQ(normalizedAxisList[1]->direction(),
+              osgeo::proj::cs::AxisDirection::NORTH);
+
+    auto opNormalized = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::EPSG_4326, normalizedCrs);
+    ASSERT_TRUE(opNormalized != nullptr);
+    EXPECT_EQ(
+        opNormalized->exportToPROJString(PROJStringFormatter::create().get()),
+        normalized_proj_string);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, normalizeForVisualization_derivedprojected) {
 
     auto crs = createDerivedProjectedCRSNorthingEasting();
