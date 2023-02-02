@@ -1190,7 +1190,7 @@ int main(int argc, char **argv) {
                           << std::endl;
                 usage();
             }
-        } else if ((arg == "-s" || arg == "--ssource-crs") && i + 1 < argc) {
+        } else if ((arg == "-s" || arg == "--source-crs") && i + 1 < argc) {
             i++;
             sourceCRSStr = argv[i];
         } else if ((arg == "-t" || arg == "--target-crs") && i + 1 < argc) {

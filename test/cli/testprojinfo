@@ -62,8 +62,8 @@ echo "Testing projinfo -s EPSG:4326 -t EPSG:32631 --single-line" >> ${OUT}
 $EXE -s EPSG:4326 -t EPSG:32631 --single-line >>${OUT}
 echo "" >>${OUT}
 
-echo "Testing projinfo -s NAD27 -t NAD83" >> ${OUT}
-$EXE -s NAD27 -t NAD83 >>${OUT}
+echo "Testing projinfo --source-crs NAD27 --target-crs NAD83" >> ${OUT}
+$EXE --source-crs NAD27 --target-crs NAD83 >>${OUT}
 echo "" >>${OUT}
 
 echo "Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary --hide-ballpark" >> ${OUT}
