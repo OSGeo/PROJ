@@ -478,7 +478,7 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
         coord.xyzt.t = P->coordinateEpoch;
     if (isnan(coord.v[0]) || isnan(coord.v[1]) || isnan(coord.v[2]) ||
         isnan(coord.v[3]))
-        coord.v[0] = coord.v[1] = coord.v[2] = coord.v[3] = NAN;
+        coord.v[0] = coord.v[1] = coord.v[2] = coord.v[3] = std::numeric_limits<double>::quiet_NaN();
     else if (direction == PJ_FWD)
         pj_fwd4d(coord, P);
     else
