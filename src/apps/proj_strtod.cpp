@@ -94,6 +94,8 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-01-17/2017-09-18
 #include <stdlib.h> /* for abs */
 #include <string.h> /* for strchr, strncmp */
 
+#include <limits>
+
 double proj_strtod(const char *str, char **endptr) {
     double number = 0, integral_part = 0;
     int exponent = 0;
