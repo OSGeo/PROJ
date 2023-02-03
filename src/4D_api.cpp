@@ -48,6 +48,7 @@
 #include "proj.h"
 #include "proj_experimental.h"
 #include "proj_internal.h"
+#include <cmath> /* for isnan */
 #include <math.h>
 
 #include "proj/common.hpp"
@@ -190,7 +191,7 @@ double proj_roundtrip(PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord) {
     t = proj_trans(P, opposite_direction(direction), t);
 
     /* if we start with NaN, we expect NaN as output */
-    if (isnan(org.v[0]) && isnan(t.v[0])) {
+    if (std::isnan(org.v[0]) && std::isnan(t.v[0])) {
         return 0.0;
     }
 
@@ -476,9 +477,10 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
         0; // dummy value, to be used by proj_trans_get_last_used_operation()
     if (P->hasCoordinateEpoch)
         coord.xyzt.t = P->coordinateEpoch;
-    if (isnan(coord.v[0]) || isnan(coord.v[1]) || isnan(coord.v[2]) ||
-        isnan(coord.v[3]))
-        coord.v[0] = coord.v[1] = coord.v[2] = coord.v[3] = std::numeric_limits<double>::quiet_NaN();
+    if (std::isnan(coord.v[0]) || std::isnan(coord.v[1]) ||
+        std::isnan(coord.v[2]) || std::isnan(coord.v[3]))
+        coord.v[0] = coord.v[1] = coord.v[2] = coord.v[3] =
+            std::numeric_limits<double>::quiet_NaN();
     else if (direction == PJ_FWD)
         pj_fwd4d(coord, P);
     else
