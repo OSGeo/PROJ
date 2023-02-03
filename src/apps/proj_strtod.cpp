@@ -127,7 +127,7 @@ double proj_strtod(const char *str, char **endptr) {
     if (strncmp(p, "NaN", 3) == 0) {
         if (endptr)
             *endptr = const_cast<char *>(p + 3);
-        return NAN;
+        return std::numeric_limits<double>::quiet_NaN();
     }
 
     /* non-numeric? */
