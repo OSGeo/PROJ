@@ -90,9 +90,9 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-01-17/2017-09-18
 #include <ctype.h>
 #include <errno.h>
 #include <float.h>  /* for HUGE_VAL */
-#include <math.h>   /* for pow() */
+#include <math.h>   /* for pow(), NAN */
 #include <stdlib.h> /* for abs */
-#include <string.h> /* for strchr */
+#include <string.h> /* for strchr, strncmp */
 
 double proj_strtod(const char *str, char **endptr) {
     double number = 0, integral_part = 0;
@@ -121,6 +121,13 @@ double proj_strtod(const char *str, char **endptr) {
         if (endptr)
             *endptr = const_cast<char *>(str);
         return 0;
+    }
+
+    /* NaN */
+    if (strncmp(p, "NaN", 3) == 0) {
+        if (endptr)
+            *endptr = const_cast<char *>(p + 3);
+        return NAN;
     }
 
     /* non-numeric? */

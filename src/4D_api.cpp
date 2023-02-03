@@ -189,6 +189,11 @@ double proj_roundtrip(PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord) {
     /* finally, we take the last half-step */
     t = proj_trans(P, opposite_direction(direction), t);
 
+    /* if we start with NaN, we expect NaN as output */
+    if (isnan(org.v[0]) && isnan(t.v[0])) {
+        return 0.0;
+    }
+
     /* checking for angular *input* since we do a roundtrip, and end where we
      * begin */
     if (proj_angular_input(P, direction))
@@ -471,7 +476,10 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
         0; // dummy value, to be used by proj_trans_get_last_used_operation()
     if (P->hasCoordinateEpoch)
         coord.xyzt.t = P->coordinateEpoch;
-    if (direction == PJ_FWD)
+    if (isnan(coord.v[0]) || isnan(coord.v[1]) || isnan(coord.v[2]) ||
+        isnan(coord.v[3]))
+        coord.v[0] = coord.v[1] = coord.v[2] = coord.v[3] = NAN;
+    else if (direction == PJ_FWD)
         pj_fwd4d(coord, P);
     else
         pj_inv4d(coord, P);
