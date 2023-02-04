@@ -294,7 +294,7 @@ PROJ string:
 WKT2:2019 string:
 CONVERSION["UTM zone 31N",METHOD["Transverse Mercator",ID["EPSG",9807]],PARAMETER["Latitude of natural origin",0,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8801]],PARAMETER["Longitude of natural origin",3,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8802]],PARAMETER["Scale factor at natural origin",0.9996,SCALEUNIT["unity",1],ID["EPSG",8805]],PARAMETER["False easting",500000,LENGTHUNIT["metre",1],ID["EPSG",8806]],PARAMETER["False northing",0,LENGTHUNIT["metre",1],ID["EPSG",8807]],ID["EPSG",16031]]
 
-Testing projinfo -s NAD27 -t NAD83
+Testing projinfo --source-crs NAD27 --target-crs NAD83
 Candidate operations found: 1
 Note: using '--spatial-test intersects' would bring more results (10)
 -------------------------------------
