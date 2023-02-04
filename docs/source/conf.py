@@ -131,6 +131,10 @@ highlight_language = 'none'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# Prevents double hyphen (--) to be replaced by Unicode long dash character
+# Cf https://stackoverflow.com/questions/15258831/how-to-handle-two-dashes-in-rest
+smartquotes = False
+
 # Replacement macros for use in code-blocks etc. With inspiration from
 # https://github.com/sphinx-doc/sphinx/issues/4054#issuecomment-329097229
 def replace_words(app, docname, source):
