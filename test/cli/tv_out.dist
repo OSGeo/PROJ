@@ -569,6 +569,10 @@ cannot initialize transformation
 cause: File not found or invalid
 program abnormally terminated
 ##############################################################
+Test cs2cs (grid missing) with scenario of https://github.com/OSGeo/PROJ/issues/3607 that we are using the 'NAD27 to WGS 84 (6)' DMA-ConusW transformation
+-111.5 45.25919444444	1402288.54	5076296.64 0.00
+-111.5 45.25919444444	1402288.54	5076296.64 0.00
+##############################################################
 Test Similarity Transformation (example from EPSG Guidance Note 7.2)
 300000 4500000	299905.060	4499796.515 0.000
 ##############################################################

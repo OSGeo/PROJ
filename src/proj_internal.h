@@ -601,6 +601,7 @@ struct PJconsts {
     bool errorIfBestTransformationNotAvailable = false;
     bool warnIfBestTransformationNotAvailable =
         true; /* to remove in PROJ 10? */
+    bool skipNonInstantiable = true;
 
     /*************************************************************************************
 
@@ -887,8 +888,8 @@ pj_create_prepared_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
 
 int pj_get_suggested_operation(PJ_CONTEXT *ctx,
                                const std::vector<PJCoordOperation> &opList,
-                               const int iExcluded[2], PJ_DIRECTION direction,
-                               PJ_COORD coord);
+                               const int iExcluded[2], bool skipNonInstantiable,
+                               PJ_DIRECTION direction, PJ_COORD coord);
 
 const PJ_UNITS *pj_list_linear_units();
 const PJ_UNITS *pj_list_angular_units();

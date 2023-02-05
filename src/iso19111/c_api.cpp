@@ -8478,8 +8478,9 @@ int proj_get_suggested_operation(PJ_CONTEXT *ctx, PJ_OBJ_LIST *operations,
 
     int iExcluded[2] = {-1, -1};
     const auto &preparedOps = opList->getPreparedOperations(ctx);
-    int idx = pj_get_suggested_operation(ctx, preparedOps, iExcluded, direction,
-                                         coord);
+    int idx = pj_get_suggested_operation(ctx, preparedOps, iExcluded,
+                                         /* skipNonInstantiable= */ false,
+                                         direction, coord);
     if (idx >= 0) {
         idx = preparedOps[idx].idxInOriginalList;
     }
