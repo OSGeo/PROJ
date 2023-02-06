@@ -84,7 +84,7 @@ accomplished by executing the following command::
    C:\temp\osgeo4w-setup.exe -q -k -r -A -s https://download.osgeo.org/osgeo4w/v2/ -P proj
 
 .. _`OSGeo4W`: https://trac.osgeo.org/osgeo4w/
-.. _`64 bit`: https://download.osgeo.org/osgeo4w/osgeo4w-setup.exe
+.. _`64 bit`: https://download.osgeo.org/osgeo4w/v2/osgeo4w-setup.exe
 
 Linux
 --------------------------------------------------------------------------------
