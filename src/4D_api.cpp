@@ -162,6 +162,16 @@ double proj_xyz_dist(PJ_COORD a, PJ_COORD b) {
     return hypot(proj_xy_dist(a, b), a.xyz.z - b.xyz.z);
 }
 
+static bool inline coord_is_all_nans(PJ_COORD coo) {
+    return std::isnan(coo.v[0]) && std::isnan(coo.v[1]) &&
+           std::isnan(coo.v[2]) && std::isnan(coo.v[3]);
+}
+
+static bool inline coord_has_nans(PJ_COORD coo) {
+    return std::isnan(coo.v[0]) || std::isnan(coo.v[1]) ||
+           std::isnan(coo.v[2]) || std::isnan(coo.v[3]);
+}
+
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
 double proj_roundtrip(PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord) {
     int i;
@@ -190,8 +200,8 @@ double proj_roundtrip(PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord) {
     /* finally, we take the last half-step */
     t = proj_trans(P, opposite_direction(direction), t);
 
-    /* if we start with NaN, we expect NaN as output */
-    if (std::isnan(org.v[0]) && std::isnan(t.v[0])) {
+    /* if we start with any NaN, we expect all NaN as output */
+    if (coord_has_nans(org) && coord_is_all_nans(t)) {
         return 0.0;
     }
 
@@ -477,8 +487,7 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
         0; // dummy value, to be used by proj_trans_get_last_used_operation()
     if (P->hasCoordinateEpoch)
         coord.xyzt.t = P->coordinateEpoch;
-    if (std::isnan(coord.v[0]) || std::isnan(coord.v[1]) ||
-        std::isnan(coord.v[2]) || std::isnan(coord.v[3]))
+    if (coord_has_nans(coord))
         coord.v[0] = coord.v[1] = coord.v[2] = coord.v[3] =
             std::numeric_limits<double>::quiet_NaN();
     else if (direction == PJ_FWD)
