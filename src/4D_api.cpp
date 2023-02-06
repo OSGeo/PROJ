@@ -209,8 +209,8 @@ static bool isSpecialCaseForNAD83_to_NAD83HARN(const PJCoordOperation &op) {
 /**************************************************************************************/
 int pj_get_suggested_operation(PJ_CONTEXT *,
                                const std::vector<PJCoordOperation> &opList,
-                               const int iExcluded[2], PJ_DIRECTION direction,
-                               PJ_COORD coord)
+                               const int iExcluded[2], bool skipNonInstantiable,
+                               PJ_DIRECTION direction, PJ_COORD coord)
 /**************************************************************************************/
 {
     const auto normalizeLongitude = [](double x) {
@@ -295,6 +295,11 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
                    alt.maxySrc <= opList[iBest].maxySrc &&
                    !isSpecialCaseForNAD83_to_NAD83HARN(opList[iBest]))) &&
                  !alt.isOffshore)) {
+
+                if (skipNonInstantiable &&
+                    !proj_coordoperation_is_instantiable(alt.pj->ctx, alt.pj)) {
+                    continue;
+                }
                 iBest = i;
                 bestAccuracy = alt.accuracy;
             }
@@ -363,6 +368,9 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
         constexpr int N_MAX_RETRY = 2;
         int iExcluded[N_MAX_RETRY] = {-1, -1};
 
+        bool skipNonInstantiable = P->skipNonInstantiable &&
+                                   !P->warnIfBestTransformationNotAvailable &&
+                                   !P->errorIfBestTransformationNotAvailable;
         const int nOperations =
             static_cast<int>(P->alternativeCoordinateOperations.size());
 
@@ -376,7 +384,7 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
             // use and has the best accuracy.
             int iBest = pj_get_suggested_operation(
                 P->ctx, P->alternativeCoordinateOperations, iExcluded,
-                direction, coord);
+                skipNonInstantiable, direction, coord);
             if (iBest < 0) {
                 break;
             }
@@ -417,6 +425,8 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
                 warnAboutMissingGrid(alt.pj);
                 if (P->errorIfBestTransformationNotAvailable)
                     return res;
+                P->warnIfBestTransformationNotAvailable = false;
+                skipNonInstantiable = true;
             }
             if (iRetry == N_MAX_RETRY) {
                 break;
@@ -2019,6 +2029,7 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
             errorIfBestTransformationNotAvailable;
         P->warnIfBestTransformationNotAvailable =
             warnIfBestTransformationNotAvailable;
+        P->skipNonInstantiable = warnIfBestTransformationNotAvailable;
     }
 
     if (P == nullptr || op_count == 1 ||

@@ -1157,6 +1157,19 @@ $EXE --only-best --no-ballpark EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
 EOF
 
 echo "##############################################################" >> ${OUT}
+echo "Test cs2cs (grid missing) with scenario of https://github.com/OSGeo/PROJ/issues/3607 that we are using the 'NAD27 to WGS 84 (6)' DMA-ConusW transformation" >> ${OUT}
+
+mkdir tmp_dir
+cp $PROJ_DATA/proj.db tmp_dir
+
+PROJ_DATA=tmp_dir $EXE +proj=latlong +datum=WGS84 +to +proj=utm +zone=10 +datum=NAD27 -E >>${OUT} 2>&1 <<EOF
+-111.5 45.25919444444
+-111.5 45.25919444444
+EOF
+
+rm -rf tmp_dir
+
+echo "##############################################################" >> ${OUT}
 echo "Test Similarity Transformation (example from EPSG Guidance Note 7.2)" >> ${OUT}
 #
 $EXE -d 3 EPSG:23031 EPSG:25831 -E >>${OUT} 2>&1 <<EOF
