@@ -360,6 +360,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1324','MWC18 Intermediate Reference 
 INSERT INTO "usage" VALUES('EPSG','18330','geodetic_datum','EPSG','1324','EPSG','4666','EPSG','1141');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1327','SIRGAS-Chile realization 5 epoch 2021',NULL,'EPSG','7019','EPSG','8901','2021-08-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18453','geodetic_datum','EPSG','1327','EPSG','1066','EPSG','1027');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1329','Marco Geocentrico Nacional de Referencia 2018',NULL,'EPSG','7019','EPSG','8901','2018-06-08',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','18473','geodetic_datum','EPSG','1329','EPSG','1070','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1333','IGS20',NULL,'EPSG','7019','EPSG','8901','2015-01-01',2015.0,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18632','geodetic_datum','EPSG','1333','EPSG','1262','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1334','DoPw22 Intermediate Reference Frame',NULL,'EPSG','7019','EPSG','8901','2022-01-01',NULL,NULL,NULL,0);
