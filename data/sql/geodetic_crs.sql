@@ -2220,3 +2220,9 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','20040','SIRGAS-Chile 2021',NULL,'geogr
 INSERT INTO "usage" VALUES('EPSG','18455','geodetic_crs','EPSG','20040','EPSG','1066','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','20041','SIRGAS-Chile 2021',NULL,'geographic 2D','EPSG','6422','EPSG','1327',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18456','geodetic_crs','EPSG','20041','EPSG','1066','EPSG','1183');
+INSERT INTO "geodetic_crs" VALUES('EPSG','20044','MAGNA-SIRGAS 2018',NULL,'geocentric','EPSG','6500','EPSG','1329',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19038','geodetic_crs','EPSG','20044','EPSG','1070','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','20045','MAGNA-SIRGAS 2018',NULL,'geographic 3D','EPSG','6423','EPSG','1329',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19039','geodetic_crs','EPSG','20045','EPSG','1070','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','20046','MAGNA-SIRGAS 2018',NULL,'geographic 2D','EPSG','6422','EPSG','1329',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','18485','geodetic_crs','EPSG','20046','EPSG','1070','EPSG','1183');

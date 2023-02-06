@@ -666,6 +666,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1324','MWC18-IRF','EPSG
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1328','INAGEOID2020 v2','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1327','SIRGAS-Chile 2021','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1253','SIRGAS-Chile 2016','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1329','MAGNA-SIRGAS 2018','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6694','POSGAR 94','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6694','POSGAR','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6694','Posiciones Geodésicas Argentinas 1994','EPSG');
@@ -7821,9 +7822,15 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10235','ETRS89 / OxWo08 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10240','ETRS89 / SYC20 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10212','ETRS89 / GWPBS22 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10217','ETRS89 / GWWAB22 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9377','MAGNA-SIRGAS 2018 / CTM12','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10222','ETRS89 / GWWWA22 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10246','D96/TM + SVS2010/Koper','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10245','D96 + SVS2010/Koper','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','11114','MAGNA-SIRGAS 2018 / Col FW','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','11115','MAGNA-SIRGAS 2018 / Col W','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','11117','MAGNA-SIRGAS 2018 / Col EC','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','11118','MAGNA-SIRGAS 2018 / Col E','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','11116','MAGNA-SIRGAS 2018 / Col Bog','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10275','ETRS89 / SMITB20 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10276','ETRS89 / SMITB20 SnakeGrid + Newlyn height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10280','ETRS89 / RBEPP12 SnakeGrid','EPSG');

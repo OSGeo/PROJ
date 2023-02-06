@@ -27,6 +27,7 @@ INSERT INTO "coordinate_system" VALUES('EPSG','1047','Cartesian',2);
 INSERT INTO "coordinate_system" VALUES('EPSG','1048','Cartesian',2);
 INSERT INTO "coordinate_system" VALUES('EPSG','1049','vertical',1);
 INSERT INTO "coordinate_system" VALUES('EPSG','1050','vertical',1);
+INSERT INTO "coordinate_system" VALUES('EPSG','1053','Cartesian',2);
 INSERT INTO "coordinate_system" VALUES('EPSG','4400','Cartesian',2);
 INSERT INTO "coordinate_system" VALUES('EPSG','4401','Cartesian',2);
 INSERT INTO "coordinate_system" VALUES('EPSG','4402','Cartesian',2);
