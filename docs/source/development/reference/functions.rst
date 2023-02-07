@@ -285,7 +285,7 @@ Coordinate transformation
     If the input coordinate contains any NaNs you are guaranteed to get a
     coordinate with all NaNs as a result.
 
-    .. versionchanged:: 9.1.2
+    .. versionchanged:: 9.2.0
 
         Define NaN handling. Prior NaN handling behavior was undefined.
 
@@ -790,7 +790,7 @@ Various
     If the input coordinate has any NaNs and the expected output of all NaNs
     is returned then the final distance will be 0.
 
-    .. versionchanged:: 9.1.2
+    .. versionchanged:: 9.2.0
 
         Define expected NaN distance of 0.
 
