@@ -2070,12 +2070,96 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
         return nullptr;
     }
 
+    const bool mayNeedToReRunWithDiscardMissing =
+        (errorIfBestTransformationNotAvailable ||
+         warnIfBestTransformationNotAvailable) &&
+        !proj_context_is_network_enabled(ctx);
+    bool foundInstanciableAndNonBallpark = false;
+
     for (auto &op : preparedOpList) {
         op.pj->over = forceOver;
         op.pj->errorIfBestTransformationNotAvailable =
             errorIfBestTransformationNotAvailable;
         op.pj->warnIfBestTransformationNotAvailable =
             warnIfBestTransformationNotAvailable;
+        if (mayNeedToReRunWithDiscardMissing &&
+            !foundInstanciableAndNonBallpark) {
+            if (!proj_coordoperation_has_ballpark_transformation(op.pj->ctx,
+                                                                 op.pj) &&
+                proj_coordoperation_is_instantiable(op.pj->ctx, op.pj)) {
+                foundInstanciableAndNonBallpark = true;
+            }
+        }
+    }
+    if (mayNeedToReRunWithDiscardMissing && !foundInstanciableAndNonBallpark) {
+        // Re-run proj_create_operations with
+        // PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID
+        // Can happen for example for NAD27->NAD83 transformation when we
+        // have no grid and thus have fallback to Helmert transformation and
+        // a WGS84 intermediate.
+        operation_ctx = proj_create_operation_factory_context(ctx, authority);
+        if (operation_ctx) {
+            proj_operation_factory_context_set_allow_ballpark_transformations(
+                ctx, operation_ctx, allowBallparkTransformations);
+
+            if (accuracy >= 0) {
+                proj_operation_factory_context_set_desired_accuracy(
+                    ctx, operation_ctx, accuracy);
+            }
+
+            if (area && area->bbox_set) {
+                proj_operation_factory_context_set_area_of_interest(
+                    ctx, operation_ctx, area->west_lon_degree,
+                    area->south_lat_degree, area->east_lon_degree,
+                    area->north_lat_degree);
+
+                if (!area->name.empty()) {
+                    proj_operation_factory_context_set_area_of_interest_name(
+                        ctx, operation_ctx, area->name.c_str());
+                }
+            }
+
+            proj_operation_factory_context_set_spatial_criterion(
+                ctx, operation_ctx,
+                PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+            proj_operation_factory_context_set_grid_availability_use(
+                ctx, operation_ctx,
+                PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
+
+            op_list = proj_create_operations(ctx, source_crs, target_crs,
+                                             operation_ctx);
+            if (op_list) {
+                ctx->forceOver = forceOver;
+                ctx->debug_level = PJ_LOG_NONE;
+                auto preparedOpList2 = pj_create_prepared_operations(
+                    ctx, source_crs, target_crs, op_list);
+                ctx->debug_level = old_debug_level;
+                ctx->forceOver = false;
+                proj_list_destroy(op_list);
+
+                if (!preparedOpList2.empty()) {
+                    // Append new lists of operations to previous one
+                    std::vector<PJCoordOperation> newOpList;
+                    for (auto &&op : preparedOpList) {
+                        if (!proj_coordoperation_has_ballpark_transformation(
+                                op.pj->ctx, op.pj)) {
+                            newOpList.emplace_back(std::move(op));
+                        }
+                    }
+                    for (auto &&op : preparedOpList2) {
+                        op.pj->over = forceOver;
+                        op.pj->errorIfBestTransformationNotAvailable =
+                            errorIfBestTransformationNotAvailable;
+                        op.pj->warnIfBestTransformationNotAvailable =
+                            warnIfBestTransformationNotAvailable;
+                        newOpList.emplace_back(std::move(op));
+                    }
+                    preparedOpList = std::move(newOpList);
+                }
+            }
+
+            proj_operation_factory_context_destroy(operation_ctx);
+        }
     }
 
     // If there's finally juste a single result, return it directly

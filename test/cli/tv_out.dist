@@ -573,6 +573,10 @@ Test cs2cs (grid missing) with scenario of https://github.com/OSGeo/PROJ/issues/
 -111.5 45.25919444444	1402288.54	5076296.64 0.00
 -111.5 45.25919444444	1402288.54	5076296.64 0.00
 ##############################################################
+Test cs2cs (grid missing) with scenario of https://github.com/OSGeo/PROJ/issues/3613 that we are using a WGS 84 intermediate to do NAD27 to NAD83
+569704.5660295591 4269024.671083651	569720.46	4268813.88 0.00
+569704.5660295591 4269024.671083651	569720.46	4268813.88 0.00
+##############################################################
 Test Similarity Transformation (example from EPSG Guidance Note 7.2)
 300000 4500000	299905.060	4499796.515 0.000
 ##############################################################
