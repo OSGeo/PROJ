@@ -1170,6 +1170,19 @@ EOF
 rm -rf tmp_dir
 
 echo "##############################################################" >> ${OUT}
+echo "Test cs2cs (grid missing) with scenario of https://github.com/OSGeo/PROJ/issues/3613 that we are using a WGS 84 intermediate to do NAD27 to NAD83" >> ${OUT}
+
+mkdir tmp_dir
+cp $PROJ_DATA/proj.db tmp_dir
+
+PROJ_DATA=tmp_dir $EXE EPSG:26915 EPSG:26715 -E >>${OUT} 2>&1 <<EOF
+569704.5660295591 4269024.671083651
+569704.5660295591 4269024.671083651
+EOF
+
+rm -rf tmp_dir
+
+echo "##############################################################" >> ${OUT}
 echo "Test Similarity Transformation (example from EPSG Guidance Note 7.2)" >> ${OUT}
 #
 $EXE -d 3 EPSG:23031 EPSG:25831 -E >>${OUT} 2>&1 <<EOF
