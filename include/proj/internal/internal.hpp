@@ -128,7 +128,7 @@ inline bool starts_with(const std::string &str, const char *prefix) noexcept {
 
 bool ci_less(const std::string &a, const std::string &b) noexcept;
 
-bool ci_starts_with(const char *str, const char *prefix) noexcept;
+PROJ_DLL bool ci_starts_with(const char *str, const char *prefix) noexcept;
 
 bool ci_starts_with(const std::string &str, const std::string &prefix) noexcept;
 

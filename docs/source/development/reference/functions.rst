@@ -282,6 +282,13 @@ Coordinate transformation
 
     Transform a single :c:type:`PJ_COORD` coordinate.
 
+    If the input coordinate contains any NaNs you are guaranteed to get a
+    coordinate with all NaNs as a result.
+
+    .. versionchanged:: 9.2.0
+
+        Define NaN handling. Prior NaN handling behavior was undefined.
+
     :param P: Transformation object
     :type P: :c:type:`PJ` *
     :param `direction`: Transformation direction.
@@ -779,6 +786,13 @@ Various
     the forward or reverse :c:data:`direction`. Returns the euclidean
     distance of the starting point :c:data:`coo` and the resulting
     coordinate after :c:data:`n` iterations back and forth.
+
+    If the input coordinate has any NaNs and the expected output of all NaNs
+    is returned then the final distance will be 0.
+
+    .. versionchanged:: 9.2.0
+
+        Define expected NaN distance of 0.
 
     :param P: Transformation object
     :type P: :c:type:`PJ` *

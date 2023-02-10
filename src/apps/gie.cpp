@@ -116,6 +116,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_strtod.h"
+#include <cmath> /* for isnan */
 #include <math.h>
 
 #include "optargpm.h"
@@ -753,7 +754,7 @@ static PJ_COORD parse_coord(const char *args) {
         // test failures when testing points at edge of grids.
         // For example 1501000.0 becomes 1501000.000000000233
         double d = proj_strtod(prev, &endp);
-        if (*endp != '\0' && !isspace(*endp)) {
+        if (!std::isnan(d) && *endp != '\0' && !isspace(*endp)) {
             double dms = PJ_TODEG(proj_dmstor(prev, &dmsendp));
             /* TODO: When projects.h is removed, call proj_dmstor() in all cases
              */
@@ -843,7 +844,7 @@ static int roundtrip(const char *args) {
     coo = proj_angular_input(T.P, T.dir) ? torad_coord(T.P, T.dir, T.a) : T.a;
 
     r = proj_roundtrip(T.P, T.dir, ntrips, &coo);
-    if (r <= d)
+    if ((std::isnan(r) && std::isnan(d)) || r <= d)
         return another_succeeding_roundtrip();
 
     if (T.verbosity > -1) {
@@ -1052,10 +1053,13 @@ static int expect(const char *args) {
         co = proj_trans (T.P->axisswap, T.dir, co);
     }
 #endif
-    if (proj_angular_output(T.P, T.dir))
+    if (std::isnan(co.v[0]) && std::isnan(ce.v[0])) {
+        d = 0.0;
+    } else if (proj_angular_output(T.P, T.dir)) {
         d = proj_lpz_dist(T.P, ce, co);
-    else
+    } else {
         d = proj_xyz_dist(co, ce);
+    }
 
     // Test written like that to handle NaN
     if (!(d <= T.tolerance))

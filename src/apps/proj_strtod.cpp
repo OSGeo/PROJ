@@ -85,6 +85,8 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-01-17/2017-09-18
 
 ***********************************************************************/
 
+#define FROM_PROJ_CPP
+
 #include "proj_strtod.h"
 
 #include <ctype.h>
@@ -92,7 +94,13 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-01-17/2017-09-18
 #include <float.h>  /* for HUGE_VAL */
 #include <math.h>   /* for pow() */
 #include <stdlib.h> /* for abs */
-#include <string.h> /* for strchr */
+#include <string.h> /* for strchr, strncmp */
+
+#include <limits>
+
+#include "proj/internal/internal.hpp"
+
+using namespace NS_PROJ::internal;
 
 double proj_strtod(const char *str, char **endptr) {
     double number = 0, integral_part = 0;
@@ -121,6 +129,13 @@ double proj_strtod(const char *str, char **endptr) {
         if (endptr)
             *endptr = const_cast<char *>(str);
         return 0;
+    }
+
+    /* NaN */
+    if (ci_starts_with(p, "NaN")) {
+        if (endptr)
+            *endptr = const_cast<char *>(p + 3);
+        return std::numeric_limits<double>::quiet_NaN();
     }
 
     /* non-numeric? */
