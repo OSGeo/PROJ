@@ -2634,6 +2634,11 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
         direction = &AxisDirection::GEOCENTRIC_Z;
     } else if (dirString == AxisDirectionWKT1::OTHER.toString()) {
         direction = &AxisDirection::UNSPECIFIED;
+    } else if (dirString == "UNKNOWN") {
+        // Found in WKT1 of NSIDC's EASE-Grid Sea Ice Age datasets.
+        // Cf https://github.com/OSGeo/gdal/issues/7210
+        emitRecoverableWarning("UNKNOWN is not a valid direction name.");
+        direction = &AxisDirection::UNSPECIFIED;
     }
 
     if (!direction) {
