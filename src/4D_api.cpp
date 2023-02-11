@@ -2433,10 +2433,27 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
         if (P->iCurCoordOp >= 0) {
             P = P->alternativeCoordinateOperations[P->iCurCoordOp].pj;
         } else {
-            pjinfo.id = "unknown";
-            pjinfo.description = "unavailable until proj_trans is called";
-            pjinfo.definition = "unavailable until proj_trans is called";
-            return pjinfo;
+            PJ *candidateOp = nullptr;
+            // If there's just a single coordinate operation which is
+            // instanciable, use it.
+            for (const auto &op : P->alternativeCoordinateOperations) {
+                if (proj_coordoperation_is_instantiable(op.pj->ctx, op.pj)) {
+                    if (candidateOp == nullptr) {
+                        candidateOp = op.pj;
+                    } else {
+                        candidateOp = nullptr;
+                        break;
+                    }
+                }
+            }
+            if (candidateOp) {
+                P = candidateOp;
+            } else {
+                pjinfo.id = "unknown";
+                pjinfo.description = "unavailable until proj_trans is called";
+                pjinfo.definition = "unavailable until proj_trans is called";
+                return pjinfo;
+            }
         }
     }
 

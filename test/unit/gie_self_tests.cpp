@@ -993,6 +993,21 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
 
 // ---------------------------------------------------------------------------
 
+TEST(gie, proj_create_crs_to_crs_WGS84_EGM08_to_WGS84) {
+    auto P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4326+3855",
+                                    "EPSG:4979", nullptr);
+    ASSERT_TRUE(P != nullptr);
+
+    EXPECT_EQ(std::string(proj_pj_info(P).description),
+              "Transformation from EGM2008 height to WGS 84 (ballpark vertical "
+              "transformation, without ellipsoid height to vertical height "
+              "correction)");
+
+    proj_destroy(P);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(gie, proj_create_crs_to_crs_outside_area_of_use) {
 
     // See https://github.com/OSGeo/proj.4/issues/1329
