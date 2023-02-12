@@ -222,6 +222,18 @@ static bool isSpecialCaseForNAD83_to_NAD83HARN(const PJCoordOperation &op) {
            op.name.find("NAD83 to NAD83(HARN) (50)") != std::string::npos;
 }
 
+// Returns true if the passed operation uses "GDA94 to WGS 84 (1)", which
+// is the null transformation
+static bool isSpecialCaseForGDA94_to_WGS84(const PJCoordOperation &op) {
+    return op.name.find("GDA94 to WGS 84 (1)") != std::string::npos;
+}
+
+// Returns true if the passed operation uses "GDA2020 to WGS 84 (2)", which
+// is the null transformation
+static bool isSpecialCaseForWGS84_to_GDA2020(const PJCoordOperation &op) {
+    return op.name.find("GDA2020 to WGS 84 (2)") != std::string::npos;
+}
+
 /**************************************************************************************/
 int pj_get_suggested_operation(PJ_CONTEXT *,
                                const std::vector<PJCoordOperation> &opList,
@@ -309,7 +321,14 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
                    alt.minySrc >= opList[iBest].minySrc &&
                    alt.maxxSrc <= opList[iBest].maxxSrc &&
                    alt.maxySrc <= opList[iBest].maxySrc &&
-                   !isSpecialCaseForNAD83_to_NAD83HARN(opList[iBest]))) &&
+                   // check that this is not equality
+                   !(alt.minxSrc == opList[iBest].minxSrc &&
+                     alt.minySrc == opList[iBest].minySrc &&
+                     alt.maxxSrc == opList[iBest].maxxSrc &&
+                     alt.maxySrc == opList[iBest].maxySrc) &&
+                   !isSpecialCaseForNAD83_to_NAD83HARN(opList[iBest]) &&
+                   !isSpecialCaseForGDA94_to_WGS84(opList[iBest]) &&
+                   !isSpecialCaseForWGS84_to_GDA2020(opList[iBest]))) &&
                  !alt.isOffshore)) {
 
                 if (skipNonInstantiable &&

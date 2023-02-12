@@ -532,24 +532,40 @@ Test cs2cs -W10
 -W argument missing or not in range [0,8]
 program abnormally terminated
 ##############################################################
-Test cs2cs --only-best (working)
-49 2 0	48d59'59.756"N	1d59'57.4"E 0.000
+Test cs2cs --only-best (grid missing) for NTF to RGF93
+Attempt to use coordinate operation NTF to RGF93 v1 (1) failed. Grid fr_ign_gr3df97a.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+49 2 0	*	* inf
 ##############################################################
-Test cs2cs (grid missing)
+Test cs2cs --only-best (working) for EPSG:4326+5773 to EPSG:4979
+49 2 0	49dN	2dE 45.064
+##############################################################
+Test cs2cs --only-best (working) for EPSG:4326 to GDA94 
+-30 152 0	30dS	152dE 0.000
+##############################################################
+Test cs2cs --only-best (working) for GDA94 to EPSG:4326 
+-30 152 0	30dS	152dE 0.000
+##############################################################
+Test cs2cs --only-best (working) for EPSG:4326 to GDA2020 
+-30 152 0	30dS	152dE 0.000
+##############################################################
+Test cs2cs --only-best (working) for GDA2020 to EPSG:4326 
+-30 152 0	30dS	152dE 0.000
+##############################################################
+Test cs2cs (grid missing) for EPSG:4326+3855 to EPSG:4979
 49 2 0	49dN	2dE 0.000
 ##############################################################
-Test cs2cs --only-best=no  (grid missing)
+Test cs2cs --only-best=no (grid missing) for EPSG:4326+3855 to EPSG:4979
 49 2 0	49dN	2dE 0.000
 ##############################################################
-Test cs2cs --only-best (grid missing)
+Test cs2cs --only-best (grid missing) for EPSG:4326+3855 to EPSG:4979
 Attempt to use coordinate operation Inverse of WGS 84 to EGM2008 height (1) failed. Grid us_nga_egm08_25.tif is not available. Consult https://proj.org/resource_files.html for guidance.
 49 2 0	*	* inf
 ##############################################################
-Test cs2cs --only-best=yes (grid missing)
+Test cs2cs --only-best=yes (grid missing) for EPSG:4326+3855 to EPSG:4979
 Attempt to use coordinate operation Inverse of WGS 84 to EGM2008 height (1) failed. Grid us_nga_egm08_25.tif is not available. Consult https://proj.org/resource_files.html for guidance.
 49 2 0	*	* inf
 ##############################################################
-Test cs2cs (grid missing) with PROJ_ONLY_BEST_DEFAULT=YES
+Test cs2cs (grid missing) with PROJ_ONLY_BEST_DEFAULT=YES for EPSG:4326+3855 to EPSG:4979
 Attempt to use coordinate operation Inverse of WGS 84 to EGM2008 height (1) failed. Grid us_nga_egm08_25.tif is not available. Consult https://proj.org/resource_files.html for guidance.
 49 2 0	*	* inf
 ##############################################################

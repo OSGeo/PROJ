@@ -1089,42 +1089,77 @@ PROJ_DISPLAY_PROGRAM_NAME=NO $EXE -W10 +proj=latlong +datum=WGS84 +to +proj=latl
 EOF
 
 echo "##############################################################" >> ${OUT}
-echo "Test cs2cs --only-best (working)" >> ${OUT}
+echo "Test cs2cs --only-best (grid missing) for NTF to RGF93" >> ${OUT}
 #
 $EXE --only-best NTF RGF93 -E >>${OUT} 2>&1 <<EOF
 49 2 0
 EOF
 
 echo "##############################################################" >> ${OUT}
-echo "Test cs2cs (grid missing)" >> ${OUT}
+echo "Test cs2cs --only-best (working) for EPSG:4326+5773 to EPSG:4979" >> ${OUT}
+#
+$EXE --only-best EPSG:4326+5773 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
+49 2 0
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs --only-best (working) for EPSG:4326 to GDA94 " >> ${OUT}
+#
+$EXE --only-best EPSG:4326 GDA94 -E >>${OUT} 2>&1 <<EOF
+-30 152 0
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs --only-best (working) for GDA94 to EPSG:4326 " >> ${OUT}
+#
+$EXE --only-best GDA94 EPSG:4326 -E >>${OUT} 2>&1 <<EOF
+-30 152 0
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs --only-best (working) for EPSG:4326 to GDA2020 " >> ${OUT}
+#
+$EXE --only-best EPSG:4326 GDA2020 -E >>${OUT} 2>&1 <<EOF
+-30 152 0
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs --only-best (working) for GDA2020 to EPSG:4326 " >> ${OUT}
+#
+$EXE --only-best GDA2020 EPSG:4326 -E >>${OUT} 2>&1 <<EOF
+-30 152 0
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs (grid missing) for EPSG:4326+3855 to EPSG:4979" >> ${OUT}
 #
 $EXE EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
 49 2 0
 EOF
 
 echo "##############################################################" >> ${OUT}
-echo "Test cs2cs --only-best=no  (grid missing)" >> ${OUT}
+echo "Test cs2cs --only-best=no (grid missing) for EPSG:4326+3855 to EPSG:4979" >> ${OUT}
 #
 $EXE --only-best=no EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
 49 2 0
 EOF
 
 echo "##############################################################" >> ${OUT}
-echo "Test cs2cs --only-best (grid missing)" >> ${OUT}
+echo "Test cs2cs --only-best (grid missing) for EPSG:4326+3855 to EPSG:4979" >> ${OUT}
 #
 $EXE --only-best EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
 49 2 0
 EOF
 
 echo "##############################################################" >> ${OUT}
-echo "Test cs2cs --only-best=yes (grid missing)" >> ${OUT}
+echo "Test cs2cs --only-best=yes (grid missing) for EPSG:4326+3855 to EPSG:4979" >> ${OUT}
 #
 $EXE --only-best=yes EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
 49 2 0
 EOF
 
 echo "##############################################################" >> ${OUT}
-echo "Test cs2cs (grid missing) with PROJ_ONLY_BEST_DEFAULT=YES" >> ${OUT}
+echo "Test cs2cs (grid missing) with PROJ_ONLY_BEST_DEFAULT=YES for EPSG:4326+3855 to EPSG:4979" >> ${OUT}
 #
 PROJ_ONLY_BEST_DEFAULT=YES $EXE EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
 49 2 0
