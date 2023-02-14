@@ -213,27 +213,6 @@ double proj_roundtrip(PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord) {
     return proj_xyz_dist(org, t);
 }
 
-// Returns true if the passed operation uses NADCON5 grids for NAD83 to
-// NAD83(HARN)
-static bool isSpecialCaseForNAD83_to_NAD83HARN(const PJCoordOperation &op) {
-    return op.name.find("NAD83 to NAD83(HARN) (47)") != std::string::npos ||
-           op.name.find("NAD83 to NAD83(HARN) (48)") != std::string::npos ||
-           op.name.find("NAD83 to NAD83(HARN) (49)") != std::string::npos ||
-           op.name.find("NAD83 to NAD83(HARN) (50)") != std::string::npos;
-}
-
-// Returns true if the passed operation uses "GDA94 to WGS 84 (1)", which
-// is the null transformation
-static bool isSpecialCaseForGDA94_to_WGS84(const PJCoordOperation &op) {
-    return op.name.find("GDA94 to WGS 84 (1)") != std::string::npos;
-}
-
-// Returns true if the passed operation uses "GDA2020 to WGS 84 (2)", which
-// is the null transformation
-static bool isSpecialCaseForWGS84_to_GDA2020(const PJCoordOperation &op) {
-    return op.name.find("GDA2020 to WGS 84 (2)") != std::string::npos;
-}
-
 /**************************************************************************************/
 int pj_get_suggested_operation(PJ_CONTEXT *,
                                const std::vector<PJCoordOperation> &opList,
@@ -311,25 +290,22 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
             // onshore and offshore Tunisia area of uses, but is slightly
             // onshore. So in a general way, prefer a onshore area to a
             // offshore one.
-            if (iBest < 0 ||
-                (alt.accuracy >= 0 &&
-                 (alt.accuracy < bestAccuracy ||
-                  // If two operations have the same accuracy, use the one that
-                  // is contained within a larger one
-                  (alt.accuracy == bestAccuracy &&
-                   alt.minxSrc >= opList[iBest].minxSrc &&
-                   alt.minySrc >= opList[iBest].minySrc &&
-                   alt.maxxSrc <= opList[iBest].maxxSrc &&
-                   alt.maxySrc <= opList[iBest].maxySrc &&
-                   // check that this is not equality
-                   !(alt.minxSrc == opList[iBest].minxSrc &&
-                     alt.minySrc == opList[iBest].minySrc &&
-                     alt.maxxSrc == opList[iBest].maxxSrc &&
-                     alt.maxySrc == opList[iBest].maxySrc) &&
-                   !isSpecialCaseForNAD83_to_NAD83HARN(opList[iBest]) &&
-                   !isSpecialCaseForGDA94_to_WGS84(opList[iBest]) &&
-                   !isSpecialCaseForWGS84_to_GDA2020(opList[iBest]))) &&
-                 !alt.isOffshore)) {
+            if (iBest < 0 || (alt.accuracy >= 0 &&
+                              (alt.accuracy < bestAccuracy ||
+                               // If two operations have the same accuracy, use
+                               // the one that is contained within a larger one
+                               (alt.accuracy == bestAccuracy &&
+                                alt.minxSrc >= opList[iBest].minxSrc &&
+                                alt.minySrc >= opList[iBest].minySrc &&
+                                alt.maxxSrc <= opList[iBest].maxxSrc &&
+                                alt.maxySrc <= opList[iBest].maxySrc &&
+                                // check that this is not equality
+                                !(alt.minxSrc == opList[iBest].minxSrc &&
+                                  alt.minySrc == opList[iBest].minySrc &&
+                                  alt.maxxSrc == opList[iBest].maxxSrc &&
+                                  alt.maxySrc == opList[iBest].maxySrc) &&
+                                !opList[iBest].isPriorityOp)) &&
+                              !alt.isOffshore)) {
 
                 if (skipNonInstantiable &&
                     !proj_coordoperation_is_instantiable(alt.pj->ctx, alt.pj)) {
@@ -2784,6 +2760,28 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+// Returns true if the passed operation uses NADCON5 grids for NAD83 to
+// NAD83(HARN)
+static bool isSpecialCaseForNAD83_to_NAD83HARN(const std::string &opName) {
+    return opName.find("NAD83 to NAD83(HARN) (47)") != std::string::npos ||
+           opName.find("NAD83 to NAD83(HARN) (48)") != std::string::npos ||
+           opName.find("NAD83 to NAD83(HARN) (49)") != std::string::npos ||
+           opName.find("NAD83 to NAD83(HARN) (50)") != std::string::npos;
+}
+
+// Returns true if the passed operation uses "GDA94 to WGS 84 (1)", which
+// is the null transformation
+static bool isSpecialCaseForGDA94_to_WGS84(const std::string &opName) {
+    return opName.find("GDA94 to WGS 84 (1)") != std::string::npos;
+}
+
+// Returns true if the passed operation uses "GDA2020 to WGS 84 (2)", which
+// is the null transformation
+static bool isSpecialCaseForWGS84_to_GDA2020(const std::string &opName) {
+    return opName.find("GDA2020 to WGS 84 (2)") != std::string::npos;
+}
+
 PJCoordOperation::PJCoordOperation(int idxInOriginalListIn, double minxSrcIn,
                                    double minySrcIn, double maxxSrcIn,
                                    double maxySrcIn, double minxDstIn,
@@ -2795,8 +2793,10 @@ PJCoordOperation::PJCoordOperation(int idxInOriginalListIn, double minxSrcIn,
       minySrc(minySrcIn), maxxSrc(maxxSrcIn), maxySrc(maxySrcIn),
       minxDst(minxDstIn), minyDst(minyDstIn), maxxDst(maxxDstIn),
       maxyDst(maxyDstIn), pj(pjIn), name(nameIn), accuracy(accuracyIn),
-      isOffshore(isOffshoreIn) {
-
+      isOffshore(isOffshoreIn),
+      isPriorityOp(isSpecialCaseForNAD83_to_NAD83HARN(name) ||
+                   isSpecialCaseForGDA94_to_WGS84(name) ||
+                   isSpecialCaseForWGS84_to_GDA2020(name)) {
     const auto IsLonLatOrLatLon = [](const PJ *crs, bool &isLonLatDegreeOut,
                                      bool &isLatLonDegreeOut) {
         const auto eType = proj_get_type(crs);

@@ -312,6 +312,7 @@ struct PJCoordOperation {
     std::string name{};
     double accuracy = -1.0;
     bool isOffshore = false;
+    bool isPriorityOp = false;
     bool srcIsLonLatDegree = false;
     bool srcIsLatLonDegree = false;
     bool dstIsLonLatDegree = false;
@@ -332,7 +333,7 @@ struct PJCoordOperation {
           minyDst(other.minyDst), maxxDst(other.maxxDst),
           maxyDst(other.maxyDst), pj(proj_clone(ctx, other.pj)),
           name(std::move(other.name)), accuracy(other.accuracy),
-          isOffshore(other.isOffshore),
+          isOffshore(other.isOffshore), isPriorityOp(other.isPriorityOp),
           srcIsLonLatDegree(other.srcIsLonLatDegree),
           srcIsLatLonDegree(other.srcIsLatLonDegree),
           dstIsLonLatDegree(other.dstIsLonLatDegree),
@@ -345,6 +346,7 @@ struct PJCoordOperation {
           minyDst(other.minyDst), maxxDst(other.maxxDst),
           maxyDst(other.maxyDst), name(std::move(other.name)),
           accuracy(other.accuracy), isOffshore(other.isOffshore),
+          isPriorityOp(other.isPriorityOp),
           srcIsLonLatDegree(other.srcIsLonLatDegree),
           srcIsLatLonDegree(other.srcIsLatLonDegree),
           dstIsLonLatDegree(other.dstIsLonLatDegree),
