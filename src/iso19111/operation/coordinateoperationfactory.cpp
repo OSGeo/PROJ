@@ -1917,7 +1917,8 @@ findCandidateGeodCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
         if (matches.size() == 1) {
             const auto &match = matches.front();
             if (datum->_isEquivalentTo(
-                    match.get(), util::IComparable::Criterion::EQUIVALENT) &&
+                    match.get(), util::IComparable::Criterion::EQUIVALENT,
+                    authFactory->databaseContext().as_nullable()) &&
                 !match->identifiers().empty()) {
                 return findCandidateGeodCRSForDatum(
                     authFactory, crs,
@@ -1974,7 +1975,8 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
                         const bool sameGeodeticDatum =
                             srcDatum->_isEquivalentTo(
                                 dstDatum.get(),
-                                util::IComparable::Criterion::EQUIVALENT);
+                                util::IComparable::Criterion::EQUIVALENT,
+                                dbContext);
                         if (sameGeodeticDatum) {
                             continue;
                         }
@@ -2124,10 +2126,11 @@ createBallparkGeographicOffset(const crs::CRSNNPtr &sourceCRS,
         dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
     const crs::GeographicCRS *geogDst =
         dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
-    const bool isSameDatum = geogSrc && geogDst &&
-                             geogSrc->datumNonNull(dbContext)->_isEquivalentTo(
-                                 geogDst->datumNonNull(dbContext).get(),
-                                 util::IComparable::Criterion::EQUIVALENT);
+    const bool isSameDatum =
+        geogSrc && geogDst &&
+        geogSrc->datumNonNull(dbContext)->_isEquivalentTo(
+            geogDst->datumNonNull(dbContext).get(),
+            util::IComparable::Criterion::EQUIVALENT, dbContext);
 
     auto name = buildOpName(isSameDatum ? NULL_GEOGRAPHIC_OFFSET
                                         : BALLPARK_GEOGRAPHIC_OFFSET,
@@ -2700,7 +2703,7 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
 
     const bool sameDatum = geogSrc->datumNonNull(dbContext)->_isEquivalentTo(
         geogDst->datumNonNull(dbContext).get(),
-        util::IComparable::Criterion::EQUIVALENT);
+        util::IComparable::Criterion::EQUIVALENT, dbContext);
 
     // Do the CRS differ by their axis order ?
     bool axisReversal2D = false;
@@ -3568,7 +3571,8 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
         const auto srcDatum = geodSrc->datumNonNull(dbContext);
         const auto dstDatum = geodDst->datumNonNull(dbContext);
         sameGeodeticDatum = srcDatum->_isEquivalentTo(
-            dstDatum.get(), util::IComparable::Criterion::EQUIVALENT);
+            dstDatum.get(), util::IComparable::Criterion::EQUIVALENT,
+            dbContext);
 
         if (res.empty() && !sameGeodeticDatum &&
             !context.inCreateOperationsWithDatumPivotAntiRecursion) {
@@ -3682,7 +3686,8 @@ findCandidateVertCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
         if (matches.size() == 1) {
             const auto &match = matches.front();
             if (datum->_isEquivalentTo(
-                    match.get(), util::IComparable::Criterion::EQUIVALENT) &&
+                    match.get(), util::IComparable::Criterion::EQUIVALENT,
+                    authFactory->databaseContext().as_nullable()) &&
                 !match->identifiers().empty()) {
                 return findCandidateVertCRSForDatum(
                     authFactory,
@@ -4447,7 +4452,8 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
         auto geogCRSOfBaseOfBoundSrcDatum =
             geogCRSOfBaseOfBoundSrc->datumNonNull(dbContext);
         if (geogCRSOfBaseOfBoundSrcDatum->_isEquivalentTo(
-                geogDstDatum.get(), util::IComparable::Criterion::EQUIVALENT)) {
+                geogDstDatum.get(), util::IComparable::Criterion::EQUIVALENT,
+                dbContext)) {
             res = createOperations(boundSrc->baseCRS(), targetCRS, context);
             return;
         }
@@ -4558,13 +4564,13 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
     } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog &&
                geogCRSOfBaseOfBoundSrc->ellipsoid()->_isEquivalentTo(
                    datum::Ellipsoid::CLARKE_1866.get(),
-                   util::IComparable::Criterion::EQUIVALENT) &&
+                   util::IComparable::Criterion::EQUIVALENT, dbContext) &&
                hubSrcGeog->datumNonNull(dbContext)->_isEquivalentTo(
                    datum::GeodeticReferenceFrame::EPSG_6326.get(),
-                   util::IComparable::Criterion::EQUIVALENT) &&
+                   util::IComparable::Criterion::EQUIVALENT, dbContext) &&
                geogDstDatum->_isEquivalentTo(
                    datum::GeodeticReferenceFrame::EPSG_6269.get(),
-                   util::IComparable::Criterion::EQUIVALENT)) {
+                   util::IComparable::Criterion::EQUIVALENT, dbContext)) {
         auto nnGeogCRSOfBaseOfBoundSrc = NN_NO_CHECK(geogCRSOfBaseOfBoundSrc);
         if (boundSrc->baseCRS()->_isEquivalentTo(
                 nnGeogCRSOfBaseOfBoundSrc.get(),
@@ -4798,7 +4804,7 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
     const auto srcDatum = vertSrc->datumNonNull(dbContext);
     const auto dstDatum = vertDst->datumNonNull(dbContext);
     const bool equivalentVDatum = srcDatum->_isEquivalentTo(
-        dstDatum.get(), util::IComparable::Criterion::EQUIVALENT);
+        dstDatum.get(), util::IComparable::Criterion::EQUIVALENT, dbContext);
 
     const auto &srcAxis = vertSrc->coordinateSystem()->axisList()[0];
     const double convSrc = srcAxis->unit().conversionToSI();

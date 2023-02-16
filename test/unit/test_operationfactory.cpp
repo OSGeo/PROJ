@@ -1950,6 +1950,8 @@ TEST(operation, geogCRS_3D_source_datum_name_is_alias_to_geogCRS) {
     ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=noop");
+    EXPECT_EQ(list[0]->nameStr(),
+              "Null geographic offset from something to WGS 84");
 }
 
 // ---------------------------------------------------------------------------
