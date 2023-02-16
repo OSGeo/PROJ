@@ -1915,6 +1915,47 @@ TEST(operation, geogCRS_to_geogCRS_with_intermediate_no_ids) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_3D_source_datum_name_is_alias_to_geogCRS) {
+
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+
+    auto objSrc = WKTParser().createFromWKT(
+        "GEOGCRS[\"something\",\n"
+        "    DATUM[\"WGS84\",\n"
+        "        ELLIPSOID[\"WGS84\",6378137,298.257223563,\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        ID[\"EPSG\",6326]],\n"
+        "    PRIMEM[\"Greenwich\",0,\n"
+        "        ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8901]],\n"
+        "    CS[ellipsoidal,3],\n"
+        "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "            ORDER[1],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "            ORDER[2],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        AXIS[\"ellipsoidal height (h)\",up,\n"
+        "            ORDER[3],\n"
+        "            LENGTHUNIT[\"Meter\",1,\n"
+        "                ID[\"EPSG\",9001]]]]");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), authFactory->createCoordinateReferenceSystem("4326"),
+        ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+    EXPECT_EQ(list[0]->nameStr(),
+              "Null geographic offset from something to WGS 84");
+}
+
+// ---------------------------------------------------------------------------
+
 static ProjectedCRSNNPtr createUTM31_WGS84() {
     return ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4326,
