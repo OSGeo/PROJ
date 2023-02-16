@@ -1954,12 +1954,11 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
     buildCRSIds(sourceCRS, context, sourceIds);
     if (sourceIds.empty()) {
         auto geodSrc = dynamic_cast<crs::GeodeticCRS *>(sourceCRS.get());
+        auto geodDst = dynamic_cast<crs::GeodeticCRS *>(targetCRS.get());
         if (geodSrc) {
+            const auto dbContext = authFactory->databaseContext().as_nullable();
             const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
-                authFactory, geodSrc,
-                geodSrc
-                    ->datumNonNull(authFactory->databaseContext().as_nullable())
-                    .get()));
+                authFactory, geodSrc, geodSrc->datumNonNull(dbContext).get()));
             std::vector<CoordinateOperationNNPtr> res;
             for (const auto &candidateSrcGeod : candidatesSrcGeod) {
                 if (candidateSrcGeod->coordinateSystem()->axisList().size() ==
@@ -1968,6 +1967,18 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
                       nullptr) ==
                      (dynamic_cast<crs::GeographicCRS *>(
                           candidateSrcGeod.get()) != nullptr))) {
+                    if (geodDst) {
+                        const auto srcDatum =
+                            candidateSrcGeod->datumNonNull(dbContext);
+                        const auto dstDatum = geodDst->datumNonNull(dbContext);
+                        const bool sameGeodeticDatum =
+                            srcDatum->_isEquivalentTo(
+                                dstDatum.get(),
+                                util::IComparable::Criterion::EQUIVALENT);
+                        if (sameGeodeticDatum) {
+                            continue;
+                        }
+                    }
                     const auto opsWithIntermediate =
                         findsOpsInRegistryWithIntermediate(
                             candidateSrcGeod, targetCRS, context,
