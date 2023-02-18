@@ -55,11 +55,30 @@ static PJ_XY eck4_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 static PJ_LP eck4_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
 
-    const double theta = aasin(P->ctx, xy.y * RC_y);
-    const double cos_theta = cos(theta);
-    const double sin_theta = sin(theta);
-    lp.lam = xy.x / (C_x * (1. + cos_theta));
-    lp.phi = aasin(P->ctx, (theta + sin_theta * (cos_theta + 2.)) * RC_p);
+    const double sin_theta = xy.y * RC_y;
+    const double one_minus_abs_sin_theta = 1.0 - fabs(sin_theta);
+    if (one_minus_abs_sin_theta >= 0.0 && one_minus_abs_sin_theta <= 1e-12) {
+        lp.lam = xy.x / C_x;
+        lp.phi = sin_theta > 0 ? M_PI / 2 : -M_PI / 2;
+    } else {
+        const double theta = aasin(P->ctx, sin_theta);
+        const double cos_theta = cos(theta);
+        lp.lam = xy.x / (C_x * (1. + cos_theta));
+        const double sin_phi = (theta + sin_theta * (cos_theta + 2.)) * RC_p;
+        lp.phi = aasin(P->ctx, sin_phi);
+    }
+    if (!P->over) {
+        const double fabs_lam_minus_pi = fabs(lp.lam) - M_PI;
+        if (fabs_lam_minus_pi > 0.0) {
+            if (fabs_lam_minus_pi > 1e-10) {
+                proj_errno_set(
+                    P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+                return lp;
+            } else {
+                lp.lam = lp.lam > 0 ? M_PI : -M_PI;
+            }
+        }
+    }
     return lp;
 }
 

@@ -1221,6 +1221,24 @@ expect  -188646.389356416 132268.540174065
 accept  -2 -1
 expect  -188646.389356416 -132268.540174065
 
+accept  -180 90
+expect  -8489602.7403 8489602.7403
+
+accept  180 90
+expect  8489602.7403 8489602.7403
+
+accept  -180 0
+expect  -16979205.4807 0
+
+accept  180 0
+expect  16979205.4807 0
+
+accept  -180 -90
+expect  -8489602.7403 -8489602.7403
+
+accept  180 -90
+expect  8489602.7403 -8489602.7403
+
 direction inverse
 accept  200 100
 expect  0.002120241 0.000756015
@@ -1231,6 +1249,47 @@ expect  -0.002120241 0.000756015
 accept  -200 -100
 expect  -0.002120241 -0.000756015
 
+accept  -8489602.74033281 8489602.74033281
+expect  -180 90
+
+accept  -8489602.75 8489602.74033281
+expect  failure errno coord_transfm_outside_projection_domain
+
+accept  8489602.74033281 8489602.74033281
+expect  180 90
+
+accept  8489602.75 8489602.74033281
+expect  failure errno coord_transfm_outside_projection_domain
+
+accept  0 8489602.75
+expect  failure errno coord_transfm_outside_projection_domain
+
+accept  -16979205.4807 0
+expect  -180 0
+
+accept  -16979205.49 0
+expect  failure errno coord_transfm_outside_projection_domain
+
+accept  16979205.4807 0
+expect  180 0
+
+accept  16979205.49 0
+expect  failure errno coord_transfm_outside_projection_domain
+
+accept  -8489602.74033281 -8489602.74033281
+expect  -180 -90
+
+accept  -8489602.75 -8489602.74033281
+expect  failure errno coord_transfm_outside_projection_domain
+
+accept  8489602.74033281 -8489602.74033281
+expect  180 -90
+
+accept  8489602.75 -8489602.74033281
+expect  failure errno coord_transfm_outside_projection_domain
+
+accept  0 -8489602.75
+expect  failure errno coord_transfm_outside_projection_domain
 
 ===============================================================================
 # Eckert V
