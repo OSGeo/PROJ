@@ -2294,9 +2294,9 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
         }
 
         const auto offset = fpRaw->tell();
-        auto grid = std::unique_ptr<NTv2Grid>(
-            new NTv2Grid(filename + ", " + gridName, ctx, fpRaw, subfile,
-                         offset, must_swap, columns, rows, extent));
+        auto grid = std::unique_ptr<NTv2Grid>(new NTv2Grid(
+            std::string(filename).append(", ").append(gridName), ctx, fpRaw,
+            subfile, offset, must_swap, columns, rows, extent));
         std::string parentName;
         parentName.assign(header + 24, 8);
         auto iter = mapGrids.find(parentName);

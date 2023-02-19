@@ -565,7 +565,8 @@ int main(int argc, char *argv[]) {
                     continue;
                 }
 
-                const std::string resource_url(endpoint + '/' + name);
+                const std::string resource_url(
+                    std::string(endpoint).append("/").append(name));
                 if (proj_is_download_needed(ctx, resource_url.c_str(), false)) {
                     total_size_to_download += file_size;
                     to_download.push_back(resource_url);
