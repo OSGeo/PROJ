@@ -305,7 +305,7 @@ add_custom_target(check_wkt1_grammar_md5 ALL
                   COMMAND ${CMAKE_COMMAND}
                       "-DIN_FILE=wkt1_grammar.y"
                       "-DTARGET=generate_wkt1_parser"
-                      "-DEXPECTED_MD5SUM=04ba1095339aeac27105f5782d6297de"
+                      "-DEXPECTED_MD5SUM=5b4495c1ec6d2ae26b7028a9bb5d8819"
                       -P "${CMAKE_CURRENT_SOURCE_DIR}/check_md5sum.cmake"
                   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/wkt1_grammar.y"

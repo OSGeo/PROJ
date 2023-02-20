@@ -817,6 +817,22 @@ TEST(wkt_parse, wkt1_geocentric_with_PROJ4_extension) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_non_conformant_inf_inverse_flattening) {
+    // Some WKT in the wild use "inf". Cf SPHEROID["unnamed",6370997,"inf"]
+    // in https://zenodo.org/record/3878979#.Y_P4g4CZNH4,
+    // https://zenodo.org/record/5831940#.Y_P4i4CZNH5
+    // or https://grasswiki.osgeo.org/wiki/Marine_Science
+    auto obj = WKTParser().setStrict(false).createFromWKT(
+        "GEOGCS[\"GCS_sphere\",DATUM[\"D_unknown\","
+        "SPHEROID[\"Spherical_Earth\",6370997,\"inf\"]],"
+        "PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->ellipsoid()->inverseFlattening()->value(), 0.0);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt2_GEODCRS_EPSG_4326) {
     auto obj = WKTParser().createFromWKT("GEODCRS" + contentWKT2_EPSG_4326);
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
