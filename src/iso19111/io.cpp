@@ -2082,7 +2082,18 @@ EllipsoidNNPtr WKTParser::Private::buildEllipsoid(const WKTNodeNNPtr &node) {
             unit = UnitOfMeasure::METRE;
         }
         Length semiMajorAxis(asDouble(children[1]), unit);
-        Scale invFlattening(asDouble(children[2]));
+        // Some WKT in the wild use "inf". Cf SPHEROID["unnamed",6370997,"inf"]
+        // in https://zenodo.org/record/3878979#.Y_P4g4CZNH4,
+        // https://zenodo.org/record/5831940#.Y_P4i4CZNH5
+        // or https://grasswiki.osgeo.org/wiki/Marine_Science
+        const auto &invFlatteningChild = children[2];
+        if (invFlatteningChild->GP()->value() == "\"inf\"") {
+            emitRecoverableWarning("Inverse flattening = \"inf\" is not "
+                                   "conformant, but understood");
+        }
+        Scale invFlattening(invFlatteningChild->GP()->value() == "\"inf\""
+                                ? 0
+                                : asDouble(invFlatteningChild));
         const auto celestialBody(
             Ellipsoid::guessBodyName(dbContext_, semiMajorAxis.getSIValue()));
         if (invFlattening.getSIValue() == 0) {

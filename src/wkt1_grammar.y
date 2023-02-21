@@ -194,8 +194,12 @@ spheroid:
 semi_major_axis:
     T_NUMBER
 
+// Some WKT in the wild use "inf". Cf SPHEROID["unnamed",6370997,"inf"]
+// in https://zenodo.org/record/3878979#.Y_P4g4CZNH4,
+// https://zenodo.org/record/5831940#.Y_P4i4CZNH5
+// or https://grasswiki.osgeo.org/wiki/Marine_Science
 inverse_flattening:
-    T_NUMBER
+    T_NUMBER | T_STRING
 
 prime_meridian:
     T_PRIMEM begin_node_name ',' longitude opt_authority end_node
