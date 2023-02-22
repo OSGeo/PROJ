@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "CS2CS" "1" "Nov 25, 2022" "9.1.1" "PROJ"
+.TH "CS2CS" "1" "Mar 1, 2023" "9.2.0" "PROJ"
 .SH NAME
 cs2cs \- Cartographic coordinate system filter
 .SH SYNOPSIS
@@ -37,7 +37,8 @@ cs2cs \- Cartographic coordinate system filter
 \fBcs2cs\fP [\fB\-eEfIlrstvwW\fP [args]]
 .in +2
 [[\-\-area <name_or_code>] | [\-\-bbox <west_long,south_lat,east_long,north_lat>]]
-[\-\-authority <name>] [\-\-no\-ballpark] [\-\-accuracy <accuracy>] [\-\-3d]
+[\-\-authority <name>] [\-\-3d]
+[\-\-accuracy <accuracy>] [\-\-only\-best[=yes|=no]] [\-\-no\-ballpark]
 ([\fI+opt[=arg]\fP ...] [+to \fI+opt[=arg]\fP ...] | {source_crs} {target_crs})
 file ...
 .in -2
@@ -57,6 +58,8 @@ an object code (like \(dqEPSG:4326\(dq, \(dqurn:ogc:def:crs:EPSG::4326\(dq,
 .IP \(bu 2
 an Object name. e.g \(dqWGS 84\(dq, \(dqWGS 84 / UTM zone 31N\(dq. In that case as
 uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
+.IP \(bu 2
+a CRS name and a coordinate epoch, separated with \(aq@\(aq. For example \(dq\fI\%ITRF2014@2025.0\fP\(dq. (\fIadded in 9.2\fP)
 .IP \(bu 2
 a OGC URN combining references for compound coordinate reference systems
 (e.g \(dq\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP\(dq or custom abbreviated
@@ -89,7 +92,7 @@ when adding a filename
 .UNINDENT
 .SH DESCRIPTION
 .sp
-\fBcs2cs\fP performs transformation between the source and destination
+\fI\%cs2cs\fP performs transformation between the source and destination
 cartographic coordinate reference system on a set of input points. The coordinate
 reference system transformation can include translation between projected and
 geographic coordinates as well as the application of datum shifts.
@@ -228,6 +231,25 @@ unspecified geographic CRS.
 .UNINDENT
 .INDENT 0.0
 .TP
+.B \-\-only\-best[=yes|=no]
+New in version 9.2.0.
+
+.sp
+Force \fIcs2cs\fP to only use the best transformation known by PROJ.
+\fIcs2cs\fP will return an error if a grid needed for the best transformation is missing.
+.sp
+Best transformation should be understood as the most accurate transformation
+available among all relevant for the point to transform, and if all known
+grids required to perform such transformation were accessible (either locally
+or through network).
+.sp
+Note that the default value for this option can be also set with the
+\fBPROJ_ONLY_BEST_DEFAULT\fP environment variable, or with the
+\fBonly_best_default\fP setting of \fI\%proj.ini\fP (\fI\%\-\-only\-best\fP
+when specified overrides such default value).
+.UNINDENT
+.INDENT 0.0
+.TP
 .B \-\-no\-ballpark
 New in version 8.0.0.
 
@@ -277,7 +299,7 @@ transformation to possibly happen.
 The \fI+opt\fP run\-line arguments are associated with cartographic
 parameters.
 .sp
-The \fBcs2cs\fP program requires two coordinate reference system (CRS) definitions. The first (or
+The \fI\%cs2cs\fP program requires two coordinate reference system (CRS) definitions. The first (or
 primary is defined based on all projection parameters not appearing after the
 \fI+to\fP argument. All projection parameters appearing after the \fI+to\fP argument
 are considered the definition of the second CRS. If there is no
@@ -290,7 +312,7 @@ When using a WKT definition or a AUTHORITY:CODE, the axis order of the CRS will
 be enforced. So for example if using EPSG:4326, the first value expected (or
 returned) will be a latitude.
 .sp
-Internally, \fBcs2cs\fP uses the \fI\%proj_create_crs_to_crs()\fP function
+Internally, \fI\%cs2cs\fP uses the \fI\%proj_create_crs_to_crs()\fP function
 to compute the appropriate coordinate operation, so implementation details of
 this function directly impact the results returned by the program.
 .sp
@@ -316,7 +338,7 @@ New in version 7.0.0.
 
 .sp
 If the \fI\%PROJ_NETWORK\fP environment variable is set to \fBON\fP,
-\fBcs2cs\fP will attempt to use remote grids stored on CDN (Content
+\fI\%cs2cs\fP will attempt to use remote grids stored on CDN (Content
 Delivery Network) storage, when they are not available locally.
 .sp
 More details are available in the \fI\%Network capabilities\fP section.
@@ -348,19 +370,68 @@ The x\-y output data will appear as three lines of:
 .sp
 .nf
 .ft C
-1402285.98  5076292.42 0.00
+1402285.93  5076292.58 0.00
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .sp
-\fBNOTE:\fP
+To get those exact values, you have need to have all current grids installed
+(in that instance the NADCON5 \fBus_noaa_nadcon5_nad27_nad83_1986_conus.tif\fP grid)
+locally or use networking capabilities mentioned above.
+.sp
+To make sure you will get the optimal result, you may add \fI\%\-\-only\-best\fP\&.
+Assuming the above mentioned grid is \fInot\fP available,
 .INDENT 0.0
 .INDENT 3.5
-To get those exact values, you have need to have all current grids installed
-locally or use networking capabilities mentioned above.
+.sp
+.nf
+.ft C
+echo \-111.5 45.25919444444 | cs2cs \-\-only\-best +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
+.sp
+would return:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+Attempt to use coordinate operation axis order change (2D) + Inverse of NAD27 to NAD83 (7) + axis order change (2D) + UTM zone 10N failed. Grid us_noaa_nadcon5_nad27_nad83_1986_conus.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+*   * inf
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+Otherwise, if you don\(aqt have the grid available and you don\(aqt specify \fI\%\-\-only\-best\fP:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+echo \-111.5 45.25919444444 | cs2cs \-\-only\-best +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+would return:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+1402224.57  5076275.42 0.00
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+which is the result when the NAD27 and NAD83 datums are dealt as identical,
+which is an approximation at a level of several tens of metres.
 .SS Using EPSG CRS codes
 .sp
 Transforming from WGS 84 latitude/longitude (in that order) to UTM Zone 31N/WGS 84
@@ -435,6 +506,6 @@ where new bug reports can be submitted to.
 .SH AUTHOR
 Frank Warmerdam
 .SH COPYRIGHT
-1983-2022
+1983-2023
 .\" Generated by docutils manpage writer.
 .
