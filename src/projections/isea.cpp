@@ -1020,6 +1020,8 @@ PJ *PROJECTION(isea) {
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
+    // NOTE: if a inverse was needed, there is some material at
+    // https://brsr.github.io/2021/08/31/snyder-equal-area.html
     P->fwd = isea_s_forward;
     isea_grid_init(&Q->dgg);
 
