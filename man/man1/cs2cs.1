@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "CS2CS" "1" "Sep 1, 2022" "9.1.0" "PROJ"
+.TH "CS2CS" "1" "Nov 25, 2022" "9.1.1" "PROJ"
 .SH NAME
 cs2cs \- Cartographic coordinate system filter
 .SH SYNOPSIS
@@ -114,7 +114,7 @@ ASCII input only. (# is the default value).
 New in version 5.2.0.
 
 .sp
-Specify the number of decimals in the output.
+Specify the number of decimals to round to in the output.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -192,7 +192,7 @@ output (when the option is not specified, \fB\-w3\fP is assumed).
 .B \-W<n>
 Where \fIn\fP is the number of significant fractional digits to employ for seconds
 output. When \fB\-W\fP is employed the fields will be constant width
-with leading zeroes.
+with leading zeroes. Valid range: \-W0 through \-W8.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -348,9 +348,17 @@ The x\-y output data will appear as three lines of:
 .sp
 .nf
 .ft C
-1402293.44  5076292.68 0.00
+1402285.98  5076292.42 0.00
 .ft P
 .fi
+.UNINDENT
+.UNINDENT
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
+To get those exact values, you have need to have all current grids installed
+locally or use networking capabilities mentioned above.
 .UNINDENT
 .UNINDENT
 .SS Using EPSG CRS codes
@@ -389,7 +397,7 @@ UTM Zone 31N/WGS 84 with WGS84 ellipsoidal height
 .sp
 .nf
 .ft C
-echo 45 2 0 | cs2cs \(dqWGS 84 + EGM96 height\(dq \(dqWGS 84 / UTM zone 31N\(dq
+echo 45 2 0 | cs2cs \(dqWGS 84 + EGM96 height\(dq \(dqWGS 84 / UTM zone 31N\(dq \-\-3d
 .ft P
 .fi
 .UNINDENT
@@ -404,6 +412,14 @@ outputs
 421184.70   4983436.77 50.69
 .ft P
 .fi
+.UNINDENT
+.UNINDENT
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
+To get those exact values, you have need to have the EGM96 grid installed
+locally or use networking capabilities mentioned above.
 .UNINDENT
 .UNINDENT
 .SH SEE ALSO
