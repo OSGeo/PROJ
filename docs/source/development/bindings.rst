@@ -31,8 +31,8 @@ Rust bindings for the latest stable version of PROJ
 
 Go (Golang)
 ===========
-`go-proj <https://github.com/everystreet/go-proj>`_:
-Go bindings and idiomatic wrapper for PROJ
+`go-proj <https://github.com/twpayne/go-proj>`_:
+Go bindings for PROJ.
 
 Julia
 =====
