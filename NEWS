@@ -144,6 +144,7 @@
 
  o WKT1 parser: only emit warning when encountering invalid UNKNOWN WKT1 axis direction (#3618)
 
+ o projinfo: fix long option name --source-crs (#3601)
 
 
 9.1.1 Release Notes
@@ -207,8 +208,6 @@
    from source operation (#3350)
 
  o Link geodtest against libm when available (#3341)
-
- o projinfo: fix long option name --source-crs (#3601)
 
 9.1.0 Release Notes
 -------------------
