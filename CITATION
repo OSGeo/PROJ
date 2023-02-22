@@ -1,6 +1,6 @@
 To cite PROJ in publications use:
 
-  PROJ contributors (2022). PROJ coordinate transformation software
+  PROJ contributors (2023). PROJ coordinate transformation software
   library. Open Source Geospatial Foundation. URL https://proj.org/.
   DOI: 10.5281/zenodo.5884394
 
@@ -12,7 +12,7 @@ A BibTeX entry for LaTeX users is
     title = {{PROJ} coordinate transformation software library},
     author = {{PROJ contributors}},
     organization = {Open Source Geospatial Foundation},
-    year = {2022},
+    year = {2023},
     url = {https://proj.org/},
     doi = {10.5281/zenodo.5884394},
   }
