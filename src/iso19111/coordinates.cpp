@@ -40,6 +40,7 @@
 
 #include "proj_json_streaming_writer.hpp"
 
+#include <cmath>
 #include <limits>
 
 using namespace NS_PROJ::internal;
@@ -149,6 +150,17 @@ CoordinateMetadata::coordinateEpoch() PROJ_PURE_DEFN {
 
 // ---------------------------------------------------------------------------
 
+// Avoid rounding issues due to year -> second (SI unit) -> year roundtrips
+static double getRoundedEpochInDecimalYear(double year) {
+    // Try to see if the value is close to xxxx.yyy decimal year.
+    if (std::fabs(1000 * year - std::round(1000 * year)) <= 1e-3) {
+        year = std::round(1000 * year) / 1000.0;
+    }
+    return year;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Get the coordinate epoch associated with this CoordinateMetadata
  * object, as decimal year.
  *
@@ -157,8 +169,9 @@ CoordinateMetadata::coordinateEpoch() PROJ_PURE_DEFN {
  */
 double CoordinateMetadata::coordinateEpochAsDecimalYear() PROJ_PURE_DEFN {
     if (d->coordinateEpoch_.has_value()) {
-        return d->coordinateEpoch_->coordinateEpoch().convertToUnit(
-            common::UnitOfMeasure::YEAR);
+        return getRoundedEpochInDecimalYear(
+            d->coordinateEpoch_->coordinateEpoch().convertToUnit(
+                common::UnitOfMeasure::YEAR));
     }
     return std::numeric_limits<double>::quiet_NaN();
 }

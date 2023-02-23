@@ -119,11 +119,23 @@ void Datum::Private::exportAnchorDefinition(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+// Avoid rounding issues due to year -> second (SI unit) -> year roundtrips
+static double getRoundedEpochInDecimalYear(double year) {
+    // Try to see if the value is close to xxxx.yyy decimal year.
+    if (std::fabs(1000 * year - std::round(1000 * year)) <= 1e-3) {
+        year = std::round(1000 * year) / 1000.0;
+    }
+    return year;
+}
+
+// ---------------------------------------------------------------------------
+
 void Datum::Private::exportAnchorEpoch(io::WKTFormatter *formatter) const {
     if (anchorEpoch->has_value()) {
         formatter->startNode(io::WKTConstants::ANCHOREPOCH, false);
-        formatter->add(
-            (*anchorEpoch)->convertToUnit(common::UnitOfMeasure::YEAR));
+        const double year =
+            (*anchorEpoch)->convertToUnit(common::UnitOfMeasure::YEAR);
+        formatter->add(getRoundedEpochInDecimalYear(year));
         formatter->endNode();
     }
 }
@@ -145,7 +157,9 @@ void Datum::Private::exportAnchorEpoch(io::JSONFormatter *formatter) const {
     if (anchorEpoch->has_value()) {
         auto writer = formatter->writer();
         writer->AddObjKey("anchor_epoch");
-        writer->Add((*anchorEpoch)->convertToUnit(common::UnitOfMeasure::YEAR));
+        const double year =
+            (*anchorEpoch)->convertToUnit(common::UnitOfMeasure::YEAR);
+        writer->Add(getRoundedEpochInDecimalYear(year));
     }
 }
 

@@ -1189,13 +1189,15 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
 
         // Test a point along the equator.
         // The same point, but in two different representations.
-        input.xyz.x = 0;   // Lat in deg
-        input.xyz.y = 140; // Long in deg
-        input.xyz.z = 0;
+        input.xyzt.x = 0;   // Lat in deg
+        input.xyzt.y = 140; // Long in deg
+        input.xyzt.z = 0;
+        input.xyzt.t = HUGE_VAL;
 
-        input_over.xyz.x = 0;    // Lat in deg
-        input_over.xyz.y = -220; // Long in deg
-        input_over.xyz.z = 0;
+        input_over.xyzt.x = 0;    // Lat in deg
+        input_over.xyzt.y = -220; // Long in deg
+        input_over.xyzt.z = 0;
+        input_over.xyzt.t = HUGE_VAL;
 
         auto output = proj_trans(P, PJ_FWD, input);
         auto output_over = proj_trans(P, PJ_FWD, input_over);
@@ -1230,9 +1232,10 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         ASSERT_TRUE(Pnormalized->over);
 
         PJ_COORD input_over_normalized;
-        input_over_normalized.xyz.x = -220; // Long in deg
-        input_over_normalized.xyz.y = 0;    // Lat in deg
-        input_over_normalized.xyz.z = 0;
+        input_over_normalized.xyzt.x = -220; // Long in deg
+        input_over_normalized.xyzt.y = 0;    // Lat in deg
+        input_over_normalized.xyzt.z = 0;
+        input_over_normalized.xyzt.t = HUGE_VAL;
         auto output_over_normalized =
             proj_trans(Pnormalized, PJ_FWD, input_over_normalized);
         EXPECT_NEAR(output_over_normalized.xyz.x, -24490287.974520184, 1e-8);
@@ -1253,13 +1256,15 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         PJ_COORD input;
         PJ_COORD input_notOver;
 
-        input.xyz.x = 0;   // Lat in deg
-        input.xyz.y = 140; // Long in deg
-        input.xyz.z = 0;
+        input.xyzt.x = 0;   // Lat in deg
+        input.xyzt.y = 140; // Long in deg
+        input.xyzt.z = 0;
+        input.xyzt.t = HUGE_VAL;
 
-        input_notOver.xyz.x = 0;    // Lat in deg
-        input_notOver.xyz.y = -220; // Long in deg
-        input_notOver.xyz.z = 0;
+        input_notOver.xyzt.x = 0;    // Lat in deg
+        input_notOver.xyzt.y = -220; // Long in deg
+        input_notOver.xyzt.z = 0;
+        input_notOver.xyzt.t = HUGE_VAL;
 
         auto output = proj_trans(P, PJ_FWD, input);
         auto output_notOver = proj_trans(P, PJ_FWD, input_notOver);
@@ -1282,13 +1287,15 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         PJ_COORD input;
         PJ_COORD input_notOver;
 
-        input.xyz.x = 0;   // Lat in deg
-        input.xyz.y = 140; // Long in deg
-        input.xyz.z = 0;
+        input.xyzt.x = 0;   // Lat in deg
+        input.xyzt.y = 140; // Long in deg
+        input.xyzt.z = 0;
+        input.xyzt.t = HUGE_VAL;
 
-        input_notOver.xyz.x = 0;    // Lat in deg
-        input_notOver.xyz.y = -220; // Long in deg
-        input_notOver.xyz.z = 0;
+        input_notOver.xyzt.x = 0;    // Lat in deg
+        input_notOver.xyzt.y = -220; // Long in deg
+        input_notOver.xyzt.z = 0;
+        input_notOver.xyzt.t = HUGE_VAL;
 
         auto output = proj_trans(P, PJ_FWD, input);
         auto output_notOver = proj_trans(P, PJ_FWD, input_notOver);
@@ -1313,13 +1320,15 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         PJ_COORD input;
         PJ_COORD input_over;
 
-        input.xyz.x = 0;   // Lat in deg
-        input.xyz.y = 140; // Long in deg
-        input.xyz.z = 0;
+        input.xyzt.x = 0;   // Lat in deg
+        input.xyzt.y = 140; // Long in deg
+        input.xyzt.z = 0;
+        input.xyzt.t = HUGE_VAL;
 
-        input_over.xyz.x = 0;    // Lat in deg
-        input_over.xyz.y = -220; // Long in deg
-        input_over.xyz.z = 0;
+        input_over.xyzt.x = 0;    // Lat in deg
+        input_over.xyzt.y = -220; // Long in deg
+        input_over.xyzt.z = 0;
+        input_over.xyzt.t = HUGE_VAL;
 
         auto output = proj_trans(P, PJ_FWD, input);
         auto output_over = proj_trans(P, PJ_FWD, input_over);
@@ -1337,9 +1346,10 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         }
 
         PJ_COORD input_over_normalized;
-        input_over_normalized.xyz.x = -220; // Long in deg
-        input_over_normalized.xyz.y = 0;    // Lat in deg
-        input_over_normalized.xyz.z = 0;
+        input_over_normalized.xyzt.x = -220; // Long in deg
+        input_over_normalized.xyzt.y = 0;    // Lat in deg
+        input_over_normalized.xyzt.z = 0;
+        input_over_normalized.xyzt.t = HUGE_VAL;
         auto output_over_normalized =
             proj_trans(Pnormalized, PJ_FWD, input_over_normalized);
         EXPECT_NEAR(output_over_normalized.xyz.x, 4980122.749364435, 1e-8);
@@ -1360,13 +1370,15 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         PJ_COORD input;
         PJ_COORD input_over;
 
-        input.xyz.x = 0;   // Lat in deg
-        input.xyz.y = 140; // Long in deg
-        input.xyz.z = 0;
+        input.xyzt.x = 0;   // Lat in deg
+        input.xyzt.y = 140; // Long in deg
+        input.xyzt.z = 0;
+        input.xyzt.t = HUGE_VAL;
 
-        input_over.xyz.x = 0;    // Lat in deg
-        input_over.xyz.y = -220; // Long in deg
-        input_over.xyz.z = 0;
+        input_over.xyzt.x = 0;    // Lat in deg
+        input_over.xyzt.y = -220; // Long in deg
+        input_over.xyzt.z = 0;
+        input_over.xyzt.t = HUGE_VAL;
 
         auto output = proj_trans(P, PJ_FWD, input);
         auto output_over = proj_trans(P, PJ_FWD, input_over);

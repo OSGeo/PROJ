@@ -13163,11 +13163,13 @@ TEST(json_import, geodetic_reference_frame_with_explicit_prime_meridian) {
 // ---------------------------------------------------------------------------
 
 TEST(json_import, geodetic_reference_frame_with_anchor_epoch) {
+    // Use dummy anchor_epoch = 0 to avoid fp issues on some architectures
+    // (cf https://github.com/OSGeo/PROJ/issues/3632)
     auto json = "{\n"
                 "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"GeodeticReferenceFrame\",\n"
                 "  \"name\": \"my_name\",\n"
-                "  \"anchor_epoch\": 2002.5,\n"
+                "  \"anchor_epoch\": 0,\n"
                 "  \"ellipsoid\": {\n"
                 "    \"name\": \"WGS 84\",\n"
                 "    \"semi_major_axis\": 6378137,\n"
@@ -15537,12 +15539,14 @@ TEST(json_import, vertical_crs_with_geoid_model_and_interpolation_crs) {
 // ---------------------------------------------------------------------------
 
 TEST(json_import, vertical_reference_frame_with_anchor_epoch) {
+    // Use dummy anchor_epoch = 0 to avoid fp issues on some architectures
+    // (cf https://github.com/OSGeo/PROJ/issues/3632)
     auto json = "{\n"
                 "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"VerticalReferenceFrame\",\n"
                 "  \"name\": \"my_name\",\n"
                 "  \"anchor\": \"my_anchor_definition\",\n"
-                "  \"anchor_epoch\": 2002.5\n"
+                "  \"anchor_epoch\": 0\n"
                 "}";
     auto obj = createFromUserInput(json, nullptr);
     auto vrf = nn_dynamic_pointer_cast<VerticalReferenceFrame>(obj);
