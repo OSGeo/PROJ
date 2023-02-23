@@ -1411,75 +1411,75 @@ END;
 
 
 CREATE VIEW coordinate_operation_view AS
-    SELECT 'grid_transformation' AS table_name, auth_name, code, name,
+    SELECT CAST('grid_transformation' AS TEXT) AS table_name, auth_name, code, name,
            description,
            method_auth_name, method_code, method_name, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
            accuracy, deprecated FROM grid_transformation
     UNION ALL
-    SELECT 'helmert_transformation' AS table_name, auth_name, code, name,
+    SELECT CAST('helmert_transformation' AS TEXT) AS table_name, auth_name, code, name,
            description,
            method_auth_name, method_code, method_name, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
            accuracy, deprecated FROM helmert_transformation
     UNION ALL
-    SELECT 'other_transformation' AS table_name, auth_name, code, name,
+    SELECT CAST('other_transformation' AS TEXT) AS table_name, auth_name, code, name,
            description,
            method_auth_name, method_code, method_name, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
            accuracy, deprecated FROM other_transformation
     UNION ALL
-    SELECT 'concatenated_operation' AS table_name, auth_name, code, name,
+    SELECT CAST('concatenated_operation' AS TEXT) AS table_name, auth_name, code, name,
            description,
-           NULL, NULL, NULL, source_crs_auth_name,
+           CAST(NULL AS TEXT) as method_auth_name, CAST(NULL AS INTEGER_OR_TEXT) as method_code, CAST(NULL AS TEXT) as method_name, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
            accuracy, deprecated FROM concatenated_operation
 ;
 
 CREATE VIEW coordinate_operation_with_conversion_view AS
     SELECT auth_name, code, table_name AS type FROM coordinate_operation_view UNION ALL
-    SELECT auth_name, code, 'conversion' FROM conversion_table;
+    SELECT auth_name, code, CAST('conversion' AS TEXT) FROM conversion_table;
 
 CREATE VIEW crs_view AS
-    SELECT 'geodetic_crs' AS table_name, auth_name, code, name, type,
+    SELECT CAST('geodetic_crs' AS TEXT) AS table_name, auth_name, code, name, type,
            description,
            deprecated FROM geodetic_crs
     UNION ALL
-    SELECT 'projected_crs' AS table_name, auth_name, code, name, 'projected',
+    SELECT CAST('projected_crs' AS TEXT) AS table_name, auth_name, code, name, CAST('projected' AS TEXT),
            description,
            deprecated FROM projected_crs
     UNION ALL
-    SELECT 'vertical_crs' AS table_name, auth_name, code, name, 'vertical',
+    SELECT CAST('vertical_crs' AS TEXT) AS table_name, auth_name, code, name, CAST('vertical' AS TEXT),
            description,
            deprecated FROM vertical_crs
     UNION ALL
-    SELECT 'compound_crs' AS table_name, auth_name, code, name, 'compound',
+    SELECT CAST('compound_crs' AS TEXT) AS table_name, auth_name, code, name, CAST('compound' AS TEXT),
            description,
            deprecated FROM compound_crs
 ;
 
 CREATE VIEW object_view AS
-    SELECT 'unit_of_measure' AS table_name, auth_name, code, name, NULL as type, deprecated FROM unit_of_measure
+    SELECT CAST('unit_of_measure' AS TEXT) AS table_name, auth_name, code, name, CAST(NULL AS TEXT) as type, deprecated FROM unit_of_measure
     UNION ALL
-    SELECT 'celestial_body', auth_name, code, name, NULL, 0 FROM celestial_body
+    SELECT CAST('celestial_body' AS TEXT), auth_name, code, name, CAST(NULL AS TEXT) as type, CAST(0 AS BOOLEAN) AS deprecated FROM celestial_body
     UNION ALL
-    SELECT 'ellipsoid', auth_name, code, name, NULL, deprecated FROM ellipsoid
+    SELECT CAST('ellipsoid' AS TEXT), auth_name, code, name, CAST(NULL AS TEXT) as type, deprecated FROM ellipsoid
     UNION ALL
-    SELECT 'extent', auth_name, code, name, NULL, deprecated FROM extent
+    SELECT CAST('extent' AS TEXT), auth_name, code, name, CAST(NULL AS TEXT) as type, deprecated FROM extent
     UNION ALL
-    SELECT 'prime_meridian', auth_name, code, name, NULL, deprecated FROM prime_meridian
+    SELECT CAST('prime_meridian' AS TEXT), auth_name, code, name, CAST(NULL AS TEXT) as type, deprecated FROM prime_meridian
     UNION ALL
-    SELECT 'geodetic_datum', auth_name, code, name, CASE WHEN ensemble_accuracy IS NOT NULL THEN 'ensemble' ELSE 'datum' END, deprecated FROM geodetic_datum
+    SELECT CAST('geodetic_datum' AS TEXT), auth_name, code, name, CAST(CASE WHEN ensemble_accuracy IS NOT NULL THEN 'ensemble' ELSE 'datum' END AS TEXT), deprecated FROM geodetic_datum
     UNION ALL
-    SELECT 'vertical_datum', auth_name, code, name, CASE WHEN ensemble_accuracy IS NOT NULL THEN 'ensemble' ELSE 'datum' END, deprecated FROM vertical_datum
+    SELECT CAST('vertical_datum' AS TEXT), auth_name, code, name, CAST(CASE WHEN ensemble_accuracy IS NOT NULL THEN 'ensemble' ELSE 'datum' END AS TEXT), deprecated FROM vertical_datum
     UNION ALL
-    SELECT 'axis', auth_name, code, name, NULL, 0 as deprecated FROM axis
+    SELECT CAST('axis' AS TEXT), auth_name, code, name, CAST(NULL AS TEXT) as type, CAST(0 AS BOOLEAN) AS deprecated FROM axis
     UNION ALL
     SELECT table_name, auth_name, code, name, type, deprecated FROM crs_view
     UNION ALL
-    SELECT 'conversion', auth_name, code, name, NULL, deprecated FROM conversion_table
+    SELECT CAST('conversion' AS TEXT), auth_name, code, name, CAST(NULL AS TEXT) as type, deprecated FROM conversion_table
     UNION ALL
-    SELECT table_name, auth_name, code, name, NULL, deprecated FROM coordinate_operation_view
+    SELECT table_name, auth_name, code, name, CAST(NULL AS TEXT) as type, deprecated FROM coordinate_operation_view
 ;
 
 CREATE VIEW authority_list AS
