@@ -3422,7 +3422,11 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
     }
     sql += " ORDER BY deprecated";
     auto res = d->run(sql, {officialName});
-    if (res.empty()) {
+    // Sorry for the hack excluding NAD83 + geographic_3D_crs, but otherwise
+    // EPSG has a weird alias from NAD83 to EPSG:4152 which happens to be
+    // NAD83(HARN), and that's definitely not desirable.
+    if (res.empty() &&
+        !(officialName == "NAD83" && tableName == "geographic_3D_crs")) {
         res = d->run(
             "SELECT auth_name, code FROM alias_name WHERE table_name = ? AND "
             "alt_name = ? AND source IN ('EPSG', 'PROJ')",

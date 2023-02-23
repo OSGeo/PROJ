@@ -588,6 +588,31 @@ TEST(crs, geographic3D_crs_as_WKT1_ESRI_database) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, geographic3D_NAD83_as_WKT1_ESRI_database) {
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+        "GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\","
+        "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+        "PRIMEM[\"Greenwich\",0.0],"
+        "UNIT[\"Degree\",0.0174532925199433]],"
+        "VERTCS[\"NAD_1983\",DATUM[\"D_North_American_1983\","
+        "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+        "PARAMETER[\"Vertical_Shift\",0.0],"
+        "PARAMETER[\"Direction\",1.0],UNIT[\"Meter\",1.0]]");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext));
+    const auto wkt = "GEOGCS[\"GCS_NAD83\",DATUM[\"D_North_American_1983\","
+                     "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+                     "PRIMEM[\"Greenwich\",0.0],"
+                     "UNIT[\"Degree\",0.0174532925199433],"
+                     "LINUNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(f.get()), wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, GeographicCRS_is2DPartOf3D) {
     EXPECT_TRUE(GeographicCRS::EPSG_4326->is2DPartOf3D(
         NN_NO_CHECK(GeographicCRS::EPSG_4979.get())));
