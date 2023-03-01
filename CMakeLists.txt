@@ -115,7 +115,7 @@ message(STATUS "Configuring PROJ:")
 #PROJ version information
 ################################################################################
 include(ProjVersion)
-proj_version(MAJOR 9 MINOR 2 PATCH 0)
+proj_version(MAJOR 9 MINOR 3 PATCH 0)
 set(PROJ_SOVERSION 25)
 set(PROJ_BUILD_VERSION "${PROJ_SOVERSION}.${PROJ_VERSION}")
 
@@ -292,7 +292,7 @@ include(ProjInstallPath)
 # By default GNUInstallDirs will use the upper case project name
 # for CMAKE_INSTALL_DOCDIR, resulting in something like share/doc/PROJ
 # instead of share/doc/proj which historically have been the path used
-# by the project. 
+# by the project.
 # Here force the use of a lower case project name and reset after
 # GNUInstallDirs has done its thing
 set(PROJECT_NAME_ORIGINAL "${PROJECT_NAME}")
