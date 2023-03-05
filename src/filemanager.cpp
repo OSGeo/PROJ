@@ -29,6 +29,9 @@
 #define FROM_PROJ_CPP
 #endif
 
+// proj_config.h must be included before testing HAVE_LIBDL
+#include "proj_config.h"
+
 #if defined(HAVE_LIBDL) && !defined(_GNU_SOURCE)
 // Required for dladdr() on Cygwin
 #define _GNU_SOURCE
@@ -49,8 +52,6 @@
 #include "proj_internal.h"
 
 #include <sys/stat.h>
-
-#include "proj_config.h"
 
 #ifdef _WIN32
 #if defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP)
