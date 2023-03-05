@@ -579,8 +579,7 @@ Attempt to use coordinate operation NAD27 to NAD83 (7) failed. Grid us_noaa_nadc
 ##############################################################
 Test cs2cs --only-best --no-ballpark (grid missing)
 Attempt to use coordinate operation Inverse of WGS 84 to EGM2008 height (1) failed. Grid us_nga_egm08_25.tif is not available. Consult https://proj.org/resource_files.html for guidance.
-Rel. 9.2.0, March 1st, 2023
-<cs2cs>: 
+
 cannot initialize transformation
 cause: File not found or invalid
 program abnormally terminated

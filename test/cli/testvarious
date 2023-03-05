@@ -1187,7 +1187,7 @@ EOF
 echo "##############################################################" >> ${OUT}
 echo "Test cs2cs --only-best --no-ballpark (grid missing)" >> ${OUT}
 #
-$EXE --only-best --no-ballpark EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
+PROJ_DISPLAY_PROGRAM_NAME=NO $EXE --only-best --no-ballpark EPSG:4326+3855 EPSG:4979 -E >>${OUT} 2>&1 <<EOF
 49 2 0
 EOF
 
