@@ -86,6 +86,7 @@ projection_data = [
     [75, "Lambert Conic Conformal", "Lambert Conic Conformal (2SP)", "Latitude of false origin", 40, "Longitude of false origin", 0, "Latitude of 1st standard parallel", 20, "Latitude of 2nd standard parallel", 60, "Easting at false origin", 0, "Northing at false origin", 0],
     [80, "Lambert Azimuthal Equal Area", "Lambert Azimuthal Equal Area", "Latitude of natural origin", 40, "Longitude of natural origin", 0, "False easting", 0, "False northing", 0,  None, None, None, None],
     [85, "Albers Equal Area", "Albers Equal Area", "Latitude of false origin", 40,"Longitude of false origin", 0,  "Latitude of 1st standard parallel", 20, "Latitude of 2nd standard parallel", 60, "Easting at false origin", 0, "Northing at false origin", 0],
+    [90, "Popular Visualisation Pseudo-Mercator", "Popular Visualisation Pseudo Mercator", "Latitude of natural origin", 0, "Longitude of natural origin", 0, "False easting", 0, "False northing", 0, None, None, None, None],
 ]
 
 method_and_param_mapping = {
@@ -111,7 +112,8 @@ method_and_param_mapping = {
     "Polar Stereographic (variant A)": ["EPSG", 9810],
     "Lambert Azimuthal Equal Area": ["EPSG", 9820],
     "Albers Equal Area" : ["EPSG", 9822],
-    "Orthographic" : ["EPSG", 9840]
+    "Orthographic" : ["EPSG", 9840],
+    "Popular Visualisation Pseudo Mercator": ["EPSG", 1024]
 }
 
 def append_proj_paramater(name, value):
