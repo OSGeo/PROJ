@@ -5,18 +5,12 @@ set -e
 sudo apt update
 
 DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends \
-    g++ cmake make sqlite3 libsqlite3-dev libtiff-dev libcurl4-openssl-dev jq
-
-CLANG_LLVM=clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04
-wget -nv https://releases.llvm.org/9.0.0/$CLANG_LLVM.tar.xz
-tar xJf $CLANG_LLVM.tar.xz
-mv $CLANG_LLVM clang+llvm-9
+    g++ cmake make sqlite3 libsqlite3-dev libtiff-dev libcurl4-openssl-dev jq \
+    clang-tools libfindbin-libs-perl
 
 NPROC=$(nproc)
 echo "NPROC=${NPROC}"
 export MAKEFLAGS="-j ${NPROC}"
-
-export PATH=$PWD/clang+llvm-9/bin:$PATH
 
 mkdir csa_build
 cd csa_build
@@ -28,7 +22,7 @@ scan-build -o scanbuildoutput -sarif -v -enable-checker alpha.unix.cstring.OutOf
 rm -f filtered_scanbuild.txt
 files=$(find scanbuildoutput -name "*.sarif")
 for f in $files; do
-    jq '.runs[].results[] | (if .locations[].physicalLocation.fileLocation.uri | (contains("_generated_parser") ) then empty else { "uri": .locations[].physicalLocation.fileLocation.uri, "msg": .message.text, "location": .codeFlows[-1].threadFlows[-1].locations[-1] } end)' < $f > tmp.txt
+    jq '.runs[].results[] | (if .locations[].physicalLocation.fileLocation.uri | (index("_generated_parser") ) then empty else { "uri": .locations[].physicalLocation.fileLocation.uri, "msg": .message.text, "location": .codeFlows[-1].threadFlows[-1].locations[-1] } end)' < $f > tmp.txt
     if [ -s tmp.txt ]; then
         echo "Errors from $f: "
         cat $f

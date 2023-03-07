@@ -116,18 +116,16 @@ Clang Static Analyzer (CSA)
 
 CSA is run by a GitHub Actions workflow. You may also run it locally.
 
-Preliminary step: install clang. For example:
+Preliminary step: install clang tools. For example, on a Debian-like OS:
 
 ::
 
-    wget https://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-    tar xJf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-    mv clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04 clang+llvm-9
-    export PATH=$PWD/clang+llvm-9/bin:$PATH
+    sudo apt install clang-tools libfindbin-libs-perl
 
 Configure PROJ with the `scan-build <https://clang-analyzer.llvm.org/scan-build.html>`__ utility of clang:
 
 ::
+
     mkdir csa_build
     cd csa_build
     scan-build cmake ..
