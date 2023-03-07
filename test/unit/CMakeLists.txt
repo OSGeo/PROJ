@@ -35,6 +35,14 @@ message(STATUS "Using internal GTest")
 configure_file(
   ${PROJ_SOURCE_DIR}/test/googletest/CMakeLists.txt.in
   ${PROJ_BINARY_DIR}/googletest-download/CMakeLists.txt)
+
+if(CYGWIN)
+# needed at least with gcc 11.3.0 Cygwin, otherwise build errors in
+# in googletest-src/googletest/include/gtest/internal/gtest-port.h related to
+# fileno() and other functions, when building gtest or including it
+add_definitions(-D_GNU_SOURCE)
+endif()
+
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${PROJ_BINARY_DIR}/googletest-download)

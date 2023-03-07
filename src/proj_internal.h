@@ -132,8 +132,21 @@
  */
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
+
+#ifndef M_1_PI
+#define M_1_PI 0.318309886183790671538
+#endif
+
+#ifndef M_PI_2
 #define M_PI_2 1.57079632679489661923
+#endif
+
+#ifndef M_PI_4
 #define M_PI_4 0.78539816339744830962
+#endif
+
+#ifndef M_2_PI
 #define M_2_PI 0.63661977236758134308
 #endif
 
@@ -143,10 +156,14 @@
 #endif
 
 /* some more useful math constants and aliases */
-#define M_FORTPI M_PI_4                       /* pi/4 */
-#define M_HALFPI M_PI_2                       /* pi/2 */
-#define M_PI_HALFPI 4.71238898038468985769    /* 1.5*pi */
-#define M_TWOPI 6.28318530717958647693        /* 2*pi */
+#define M_FORTPI M_PI_4                    /* pi/4 */
+#define M_HALFPI M_PI_2                    /* pi/2 */
+#define M_PI_HALFPI 4.71238898038468985769 /* 1.5*pi */
+
+#ifndef M_TWOPI
+#define M_TWOPI 6.28318530717958647693 /* 2*pi */
+#endif
+
 #define M_TWO_D_PI M_2_PI                     /* 2/pi */
 #define M_TWOPI_HALFPI 7.85398163397448309616 /* 2.5*pi */
 
