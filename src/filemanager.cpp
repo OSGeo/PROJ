@@ -1364,18 +1364,16 @@ std::string pj_get_relative_share_proj(PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
-static const char *get_path_from_relative_share_proj(PJ_CONTEXT *ctx,
-                                                     const char *name,
-                                                     std::string &out) {
+static bool get_path_from_relative_share_proj(PJ_CONTEXT *ctx, const char *name,
+                                              std::string &out) {
     out = pj_get_relative_share_proj(ctx);
     if (out.empty()) {
-        return nullptr;
+        return false;
     }
     out += '/';
     out += name;
 
-    return NS_PROJ::FileManager::exists(ctx, out.c_str()) ? out.c_str()
-                                                          : nullptr;
+    return NS_PROJ::FileManager::exists(ctx, out.c_str());
 }
 
 /************************************************************************/
@@ -1414,8 +1412,8 @@ static void *pj_open_lib_internal(
     char *out_full_filename, size_t out_full_filename_size) {
     try {
         std::string fname;
-        const char *sysname = nullptr;
         void *fid = nullptr;
+        const char *tmpname = nullptr;
         std::string projLib;
 
         if (ctx == nullptr) {
@@ -1425,7 +1423,7 @@ static void *pj_open_lib_internal(
         if (out_full_filename != nullptr && out_full_filename_size > 0)
             out_full_filename[0] = '\0';
 
-        auto open_lib_from_paths = [&ctx, open_file, &name, &fname, &sysname,
+        auto open_lib_from_paths = [&ctx, open_file, &name, &fname,
                                     &mode](const std::string &projLibPaths) {
             void *lib_fid = nullptr;
             auto paths = NS_PROJ::internal::split(projLibPaths, dirSeparator);
@@ -1433,8 +1431,7 @@ static void *pj_open_lib_internal(
                 fname = NS_PROJ::internal::stripQuotes(path);
                 fname += DIR_CHAR;
                 fname += name;
-                sysname = fname.c_str();
-                lib_fid = open_file(ctx, sysname, mode);
+                lib_fid = open_file(ctx, fname.c_str(), mode);
                 if (lib_fid)
                     break;
             }
@@ -1443,35 +1440,34 @@ static void *pj_open_lib_internal(
 
         /* check if ~/name */
         if (is_tilde_slash(name))
-            if ((sysname = getenv("HOME")) != nullptr) {
-                fname = sysname;
+            if (const char *home = getenv("HOME")) {
+                fname = home;
                 fname += DIR_CHAR;
                 fname += name;
-                sysname = fname.c_str();
             } else
                 return nullptr;
 
         /* or fixed path: /name, ./name or ../name  */
         else if (is_rel_or_absolute_filename(name)) {
-            sysname = name;
+            fname = name;
 #ifdef _WIN32
             try {
                 NS_PROJ::UTF8ToWString(name);
             } catch (const std::exception &) {
                 fname = NS_PROJ::Win32Recode(name, CP_ACP, CP_UTF8);
-                sysname = fname.c_str();
             }
 #endif
         }
 
         else if (starts_with(name, "http://") || starts_with(name, "https://"))
-            sysname = name;
+            fname = name;
 
         /* or try to use application provided file finder */
         else if (ctx->file_finder != nullptr &&
-                 (sysname = ctx->file_finder(
-                      ctx, name, ctx->file_finder_user_data)) != nullptr)
-            ;
+                 (tmpname = ctx->file_finder(
+                      ctx, name, ctx->file_finder_user_data)) != nullptr) {
+            fname = tmpname;
+        }
 
         /* The user has search paths set */
         else if (!ctx->search_paths.empty()) {
@@ -1480,8 +1476,7 @@ static void *pj_open_lib_internal(
                     fname = path;
                     fname += DIR_CHAR;
                     fname += name;
-                    sysname = fname.c_str();
-                    fid = open_file(ctx, sysname, mode);
+                    fid = open_file(ctx, fname.c_str(), mode);
                 } catch (const std::exception &) {
                 }
                 if (fid)
@@ -1500,7 +1495,6 @@ static void *pj_open_lib_internal(
             fname = proj_context_get_user_writable_directory(ctx, false);
             fname += DIR_CHAR;
             fname += name;
-            sysname = fname.c_str();
         }
 
         /* if the environment PROJ_DATA defined, and *not* tried as last
@@ -1511,8 +1505,7 @@ static void *pj_open_lib_internal(
             fid = open_lib_from_paths(projLib);
         }
 
-        else if ((sysname = get_path_from_relative_share_proj(
-                      ctx, name, fname)) != nullptr) {
+        else if (get_path_from_relative_share_proj(ctx, name, fname)) {
             /* check if it lives in a ../share/proj dir of the proj dll */
         } else if (proj_data_name != nullptr &&
                    (fid = open_file(
@@ -1524,7 +1517,6 @@ static void *pj_open_lib_internal(
             fname = proj_data_name;
             fname += DIR_CHAR;
             fname += name;
-            sysname = fname.c_str();
         }
 
         /* if the environment PROJ_DATA defined, and tried as last possibility
@@ -1537,15 +1529,15 @@ static void *pj_open_lib_internal(
 
         else {
             /* just try it bare bones */
-            sysname = name;
+            fname = name;
         }
 
-        assert(sysname); // to make Coverity Scan happy
         if (fid != nullptr ||
-            (fid = open_file(ctx, sysname, mode)) != nullptr) {
+            (fid = open_file(ctx, fname.c_str(), mode)) != nullptr) {
             if (out_full_filename != nullptr && out_full_filename_size > 0) {
                 // cppcheck-suppress nullPointer
-                strncpy(out_full_filename, sysname, out_full_filename_size);
+                strncpy(out_full_filename, fname.c_str(),
+                        out_full_filename_size);
                 out_full_filename[out_full_filename_size - 1] = '\0';
             }
             errno = 0;
@@ -1555,7 +1547,7 @@ static void *pj_open_lib_internal(
             proj_context_errno_set(ctx, errno);
 
         pj_log(ctx, PJ_LOG_DEBUG, "pj_open_lib(%s): call fopen(%s) - %s", name,
-               sysname, fid == nullptr ? "failed" : "succeeded");
+               fname.c_str(), fid == nullptr ? "failed" : "succeeded");
 
         return (fid);
     } catch (const std::exception &) {
