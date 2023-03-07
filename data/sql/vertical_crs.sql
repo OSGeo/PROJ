@@ -349,7 +349,7 @@ INSERT INTO "usage" VALUES('EPSG','5439','vertical_crs','EPSG','7707','EPSG','43
 INSERT INTO "vertical_crs" VALUES('EPSG','7832','POM96 height',NULL,'EPSG','6499','EPSG','1171',0);
 INSERT INTO "usage" VALUES('EPSG','5497','vertical_crs','EPSG','7832','EPSG','4425','EPSG','1029');
 INSERT INTO "vertical_crs" VALUES('EPSG','7837','DHHN2016 height',NULL,'EPSG','6499','EPSG','1170',0);
-INSERT INTO "usage" VALUES('EPSG','5498','vertical_crs','EPSG','7837','EPSG','3339','EPSG','1178');
+INSERT INTO "usage" VALUES('EPSG','5498','vertical_crs','EPSG','7837','EPSG','1103','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','7839','NZVD2016 height',NULL,'EPSG','6499','EPSG','1169',0);
 INSERT INTO "usage" VALUES('EPSG','5499','vertical_crs','EPSG','7839','EPSG','1175','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','7841','POM08 height',NULL,'EPSG','6499','EPSG','1172',0);
@@ -470,6 +470,8 @@ INSERT INTO "vertical_crs" VALUES('EPSG','10150','MSL UK & Ireland VORF08 depth'
 INSERT INTO "usage" VALUES('EPSG','18584','vertical_crs','EPSG','10150','EPSG','4668','EPSG','1198');
 INSERT INTO "vertical_crs" VALUES('EPSG','10151','CD UK & Ireland VORF08 depth',NULL,'EPSG','6498','EPSG','1331',0);
 INSERT INTO "usage" VALUES('EPSG','18583','vertical_crs','EPSG','10151','EPSG','4668','EPSG','1198');
+INSERT INTO "vertical_crs" VALUES('EPSG','10190','NGA 2022 height',NULL,'EPSG','6499','EPSG','1354',0);
+INSERT INTO "usage" VALUES('EPSG','19483','vertical_crs','EPSG','10190','EPSG','3213','EPSG','1026');
 INSERT INTO "vertical_crs" VALUES('EPSG','20000','SVD2006 height',NULL,'EPSG','6499','EPSG','1323',0);
 INSERT INTO "usage" VALUES('EPSG','17962','vertical_crs','EPSG','20000','EPSG','4058','EPSG','1180');
 INSERT INTO "vertical_crs" VALUES('EPSG','20034','CGVD2013a(2002) height',NULL,'EPSG','6499','EPSG','1325',0);

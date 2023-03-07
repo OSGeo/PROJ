@@ -732,7 +732,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','9920','OSGB36 / British National Grid 
 INSERT INTO "usage" VALUES('EPSG','17332','compound_crs','EPSG','9920','EPSG','4390','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9922','ETRS89 / ITM + BI height',NULL,'EPSG','2157','EPSG','9451',0);
 INSERT INTO "usage" VALUES('EPSG','17338','compound_crs','EPSG','9922','EPSG','1305','EPSG','1026');
-INSERT INTO "compound_crs" VALUES('EPSG','9924','ETRS89 + DHHN2016 height',NULL,'EPSG','4258','EPSG','7837',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9924','ETRS89 + DHHN2016 height',NULL,'EPSG','4258','EPSG','7837',1);
 INSERT INTO "usage" VALUES('EPSG','17168','compound_crs','EPSG','9924','EPSG','3339','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9928','DB_REF2003 zone 2',NULL,'EPSG','5682','EPSG','9923',0);
 INSERT INTO "usage" VALUES('EPSG','17297','compound_crs','EPSG','9928','EPSG','1624','EPSG','1141');
@@ -830,6 +830,8 @@ INSERT INTO "compound_crs" VALUES('EPSG','10276','SMITB20 Grid + ODN height',NUL
 INSERT INTO "usage" VALUES('EPSG','19179','compound_crs','EPSG','10276','EPSG','4688','EPSG','1141');
 INSERT INTO "compound_crs" VALUES('EPSG','10281','RBEPP12 Grid + ODN height',NULL,'EPSG','10280','EPSG','5701',0);
 INSERT INTO "usage" VALUES('EPSG','19185','compound_crs','EPSG','10281','EPSG','4689','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','10293','ETRS89/DREF91/2016 + DHHN2016 height',NULL,'EPSG','10284','EPSG','7837',0);
+INSERT INTO "usage" VALUES('EPSG','19275','compound_crs','EPSG','10293','EPSG','1103','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);
