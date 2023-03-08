@@ -8349,10 +8349,9 @@ PJ_OPERATION_LIST::getPreparedOperations(PJ_CONTEXT *ctx) {
  * by increasing accuracy. Operations with unknown accuracy are sorted last,
  * whatever their area.
  *
- * When one of the source or target CRS has a vertical component but not the
- * other one, the one that has no vertical component is automatically promoted
- * to a 3D version, where its vertical axis is the ellipsoidal height in metres,
- * using the ellipsoid of the base geodetic CRS.
+ * Starting with PROJ 9.1, vertical transformations are only done if both
+ * source CRS and target CRS are 3D CRS or Compound CRS with a vertical
+ * component. You may need to use proj_crs_promote_to_3D().
  *
  * @param ctx PROJ context, or NULL for default context
  * @param source_crs source CRS. Must not be NULL.
