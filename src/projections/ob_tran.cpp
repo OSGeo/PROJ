@@ -194,13 +194,26 @@ PJ *PROJECTION(ob_tran) {
         proj_log_error(P, _("Failed to find projection to be rotated"));
         return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
-    R = proj_create_argv(P->ctx, args.argc, args.argv);
+    R = pj_create_argv_internal(P->ctx, args.argc, args.argv);
     free(args.argv);
 
     if (nullptr == R) {
         proj_log_error(P, _("Projection to be rotated is unknown"));
         return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
+
+    // Transfer the used flag from the R object to the P object
+    for (auto p = P->params; p; p = p->next) {
+        if (!p->used) {
+            for (auto r = R->params; r; r = r->next) {
+                if (r->used && strcmp(r->param, p->param) == 0) {
+                    p->used = 1;
+                    break;
+                }
+            }
+        }
+    }
+
     Q->link = R;
 
     if (pj_param(P->ctx, P->params, "to_alpha").i) {
