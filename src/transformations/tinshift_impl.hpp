@@ -437,11 +437,11 @@ static double distance_point_segment(double x, double y, double x1, double y1,
                                      double x2, double y2, double dist12) {
     // squared distance of point x/y to line segment x1/y1 -- x2/y2
     double t = ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / dist12;
-    if (t <= 0) {
+    if (t <= 0.0) {
         // closest to x1/y1
         return squared_distance(x, y, x1, y1);
     }
-    if (t >= 1) {
+    if (t >= 1.0) {
         // closest to y2/y2
         return squared_distance(x, y, x2, y2);
     }

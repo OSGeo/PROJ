@@ -15,7 +15,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install PROJ build dependencies
         run: |
@@ -65,7 +65,7 @@ jobs:
     container: osgeo/proj-docs
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Print versions
       shell: bash -l {0}
       run: |

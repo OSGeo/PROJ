@@ -1,4 +1,4 @@
-name: coverity-scan
+name: Coverity scan
 
 # Controls when the action will run. 
 on:
@@ -11,11 +11,11 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build:
-    runs-on: ubuntu-20.04
+  coverity:
+    runs-on: ubuntu-22.04
     if: github.repository == 'OSGeo/PROJ'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Libraries
         run: |
