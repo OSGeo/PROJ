@@ -11680,6 +11680,19 @@ TEST(io, projparse_ob_tran_longlat) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_ob_tran_rhealpix) {
+    std::string input(
+        "+proj=ob_tran +o_proj=rhealpix +o_lat_p=90 +o_lon_p=-180 +lon_0=180 "
+        "+north_square=1 +south_square=0 +ellps=WGS84 +type=crs");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              input);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_longlat_title) {
     std::string projString("+title=Ile d'Amsterdam 1963 +proj=longlat "
                            "+towgs84=109.7530,-528.1330,-362.2440 "
