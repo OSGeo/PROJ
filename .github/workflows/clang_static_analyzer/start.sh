@@ -2,7 +2,7 @@
 
 set -e
 
-sudo apt update
+sudo apt-get update
 
 DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends \
     g++ cmake make sqlite3 libsqlite3-dev libtiff-dev libcurl4-openssl-dev jq
