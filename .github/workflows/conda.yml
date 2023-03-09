@@ -44,7 +44,7 @@ jobs:
       working-directory: ./proj.4-feedstock
 
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.platform }}-conda-package
         path: ./proj.4-feedstock/packages/

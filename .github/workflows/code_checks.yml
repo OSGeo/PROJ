@@ -23,8 +23,8 @@ jobs:
 
       - name: Install Requirements
         run: |
-          sudo apt update
-          sudo apt install -y --no-install-recommends cppcheck
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cppcheck
 
       - name: Run cppcheck test
         run: ./scripts/cppcheck.sh
@@ -37,7 +37,7 @@ jobs:
 
       - name: Install Requirements
         run: |
-            sudo apt install python3-pip
+            sudo apt-get install python3-pip
             sudo pip3 install cffconvert
 
       - name: Validate citation file
