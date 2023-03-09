@@ -1153,7 +1153,9 @@ static int dispatch(const char *cmnd, const char *args) {
 
 namespace { // anonymous namespace
 static const struct {
+    /* cppcheck-suppress unusedStructMember */
     const char *the_err_const;
+    /* cppcheck-suppress unusedStructMember */
     int the_errno;
 } lookup[] = {
 
