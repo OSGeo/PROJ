@@ -307,8 +307,7 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
                                 !opList[iBest].isPriorityOp)) &&
                               !alt.isOffshore)) {
 
-                if (skipNonInstantiable &&
-                    !proj_coordoperation_is_instantiable(alt.pj->ctx, alt.pj)) {
+                if (skipNonInstantiable && !alt.isInstantiable()) {
                     continue;
                 }
                 iBest = i;
@@ -319,6 +318,16 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
 
     return iBest;
 }
+
+//! @cond Doxygen_Suppress
+/**************************************************************************************/
+bool PJCoordOperation::isInstantiable() const {
+    /**************************************************************************************/
+    if (isInstantiableCached == INSTANTIABLE_STATUS_UNKNOWN)
+        isInstantiableCached = proj_coordoperation_is_instantiable(pj->ctx, pj);
+    return bool(isInstantiableCached);
+}
+//! @endcond
 
 /**************************************************************************************/
 static void warnAboutMissingGrid(PJ *P)
@@ -2100,7 +2109,7 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
             !foundInstanciableAndNonBallpark) {
             if (!proj_coordoperation_has_ballpark_transformation(op.pj->ctx,
                                                                  op.pj) &&
-                proj_coordoperation_is_instantiable(op.pj->ctx, op.pj)) {
+                op.isInstantiable()) {
                 foundInstanciableAndNonBallpark = true;
             }
         }
@@ -2432,7 +2441,7 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
             // If there's just a single coordinate operation which is
             // instanciable, use it.
             for (const auto &op : P->alternativeCoordinateOperations) {
-                if (proj_coordoperation_is_instantiable(op.pj->ctx, op.pj)) {
+                if (op.isInstantiable()) {
                     if (candidateOp == nullptr) {
                         candidateOp = op.pj;
                     } else {
