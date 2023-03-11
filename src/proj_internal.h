@@ -316,6 +316,7 @@ typedef void (*PJ_OPERATOR)(PJ_COORD &, PJ *);
 #define PJD_WGS84 4 /* WGS84 (or anything considered equivalent) */
 
 struct PJCoordOperation {
+  public:
     int idxInOriginalList;
     double minxSrc = 0.0;
     double minySrc = 0.0;
@@ -390,6 +391,13 @@ struct PJCoordOperation {
     }
 
     ~PJCoordOperation() { proj_destroy(pj); }
+
+    bool isInstantiable() const;
+
+  private:
+    static constexpr int INSTANTIABLE_STATUS_UNKNOWN =
+        -1; // must be different from 0(=false) and 1(=true)
+    mutable int isInstantiableCached = INSTANTIABLE_STATUS_UNKNOWN;
 };
 
 enum class TMercAlgo {
