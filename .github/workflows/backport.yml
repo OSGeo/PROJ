@@ -5,6 +5,7 @@ on:
       - closed
       - labeled
 
+permissions: {}
 jobs:
   backport:
     runs-on: ubuntu-latest
@@ -13,6 +14,6 @@ jobs:
       - name: Backport Bot
         id: backport
         if: github.event.pull_request.merged && ( ( github.event.action == 'closed' && contains( join( github.event.pull_request.labels.*.name ), 'backport') ) || contains( github.event.label.name, 'backport' ) )
-        uses: m-kuhn/backport@v1.1.1
+        uses: m-kuhn/backport@v1.2.7
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.BACKPORT_TOKEN }}
