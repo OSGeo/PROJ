@@ -1061,8 +1061,8 @@ int main(int argc, char **argv) {
         if (arg == "-o" && i + 1 < argc) {
             outputSwitchSpecified = true;
             i++;
-            auto formats(split(argv[i], ','));
-            for (auto format : formats) {
+            const auto formats(split(argv[i], ','));
+            for (const auto &format : formats) {
                 if (ci_equal(format, "all")) {
                     outputAll = true;
                     outputOpt.PROJ5 = true;
