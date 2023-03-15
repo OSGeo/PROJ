@@ -5,6 +5,6 @@
 # it is build from docs/docbuild/Dockerfile
 # and is manually pushed as needed to DockerHub
 
-docker pull osgeo/proj-docs
+docker pull ghcr.io/osgeo/proj-docs
 
 
