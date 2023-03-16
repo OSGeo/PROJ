@@ -4,5 +4,5 @@ From the base PROJ repository directory:
 
 ```bash
 cd docs
-docker run -i -t -v $PWD/..:/io -w /io/docs/ osgeo/proj-docs make html
+docker run -i -t -v $PWD/..:/io -w /io/docs/ ghcr.io/osgeo/proj-docs make html
 ```
