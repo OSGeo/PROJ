@@ -211,7 +211,7 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
                     return val;
                 }
             } else if (desc == "ellipsoidal_height_offset" ||
-                       desc == "geoid_undulation" ||
+                       desc == "geoid_undulation" || desc == "hydroid_height" ||
                        desc == "vertical_offset") {
                 idxSampleZ = i;
                 const auto unit = grid->unit(idxSampleZ);

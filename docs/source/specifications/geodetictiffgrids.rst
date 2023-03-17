@@ -289,10 +289,24 @@ is an easy way to inspect such grid files:
       is expressed in the target CRS) to
       get an ellipsoidal height (that is expressed in the source CRS), also
       called the geoid undulation.
+      The value is positive upward from the reference ellipsoid.
       Note the possible confusion related to what is the source CRS and target CRS and
       the semantics of the value stored (to convert from the source to the target,
       one must subtract the value contained in the grid). This is the convention
-      used by the `EPSG:9665 <https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9665>`_
+      used by the `EPSG:9665 <https://epsg.org/coord-operation-method_9665/Geographic3D-to-GravityRelatedHeight-gtx.html>`_
+      operation method.
+
+    + ``hydroid_height``: valid for TYPE=VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL.
+      For a source CRS being a geographic CRS and a target CRS being a vertical CRS
+      representing a tidal surface (typically Chart Datum, Highest/Lowest Astronomical
+      Tide (HAT/LAT), High/Low Waters, Mean Sea Level), the hydroid height is
+      the value to add to a height related to a tidal surface (that is expressed
+      in the target CRS) to get an ellipsoidal height (that is expressed in the source CRS).
+      The value is positive upward from the reference ellipsoid.
+      Note the possible confusion related to what is the source CRS and target CRS and
+      the semantics of the value stored (to convert from the source to the target,
+      one must subtract the value contained in the grid). This is the convention
+      used by the `EPSG:1115 <https://epsg.org/coord-operation-method_1115/Geographic3D-to-GravityRelatedDepth-txt.html>`_
       operation method.
 
     + ``vertical_offset``: valid for TYPE=VERTICAL_OFFSET_VERTICAL_TO_VERTICAL.
