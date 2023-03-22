@@ -1478,7 +1478,12 @@ struct FilterResults {
             const auto curAccuracy = getAccuracy(op);
             bool dummy = false;
             const auto curExtent = getExtent(op, true, dummy);
-            const auto curStepCount = getTransformationStepCount(op);
+            // If a concatenated operation has an identifier, consider it as
+            // a single step (to be opposed to synthetized concatenated
+            // operations). Helps for example to get EPSG:8537,
+            // "Egypt 1907 to WGS 84 (2)"
+            const auto curStepCount =
+                op->identifiers().empty() ? getTransformationStepCount(op) : 1;
 
             if (first) {
                 resTemp.emplace_back(op);
