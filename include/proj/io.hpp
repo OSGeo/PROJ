@@ -562,7 +562,7 @@ class PROJ_GCC_DLL JSONFormatter {
     PROJ_INTERNAL bool
     outputUsage(bool calledBeforeObjectContext = false) const;
 
-    PROJ_INTERNAL static const char *PROJJSON_v0_6;
+    PROJ_INTERNAL static const char *PROJJSON_v0_7;
 
     //! @endcond
 

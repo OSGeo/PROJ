@@ -109,10 +109,10 @@ NS_PROJ_START
 namespace io {
 
 //! @cond Doxygen_Suppress
-const char *JSONFormatter::PROJJSON_v0_6 =
-    "https://proj.org/schemas/v0.6/projjson.schema.json";
+const char *JSONFormatter::PROJJSON_v0_7 =
+    "https://proj.org/schemas/v0.7/projjson.schema.json";
 
-#define PROJJSON_DEFAULT_VERSION JSONFormatter::PROJJSON_v0_6
+#define PROJJSON_DEFAULT_VERSION JSONFormatter::PROJJSON_v0_7
 
 //! @endcond
 
@@ -3622,10 +3622,16 @@ WKTParser::Private::buildConcatenatedOperation(const WKTNodeNNPtr &node) {
     ConcatenatedOperation::fixStepsDirection(
         NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), operations);
 
+    std::vector<PositionalAccuracyNNPtr> accuracies;
+    auto &accuracyNode = nodeP->lookForChild(WKTConstants::OPERATIONACCURACY);
+    if (/*!isNull(accuracyNode) && */ accuracyNode->GP()->childrenSize() == 1) {
+        accuracies.push_back(PositionalAccuracy::create(
+            stripQuotes(accuracyNode->GP()->children()[0])));
+    }
+
     try {
-        return ConcatenatedOperation::create(
-            buildProperties(node), operations,
-            std::vector<PositionalAccuracyNNPtr>());
+        return ConcatenatedOperation::create(buildProperties(node), operations,
+                                             accuracies);
     } catch (const InvalidOperation &e) {
         throw ParsingException(
             std::string("Cannot build concatenated operation: ") + e.what());
@@ -6528,10 +6534,15 @@ JSONParser::buildConcatenatedOperation(const json &j) {
 
     ConcatenatedOperation::fixStepsDirection(sourceCRS, targetCRS, operations);
 
+    std::vector<PositionalAccuracyNNPtr> accuracies;
+    if (j.contains("accuracy")) {
+        accuracies.push_back(
+            PositionalAccuracy::create(getString(j, "accuracy")));
+    }
+
     try {
-        return ConcatenatedOperation::create(
-            buildProperties(j), operations,
-            std::vector<PositionalAccuracyNNPtr>());
+        return ConcatenatedOperation::create(buildProperties(j), operations,
+                                             accuracies);
     } catch (const InvalidOperation &e) {
         throw ParsingException(
             std::string("Cannot build concatenated operation: ") + e.what());
