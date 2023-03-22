@@ -93,6 +93,13 @@ expect      failure errno coord_transfm_outside_grid
 accept      -179.816        54.5        0
 expect      failure errno coord_transfm_outside_grid
 
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/test_hydroid_height.tif
+-------------------------------------------------------------------------------
+accept      2          49          0
+expect      2          49          44.643493652
+-------------------------------------------------------------------------------
+
 
 ----------------------------------------------------------------------
 # Geographic 3D offsets with quadratic interpolation (defined in file)
