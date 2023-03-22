@@ -163,7 +163,7 @@ GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.25722
 
 PROJJSON:
 {
-  "$schema": "https://proj.org/schemas/v0.6/projjson.schema.json",
+  "$schema": "https://proj.org/schemas/v0.7/projjson.schema.json",
   "type": "GeographicCRS",
   "name": "WGS 84",
   "datum_ensemble": {

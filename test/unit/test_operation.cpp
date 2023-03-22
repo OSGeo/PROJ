@@ -484,6 +484,7 @@ TEST(operation, concatenated_operation) {
                     "    STEP[" +
                     step2_wkt +
                     "],\n"
+                    "    OPERATIONACCURACY[0.1],\n"
                     "    ID[\"codeSpace\",\"code\"],\n"
                     "    REMARK[\"my remarks\"]]";
 
