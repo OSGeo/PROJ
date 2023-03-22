@@ -15093,6 +15093,7 @@ TEST(json_import, concatenated_operation) {
         "      \"remarks\": \"remarks\"\n"
         "    }\n"
         "  ],\n"
+        "  \"accuracy\": \"0.02\",\n"
         "  \"area\": \"Australia - GDA\",\n"
         "  \"bbox\": {\n"
         "    \"south_latitude\": -60.56,\n"

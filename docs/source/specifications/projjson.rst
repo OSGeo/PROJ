@@ -51,6 +51,7 @@ in the WKT2:2019 specification also apply, as supplement to the JSON schema cons
 History of the schema
 ---------------------
 
+* v0.7: added "accuracy" property in ConcatenatedOperation. Implemented in PROJ 9.2.1
 * v0.6:
      - Implemented in PROJ 9.2
      - Additional optional "source_crs" property in "abridged_transformation".
