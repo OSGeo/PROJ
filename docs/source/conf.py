@@ -35,6 +35,7 @@ import bibstyle
 extensions = [
     'sphinx.ext.mathjax',
     'sphinxcontrib.bibtex',
+    "sphinxcontrib.jquery",
     'sphinxcontrib.spelling',
     'breathe',
     'redirects',
