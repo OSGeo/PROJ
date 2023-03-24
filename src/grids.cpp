@@ -1538,7 +1538,7 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
             }
         }
 
-        // Identify the index of the geoid_undulation/vertical_offset
+        // Identify the index of the vertical correction
         bool foundDescriptionForAtLeastOneSample = false;
         bool foundDescriptionForShift = false;
         for (int i = 0; i < static_cast<int>(grid->samplesPerPixel()); ++i) {
@@ -1546,7 +1546,9 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
             if (!desc.empty()) {
                 foundDescriptionForAtLeastOneSample = true;
             }
-            if (desc == "geoid_undulation" || desc == "vertical_offset") {
+            if (desc == "geoid_undulation" || desc == "vertical_offset" ||
+                desc == "hydroid_height" ||
+                desc == "ellipsoidal_height_offset") {
                 idxSample = static_cast<uint16_t>(i);
                 foundDescriptionForShift = true;
             }
@@ -1561,13 +1563,15 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                     // IFD for example
                     pj_log(ctx, PJ_LOG_DEBUG,
                            "Ignoring IFD %d as it has no "
-                           "geoid_undulation/vertical_offset channel",
+                           "geoid_undulation/vertical_offset/hydroid_height/"
+                           "ellipsoidal_height_offset channel",
                            ifd);
                     continue;
                 } else {
                     pj_log(ctx, PJ_LOG_DEBUG,
                            "IFD 0 has channel descriptions, but no "
-                           "geoid_undulation/vertical_offset channel");
+                           "geoid_undulation/vertical_offset/hydroid_height/"
+                           "ellipsoidal_height_offset channel");
                     return nullptr;
                 }
             }
