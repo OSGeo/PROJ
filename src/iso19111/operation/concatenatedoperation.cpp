@@ -718,6 +718,12 @@ void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
         formatter->popDisableUsage();
     }
 
+    if (!coordinateOperationAccuracies().empty()) {
+        formatter->startNode(io::WKTConstants::OPERATIONACCURACY, false);
+        formatter->add(coordinateOperationAccuracies()[0]->value());
+        formatter->endNode();
+    }
+
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
 }
@@ -756,6 +762,11 @@ void ConcatenatedOperation::_exportToJSON(
             formatter->setAllowIDInImmediateChild();
             operation->_exportToJSON(formatter);
         }
+    }
+
+    if (!coordinateOperationAccuracies().empty()) {
+        writer->AddObjKey("accuracy");
+        writer->Add(coordinateOperationAccuracies()[0]->value());
     }
 
     ObjectUsage::baseExportToJSON(formatter);
