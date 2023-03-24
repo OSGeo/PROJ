@@ -401,6 +401,26 @@ map_datum_esri_name_to_auth_code = {}
 map_datum_esri_to_parameters = {}
 
 
+def get_old_esri_name(s):
+    """Massage datum/CRS name like old ESRI software did"""
+
+    # Needed for EPSG:8353 S_JTSK_JTSK03_Krovak_East_North
+    # Cf https://github.com/OSGeo/gdal/issues/75054
+    if '[' in s:
+        s = s.replace('-', '_')
+        s = s.replace('[', '')
+        s = s.replace(']', '')
+
+    # Not totally sure of below, so disable
+    if False:
+        s = s.replace('_(', '_').replace(')_', '_')
+        s = s.replace('.', '_')
+        s = s.replace('(', '_').replace(')', '_')
+        if s.endswith('_'):
+            s = s[0:-1]
+
+    return s
+
 def import_datum():
     with open(path_to_csv / 'pe_list_datum.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
@@ -453,6 +473,12 @@ def import_datum():
                 if src_name != esri_name:
                     sql = """INSERT INTO alias_name VALUES('geodetic_datum','EPSG','%s','%s','ESRI');""" % (
                         code, escape_literal(esri_name))
+                    all_sql.append(sql)
+
+                old_esri_name = get_old_esri_name(esri_name)
+                if old_esri_name != esri_name:
+                    sql = """INSERT INTO alias_name VALUES('geodetic_datum','EPSG','%s','%s','ESRI');""" % (
+                        code, escape_literal(old_esri_name))
                     all_sql.append(sql)
 
                 description = row[idx_description]
@@ -580,6 +606,13 @@ def import_geogcs():
                     sql = """INSERT INTO alias_name VALUES('geodetic_crs','EPSG','%s','%s','ESRI');""" % (
                         code, escape_literal(esri_name))
                     all_sql.append(sql)
+
+                old_esri_name = get_old_esri_name(esri_name)
+                if old_esri_name != esri_name:
+                    sql = """INSERT INTO alias_name VALUES('geodetic_crs','EPSG','%s','%s','ESRI');""" % (
+                        code, escape_literal(old_esri_name))
+                    all_sql.append(sql)
+
             else:
                 assert authority.upper() == 'ESRI', row
 
@@ -1296,6 +1329,13 @@ def import_projcs():
                     sql = """INSERT INTO alias_name VALUES('projected_crs','EPSG','%s','%s','ESRI');""" % (
                         code, escape_literal(esri_name))
                     all_sql.append(sql)
+
+                old_esri_name = get_old_esri_name(esri_name)
+                if old_esri_name != esri_name:
+                    sql = """INSERT INTO alias_name VALUES('projected_crs','EPSG','%s','%s','ESRI');""" % (
+                        code, escape_literal(old_esri_name))
+                    all_sql.append(sql)
+
             else:
                 assert authority.upper() == 'ESRI', row
 
@@ -1534,6 +1574,13 @@ def import_vdatum():
                     sql = """INSERT INTO alias_name VALUES('vertical_datum','EPSG','%s','%s','ESRI');""" % (
                         wkid, escape_literal(esri_name))
                     all_sql.append(sql)
+
+                old_esri_name = get_old_esri_name(esri_name)
+                if old_esri_name != esri_name:
+                    sql = """INSERT INTO alias_name VALUES('vertical_datum','EPSG','%s','%s','ESRI');""" % (
+                        wkid, escape_literal(old_esri_name))
+                    all_sql.append(sql)
+
             else:
                 assert authority.upper() == 'ESRI', row
 
@@ -1647,6 +1694,13 @@ def import_vertcs():
                     sql = """INSERT INTO alias_name VALUES('vertical_crs','EPSG','%s','%s','ESRI');""" % (
                         code, escape_literal(esri_name))
                     all_sql.append(sql)
+
+                old_esri_name = get_old_esri_name(esri_name)
+                if old_esri_name != esri_name:
+                    sql = """INSERT INTO alias_name VALUES('vertical_crs','EPSG','%s','%s','ESRI');""" % (
+                        code, escape_literal(old_esri_name))
+                    all_sql.append(sql)
+
             else:
                 assert authority.upper() == 'ESRI', row
 
@@ -1840,6 +1894,13 @@ def import_hvcoordsys():
                     sql = """INSERT INTO alias_name VALUES('compound_crs','EPSG','%s','%s','ESRI');""" % (
                         code, escape_literal(esri_name))
                     all_sql.append(sql)
+
+                old_esri_name = get_old_esri_name(esri_name)
+                if old_esri_name != esri_name:
+                    sql = """INSERT INTO alias_name VALUES('compound_crs','EPSG','%s','%s','ESRI');""" % (
+                        code, escape_literal(old_esri_name))
+                    all_sql.append(sql)
+
             else:
                 assert False, row  # no ESRI specific entries at that time !
 
