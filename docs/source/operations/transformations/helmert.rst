@@ -331,7 +331,7 @@ The three rotation matrices can be combined in one:
 .. math::
 
     \begin{align}
-        \mathbf{R} = \mathbf{R_X} \mathbf{R_Y} \mathbf{R_Y}
+        \mathbf{R} = \mathbf{R_X} \mathbf{R_Y} \mathbf{R_Z}
     \end{align}
 
 
