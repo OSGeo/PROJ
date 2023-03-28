@@ -51,6 +51,7 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include "proj/internal/datum_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
@@ -4332,7 +4333,8 @@ PJ *proj_create_engineering_crs(PJ_CONTEXT *ctx, const char *crs_name) {
         return pj_obj_create(
             ctx, EngineeringCRS::create(
                      createPropertyMapName(crs_name),
-                     EngineeringDatum::create(PropertyMap()),
+                     EngineeringDatum::create(
+                         createPropertyMapName(UNKNOWN_ENGINEERING_DATUM)),
                      CartesianCS::createEastingNorthing(UnitOfMeasure::METRE)));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());

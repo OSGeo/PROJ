@@ -61,6 +61,7 @@
 #include "operation/parammappings.hpp"
 
 #include "proj/internal/coordinatesystem_internal.hpp"
+#include "proj/internal/datum_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
@@ -5180,8 +5181,7 @@ WKTParser::Private::buildEngineeringCRSFromLocalCS(const WKTNodeNNPtr &node) {
             // has a tradition of emitting just LOCAL_CS["foo"]
             []() {
                 PropertyMap map;
-                map.set(IdentifiedObject::NAME_KEY,
-                        "Unknown engineering datum");
+                map.set(IdentifiedObject::NAME_KEY, UNKNOWN_ENGINEERING_DATUM);
                 return map;
             }());
     return EngineeringCRS::create(buildProperties(node), datum, cs);

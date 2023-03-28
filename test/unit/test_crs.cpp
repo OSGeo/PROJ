@@ -5968,6 +5968,51 @@ TEST(crs, engineeringCRS_WKT1) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, engineeringCRS_unknown_equivalence) {
+
+    // Test equivalent of CRS definition got from GPKG (wkt2) and its equivalent
+    // from GeoTIFF (wkt1)
+    // Cf https://github.com/r-spatial/sf/issues/2049#issuecomment-1486600723
+    auto wkt1 = "ENGCRS[\"Undefined Cartesian SRS with unknown unit\",\n"
+                "    EDATUM[\"\"],\n"
+                "    CS[Cartesian,2],\n"
+                "        AXIS[\"(E)\",east,\n"
+                "            ORDER[1],\n"
+                "            LENGTHUNIT[\"metre\",1,\n"
+                "                ID[\"EPSG\",9001]]],\n"
+                "        AXIS[\"(N)\",north,\n"
+                "            ORDER[2],\n"
+                "            LENGTHUNIT[\"metre\",1,\n"
+                "                ID[\"EPSG\",9001]]]]";
+
+    auto wkt2 = "ENGCRS[\"Undefined Cartesian SRS with unknown unit\",\n"
+                "    EDATUM[\"Unknown engineering datum\"],\n"
+                "    CS[Cartesian,2],\n"
+                "        AXIS[\"x\",unspecified,\n"
+                "            ORDER[1],\n"
+                "            LENGTHUNIT[\"metre\",1,\n"
+                "                ID[\"EPSG\",9001]]],\n"
+                "        AXIS[\"y\",unspecified,\n"
+                "            ORDER[2],\n"
+                "            LENGTHUNIT[\"metre\",1,\n"
+                "                ID[\"EPSG\",9001]]]]";
+
+    auto obj1 = WKTParser().createFromWKT(wkt1);
+    auto crs1 = nn_dynamic_pointer_cast<CRS>(obj1);
+    ASSERT_TRUE(crs1 != nullptr);
+
+    auto obj2 = WKTParser().createFromWKT(wkt2);
+    auto crs2 = nn_dynamic_pointer_cast<CRS>(obj2);
+    ASSERT_TRUE(crs2 != nullptr);
+
+    EXPECT_TRUE(
+        crs1->isEquivalentTo(crs2.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        crs2->isEquivalentTo(crs1.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
 static ParametricCSNNPtr createParametricCS() {
 
     return ParametricCS::create(

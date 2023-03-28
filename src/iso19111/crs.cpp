@@ -44,6 +44,7 @@
 
 #include "proj/internal/coordinatesystem_internal.hpp"
 #include "proj/internal/crs_internal.hpp"
+#include "proj/internal/datum_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
@@ -6953,7 +6954,7 @@ void EngineeringCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     formatter->addQuotedString(nameStr());
     const auto &datumName = datum()->nameStr();
     if (isWKT2 ||
-        (!datumName.empty() && datumName != "Unknown engineering datum")) {
+        (!datumName.empty() && datumName != UNKNOWN_ENGINEERING_DATUM)) {
         datum()->_exportToWKT(formatter);
     }
     if (!isWKT2) {
@@ -7006,8 +7007,54 @@ bool EngineeringCRS::_isEquivalentTo(
     const util::IComparable *other, util::IComparable::Criterion criterion,
     const io::DatabaseContextPtr &dbContext) const {
     auto otherEngineeringCRS = dynamic_cast<const EngineeringCRS *>(other);
-    return otherEngineeringCRS != nullptr &&
-           SingleCRS::baseIsEquivalentTo(other, criterion, dbContext);
+    if (otherEngineeringCRS == nullptr ||
+        (criterion == util::IComparable::Criterion::STRICT &&
+         !ObjectUsage::_isEquivalentTo(other, criterion, dbContext))) {
+        return false;
+    }
+
+    // Check datum
+    const auto &thisDatum = datum();
+    const auto &otherDatum = otherEngineeringCRS->datum();
+    if (!thisDatum->_isEquivalentTo(otherDatum.get(), criterion, dbContext)) {
+        return false;
+    }
+
+    // Check coordinate system
+    const auto &thisCS = coordinateSystem();
+    const auto &otherCS = otherEngineeringCRS->coordinateSystem();
+    if (!(thisCS->_isEquivalentTo(otherCS.get(), criterion, dbContext))) {
+        const auto thisCartCS = dynamic_cast<cs::CartesianCS *>(thisCS.get());
+        const auto otherCartCS = dynamic_cast<cs::CartesianCS *>(otherCS.get());
+        const auto &thisAxisList = thisCS->axisList();
+        const auto &otherAxisList = otherCS->axisList();
+        // Check particular case of
+        // https://github.com/r-spatial/sf/issues/2049#issuecomment-1486600723
+        if (criterion != util::IComparable::Criterion::STRICT && thisCartCS &&
+            otherCartCS && thisAxisList.size() == 2 &&
+            otherAxisList.size() == 2 &&
+            ((&thisAxisList[0]->direction() ==
+                  &cs::AxisDirection::UNSPECIFIED &&
+              &thisAxisList[1]->direction() ==
+                  &cs::AxisDirection::UNSPECIFIED) ||
+             (&otherAxisList[0]->direction() ==
+                  &cs::AxisDirection::UNSPECIFIED &&
+              &otherAxisList[1]->direction() ==
+                  &cs::AxisDirection::UNSPECIFIED)) &&
+            ((thisAxisList[0]->nameStr() == "X" &&
+              otherAxisList[0]->nameStr() == "Easting" &&
+              thisAxisList[1]->nameStr() == "Y" &&
+              otherAxisList[1]->nameStr() == "Northing") ||
+             (otherAxisList[0]->nameStr() == "X" &&
+              thisAxisList[0]->nameStr() == "Easting" &&
+              otherAxisList[1]->nameStr() == "Y" &&
+              thisAxisList[1]->nameStr() == "Northing"))) {
+            return true;
+        }
+        return false;
+    }
+
+    return true;
 }
 
 // ---------------------------------------------------------------------------
