@@ -36,6 +36,7 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include "proj/internal/datum_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
@@ -2654,12 +2655,17 @@ void EngineeringDatum::_exportToJSON(
 bool EngineeringDatum::_isEquivalentTo(
     const util::IComparable *other, util::IComparable::Criterion criterion,
     const io::DatabaseContextPtr &dbContext) const {
-    auto otherTD = dynamic_cast<const EngineeringDatum *>(other);
-    if (otherTD == nullptr ||
-        !Datum::_isEquivalentTo(other, criterion, dbContext)) {
+    auto otherDatum = dynamic_cast<const EngineeringDatum *>(other);
+    if (otherDatum == nullptr) {
         return false;
     }
-    return true;
+    if (criterion != util::IComparable::Criterion::STRICT &&
+        (nameStr().empty() || nameStr() == UNKNOWN_ENGINEERING_DATUM) &&
+        (otherDatum->nameStr().empty() ||
+         otherDatum->nameStr() == UNKNOWN_ENGINEERING_DATUM)) {
+        return true;
+    }
+    return Datum::_isEquivalentTo(other, criterion, dbContext);
 }
 //! @endcond
 
