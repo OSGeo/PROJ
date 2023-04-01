@@ -704,6 +704,7 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1354','NGA 2022','EPSG'
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1355','RGSH2020','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6661','Latvia 1992','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1356','LKS-2020','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1357','RGNC15','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -2290,7 +2291,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3401','NAD83 / 10TM AEP 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3403','NAD83 / 10TM AEP Resource','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3402','NAD83 / 10TM AEP Forest','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3854','ST74 0 gon 65:-1','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3163','RGNC / Lambert New Caledonia','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3163','Lambert NC91','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4298','Timbalai 1968','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4298','BT68','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','29849','BT68 / UTM zone 49N','EPSG');
@@ -3631,7 +3632,6 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3159','NAD83(CSRS) / UTM
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3160','NAD83(CSRS) / UTM 16N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3161','NAD83 / Ontario MNR LCC','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3162','NAD83(CSRS) / ON MNR LCC','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3163','RGNC / LCC New Caledonia','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3164','ST87 Ouvea / UTM 58S','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3165','NEA74 Noumea / LCC','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3166','NEA74 Noumea / LCC2','EPSG');
@@ -7860,3 +7860,13 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10177','IGS20 - LatLonEHt
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10178','982','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10178','IGS20 - LatLon','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10285','ETRS89/DREF91/R16 / 3GK zn3','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4749','RGNC91-93 (lat-lon)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4907','RGNC91-93 (lat-lon)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10309','RGNC15 (lat-lon)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10310','RGNC15 (lat-lon)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','9351','NGNC height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9540','RGNC91-93 + NGNC height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10318','RGNC15 (lon-lat) + NGNC height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10314','Lambert NC15','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10315','RGNC / UTM zone 57S','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10316','RGNC / UTM zone 58S','EPSG');
