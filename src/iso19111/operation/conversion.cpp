@@ -3283,7 +3283,13 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
 
         const MethodMapping *mapping =
             !isWKT2 ? getMapping(l_method.get()) : nullptr;
+        bool hasInterpolationCRSParameter = false;
         for (const auto &genOpParamvalue : parameterValues()) {
+            const auto opParamvalue =
+                dynamic_cast<const OperationParameterValue *>(
+                    genOpParamvalue.get());
+            const int paramEPSGCode =
+                opParamvalue ? opParamvalue->parameter()->getEPSGCode() : 0;
 
             // EPSG has normally no Latitude of natural origin for Equidistant
             // Cylindrical but PROJ can handle it, so output the parameter if
@@ -3291,12 +3297,8 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
             if ((methodEPSGCode == EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL ||
                  methodEPSGCode ==
                      EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL)) {
-                auto opParamvalue =
-                    dynamic_cast<const OperationParameterValue *>(
-                        genOpParamvalue.get());
-                if (opParamvalue &&
-                    opParamvalue->parameter()->getEPSGCode() ==
-                        EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN) {
+                if (paramEPSGCode ==
+                    EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN) {
                     const auto &paramValue = opParamvalue->parameterValue();
                     if (paramValue->type() == ParameterValue::Type::MEASURE) {
                         const auto &measure = paramValue->value();
@@ -3308,26 +3310,36 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
             }
             // Same for false easting / false northing for Vertical Perspective
             else if (methodEPSGCode == EPSG_CODE_METHOD_VERTICAL_PERSPECTIVE) {
-                auto opParamvalue =
-                    dynamic_cast<const OperationParameterValue *>(
-                        genOpParamvalue.get());
-                if (opParamvalue) {
-                    const auto paramEPSGCode =
-                        opParamvalue->parameter()->getEPSGCode();
-                    if (paramEPSGCode == EPSG_CODE_PARAMETER_FALSE_EASTING ||
-                        paramEPSGCode == EPSG_CODE_PARAMETER_FALSE_NORTHING) {
-                        const auto &paramValue = opParamvalue->parameterValue();
-                        if (paramValue->type() ==
-                            ParameterValue::Type::MEASURE) {
-                            const auto &measure = paramValue->value();
-                            if (measure.getSIValue() == 0) {
-                                continue;
-                            }
+                if (paramEPSGCode == EPSG_CODE_PARAMETER_FALSE_EASTING ||
+                    paramEPSGCode == EPSG_CODE_PARAMETER_FALSE_NORTHING) {
+                    const auto &paramValue = opParamvalue->parameterValue();
+                    if (paramValue->type() == ParameterValue::Type::MEASURE) {
+                        const auto &measure = paramValue->value();
+                        if (measure.getSIValue() == 0) {
+                            continue;
                         }
                     }
                 }
             }
+            if (paramEPSGCode ==
+                    EPSG_CODE_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS ||
+                paramEPSGCode ==
+                    EPSG_CODE_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS) {
+                hasInterpolationCRSParameter = true;
+            }
             genOpParamvalue->_exportToWKT(formatter, mapping);
+        }
+
+        // If we have an interpolation CRS that has a EPSG code, then
+        // we can export it as a PARAMETER[]
+        const auto l_interpolationCRS = interpolationCRS();
+        if (!hasInterpolationCRSParameter && l_interpolationCRS) {
+            const auto code = l_interpolationCRS->getEPSGCode();
+            if (code != 0) {
+                createOperationParameterValueFromInterpolationCRS(
+                    methodEPSGCode, code)
+                    ->_exportToWKT(formatter, mapping);
+            }
         }
     }
 
@@ -3365,17 +3377,45 @@ void Conversion::_exportToJSON(
     writer->AddObjKey("method");
     formatter->setOmitTypeInImmediateChild();
     formatter->setAllowIDInImmediateChild();
-    method()->_exportToJSON(formatter);
+    const auto &l_method = method();
+    l_method->_exportToJSON(formatter);
 
     const auto &l_parameterValues = parameterValues();
-    if (!l_parameterValues.empty()) {
+    const auto l_interpolationCRS = interpolationCRS();
+    if (!l_parameterValues.empty() || l_interpolationCRS) {
         writer->AddObjKey("parameters");
         {
+            bool hasInterpolationCRSParameter = false;
             auto parametersContext(writer->MakeArrayContext(false));
             for (const auto &genOpParamvalue : l_parameterValues) {
+                const auto opParamvalue =
+                    dynamic_cast<const OperationParameterValue *>(
+                        genOpParamvalue.get());
+                const int paramEPSGCode =
+                    opParamvalue ? opParamvalue->parameter()->getEPSGCode() : 0;
+                if (paramEPSGCode ==
+                        EPSG_CODE_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS ||
+                    paramEPSGCode ==
+                        EPSG_CODE_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS) {
+                    hasInterpolationCRSParameter = true;
+                }
                 formatter->setAllowIDInImmediateChild();
                 formatter->setOmitTypeInImmediateChild();
                 genOpParamvalue->_exportToJSON(formatter);
+            }
+
+            // If we have an interpolation CRS that has a EPSG code, then
+            // we can export it as a parameter
+            if (!hasInterpolationCRSParameter && l_interpolationCRS) {
+                const auto methodEPSGCode = l_method->getEPSGCode();
+                const auto code = l_interpolationCRS->getEPSGCode();
+                if (code != 0) {
+                    formatter->setAllowIDInImmediateChild();
+                    formatter->setOmitTypeInImmediateChild();
+                    createOperationParameterValueFromInterpolationCRS(
+                        methodEPSGCode, code)
+                        ->_exportToJSON(formatter);
+                }
             }
         }
     }

@@ -49,6 +49,10 @@ class DerivedCRS;
 class ProjectedCRS;
 } // namespace crs
 
+namespace io {
+class JSONParser;
+} // namespace io
+
 namespace coordinates {
 class CoordinateMetadata;
 using CoordinateMetadataPtr = std::shared_ptr<CoordinateMetadata>;
@@ -184,6 +188,7 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     PROJ_FRIEND(CoordinateOperationFactory);
     PROJ_FRIEND(ConcatenatedOperation);
     PROJ_FRIEND(io::WKTParser);
+    PROJ_FRIEND(io::JSONParser);
     PROJ_INTERNAL void
     setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
                            std::weak_ptr<crs::CRS> targetCRSIn);
@@ -674,6 +679,10 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
                                        util::IComparable::Criterion criterion,
                                        const io::DatabaseContextPtr &dbContext,
                                        bool inOtherDirection) const;
+
+    PROJ_INTERNAL static GeneralParameterValueNNPtr
+    createOperationParameterValueFromInterpolationCRS(int methodEPSGCode,
+                                                      int crsEPSGCode);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
