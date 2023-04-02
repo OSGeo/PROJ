@@ -396,6 +396,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1355','Sonatrach Reference Frame 202
 INSERT INTO "usage" VALUES('EPSG','19535','geodetic_datum','EPSG','1355','EPSG','1026','EPSG','1136');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1356','Latvian coordinate system 2020',NULL,'EPSG','7019','EPSG','8901','2023-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','19558','geodetic_datum','EPSG','1356','EPSG','1139','EPSG','1026');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1357','Reseau Geodesique de Nouvelle Caledonie 2015',NULL,'EPSG','7019','EPSG','8901','2016-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19600','geodetic_datum','EPSG','1357','EPSG','1174','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,'EPSG','7001','EPSG','8901',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13422','geodetic_datum','EPSG','6001','EPSG','1263','EPSG','1213');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,'EPSG','7002','EPSG','8901',NULL,NULL,NULL,NULL,0);
