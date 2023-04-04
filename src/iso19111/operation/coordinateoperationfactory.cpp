@@ -2978,9 +2978,14 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     auto createTransformations = [&](const crs::CRSNNPtr &candidateSrcGeod,
                                      const crs::CRSNNPtr &candidateDstGeod,
                                      const CoordinateOperationNNPtr &opFirst,
-                                     bool isNullFirst) {
+                                     bool isNullFirst,
+                                     bool useOnlyDirectRegistryOp) {
+        bool resNonEmptyBeforeFiltering;
         const auto opsSecond =
-            createOperations(candidateSrcGeod, candidateDstGeod, context);
+            useOnlyDirectRegistryOp
+                ? findOpsInRegistryDirect(candidateSrcGeod, candidateDstGeod,
+                                          context, resNonEmptyBeforeFiltering)
+                : createOperations(candidateSrcGeod, candidateDstGeod, context);
         const auto opsThird = createOperations(
             sourceAndTargetAre3D
                 ? candidateDstGeod->promoteTo3D(std::string(), dbContext)
@@ -3099,9 +3104,13 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
         }
     };
 
+    // The below logic is thus quite fragile, and attempts at changing it
+    // result in degraded results for other use cases...
+    //
     // Start in priority with candidates that have exactly the same name as
-    // the sourcCRS and targetCRS. Typically for the case of init=IGNF:XXXX
-
+    // the sourceCRS and targetCRS (Typically for the case of init=IGNF:XXXX);
+    // and then attempt candidate geodetic CRS with different names
+    //
     // Transformation from IGNF:NTFP to IGNF:RGF93G,
     // using
     // NTF geographiques Paris (gr) vers NTF GEOGRAPHIQUES GREENWICH (DMS) +
@@ -3110,72 +3119,98 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     // of IGNF:RGF93G being returned before IGNF:RGF93GEO in candidatesDstGeod.
     // If RGF93GEO is returned before then we go through WGS84 and use
     // instead a Helmert transformation.
-    // The below logic is thus quite fragile, and attempts at changing it
-    // result in degraded results for other use cases...
+    //
+    // Actually, in the general case, we do the lookup in 2 passes with the 2
+    // above steps in each pass:
+    // - one first pass where we only consider direct transformations (no
+    //   other intermediate CRS)
+    // - a second pass where we allow transformation through another
+    //   intermediate CRS.
+    // ... but when transforming between 2 IGNF CRS, we do just one single pass
+    // by allowing directly all transformation. There is no strong reason for
+    // that particular case, except that otherwise we'd get different results
+    // for thest test/cli/testIGNF script when transforming a point outside
+    // the area of validity... Not totally sure the behaviour we try to preserve
+    // here with the particular case is fundamentally better than the general
+    // case. The general case is needed typically for the RGNC91-93 -> RGNC15
+    // transformation where we we need to actually use a transformation between
+    // RGNC91-93 (lon-lat) -> RGNC15 (lon-lat), and not chain 2 no-op
+    // transformations RGNC91-93 -> WGS 84 and RGNC15 -> WGS84.
 
-    for (const auto &candidateSrcGeod : candidatesSrcGeod) {
-        if (candidateSrcGeod->nameStr() == sourceCRS->nameStr()) {
-            auto sourceSrcGeodModified(
-                sourceAndTargetAre3D
-                    ? candidateSrcGeod->promoteTo3D(std::string(), dbContext)
-                    : candidateSrcGeod);
-            for (const auto &candidateDstGeod : candidatesDstGeod) {
-                if (candidateDstGeod->nameStr() == targetCRS->nameStr()) {
+    const auto isIGNF = [](const crs::CRSNNPtr &crs) {
+        const auto &ids = crs->identifiers();
+        return !ids.empty() && *(ids.front()->codeSpace()) == "IGNF";
+    };
+    const int nIters = (isIGNF(sourceCRS) && isIGNF(targetCRS)) ? 1 : 2;
+    for (int iter = 0; iter < nIters; ++iter) {
+        const bool useOnlyDirectRegistryOp = (iter == 0 && nIters == 2);
+        for (const auto &candidateSrcGeod : candidatesSrcGeod) {
+            if (candidateSrcGeod->nameStr() == sourceCRS->nameStr()) {
+                auto sourceSrcGeodModified(sourceAndTargetAre3D
+                                               ? candidateSrcGeod->promoteTo3D(
+                                                     std::string(), dbContext)
+                                               : candidateSrcGeod);
+                for (const auto &candidateDstGeod : candidatesDstGeod) {
+                    if (candidateDstGeod->nameStr() == targetCRS->nameStr()) {
 #ifdef TRACE_CREATE_OPERATIONS
-                    ENTER_BLOCK("try " + objectAsStr(sourceCRS.get()) + "->" +
-                                objectAsStr(candidateSrcGeod.get()) + "->" +
-                                objectAsStr(candidateDstGeod.get()) + "->" +
-                                objectAsStr(targetCRS.get()) + ")");
+                        ENTER_BLOCK("try " + objectAsStr(sourceCRS.get()) +
+                                    "->" + objectAsStr(candidateSrcGeod.get()) +
+                                    "->" + objectAsStr(candidateDstGeod.get()) +
+                                    "->" + objectAsStr(targetCRS.get()) + ")");
 #endif
-                    const auto opsFirst = createOperations(
-                        sourceCRS, sourceSrcGeodModified, context);
-                    assert(!opsFirst.empty());
-                    const bool isNullFirst =
-                        isNullTransformation(opsFirst[0]->nameStr());
-                    createTransformations(candidateSrcGeod, candidateDstGeod,
-                                          opsFirst[0], isNullFirst);
-                    if (!res.empty()) {
-                        if (hasResultSetOnlyResultsWithPROJStep(res)) {
-                            continue;
+                        const auto opsFirst = createOperations(
+                            sourceCRS, sourceSrcGeodModified, context);
+                        assert(!opsFirst.empty());
+                        const bool isNullFirst =
+                            isNullTransformation(opsFirst[0]->nameStr());
+                        createTransformations(
+                            candidateSrcGeod, candidateDstGeod, opsFirst[0],
+                            isNullFirst, useOnlyDirectRegistryOp);
+                        if (!res.empty()) {
+                            if (hasResultSetOnlyResultsWithPROJStep(res)) {
+                                continue;
+                            }
+                            return;
                         }
-                        return;
                     }
                 }
             }
         }
-    }
 
-    for (const auto &candidateSrcGeod : candidatesSrcGeod) {
-        const bool bSameSrcName =
-            candidateSrcGeod->nameStr() == sourceCRS->nameStr();
+        for (const auto &candidateSrcGeod : candidatesSrcGeod) {
+            const bool bSameSrcName =
+                candidateSrcGeod->nameStr() == sourceCRS->nameStr();
 #ifdef TRACE_CREATE_OPERATIONS
-        ENTER_BLOCK("");
+            ENTER_BLOCK("");
 #endif
-        auto sourceSrcGeodModified(
-            sourceAndTargetAre3D
-                ? candidateSrcGeod->promoteTo3D(std::string(), dbContext)
-                : candidateSrcGeod);
-        const auto opsFirst =
-            createOperations(sourceCRS, sourceSrcGeodModified, context);
-        assert(!opsFirst.empty());
-        const bool isNullFirst = isNullTransformation(opsFirst[0]->nameStr());
+            auto sourceSrcGeodModified(
+                sourceAndTargetAre3D
+                    ? candidateSrcGeod->promoteTo3D(std::string(), dbContext)
+                    : candidateSrcGeod);
+            const auto opsFirst =
+                createOperations(sourceCRS, sourceSrcGeodModified, context);
+            assert(!opsFirst.empty());
+            const bool isNullFirst =
+                isNullTransformation(opsFirst[0]->nameStr());
 
-        for (const auto &candidateDstGeod : candidatesDstGeod) {
-            if (bSameSrcName &&
-                candidateDstGeod->nameStr() == targetCRS->nameStr()) {
-                continue;
-            }
+            for (const auto &candidateDstGeod : candidatesDstGeod) {
+                if (bSameSrcName &&
+                    candidateDstGeod->nameStr() == targetCRS->nameStr()) {
+                    continue;
+                }
 
 #ifdef TRACE_CREATE_OPERATIONS
-            ENTER_BLOCK("try " + objectAsStr(sourceCRS.get()) + "->" +
-                        objectAsStr(candidateSrcGeod.get()) + "->" +
-                        objectAsStr(candidateDstGeod.get()) + "->" +
-                        objectAsStr(targetCRS.get()) + ")");
+                ENTER_BLOCK("try " + objectAsStr(sourceCRS.get()) + "->" +
+                            objectAsStr(candidateSrcGeod.get()) + "->" +
+                            objectAsStr(candidateDstGeod.get()) + "->" +
+                            objectAsStr(targetCRS.get()) + ")");
 #endif
-            createTransformations(candidateSrcGeod, candidateDstGeod,
-                                  opsFirst[0], isNullFirst);
-            if (!res.empty() && !hasResultSetOnlyResultsWithPROJStep(res)) {
-                return;
+                createTransformations(candidateSrcGeod, candidateDstGeod,
+                                      opsFirst[0], isNullFirst,
+                                      useOnlyDirectRegistryOp);
+                if (!res.empty() && !hasResultSetOnlyResultsWithPROJStep(res)) {
+                    return;
+                }
             }
         }
     }
