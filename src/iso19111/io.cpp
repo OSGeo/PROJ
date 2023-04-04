@@ -3363,6 +3363,24 @@ UnitOfMeasure WKTParser::Private::guessUnitForParameter(
 
 // ---------------------------------------------------------------------------
 
+static bool
+isEPSGCodeForInterpolationParameter(const OperationParameterNNPtr &parameter) {
+    const auto &name = parameter->nameStr();
+    const auto epsgCode = parameter->getEPSGCode();
+    return name == EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS ||
+           epsgCode == EPSG_CODE_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS ||
+           name == EPSG_NAME_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS ||
+           epsgCode == EPSG_CODE_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS;
+}
+
+// ---------------------------------------------------------------------------
+
+static bool isIntegerParameter(const OperationParameterNNPtr &parameter) {
+    return isEPSGCodeForInterpolationParameter(parameter);
+}
+
+// ---------------------------------------------------------------------------
+
 void WKTParser::Private::consumeParameters(
     const WKTNodeNNPtr &node, bool isAbridged,
     std::vector<OperationParameterNNPtr> &parameters,
@@ -3413,8 +3431,13 @@ void WKTParser::Private::consumeParameters(
                         }
                     }
 
-                    values.push_back(
-                        ParameterValue::create(Measure(val, unit)));
+                    if (isIntegerParameter(parameters.back())) {
+                        values.push_back(ParameterValue::create(
+                            std::stoi(childNodeChildren[1]->GP()->value())));
+                    } else {
+                        values.push_back(
+                            ParameterValue::create(Measure(val, unit)));
+                    }
                 } catch (const std::exception &) {
                     throw ParsingException(concat(
                         "unhandled parameter value type : ", paramValue));
@@ -3458,6 +3481,9 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
     consumeParameters(node, false, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
 
+    auto interpolationCRS = dealWithEPSGCodeForInterpolationCRSParameter(
+        dbContext_, parameters, values);
+
     auto &convProps = buildProperties(node);
     auto &methodProps = buildProperties(methodNode);
     std::string convName;
@@ -3469,13 +3495,14 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
 
         auto &invConvProps = buildProperties(node, true);
         auto &invMethodProps = buildProperties(methodNode, true);
-        return NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(
+        auto conv = NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(
             Conversion::create(invConvProps, invMethodProps, parameters, values)
                 ->inverse()));
+        if (interpolationCRS)
+            conv->setInterpolationCRS(interpolationCRS);
+        return conv;
     }
     auto conv = Conversion::create(convProps, methodProps, parameters, values);
-    auto interpolationCRS = dealWithEPSGCodeForInterpolationCRSParameter(
-        dbContext_, parameters, values);
     if (interpolationCRS)
         conv->setInterpolationCRS(interpolationCRS);
     return conv;
@@ -3491,15 +3518,8 @@ static CRSPtr dealWithEPSGCodeForInterpolationCRSParameter(
     // crs_epsg_code] into proper interpolation CRS
     if (dbContext != nullptr) {
         for (size_t i = 0; i < parameters.size(); ++i) {
-            const auto &l_name = parameters[i]->nameStr();
-            const auto epsgCode = parameters[i]->getEPSGCode();
-            if (l_name == EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS ||
-                epsgCode ==
-                    EPSG_CODE_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS ||
-                l_name == EPSG_NAME_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS ||
-                epsgCode == EPSG_CODE_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS) {
-                const int code =
-                    static_cast<int>(values[i]->value().getSIValue());
+            if (isEPSGCodeForInterpolationParameter(parameters[i])) {
+                const int code = values[i]->integerValue();
                 try {
                     auto authFactory = AuthorityFactory::create(
                         NN_NO_CHECK(dbContext), Identifier::EPSG);
@@ -5593,6 +5613,7 @@ class JSONParser {
     static std::string getString(const json &j, const char *key);
     static json getObject(const json &j, const char *key);
     static json getArray(const json &j, const char *key);
+    static int getInteger(const json &j, const char *key);
     static double getNumber(const json &j, const char *key);
     static UnitOfMeasure getUnit(const json &j, const char *key);
     static std::string getName(const json &j);
@@ -5747,6 +5768,27 @@ json JSONParser::getArray(const json &j, const char *key) {
                                "\" should be a array");
     }
     return v.get<json>();
+}
+
+// ---------------------------------------------------------------------------
+
+int JSONParser::getInteger(const json &j, const char *key) {
+    if (!j.contains(key)) {
+        throw ParsingException(std::string("Missing \"") + key + "\" key");
+    }
+    auto v = j[key];
+    if (!v.is_number()) {
+        throw ParsingException(std::string("The value of \"") + key +
+                               "\" should be an integer");
+    }
+    const double dbl = v.get<double>();
+    if (!(dbl >= std::numeric_limits<int>::min() &&
+          dbl <= std::numeric_limits<int>::max() &&
+          static_cast<int>(dbl) == dbl)) {
+        throw ParsingException(std::string("The value of \"") + key +
+                               "\" should be an integer");
+    }
+    return static_cast<int>(dbl);
 }
 
 // ---------------------------------------------------------------------------
@@ -6393,8 +6435,16 @@ ConversionNNPtr JSONParser::buildConversion(const json &j) {
         }
         parameters.emplace_back(
             OperationParameter::create(buildProperties(param)));
-        values.emplace_back(ParameterValue::create(getMeasure(param)));
+        if (isIntegerParameter(parameters.back())) {
+            values.emplace_back(
+                ParameterValue::create(getInteger(param, "value")));
+        } else {
+            values.emplace_back(ParameterValue::create(getMeasure(param)));
+        }
     }
+
+    auto interpolationCRS = dealWithEPSGCodeForInterpolationCRSParameter(
+        dbContext_, parameters, values);
 
     std::string convName;
     std::string methodName;
@@ -6405,11 +6455,17 @@ ConversionNNPtr JSONParser::buildConversion(const json &j) {
 
         auto invConvProps = buildProperties(j, true);
         auto invMethodProps = buildProperties(methodJ, true);
-        return NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(
+        auto conv = NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(
             Conversion::create(invConvProps, invMethodProps, parameters, values)
                 ->inverse()));
+        if (interpolationCRS)
+            conv->setInterpolationCRS(interpolationCRS);
+        return conv;
     }
-    return Conversion::create(convProps, methodProps, parameters, values);
+    auto conv = Conversion::create(convProps, methodProps, parameters, values);
+    if (interpolationCRS)
+        conv->setInterpolationCRS(interpolationCRS);
+    return conv;
 }
 
 // ---------------------------------------------------------------------------
