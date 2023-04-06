@@ -750,7 +750,8 @@ void OperationParameterValue::_exportToJSON(
     writer->Add(parameter()->nameStr());
 
     const auto &l_value(parameterValue());
-    if (l_value->type() == ParameterValue::Type::MEASURE) {
+    const auto value_type = l_value->type();
+    if (value_type == ParameterValue::Type::MEASURE) {
         writer->AddObjKey("value");
         writer->Add(l_value->value().value(), 15);
         writer->AddObjKey("unit");
@@ -762,9 +763,12 @@ void OperationParameterValue::_exportToJSON(
         } else {
             l_unit._exportToJSON(formatter);
         }
-    } else if (l_value->type() == ParameterValue::Type::FILENAME) {
+    } else if (value_type == ParameterValue::Type::FILENAME) {
         writer->AddObjKey("value");
         writer->Add(l_value->valueFile());
+    } else if (value_type == ParameterValue::Type::INTEGER) {
+        writer->AddObjKey("value");
+        writer->Add(l_value->integerValue());
     }
 
     if (formatter->outputId()) {
@@ -2654,6 +2658,29 @@ InvalidOperation::~InvalidOperation() = default;
 
 // ---------------------------------------------------------------------------
 
+GeneralParameterValueNNPtr
+SingleOperation::createOperationParameterValueFromInterpolationCRS(
+    int methodEPSGCode, int crsEPSGCode) {
+    util::PropertyMap propertiesParameter;
+    propertiesParameter.set(
+        common::IdentifiedObject::NAME_KEY,
+        methodEPSGCode == EPSG_CODE_METHOD_VERTICAL_OFFSET_AND_SLOPE
+            ? EPSG_NAME_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS
+            : EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS);
+    propertiesParameter.set(
+        metadata::Identifier::CODE_KEY,
+        methodEPSGCode == EPSG_CODE_METHOD_VERTICAL_OFFSET_AND_SLOPE
+            ? EPSG_CODE_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS
+            : EPSG_CODE_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS);
+    propertiesParameter.set(metadata::Identifier::CODESPACE_KEY,
+                            metadata::Identifier::EPSG);
+    return OperationParameterValue::create(
+        OperationParameter::create(propertiesParameter),
+        ParameterValue::create(crsEPSGCode));
+}
+
+// ---------------------------------------------------------------------------
+
 void SingleOperation::exportTransformationToWKT(
     io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
@@ -2685,33 +2712,38 @@ void SingleOperation::exportTransformationToWKT(
         exportSourceCRSAndTargetCRSToWKT(this, formatter);
     }
 
-    method()->_exportToWKT(formatter);
+    const auto &l_method = method();
+    l_method->_exportToWKT(formatter);
 
+    bool hasInterpolationCRSParameter = false;
     for (const auto &paramValue : parameterValues()) {
+        const auto opParamvalue =
+            dynamic_cast<const OperationParameterValue *>(paramValue.get());
+        const int paramEPSGCode =
+            opParamvalue ? opParamvalue->parameter()->getEPSGCode() : 0;
+        if (paramEPSGCode ==
+                EPSG_CODE_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS ||
+            paramEPSGCode == EPSG_CODE_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS) {
+            hasInterpolationCRSParameter = true;
+        }
         paramValue->_exportToWKT(formatter, nullptr);
     }
 
-    const auto l_interpolactionCRS = interpolationCRS();
+    const auto l_interpolationCRS = interpolationCRS();
     if (formatter->abridgedTransformation()) {
         // If we have an interpolation CRS that has a EPSG code, then
         // we can export it as a PARAMETER[]
-        if (l_interpolactionCRS) {
-            const auto code = l_interpolactionCRS->getEPSGCode();
+        if (!hasInterpolationCRSParameter && l_interpolationCRS) {
+            const auto code = l_interpolationCRS->getEPSGCode();
             if (code != 0) {
-                formatter->startNode(io::WKTConstants::PARAMETER, false);
-                formatter->addQuotedString(
-                    EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS);
-                formatter->add(code);
-                formatter->startNode(io::WKTConstants::ID, false);
-                formatter->addQuotedString(metadata::Identifier::EPSG);
-                formatter->add(
-                    EPSG_CODE_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS);
-                formatter->endNode();
-                formatter->endNode();
+                const auto methodEPSGCode = l_method->getEPSGCode();
+                createOperationParameterValueFromInterpolationCRS(
+                    methodEPSGCode, code)
+                    ->_exportToWKT(formatter, nullptr);
             }
         }
     } else {
-        if (l_interpolactionCRS) {
+        if (l_interpolationCRS) {
             formatter->startNode(io::WKTConstants::INTERPOLATIONCRS, false);
             interpolationCRS()->_exportToWKT(formatter);
             formatter->endNode();

@@ -5763,6 +5763,41 @@ TEST(wkt_parse, DerivedVerticalCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, DerivedVerticalCRS_EPSG_code_for_horizontal_CRS) {
+    auto wkt = "VERTCRS[\"Derived vertCRS\",\n"
+               "    BASEVERTCRS[\"ODN height\",\n"
+               "        VDATUM[\"Ordnance Datum Newlyn\",\n"
+               "            ID[\"EPSG\",5101]]],\n"
+               "    DERIVINGCONVERSION[\"Conv Vertical Offset and Slope\",\n"
+               "        METHOD[\"Vertical Offset and Slope\",\n"
+               "            ID[\"EPSG\",1046]],\n"
+               "        PARAMETER[\"Ordinate 1 of evaluation point\",40.5,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8617]],\n"
+               "        PARAMETER[\"EPSG code for Horizontal CRS\",4277,\n"
+               "            ID[\"EPSG\",1037]]],\n"
+               "    CS[vertical,1],\n"
+               "        AXIS[\"gravity-related height (H)\",up,\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]]";
+
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedVerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    // "EPSG code for Horizontal CRS" is removed and set as interpolation CRS
+    EXPECT_EQ(crs->derivingConversion()->parameterValues().size(), 1U);
+    EXPECT_TRUE(crs->derivingConversion()->interpolationCRS() != nullptr);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, DerivedEngineeringCRS) {
 
     auto wkt = "ENGCRS[\"Derived EngineeringCRS\",\n"
@@ -16101,6 +16136,89 @@ TEST(json_import, derived_vertical_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<DerivedVerticalCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, derived_vertical_crs_EPSG_code_for_horizontal_CRS) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"DerivedVerticalCRS\",\n"
+                "  \"name\": \"Derived vertCRS\",\n"
+                "  \"base_crs\": {\n"
+                "    \"type\": \"VerticalCRS\",\n"
+                "    \"name\": \"ODN height\",\n"
+                "    \"datum\": {\n"
+                "      \"type\": \"VerticalReferenceFrame\",\n"
+                "      \"name\": \"Ordnance Datum Newlyn\",\n"
+                "      \"id\": {\n"
+                "        \"authority\": \"EPSG\",\n"
+                "        \"code\": 5101\n"
+                "      }\n"
+                "    },\n"
+                "    \"coordinate_system\": {\n"
+                "      \"subtype\": \"vertical\",\n"
+                "      \"axis\": [\n"
+                "        {\n"
+                "          \"name\": \"Gravity-related height\",\n"
+                "          \"abbreviation\": \"H\",\n"
+                "          \"direction\": \"up\",\n"
+                "          \"unit\": \"metre\"\n"
+                "        }\n"
+                "      ]\n"
+                "    }\n"
+                "  },\n"
+                "  \"conversion\": {\n"
+                "    \"name\": \"Conv Vertical Offset and Slope\",\n"
+                "    \"method\": {\n"
+                "      \"name\": \"Vertical Offset and Slope\",\n"
+                "      \"id\": {\n"
+                "        \"authority\": \"EPSG\",\n"
+                "        \"code\": 1046\n"
+                "      }\n"
+                "    },\n"
+                "    \"parameters\": [\n"
+                "      {\n"
+                "        \"name\": \"Ordinate 1 of evaluation point\",\n"
+                "        \"value\": 40.5,\n"
+                "        \"unit\": \"degree\",\n"
+                "        \"id\": {\n"
+                "          \"authority\": \"EPSG\",\n"
+                "          \"code\": 8617\n"
+                "        }\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"EPSG code for Horizontal CRS\",\n"
+                "        \"value\": 4277,\n"
+                "        \"id\": {\n"
+                "          \"authority\": \"EPSG\",\n"
+                "          \"code\": 1037\n"
+                "        }\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"vertical\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Gravity-related height\",\n"
+                "        \"abbreviation\": \"H\",\n"
+                "        \"direction\": \"up\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+
+    auto obj = createFromUserInput(json, DatabaseContext::create());
+    auto crs = nn_dynamic_pointer_cast<DerivedVerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    // "EPSG code for Horizontal CRS" is removed and set as interpolation CRS
+    EXPECT_EQ(crs->derivingConversion()->parameterValues().size(), 1U);
+    EXPECT_TRUE(crs->derivingConversion()->interpolationCRS() != nullptr);
+
     EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
 }
