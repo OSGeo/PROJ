@@ -367,7 +367,6 @@ set(CPACK_SOURCE_IGNORE_FILES
   /Dockerfile
   /docs/
   /Doxyfile
-  /examples/
   /HOWTO-RELEASE
   /m4/lt*
   /m4/libtool*
