@@ -329,6 +329,11 @@ if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
 
+option(BUILD_EXAMPLES "Whether to build example programs" OFF)
+if(BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
+
 set(docfiles COPYING NEWS AUTHORS)
 install(FILES ${docfiles}
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
