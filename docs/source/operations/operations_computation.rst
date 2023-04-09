@@ -109,6 +109,8 @@ does not cover the area of use of the 2 CRSs, a
 'Ballpark geographic offset from NAD27 to NAD83' operation is synthetized by PROJ
 (see :term:`Ballpark transformation`)
 
+.. _operations_computation_filtering:
+
 Filtering and sorting of coordinate operations
 ----------------------------------------------
 

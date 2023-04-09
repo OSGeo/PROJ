@@ -1,10 +1,10 @@
 .. _dev_quickstart:
 
 ================================================================================
-Quick start
+Quick start for C API usage
 ================================================================================
 
-This is a short introduction to the PROJ API. In the following section
+This is a short introduction to the PROJ C API. In the following section
 we create two simple programs that illustrate how to transform points
 between two different coordinate systems, and how to convert between
 projected and geodetic (geographic) coordinates for a single
