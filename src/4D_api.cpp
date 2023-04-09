@@ -1484,7 +1484,8 @@ int proj_trans_bounds(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
     bool degree_input = proj_degree_input(P, direction) != 0;
     if (degree_output && densify_pts < 2) {
         proj_log_error(
-            P, _("densify_pts must be at least 2 if the output is geographic."));
+            P,
+            _("densify_pts must be at least 2 if the output is geographic."));
         proj_errno_set(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         return false;
     }
