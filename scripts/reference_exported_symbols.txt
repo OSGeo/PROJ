@@ -656,6 +656,7 @@ osgeo::proj::operation::CoordinateOperationContext::setTargetCoordinateEpoch(osg
 osgeo::proj::operation::CoordinateOperationContext::setUsePROJAlternativeGridNames(bool)
 osgeo::proj::operation::CoordinateOperation::~CoordinateOperation()
 osgeo::proj::operation::CoordinateOperation::coordinateOperationAccuracies() const
+osgeo::proj::operation::CoordinateOperation::coordinateTransformer(pj_ctx*) const
 osgeo::proj::operation::CoordinateOperationFactory::~CoordinateOperationFactory()
 osgeo::proj::operation::CoordinateOperationFactory::create()
 osgeo::proj::operation::CoordinateOperationFactory::createOperation(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&) const
@@ -672,6 +673,8 @@ osgeo::proj::operation::CoordinateOperation::sourceCoordinateEpoch() const
 osgeo::proj::operation::CoordinateOperation::sourceCRS() const
 osgeo::proj::operation::CoordinateOperation::targetCoordinateEpoch() const
 osgeo::proj::operation::CoordinateOperation::targetCRS() const
+osgeo::proj::operation::CoordinateTransformer::~CoordinateTransformer()
+osgeo::proj::operation::CoordinateTransformer::transform(PJ_COORD)
 osgeo::proj::operation::GeneralOperationParameter::~GeneralOperationParameter()
 osgeo::proj::operation::GeneralParameterValue::~GeneralParameterValue()
 osgeo::proj::operation::GridDescription::~GridDescription()

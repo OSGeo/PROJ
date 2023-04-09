@@ -930,6 +930,8 @@ void pj_clear_sqlite_cache();
 PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial,
                             double deltaXYTolerance);
 
+PJ *pj_obj_create(PJ_CONTEXT *ctx, const NS_PROJ::util::BaseObjectNNPtr &objIn);
+
 /*****************************************************************************/
 /*                                                                           */
 /*                              proj_api.h                                   */

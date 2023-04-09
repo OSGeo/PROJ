@@ -2027,6 +2027,18 @@ TEST(operation, geogCRS_to_projCRS) {
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm "
               "+zone=31 +ellps=WGS84");
+
+    PJ_CONTEXT *ctx = proj_context_create();
+    auto transformer = op->coordinateTransformer(ctx);
+    PJ_COORD c;
+    c.v[0] = 49;
+    c.v[1] = 2;
+    c.v[2] = 0;
+    c.v[3] = HUGE_VAL;
+    c = transformer->transform(c);
+    EXPECT_NEAR(c.v[0], 426857.98771728, 1e-8);
+    EXPECT_NEAR(c.v[1], 5427937.52346492, 1e-8);
+    proj_context_destroy(ctx);
 }
 
 // ---------------------------------------------------------------------------
