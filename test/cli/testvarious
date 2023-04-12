@@ -1218,6 +1218,36 @@ EOF
 rm -rf tmp_dir
 
 echo "##############################################################" >> ${OUT}
+echo "Test cs2cs (grid missing) with scenario of https://lists.osgeo.org/pipermail/proj/2023-April/011003.html" >> ${OUT}
+
+mkdir tmp_dir
+cp $PROJ_DATA/proj.db tmp_dir
+
+echo 39 -3 0 | PROJ_DATA=tmp_dir PROJ_DEBUG=2 $EXE EPSG:4326+5773 EPSG:4326+5782 -E 2>&1|grep -v pj_open_lib >> ${OUT}
+
+rm -rf tmp_dir
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs (grid missing) --only-best=no with scenario of https://lists.osgeo.org/pipermail/proj/2023-April/011003.html" >> ${OUT}
+
+mkdir tmp_dir
+cp $PROJ_DATA/proj.db tmp_dir
+
+echo 39 -3 0 | PROJ_DATA=tmp_dir PROJ_DEBUG=2 $EXE --only-best=no EPSG:4326+5773 EPSG:4326+5782 -E 2>&1|grep -v pj_open_lib >> ${OUT}
+
+rm -rf tmp_dir
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs (grid missing) --only-best with scenario of https://lists.osgeo.org/pipermail/proj/2023-April/011003.html" >> ${OUT}
+
+mkdir tmp_dir
+cp $PROJ_DATA/proj.db tmp_dir
+
+echo 39 -3 0 | PROJ_DISPLAY_PROGRAM_NAME=NO PROJ_DATA=tmp_dir PROJ_DEBUG=2 $EXE --only-best EPSG:4326+5773 EPSG:4326+5782 -E 2>&1|grep -v pj_open_lib >> ${OUT}
+
+rm -rf tmp_dir
+
+echo "##############################################################" >> ${OUT}
 echo "Test Similarity Transformation (example from EPSG Guidance Note 7.2)" >> ${OUT}
 #
 $EXE -d 3 EPSG:23031 EPSG:25831 -E >>${OUT} 2>&1 <<EOF

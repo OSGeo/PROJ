@@ -1878,25 +1878,29 @@ pj_create_prepared_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
             double north_lat = 0.0;
 
             const char *areaName = nullptr;
-            if (proj_get_area_of_use(ctx, op, &west_lon, &south_lat, &east_lon,
-                                     &north_lat, &areaName)) {
-                const bool isOffshore =
-                    areaName && strstr(areaName, "- offshore");
-                if (west_lon <= east_lon) {
-                    op = add_coord_op_to_list(
-                        i, op, west_lon, south_lat, east_lon, north_lat,
-                        pjGeogToSrc, pjGeogToDst, isOffshore, preparedOpList);
-                } else {
-                    auto op_clone = proj_clone(ctx, op);
+            if (!proj_get_area_of_use(ctx, op, &west_lon, &south_lat, &east_lon,
+                                      &north_lat, &areaName)) {
+                west_lon = -180;
+                south_lat = -90;
+                east_lon = 180;
+                north_lat = 90;
+            }
 
-                    op = add_coord_op_to_list(
-                        i, op, west_lon, south_lat, 180, north_lat, pjGeogToSrc,
-                        pjGeogToDst, isOffshore, preparedOpList);
-                    op_clone = add_coord_op_to_list(
-                        i, op_clone, -180, south_lat, east_lon, north_lat,
-                        pjGeogToSrc, pjGeogToDst, isOffshore, preparedOpList);
-                    proj_destroy(op_clone);
-                }
+            const bool isOffshore = areaName && strstr(areaName, "- offshore");
+            if (west_lon <= east_lon) {
+                op = add_coord_op_to_list(i, op, west_lon, south_lat, east_lon,
+                                          north_lat, pjGeogToSrc, pjGeogToDst,
+                                          isOffshore, preparedOpList);
+            } else {
+                auto op_clone = proj_clone(ctx, op);
+
+                op = add_coord_op_to_list(i, op, west_lon, south_lat, 180,
+                                          north_lat, pjGeogToSrc, pjGeogToDst,
+                                          isOffshore, preparedOpList);
+                op_clone = add_coord_op_to_list(
+                    i, op_clone, -180, south_lat, east_lon, north_lat,
+                    pjGeogToSrc, pjGeogToDst, isOffshore, preparedOpList);
+                proj_destroy(op_clone);
             }
 
             proj_destroy(op);
@@ -2056,20 +2060,38 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
         P->skipNonInstantiable = warnIfBestTransformationNotAvailable;
     }
 
-    if (P == nullptr || op_count == 1 ||
-        proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
-        proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS) {
+    const bool mayNeedToReRunWithDiscardMissing =
+        (errorIfBestTransformationNotAvailable ||
+         warnIfBestTransformationNotAvailable) &&
+        !proj_context_is_network_enabled(ctx);
+    int singleOpIsInstanciable = -1;
+    if (P != nullptr && op_count == 1 && mayNeedToReRunWithDiscardMissing) {
+        singleOpIsInstanciable = proj_coordoperation_is_instantiable(ctx, P);
+    }
+
+    const auto backup_errno = proj_context_errno(ctx);
+    if ((P == nullptr ||
+         (op_count == 1 &&
+          (!mayNeedToReRunWithDiscardMissing ||
+           errorIfBestTransformationNotAvailable ||
+           singleOpIsInstanciable == static_cast<int>(true))) ||
+         proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
+         proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS)) {
         proj_list_destroy(op_list);
         ctx->forceOver = false;
 
-        if (P != nullptr &&
-            (errorIfBestTransformationNotAvailable ||
-             warnIfBestTransformationNotAvailable) &&
-            !proj_coordoperation_is_instantiable(ctx, P)) {
-            warnAboutMissingGrid(P);
-            if (errorIfBestTransformationNotAvailable) {
-                proj_destroy(P);
-                return nullptr;
+        if (P != nullptr && (errorIfBestTransformationNotAvailable ||
+                             warnIfBestTransformationNotAvailable)) {
+            if (singleOpIsInstanciable < 0) {
+                singleOpIsInstanciable =
+                    proj_coordoperation_is_instantiable(ctx, P);
+            }
+            if (!singleOpIsInstanciable) {
+                warnAboutMissingGrid(P);
+                if (errorIfBestTransformationNotAvailable) {
+                    proj_destroy(P);
+                    return nullptr;
+                }
             }
         }
 
@@ -2077,6 +2099,9 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
             P->over = forceOver;
         }
         return P;
+    } else if (op_count == 1 && mayNeedToReRunWithDiscardMissing &&
+               !singleOpIsInstanciable) {
+        warnAboutMissingGrid(P);
     }
 
     if (errorIfBestTransformationNotAvailable ||
@@ -2094,10 +2119,6 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
         return nullptr;
     }
 
-    const bool mayNeedToReRunWithDiscardMissing =
-        (errorIfBestTransformationNotAvailable ||
-         warnIfBestTransformationNotAvailable) &&
-        !proj_context_is_network_enabled(ctx);
     bool foundInstanciableAndNonBallpark = false;
 
     for (auto &op : preparedOpList) {
@@ -2152,6 +2173,8 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
 
             op_list = proj_create_operations(ctx, source_crs, target_crs,
                                              operation_ctx);
+            proj_operation_factory_context_destroy(operation_ctx);
+
             if (op_list) {
                 ctx->forceOver = forceOver;
                 ctx->debug_level = PJ_LOG_NONE;
@@ -2179,10 +2202,30 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
                         newOpList.emplace_back(std::move(op));
                     }
                     preparedOpList = std::move(newOpList);
+                } else {
+                    // We get there in "cs2cs --only-best --no-ballpark
+                    // EPSG:4326+3855 EPSG:4979" use case, where the initial
+                    // create_operations returned 1 operation, and the retry
+                    // with
+                    // PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID
+                    // returned 0.
+                    if (op_count == 1 &&
+                        (errorIfBestTransformationNotAvailable ||
+                         warnIfBestTransformationNotAvailable)) {
+                        if (singleOpIsInstanciable < 0) {
+                            singleOpIsInstanciable =
+                                proj_coordoperation_is_instantiable(ctx, P);
+                        }
+                        if (!singleOpIsInstanciable) {
+                            if (errorIfBestTransformationNotAvailable) {
+                                proj_destroy(P);
+                                proj_context_errno_set(ctx, backup_errno);
+                                return nullptr;
+                            }
+                        }
+                    }
                 }
             }
-
-            proj_operation_factory_context_destroy(operation_ctx);
         }
     }
 
