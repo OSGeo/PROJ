@@ -5988,7 +5988,7 @@ TEST(operation, vertCRS_to_vertCRS_context) {
         authFactory->createCoordinateReferenceSystem("7968"),
         // NAVD88 height (1)
         authFactory->createCoordinateReferenceSystem("5703"), ctxt);
-    ASSERT_EQ(list.size(), 3U);
+    ASSERT_EQ(list.size(), 4U);
     EXPECT_EQ(list[0]->nameStr(), "NGVD29 height (m) to NAVD88 height (3)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=vgridshift +grids=us_noaa_vertcone.tif +multiplier=1");
@@ -6005,7 +6005,7 @@ TEST(operation, vertCRS_to_vertCRS_New_Zealand_context) {
         authFactory->createCoordinateReferenceSystem("7839"),
         // Auckland 1946 height
         authFactory->createCoordinateReferenceSystem("5759"), ctxt);
-    ASSERT_EQ(list.size(), 1U);
+    ASSERT_EQ(list.size(), 2U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=vgridshift +grids=nz_linz_auckht1946-nzvd2016.tif "
               "+multiplier=1");

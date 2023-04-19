@@ -3250,6 +3250,17 @@ bool DatabaseContext::lookForGridInfo(
     bool &directDownload, bool &openLicense, bool &gridAvailable) const {
     Private::GridInfoCache info;
 
+    if (projFilename == "null") {
+        // Special case for implicit "null" grid.
+        fullFilename.clear();
+        packageName.clear();
+        url.clear();
+        directDownload = false;
+        openLicense = true;
+        gridAvailable = true;
+        return true;
+    }
+
     auto ctxt = d->pjCtxt();
     if (ctxt == nullptr) {
         ctxt = pj_get_default_ctx();

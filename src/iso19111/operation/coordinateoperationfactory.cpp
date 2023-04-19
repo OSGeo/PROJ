@@ -4860,14 +4860,27 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
     if (convDst == 0)
         throw InvalidOperation("Conversion factor of target unit is 0");
     const double factor = convSrc / convDst;
+
+    const auto &sourceCRSExtent = getExtent(sourceCRS);
+    const auto &targetCRSExtent = getExtent(targetCRS);
+    const bool sameExtent =
+        sourceCRSExtent && targetCRSExtent &&
+        sourceCRSExtent->_isEquivalentTo(
+            targetCRSExtent.get(), util::IComparable::Criterion::EQUIVALENT);
+
+    util::PropertyMap map;
+    map.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+            sameExtent ? NN_NO_CHECK(sourceCRSExtent)
+                       : metadata::Extent::WORLD);
+
     if (!equivalentVDatum) {
         auto name = buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
         name += " (";
         name += BALLPARK_VERTICAL_TRANSFORMATION;
         name += ')';
         auto conv = Transformation::createChangeVerticalUnit(
-            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name),
-            sourceCRS, targetCRS,
+            map.set(common::IdentifiedObject::NAME_KEY, name), sourceCRS,
+            targetCRS,
             // In case of a height depth reversal, we should probably have
             // 2 steps instead of putting a negative factor...
             common::Scale(heightDepthReversal ? -factor : factor), {});
@@ -4876,7 +4889,7 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
     } else if (convSrc != convDst || !heightDepthReversal) {
         auto name = buildConvName(sourceCRS->nameStr(), targetCRS->nameStr());
         auto conv = Conversion::createChangeVerticalUnit(
-            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name),
+            map.set(common::IdentifiedObject::NAME_KEY, name),
             // In case of a height depth reversal, we should probably have
             // 2 steps instead of putting a negative factor...
             common::Scale(heightDepthReversal ? -factor : factor));
@@ -4885,7 +4898,7 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
     } else {
         auto name = buildConvName(sourceCRS->nameStr(), targetCRS->nameStr());
         auto conv = Conversion::createHeightDepthReversal(
-            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name));
+            map.set(common::IdentifiedObject::NAME_KEY, name));
         conv->setCRSs(sourceCRS, targetCRS, nullptr);
         res.push_back(conv);
     }
