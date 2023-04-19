@@ -592,6 +592,21 @@ Test cs2cs (grid missing) with scenario of https://github.com/OSGeo/PROJ/issues/
 569704.5660295591 4269024.671083651	569720.46	4268813.88 0.00
 569704.5660295591 4269024.671083651	569720.46	4268813.88 0.00
 ##############################################################
+Test cs2cs (grid missing) with scenario of https://lists.osgeo.org/pipermail/proj/2023-April/011003.html
+Attempt to use coordinate operation Inverse of WGS 84 to EGM96 height (1) + ETRS89 to Alicante height (1) using ETRS89 to WGS 84 (1) failed. Grid es_ign_egm08-rednap.tif is not available. Consult https://proj.org/resource_files.html for guidance. Grid us_nga_egm96_15.tif is not available. Consult https://proj.org/resource_files.html for guidance. This might become an error in a future PROJ major release. Set the ONLY_BEST option to YES or NO. This warning will no longer be emitted (for the current transformation instance).
+Using coordinate operation Transformation from EGM96 height to Alicante height (ballpark vertical transformation)
+39 -3 0	39.00	-3.00 0.00
+##############################################################
+Test cs2cs (grid missing) --only-best=no with scenario of https://lists.osgeo.org/pipermail/proj/2023-April/011003.html
+39 -3 0	39.00	-3.00 0.00
+##############################################################
+Test cs2cs (grid missing) --only-best with scenario of https://lists.osgeo.org/pipermail/proj/2023-April/011003.html
+Attempt to use coordinate operation Inverse of WGS 84 to EGM96 height (1) + ETRS89 to Alicante height (1) using ETRS89 to WGS 84 (1) failed. Grid es_ign_egm08-rednap.tif is not available. Consult https://proj.org/resource_files.html for guidance. Grid us_nga_egm96_15.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+
+cannot initialize transformation
+cause: File not found or invalid
+program abnormally terminated
+##############################################################
 Test Similarity Transformation (example from EPSG Guidance Note 7.2)
 300000 4500000	299905.060	4499796.515 0.000
 ##############################################################
