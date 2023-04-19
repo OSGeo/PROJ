@@ -13,7 +13,7 @@ PROJ project or using the library in their own software.
 
    dev_practices
    quickstart
-   transformations
+   quickstart_cpp
    errorhandling
    reference/index
    cmake

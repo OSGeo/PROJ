@@ -376,11 +376,120 @@ CoordinateOperation::normalizeForVisualization() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a coordinate transformer for this operation.
+ *
+ * The returned coordinate transformer is tied to the provided context,
+ * and should only be called by the thread "owning" the passed context.
+ * It should not be used after the context has been destroyed.
+ *
+ * @param ctx Execution context to which the transformer will be tied to.
+ *            If null, the default context will be used (only sfe for
+ *            single-threaded applications).
+ * @return a new CoordinateTransformer instance.
+ * @since 9.3
+ * @throw UnsupportedOperationException if the transformer cannot be
+ * instantiated.
+ */
+CoordinateTransformerNNPtr
+CoordinateOperation::coordinateTransformer(PJ_CONTEXT *ctx) const {
+    auto l_this = NN_NO_CHECK(std::dynamic_pointer_cast<CoordinateOperation>(
+        shared_from_this().as_nullable()));
+    return CoordinateTransformer::create(l_this, ctx);
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 CoordinateOperationNNPtr CoordinateOperation::shallowClone() const {
     return _shallowClone();
 }
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct CoordinateTransformer::Private {
+    PJ *pj_;
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+CoordinateTransformer::CoordinateTransformer()
+    : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+CoordinateTransformer::~CoordinateTransformer() {
+    if (d->pj_) {
+        proj_assign_context(d->pj_, pj_get_default_ctx());
+        proj_destroy(d->pj_);
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+CoordinateTransformerNNPtr
+CoordinateTransformer::create(const CoordinateOperationNNPtr &op,
+                              PJ_CONTEXT *ctx) {
+    auto transformer = NN_NO_CHECK(
+        CoordinateTransformer::make_unique<CoordinateTransformer>());
+    transformer->d->pj_ = pj_obj_create(ctx, op);
+    if (transformer->d->pj_ == nullptr)
+        throw util::UnsupportedOperationException(
+            "Cannot instantiate transformer");
+    return transformer;
+}
+
+// ---------------------------------------------------------------------------
+
+/** Transforms a coordinate tuple.
+ *
+ * PJ_COORD is a union of many structures. In the context of this method,
+ * it is prudent to only use the v[] array, with the understanding that
+ * the expected input values should be passed in the order and the unit of
+ * the successive axis of the input CRS. Similarly the values returned in the
+ * v[] array of the output PJ_COORD are in the order and the unit of the
+ * successive axis of the output CRS.
+ * For coordinate operations involving a time-dependent operation,
+ * coord.v[3] is the decimal year of the coordinate epoch of the input (or
+ * HUGE_VAL to indicate none)
+ *
+ * If an error occurs, HUGE_VAL is returned in the .v[0] member of the output
+ * coordinate tuple.
+ *
+ * Example how to transform coordinates from EPSG:4326 (WGS 84
+ * latitude/longitude) to EPSG:32631 (WGS 84 / UTM zone 31N).
+\code{.cpp}
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto coord_op_ctxt = CoordinateOperationContext::create(
+        authFactory, nullptr, 0.0);
+    auto authFactoryEPSG =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactoryEPSG->createCoordinateReferenceSystem("4326"),
+        authFactoryEPSG->createCoordinateReferenceSystem("32631"),
+        coord_op_ctxt);
+    ASSERT_TRUE(!list.empty());
+    PJ_CONTEXT* ctx = proj_context_create();
+    auto transformer = list[0]->coordinateTransformer(ctx);
+    PJ_COORD c;
+    c.v[0] = 49; // latitude in degree
+    c.v[1] = 2;  // longitude in degree
+    c.v[2] = 0;
+    c.v[3] = HUGE_VAL;
+    c = transformer->transform(c);
+    EXPECT_NEAR(c.v[0], 426857.98771728, 1e-8); // easting in metre
+    EXPECT_NEAR(c.v[1], 5427937.52346492, 1e-8); // northing in metre
+    proj_context_destroy(ctx);
+\endcode
+ */
+PJ_COORD CoordinateTransformer::transform(PJ_COORD coord) {
+    return proj_trans(d->pj_, PJ_FWD, coord);
+}
 
 // ---------------------------------------------------------------------------
 

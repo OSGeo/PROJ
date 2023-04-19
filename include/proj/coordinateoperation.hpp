@@ -38,6 +38,8 @@
 #include "io.hpp"
 #include "metadata.hpp"
 
+#include "proj.h"
+
 NS_PROJ_START
 
 namespace crs {
@@ -103,6 +105,45 @@ using CoordinateOperationPtr = std::shared_ptr<CoordinateOperation>;
 /** Non-null shared pointer of CoordinateOperation */
 using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
 
+// ---------------------------------------------------------------------------
+
+class CoordinateTransformer;
+/** Shared pointer of CoordinateTransformer */
+using CoordinateTransformerPtr = std::unique_ptr<CoordinateTransformer>;
+/** Non-null shared pointer of CoordinateTransformer */
+using CoordinateTransformerNNPtr = util::nn<CoordinateTransformerPtr>;
+
+/** \brief Coordinate transformer.
+ *
+ * Performs coordinate transformation of coordinate tuplies.
+ *
+ * @since 9.3
+ */
+class PROJ_GCC_DLL CoordinateTransformer {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~CoordinateTransformer();
+    //! @endcond
+
+    PROJ_DLL PJ_COORD transform(PJ_COORD coord);
+
+  protected:
+    PROJ_FRIEND(CoordinateOperation);
+
+    PROJ_INTERNAL CoordinateTransformer();
+
+    PROJ_INTERNAL static CoordinateTransformerNNPtr
+    create(const CoordinateOperationNNPtr &op, PJ_CONTEXT *ctx);
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    INLINED_MAKE_UNIQUE
+    CoordinateTransformer &
+    operator=(const CoordinateTransformer &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
 class Transformation;
 /** Shared pointer of Transformation */
 using TransformationPtr = std::shared_ptr<Transformation>;
@@ -151,7 +192,8 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     PROJ_DLL const util::optional<common::DataEpoch> &
     targetCoordinateEpoch() const;
 
-    // virtual void transform(...) = 0;  TODO
+    PROJ_DLL CoordinateTransformerNNPtr
+    coordinateTransformer(PJ_CONTEXT *ctx) const;
 
     /** \brief Return the inverse of the coordinate operation.
      * @throw util::UnsupportedOperationException

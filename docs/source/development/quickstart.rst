@@ -1,10 +1,10 @@
 .. _dev_quickstart:
 
 ================================================================================
-Quick start
+Quick start for C API usage
 ================================================================================
 
-This is a short introduction to the PROJ API. In the following section
+This is a short introduction to the PROJ C API. In the following section
 we create two simple programs that illustrate how to transform points
 between two different coordinate systems, and how to convert between
 projected and geodetic (geographic) coordinates for a single
@@ -19,7 +19,7 @@ file. Here :file:`stdio.h` is also included so we can print some text to the scr
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 39-40
+  :lines: 10-11
 
 Let's declare a few variables that'll be used later in the program. Each variable
 will be discussed below.
@@ -27,7 +27,7 @@ See the :doc:`reference for more info on data types <reference/datatypes>`.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 43-46
+  :lines: 14-17
   :dedent: 4
 
 For use in multi-threaded programs the :c:type:`PJ_CONTEXT` threading-context
@@ -36,7 +36,7 @@ completeness we demonstrate its use here.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 50
+  :lines: 21
   :dedent: 4
 
 Next we create the :c:type:`PJ` transformation object ``P`` with the function
@@ -44,7 +44,7 @@ Next we create the :c:type:`PJ` transformation object ``P`` with the function
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 52-60
+  :lines: 23-31
   :dedent: 4
 
 Here we have set up a transformation from geographic coordinates to UTM zone
@@ -141,7 +141,7 @@ most projected CRS.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 65-71
+  :lines: 36-42
   :dedent: 4
 
 Next we create a :c:type:`PJ_COORD` coordinate object, using the function
@@ -155,7 +155,7 @@ longitude followed by latitude, and the units are degrees.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 76
+  :lines: 47
   :dedent: 4
 
 Now we are ready to transform the coordinate into UTM zone 32, using the
@@ -163,7 +163,7 @@ function :c:func:`proj_trans`.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 79-80
+  :lines: 50-51
   :dedent: 4
 
 :c:func:`proj_trans` takes as its arguments:
@@ -185,7 +185,7 @@ geographic) as follows:
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 82-83
+  :lines: 53-54
   :dedent: 4
 
 Before ending the program, we need to release the memory allocated to our
@@ -193,7 +193,7 @@ objects:
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 86-87
+  :lines: 57-58
   :dedent: 4
 
 
@@ -202,7 +202,7 @@ A complete compilable version of the example code can be seen below:
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
   :linenos:
-  :lines: 39-
+  :lines: 10-
   
 The following example illustrates how to convert between a CRS and
 geodetic coordinates for that CRS.

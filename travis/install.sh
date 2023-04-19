@@ -57,6 +57,7 @@ cmake \
   -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D USE_CCACHE=${USE_CCACHE} \
   -D BUILD_SHARED_LIBS=ON \
+  -D BUILD_EXAMPLES=ON \
   -D CMAKE_INSTALL_PREFIX=/tmp/proj_shared_install_from_dist \
   ..
 make
