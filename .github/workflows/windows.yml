@@ -46,9 +46,7 @@ jobs:
         shell: cmd
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-            vcpkg install sqlite3[core,tool]:${{ env.ARCH }}-windows
-            vcpkg install tiff:${{ env.ARCH }}-windows
-            vcpkg install curl:${{ env.ARCH }}-windows
+            vcpkg install sqlite3[core,tool] tiff curl --triplet=${{ env.ARCH }}-windows
 
       - name: Build
         shell: cmd
