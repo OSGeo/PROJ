@@ -325,7 +325,7 @@ bool PJCoordOperation::isInstantiable() const {
     /**************************************************************************************/
     if (isInstantiableCached == INSTANTIABLE_STATUS_UNKNOWN)
         isInstantiableCached = proj_coordoperation_is_instantiable(pj->ctx, pj);
-    return bool(isInstantiableCached);
+    return (isInstantiableCached == 1);
 }
 //! @endcond
 
