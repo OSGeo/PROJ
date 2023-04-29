@@ -2,6 +2,15 @@
 # files containing dictionary of useful projection
 #
 
+set(PROJ_DB_CACHE_DIR "" CACHE PATH "Directory used to cache proj.db")
+if(NOT IS_DIRECTORY ${PROJ_DB_CACHE_DIR})
+  if(NOT "${PROJ_DB_CACHE_DIR}" STREQUAL "")
+    message(WARNING
+      "PROJ_DB_CACHE_DIR (${PROJ_DB_CACHE_DIR}) not set to a directory")
+    set(PROJ_DB_CACHE_DIR "")
+  endif()
+endif()
+
 set(CONFIG_FILES
   proj.ini
 )
@@ -36,7 +45,7 @@ include(sql_filelist.cmake)
 add_custom_command(
   OUTPUT ${PROJ_DB}
   COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJ_DB}
-  COMMAND ${CMAKE_COMMAND} "-DALL_SQL_IN=${ALL_SQL_IN}" "-DEXE_SQLITE3=${EXE_SQLITE3}" "-DPROJ_DB=${PROJ_DB}" "-DPROJ_VERSION=${PROJ_VERSION}"
+  COMMAND ${CMAKE_COMMAND} "-DALL_SQL_IN=${ALL_SQL_IN}" "-DEXE_SQLITE3=${EXE_SQLITE3}" "-DPROJ_DB=${PROJ_DB}" "-DPROJ_VERSION=${PROJ_VERSION}" "-DPROJ_DB_CACHE_DIR=${PROJ_DB_CACHE_DIR}"
     -P "${CMAKE_CURRENT_SOURCE_DIR}/generate_proj_db.cmake"
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJ_DB} ${CMAKE_CURRENT_BINARY_DIR}/for_tests
   DEPENDS ${SQL_FILES} "${CMAKE_CURRENT_SOURCE_DIR}/generate_proj_db.cmake"
