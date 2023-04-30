@@ -9064,7 +9064,7 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
                             std::swap(maxxDst, maxyDst);
                         }
                     }
-                    ctx->forceOver = alt.pj->over;
+                    ctx->forceOver = alt.pj->over != 0;
                     auto pjNormalized =
                         pj_obj_create(ctx, co->normalizeForVisualization());
                     pjNormalized->over = alt.pj->over;
@@ -9103,7 +9103,7 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
         return nullptr;
     }
     try {
-        ctx->forceOver = obj->over;
+        ctx->forceOver = obj->over != 0;
         auto pjNormalized = pj_obj_create(ctx, co->normalizeForVisualization());
         pjNormalized->over = obj->over;
         ctx->forceOver = false;

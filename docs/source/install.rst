@@ -400,8 +400,8 @@ Install PROJ dependencies
 
 ::
 
-    vcpkg.exe install sqlite3[core,tool]:x86-windows tiff:x86-windows curl:x86-windows
-    vcpkg.exe install sqlite3[core,tool]:x64-windows tiff:x64-windows curl:x64-windows
+    vcpkg install sqlite3[core,tool] tiff curl --triplet=x86-windows
+    vcpkg install sqlite3[core,tool] tiff curl --triplet=x64-windows
 
 .. note:: The tiff and curl dependencies are only needed since PROJ 7.0
 
