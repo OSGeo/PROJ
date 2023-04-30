@@ -59,6 +59,14 @@ static PJ_XY aitoff_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double c, d;
 
+#if 0
+    // Likely domain of validity for wintri in +over mode. Should be confirmed
+    // Cf https://lists.osgeo.org/pipermail/gdal-dev/2023-April/057164.html
+    if (Q->mode == WINKEL_TRIPEL && fabs(lp.lam) > 2 * M_PI) {
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+        return xy;
+    }
+#endif
     c = 0.5 * lp.lam;
     d = acos(cos(lp.phi) * cos(c));
     if (d != 0.0) { /* basic Aitoff */
