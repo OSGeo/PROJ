@@ -28,8 +28,6 @@ if test -f "$WORK_DIR/ccache.tar.gz"; then
     (cd $HOME && tar xzf "$WORK_DIR/ccache.tar.gz")
 fi
 
-export PROJ_DB_CACHE_DIR="$HOME/.ccache"
-
 sudo apt-get install -y --no-install-recommends \
     binutils-mingw-w64-x86-64 \
     gcc-mingw-w64-x86-64 \
@@ -110,6 +108,7 @@ cmake -G "Unix Makefiles" \
     -D ENABLE_CURL=OFF \
     -D BUILD_PROJSYNC=OFF \
     -D USE_CCACHE=ON \
+    -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
     ..
 make
 # Run a subset of tests that should pass

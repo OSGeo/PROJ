@@ -22,8 +22,6 @@ if test -f "$WORK_DIR/ccache.tar.gz"; then
     (cd $HOME && tar xzf "$WORK_DIR/ccache.tar.gz")
 fi
 
-export PROJ_DB_CACHE_DIR="$HOME/.ccache"
-
 ccache -M 500M
 
 # -fno-use-cxa-atexit is needed to build with -coverage
