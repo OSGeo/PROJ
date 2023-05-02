@@ -56,6 +56,7 @@ cd shared_build
 cmake \
   -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D USE_CCACHE=${USE_CCACHE} \
+  -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
   -D BUILD_SHARED_LIBS=ON \
   -D BUILD_EXAMPLES=ON \
   -D CMAKE_INSTALL_PREFIX=/tmp/proj_shared_install_from_dist \
@@ -94,6 +95,7 @@ cd static_build
 cmake \
   -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D USE_CCACHE=${USE_CCACHE} \
+  -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
   -D BUILD_SHARED_LIBS=OFF \
   -D CMAKE_INSTALL_PREFIX=/tmp/proj_static_install_from_dist \
   -D CMAKE_INSTALL_INCLUDEDIR=/tmp/proj_static_install_from_dist/include \
@@ -228,7 +230,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
 
     mkdir build_cmake
     cd build_cmake
-    cmake -D USE_CCACHE=${USE_CCACHE} ..
+    cmake -D USE_CCACHE=${USE_CCACHE} -D PROJ_DB_CACHE_DIR=$HOME/.ccache ..
     make
 
     # return to root
@@ -245,6 +247,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
             cmake \
               -D CMAKE_BUILD_TYPE=Debug \
               -D USE_CCACHE=${USE_CCACHE} \
+              -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
               -D CMAKE_C_FLAGS="--coverage" \
               -D CMAKE_CXX_FLAGS="--coverage" \
               . ;
@@ -252,6 +255,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
             LDFLAGS="$LDFLAGS -lgcov" cmake \
               -D CMAKE_BUILD_TYPE=Debug \
               -D USE_CCACHE=${USE_CCACHE} \
+              -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
               -D CMAKE_C_FLAGS="$CFLAGS --coverage" \
               -D CMAKE_CXX_FLAGS="$CXXFLAGS --coverage" \
               . ;
@@ -260,6 +264,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
         cmake \
           -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
           -D USE_CCACHE=${USE_CCACHE} \
+          -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
           . ;
     fi
     make

@@ -54,12 +54,14 @@ jobs:
             set VCPKG_INSTALLED=c:\vcpkg\installed\${{ env.ARCH }}-windows
             dir %VCPKG_INSTALLED%\bin
             dir %VCPKG_INSTALLED%\tools
+            set PROJ_DB_CACHE_DIR=%VCPKG_INSTALLED%\cache
+            mkdir %PROJ_DB_CACHE_DIR%
             set PATH=%VCPKG_INSTALLED%\bin;%VCPKG_INSTALLED%\tools;%PATH%
             set PROJ_BUILD=%GITHUB_WORKSPACE%\build
             mkdir %PROJ_BUILD%
             cd %PROJ_BUILD%
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
-            cmake -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DBUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%" ..
+            cmake -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DBUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%" -DPROJ_DB_CACHE_DIR=%PROJ_DB_CACHE_DIR% ..
             ninja -v
             ninja install
             dir %PROJ_DIR%\bin
@@ -132,7 +134,7 @@ jobs:
             PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
             mkdir ${PROJ_BUILD}
             cd ${PROJ_BUILD}
-            cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_CXX_FLAGS="-Werror" -DUSE_CCACHE=ON ..
+            cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_CXX_FLAGS="-Werror" -DUSE_CCACHE=ON -DPROJ_DB_CACHE_DIR=$HOME/.ccache ..
             make -j 2
             make install
             ls ${PROJ_DIR}/bin

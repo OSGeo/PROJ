@@ -30,8 +30,6 @@ if test -f "$WORK_DIR/ccache.tar.gz"; then
     (cd $HOME && tar xzf "$WORK_DIR/ccache.tar.gz")
 fi
 
-export PROJ_DB_CACHE_DIR="$HOME/.ccache"
-
 ccache -M 500M
 
 CFLAGS="-Werror $CFLAGS" CXXFLAGS="-Werror $CXXFLAGS" ./travis/install.sh
