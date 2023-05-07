@@ -4388,15 +4388,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
 
     const std::string projCRSName = stripQuotes(nodeP->children()[0]);
     if (esriStyle_ && dbContext_) {
-        // It is likely that the ESRI definition of EPSG:32661 (UPS North) &
-        // EPSG:32761 (UPS South) uses the easting-northing order, instead
-        // of the EPSG northing-easting order
-        // so don't substitute names to avoid confusion.
-        if (projCRSName == "UPS_North") {
-            props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS North (E,N)");
-        } else if (projCRSName == "UPS_South") {
-            props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS South (E,N)");
-        } else if (cartesianCS) {
+        if (cartesianCS) {
             std::string outTableName;
             std::string authNameFromAlias;
             std::string codeFromAlias;

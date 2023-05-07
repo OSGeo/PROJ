@@ -7325,9 +7325,11 @@ TEST(wkt_parse, wkt1_esri_ups_north) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
-    EXPECT_EQ(crs->nameStr(), "WGS 84 / UPS North (E,N)");
+    EXPECT_EQ(crs->nameStr(), "WGS 84 / UPS North (N,E)");
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->direction(),
               AxisDirection::SOUTH);
+    // Yes, inconsistency between the name (coming from EPSG) and the fact
+    // that with ESRI CRS, we always output E, N axis order
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->abbreviation(), "E");
     EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->direction(),
               AxisDirection::SOUTH);
@@ -7355,9 +7357,11 @@ TEST(wkt_parse, wkt1_esri_ups_south) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
-    EXPECT_EQ(crs->nameStr(), "WGS 84 / UPS South (E,N)");
+    EXPECT_EQ(crs->nameStr(), "WGS 84 / UPS South (N,E)");
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->direction(),
               AxisDirection::NORTH);
+    // Yes, inconsistency between the name (coming from EPSG) and the fact
+    // that with ESRI CRS, we always output E, N axis order
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->abbreviation(), "E");
     EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->direction(),
               AxisDirection::NORTH);
