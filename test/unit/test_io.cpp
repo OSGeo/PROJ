@@ -7307,6 +7307,7 @@ TEST(wkt_parse, wkt1_esri_normalize_unit) {
 // ---------------------------------------------------------------------------
 
 TEST(wkt_parse, wkt1_esri_ups_north) {
+    // EPSG:32661
     auto wkt = "PROJCS[\"UPS_North\",GEOGCS[\"GCS_WGS_1984\","
                "DATUM[\"D_WGS_1984\","
                "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
@@ -7319,9 +7320,8 @@ TEST(wkt_parse, wkt1_esri_ups_north) {
                "PARAMETER[\"Latitude_Of_Origin\",90.0],"
                "UNIT[\"Meter\",1.0]]";
 
-    auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
-                   .createFromWKT(wkt);
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
@@ -7334,11 +7334,18 @@ TEST(wkt_parse, wkt1_esri_ups_north) {
     EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->direction(),
               AxisDirection::SOUTH);
     EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->abbreviation(), "N");
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(wkt_parse, wkt1_esri_ups_south) {
+    // EPSG:32671
     auto wkt = "PROJCS[\"UPS_South\",GEOGCS[\"GCS_WGS_1984\","
                "DATUM[\"D_WGS_1984\","
                "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
@@ -7351,9 +7358,8 @@ TEST(wkt_parse, wkt1_esri_ups_south) {
                "PARAMETER[\"Latitude_Of_Origin\",-90.0],"
                "UNIT[\"Meter\",1.0]]";
 
-    auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
-                   .createFromWKT(wkt);
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
@@ -7366,6 +7372,86 @@ TEST(wkt_parse, wkt1_esri_ups_south) {
     EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->direction(),
               AxisDirection::NORTH);
     EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->abbreviation(), "N");
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_esri_wgs_1984_ups_north_E_N) {
+    // EPSG:5041
+    auto wkt = "PROJCS[\"WGS_1984_UPS_North_(E-N)\","
+               "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\","
+               "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+               "PRIMEM[\"Greenwich\",0.0],"
+               "UNIT[\"Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Polar_Stereographic_Variant_A\"],"
+               "PARAMETER[\"False_Easting\",2000000.0],"
+               "PARAMETER[\"False_Northing\",2000000.0],"
+               "PARAMETER[\"Central_Meridian\",0.0],"
+               "PARAMETER[\"Scale_Factor\",0.994],"
+               "PARAMETER[\"Latitude_Of_Origin\",90.0],"
+               "UNIT[\"Meter\",1.0]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->nameStr(), "WGS 84 / UPS North (E,N)");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->direction(),
+              AxisDirection::SOUTH);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->abbreviation(), "E");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->direction(),
+              AxisDirection::SOUTH);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->abbreviation(), "N");
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_esri_wgs_1984_ups_south_E_N) {
+    // EPSG:5042
+    auto wkt = "PROJCS[\"WGS_1984_UPS_South_(E-N)\","
+               "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\","
+               "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+               "PRIMEM[\"Greenwich\",0.0],"
+               "UNIT[\"Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Polar_Stereographic_Variant_A\"],"
+               "PARAMETER[\"False_Easting\",2000000.0],"
+               "PARAMETER[\"False_Northing\",2000000.0],"
+               "PARAMETER[\"Central_Meridian\",0.0],"
+               "PARAMETER[\"Scale_Factor\",0.994],"
+               "PARAMETER[\"Latitude_Of_Origin\",-90.0],"
+               "UNIT[\"Meter\",1.0]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->nameStr(), "WGS 84 / UPS South (E,N)");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->direction(),
+              AxisDirection::NORTH);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->abbreviation(), "E");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->direction(),
+              AxisDirection::NORTH);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->abbreviation(), "N");
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
 }
 
 // ---------------------------------------------------------------------------
