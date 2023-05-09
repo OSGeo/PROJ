@@ -289,6 +289,15 @@ config_str = """
         - Scale_Factor: EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN
         - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
 
+- Polar_Stereographic_Variant_A:
+    WKT2_name: EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+        - Scale_Factor: EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN
+        - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
+
 - Equidistant_Conic:
     WKT2_name: PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC
     Params:
@@ -740,7 +749,6 @@ config_str = """
 # Missing mappings
 
 # Transverse_Mercator_NGA_2014: utm -- tricky mapping from Central_Meridian to zone
-# Polar_Stereographic_Variant_A: ups -- tricky mapping from Latitude_Of_Origin to "+south" when required
 # Transverse Mercator: alias for Transverse_Mercator, as seen in ESRI:102470 - ESRI:102489
 
 

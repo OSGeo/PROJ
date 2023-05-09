@@ -3086,6 +3086,19 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
                 esriMethodName = "Rectified_Skew_Orthomorphic_Center";
             }
         } else if (esriMapping->epsg_code ==
+                   EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A) {
+            // Quite empiric, but looking at pe_list_projcs.csv, the only
+            // CRS that use Polar_Stereographic_Variant_A are EPSG:5041 and 5042
+            if (l_targetCRS &&
+                // EPSG:5041
+                (l_targetCRS->nameStr() == "WGS 84 / UPS North (E,N)" ||
+                 // EPSG:5042
+                 l_targetCRS->nameStr() == "WGS 84 / UPS South (E,N)")) {
+                esriMethodName = "Polar_Stereographic_Variant_A";
+            } else {
+                esriMethodName = "Stereographic";
+            }
+        } else if (esriMapping->epsg_code ==
                    EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B) {
             if (conv->parameterValueNumericAsSI(
                     EPSG_CODE_PARAMETER_LATITUDE_STD_PARALLEL) > 0) {
