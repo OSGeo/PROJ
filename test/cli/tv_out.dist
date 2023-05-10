@@ -607,6 +607,9 @@ cannot initialize transformation
 cause: File not found or invalid
 program abnormally terminated
 ##############################################################
+Test cs2cs grid missing with @gridname
+49dN	2dE 0.000
+##############################################################
 Test Similarity Transformation (example from EPSG Guidance Note 7.2)
 300000 4500000	299905.060	4499796.515 0.000
 ##############################################################
