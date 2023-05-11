@@ -385,6 +385,19 @@ static const ESRIParamMapping paramsESRI_Stereographic[] = {
      EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
     {nullptr, nullptr, 0, "0.0", false}};
 
+static const ESRIParamMapping paramsESRI_Polar_Stereographic_Variant_A[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
+    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Scale_Factor", EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, "0.0", false},
+    {"Latitude_Of_Origin", EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {nullptr, nullptr, 0, "0.0", false}};
+
 static const ESRIParamMapping paramsESRI_Equidistant_Conic[] = {
     {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
      EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
@@ -1033,6 +1046,10 @@ static const ESRIMethodMapping esriMappings[] = {
      paramsESRI_Hotine_Oblique_Mercator_Two_Point_Natural_Origin},
     {"Stereographic", PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC, 0,
      paramsESRI_Stereographic},
+    {"Polar_Stereographic_Variant_A",
+     EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A,
+     EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A,
+     paramsESRI_Polar_Stereographic_Variant_A},
     {"Equidistant_Conic", PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC, 0,
      paramsESRI_Equidistant_Conic},
     {"Cassini", EPSG_NAME_METHOD_CASSINI_SOLDNER,
