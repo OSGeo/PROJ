@@ -1248,6 +1248,13 @@ echo 39 -3 0 | PROJ_DISPLAY_PROGRAM_NAME=NO PROJ_DATA=tmp_dir PROJ_DEBUG=2 $EXE 
 rm -rf tmp_dir
 
 echo "##############################################################" >> ${OUT}
+echo "Test cs2cs grid missing with @gridname" >> ${OUT}
+
+$EXE +proj=longlat +datum=WGS84 +units=m +geoidgrids=@i_dont_exist.tif +vunits=m +no_defs +type=crs +to EPSG:4979 >> ${OUT} <<EOF
+2 49 0
+EOF
+
+echo "##############################################################" >> ${OUT}
 echo "Test Similarity Transformation (example from EPSG Guidance Note 7.2)" >> ${OUT}
 #
 $EXE -d 3 EPSG:23031 EPSG:25831 -E >>${OUT} 2>&1 <<EOF

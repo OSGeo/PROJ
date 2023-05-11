@@ -297,7 +297,9 @@ bool CoordinateOperation::isPROJInstantiable(
     }
     for (const auto &gridDesc :
          gridsNeeded(databaseContext, considerKnownGridsAsAvailable)) {
-        if (!gridDesc.available) {
+        // Grid name starting with @ are considered as optional.
+        if (!gridDesc.available &&
+            (gridDesc.shortName.empty() || gridDesc.shortName[0] != '@')) {
             return false;
         }
     }
