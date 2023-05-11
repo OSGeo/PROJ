@@ -9656,7 +9656,7 @@ TEST(io, projparse_longlat_ellps_WGS84) {
     f->simulCurNodeHasId();
     crs->exportToWKT(f.get());
     auto expected = "GEODCRS[\"unknown\",\n"
-                    "    DATUM[\"Unknown based on WGS84 ellipsoid\",\n"
+                    "    DATUM[\"Unknown based on WGS 84 ellipsoid\",\n"
                     "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
                     "            LENGTHUNIT[\"metre\",1]]],\n"
                     "    PRIMEM[\"Greenwich\",0,\n"
@@ -9682,7 +9682,7 @@ TEST(io, projparse_longlat_ellps_GRS80) {
     f->simulCurNodeHasId();
     crs->exportToWKT(f.get());
     auto expected = "GEODCRS[\"unknown\",\n"
-                    "    DATUM[\"Unknown based on GRS80 ellipsoid\",\n"
+                    "    DATUM[\"Unknown based on GRS 1980 ellipsoid\",\n"
                     "        ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
                     "            LENGTHUNIT[\"metre\",1]]],\n"
                     "    PRIMEM[\"Greenwich\",0,\n"
@@ -9735,7 +9735,7 @@ TEST(io, projparse_longlat_a_rf_WGS84) {
     f->simulCurNodeHasId();
     crs->exportToWKT(f.get());
     auto expected = "GEODCRS[\"unknown\",\n"
-                    "    DATUM[\"unknown\",\n"
+                    "    DATUM[\"Unknown based on WGS 84 ellipsoid\",\n"
                     "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
                     "            LENGTHUNIT[\"metre\",1]]],\n"
                     "    PRIMEM[\"Greenwich\",0,\n"
@@ -11621,7 +11621,7 @@ TEST(io, projparse_geocent) {
     f->setMultiLine(false);
     crs->exportToWKT(f.get());
     auto wkt = f->toString();
-    EXPECT_EQ(wkt, "GEODCRS[\"unknown\",DATUM[\"Unknown based on WGS84 "
+    EXPECT_EQ(wkt, "GEODCRS[\"unknown\",DATUM[\"Unknown based on WGS 84 "
                    "ellipsoid\",ELLIPSOID[\"WGS "
                    "84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],"
                    "PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0."
