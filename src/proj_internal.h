@@ -318,14 +318,27 @@ typedef void (*PJ_OPERATOR)(PJ_COORD &, PJ *);
 struct PJCoordOperation {
   public:
     int idxInOriginalList;
+
+    // [min|max][x|y]Src define the bounding box of the area of validity of
+    // the transformation, expressed in the source CRS. Except if the source
+    // CRS is a geocentric one, in which case the bounding box is defined in
+    // a geographic lon,lat CRS (pjSrcGeocentricToLonLat will have to be used
+    // on input coordinates in the forward direction)
     double minxSrc = 0.0;
     double minySrc = 0.0;
     double maxxSrc = 0.0;
     double maxySrc = 0.0;
+
+    // [min|max][x|y]Dst define the bounding box of the area of validity of
+    // the transformation, expressed in the target CRS. Except if the target
+    // CRS is a geocentric one, in which case the bounding box is defined in
+    // a geographic lon,lat CRS (pjDstGeocentricToLonLat will have to be used
+    // on input coordinates in the inverse direction)
     double minxDst = 0.0;
     double minyDst = 0.0;
     double maxxDst = 0.0;
     double maxyDst = 0.0;
+
     PJ *pj = nullptr;
     std::string name{};
     double accuracy = -1.0;
@@ -336,11 +349,23 @@ struct PJCoordOperation {
     bool dstIsLonLatDegree = false;
     bool dstIsLatLonDegree = false;
 
+    // pjSrcGeocentricToLonLat is defined if the source CRS of pj is geocentric
+    // and in that case it transforms from those geocentric coordinates to
+    // geographic ones in lon, lat order
+    PJ *pjSrcGeocentricToLonLat = nullptr;
+
+    // pjDstGeocentricToLonLat is defined if the target CRS of pj is geocentric
+    // and in that case it transforms from those geocentric coordinates to
+    // geographic ones in lon, lat order
+    PJ *pjDstGeocentricToLonLat = nullptr;
+
     PJCoordOperation(int idxInOriginalListIn, double minxSrcIn,
                      double minySrcIn, double maxxSrcIn, double maxySrcIn,
                      double minxDstIn, double minyDstIn, double maxxDstIn,
                      double maxyDstIn, PJ *pjIn, const std::string &nameIn,
-                     double accuracyIn, bool isOffshoreIn);
+                     double accuracyIn, bool isOffshoreIn,
+                     const PJ *pjSrcGeocentricToLonLatIn,
+                     const PJ *pjDstGeocentricToLonLatIn);
 
     PJCoordOperation(const PJCoordOperation &) = delete;
 
@@ -355,7 +380,15 @@ struct PJCoordOperation {
           srcIsLonLatDegree(other.srcIsLonLatDegree),
           srcIsLatLonDegree(other.srcIsLatLonDegree),
           dstIsLonLatDegree(other.dstIsLonLatDegree),
-          dstIsLatLonDegree(other.dstIsLatLonDegree) {}
+          dstIsLatLonDegree(other.dstIsLatLonDegree),
+          pjSrcGeocentricToLonLat(
+              other.pjSrcGeocentricToLonLat
+                  ? proj_clone(ctx, other.pjSrcGeocentricToLonLat)
+                  : nullptr),
+          pjDstGeocentricToLonLat(
+              other.pjDstGeocentricToLonLat
+                  ? proj_clone(ctx, other.pjDstGeocentricToLonLat)
+                  : nullptr) {}
 
     PJCoordOperation(PJCoordOperation &&other)
         : idxInOriginalList(other.idxInOriginalList), minxSrc(other.minxSrc),
@@ -371,6 +404,10 @@ struct PJCoordOperation {
           dstIsLatLonDegree(other.dstIsLatLonDegree) {
         pj = other.pj;
         other.pj = nullptr;
+        pjSrcGeocentricToLonLat = other.pjSrcGeocentricToLonLat;
+        other.pjSrcGeocentricToLonLat = nullptr;
+        pjDstGeocentricToLonLat = other.pjDstGeocentricToLonLat;
+        other.pjDstGeocentricToLonLat = nullptr;
     }
 
     PJCoordOperation &operator=(const PJCoordOperation &) = delete;
@@ -390,7 +427,7 @@ struct PJCoordOperation {
         return !(operator==(other));
     }
 
-    ~PJCoordOperation() { proj_destroy(pj); }
+    ~PJCoordOperation();
 
     bool isInstantiable() const;
 
