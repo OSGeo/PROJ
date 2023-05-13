@@ -443,8 +443,10 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
             } else if (P->errorIfBestTransformationNotAvailable ||
                        P->warnIfBestTransformationNotAvailable) {
                 warnAboutMissingGrid(alt.pj);
-                if (P->errorIfBestTransformationNotAvailable)
+                if (P->errorIfBestTransformationNotAvailable) {
+                    proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_NO_OPERATION);
                     return res;
+                }
                 P->warnIfBestTransformationNotAvailable = false;
                 skipNonInstantiable = true;
             }
