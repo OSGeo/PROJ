@@ -8,6 +8,9 @@ INSERT INTO grid_alternatives(original_grid_name,
                               url, direct_download, open_license, directory)
 VALUES
 
+-- ar_ign - Instituto Geográfico Nacional (IGN)
+('GEOIDE-Ar16.gri','ar_ign_GEOIDE-Ar16.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ar_ign_GEOIDE-Ar16.tif',1,1,NULL),
+
 -- at_bev - Austria Bundesamt für Eich- und Vermessungswessen
 ('AT_GIS_GRID.gsb','at_bev_AT_GIS_GRID.tif','AT_GIS_GRID.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/at_bev_AT_GIS_GRID.tif',1,1,NULL),
 ('AT_GIS_GRID_2021_09_28.gsb','at_bev_AT_GIS_GRID_2021_09_28.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/at_bev_AT_GIS_GRID_2021_09_28.tif',1,1,NULL),
