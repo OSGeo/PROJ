@@ -944,6 +944,8 @@ Several candidates area of use matching provided name :
   EPSG:3631 : Denmark - Jutland onshore west of 10°E.
   EPSG:3632 : Denmark - onshore - Jutland east of 9°E and Funen.
   EPSG:4575 : Denmark - onshore Jutland, Funen, Zealand and Lolland.
+  EPSG:4693 : Denmark - onshore - Copenhagen and surrounding area.
+  EPSG:4694 : Denmark - onshore northern Schleswig and surrounding islands (i.e. Jutland south of the pre-1920 border near the Kongea river).
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area no_match --summary
 No area of use matching provided name

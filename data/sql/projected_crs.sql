@@ -7447,6 +7447,8 @@ INSERT INTO "projected_crs" VALUES('EPSG','9972','SCM22 Grid',NULL,'EPSG','4400'
 INSERT INTO "usage" VALUES('EPSG','17441','projected_crs','EPSG','9972','EPSG','4665','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','9977','FNL22 Grid',NULL,'EPSG','4400','EPSG','9974','EPSG','9976',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','17456','projected_crs','EPSG','9977','EPSG','4664','EPSG','1141');
+INSERT INTO "projected_crs" VALUES('EPSG','10160','S34J reconstruction east-orientated',NULL,'EPSG','4400','EPSG','10158','EPSG','10159',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19661','projected_crs','EPSG','10160','EPSG','2531','EPSG','1028');
 INSERT INTO "projected_crs" VALUES('EPSG','10183','DoPw22 Grid',NULL,'EPSG','4400','EPSG','10175','EPSG','10182',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18655','projected_crs','EPSG','10183','EPSG','4686','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','10188','ShAb07 Grid',NULL,'EPSG','4400','EPSG','10185','EPSG','10187',NULL,0);
@@ -7469,6 +7471,12 @@ INSERT INTO "projected_crs" VALUES('EPSG','10235','OxWo08 Grid',NULL,'EPSG','440
 INSERT INTO "usage" VALUES('EPSG','18786','projected_crs','EPSG','10235','EPSG','4680','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','10240','SYC20 Grid',NULL,'EPSG','4400','EPSG','10237','EPSG','10239',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18788','projected_crs','EPSG','10240','EPSG','4679','EPSG','1141');
+INSERT INTO "projected_crs" VALUES('EPSG','10250','S34S reconstruction east-orientated',NULL,'EPSG','4400','EPSG','10249','EPSG','10159',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19665','projected_crs','EPSG','10250','EPSG','2532','EPSG','1028');
+INSERT INTO "projected_crs" VALUES('EPSG','10254','S45B reconstruction east-orientated',NULL,'EPSG','4400','EPSG','10252','EPSG','10253',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19674','projected_crs','EPSG','10254','EPSG','2533','EPSG','1028');
+INSERT INTO "projected_crs" VALUES('EPSG','10270','Ostenfeld reconstruction',NULL,'EPSG','4400','EPSG','10268','EPSG','10269',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19698','projected_crs','EPSG','10270','EPSG','4694','EPSG','1028');
 INSERT INTO "projected_crs" VALUES('EPSG','10275','SMITB20 Grid',NULL,'EPSG','4400','EPSG','10272','EPSG','10274',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','19178','projected_crs','EPSG','10275','EPSG','4688','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','10280','RBEPP12 Grid',NULL,'EPSG','4400','EPSG','10277','EPSG','10279',NULL,0);
