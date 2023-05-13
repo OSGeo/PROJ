@@ -705,6 +705,13 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1355','RGSH2020','EPSG'
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6661','Latvia 1992','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1356','LKS-2020','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1357','RGNC15','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1346','S45B-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1347','GS-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1348','GSB-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1349','KK-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1350','Ostenfeld-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1332','S34J-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1337','S34S-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -7870,3 +7877,7 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10318','RGNC15 (lon-lat) 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10314','Lambert NC15','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10315','RGNC / UTM zone 57S','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10316','RGNC / UTM zone 58S','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10160','System 34 Jylland, østvendt','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10250','System 34 Sjælland, østvendt','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10254','System 45 Bornholm, østvendt','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10268','OS-IRF','EPSG');

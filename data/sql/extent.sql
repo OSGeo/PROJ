@@ -1508,7 +1508,7 @@ INSERT INTO "extent" VALUES('EPSG','2528','USA - Texas - SPCS83 - S','United Sta
 INSERT INTO "extent" VALUES('EPSG','2529','USA - Louisiana - SPCS83 - S','United States (USA) - Louisiana - counties of Acadia; Allen; Ascension; Assumption; Beauregard; Calcasieu; Cameron; East Baton Rouge; East Feliciana; Evangeline; Iberia; Iberville; Jefferson; Jefferson Davis; Lafayette; LaFourche; Livingston; Orleans; Plaquemines; Pointe Coupee; St Bernard; St Charles; St Helena; St James; St John the Baptist; St Landry; St Martin; St Mary; St Tammany; Tangipahoa; Terrebonne; Vermilion; Washington; West Baton Rouge; West Feliciana.',28.85,31.07,-93.94,-88.75,0);
 INSERT INTO "extent" VALUES('EPSG','2530','UK - Northern Ireland - onshore','United Kingdom (UK) - Northern Ireland (Ulster) - onshore.',53.96,55.36,-8.18,-5.34,0);
 INSERT INTO "extent" VALUES('EPSG','2531','Denmark - onshore Jutland and Funen','Denmark - Jutland and Funen - onshore.',54.67,57.8,8.0,11.29,0);
-INSERT INTO "extent" VALUES('EPSG','2532','Denmark - onshore Zealand and Lolland','Denmark - Zealand and Lolland (onshore).',54.51,56.79,10.79,12.69,0);
+INSERT INTO "extent" VALUES('EPSG','2532','Denmark - onshore Zealand and Lolland','Denmark - Zealand and Lolland (onshore).',54.51,56.79,10.79,12.87,0);
 INSERT INTO "extent" VALUES('EPSG','2533','Denmark - onshore Bornholm','Denmark - Bornholm onshore.',54.94,55.38,14.59,15.25,0);
 INSERT INTO "extent" VALUES('EPSG','2534','World - N hemisphere - 3-degree CM 027°E','Between 25°30''E and 28°30''E, northern hemisphere.',0.0,84.0,25.5,28.5,0);
 INSERT INTO "extent" VALUES('EPSG','2535','World - N hemisphere - 3-degree CM 030°E','Between 28°30''E and 31°30''E, northern hemisphere.',0.0,84.0,28.5,31.5,0);
@@ -3550,7 +3550,7 @@ INSERT INTO "extent" VALUES('EPSG','4571','Argentina - south Santa Cruz east of 
 INSERT INTO "extent" VALUES('EPSG','4572','Argentina - 44°S to 47.5°S','Argentina - Chubut province south of approximately 44°S and Santa Cruz province north of approximately 47°30''S - Golfo San Jorge basin onshore and offshore.',-47.5,-43.99,-72.36,-63.24,0);
 INSERT INTO "extent" VALUES('EPSG','4573','Argentina - onshore','Argentina - onshore.',-55.11,-21.78,-73.59,-53.65,0);
 INSERT INTO "extent" VALUES('EPSG','4574','Brazil - west of 54°W and between 18°S and 27°30''S','Brazil - west of 54°W and between 18°S and 27°30''S.',-27.5,-17.99,-58.16,-54.0,0);
-INSERT INTO "extent" VALUES('EPSG','4575','Denmark - onshore Jutland, Funen, Zealand and Lolland','Denmark - onshore Jutland, Funen, Zealand and Lolland.',54.51,57.8,8.0,12.69,0);
+INSERT INTO "extent" VALUES('EPSG','4575','Denmark - onshore Jutland, Funen, Zealand and Lolland','Denmark - onshore Jutland, Funen, Zealand and Lolland.',54.51,57.8,8.0,12.87,0);
 INSERT INTO "extent" VALUES('EPSG','4576','Brazil - 54°W to 48°W and 15°S to 27°30''S','Brazil - onshore between 54°W and 48°W and between 15°S and 27°30''S.',-27.5,-14.99,-54.0,-47.99,0);
 INSERT INTO "extent" VALUES('EPSG','4577','Argentina - 70.5°W to 67.5°W mainland onshore','Argentina - between 70°30''W and 67°30''W, onshore mainland.',-52.43,-24.08,-70.5,-67.49,0);
 INSERT INTO "extent" VALUES('EPSG','4578','Argentina - 67.5°W to 64.5°W mainland onshore','Argentina - between 67°30''W and 64°30''W, onshore mainland.',-49.05,-21.78,-67.5,-64.49,0);
@@ -3666,6 +3666,8 @@ INSERT INTO "extent" VALUES('EPSG','4687','UK - Shrewsbury to Aberystwyth','Unit
 INSERT INTO "extent" VALUES('EPSG','4688','UK – Okehampton to Penstone','United Kingdom (UK) - on or related to the rail route from Okehampton to Penstone.',50.65,50.85,-4.1,-3.6,0);
 INSERT INTO "extent" VALUES('EPSG','4689','UK – Reading to Penzance','United Kingdom (UK) - on or related to the rail route from Reading via Newbury to Penzance.',50.05,51.7,-5.63,-0.85,0);
 INSERT INTO "extent" VALUES('EPSG','4690','UK - London to Fishguard','United Kingdom (UK) - on or related to the rail routes from London (Paddington) to Swansea; Swansea to Pembroke Dock, Milford Haven and Fishguard; and around Cardiff and the valleys.',51.25,52.06,-5.16,-0.1,0);
+INSERT INTO "extent" VALUES('EPSG','4693','Denmark - Copenhagen','Denmark - onshore - Copenhagen and surrounding area.',55.51,55.82,12.23,12.73,0);
+INSERT INTO "extent" VALUES('EPSG','4694','Denmark - northern Schleswig','Denmark - onshore northern Schleswig and surrounding islands (i.e. Jutland south of the pre-1920 border near the Kongea river).',54.8,55.47,8.37,10.16,0);
 INSERT INTO "extent" VALUES('EPSG','4701','USA - Illinois - Carroll, Jo Daviess, Stephenson','United States (USA) - Illinois - counties of Carroll, Jo Daviess and Stephenson.',41.92,42.51,-90.66,-89.39,0);
 INSERT INTO "extent" VALUES('EPSG','4702','USA - Illinois - Lee, Ogle, Winnebago','United States (USA) - Illinois - counties of Lee, Ogle and Winnebago.',41.58,42.51,-89.69,-88.93,0);
 INSERT INTO "extent" VALUES('EPSG','4703','USA - Illinois - Boone, Dekalb, Kane, Kendall, McHenry','United States (USA) - Illinois - counties of Boone, Dekalb, Kane, Kendall and McHenry.',41.45,42.5,-88.95,-88.19,0);
