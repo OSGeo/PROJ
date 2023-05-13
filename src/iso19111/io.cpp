@@ -10365,7 +10365,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
                 return GeodeticReferenceFrame::create(
                     grfMap.set(IdentifiedObject::NAME_KEY,
                                title.empty()
-                                   ? "Unknown based on WGS84 ellipsoid" +
+                                   ? "Unknown based on WGS 84 ellipsoid" +
                                          datumNameSuffix
                                    : title),
                     Ellipsoid::WGS84, optionalEmptyString, pm);
@@ -10373,7 +10373,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
                 return GeodeticReferenceFrame::create(
                     grfMap.set(IdentifiedObject::NAME_KEY,
                                title.empty()
-                                   ? "Unknown based on GRS80 ellipsoid" +
+                                   ? "Unknown based on GRS 1980 ellipsoid" +
                                          datumNameSuffix
                                    : title),
                     Ellipsoid::GRS1980, optionalEmptyString, pm);
@@ -10441,10 +10441,20 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
     const auto createGRF = [&grfMap, &title, &optionalEmptyString,
                             &datumNameSuffix,
                             &pm](const EllipsoidNNPtr &ellipsoid) {
+        std::string datumName(title);
+        if (title.empty()) {
+            if (ellipsoid->nameStr() != "unknown") {
+                datumName = "Unknown based on ";
+                datumName += ellipsoid->nameStr();
+                datumName += " ellipsoid";
+            } else {
+                datumName = "unknown";
+            }
+            datumName += datumNameSuffix;
+        }
         return GeodeticReferenceFrame::create(
-            grfMap.set(IdentifiedObject::NAME_KEY,
-                       title.empty() ? "unknown" + datumNameSuffix : title),
-            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
+            grfMap.set(IdentifiedObject::NAME_KEY, datumName), ellipsoid,
+            optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     };
 
     if (a > 0 && (b > 0 || !bStr.empty())) {
