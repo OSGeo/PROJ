@@ -194,10 +194,10 @@ paragraph for more details.
 
     - AUTHORITY=name: to restrict the authority of coordinate operations
       looked up in the database. When not specified, coordinate
-      ``operations from any authority`` will be searched, with the restrictions set
+      operations from any authority will be searched, with the restrictions set
       in the authority_to_authority_preference database table related to the authority
       of the source/target CRS themselves.
-      If authority is set to "any", then coordinate operations from any authority will be searched
+      If authority is set to ``any``, then coordinate operations from any authority will be searched.
       If authority is a non-empty string different of ``any``, then coordinate operations
       will be searched only in that authority namespace (e.g ``EPSG``).
 
