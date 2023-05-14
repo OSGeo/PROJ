@@ -7311,6 +7311,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3106','Gulshan 303 / BUT
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9678','Gulshan / Bangladesh TM','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9680','WGS 84 / Bangladesh Universal Transverse Mercator','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9680','WGS 84 / BUTM 2010','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9549','LTF2004(G) / LTF2004(C)','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6893','WGS 84 / World Mercator + EGM2008 height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','7955','St. Helena Tritan / UTM zone 30S + Tritan 2011 height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','7956','SHMG2015 + SHVD2015 height','EPSG');
@@ -7880,4 +7881,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10316','RGNC / UTM zone 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10160','System 34 Jylland, østvendt','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10250','System 34 Sjælland, østvendt','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10254','System 45 Bornholm, østvendt','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10262','Generalstabens System Bornholm, østvendt','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10268','OS-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10258','Generalstabens System, østvendt','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10266','Københavns Kommunes System, østvendt','EPSG');

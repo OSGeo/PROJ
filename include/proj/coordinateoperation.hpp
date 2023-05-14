@@ -985,6 +985,14 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
         const common::Length &falseEasting,
         const common::Length &falseNorthing);
 
+    PROJ_DLL static ConversionNNPtr createLambertConicConformal_1SP_VariantB(
+        const util::PropertyMap &properties,
+        const common::Angle &latitudeNatOrigin, const common::Scale &scale,
+        const common::Angle &latitudeFalseOrigin,
+        const common::Angle &longitudeFalseOrigin,
+        const common::Length &eastingFalseOrigin,
+        const common::Length &northingFalseOrigin);
+
     PROJ_DLL static ConversionNNPtr
     createLambertConicConformal_2SP(const util::PropertyMap &properties,
                                     const common::Angle &latitudeFalseOrigin,

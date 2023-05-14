@@ -583,6 +583,7 @@ osgeo::proj::operation::Conversion::createKrovak(osgeo::proj::util::PropertyMap 
 osgeo::proj::operation::Conversion::createLabordeObliqueMercator(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createLambertAzimuthalEqualArea(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createLambertConicConformal_1SP(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createLambertConicConformal_1SP_VariantB(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createLambertConicConformal_2SP_Belgium(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createLambertConicConformal_2SP_Michigan(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&, osgeo::proj::common::Scale const&)
 osgeo::proj::operation::Conversion::createLambertConicConformal_2SP(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
@@ -911,6 +912,7 @@ proj_create_conversion_krovak_north_oriented
 proj_create_conversion_laborde_oblique_mercator
 proj_create_conversion_lambert_azimuthal_equal_area
 proj_create_conversion_lambert_conic_conformal_1sp
+proj_create_conversion_lambert_conic_conformal_1sp_variant_b
 proj_create_conversion_lambert_conic_conformal_2sp
 proj_create_conversion_lambert_conic_conformal_2sp_belgium
 proj_create_conversion_lambert_conic_conformal_2sp_michigan

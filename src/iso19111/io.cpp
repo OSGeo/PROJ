@@ -11089,13 +11089,18 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
         const auto &lat_1 = getParamValue(step, "lat_1");
         const auto &lat_2 = getParamValue(step, "lat_2");
         const auto &k = getParamValueK(step);
-        if (lat_2.empty() && !lat_0.empty() && !lat_1.empty() &&
-            (lat_0 == lat_1 ||
-             // For some reason with gcc 5.3.1-14ubuntu2 32bit, the following
-             // comparison returns false even if lat_0 == lat_1. Smells like
-             // a compiler bug
-             getAngularValue(lat_0) == getAngularValue(lat_1))) {
-            mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+        if (lat_2.empty() && !lat_0.empty() && !lat_1.empty()) {
+            if (lat_0 == lat_1 ||
+                // For some reason with gcc 5.3.1-14ubuntu2 32bit, the following
+                // comparison returns false even if lat_0 == lat_1. Smells like
+                // a compiler bug
+                getAngularValue(lat_0) == getAngularValue(lat_1)) {
+                mapping =
+                    getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+            } else {
+                mapping = getMapping(
+                    EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_VARIANT_B);
+            }
         } else if (!k.empty() && getNumericValue(k) != 1.0) {
             mapping = getMapping(
                 EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN);

@@ -1779,6 +1779,41 @@ TEST(operation, lcc1sp_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, lcc1sp_variant_b_export) {
+    auto conv = Conversion::createLambertConicConformal_1SP_VariantB(
+        PropertyMap(), Angle(1), Scale(2), Angle(3), Angle(4), Length(5),
+        Length(6));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=lcc +lat_1=1 +k_0=2 +lat_0=3 +lon_0=4 +x_0=5 +y_0=6");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
+              "CONVERSION[\"Lambert Conic Conformal (1SP variant B)\",\n"
+              "    METHOD[\"Lambert Conic Conformal (1SP variant B)\",\n"
+              "        ID[\"EPSG\",1102]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Scale factor at natural origin\",2,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8805]],\n"
+              "    PARAMETER[\"Latitude of false origin\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8821]],\n"
+              "    PARAMETER[\"Longitude of false origin\",4,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8822]],\n"
+              "    PARAMETER[\"Easting at false origin\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8826]],\n"
+              "    PARAMETER[\"Northing at false origin\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8827]]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, lcc2sp_export) {
     auto conv = Conversion::createLambertConicConformal_2SP(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
