@@ -7301,6 +7301,8 @@ INSERT INTO "projected_crs" VALUES('EPSG','9494','SRGI2013 / UTM zone 54S',NULL,
 INSERT INTO "usage" VALUES('EPSG','14172','projected_crs','EPSG','9494','EPSG','1663','EPSG','1266');
 INSERT INTO "projected_crs" VALUES('EPSG','9498','POSGAR 2007 / CABA 2019',NULL,'EPSG','4530','EPSG','5340','EPSG','9497',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14513','projected_crs','EPSG','9498','EPSG','4610','EPSG','1056');
+INSERT INTO "projected_crs" VALUES('EPSG','9549','LTF2004(C)',NULL,'EPSG','4400','EPSG','9547','EPSG','9548',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14928','projected_crs','EPSG','9549','EPSG','4613','EPSG','1271');
 INSERT INTO "projected_crs" VALUES('EPSG','9674','NAD83 / USFS R6 Albers',NULL,'EPSG','4400','EPSG','4269','EPSG','9673',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14787','projected_crs','EPSG','9674','EPSG','2381','EPSG','1165');
 INSERT INTO "projected_crs" VALUES('EPSG','9678','Gulshan 303 / Bangladesh Transverse Mercator',NULL,'EPSG','4400','EPSG','4682','EPSG','9677',NULL,0);
@@ -7475,6 +7477,12 @@ INSERT INTO "projected_crs" VALUES('EPSG','10250','S34S reconstruction east-orie
 INSERT INTO "usage" VALUES('EPSG','19665','projected_crs','EPSG','10250','EPSG','2532','EPSG','1028');
 INSERT INTO "projected_crs" VALUES('EPSG','10254','S45B reconstruction east-orientated',NULL,'EPSG','4400','EPSG','10252','EPSG','10253',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','19674','projected_crs','EPSG','10254','EPSG','2533','EPSG','1028');
+INSERT INTO "projected_crs" VALUES('EPSG','10258','GS reconstruction east-orientated',NULL,'EPSG','4400','EPSG','10256','EPSG','10257',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19709','projected_crs','EPSG','10258','EPSG','4575','EPSG','1153');
+INSERT INTO "projected_crs" VALUES('EPSG','10262','GSB reconstruction east-orientated',NULL,'EPSG','4400','EPSG','10260','EPSG','10261',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19685','projected_crs','EPSG','10262','EPSG','2533','EPSG','1180');
+INSERT INTO "projected_crs" VALUES('EPSG','10266','KK reconstruction east-orientated',NULL,'EPSG','4400','EPSG','10265','EPSG','10257',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19710','projected_crs','EPSG','10266','EPSG','4693','EPSG','1153');
 INSERT INTO "projected_crs" VALUES('EPSG','10270','Ostenfeld reconstruction',NULL,'EPSG','4400','EPSG','10268','EPSG','10269',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','19698','projected_crs','EPSG','10270','EPSG','4694','EPSG','1028');
 INSERT INTO "projected_crs" VALUES('EPSG','10275','SMITB20 Grid',NULL,'EPSG','4400','EPSG','10272','EPSG','10274',NULL,0);

@@ -10468,9 +10468,26 @@ TEST(io, projparse_lcc_as_lcc1sp) {
 
 // ---------------------------------------------------------------------------
 
-TEST(io, projparse_lcc_as_lcc2sp) {
+TEST(io, projparse_lcc_as_lcc1sp_variant_b) {
     auto obj = PROJStringParser().createFromPROJString(
         "+proj=lcc +lat_0=45 +lat_1=46 +type=crs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f.get());
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("Lambert Conic Conformal (1SP variant B)") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_lcc_as_lcc2sp) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=lcc +lat_0=45 +lat_1=46 +lat_2=44 +type=crs");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     WKTFormatterNNPtr f(WKTFormatter::create());
@@ -10486,7 +10503,7 @@ TEST(io, projparse_lcc_as_lcc2sp) {
 
 TEST(io, projparse_lcc_as_lcc2sp_michigan) {
     auto obj = PROJStringParser().createFromPROJString(
-        "+proj=lcc +lat_0=45 +lat_1=46 +k_0=1.02 +type=crs");
+        "+proj=lcc +lat_0=45 +lat_1=46 +lat_2=44 +k_0=1.02 +type=crs");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     WKTFormatterNNPtr f(WKTFormatter::create());

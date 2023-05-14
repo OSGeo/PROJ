@@ -335,6 +335,13 @@ PJ PROJ_DLL *proj_create_conversion_lambert_conic_conformal_1sp(
     double ang_unit_conv_factor, const char *linear_unit_name,
     double linear_unit_conv_factor);
 
+PJ PROJ_DLL *proj_create_conversion_lambert_conic_conformal_1sp_variant_b(
+    PJ_CONTEXT *ctx, double latitude_nat_origin, double scale,
+    double latitude_false_origin, double longitude_false_origin,
+    double easting_false_origin, double northing_false_origin,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor);
+
 PJ PROJ_DLL *proj_create_conversion_lambert_conic_conformal_2sp(
     PJ_CONTEXT *ctx, double latitude_false_origin,
     double longitude_false_origin, double latitude_first_parallel,

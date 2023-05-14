@@ -502,6 +502,7 @@ BEGIN
             'EPSG_1069_Change of Vertical Unit',
             'EPSG_1104_Change of Vertical Unit',
             'EPSG_1078_Equal Earth',
+            'EPSG_1102_Lambert Conic Conformal (1SP variant B)',
             'EPSG_1111_Transverse Mercator 3D',
             'EPSG_9602_Geographic/geocentric conversions',
             'EPSG_9659_Geographic3D to 2D conversion',
