@@ -1255,6 +1255,58 @@ $EXE +proj=longlat +datum=WGS84 +units=m +geoidgrids=@i_dont_exist.tif +vunits=m
 EOF
 
 echo "##############################################################" >> ${OUT}
+echo "Test cs2cs geographic -> geocentric using BETA2007.gsb grid" >> ${OUT}
+
+$EXE EPSG:4746 EPSG:4978 >> ${OUT} <<EOF
+50.5 10 0
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs geocentric -> geographic using BETA2007.gsb grid" >> ${OUT}
+
+$EXE EPSG:4978 EPSG:4746 >> ${OUT} <<EOF
+4003461.55 705832.08 4898267.79
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs geographic -> geocentric, normally using BETA2007.gsb grid but missing" >> ${OUT}
+
+mkdir tmp_dir
+cp $PROJ_DATA/proj.db tmp_dir
+
+PROJ_DATA=tmp_dir $EXE EPSG:4746 EPSG:4978 >> ${OUT} <<EOF
+50.5 10 0
+EOF
+
+rm -rf tmp_dir
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs geocentric -> geographic, normally using BETA2007.gsb grid but missing" >> ${OUT}
+
+mkdir tmp_dir
+cp $PROJ_DATA/proj.db tmp_dir
+
+PROJ_DATA=tmp_dir $EXE EPSG:4978 EPSG:4746 >> ${OUT} <<EOF
+4003461.37 705832.04 4898267.94
+EOF
+
+rm -rf tmp_dir
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs geographic -> geocentric outside BETA2007.gsb grid" >> ${OUT}
+
+$EXE EPSG:4746 EPSG:4978 >> ${OUT} <<EOF
+49 2 0
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test cs2cs geocentric -> geographic outside BETA2007.gsb grid" >> ${OUT}
+
+$EXE EPSG:4978 EPSG:4746  >> ${OUT} <<EOF
+4189881.02 146313.87 4790558.75
+EOF
+
+echo "##############################################################" >> ${OUT}
 echo "Test Similarity Transformation (example from EPSG Guidance Note 7.2)" >> ${OUT}
 #
 $EXE -d 3 EPSG:23031 EPSG:25831 -E >>${OUT} 2>&1 <<EOF
