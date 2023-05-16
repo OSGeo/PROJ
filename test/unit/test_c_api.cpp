@@ -2708,6 +2708,14 @@ TEST_F(CApi, proj_create_projections) {
         ASSERT_NE(projCRS, nullptr);
     }
     {
+        auto projCRS =
+            proj_create_conversion_lambert_conic_conformal_1sp_variant_b(
+                m_ctxt, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+                1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
         auto projCRS = proj_create_conversion_lambert_conic_conformal_2sp(
             m_ctxt, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
             1.0);
