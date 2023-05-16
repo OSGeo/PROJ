@@ -94,15 +94,20 @@ PJ *TRANSFORMATION(tinshift, 1) {
     file->seek(0, SEEK_END);
     unsigned long long size = file->tell();
     // Arbitrary threshold to avoid ingesting an arbitrarily large JSON file,
-    // that could be a denial of service risk. 10 MB should be sufficiently
+    // that could be a denial of service risk. 100 MB should be sufficiently
     // large for any valid use !
-    if (size > 10 * 1024 * 1024) {
+    if (size > 100 * 1024 * 1024) {
         proj_log_error(P, _("File %s too large"), filename);
         return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
     file->seek(0);
     std::string jsonStr;
-    jsonStr.resize(static_cast<size_t>(size));
+    try {
+        jsonStr.resize(static_cast<size_t>(size));
+    } catch (const std::bad_alloc &) {
+        proj_log_error(P, _("Cannot read %s. Not enough memory"), filename);
+        return destructor(P, PROJ_ERR_OTHER);
+    }
     if (file->read(&jsonStr[0], jsonStr.size()) != jsonStr.size()) {
         proj_log_error(P, _("Cannot read %s"), filename);
         return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
