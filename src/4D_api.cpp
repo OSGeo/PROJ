@@ -245,8 +245,24 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
         const auto &alt = opList[i];
         bool spatialCriterionOK = false;
         if (direction == PJ_FWD) {
-            if (coord.xyzt.x >= alt.minxSrc && coord.xyzt.y >= alt.minySrc &&
-                coord.xyzt.x <= alt.maxxSrc && coord.xyzt.y <= alt.maxySrc) {
+            if (alt.pjSrcGeocentricToLonLat) {
+                if (alt.minxSrc == -180 && alt.minySrc == -90 &&
+                    alt.maxxSrc == 180 && alt.maxySrc == 90) {
+                    spatialCriterionOK = true;
+                } else {
+                    PJ_COORD tmp = coord;
+                    pj_fwd4d(tmp, alt.pjSrcGeocentricToLonLat);
+                    if (tmp.xyzt.x >= alt.minxSrc &&
+                        tmp.xyzt.y >= alt.minySrc &&
+                        tmp.xyzt.x <= alt.maxxSrc &&
+                        tmp.xyzt.y <= alt.maxySrc) {
+                        spatialCriterionOK = true;
+                    }
+                }
+            } else if (coord.xyzt.x >= alt.minxSrc &&
+                       coord.xyzt.y >= alt.minySrc &&
+                       coord.xyzt.x <= alt.maxxSrc &&
+                       coord.xyzt.y <= alt.maxySrc) {
                 spatialCriterionOK = true;
             } else if (alt.srcIsLonLatDegree && coord.xyzt.y >= alt.minySrc &&
                        coord.xyzt.y <= alt.maxySrc) {
@@ -264,8 +280,24 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
                 }
             }
         } else {
-            if (coord.xyzt.x >= alt.minxDst && coord.xyzt.y >= alt.minyDst &&
-                coord.xyzt.x <= alt.maxxDst && coord.xyzt.y <= alt.maxyDst) {
+            if (alt.pjDstGeocentricToLonLat) {
+                if (alt.minxDst == -180 && alt.minyDst == -90 &&
+                    alt.maxxDst == 180 && alt.maxyDst == 90) {
+                    spatialCriterionOK = true;
+                } else {
+                    PJ_COORD tmp = coord;
+                    pj_fwd4d(tmp, alt.pjDstGeocentricToLonLat);
+                    if (tmp.xyzt.x >= alt.minxDst &&
+                        tmp.xyzt.y >= alt.minyDst &&
+                        tmp.xyzt.x <= alt.maxxDst &&
+                        tmp.xyzt.y <= alt.maxyDst) {
+                        spatialCriterionOK = true;
+                    }
+                }
+            } else if (coord.xyzt.x >= alt.minxDst &&
+                       coord.xyzt.y >= alt.minyDst &&
+                       coord.xyzt.x <= alt.maxxDst &&
+                       coord.xyzt.y <= alt.maxyDst) {
                 spatialCriterionOK = true;
             } else if (alt.dstIsLonLatDegree && coord.xyzt.y >= alt.minyDst &&
                        coord.xyzt.y <= alt.maxyDst) {
@@ -320,6 +352,14 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
 }
 
 //! @cond Doxygen_Suppress
+/**************************************************************************************/
+PJCoordOperation::~PJCoordOperation() {
+    /**************************************************************************************/
+    proj_destroy(pj);
+    proj_destroy(pjSrcGeocentricToLonLat);
+    proj_destroy(pjDstGeocentricToLonLat);
+}
+
 /**************************************************************************************/
 bool PJCoordOperation::isInstantiable() const {
     /**************************************************************************************/
@@ -1659,11 +1699,11 @@ static void reproject_bbox(PJ *pjGeogToCrs, double west_lon, double south_lat,
 }
 
 /*****************************************************************************/
-static PJ *add_coord_op_to_list(int idxInOriginalList, PJ *op, double west_lon,
-                                double south_lat, double east_lon,
-                                double north_lat, PJ *pjGeogToSrc,
-                                PJ *pjGeogToDst, bool isOffshore,
-                                std::vector<PJCoordOperation> &altCoordOps) {
+static PJ *add_coord_op_to_list(
+    int idxInOriginalList, PJ *op, double west_lon, double south_lat,
+    double east_lon, double north_lat, PJ *pjGeogToSrc, PJ *pjGeogToDst,
+    const PJ *pjSrcGeocentricToLonLat, const PJ *pjDstGeocentricToLonLat,
+    bool isOffshore, std::vector<PJCoordOperation> &altCoordOps) {
     /*****************************************************************************/
 
     double minxSrc;
@@ -1675,19 +1715,35 @@ static PJ *add_coord_op_to_list(int idxInOriginalList, PJ *op, double west_lon,
     double maxxDst;
     double maxyDst;
 
-    reproject_bbox(pjGeogToSrc, west_lon, south_lat, east_lon, north_lat,
-                   minxSrc, minySrc, maxxSrc, maxySrc);
-    reproject_bbox(pjGeogToDst, west_lon, south_lat, east_lon, north_lat,
-                   minxDst, minyDst, maxxDst, maxyDst);
+    if (pjSrcGeocentricToLonLat) {
+        minxSrc = west_lon;
+        minySrc = south_lat;
+        maxxSrc = east_lon;
+        maxySrc = north_lat;
+    } else {
+        reproject_bbox(pjGeogToSrc, west_lon, south_lat, east_lon, north_lat,
+                       minxSrc, minySrc, maxxSrc, maxySrc);
+    }
+
+    if (pjDstGeocentricToLonLat) {
+        minxDst = west_lon;
+        minyDst = south_lat;
+        maxxDst = east_lon;
+        maxyDst = north_lat;
+    } else {
+        reproject_bbox(pjGeogToDst, west_lon, south_lat, east_lon, north_lat,
+                       minxDst, minyDst, maxxDst, maxyDst);
+    }
 
     if (minxSrc <= maxxSrc && minxDst <= maxxDst) {
         const char *c_name = proj_get_name(op);
         std::string name(c_name ? c_name : "");
 
         const double accuracy = proj_coordoperation_get_accuracy(op->ctx, op);
-        altCoordOps.emplace_back(idxInOriginalList, minxSrc, minySrc, maxxSrc,
-                                 maxySrc, minxDst, minyDst, maxxDst, maxyDst,
-                                 op, name, accuracy, isOffshore);
+        altCoordOps.emplace_back(
+            idxInOriginalList, minxSrc, minySrc, maxxSrc, maxySrc, minxDst,
+            minyDst, maxxDst, maxyDst, op, name, accuracy, isOffshore,
+            pjSrcGeocentricToLonLat, pjDstGeocentricToLonLat);
         op = nullptr;
     }
     return op;
@@ -1799,6 +1855,57 @@ static PJ *create_operation_to_geog_crs(PJ_CONTEXT *ctx, const PJ *crs) {
 }
 
 /*****************************************************************************/
+static PJ *create_operation_geocentric_crs_to_geog_crs(PJ_CONTEXT *ctx,
+                                                       const PJ *geocentric_crs)
+/*****************************************************************************/
+{
+    assert(proj_get_type(geocentric_crs) == PJ_TYPE_GEOCENTRIC_CRS);
+
+    auto datum = proj_crs_get_datum_forced(ctx, geocentric_crs);
+    assert(datum);
+    auto cs = proj_create_ellipsoidal_2D_cs(ctx, PJ_ELLPS2D_LONGITUDE_LATITUDE,
+                                            nullptr, 0);
+    auto ellps = proj_get_ellipsoid(ctx, datum);
+    proj_destroy(datum);
+    double semi_major_metre = 0;
+    double inv_flattening = 0;
+    proj_ellipsoid_get_parameters(ctx, ellps, &semi_major_metre, nullptr,
+                                  nullptr, &inv_flattening);
+    // It is critical to set the prime meridian to 0
+    auto lon_lat_crs = proj_create_geographic_crs(
+        ctx, "unnamed crs", "unnamed datum", proj_get_name(ellps),
+        semi_major_metre, inv_flattening, "Reference prime meridian", 0,
+        nullptr, 0, cs);
+    proj_destroy(ellps);
+    proj_destroy(cs);
+
+    // Create the transformation from this geocentric CRS to the lon-lat one
+    auto operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
+    proj_operation_factory_context_set_spatial_criterion(
+        ctx, operation_ctx, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+    proj_operation_factory_context_set_grid_availability_use(
+        ctx, operation_ctx,
+        PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
+    auto op_list =
+        proj_create_operations(ctx, geocentric_crs, lon_lat_crs, operation_ctx);
+    proj_operation_factory_context_destroy(operation_ctx);
+    proj_destroy(lon_lat_crs);
+
+    const int nOpCount = op_list == nullptr ? 0 : proj_list_get_count(op_list);
+    if (nOpCount != 1) {
+        proj_context_log_debug(ctx, "Cannot compute transformation from "
+                                    "geocentric CRS to geographic CRS");
+        proj_list_destroy(op_list);
+        return nullptr;
+    }
+
+    auto op = proj_list_get(ctx, op_list, 0);
+    assert(op);
+    proj_list_destroy(op_list);
+    return op;
+}
+
+/*****************************************************************************/
 PJ *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *source_crs,
                            const char *target_crs, PJ_AREA *area) {
     /******************************************************************************
@@ -1846,21 +1953,46 @@ pj_create_prepared_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
                               const PJ *target_crs, PJ_OBJ_LIST *op_list)
 /*****************************************************************************/
 {
-    auto pjGeogToSrc = create_operation_to_geog_crs(ctx, source_crs);
-    if (!pjGeogToSrc) {
-        proj_context_log_debug(ctx,
-                               "Cannot create transformation from geographic "
-                               "CRS of source CRS to source CRS");
-        return {};
+    PJ *pjGeogToSrc = nullptr;
+    PJ *pjSrcGeocentricToLonLat = nullptr;
+    if (proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS) {
+        pjSrcGeocentricToLonLat =
+            create_operation_geocentric_crs_to_geog_crs(ctx, source_crs);
+        if (!pjSrcGeocentricToLonLat) {
+            // shouldn't happen
+            return {};
+        }
+    } else {
+        pjGeogToSrc = create_operation_to_geog_crs(ctx, source_crs);
+        if (!pjGeogToSrc) {
+            proj_context_log_debug(
+                ctx, "Cannot create transformation from geographic "
+                     "CRS of source CRS to source CRS");
+            return {};
+        }
     }
 
-    auto pjGeogToDst = create_operation_to_geog_crs(ctx, target_crs);
-    if (!pjGeogToDst) {
-        proj_context_log_debug(ctx,
-                               "Cannot create transformation from geographic "
-                               "CRS of target CRS to target CRS");
-        proj_destroy(pjGeogToSrc);
-        return {};
+    PJ *pjGeogToDst = nullptr;
+    PJ *pjDstGeocentricToLonLat = nullptr;
+    if (proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS) {
+        pjDstGeocentricToLonLat =
+            create_operation_geocentric_crs_to_geog_crs(ctx, target_crs);
+        if (!pjDstGeocentricToLonLat) {
+            // shouldn't happen
+            proj_destroy(pjSrcGeocentricToLonLat);
+            proj_destroy(pjGeogToSrc);
+            return {};
+        }
+    } else {
+        pjGeogToDst = create_operation_to_geog_crs(ctx, target_crs);
+        if (!pjGeogToDst) {
+            proj_context_log_debug(
+                ctx, "Cannot create transformation from geographic "
+                     "CRS of target CRS to target CRS");
+            proj_destroy(pjSrcGeocentricToLonLat);
+            proj_destroy(pjGeogToSrc);
+            return {};
+        }
     }
 
     try {
@@ -1888,18 +2020,21 @@ pj_create_prepared_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
 
             const bool isOffshore = areaName && strstr(areaName, "- offshore");
             if (west_lon <= east_lon) {
-                op = add_coord_op_to_list(i, op, west_lon, south_lat, east_lon,
-                                          north_lat, pjGeogToSrc, pjGeogToDst,
-                                          isOffshore, preparedOpList);
+                op = add_coord_op_to_list(
+                    i, op, west_lon, south_lat, east_lon, north_lat,
+                    pjGeogToSrc, pjGeogToDst, pjSrcGeocentricToLonLat,
+                    pjDstGeocentricToLonLat, isOffshore, preparedOpList);
             } else {
                 auto op_clone = proj_clone(ctx, op);
 
-                op = add_coord_op_to_list(i, op, west_lon, south_lat, 180,
-                                          north_lat, pjGeogToSrc, pjGeogToDst,
-                                          isOffshore, preparedOpList);
+                op = add_coord_op_to_list(
+                    i, op, west_lon, south_lat, 180, north_lat, pjGeogToSrc,
+                    pjGeogToDst, pjSrcGeocentricToLonLat,
+                    pjDstGeocentricToLonLat, isOffshore, preparedOpList);
                 op_clone = add_coord_op_to_list(
                     i, op_clone, -180, south_lat, east_lon, north_lat,
-                    pjGeogToSrc, pjGeogToDst, isOffshore, preparedOpList);
+                    pjGeogToSrc, pjGeogToDst, pjSrcGeocentricToLonLat,
+                    pjDstGeocentricToLonLat, isOffshore, preparedOpList);
                 proj_destroy(op_clone);
             }
 
@@ -1908,10 +2043,14 @@ pj_create_prepared_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
 
         proj_destroy(pjGeogToSrc);
         proj_destroy(pjGeogToDst);
+        proj_destroy(pjSrcGeocentricToLonLat);
+        proj_destroy(pjDstGeocentricToLonLat);
         return preparedOpList;
     } catch (const std::exception &) {
         proj_destroy(pjGeogToSrc);
         proj_destroy(pjGeogToDst);
+        proj_destroy(pjSrcGeocentricToLonLat);
+        proj_destroy(pjDstGeocentricToLonLat);
         return {};
     }
 }
@@ -2070,13 +2209,10 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
     }
 
     const auto backup_errno = proj_context_errno(ctx);
-    if ((P == nullptr ||
-         (op_count == 1 &&
-          (!mayNeedToReRunWithDiscardMissing ||
-           errorIfBestTransformationNotAvailable ||
-           singleOpIsInstanciable == static_cast<int>(true))) ||
-         proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
-         proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS)) {
+    if (P == nullptr ||
+        (op_count == 1 && (!mayNeedToReRunWithDiscardMissing ||
+                           errorIfBestTransformationNotAvailable ||
+                           singleOpIsInstanciable == static_cast<int>(true)))) {
         proj_list_destroy(op_list);
         ctx->forceOver = false;
 
@@ -2835,13 +2971,12 @@ static bool isSpecialCaseForWGS84_to_GDA2020(const std::string &opName) {
     return opName.find("GDA2020 to WGS 84 (2)") != std::string::npos;
 }
 
-PJCoordOperation::PJCoordOperation(int idxInOriginalListIn, double minxSrcIn,
-                                   double minySrcIn, double maxxSrcIn,
-                                   double maxySrcIn, double minxDstIn,
-                                   double minyDstIn, double maxxDstIn,
-                                   double maxyDstIn, PJ *pjIn,
-                                   const std::string &nameIn, double accuracyIn,
-                                   bool isOffshoreIn)
+PJCoordOperation::PJCoordOperation(
+    int idxInOriginalListIn, double minxSrcIn, double minySrcIn,
+    double maxxSrcIn, double maxySrcIn, double minxDstIn, double minyDstIn,
+    double maxxDstIn, double maxyDstIn, PJ *pjIn, const std::string &nameIn,
+    double accuracyIn, bool isOffshoreIn, const PJ *pjSrcGeocentricToLonLatIn,
+    const PJ *pjDstGeocentricToLonLatIn)
     : idxInOriginalList(idxInOriginalListIn), minxSrc(minxSrcIn),
       minySrc(minySrcIn), maxxSrc(maxxSrcIn), maxySrc(maxySrcIn),
       minxDst(minxDstIn), minyDst(minyDstIn), maxxDst(maxxDstIn),
@@ -2849,7 +2984,15 @@ PJCoordOperation::PJCoordOperation(int idxInOriginalListIn, double minxSrcIn,
       isOffshore(isOffshoreIn),
       isPriorityOp(isSpecialCaseForNAD83_to_NAD83HARN(name) ||
                    isSpecialCaseForGDA94_to_WGS84(name) ||
-                   isSpecialCaseForWGS84_to_GDA2020(name)) {
+                   isSpecialCaseForWGS84_to_GDA2020(name)),
+      pjSrcGeocentricToLonLat(pjSrcGeocentricToLonLatIn
+                                  ? proj_clone(pjSrcGeocentricToLonLatIn->ctx,
+                                               pjSrcGeocentricToLonLatIn)
+                                  : nullptr),
+      pjDstGeocentricToLonLat(pjDstGeocentricToLonLatIn
+                                  ? proj_clone(pjDstGeocentricToLonLatIn->ctx,
+                                               pjDstGeocentricToLonLatIn)
+                                  : nullptr) {
     const auto IsLonLatOrLatLon = [](const PJ *crs, bool &isLonLatDegreeOut,
                                      bool &isLatLonDegreeOut) {
         const auto eType = proj_get_type(crs);

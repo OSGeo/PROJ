@@ -610,6 +610,24 @@ program abnormally terminated
 Test cs2cs grid missing with @gridname
 49dN	2dE 0.000
 ##############################################################
+Test cs2cs geographic -> geocentric using BETA2007.gsb grid
+4003461.55	705832.08 4898267.79
+##############################################################
+Test cs2cs geocentric -> geographic using BETA2007.gsb grid
+50d30'N	10dE -0.001
+##############################################################
+Test cs2cs geographic -> geocentric, normally using BETA2007.gsb grid but missing
+4003461.37	705832.04 4898267.94
+##############################################################
+Test cs2cs geocentric -> geographic, normally using BETA2007.gsb grid but missing
+50d30'N	10dE -0.002
+##############################################################
+Test cs2cs geographic -> geocentric outside BETA2007.gsb grid
+4189881.02	146313.87 4790558.75
+##############################################################
+Test cs2cs geocentric -> geographic outside BETA2007.gsb grid
+49dN	2dE 0.002
+##############################################################
 Test Similarity Transformation (example from EPSG Guidance Note 7.2)
 300000 4500000	299905.060	4499796.515 0.000
 ##############################################################
