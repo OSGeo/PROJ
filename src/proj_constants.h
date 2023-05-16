@@ -47,6 +47,10 @@
     "Lambert Conic Conformal (1SP)"
 #define EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP 9801
 
+#define EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_VARIANT_B                 \
+    "Lambert Conic Conformal (1SP variant B)"
+#define EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_VARIANT_B 1102
+
 #define EPSG_NAME_METHOD_NZMG "New Zealand Map Grid"
 #define EPSG_CODE_METHOD_NZMG 9811
 

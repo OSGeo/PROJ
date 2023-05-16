@@ -470,9 +470,13 @@ BEGIN
     # the source/target CRS names from the transformation name.
     # Method EPSG:9666 'P6 I=J+90 seismic bin grid coordinate operation' requires more than 7 parameters. Not supported by PROJ for now
     # Idem for EPSG:1049 'P6 I=J-90 seismic bin grid coordinate operation'
-    # EPSG:1102 is "Lambert Conic Conformal (1SP variant B)" and is only used at time of writing for specialized CRS EPSG:9548, "Lyon Turin Ferroviaire 2004 (C)"
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH' AND (coord_op_method_code NOT IN (1068, 1069, 9666, 1049, 1102) OR coord_op_code IN (7812,7813))")
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH' AND (coord_op_method_code NOT IN (1068, 1069, 9666, 1049) OR coord_op_code IN (7812,7813))")
     for (code, name, method_code, method_name, deprecated, remarks) in proj_db_cursor.fetchall():
+        # If skipping some projection methods is needed
+        if method_code in ():
+            print(f"Skipping conversion {code}, {name}, {method_code}, {method_name} as the map projection is not handled")
+            continue
+
         expected_order = 1
         max_n_params = 7
         param_auth_name = [None for i in range(max_n_params)]
@@ -551,17 +555,17 @@ def fill_projected_crs(proj_db_cursor):
     #proj_db_cursor.execute(
     #    "INSERT INTO crs SELECT 'EPSG', coord_ref_sys_code, coord_ref_sys_kind FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('projected')")
     #proj_db_cursor.execute("INSERT INTO projected_crs SELECT 'EPSG', coord_ref_sys_code, coord_ref_sys_name, 'EPSG', coord_sys_code, 'EPSG', base_crs_code, 'EPSG', projection_conv_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('projected')")
-    proj_db_cursor.execute("SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, ?, coord_sys_code, ?, base_crs_code, ?, projection_conv_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('projected')", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
-    for row in proj_db_cursor.fetchall():
-        (auth_name, code, name, description, coordinate_system_auth_name, coordinate_system_code, geodetic_crs_auth_name, geodetic_crs_code, conversion_auth_name, conversion_code, deprecated) = row
-        if code == 9549: # "LTF2004(C)"
-            print('Skipping EPSG:9549 LTF2004(C) as we do not handle yet projection method EPSG:1102 is "Lambert Conic Conformal (1SP variant B)"')
+    proj_db_cursor.execute("SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, ?, coord_sys_code, ?, base_crs_code, ?, projection_conv_code, crs.deprecated, co.coord_op_method_code, com.coord_op_method_name FROM epsg.epsg_coordinatereferencesystem crs LEFT JOIN epsg.epsg_coordoperation co ON crs.projection_conv_code = co.coord_op_code LEFT JOIN epsg.epsg_coordoperationmethod com USING (coord_op_method_code) WHERE coord_ref_sys_kind IN ('projected')", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+    for (auth_name, code, name, description, coordinate_system_auth_name, coordinate_system_code, geodetic_crs_auth_name, geodetic_crs_code, conversion_auth_name, conversion_code, deprecated, coord_op_method_code, coord_op_method_name) in proj_db_cursor.fetchall():
+        # If skipping some projection methods is needed
+        if coord_op_method_code in ():
+            print(f'Skipping EPSG:{code} {name} as we do not handle yet projection method EPSG:{coord_op_method_code} / {coord_op_method_name}')
             continue
         proj_db_cursor.execute("SELECT 1 FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_code = ? AND coord_ref_sys_kind IN ('geographic 2D', 'geographic 3D', 'geocentric')", (geodetic_crs_code,))
         if proj_db_cursor.fetchone():
             #proj_db_cursor.execute("INSERT INTO crs VALUES (?, ?, 'projected')", (EPSG_AUTHORITY, code))
             try:
-                proj_db_cursor.execute("INSERT INTO projected_crs VALUES (?,?,?,?,?,?,?,?,?,?,NULL,?)", row)
+                proj_db_cursor.execute("INSERT INTO projected_crs VALUES (?,?,?,?,?,?,?,?,?,?,NULL,?)", (auth_name, code, name, description, coordinate_system_auth_name, coordinate_system_code, geodetic_crs_auth_name, geodetic_crs_code, conversion_auth_name, conversion_code, deprecated))
             except sqlite3.IntegrityError as e:
                 print(e)
                 print(row)

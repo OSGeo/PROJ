@@ -108,12 +108,12 @@ static const ParamMapping paramLongitudeFalseOrigin = {
     EPSG_CODE_PARAMETER_LONGITUDE_FALSE_ORIGIN, WKT1_CENTRAL_MERIDIAN,
     common::UnitOfMeasure::Type::ANGULAR, lon_0};
 
-static const ParamMapping paramFalseEastingOrigin = {
+static const ParamMapping paramEastingFalseOrigin = {
     EPSG_NAME_PARAMETER_EASTING_FALSE_ORIGIN,
     EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN, WKT1_FALSE_EASTING,
     common::UnitOfMeasure::Type::LINEAR, x_0};
 
-static const ParamMapping paramFalseNorthingOrigin = {
+static const ParamMapping paramNorthingFalseOrigin = {
     EPSG_NAME_PARAMETER_NORTHING_FALSE_ORIGIN,
     EPSG_CODE_PARAMETER_NORTHING_FALSE_ORIGIN, WKT1_FALSE_NORTHING,
     common::UnitOfMeasure::Type::LINEAR, y_0};
@@ -159,7 +159,7 @@ static const ParamMapping *const paramsTPEQD[] = {&paramLatFirstPoint,
 
 static const ParamMapping *const paramsTMG[] = {
     &paramLatitudeFalseOrigin, &paramLongitudeFalseOrigin,
-    &paramFalseEastingOrigin, &paramFalseNorthingOrigin, nullptr};
+    &paramEastingFalseOrigin, &paramNorthingFalseOrigin, nullptr};
 
 static const ParamMapping paramLatFalseOriginLatOfCenter = {
     EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN,
@@ -176,17 +176,40 @@ static const ParamMapping *const paramsAEA[] = {
     &paramLongFalseOriginLongOfCenter,
     &paramLatitude1stStdParallel,
     &paramLatitude2ndStdParallel,
-    &paramFalseEastingOrigin,
-    &paramFalseNorthingOrigin,
+    &paramEastingFalseOrigin,
+    &paramNorthingFalseOrigin,
     nullptr};
+
+static const ParamMapping paramLatitudeNatOriginLCC1SP = {
+    EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+    EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, WKT1_LATITUDE_OF_ORIGIN,
+    common::UnitOfMeasure::Type::ANGULAR, lat_1};
+
+static const ParamMapping *const paramsLCC1SP[] = {
+    &paramLatitudeNatOriginLCC1SP,
+    &paramLongitudeNatOrigin,
+    &paramScaleFactor,
+    &paramFalseEasting,
+    &paramFalseNorthing,
+    nullptr};
+
+static const ParamMapping *const paramsLCC1SPVariantB[] = {
+    &paramLatitudeNatOriginLCC1SP,
+    &paramScaleFactor,
+    &paramLatitudeFalseOrigin,
+    &paramLongitudeFalseOrigin,
+    &paramEastingFalseOrigin,
+    &paramNorthingFalseOrigin,
+    nullptr,
+};
 
 static const ParamMapping *const paramsLCC2SP[] = {
     &paramLatitudeFalseOrigin,
     &paramLongitudeFalseOrigin,
     &paramLatitude1stStdParallel,
     &paramLatitude2ndStdParallel,
-    &paramFalseEastingOrigin,
-    &paramFalseNorthingOrigin,
+    &paramEastingFalseOrigin,
+    &paramNorthingFalseOrigin,
     nullptr,
 };
 
@@ -198,7 +221,7 @@ static const ParamMapping paramEllipsoidScaleFactor = {
 static const ParamMapping *const paramsLCC2SPMichigan[] = {
     &paramLatitudeFalseOrigin,    &paramLongitudeFalseOrigin,
     &paramLatitude1stStdParallel, &paramLatitude2ndStdParallel,
-    &paramFalseEastingOrigin,     &paramFalseNorthingOrigin,
+    &paramEastingFalseOrigin,     &paramNorthingFalseOrigin,
     &paramEllipsoidScaleFactor,   nullptr,
 };
 
@@ -589,20 +612,12 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
      EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
-     "Lambert_Conformal_Conic_1SP", "lcc", nullptr,
-     []() {
-         static const ParamMapping paramLatLCC1SP = {
-             EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
-             EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
-             WKT1_LATITUDE_OF_ORIGIN, common::UnitOfMeasure::Type::ANGULAR,
-             lat_1};
+     "Lambert_Conformal_Conic_1SP", "lcc", nullptr, paramsLCC1SP},
 
-         static const ParamMapping *const x[] = {
-             &paramLatLCC1SP,    &paramLongitudeNatOrigin, &paramScaleFactor,
-             &paramFalseEasting, &paramFalseNorthing,      nullptr,
-         };
-         return x;
-     }()},
+    {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_VARIANT_B,
+     EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_VARIANT_B,
+     nullptr, // no mapping to WKT1_GDAL
+     "lcc", nullptr, paramsLCC1SPVariantB},
 
     {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_2SP,
      EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP,

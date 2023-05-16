@@ -593,6 +593,40 @@ ConversionNNPtr Conversion::createLambertConicConformal_1SP(
 
 /** \brief Instantiate a conversion based on the
  * <a href="../../../operations/projections/lcc.html">
+ * Lambert Conic Conformal 1SP Variant B</a> projection method.
+ *
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_1102/index.html">
+ * EPSG:1102</a>.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeNatOrigin See \ref center_latitude
+ * @param scale See \ref scale
+ * @param latitudeFalseOrigin See \ref latitude_false_origin
+ * @param longitudeFalseOrigin See \ref longitude_false_origin
+ * @param eastingFalseOrigin See \ref easting_false_origin
+ * @param northingFalseOrigin See \ref northing_false_origin
+ * @return a new Conversion.
+ * @since 9.2.1
+ */
+ConversionNNPtr Conversion::createLambertConicConformal_1SP_VariantB(
+    const util::PropertyMap &properties, const common::Angle &latitudeNatOrigin,
+    const common::Scale &scale, const common::Angle &latitudeFalseOrigin,
+    const common::Angle &longitudeFalseOrigin,
+    const common::Length &eastingFalseOrigin,
+    const common::Length &northingFalseOrigin) {
+    return create(properties,
+                  EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_VARIANT_B,
+                  createParams(latitudeNatOrigin, scale, latitudeFalseOrigin,
+                               longitudeFalseOrigin, eastingFalseOrigin,
+                               northingFalseOrigin));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a conversion based on the
+ * <a href="../../../operations/projections/lcc.html">
  * Lambert Conic Conformal 2SP</a> projection method.
  *
  * This method is defined as

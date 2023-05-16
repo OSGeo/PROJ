@@ -5310,6 +5310,43 @@ PJ *proj_create_conversion_lambert_conic_conformal_1sp(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a ProjectedCRS with a conversion based on the Lambert
+ * Conic Conformal (1SP Variant B) projection method.
+ *
+ * See
+ * osgeo::proj::operation::Conversion::createLambertConicConformal_1SP_VariantB().
+ *
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
+ * @since 9.2.1
+ */
+PJ *proj_create_conversion_lambert_conic_conformal_1sp_variant_b(
+    PJ_CONTEXT *ctx, double latitude_nat_origin, double scale,
+    double latitude_false_origin, double longitude_false_origin,
+    double easting_false_origin, double northing_false_origin,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor) {
+    SANITIZE_CTX(ctx);
+    try {
+        UnitOfMeasure linearUnit(
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
+        UnitOfMeasure angUnit(
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
+        auto conv = Conversion::createLambertConicConformal_1SP_VariantB(
+            PropertyMap(), Angle(latitude_nat_origin, angUnit), Scale(scale),
+            Angle(latitude_false_origin, angUnit),
+            Angle(longitude_false_origin, angUnit),
+            Length(easting_false_origin, linearUnit),
+            Length(northing_false_origin, linearUnit));
+        return proj_create_conversion(ctx, conv);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Lambert
  * Conic Conformal (2SP) projection method.
  *
  * See osgeo::proj::operation::Conversion::createLambertConicConformal_2SP().
