@@ -121,6 +121,16 @@ VALUES
 ('gr2000g.gri','dk_sdfe_gvr2000.tif','gvr2000.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/dk_sdfe_gvr2000.tif',1,1,NULL),
 ('ggeoid16.gri','dk_sdfe_gvr2016.tif','gvr2016.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/dk_sdfe_gvr2016.tif',1,1,NULL),
 
+-- dk_sdfi - Danish Agency for Data Supply and Infrastructure
+-- Denmark mainland
+('gs_2022.gsb','dk_sdfi_gs_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_gs_2022.tif',1,1,NULL),
+('gsb_2022.gsb','dk_sdfi_gsb_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_gsb_2022.tif',1,1,NULL),
+('kk_2022.gsb','dk_sdfi_kk_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_kk_2022.tif',1,1,NULL),
+('os_2022.gsb','dk_sdfi_os_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_os_2022.tif',1,1,NULL),
+('s34j_2022.gsb','dk_sdfi_s34j_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_s34j_2022.tif',1,1,NULL),
+('s34s_2022.gsb','dk_sdfi_s34s_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_s34s_2022.tif',1,1,NULL),
+('s45b_2022.gsb','dk_sdfi_s45b_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_s45b_2022.tif',1,1,NULL),
+
 -- es_cat_icgc - Institut Cartogràfic i Geològic de Catalunya (ICGC)
 ('100800401.gsb','es_cat_icgc_100800401.tif','100800401.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_cat_icgc_100800401.tif',1,1,NULL),
 
