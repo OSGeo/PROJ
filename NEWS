@@ -1,3 +1,59 @@
+9.2.1 Release Notes
+-------------------
+
+ Database updates
+ --------
+
+ o Add alias for old ESRI datum/CRS names of EPSG:8353
+   S_JTSK_JTSK03_Krovak_East_North (#3678)
+
+ o Pseudo Mercator now supported with IAU CRS's (#3645)
+
+ o Updated to EPSG 10.088 (#3731)
+
+ Bug fixes
+ ----------
+
+ o Fixed build errors with Cygwin (#3642)
+
+ o PROJ string CRS parser: make sure that PROJ arguments of the rotated
+   string are kept in the WKT representation (#3656)
+
+ o Fix slowness on proj_trans() when doing WGS 84 <--> NAD83 conversions (#3661)
+
+ o vgridshift/gridshift: accept hydroid_height as valid band description (#3675)
+
+ o WKT/PROJJSON: import/export accuracy of ConcatenatedOperation (#3676)
+
+ o Coordinate operation factory: count identified concatenated operations as a
+   single step (#3677)
+
+ o EngineeringCRS: make proj_create_engineering_crs() set a datum name
+   and relax isEquivalentTo() comparisons (#3685)
+
+ o PROJJSON: fix import/export of integer parameter value, and deal with
+   interpolation CRS parameters in conversions (#3695)
+
+ o  CMake: avoid imbalanced cmake_policy push/pop if TIFF or CURL dependency
+    cannot be found (#3697)
+ 
+ o  proj_create_crs_to_crs(): restore transformation selection behaviour
+    of PROJ 9.1 when grids are missing (#3707)
+
+ o  ESRI WKT: improve roundtrip of name and definition for UPS WGS84 CRS (#3720)
+
+ o CRS instanciation from PROJ.4 string: set 'Unknown based on XXXX ellipsoid'
+   datum name when instanciating from known +a, +rf (#3727)
+
+ o  cs2cs / proj_create_crs_to_crs(): fix regression with geocentric CRS (#3729)
+
+ o  proj_trans(): set PROJ_ERR_COORD_TRANSFM_NO_OPERATION error when failing
+    in ONLY_BEST=YES mode (#3730)
+
+ o  tinshift: raise maximum size of JSON file to 100 MB (#3736)
+ 
+
+
 9.2.0 Release Notes
 -------------------
 
