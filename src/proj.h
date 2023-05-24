@@ -175,7 +175,7 @@ extern "C" {
 /* The version numbers should be updated with every release! **/
 #define PROJ_VERSION_MAJOR 9
 #define PROJ_VERSION_MINOR 2
-#define PROJ_VERSION_PATCH 0
+#define PROJ_VERSION_PATCH 1
 
 /* Note: the following 3 defines have been introduced in PROJ 8.0.1 */
 /* Macro to compute a PROJ version number from its components */
