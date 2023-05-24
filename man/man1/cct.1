@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "CCT" "1" "Mar 1, 2023" "9.2.0" "PROJ"
+.TH "CCT" "1" "Jun 1, 2023" "9.2.1" "PROJ"
 .SH NAME
 cct \- Coordinate Conversion and Transformation
 .SH SYNOPSIS
@@ -54,13 +54,13 @@ a proj\-string,
 .IP \(bu 2
 a WKT string,
 .IP \(bu 2
-an object code (like \(dqEPSG:1671\(dq \(dqurn:ogc:def:coordinateOperation:EPSG::1671\(dq),
+an object code (like "EPSG:1671" "urn:ogc:def:coordinateOperation:EPSG::1671"),
 .IP \(bu 2
-an object name. e.g. \(dqITRF2014 to ETRF2014 (1)\(dq. In that case as
+an object name. e.g. "ITRF2014 to ETRF2014 (1)". In that case as
 uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
 .IP \(bu 2
 a OGC URN combining references for concatenated operations
-(e.g. \(dq\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP\(dq)
+(e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
 .IP \(bu 2
 a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.4/projjson.schema.json\fP
 .UNINDENT
@@ -162,7 +162,7 @@ Usage varies with operation.
 \fI\%cct\fP is an acronym meaning \fICoordinate Conversion and Transformation\fP\&.
 .sp
 The acronym refers to definitions given in the OGC 08\-015r2/ISO\-19111
-standard \(dqGeographical Information \-\- Spatial Referencing by Coordinates\(dq,
+standard "Geographical Information \-\- Spatial Referencing by Coordinates",
 which defines two different classes of \fIcoordinate operations\fP:
 .sp
 \fICoordinate Conversions\fP, which are coordinate operations where input
@@ -319,7 +319,7 @@ Coordinate operation referenced through its name
 .sp
 .nf
 .ft C
-$ echo 3541657.3778 948984.2343 5201383.5231 2020.5 | cct \(dqITRF2014 to ETRF2014 (1)\(dq
+$ echo 3541657.3778 948984.2343 5201383.5231 2020.5 | cct "ITRF2014 to ETRF2014 (1)"
 3541657.9112    948983.7503  5201383.2482     2020.5000
 .ft P
 .fi

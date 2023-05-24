@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "GIE" "1" "Mar 1, 2023" "9.2.0" "PROJ"
+.TH "GIE" "1" "Jun 1, 2023" "9.2.1" "PROJ"
 .SH NAME
 gie \- The Geospatial Integrity Investigation Environment
 .SH SYNOPSIS
@@ -343,7 +343,7 @@ expect 12 55 0 0
 .UNINDENT
 .UNINDENT
 .sp
-The default direction is \(dqforward\(dq.
+The default direction is "forward".
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -458,7 +458,7 @@ end with the space character followed by backslash to mark the continuation.
 <gie\-strict>
 # This is a comment. The following line with multiple repeated characters too
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-# A command on several lines must use \(dq \e\(dq continuation
+# A command on several lines must use " \e" continuation
 operation proj=hgridshift +grids=nzgd2kgrid0005.gsb \e
           ellps=GRS80
 tolerance 1 mm
@@ -474,8 +474,8 @@ expect    173                 \-45
 .UNINDENT
 .SH BACKGROUND
 .sp
-More importantly than being an acronym for \(dqGeospatial Integrity Investigation
-Environment\(dq, gie were also the initials, user id, and USGS email address of
+More importantly than being an acronym for "Geospatial Integrity Investigation
+Environment", gie were also the initials, user id, and USGS email address of
 Gerald Ian Evenden (1935\-\-2016), the geospatial visionary, who, already in the
 1980s, started what was to become the PROJ of today.
 .sp
@@ -497,7 +497,7 @@ call like \fBhypot(x,y)\fP\&.
 .sp
 While today, we may have more formally well defined metadata systems (most
 prominent the OGC WKT2 representation), nothing comes close being as easily
-readable (\(dqhuman compatible\(dq) as Gerald\(aqs key\-value system. This system in
+readable ("human compatible") as Gerald\(aqs key\-value system. This system in
 particular, and the PROJ system in general, was Gerald\(aqs great gift to anyone
 using and/or communicating about geodata.
 .sp

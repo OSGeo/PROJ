@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "PROJ" "1" "Mar 1, 2023" "9.2.0" "PROJ"
+.TH "PROJ" "1" "Jun 1, 2023" "9.2.1" "PROJ"
 .SH NAME
 proj \- Cartographic projection filter
 .SH SYNOPSIS
@@ -163,7 +163,7 @@ reciprocal value of \fImult\fP is employed.
 .B \-f <format>
 Where \fIformat\fP is a printf format string to control the form of the output values.
 For inverse projections, the output will be in degrees when this option is
-employed. The default format is \fB\(dq%.2f\(dq\fP for forward projection and DMS for
+employed. The default format is \fB"%.2f"\fP for forward projection and DMS for
 inverse.
 .UNINDENT
 .INDENT 0.0
@@ -211,7 +211,7 @@ portions of the input line are appended to the output line.
 Input geographic data (longitude and latitude) must be in DMS or decimal degrees format and input
 cartesian data must be in units consistent with the ellipsoid major axis or
 sphere radius units. Output geographic coordinates will be in DMS (if the
-\fB\-w\fP switch is not employed) and precise to 0.001\(dq with trailing, zero\-valued
+\fB\-w\fP switch is not employed) and precise to 0.001" with trailing, zero\-valued
 minute\-second fields deleted.
 .SH EXAMPLE
 .sp
@@ -222,7 +222,7 @@ The following script
 .nf
 .ft C
 proj +proj=utm +lon_0=112w +ellps=clrk66 \-r <<EOF
-45d15\(aq33.1\(dq 111.5W
+45d15\(aq33.1" 111.5W
 45d15.551666667N \-111d30
 +45.25919444444 111d30\(aq000w
 EOF

@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "CS2CS" "1" "Mar 1, 2023" "9.2.0" "PROJ"
+.TH "CS2CS" "1" "Jun 1, 2023" "9.2.1" "PROJ"
 .SH NAME
 cs2cs \- Cartographic coordinate system filter
 .SH SYNOPSIS
@@ -53,29 +53,29 @@ a proj\-string,
 .IP \(bu 2
 a WKT string,
 .IP \(bu 2
-an object code (like \(dqEPSG:4326\(dq, \(dqurn:ogc:def:crs:EPSG::4326\(dq,
-\(dqurn:ogc:def:coordinateOperation:EPSG::1671\(dq),
+an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
+"urn:ogc:def:coordinateOperation:EPSG::1671"),
 .IP \(bu 2
-an Object name. e.g \(dqWGS 84\(dq, \(dqWGS 84 / UTM zone 31N\(dq. In that case as
+an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
 uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
 .IP \(bu 2
-a CRS name and a coordinate epoch, separated with \(aq@\(aq. For example \(dq\fI\%ITRF2014@2025.0\fP\(dq. (\fIadded in 9.2\fP)
+a CRS name and a coordinate epoch, separated with \(aq@\(aq. For example "\fI\%ITRF2014@2025.0\fP". (\fIadded in 9.2\fP)
 .IP \(bu 2
 a OGC URN combining references for compound coordinate reference systems
-(e.g \(dq\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP\(dq or custom abbreviated
-syntax \(dqEPSG:2393+5717\(dq),
+(e.g "\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP" or custom abbreviated
+syntax "EPSG:2393+5717"),
 .IP \(bu 2
 a OGC URN combining references for references for projected or derived CRSs
-e.g. for Projected 3D CRS \(dqUTM zone 31N / WGS 84 (3D)\(dq:
-\(dq\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP\(dq
+e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)":
+"\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP"
 (\fIadded in 6.2\fP)
 .IP \(bu 2
 a OGC URN combining references for concatenated operations
-(e.g. \(dq\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP\(dq)
+(e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
 .IP \(bu 2
 a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.4/projjson.schema.json\fP (\fIadded in 6.2\fP)
 .IP \(bu 2
-a compound CRS made from two object names separated with \(dq + \(dq. e.g. \(dqWGS 84 + EGM96 height\(dq (\fIadded in 7.1\fP)
+a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + EGM96 height" (\fIadded in 7.1\fP)
 .UNINDENT
 .sp
 New in version 6.0.0.
@@ -181,7 +181,7 @@ third.
 Where \fIformat\fP is a printf format string to control the form of the output values.
 For inverse projections, the output will be in degrees when this option is
 employed. If a format is specified for inverse projection the output data
-will be in decimal degrees. The default format is \fB\(dq%.2f\(dq\fP for forward
+will be in decimal degrees. The default format is \fB"%.2f"\fP for forward
 projection and DMS for inverse.
 .UNINDENT
 .INDENT 0.0
@@ -211,7 +211,7 @@ New in version 8.0.0.
 .sp
 Specify an area of interest to restrict the results when researching
 coordinate operations between 2 CRS. The area of interest can be specified either
-as a name (e.g \(dqDenmark \- onshore\(dq) or a AUTHORITY:CODE (EPSG:3237)
+as a name (e.g "Denmark \- onshore") or a AUTHORITY:CODE (EPSG:3237)
 .sp
 This option is mutually exclusive with \fI\%\-\-bbox\fP\&.
 .UNINDENT
@@ -288,7 +288,7 @@ This option is mutually exclusive with \fI\%\-\-bbox\fP\&.
 New in version 9.1.
 
 .sp
-\(dqPromote\(dq 2D CRS(s) to their 3D version, where the vertical axis is the
+"Promote" 2D CRS(s) to their 3D version, where the vertical axis is the
 ellipsoidal height in metres, using the ellipsoid of the base geodetic CRS.
 Depending on PROJ versions and the exact nature of the CRS involved,
 especially before PROJ 9.1, a mix of 2D and 3D CRS could lead to 2D or 3D
@@ -352,7 +352,7 @@ The following script
 .nf
 .ft C
 cs2cs +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27 \-r <<EOF
-45°15\(aq33.1\(dq 111.5W
+45°15\(aq33.1" 111.5W
 45d15.551666667N \-111d30
 +45.25919444444 111d30\(aq000w
 EOF
@@ -468,7 +468,7 @@ UTM Zone 31N/WGS 84 with WGS84 ellipsoidal height
 .sp
 .nf
 .ft C
-echo 45 2 0 | cs2cs \(dqWGS 84 + EGM96 height\(dq \(dqWGS 84 / UTM zone 31N\(dq \-\-3d
+echo 45 2 0 | cs2cs "WGS 84 + EGM96 height" "WGS 84 / UTM zone 31N" \-\-3d
 .ft P
 .fi
 .UNINDENT

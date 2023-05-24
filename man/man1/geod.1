@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "GEOD" "1" "Mar 1, 2023" "9.2.0" "PROJ"
+.TH "GEOD" "1" "Jun 1, 2023" "9.2.1" "PROJ"
 .SH NAME
 geod \- Geodesic computations
 .SH SYNOPSIS
@@ -92,7 +92,7 @@ geographic coordinate values. The default mode is DMS.
 .TP
 .B \-F <format>
 Where \fIformat\fP is a printf format string to control the output form of the distance
-value. The default mode is \fB\(dq%.3f\(dq\fP\&.
+value. The default mode is \fB"%.3f"\fP\&.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -141,7 +141,7 @@ azimuthal data must be in decimal degrees or DMS format and
 input distance data must be in units consistent with the ellipsoid
 major axis or sphere radius units. The latitude must lie
 in the range [\-90d,90d]. Output geographic coordinates will be
-in DMS (if the \fI\%\-f\fP switch is not employed) to 0.001\(dq with trailing,
+in DMS (if the \fI\%\-f\fP switch is not employed) to 0.001" with trailing,
 zero\-valued minute\-second fields deleted. Output distance
 data will be in the same units as the ellipsoid or sphere
 radius.
@@ -189,7 +189,7 @@ which gives the results:
 .sp
 .nf
 .ft C
-\-66d31\(aq50.141\(dq 75d39\(aq13.083\(dq 2587.504
+\-66d31\(aq50.141" 75d39\(aq13.083" 2587.504
 .ft P
 .fi
 .UNINDENT
@@ -206,7 +206,7 @@ and determine Portland\(aqs location by azimuth and distance:
 .nf
 .ft C
 geod +ellps=clrk66 +units=us\-mi <<EOF
-42d15\(aqN 71d07\(aqW \-66d31\(aq50.141\(dq 2587.504
+42d15\(aqN 71d07\(aqW \-66d31\(aq50.141" 2587.504
 EOF
 .ft P
 .fi
@@ -219,7 +219,7 @@ which gives:
 .sp
 .nf
 .ft C
-45d31\(aq0.003\(dqN 123d40\(aq59.985\(dqW 75d39\(aq13.094\(dq
+45d31\(aq0.003"N 123d40\(aq59.985"W 75d39\(aq13.094"
 .ft P
 .fi
 .UNINDENT
