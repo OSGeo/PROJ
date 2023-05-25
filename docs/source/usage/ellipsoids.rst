@@ -65,23 +65,29 @@ the ellipsoid into a sphere with features defined by the ellipsoid.
 Ellipsoid spherification parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-.. option:: +R_A=<value>
+.. option:: +R_A
 
    A sphere with the same surface area as the ellipsoid.
 
-.. option:: +R_V=<value>
+.. option:: +R_V
 
    A sphere with the same volume as the ellipsoid.
 
-.. option:: +R_a=<value>
+.. option:: +R_C
+
+   .. versionadded:: 9.3.0
+
+   A sphere whose radius is the radius of the conformal sphere at :math:`\phi_0`.
+
+.. option:: +R_a
 
    A sphere with :math:`R = (a + b)/2` (arithmetic mean).
 
-.. option:: +R_g=<value>
+.. option:: +R_g
 
    A sphere with :math:`R = \sqrt{ab}` (geometric mean).
 
-.. option:: +R_h=<value>
+.. option:: +R_h
 
    A sphere with :math:`R = 2ab/(a+b)` (harmonic mean).
 
