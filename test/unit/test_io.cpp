@@ -10618,6 +10618,23 @@ TEST(io, projparse_cea_ellipsoidal_with_k_0) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_merc_spherical_on_ellipsoid) {
+    std::string input("+proj=merc +R_C +lat_0=1 +lon_0=2 +x_0=3 +y_0=4 "
+                      "+ellps=WGS84 +units=m +no_defs +type=crs");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->derivingConversion()->method()->getEPSGCode(),
+              EPSG_CODE_METHOD_MERCATOR_SPHERICAL);
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        input);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_geos_sweep_x) {
     auto obj = PROJStringParser().createFromPROJString(
         "+proj=geos +sweep=x +h=1 +type=crs");

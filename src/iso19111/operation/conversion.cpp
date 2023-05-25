@@ -1752,6 +1752,38 @@ ConversionNNPtr Conversion::createPopularVisualisationPseudoMercator(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the
+ * <a href="../../../operations/projections/merc.html">
+ * Mercator</a> projection method, using its spherical formulation
+ *
+ * When used with an ellipsoid, the radius used is the radius of the conformal
+ * sphere at centerLat.
+ *
+ * This method is defined as
+ * <a
+ * href="https://epsg.org/coord-operation-method_1026/Mercator-Spherical.html">
+ * EPSG:1026</a>.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude . Usually 0
+ * @param centerLong See \ref center_longitude . Usually 0
+ * @param falseEasting See \ref false_easting . Usually 0
+ * @param falseNorthing See \ref false_northing . Usually 0
+ * @return a new Conversion.
+ * @since 9.3
+ */
+ConversionNNPtr Conversion::createMercatorSpherical(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    return create(
+        properties, EPSG_CODE_METHOD_MERCATOR_SPHERICAL,
+        createParams(centerLat, centerLong, falseEasting, falseNorthing));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a conversion based on the
  * <a href="../../../operations/projections/moll.html">
  * Mollweide</a> projection method.
  *

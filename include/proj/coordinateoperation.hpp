@@ -1292,6 +1292,11 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
         const common::Angle &centerLong, const common::Length &falseEasting,
         const common::Length &falseNorthing);
 
+    PROJ_DLL static ConversionNNPtr createMercatorSpherical(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
     PROJ_DLL static ConversionNNPtr
     createMollweide(const util::PropertyMap &properties,
                     const common::Angle &centerLong,
