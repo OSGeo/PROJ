@@ -15,15 +15,6 @@ matrix:
   include:
 
     - os: linux
-      dist: xenial
-      compiler: gcc
-      services:
-        - docker
-      env:
-        - BUILD_NAME=publish_doc
-        - DETAILS="publish_doc"
-
-    - os: linux
       dist: bionic
       compiler: gcc
       arch: s390x
@@ -49,8 +40,6 @@ install: ./travis/${BUILD_NAME}/install.sh
 
 script:
   - echo "done"
-
-after_success: ./travis/${BUILD_NAME}/after_success.sh
 
 notifications:
   irc:
