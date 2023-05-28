@@ -31,8 +31,3 @@ PROJ
     You can download the source code for PROJ on the :ref:`download section<download>`
     and find links to prepackaged executables in the
     :ref:`installation section<install>`.
-
-    In addition to this website the PROJ documentation is also available in `PDF`_
-    form.
-
-.. _`PDF`: https://raw.githubusercontent.com/OSGeo/proj.4/gh-pages/proj.pdf
