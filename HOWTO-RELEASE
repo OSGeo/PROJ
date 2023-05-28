@@ -182,8 +182,6 @@ See step 1.6 above. Do not rename the archives with RC postfixes.
     :s/^o/*/
 
   - Update download links in `docs/source/download.rst`
-  - Update `$TRAVIS_BRANCH` in `travis\after_success.sh` to new maintenance
-    branch.
 
 
 
@@ -241,13 +239,17 @@ version numbers in the files.
 *Commit changes. Either to master or maintenance branch depending on the nature
 of the release.*
 
-3.2 Disable website deployment when releasing a new non-bugfix version
+3.2 Documentation
 -------------------------------------------------------------------------------
 
-If the previous active version was, let's say, 6.1 and the new version is, let's say, 6.2,
-then checkout 6.1 branch, and in travis/after_success.sh, remove the code
-that causes commits to 6.1 to cause a website refresh, that is remove the
-code under `if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "6.1"; then`.
+HTML and PDF documentation is built using ReadTheDocs, which supports multiple
+versions. Versions are based on branch labels, e.g. "9.2". To modify settings,
+registered users must first log in. To add a version, go to
+https://readthedocs.org/projects/osgeo-proj/versions/ and click "Activate"
+next to the maintenance branch label.
+
+The latest maintenance branch should be set as the "Default version" found at
+https://readthedocs.org/dashboard/osgeo-proj/advanced/
 
 Also edit docs/source/conf.py to change the active branch for documentation
 in the `github_version` variable.
