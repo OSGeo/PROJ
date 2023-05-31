@@ -770,6 +770,9 @@ static const MethodMapping projectionMethodMappings[] = {
                                               // handled manually
      "webmerc", nullptr, paramsNatOrigin},
 
+    {EPSG_NAME_METHOD_MERCATOR_SPHERICAL, EPSG_CODE_METHOD_MERCATOR_SPHERICAL,
+     nullptr, "merc", "R_C", paramsNatOrigin},
+
     {PROJ_WKT2_NAME_METHOD_MOLLWEIDE, 0, "Mollweide", "moll", nullptr,
      paramsLongNatOrigin},
 
@@ -938,6 +941,7 @@ const struct MethodNameCode methodNameCodes[] = {
     METHOD_NAME_CODE(KROVAK),
     METHOD_NAME_CODE(LAMBERT_AZIMUTHAL_EQUAL_AREA),
     METHOD_NAME_CODE(POPULAR_VISUALISATION_PSEUDO_MERCATOR),
+    METHOD_NAME_CODE(MERCATOR_SPHERICAL),
     METHOD_NAME_CODE(MERCATOR_VARIANT_A),
     METHOD_NAME_CODE(MERCATOR_VARIANT_B),
     METHOD_NAME_CODE(OBLIQUE_STEREOGRAPHIC),

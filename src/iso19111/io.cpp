@@ -11180,7 +11180,26 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
                 }
             }
         } else if (hasParamValue(step, "lat_ts")) {
+            if (hasParamValue(step, "R_C") &&
+                !geodCRS->ellipsoid()->isSphere() &&
+                getAngularValue(getParamValue(step, "lat_ts")) != 0) {
+                throw ParsingException("lat_ts != 0 not supported for "
+                                       "spherical Mercator on an ellipsoid");
+            }
             mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
+        } else if (hasParamValue(step, "R_C")) {
+            const auto &k = getParamValueK(step);
+            if (!k.empty() && getNumericValue(k) != 1.0) {
+                if (geodCRS->ellipsoid()->isSphere()) {
+                    mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
+                } else {
+                    throw ParsingException(
+                        "k_0 != 1 not supported for spherical Mercator on an "
+                        "ellipsoid");
+                }
+            } else {
+                mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_SPHERICAL);
+            }
         } else {
             mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
         }

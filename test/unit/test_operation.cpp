@@ -3376,6 +3376,85 @@ TEST(operation, webmerc_import_from_broken_esri_WGS_84_Pseudo_Mercator) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, mercator_spherical_export) {
+    auto conv = Conversion::createMercatorSpherical(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=merc +R_C +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
+              "CONVERSION[\"Mercator (Spherical)\",\n"
+              "    METHOD[\"Mercator (Spherical)\",\n"
+              "        ID[\"EPSG\",1026]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_spherical_import) {
+    auto wkt2 = "PROJCRS[\"unknown\",\n"
+                "    BASEGEOGCRS[\"unknown\",\n"
+                "        DATUM[\"World Geodetic System 1984\",\n"
+                "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+                "                LENGTHUNIT[\"metre\",1]],\n"
+                "            ID[\"EPSG\",6326]],\n"
+                "        PRIMEM[\"Greenwich\",0,\n"
+                "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+                "            ID[\"EPSG\",8901]]],\n"
+                "    CONVERSION[\"unknown\",\n"
+                "        METHOD[\"Mercator (Spherical)\",\n"
+                "            ID[\"EPSG\",1026]],\n"
+                "        PARAMETER[\"Latitude of natural origin\",0,\n"
+                "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+                "            ID[\"EPSG\",8801]],\n"
+                "        PARAMETER[\"Longitude of natural origin\",0,\n"
+                "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+                "            ID[\"EPSG\",8802]],\n"
+                "        PARAMETER[\"False easting\",0,\n"
+                "            LENGTHUNIT[\"metre\",1],\n"
+                "            ID[\"EPSG\",8806]],\n"
+                "        PARAMETER[\"False northing\",0,\n"
+                "            LENGTHUNIT[\"metre\",1],\n"
+                "            ID[\"EPSG\",8807]]],\n"
+                "    CS[Cartesian,2],\n"
+                "        AXIS[\"(E)\",east,\n"
+                "            ORDER[1],\n"
+                "            LENGTHUNIT[\"metre\",1,\n"
+                "                ID[\"EPSG\",9001]]],\n"
+                "        AXIS[\"(N)\",north,\n"
+                "            ORDER[2],\n"
+                "            LENGTHUNIT[\"metre\",1,\n"
+                "                ID[\"EPSG\",9001]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt2);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=merc +R_C +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 "
+              "+units=m +no_defs +type=crs");
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        wkt2);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, mollweide_export) {
 
     auto conv = Conversion::createMollweide(PropertyMap(), Angle(1), Length(2),

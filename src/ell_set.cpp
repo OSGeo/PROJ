@@ -49,16 +49,21 @@ int pj_ellipsoid(PJ *P) {
 
         Spherification parameters supported are:
             R_A, which gives a sphere with the same surface area as the
-    ellipsoid R_V, which gives a sphere with the same volume as the ellipsoid
+            ellipsoid R_V, which gives a sphere with the same volume as the
+    ellipsoid
 
             R_a, which gives a sphere with R = (a + b)/2   (arithmetic mean)
             R_g, which gives a sphere with R = sqrt(a*b)   (geometric mean)
             R_h, which gives a sphere with R = 2*a*b/(a+b) (harmonic mean)
 
             R_lat_a=phi, which gives a sphere with R being the arithmetic mean
-    of of the corresponding ellipsoid at latitude phi. R_lat_g=phi, which gives
-    a sphere with R being the geometric mean of of the corresponding ellipsoid
-    at latitude phi.
+            of of the corresponding ellipsoid at latitude phi.
+            R_lat_g=phi, which gives
+            a sphere with R being the geometric mean of of the corresponding
+    ellipsoid at latitude phi.
+
+            R_C, which gives a sphere with the radius of the conformal sphere
+            at phi0.
 
         If R is given as size parameter, any shape and spherification parameters
         given are ignored.
@@ -349,8 +354,8 @@ static const double RV6 = 55 / 1296.;
 /***************************************************************************************/
 static int ellps_spherification(PJ *P) {
     /***************************************************************************************/
-    const char *keys[] = {"R_A", "R_V",     "R_a",    "R_g",
-                          "R_h", "R_lat_a", "R_lat_g"};
+    const char *keys[] = {"R_A", "R_V",     "R_a",     "R_g",
+                          "R_h", "R_lat_a", "R_lat_g", "R_C"};
     size_t len, i;
     paralist *par = nullptr;
 
@@ -427,6 +432,22 @@ static int ellps_spherification(PJ *P) {
             P->a *= (1. - P->es + t) / (2 * t * sqrt(t));
         else /* geometric */
             P->a *= sqrt(1 - P->es) / t;
+        break;
+
+    /* R_C - a sphere with R = radius of conformal sphere, taken at a
+     * latitude that is phi0 (note: at least for mercator. for other
+     * projection methods, this could be phi1)
+     * Formula from IOGP Publication 373-7-2 – Geomatics Guidance Note number 7,
+     * part 2 1.1 Ellipsoid parameters
+     */
+    case 7:
+        t = sin(P->phi0);
+        t = 1 - P->es * t * t;
+        if (t == 0.) {
+            proj_log_error(P, _("Invalid eccentricity"));
+            return proj_errno_set(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
+        P->a *= sqrt(1 - P->es) / t;
         break;
     }
 
