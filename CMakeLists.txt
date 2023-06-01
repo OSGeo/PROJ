@@ -369,6 +369,7 @@ set(CPACK_SOURCE_IGNORE_FILES
   /autom4te\\.cache
   /CODE_OF_CONDUCT.md
   /CONTRIBUTING.md
+  /disabled_workflows/
   /Dockerfile
   /docs/
   /Doxyfile
