@@ -3,6 +3,52 @@
 News
 ###############################################################################
 
+9.2.1 Release Notes
+++++++++++++++++++++
+*June 1st 2023*
+
+Database updates
+----------------
+
+* Add alias for old ESRI datum/CRS names of EPSG:8353 S_JTSK_JTSK03_Krovak_East_North (`#3678 <https://github.com/OSGeo/PROJ/issues/3678>`_)
+
+* Pseudo Mercator now supported with IAU CRS's (`#3645 <https://github.com/OSGeo/PROJ/issues/3645>`_)
+
+* Updated to EPSG 10.088 (`#3731 <https://github.com/OSGeo/PROJ/issues/3731>`_)
+
+Bug fixes
+---------
+
+* Fixed build errors with Cygwin (`#3642 <https://github.com/OSGeo/PROJ/issues/3642>`_)
+
+* PROJ string CRS parser: make sure that PROJ arguments of the rotated string are kept in the WKT representation (`#3656 <https://github.com/OSGeo/PROJ/issues/3656>`_)
+
+* Fix slowness on ``proj_trans()`` when doing WGS 84 <--> NAD83 conversions (`#3661 <https://github.com/OSGeo/PROJ/issues/3661>`_)
+
+* ``vgridshift``/``gridshift``: accept ``hydroid_height`` as valid band description (`#3675 <https://github.com/OSGeo/PROJ/issues/3675>`_)
+
+* WKT/PROJJSON: import/export accuracy of ConcatenatedOperation (`#3676 <https://github.com/OSGeo/PROJ/issues/3676>`_)
+
+* Coordinate operation factory: count identified concatenated operations as a single step (`#3677 <https://github.com/OSGeo/PROJ/issues/3677>`_)
+
+* EngineeringCRS: make ```proj_create_engineering_crs()``` set a datum name and relax ``isEquivalentTo()`` comparisons (`#3685 <https://github.com/OSGeo/PROJ/issues/3685>`_)
+
+* PROJJSON: fix import/export of integer parameter value, and deal with interpolation CRS parameters in conversions (`#3695 <https://github.com/OSGeo/PROJ/issues/3695>`_)
+
+* CMake: avoid imbalanced cmake_policy push/pop if TIFF or CURL dependency cannot be found (`#3697 <https://github.com/OSGeo/PROJ/issues/3697>`_)
+
+* ``proj_create_crs_to_crs()``: restore transformation selection behaviour of PROJ 9.1 when grids are missing (`#3707 <https://github.com/OSGeo/PROJ/issues/3707>`_)
+
+* ESRI WKT: improve roundtrip of name and definition for UPS WGS84 CRS (`#3720 <https://github.com/OSGeo/PROJ/issues/3720>`_)
+
+* CRS instanciation from PROJ.4 string: set 'Unknown based on XXXX ellipsoid' datum name when instanciating from known +a, +rf (`#3727 <https://github.com/OSGeo/PROJ/issues/3727>`_)
+
+* :program:`cs2cs` / ``proj_create_crs_to_crs()``: fix regression with geocentric CRS (`#3729 <https://github.com/OSGeo/PROJ/issues/3729>`_)
+
+* ``proj_trans()``: set ``PROJ_ERR_COORD_TRANSFM_NO_OPERATION`` error when failing in ``ONLY_BEST=YES`` mode (`#3730 <https://github.com/OSGeo/PROJ/issues/3730>`_)
+
+* ``tinshift``: raise maximum size of JSON file to 100 MB (`#3736 <https://github.com/OSGeo/PROJ/issues/3736>`_)
+
 9.2.0 Release Notes
 ++++++++++++++++++++
 *March 1st 2023*
