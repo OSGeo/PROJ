@@ -82,13 +82,6 @@ else ()
   set (MSVC_TOOLSET_VERSION 0)
   set (MSVC_TOOLSET_MAJOR 0)
 endif ()
-if (CMAKE_CROSSCOMPILING)
-  # Ensure that all "true" (resp. "false") settings are represented by
-  # the same string.
-  set (CMAKE_CROSSCOMPILING_STR "ON")
-else ()
-  set (CMAKE_CROSSCOMPILING_STR "OFF")
-endif ()
 
 # If this is a regular build (PROJECT_SOURCE_DIR == CMAKE_SOURCE_DIR), export legacy files by default
 # Otherwise, this is embedded in another project, only export PROJ target
