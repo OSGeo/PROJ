@@ -124,7 +124,12 @@ int main(int argc, char *argv[]) {
             fclose(f);
             exit(1);
         }
-        fread(buf, nLen, 1, f);
+        if (fread(buf, nLen, 1, f) != 1) {
+            fprintf(stderr, "fread failed.\n");
+            fclose(f);
+            free(buf);
+            exit(1);
+        }
         fclose(f);
         nRet = LLVMFuzzerTestOneInput((const uint8_t *)(buf), nLen);
         free(buf);
