@@ -421,6 +421,13 @@ GeographicBoundingBox::Private::intersection(const Private &otherExtent) const {
             return nullptr;
         }
 
+        // Bail out on longitudes not in [-180,180]. We could probably make
+        // some sense of them, but this check at least avoid potential infinite
+        // recursion.
+        if (oW > 180 || oE < -180) {
+            return nullptr;
+        }
+
         // Return larger of two parts of the multipolygon
         auto inter1 = intersection(Private(oW, oS, 180.0, oN));
         auto inter2 = intersection(Private(-180.0, oS, oE, oN));
