@@ -122,6 +122,11 @@ Central point and azimuth method
     bearing of centre line. If :option:`+alpha` is not given, then
     :option:`+gamma` is used to determine :option:`+alpha`.
 
+    If specifying only :option:`+gamma` without :option:`+alpha`, the maximum
+    value of the absolute value of :option:`+gamma` is a function of the
+    absolute value of :option:`+lat_0`, equal to :math:`90° - |\phi_0|` on a
+    sphere and slightly above on a non-spherical ellipsoid.
+
 .. option:: +lonc=<value>
 
     Longitude of the projection centre. Note that this value is used to
