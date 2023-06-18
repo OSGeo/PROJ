@@ -71,8 +71,8 @@ In the second case, the azimuth is given indirectly by specifying two points on
 the central line, using the options
 :option:`+lat_1`, :option:`+lon_1`, :option:`+lat_2`, and :option:`+lon_2`.
 
-Example: Verify that the Mercator and Transverse Mercator projectios are
-limiting forms of the Oblique Mercator
+Example: Verify that the Mercator, and Transverse Mercator (on a sphere),
+projectios are limiting forms of the Oblique Mercator
 
 ::
 
@@ -80,10 +80,10 @@ limiting forms of the Oblique Mercator
     1335833.89	7326837.71
     $ echo 12 55 | proj +proj=omerc +alpha=90
     1335833.89	7326837.71
-    $ echo 12 55 | proj +proj=tmerc
-    765976.37	6163338.40
-    $ echo 12 55 | proj +proj=omerc +alpha=0
-    765265.92	6162333.82 #Oops, could someone adjust the example to make the answers match? Thanks!
+    $ echo 12 55 | proj +proj=omerc +alpha=0 +R=6400000
+    766869.97 6209742.96
+    $ echo 12 55 | proj +proj=tmerc +R=6400000
+    766869.97 6209742.96
     
 Example: Second case - indirectly given azimuth
 
