@@ -192,18 +192,18 @@ The following script
 
 .. code-block:: console
 
-    proj +proj=utm +lon_0=112w +ellps=clrk66 -r <<EOF
+    proj +proj=utm +zone=12 +ellps=GRS80 -r <<EOF
     45d15'33.1" 111.5W
     45d15.551666667N -111d30
     +45.25919444444 111d30'000w
     EOF
 
-will perform UTM forward projection with a standard UTM central meridian
-nearest longitude 112W. The geographic values of this example are equivalent
+will perform UTM zone 12 forward projection.
+The geographic values of this example are equivalent
 and meant as examples of various forms of DMS input. The x-y output
 data will appear as three lines of::
 
-    460769.27     5011648.45
+    460770.43     5011865.86
 
 .. only:: man
 
