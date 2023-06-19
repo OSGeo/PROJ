@@ -44,7 +44,7 @@ Usage
 The Equal Earth projection has no special options. Here is
 an example of an forward projection on a sphere with a radius of 1 m::
 
-    $ echo 122 47 | src/proj +proj=eqearth +R=1
+    $ echo 122 47 | proj +proj=eqearth +R=1
     1.55    0.89
 
 Parameters
