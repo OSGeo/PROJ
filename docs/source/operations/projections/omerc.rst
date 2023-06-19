@@ -72,7 +72,7 @@ the central line, using the options
 :option:`+lat_1`, :option:`+lon_1`, :option:`+lat_2`, and :option:`+lon_2`.
 
 Example: Verify that the Mercator, and Transverse Mercator (on a sphere),
-projectios are limiting forms of the Oblique Mercator
+projections are limiting forms of the Oblique Mercator
 
 ::
 
