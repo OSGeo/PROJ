@@ -109,8 +109,8 @@ parameters given are ignored.
 Built-in ellipsoid definitions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The ``ellps=xxx`` parameter provides both size and shape for a number of
-built-in ellipsoid definitions.
+The ``+ellps=xxx`` parameter provides both size and shape for a number of
+built-in ellipsoid definitions. Default is GRS80 if not given.
 
     ============   =================================    ============================
     ellps          Parameters                           Datum name
@@ -127,7 +127,7 @@ built-in ellipsoid definitions.
     sphere         a=6370997.0      b=6370997.0         Normal Sphere (r=6370997)
     ============   =================================    ============================
 
-If size and shape are given as ``ellps=xxx``, later shape and size parameters
+If size and shape are given as ``+ellps=xxx``, later shape and size parameters
 are are taken into account as modifiers for the built-in ellipsoid definition.
 
 While this may seem strange, it is in accordance with historical PROJ
