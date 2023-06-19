@@ -76,12 +76,15 @@ projectios are limiting forms of the Oblique Mercator
 
 ::
 
-    $ echo 12 55 | proj +proj=merc
+    $ echo 12 55 | proj +proj=merc +ellps=GRS80
     1335833.89	7326837.71
-    $ echo 12 55 | proj +proj=omerc +alpha=90
+
+    $ echo 12 55 | proj +proj=omerc +alpha=90 +ellps=GRS80
     1335833.89	7326837.71
+
     $ echo 12 55 | proj +proj=omerc +alpha=0 +R=6400000
     766869.97 6209742.96
+
     $ echo 12 55 | proj +proj=tmerc +R=6400000
     766869.97 6209742.96
     
