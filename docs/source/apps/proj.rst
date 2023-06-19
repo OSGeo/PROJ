@@ -199,7 +199,7 @@ The following script
 
 .. code-block:: console
 
-    proj +proj=utm +zone=12 -r <<EOF
+    proj +proj=utm +zone=12 +ellps=GRS80 -r <<EOF
     45d15'33.1" 111.5W
     45d15.551666667N -111d30
     +45.25919444444 111d30'000w
