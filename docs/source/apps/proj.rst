@@ -180,6 +180,12 @@ For ASCII input data the two data values must be in the first two white space
 separated fields and when both input and output are ASCII all trailing
 portions of the input line are appended to the output line.
 
+<!-- Feel free to remove check-list items aren't relevant to your change -->
+
+ - [ ] Closes #xxxx
+ - [ ] Tests added
+ - [ ] Added clear title that can be used to generate release notes
+ - [ ] Fully documented, including updating `docs/source/*.rst` for new API
 Input geographic data (longitude and latitude) must be in DMS or decimal degrees format and input
 cartesian data must be in units consistent with the ellipsoid major axis or
 sphere radius units. Output geographic coordinates will be in DMS (if the
@@ -203,7 +209,7 @@ The geographic values of this example are equivalent
 and meant as examples of various forms of DMS input. The x-y output
 data will appear as three lines of::
 
-    460770.43    5011865.86
+    460770.43     5011865.86
 
 .. only:: man
 
