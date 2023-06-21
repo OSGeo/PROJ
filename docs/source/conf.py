@@ -205,13 +205,13 @@ htm_css_files = [
     'theme_overrides.css',  # override wide tables in RTD theme
 ]
 
+# display "Edit on GitHub"
 html_context = {
     'display_github': True,
-    'theme_vcs_pageview_mode': 'edit',
     'github_user': 'OSGeo',
     'github_repo': 'PROJ',
-    # TODO: edit when switching active branch
-    'github_version': '9.1/docs/source/',
+    'github_version': '9.1',
+    'conf_py_path': '/docs/source/',
 }
 
 # Add any extra paths that contain custom files (such as robots.txt or
