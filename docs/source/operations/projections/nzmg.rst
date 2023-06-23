@@ -1,13 +1,13 @@
 .. _nzmg:
 
 ********************************************************************************
-New Zealand Map Grid
+New Zealand Map Grid (EPSG:27200)
 ********************************************************************************
 
 .. figure:: ./images/nzmg.png
    :width: 500 px
    :align: center
-   :alt:   New Zealand Map Grid
+   :alt:   New Zealand Map Grid (EPSG:27200)
 
    proj-string: ``+proj=nzmg``
 
