@@ -40,7 +40,7 @@ satellite data to be represented accurately as a rectangular array.
 
    proj-string: ``+proj=som +inc_angle=98.303820000243860022 +ps_rev=0.06866666666666667 +asc_lon=64.412896137498847793``
 
-   proj-string: ``+proj=som +inc_angle=1.7157253262878522r +ps_rev=0.06866666666666667 +asc_lon=1.1242171183417042r``
+   (gives same results as: ``+proj=som +inc_angle=1.7157253262878522r +ps_rev=0.06866666666666667 +asc_lon=1.1242171183417042r``)
 
 Parameters
 ################################################################################
