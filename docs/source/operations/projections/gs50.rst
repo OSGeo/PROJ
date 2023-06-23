@@ -1,7 +1,7 @@
 .. _gs50:
 
 ********************************************************************************
-Modified Stereographic of 50 U.S.
+Modified Stereographic of the 50 U.S. states
 ********************************************************************************
 
 +---------------------+----------------------------------------------------------+
@@ -24,7 +24,7 @@ Modified Stereographic of 50 U.S.
 .. figure:: ./images/gs50.png
    :width: 500 px
    :align: center
-   :alt:   Modified Stereographic of 50 U.S.
+   :alt:   Modified Stereographic of the 50 U.S. states
 
    proj-string: ``+proj=gs50``
 
