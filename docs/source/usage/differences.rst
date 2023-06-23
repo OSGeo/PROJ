@@ -37,19 +37,21 @@ PROJ 5, this was handled incorrectly when a custom central meridian was set with
 :option:`+lon_0`. This caused a change in sign on the resulting easting as seen
 below::
 
-    $ proj +proj=merc +lon_0=110
+    $ proj +proj=merc +lon_0=110 <<EOF
     -70 0
-    -20037508.34    0.00
     290 0
+    EOF
     20037508.34     0.00
+    -20037508.34    0.00
 
 From PROJ 5 on onwards, the same input now results in same coordinates, as seen
 from the example below where PROJ 5 is used::
 
-    $ proj +proj=merc +lon_0=110
+    $ proj +proj=merc +lon_0=110 <<EOF
     -70 0
-    -20037508.34    0.00
     290 0
+    EOF
+    -20037508.34     0.00
     -20037508.34    0.00
 
 The change is made on the basis that :math:`\lambda=290^{\circ}` is a full
