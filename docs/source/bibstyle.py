@@ -27,16 +27,17 @@
 ###############################################################################
 
 import re
+
+from pybtex.plugin import register_plugin
 from pybtex.style.formatting.unsrt import Style as UnsrtStyle
 from pybtex.style.labels.alpha import LabelStyle
-from pybtex.plugin import register_plugin
 
 
 class LinkLabelStyle(LabelStyle):
     """Citation label used in text, and before each item in the
     References section"""
 
-    re_char_nums = re.compile(r'^[\d\w]+$')
+    re_char_nums = re.compile(r"^[\d\w]+$")
 
     def format_label(self, entry):
         """Returns BibTeX key for label
@@ -47,23 +48,25 @@ class LinkLabelStyle(LabelStyle):
         label = entry.key
         if not self.re_char_nums.match(label):
             raise KeyError(
-                'BibTeX key must contain only letters and numbers '
-                '(found {0!r})'.format(label))
+                "BibTeX key must contain only letters and numbers "
+                "(found {!r})".format(label)
+            )
         return label
 
 
 class CustomStyle(UnsrtStyle):
     """Citation style in the References section"""
+
     # TODO: Make more Harvard-like, i.e. year after name(s)
 
-    default_label_style = 'linklabel'
-    default_name_style = 'lastfirst'
-    default_sorting_style = 'author_year_title'
+    default_label_style = "linklabel"
+    default_name_style = "lastfirst"
+    default_sorting_style = "author_year_title"
 
     def __init__(self, **kwargs):
-        kwargs['abbreviate_names'] = True
+        kwargs["abbreviate_names"] = True
         UnsrtStyle.__init__(self, **kwargs)
 
 
-register_plugin('pybtex.style.labels', 'linklabel', LinkLabelStyle)
-register_plugin('pybtex.style.formatting', 'customstyle', CustomStyle)
+register_plugin("pybtex.style.labels", "linklabel", LinkLabelStyle)
+register_plugin("pybtex.style.formatting", "customstyle", CustomStyle)
