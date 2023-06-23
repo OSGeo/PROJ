@@ -63,7 +63,9 @@ set_variable_from_rel_or_absolute_path("@PROJECT_VARIANT_NAME@_BINARY_DIRS" "${_
 set (@PROJECT_VARIANT_NAME@_LIBRARIES @PROJECT_VARIANT_NAME@::proj)
 # Read in the exported definition of the library
 include ("${_DIR}/@PROJECT_NAME_LOWER@-targets.cmake")
-include ("${_DIR}/@PROJECT_LEGACY_LOWER@-targets.cmake")
+if (@INSTALL_LEGACY_CMAKE_FILES@)
+  include ("${_DIR}/@PROJECT_LEGACY_LOWER@-targets.cmake")
+endif()
 
 unset (_ROOT)
 unset (_DIR)
