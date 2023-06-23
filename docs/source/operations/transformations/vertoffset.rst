@@ -30,7 +30,7 @@ Examples
 Vertical offset from LN02 height to EVRF2000 height with horizontal coordinates in ETRS89::
 
     +proj=vertoffset +lat_0=46.9166666666666666 +lon_0=8.183333333333334 \
-        +dh=-0.245 +slope_lat=-0.210 +slope_lon=-0.032 +ellps=GRS80
+        +dh=-0.245 +slope_lat=-0.210 +slope_lon=-0.032
 
 Parameters
 ################################################################################
