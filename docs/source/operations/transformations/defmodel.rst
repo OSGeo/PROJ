@@ -62,4 +62,5 @@ Transforming a point with the LINZ NZGD2000 deformation model:
 
 ::
 
-    echo 166.7133850980 -44.5105886020 293.3700 2007.689 | cct +proj=defmodel +model=nzgd2000-20180701.json
+    echo 166.7133850980 -44.5105886020 293.3700 2007.689 | 
+         cct +proj=defmodel +model=nzgd2000-20180701.json
