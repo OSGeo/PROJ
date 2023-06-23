@@ -284,13 +284,15 @@ TEST(metadata, extent_edge_cases) {
         optional<std::string>(), std::vector<GeographicExtentNNPtr>(),
         std::vector<VerticalExtentNNPtr>(), std::vector<TemporalExtentNNPtr>());
 
-    auto A = Extent::createFromBBOX(-180, -90, 180, 90);
-    auto B = Extent::createFromBBOX(180, -90, 180, 90);
-    EXPECT_FALSE(A->intersects(B));
-    EXPECT_FALSE(B->intersects(A));
-    EXPECT_FALSE(A->contains(B));
-    EXPECT_TRUE(A->intersection(B) == nullptr);
-    EXPECT_TRUE(B->intersection(A) == nullptr);
+    {
+        auto A = Extent::createFromBBOX(-180, -90, 180, 90);
+        auto B = Extent::createFromBBOX(180, -90, 180, 90);
+        EXPECT_FALSE(A->intersects(B));
+        EXPECT_FALSE(B->intersects(A));
+        EXPECT_FALSE(A->contains(B));
+        EXPECT_TRUE(A->intersection(B) == nullptr);
+        EXPECT_TRUE(B->intersection(A) == nullptr);
+    }
 
     EXPECT_THROW(Extent::createFromBBOX(
                      std::numeric_limits<double>::quiet_NaN(), -90, 180, 90),
@@ -304,6 +306,20 @@ TEST(metadata, extent_edge_cases) {
     EXPECT_THROW(Extent::createFromBBOX(
                      -180, -90, 180, std::numeric_limits<double>::quiet_NaN()),
                  InvalidValueTypeException);
+
+    // Scenario of https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=57328
+    {
+        auto A = Extent::createFromBBOX(0, 1, 2, 3);
+        auto B = Extent::createFromBBOX(200, -80, -100, 80);
+        EXPECT_TRUE(A->intersection(B) == nullptr);
+        EXPECT_TRUE(B->intersection(A) == nullptr);
+    }
+    {
+        auto A = Extent::createFromBBOX(0, 1, 2, 3);
+        auto B = Extent::createFromBBOX(100, -80, -200, 80);
+        EXPECT_TRUE(A->intersection(B) == nullptr);
+        EXPECT_TRUE(B->intersection(A) == nullptr);
+    }
 }
 
 // ---------------------------------------------------------------------------

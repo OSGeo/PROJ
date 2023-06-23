@@ -8,12 +8,11 @@ and call scripts in this directory.
 The list of issues is in:
 https://bugs.chromium.org/p/oss-fuzz/issues/list?q=proj4
 
-- Build standard_fuzzer in a standalone mode:
-
-    $ g++ -g -std=c++11 standard_fuzzer.cpp -o standard_fuzzer -fvisibility=hidden -DSTANDALONE ../../build/lib/libproj.a -lpthread -lsqlite3 -I../../src -I../../include
+- Build proj_crs_to_crs_fuzzer in a standalone mode with the
+  -DBUILD_TESTING=ON CMake options
 
   Run it:
-    $ PROJ_DATA=../../data ./standard_fuzzer {file_generated_by_oss_fuzz}
+    $ bin/proj_crs_to_crs_fuzzer {file_generated_by_oss_fuzz}
 
 - Run locally OSS Fuzz:
     $ git clone https://github.com/google/oss-fuzz.git
@@ -24,8 +23,8 @@ https://bugs.chromium.org/p/oss-fuzz/issues/list?q=proj4
   Build fuzzers with the address sanitizer (could use undefined, etc...)
     $ python infra/helper.py build_fuzzers --sanitizer address $PROJECT_NAME
 
-  Test a particular fuzzer (replace standard_fuzzer by other fuzzers)
-    $ python infra/helper.py run_fuzzer $PROJECT_NAME standard_fuzzer
+  Test a particular fuzzer (replace proj_crs_to_crs_fuzzer by other fuzzers)
+    $ python infra/helper.py run_fuzzer $PROJECT_NAME proj_crs_to_crs_fuzzer
 
 
 How to deal with issues reported in https://bugs.chromium.org/p/oss-fuzz/issues/list?q=proj4 ?
