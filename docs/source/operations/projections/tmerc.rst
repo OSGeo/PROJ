@@ -64,12 +64,12 @@ The following table gives special cases of the Transverse Mercator projection.
 
 Example using Gauss-Kruger on Germany area (aka EPSG:31467) ::
 
-    $ echo 9 51 | proj +proj=tmerc +lat_0=0 +lon_0=9 +k_0=1 +x_0=3500000 +y_0=0 +ellps=bessel +units=m
+    $ echo 9 51 | proj +proj=tmerc +lon_0=9 +x_0=3500000 +ellps=bessel
     3500000.00  5651505.56
 
 Example using Gauss Boaga on Italy area (EPSG:3004) ::
 
-    $ echo 15 42 | proj +proj=tmerc +lat_0=0 +lon_0=15 +k_0=0.9996 +x_0=2520000 +y_0=0 +ellps=intl +units=m
+    $ echo 15 42 | proj +proj=tmerc +lon_0=15 +k_0=0.9996 +x_0=2520000 +ellps=intl
     2520000.00  4649858.60
 
 Parameters
