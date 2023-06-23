@@ -27,9 +27,9 @@ longitude=90, latitude=0 and the third axis (Z) points to the North pole.
 Usage
 ################################################################################
 
-Convert geodetic coordinates to GRS80 cartesian coordinates::
+Convert geodetic coordinates to cartesian (uses default +ellps=GRS80)::
 
-    echo 17.7562015132 45.3935192042 133.12 2017.8 | cct +proj=cart +ellps=GRS80
+    echo 17.7562015132 45.3935192042 133.12 2017.8 | cct +proj=cart
     4272922.1553   1368283.0597  4518261.3501     2017.8000
 
 Parameters
