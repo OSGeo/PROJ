@@ -45,8 +45,8 @@ NTF to RGF93 transformation using :file:`gr3df97a.tif` grid
     +proj=pipeline
         +step +proj=push +v_3
         +step +proj=cart +ellps=clrk80ign
-        +step +proj=xyzgridshift +grids=gr3df97a.tif +grid_ref=output_crs +ellps=GRS80
-        +step +proj=cart +ellps=GRS80 +inv
+        +step +proj=xyzgridshift +grids=gr3df97a.tif +grid_ref=output_crs
+        +step +proj=cart +inv
         +step +proj=pop +v_3
 
 Parameters
