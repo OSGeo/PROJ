@@ -47,7 +47,7 @@ the reverse direction.
         +step +proj=vgridshift +grids=nlgeo2018.gtx \
         +step +proj=push +v_3 \
         +step +proj=set +v_3=43 \
-        +step +proj=cart +ellps=GRS80 \
+        +step +proj=cart \
         +step +proj=helmert +x=-565.7346 +y=-50.4058 +z=-465.2895 +rx=-0.395023 +ry=0.330776 +rz=-1.876073 +s=-4.07242 +convention=coordinate_frame +exact \
         +step +proj=cart +inv +ellps=bessel \
         +step +proj=hgridshift +inv +grids=rdcorr2018.gsb,null \
