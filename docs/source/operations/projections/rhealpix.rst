@@ -34,10 +34,10 @@ Environment (SCENZGrid).
 Usage
 ###############################################################################
 
-To run a rHEALPix projection on a WGS84 ellipsoidal model, use the following
+To run a rHEALPix projection (on the default GRS80 ellipsoidal model,) use the following
 command::
 
-    proj +proj=rhealpix -f '%.2f' +ellps=WGS84 +south_square=0 +north_square=2  -E << EOF
+    proj +proj=rhealpix +north_square=2 -E << EOF
     > 55 12
     > EOF
     55 12   6115727.86  1553840.13
