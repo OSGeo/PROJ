@@ -35,7 +35,7 @@ degrees from the meridian so that they are oriented with the coastline of the So
 Lines increase from Northwest to Southeast.
 A unit of line is 12 nautical miles. Stations increase from inshore to offshore.
 A unit of station is equal to 4 nautical miles.
-The rotation point is located at line 80, station 60, or 34.15 degrees N, -121.15 degrees W, and is depicted by the red dot in the figure.
+The rotation point is located at line 80, station 60, or 34.15 degrees N, 121.15 degrees W, and is depicted by the red dot in the figure.
 By convention, the ellipsoid of Clarke 1866 is used to calculate CalCOFI coordinates.
 
 The CalCOFI program is a joint research effort by the U.S. National Oceanic and
