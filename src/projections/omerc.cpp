@@ -187,7 +187,7 @@ PJ *PROJECTION(omerc) {
 
         if (fabs(fabs(P->phi0) - M_HALFPI) <= TOL) {
             proj_log_error(
-                P, _("Invalid value for lat_01: |lat_0| should be < 90°"));
+                P, _("Invalid value for lat_0: |lat_0| should be < 90°"));
             return pj_default_destructor(P,
                                          PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
@@ -225,12 +225,25 @@ PJ *PROJECTION(omerc) {
             gamma0 = aasin(P->ctx, sin(alpha_c) / D);
             if (!gam)
                 gamma = alpha_c;
-        } else
-            alpha_c = aasin(P->ctx, D * sin(gamma0 = gamma));
+        } else {
+            gamma0 = gamma;
+            alpha_c = aasin(P->ctx, D * sin(gamma0));
+            if (proj_errno(P) != 0) {
+                // For a sphere, |gamma| must be <= 90 - |lat_0|
+                // On an ellipsoid, this is very slightly above
+                proj_log_error(P,
+                               ("Invalid value for gamma: given lat_0 value, "
+                                "|gamma| should be <= " +
+                                std::to_string(asin(1. / D) / M_PI * 180) + "°")
+                                   .c_str());
+                return pj_default_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            }
+        }
 
         if (fabs(fabs(P->phi0) - M_HALFPI) <= TOL) {
             proj_log_error(
-                P, _("Invalid value for lat_01: |lat_0| should be < 90°"));
+                P, _("Invalid value for lat_0: |lat_0| should be < 90°"));
             return pj_default_destructor(P,
                                          PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
