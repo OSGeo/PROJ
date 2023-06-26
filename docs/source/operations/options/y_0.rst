@@ -1,5 +1,5 @@
 .. option:: +y_0=<value>
 
-    False northing.
+    False northing, in meters.
 
     *Defaults to 0.0.*
