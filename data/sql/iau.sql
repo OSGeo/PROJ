@@ -41,7 +41,7 @@ INSERT INTO conversion VALUES ('IAU_2015',80,'Lambert Azimuthal Equal Area','','
 INSERT INTO usage VALUES('IAU_2015','CONV_80','conversion','IAU_2015',80,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO conversion VALUES ('IAU_2015',85,'Albers Equal Area','','EPSG','9822','Albers Equal Area','EPSG','8821','Latitude of false origin',40,'EPSG',9122,'EPSG','8822','Longitude of false origin',0,'EPSG',9122,'EPSG','8823','Latitude of 1st standard parallel',20,'EPSG',9122,'EPSG','8824','Latitude of 2nd standard parallel',60,'EPSG',9122,'EPSG','8826','Easting at false origin',0,'EPSG',9001,'EPSG','8827','Northing at false origin',0,'EPSG',9001,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','CONV_85','conversion','IAU_2015',85,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO conversion VALUES ('IAU_2015',90,'Popular Visualisation Pseudo-Mercator','','EPSG','1024','Popular Visualisation Pseudo Mercator','EPSG','8801','Latitude of natural origin',0,'EPSG',9122,'EPSG','8802','Longitude of natural origin',0,'EPSG',9122,'EPSG','8806','False easting',0,'EPSG',9001,'EPSG','8807','False northing',0,'EPSG',9001,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO conversion VALUES ('IAU_2015',90,'Mercator','','EPSG','1026','Mercator (Spherical)','EPSG','8801','Latitude of natural origin',0,'EPSG',9122,'EPSG','8802','Longitude of natural origin',0,'EPSG',9122,'EPSG','8806','False easting',0,'EPSG',9001,'EPSG','8807','False northing',0,'EPSG',9001,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','CONV_90','conversion','IAU_2015',90,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 10, 'Sun', 695700000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 1000, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -82,7 +82,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',1080,'Sun (2015) - Sphere / Ocentric
 INSERT INTO usage VALUES('IAU_2015','PCRS_1080','projected_crs','IAU_2015',1080,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',1085,'Sun (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',1000,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_1085','projected_crs','IAU_2015',1085,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',1090,'Sun (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',1000,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',1090,'Sun (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',1000,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_1090','projected_crs','IAU_2015',1090,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 199, 'Mercury', 2440530.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 19900, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -123,7 +123,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',19980,'Mercury (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_19980','projected_crs','IAU_2015',19980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',19985,'Mercury (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',19900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_19985','projected_crs','IAU_2015',19985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',19990,'Mercury (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',19900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',19990,'Mercury (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',19900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_19990','projected_crs','IAU_2015',19990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',19901,'Mercury (2015)',NULL,'IAU_2015',199,2440530.000000,'EPSG','9001',NULL,2438260.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',19901,'Mercury (2015)','','IAU_2015',19901,'IAU_2015',19900,NULL,NULL,NULL,'Hun Kal: 20 W.0',0);
@@ -162,7 +162,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',19981,'Mercury (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_19981','projected_crs','IAU_2015',19981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',19986,'Mercury (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',19901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_19986','projected_crs','IAU_2015',19986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',19991,'Mercury (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',19901,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',19991,'Mercury (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',19901,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_19991','projected_crs','IAU_2015',19991,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',19902,'Mercury (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',19901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_19902','geodetic_crs','IAU_2015',19902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -198,7 +198,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',19982,'Mercury (2015) / Ocentric / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_19982','projected_crs','IAU_2015',19982,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',19987,'Mercury (2015) / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',19902,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_19987','projected_crs','IAU_2015',19987,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',19992,'Mercury (2015) / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',19902,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',19992,'Mercury (2015) / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',19902,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_19992','projected_crs','IAU_2015',19992,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 299, 'Venus', 6051800.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 29900, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -239,7 +239,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',29980,'Venus (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_29980','projected_crs','IAU_2015',29980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',29985,'Venus (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',29900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_29985','projected_crs','IAU_2015',29985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',29990,'Venus (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',29900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',29990,'Venus (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',29900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_29990','projected_crs','IAU_2015',29990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 399, 'Earth', 6378136.600000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 39900, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -280,7 +280,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',39980,'Earth (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_39980','projected_crs','IAU_2015',39980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',39985,'Earth (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',39900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_39985','projected_crs','IAU_2015',39985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',39990,'Earth (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',39900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',39990,'Earth (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',39900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_39990','projected_crs','IAU_2015',39990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',39901,'Earth (2015)',NULL,'IAU_2015',399,6378136.600000,'EPSG','9001',NULL,6356751.900000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',39901,'Earth (2015)','','IAU_2015',39901,'IAU_2015',39900,NULL,NULL,NULL,'Greenwich: 0.0',0);
@@ -319,7 +319,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',39981,'Earth (2015) / Ographic / Lam
 INSERT INTO usage VALUES('IAU_2015','PCRS_39981','projected_crs','IAU_2015',39981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',39986,'Earth (2015) / Ographic / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',39901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_39986','projected_crs','IAU_2015',39986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',39991,'Earth (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',39901,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',39991,'Earth (2015) / Ographic / Mercator',NULL,'EPSG','4400','IAU_2015',39901,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_39991','projected_crs','IAU_2015',39991,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',39902,'Earth (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',39901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_39902','geodetic_crs','IAU_2015',39902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -362,7 +362,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',30180,'Moon (2015) - Sphere / Ocentr
 INSERT INTO usage VALUES('IAU_2015','PCRS_30180','projected_crs','IAU_2015',30180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',30185,'Moon (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',30100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_30185','projected_crs','IAU_2015',30185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',30190,'Moon (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',30100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',30190,'Moon (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',30100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_30190','projected_crs','IAU_2015',30190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 499, 'Mars', 3396190.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 49900, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -403,7 +403,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',49980,'Mars (2015) - Sphere / Ocentr
 INSERT INTO usage VALUES('IAU_2015','PCRS_49980','projected_crs','IAU_2015',49980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',49985,'Mars (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',49900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_49985','projected_crs','IAU_2015',49985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',49990,'Mars (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',49900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',49990,'Mars (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',49900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_49990','projected_crs','IAU_2015',49990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',49901,'Mars (2015)',NULL,'IAU_2015',499,3396190.000000,'EPSG','9001',NULL,3376200.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',49901,'Mars (2015)','','IAU_2015',49901,'IAU_2015',49900,NULL,NULL,NULL,'Viking 1 lander: 47.95137 W',0);
@@ -442,7 +442,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',49981,'Mars (2015) / Ographic / Lamb
 INSERT INTO usage VALUES('IAU_2015','PCRS_49981','projected_crs','IAU_2015',49981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',49986,'Mars (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',49901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_49986','projected_crs','IAU_2015',49986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',49991,'Mars (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',49901,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',49991,'Mars (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',49901,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_49991','projected_crs','IAU_2015',49991,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',49902,'Mars (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',49901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_49902','geodetic_crs','IAU_2015',49902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -478,7 +478,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',49982,'Mars (2015) / Ocentric / Lamb
 INSERT INTO usage VALUES('IAU_2015','PCRS_49982','projected_crs','IAU_2015',49982,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',49987,'Mars (2015) / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',49902,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_49987','projected_crs','IAU_2015',49987,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',49992,'Mars (2015) / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',49902,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',49992,'Mars (2015) / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',49902,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_49992','projected_crs','IAU_2015',49992,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 401, 'Phobos', 11080.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 40100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -519,7 +519,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',40180,'Phobos (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_40180','projected_crs','IAU_2015',40180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',40185,'Phobos (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',40100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_40185','projected_crs','IAU_2015',40185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',40190,'Phobos (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',40100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',40190,'Phobos (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',40100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_40190','projected_crs','IAU_2015',40190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 402, 'Deimos', 6200.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 40200, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -560,7 +560,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',40280,'Deimos (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_40280','projected_crs','IAU_2015',40280,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',40285,'Deimos (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',40200,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_40285','projected_crs','IAU_2015',40285,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',40290,'Deimos (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',40200,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',40290,'Deimos (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',40200,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_40290','projected_crs','IAU_2015',40290,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 599, 'Jupiter', 71492000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 59900, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -601,7 +601,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',59980,'Jupiter (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_59980','projected_crs','IAU_2015',59980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',59985,'Jupiter (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',59900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_59985','projected_crs','IAU_2015',59985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',59990,'Jupiter (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',59900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',59990,'Jupiter (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',59900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_59990','projected_crs','IAU_2015',59990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',59901,'Jupiter (2015)',NULL,'IAU_2015',599,71492000.000000,'EPSG','9001',NULL,66854000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',59901,'Jupiter (2015)','','IAU_2015',59901,'IAU_2015',59900,NULL,NULL,NULL,NULL,0);
@@ -640,7 +640,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',59981,'Jupiter (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_59981','projected_crs','IAU_2015',59981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',59986,'Jupiter (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',59901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_59986','projected_crs','IAU_2015',59986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',59991,'Jupiter (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',59901,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',59991,'Jupiter (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',59901,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_59991','projected_crs','IAU_2015',59991,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',59902,'Jupiter (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',59901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_59902','geodetic_crs','IAU_2015',59902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -676,7 +676,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',59982,'Jupiter (2015) / Ocentric / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_59982','projected_crs','IAU_2015',59982,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',59987,'Jupiter (2015) / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',59902,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_59987','projected_crs','IAU_2015',59987,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',59992,'Jupiter (2015) / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',59902,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',59992,'Jupiter (2015) / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',59902,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_59992','projected_crs','IAU_2015',59992,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 501, 'Io', 1821490.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 50100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -717,7 +717,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',50180,'Io (2015) - Sphere / Ocentric
 INSERT INTO usage VALUES('IAU_2015','PCRS_50180','projected_crs','IAU_2015',50180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50185,'Io (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',50100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50185','projected_crs','IAU_2015',50185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',50190,'Io (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',50100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',50190,'Io (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',50100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50190','projected_crs','IAU_2015',50190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 502, 'Europa', 1560800.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 50200, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -758,7 +758,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',50280,'Europa (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_50280','projected_crs','IAU_2015',50280,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50285,'Europa (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',50200,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50285','projected_crs','IAU_2015',50285,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',50290,'Europa (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',50200,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',50290,'Europa (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',50200,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50290','projected_crs','IAU_2015',50290,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 503, 'Ganymede', 2631200.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 50300, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -799,7 +799,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',50380,'Ganymede (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_50380','projected_crs','IAU_2015',50380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50385,'Ganymede (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',50300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50385','projected_crs','IAU_2015',50385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',50390,'Ganymede (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',50300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',50390,'Ganymede (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',50300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50390','projected_crs','IAU_2015',50390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',50301,'Ganymede (2015)',NULL,'IAU_2015',503,2631200.000000,'EPSG','9001',NULL,2631200.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50301,'Ganymede (2015)','','IAU_2015',50301,'IAU_2015',50300,NULL,NULL,NULL,'Anat: 128 W.0',0);
@@ -838,7 +838,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',50381,'Ganymede (2015) / Ographic / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_50381','projected_crs','IAU_2015',50381,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50386,'Ganymede (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',50301,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50386','projected_crs','IAU_2015',50386,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',50391,'Ganymede (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',50301,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',50391,'Ganymede (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',50301,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50391','projected_crs','IAU_2015',50391,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 504, 'Callisto', 2410300.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 50400, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -879,7 +879,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',50480,'Callisto (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_50480','projected_crs','IAU_2015',50480,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50485,'Callisto (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',50400,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50485','projected_crs','IAU_2015',50485,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',50490,'Callisto (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',50400,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',50490,'Callisto (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',50400,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50490','projected_crs','IAU_2015',50490,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',50401,'Callisto (2015)',NULL,'IAU_2015',504,2410300.000000,'EPSG','9001',NULL,2410300.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',50401,'Callisto (2015)','','IAU_2015',50401,'IAU_2015',50400,NULL,NULL,NULL,'Saga: 326 W.0',0);
@@ -918,7 +918,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',50481,'Callisto (2015) / Ographic / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_50481','projected_crs','IAU_2015',50481,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50486,'Callisto (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',50401,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50486','projected_crs','IAU_2015',50486,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',50491,'Callisto (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',50401,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',50491,'Callisto (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',50401,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50491','projected_crs','IAU_2015',50491,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 505, 'Amalthea', 83500.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 50500, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -959,7 +959,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',50580,'Amalthea (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_50580','projected_crs','IAU_2015',50580,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50585,'Amalthea (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',50500,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50585','projected_crs','IAU_2015',50585,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',50590,'Amalthea (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',50500,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',50590,'Amalthea (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',50500,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50590','projected_crs','IAU_2015',50590,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 506, 'Himalia', 85000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 50600, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1000,7 +1000,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',50680,'Himalia (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_50680','projected_crs','IAU_2015',50680,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50685,'Himalia (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',50600,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50685','projected_crs','IAU_2015',50685,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',50690,'Himalia (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',50600,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',50690,'Himalia (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',50600,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50690','projected_crs','IAU_2015',50690,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 507, 'Elara', 40000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 50700, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1041,7 +1041,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',50780,'Elara (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_50780','projected_crs','IAU_2015',50780,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50785,'Elara (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',50700,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50785','projected_crs','IAU_2015',50785,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',50790,'Elara (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',50700,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',50790,'Elara (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',50700,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50790','projected_crs','IAU_2015',50790,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 508, 'Pasiphae', 18000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 50800, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1082,7 +1082,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',50880,'Pasiphae (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_50880','projected_crs','IAU_2015',50880,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50885,'Pasiphae (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',50800,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50885','projected_crs','IAU_2015',50885,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',50890,'Pasiphae (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',50800,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',50890,'Pasiphae (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',50800,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50890','projected_crs','IAU_2015',50890,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 509, 'Sinope', 14000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 50900, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1123,7 +1123,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',50980,'Sinope (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_50980','projected_crs','IAU_2015',50980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',50985,'Sinope (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',50900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50985','projected_crs','IAU_2015',50985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',50990,'Sinope (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',50900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',50990,'Sinope (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',50900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_50990','projected_crs','IAU_2015',50990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 510, 'Lysithea', 12000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 51000, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1164,7 +1164,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',51080,'Lysithea (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_51080','projected_crs','IAU_2015',51080,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51085,'Lysithea (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',51000,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51085','projected_crs','IAU_2015',51085,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',51090,'Lysithea (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',51000,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',51090,'Lysithea (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',51000,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51090','projected_crs','IAU_2015',51090,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 511, 'Carme', 15000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 51100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1205,7 +1205,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',51180,'Carme (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_51180','projected_crs','IAU_2015',51180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51185,'Carme (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',51100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51185','projected_crs','IAU_2015',51185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',51190,'Carme (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',51100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',51190,'Carme (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',51100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51190','projected_crs','IAU_2015',51190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 512, 'Ananke', 10000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 51200, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1246,7 +1246,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',51280,'Ananke (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_51280','projected_crs','IAU_2015',51280,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51285,'Ananke (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',51200,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51285','projected_crs','IAU_2015',51285,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',51290,'Ananke (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',51200,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',51290,'Ananke (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',51200,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51290','projected_crs','IAU_2015',51290,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 513, 'Leda', 5000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 51300, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1287,7 +1287,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',51380,'Leda (2015) - Sphere / Ocentr
 INSERT INTO usage VALUES('IAU_2015','PCRS_51380','projected_crs','IAU_2015',51380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51385,'Leda (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',51300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51385','projected_crs','IAU_2015',51385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',51390,'Leda (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',51300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',51390,'Leda (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',51300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51390','projected_crs','IAU_2015',51390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 514, 'Thebe', 49300.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 51400, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1328,7 +1328,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',51480,'Thebe (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_51480','projected_crs','IAU_2015',51480,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51485,'Thebe (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',51400,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51485','projected_crs','IAU_2015',51485,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',51490,'Thebe (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',51400,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',51490,'Thebe (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',51400,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51490','projected_crs','IAU_2015',51490,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 515, 'Adrastea', 8200.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 51500, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1369,7 +1369,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',51580,'Adrastea (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_51580','projected_crs','IAU_2015',51580,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51585,'Adrastea (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',51500,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51585','projected_crs','IAU_2015',51585,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',51590,'Adrastea (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',51500,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',51590,'Adrastea (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',51500,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51590','projected_crs','IAU_2015',51590,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 516, 'Metis', 21500.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 51600, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1410,7 +1410,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',51680,'Metis (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_51680','projected_crs','IAU_2015',51680,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',51685,'Metis (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',51600,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51685','projected_crs','IAU_2015',51685,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',51690,'Metis (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',51600,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',51690,'Metis (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',51600,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_51690','projected_crs','IAU_2015',51690,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Skip Callirrhoe has it lacks all axis information
 -- Skip Themisto has it lacks all axis information
@@ -1485,7 +1485,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',69980,'Saturn (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_69980','projected_crs','IAU_2015',69980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',69985,'Saturn (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',69900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_69985','projected_crs','IAU_2015',69985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',69990,'Saturn (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',69900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',69990,'Saturn (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',69900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_69990','projected_crs','IAU_2015',69990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',69901,'Saturn (2015)',NULL,'IAU_2015',699,60268000.000000,'EPSG','9001',NULL,54364000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',69901,'Saturn (2015)','','IAU_2015',69901,'IAU_2015',69900,NULL,NULL,NULL,NULL,0);
@@ -1524,7 +1524,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',69981,'Saturn (2015) / Ographic / La
 INSERT INTO usage VALUES('IAU_2015','PCRS_69981','projected_crs','IAU_2015',69981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',69986,'Saturn (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',69901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_69986','projected_crs','IAU_2015',69986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',69991,'Saturn (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',69901,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',69991,'Saturn (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',69901,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_69991','projected_crs','IAU_2015',69991,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',69902,'Saturn (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',69901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_69902','geodetic_crs','IAU_2015',69902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1560,7 +1560,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',69982,'Saturn (2015) / Ocentric / La
 INSERT INTO usage VALUES('IAU_2015','PCRS_69982','projected_crs','IAU_2015',69982,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',69987,'Saturn (2015) / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',69902,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_69987','projected_crs','IAU_2015',69987,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',69992,'Saturn (2015) / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',69902,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',69992,'Saturn (2015) / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',69902,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_69992','projected_crs','IAU_2015',69992,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 601, 'Mimas', 198200.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 60100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1601,7 +1601,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60180,'Mimas (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_60180','projected_crs','IAU_2015',60180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60185,'Mimas (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',60100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60185','projected_crs','IAU_2015',60185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',60190,'Mimas (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',60100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',60190,'Mimas (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',60100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60190','projected_crs','IAU_2015',60190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 602, 'Enceladus', 252100.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 60200, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1642,7 +1642,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60280,'Enceladus (2015) - Sphere / O
 INSERT INTO usage VALUES('IAU_2015','PCRS_60280','projected_crs','IAU_2015',60280,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60285,'Enceladus (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',60200,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60285','projected_crs','IAU_2015',60285,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',60290,'Enceladus (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',60200,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',60290,'Enceladus (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',60200,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60290','projected_crs','IAU_2015',60290,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 603, 'Tethys', 531000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 60300, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1683,7 +1683,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60380,'Tethys (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_60380','projected_crs','IAU_2015',60380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60385,'Tethys (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',60300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60385','projected_crs','IAU_2015',60385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',60390,'Tethys (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',60300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',60390,'Tethys (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',60300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60390','projected_crs','IAU_2015',60390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 604, 'Dione', 561400.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 60400, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1724,7 +1724,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60480,'Dione (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_60480','projected_crs','IAU_2015',60480,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60485,'Dione (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',60400,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60485','projected_crs','IAU_2015',60485,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',60490,'Dione (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',60400,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',60490,'Dione (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',60400,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60490','projected_crs','IAU_2015',60490,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 605, 'Rhea', 763500.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 60500, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1765,7 +1765,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60580,'Rhea (2015) - Sphere / Ocentr
 INSERT INTO usage VALUES('IAU_2015','PCRS_60580','projected_crs','IAU_2015',60580,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60585,'Rhea (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',60500,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60585','projected_crs','IAU_2015',60585,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',60590,'Rhea (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',60500,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',60590,'Rhea (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',60500,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60590','projected_crs','IAU_2015',60590,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 606, 'Titan', 2575000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 60600, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1806,7 +1806,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60680,'Titan (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_60680','projected_crs','IAU_2015',60680,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60685,'Titan (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',60600,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60685','projected_crs','IAU_2015',60685,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',60690,'Titan (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',60600,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',60690,'Titan (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',60600,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60690','projected_crs','IAU_2015',60690,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 607, 'Hyperion', 135000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 60700, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1847,7 +1847,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60780,'Hyperion (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_60780','projected_crs','IAU_2015',60780,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60785,'Hyperion (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',60700,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60785','projected_crs','IAU_2015',60785,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',60790,'Hyperion (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',60700,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',60790,'Hyperion (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',60700,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60790','projected_crs','IAU_2015',60790,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 608, 'Iapetus', 745700.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 60800, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -1888,7 +1888,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60880,'Iapetus (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_60880','projected_crs','IAU_2015',60880,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60885,'Iapetus (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',60800,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60885','projected_crs','IAU_2015',60885,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',60890,'Iapetus (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',60800,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',60890,'Iapetus (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',60800,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60890','projected_crs','IAU_2015',60890,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',60801,'Iapetus (2015)',NULL,'IAU_2015',608,745700.000000,'EPSG','9001',NULL,712100.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',60801,'Iapetus (2015)','','IAU_2015',60801,'IAU_2015',60800,NULL,NULL,NULL,'Almeric: 276 W.0',0);
@@ -1927,7 +1927,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60881,'Iapetus (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_60881','projected_crs','IAU_2015',60881,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60886,'Iapetus (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',60801,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60886','projected_crs','IAU_2015',60886,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',60891,'Iapetus (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',60801,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',60891,'Iapetus (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',60801,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60891','projected_crs','IAU_2015',60891,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',60802,'Iapetus (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',60801,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_60802','geodetic_crs','IAU_2015',60802,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -1963,7 +1963,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60882,'Iapetus (2015) / Ocentric / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_60882','projected_crs','IAU_2015',60882,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60887,'Iapetus (2015) / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',60802,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60887','projected_crs','IAU_2015',60887,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',60892,'Iapetus (2015) / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',60802,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',60892,'Iapetus (2015) / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',60802,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60892','projected_crs','IAU_2015',60892,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 609, 'Phoebe', 106500.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 60900, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2004,7 +2004,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',60980,'Phoebe (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_60980','projected_crs','IAU_2015',60980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',60985,'Phoebe (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',60900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60985','projected_crs','IAU_2015',60985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',60990,'Phoebe (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',60900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',60990,'Phoebe (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',60900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_60990','projected_crs','IAU_2015',60990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 610, 'Janus', 89200.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 61000, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2045,7 +2045,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',61080,'Janus (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_61080','projected_crs','IAU_2015',61080,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61085,'Janus (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',61000,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61085','projected_crs','IAU_2015',61085,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',61090,'Janus (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',61000,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',61090,'Janus (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',61000,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61090','projected_crs','IAU_2015',61090,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 611, 'Epimetheus', 58200.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 61100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2086,7 +2086,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',61180,'Epimetheus (2015) - Sphere / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_61180','projected_crs','IAU_2015',61180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61185,'Epimetheus (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',61100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61185','projected_crs','IAU_2015',61185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',61190,'Epimetheus (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',61100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',61190,'Epimetheus (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',61100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61190','projected_crs','IAU_2015',61190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 612, 'Helene', 18000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 61200, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2127,7 +2127,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',61280,'Helene (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_61280','projected_crs','IAU_2015',61280,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61285,'Helene (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',61200,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61285','projected_crs','IAU_2015',61285,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',61290,'Helene (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',61200,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',61290,'Helene (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',61200,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61290','projected_crs','IAU_2015',61290,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 613, 'Telesto', 12400.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 61300, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2168,7 +2168,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',61380,'Telesto (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_61380','projected_crs','IAU_2015',61380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61385,'Telesto (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',61300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61385','projected_crs','IAU_2015',61385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',61390,'Telesto (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',61300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',61390,'Telesto (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',61300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61390','projected_crs','IAU_2015',61390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 614, 'Calypso', 9600.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 61400, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2209,7 +2209,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',61480,'Calypso (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_61480','projected_crs','IAU_2015',61480,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61485,'Calypso (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',61400,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61485','projected_crs','IAU_2015',61485,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',61490,'Calypso (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',61400,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',61490,'Calypso (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',61400,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61490','projected_crs','IAU_2015',61490,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 615, 'Atlas', 15100.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 61500, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2250,7 +2250,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',61580,'Atlas (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_61580','projected_crs','IAU_2015',61580,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61585,'Atlas (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',61500,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61585','projected_crs','IAU_2015',61585,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',61590,'Atlas (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',61500,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',61590,'Atlas (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',61500,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61590','projected_crs','IAU_2015',61590,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 616, 'Prometheus', 43100.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 61600, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2291,7 +2291,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',61680,'Prometheus (2015) - Sphere / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_61680','projected_crs','IAU_2015',61680,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61685,'Prometheus (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',61600,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61685','projected_crs','IAU_2015',61685,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',61690,'Prometheus (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',61600,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',61690,'Prometheus (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',61600,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61690','projected_crs','IAU_2015',61690,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 617, 'Pandora', 40600.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 61700, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2332,7 +2332,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',61780,'Pandora (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_61780','projected_crs','IAU_2015',61780,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61785,'Pandora (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',61700,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61785','projected_crs','IAU_2015',61785,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',61790,'Pandora (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',61700,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',61790,'Pandora (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',61700,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61790','projected_crs','IAU_2015',61790,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 618, 'Pan', 14000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 61800, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2373,7 +2373,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',61880,'Pan (2015) - Sphere / Ocentri
 INSERT INTO usage VALUES('IAU_2015','PCRS_61880','projected_crs','IAU_2015',61880,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',61885,'Pan (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',61800,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61885','projected_crs','IAU_2015',61885,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',61890,'Pan (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',61800,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',61890,'Pan (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',61800,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_61890','projected_crs','IAU_2015',61890,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Skip Ymir has it lacks all axis information
 -- Skip Paaliaq has it lacks all axis information
@@ -2427,7 +2427,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',63280,'Methone (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_63280','projected_crs','IAU_2015',63280,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',63285,'Methone (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',63200,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63285','projected_crs','IAU_2015',63285,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',63290,'Methone (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',63200,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',63290,'Methone (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',63200,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63290','projected_crs','IAU_2015',63290,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 633, 'Pallene', 2230.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 63300, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2468,7 +2468,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',63380,'Pallene (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_63380','projected_crs','IAU_2015',63380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',63385,'Pallene (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',63300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63385','projected_crs','IAU_2015',63385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',63390,'Pallene (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',63300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',63390,'Pallene (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',63300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63390','projected_crs','IAU_2015',63390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 634, 'Polydeuces', 1300.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 63400, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2509,7 +2509,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',63480,'Polydeuces (2015) - Sphere / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_63480','projected_crs','IAU_2015',63480,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',63485,'Polydeuces (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',63400,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63485','projected_crs','IAU_2015',63485,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',63490,'Polydeuces (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',63400,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',63490,'Polydeuces (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',63400,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63490','projected_crs','IAU_2015',63490,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 635, 'Daphnis', 3800.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 63500, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2550,7 +2550,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',63580,'Daphnis (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_63580','projected_crs','IAU_2015',63580,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',63585,'Daphnis (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',63500,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63585','projected_crs','IAU_2015',63585,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',63590,'Daphnis (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',63500,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',63590,'Daphnis (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',63500,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_63590','projected_crs','IAU_2015',63590,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Skip Aegir has it lacks all axis information
 -- Skip Bebhionn has it lacks all axis information
@@ -2604,7 +2604,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',64980,'Anthe (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_64980','projected_crs','IAU_2015',64980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',64985,'Anthe (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',64900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_64985','projected_crs','IAU_2015',64985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',64990,'Anthe (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',64900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',64990,'Anthe (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',64900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_64990','projected_crs','IAU_2015',64990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Skip Jarnsaxa has it lacks all axis information
 -- Skip Greip has it lacks all axis information
@@ -2648,7 +2648,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',65380,'Aegaeon (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_65380','projected_crs','IAU_2015',65380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',65385,'Aegaeon (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',65300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_65385','projected_crs','IAU_2015',65385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',65390,'Aegaeon (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',65300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',65390,'Aegaeon (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',65300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_65390','projected_crs','IAU_2015',65390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 799, 'Uranus', 25559000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 79900, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2689,7 +2689,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',79980,'Uranus (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_79980','projected_crs','IAU_2015',79980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',79985,'Uranus (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',79900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_79985','projected_crs','IAU_2015',79985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',79990,'Uranus (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',79900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',79990,'Uranus (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',79900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_79990','projected_crs','IAU_2015',79990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',79901,'Uranus (2015)',NULL,'IAU_2015',799,25559000.000000,'EPSG','9001',NULL,24973000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',79901,'Uranus (2015)','','IAU_2015',79901,'IAU_2015',79900,NULL,NULL,NULL,NULL,0);
@@ -2728,7 +2728,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',79981,'Uranus (2015) / Ographic / La
 INSERT INTO usage VALUES('IAU_2015','PCRS_79981','projected_crs','IAU_2015',79981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',79986,'Uranus (2015) / Ographic / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',79901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_79986','projected_crs','IAU_2015',79986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',79991,'Uranus (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',79901,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',79991,'Uranus (2015) / Ographic / Mercator',NULL,'EPSG','4400','IAU_2015',79901,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_79991','projected_crs','IAU_2015',79991,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',79902,'Uranus (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',79901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_79902','geodetic_crs','IAU_2015',79902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -2771,7 +2771,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',70180,'Ariel (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_70180','projected_crs','IAU_2015',70180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70185,'Ariel (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',70100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70185','projected_crs','IAU_2015',70185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',70190,'Ariel (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',70100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',70190,'Ariel (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',70100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70190','projected_crs','IAU_2015',70190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 702, 'Umbriel', 584700.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 70200, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2812,7 +2812,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',70280,'Umbriel (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_70280','projected_crs','IAU_2015',70280,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70285,'Umbriel (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',70200,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70285','projected_crs','IAU_2015',70285,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',70290,'Umbriel (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',70200,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',70290,'Umbriel (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',70200,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70290','projected_crs','IAU_2015',70290,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 703, 'Titania', 788900.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 70300, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2853,7 +2853,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',70380,'Titania (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_70380','projected_crs','IAU_2015',70380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70385,'Titania (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',70300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70385','projected_crs','IAU_2015',70385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',70390,'Titania (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',70300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',70390,'Titania (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',70300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70390','projected_crs','IAU_2015',70390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 704, 'Oberon', 761400.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 70400, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2894,7 +2894,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',70480,'Oberon (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_70480','projected_crs','IAU_2015',70480,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70485,'Oberon (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',70400,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70485','projected_crs','IAU_2015',70485,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',70490,'Oberon (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',70400,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',70490,'Oberon (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',70400,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70490','projected_crs','IAU_2015',70490,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 705, 'Miranda', 235800.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 70500, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2935,7 +2935,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',70580,'Miranda (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_70580','projected_crs','IAU_2015',70580,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70585,'Miranda (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',70500,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70585','projected_crs','IAU_2015',70585,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',70590,'Miranda (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',70500,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',70590,'Miranda (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',70500,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70590','projected_crs','IAU_2015',70590,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 706, 'Cordelia', 13000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 70600, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -2976,7 +2976,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',70680,'Cordelia (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_70680','projected_crs','IAU_2015',70680,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70685,'Cordelia (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',70600,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70685','projected_crs','IAU_2015',70685,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',70690,'Cordelia (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',70600,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',70690,'Cordelia (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',70600,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70690','projected_crs','IAU_2015',70690,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 707, 'Ophelia', 15000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 70700, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3017,7 +3017,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',70780,'Ophelia (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_70780','projected_crs','IAU_2015',70780,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70785,'Ophelia (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',70700,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70785','projected_crs','IAU_2015',70785,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',70790,'Ophelia (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',70700,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',70790,'Ophelia (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',70700,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70790','projected_crs','IAU_2015',70790,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 708, 'Bianca', 21000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 70800, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3058,7 +3058,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',70880,'Bianca (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_70880','projected_crs','IAU_2015',70880,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70885,'Bianca (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',70800,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70885','projected_crs','IAU_2015',70885,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',70890,'Bianca (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',70800,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',70890,'Bianca (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',70800,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70890','projected_crs','IAU_2015',70890,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 709, 'Cressida', 31000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 70900, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3099,7 +3099,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',70980,'Cressida (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_70980','projected_crs','IAU_2015',70980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',70985,'Cressida (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',70900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70985','projected_crs','IAU_2015',70985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',70990,'Cressida (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',70900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',70990,'Cressida (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',70900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_70990','projected_crs','IAU_2015',70990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 710, 'Desdemona', 27000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 71000, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3140,7 +3140,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',71080,'Desdemona (2015) - Sphere / O
 INSERT INTO usage VALUES('IAU_2015','PCRS_71080','projected_crs','IAU_2015',71080,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71085,'Desdemona (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',71000,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71085','projected_crs','IAU_2015',71085,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',71090,'Desdemona (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',71000,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',71090,'Desdemona (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',71000,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71090','projected_crs','IAU_2015',71090,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 711, 'Juliet', 42000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 71100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3181,7 +3181,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',71180,'Juliet (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_71180','projected_crs','IAU_2015',71180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71185,'Juliet (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',71100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71185','projected_crs','IAU_2015',71185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',71190,'Juliet (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',71100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',71190,'Juliet (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',71100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71190','projected_crs','IAU_2015',71190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 712, 'Portia', 54000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 71200, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3222,7 +3222,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',71280,'Portia (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_71280','projected_crs','IAU_2015',71280,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71285,'Portia (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',71200,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71285','projected_crs','IAU_2015',71285,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',71290,'Portia (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',71200,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',71290,'Portia (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',71200,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71290','projected_crs','IAU_2015',71290,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 713, 'Rosalind', 27000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 71300, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3263,7 +3263,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',71380,'Rosalind (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_71380','projected_crs','IAU_2015',71380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71385,'Rosalind (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',71300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71385','projected_crs','IAU_2015',71385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',71390,'Rosalind (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',71300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',71390,'Rosalind (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',71300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71390','projected_crs','IAU_2015',71390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 714, 'Belinda', 33000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 71400, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3304,7 +3304,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',71480,'Belinda (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_71480','projected_crs','IAU_2015',71480,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71485,'Belinda (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',71400,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71485','projected_crs','IAU_2015',71485,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',71490,'Belinda (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',71400,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',71490,'Belinda (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',71400,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71490','projected_crs','IAU_2015',71490,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 715, 'Puck', 77000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 71500, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3345,7 +3345,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',71580,'Puck (2015) - Sphere / Ocentr
 INSERT INTO usage VALUES('IAU_2015','PCRS_71580','projected_crs','IAU_2015',71580,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',71585,'Puck (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',71500,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71585','projected_crs','IAU_2015',71585,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',71590,'Puck (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',71500,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',71590,'Puck (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',71500,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_71590','projected_crs','IAU_2015',71590,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Skip Caliban has it lacks all axis information
 -- Skip Sycorax has it lacks all axis information
@@ -3398,7 +3398,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',89980,'Neptune (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_89980','projected_crs','IAU_2015',89980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',89985,'Neptune (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',89900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_89985','projected_crs','IAU_2015',89985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',89990,'Neptune (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',89900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',89990,'Neptune (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',89900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_89990','projected_crs','IAU_2015',89990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',89901,'Neptune (2015)',NULL,'IAU_2015',899,24764000.000000,'EPSG','9001',NULL,24341000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',89901,'Neptune (2015)','','IAU_2015',89901,'IAU_2015',89900,NULL,NULL,NULL,NULL,0);
@@ -3437,7 +3437,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',89981,'Neptune (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_89981','projected_crs','IAU_2015',89981,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',89986,'Neptune (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',89901,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_89986','projected_crs','IAU_2015',89986,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',89991,'Neptune (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',89901,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',89991,'Neptune (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',89901,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_89991','projected_crs','IAU_2015',89991,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',89902,'Neptune (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',89901,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_89902','geodetic_crs','IAU_2015',89902,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3473,7 +3473,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',89982,'Neptune (2015) / Ocentric / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_89982','projected_crs','IAU_2015',89982,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',89987,'Neptune (2015) / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',89902,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_89987','projected_crs','IAU_2015',89987,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',89992,'Neptune (2015) / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',89902,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',89992,'Neptune (2015) / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',89902,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_89992','projected_crs','IAU_2015',89992,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 801, 'Triton', 1352600.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 80100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3514,7 +3514,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80180,'Triton (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_80180','projected_crs','IAU_2015',80180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80185,'Triton (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',80100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80185','projected_crs','IAU_2015',80185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80190,'Triton (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',80100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80190,'Triton (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',80100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80190','projected_crs','IAU_2015',80190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 802, 'Nereid', 170000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 80200, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3555,7 +3555,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80280,'Nereid (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_80280','projected_crs','IAU_2015',80280,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80285,'Nereid (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',80200,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80285','projected_crs','IAU_2015',80285,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80290,'Nereid (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',80200,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80290,'Nereid (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',80200,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80290','projected_crs','IAU_2015',80290,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 803, 'Naiad', 29000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 80300, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3596,7 +3596,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80380,'Naiad (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_80380','projected_crs','IAU_2015',80380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80385,'Naiad (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',80300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80385','projected_crs','IAU_2015',80385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80390,'Naiad (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',80300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80390,'Naiad (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',80300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80390','projected_crs','IAU_2015',80390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',80301,'Naiad (2015)',NULL,'IAU_2015',803,29000.000000,'EPSG','9001',NULL,29000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80301,'Naiad (2015)','','IAU_2015',80301,'IAU_2015',80300,NULL,NULL,NULL,NULL,0);
@@ -3635,7 +3635,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80381,'Naiad (2015) / Ographic / Lam
 INSERT INTO usage VALUES('IAU_2015','PCRS_80381','projected_crs','IAU_2015',80381,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80386,'Naiad (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80301,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80386','projected_crs','IAU_2015',80386,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80391,'Naiad (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80301,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80391,'Naiad (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80301,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80391','projected_crs','IAU_2015',80391,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 804, 'Thalassa', 40000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 80400, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3676,7 +3676,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80480,'Thalassa (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_80480','projected_crs','IAU_2015',80480,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80485,'Thalassa (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',80400,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80485','projected_crs','IAU_2015',80485,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80490,'Thalassa (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',80400,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80490,'Thalassa (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',80400,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80490','projected_crs','IAU_2015',80490,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',80401,'Thalassa (2015)',NULL,'IAU_2015',804,40000.000000,'EPSG','9001',NULL,40000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80401,'Thalassa (2015)','','IAU_2015',80401,'IAU_2015',80400,NULL,NULL,NULL,NULL,0);
@@ -3715,7 +3715,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80481,'Thalassa (2015) / Ographic / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_80481','projected_crs','IAU_2015',80481,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80486,'Thalassa (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80401,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80486','projected_crs','IAU_2015',80486,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80491,'Thalassa (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80401,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80491,'Thalassa (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80401,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80491','projected_crs','IAU_2015',80491,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 805, 'Despina', 74000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 80500, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3756,7 +3756,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80580,'Despina (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_80580','projected_crs','IAU_2015',80580,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80585,'Despina (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',80500,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80585','projected_crs','IAU_2015',80585,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80590,'Despina (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',80500,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80590,'Despina (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',80500,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80590','projected_crs','IAU_2015',80590,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',80501,'Despina (2015)',NULL,'IAU_2015',805,74000.000000,'EPSG','9001',NULL,74000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80501,'Despina (2015)','','IAU_2015',80501,'IAU_2015',80500,NULL,NULL,NULL,NULL,0);
@@ -3795,7 +3795,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80581,'Despina (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_80581','projected_crs','IAU_2015',80581,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80586,'Despina (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80501,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80586','projected_crs','IAU_2015',80586,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80591,'Despina (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80501,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80591,'Despina (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80501,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80591','projected_crs','IAU_2015',80591,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 806, 'Galatea', 79000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 80600, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3836,7 +3836,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80680,'Galatea (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_80680','projected_crs','IAU_2015',80680,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80685,'Galatea (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',80600,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80685','projected_crs','IAU_2015',80685,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80690,'Galatea (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',80600,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80690,'Galatea (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',80600,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80690','projected_crs','IAU_2015',80690,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',80601,'Galatea (2015)',NULL,'IAU_2015',806,79000.000000,'EPSG','9001',NULL,79000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80601,'Galatea (2015)','','IAU_2015',80601,'IAU_2015',80600,NULL,NULL,NULL,NULL,0);
@@ -3875,7 +3875,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80681,'Galatea (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_80681','projected_crs','IAU_2015',80681,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80686,'Galatea (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80601,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80686','projected_crs','IAU_2015',80686,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80691,'Galatea (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80601,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80691,'Galatea (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80601,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80691','projected_crs','IAU_2015',80691,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 807, 'Larissa', 96000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 80700, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -3916,7 +3916,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80780,'Larissa (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_80780','projected_crs','IAU_2015',80780,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80785,'Larissa (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',80700,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80785','projected_crs','IAU_2015',80785,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80790,'Larissa (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',80700,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80790,'Larissa (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',80700,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80790','projected_crs','IAU_2015',80790,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',80701,'Larissa (2015)',NULL,'IAU_2015',807,96000.000000,'EPSG','9001',NULL,89000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',80701,'Larissa (2015)','','IAU_2015',80701,'IAU_2015',80700,NULL,NULL,NULL,NULL,0);
@@ -3955,7 +3955,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80781,'Larissa (2015) / Ographic / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_80781','projected_crs','IAU_2015',80781,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80786,'Larissa (2015) / Ographic / Albers Equal Area',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80701,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80786','projected_crs','IAU_2015',80786,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80791,'Larissa (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80701,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80791,'Larissa (2015) / Ographic / Mercator',NULL,'PROJ','PROJECTED_WEST_NORTH','IAU_2015',80701,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80791','projected_crs','IAU_2015',80791,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',80702,'Larissa (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',80701,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_80702','geodetic_crs','IAU_2015',80702,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -3991,7 +3991,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80782,'Larissa (2015) / Ocentric / L
 INSERT INTO usage VALUES('IAU_2015','PCRS_80782','projected_crs','IAU_2015',80782,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80787,'Larissa (2015) / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',80702,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80787','projected_crs','IAU_2015',80787,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80792,'Larissa (2015) / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',80702,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80792,'Larissa (2015) / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',80702,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80792','projected_crs','IAU_2015',80792,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 808, 'Proteus', 208000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 80800, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4032,7 +4032,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',80880,'Proteus (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_80880','projected_crs','IAU_2015',80880,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',80885,'Proteus (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',80800,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80885','projected_crs','IAU_2015',80885,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',80890,'Proteus (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',80800,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',80890,'Proteus (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',80800,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_80890','projected_crs','IAU_2015',80890,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Skip Halimede has it lacks all axis information
 -- Skip Psamathe has it lacks all axis information
@@ -4078,7 +4078,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',99980,'Pluto (2015) - Sphere / Ocent
 INSERT INTO usage VALUES('IAU_2015','PCRS_99980','projected_crs','IAU_2015',99980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',99985,'Pluto (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',99900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_99985','projected_crs','IAU_2015',99985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',99990,'Pluto (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',99900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',99990,'Pluto (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',99900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_99990','projected_crs','IAU_2015',99990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 901, 'Charon', 606000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 90100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4119,7 +4119,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',90180,'Charon (2015) - Sphere / Ocen
 INSERT INTO usage VALUES('IAU_2015','PCRS_90180','projected_crs','IAU_2015',90180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',90185,'Charon (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',90100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_90185','projected_crs','IAU_2015',90185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',90190,'Charon (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',90100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',90190,'Charon (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',90100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_90190','projected_crs','IAU_2015',90190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Borrelly lacks value for semimajor and/or axisb and/or semiminor. Only consider its mean value.
 INSERT INTO celestial_body VALUES('IAU_2015', 1000005, 'Borrelly', 4220.000000);
@@ -4161,7 +4161,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',100000580,'Borrelly (2015) - Sphere 
 INSERT INTO usage VALUES('IAU_2015','PCRS_100000580','projected_crs','IAU_2015',100000580,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100000585,'Borrelly (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',100000500,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100000585','projected_crs','IAU_2015',100000585,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',100000590,'Borrelly (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',100000500,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',100000590,'Borrelly (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',100000500,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100000590','projected_crs','IAU_2015',100000590,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 1000012, 'Churyumov-Gerasimenko', 1650.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 100001200, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4202,7 +4202,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',100001280,'Churyumov-Gerasimenko (20
 INSERT INTO usage VALUES('IAU_2015','PCRS_100001280','projected_crs','IAU_2015',100001280,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100001285,'Churyumov-Gerasimenko (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',100001200,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100001285','projected_crs','IAU_2015',100001285,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',100001290,'Churyumov-Gerasimenko (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',100001200,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',100001290,'Churyumov-Gerasimenko (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',100001200,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100001290','projected_crs','IAU_2015',100001290,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 1000036, 'Halley', 8000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 100003600, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4243,7 +4243,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',100003680,'Halley (2015) - Sphere / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_100003680','projected_crs','IAU_2015',100003680,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100003685,'Halley (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',100003600,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100003685','projected_crs','IAU_2015',100003685,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',100003690,'Halley (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',100003600,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',100003690,'Halley (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',100003600,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100003690','projected_crs','IAU_2015',100003690,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',100003601,'Halley (2015)',NULL,'IAU_2015',1000036,8000.000000,'EPSG','9001',NULL,4000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',100003601,'Halley (2015)','','IAU_2015',100003601,'IAU_2015',100003600,NULL,NULL,NULL,NULL,0);
@@ -4282,7 +4282,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',100003681,'Halley (2015) / Ographic 
 INSERT INTO usage VALUES('IAU_2015','PCRS_100003681','projected_crs','IAU_2015',100003681,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100003686,'Halley (2015) / Ographic / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',100003601,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100003686','projected_crs','IAU_2015',100003686,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',100003691,'Halley (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',100003601,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',100003691,'Halley (2015) / Ographic / Mercator',NULL,'EPSG','4400','IAU_2015',100003601,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100003691','projected_crs','IAU_2015',100003691,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',100003602,'Halley (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',100003601,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_100003602','geodetic_crs','IAU_2015',100003602,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4326,7 +4326,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',100004180,'Hartley 2 (2015) - Sphere
 INSERT INTO usage VALUES('IAU_2015','PCRS_100004180','projected_crs','IAU_2015',100004180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100004185,'Hartley 2 (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',100004100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100004185','projected_crs','IAU_2015',100004185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',100004190,'Hartley 2 (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',100004100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',100004190,'Hartley 2 (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',100004100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100004190','projected_crs','IAU_2015',100004190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Tempel 1 lacks value for semimajor and/or axisb and/or semiminor. Only consider its mean value.
 INSERT INTO celestial_body VALUES('IAU_2015', 1000093, 'Tempel 1', 3000.000000);
@@ -4368,7 +4368,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',100009380,'Tempel 1 (2015) - Sphere 
 INSERT INTO usage VALUES('IAU_2015','PCRS_100009380','projected_crs','IAU_2015',100009380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100009385,'Tempel 1 (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',100009300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100009385','projected_crs','IAU_2015',100009385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',100009390,'Tempel 1 (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',100009300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',100009390,'Tempel 1 (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',100009300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100009390','projected_crs','IAU_2015',100009390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 1000107, 'Wild 2', 1975.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 100010700, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4409,7 +4409,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',100010780,'Wild 2 (2015) - Sphere / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_100010780','projected_crs','IAU_2015',100010780,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',100010785,'Wild 2 (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',100010700,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100010785','projected_crs','IAU_2015',100010785,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',100010790,'Wild 2 (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',100010700,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',100010790,'Wild 2 (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',100010700,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_100010790','projected_crs','IAU_2015',100010790,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 9511010, 'Gaspra', 6100.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 951101000, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4450,7 +4450,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',951101080,'Gaspra (2015) - Sphere / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_951101080','projected_crs','IAU_2015',951101080,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',951101085,'Gaspra (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',951101000,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_951101085','projected_crs','IAU_2015',951101085,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',951101090,'Gaspra (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',951101000,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',951101090,'Gaspra (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',951101000,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_951101090','projected_crs','IAU_2015',951101090,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 2431010, 'Ida', 15650.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 243101000, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4491,7 +4491,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',243101080,'Ida (2015) - Sphere / Oce
 INSERT INTO usage VALUES('IAU_2015','PCRS_243101080','projected_crs','IAU_2015',243101080,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',243101085,'Ida (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',243101000,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_243101085','projected_crs','IAU_2015',243101085,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',243101090,'Ida (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',243101000,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',243101090,'Ida (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',243101000,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_243101090','projected_crs','IAU_2015',243101090,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Skip Dactyl has it lacks all axis information
 INSERT INTO celestial_body VALUES('IAU_2015', 2000001, 'Ceres', 487300.000000);
@@ -4533,7 +4533,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200000180,'Ceres (2015) - Sphere / O
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000180','projected_crs','IAU_2015',200000180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200000185,'Ceres (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200000100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000185','projected_crs','IAU_2015',200000185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200000190,'Ceres (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200000100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200000190,'Ceres (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',200000100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000190','projected_crs','IAU_2015',200000190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',200000101,'Ceres (2015)',NULL,'IAU_2015',2000001,487300.000000,'EPSG','9001',NULL,446000.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200000101,'Ceres (2015)','','IAU_2015',200000101,'IAU_2015',200000100,NULL,NULL,NULL,'Kait: 0.0',0);
@@ -4572,7 +4572,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200000181,'Ceres (2015) / Ographic /
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000181','projected_crs','IAU_2015',200000181,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200000186,'Ceres (2015) / Ographic / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200000101,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000186','projected_crs','IAU_2015',200000186,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200000191,'Ceres (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200000101,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200000191,'Ceres (2015) / Ographic / Mercator',NULL,'EPSG','4400','IAU_2015',200000101,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000191','projected_crs','IAU_2015',200000191,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',200000102,'Ceres (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',200000101,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200000102','geodetic_crs','IAU_2015',200000102,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4616,7 +4616,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200000480,'Vesta (2015) - Sphere / O
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000480','projected_crs','IAU_2015',200000480,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200000485,'Vesta (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200000400,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000485','projected_crs','IAU_2015',200000485,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200000490,'Vesta (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200000400,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200000490,'Vesta (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',200000400,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200000490','projected_crs','IAU_2015',200000490,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 2000016, 'Psyche', 113000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 200001600, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4657,7 +4657,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200001680,'Psyche (2015) - Sphere / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_200001680','projected_crs','IAU_2015',200001680,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200001685,'Psyche (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200001600,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200001685','projected_crs','IAU_2015',200001685,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200001690,'Psyche (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200001600,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200001690,'Psyche (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',200001600,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200001690','projected_crs','IAU_2015',200001690,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 2000021, 'Lutetia', 52500.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 200002100, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4698,7 +4698,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200002180,'Lutetia (2015) - Sphere /
 INSERT INTO usage VALUES('IAU_2015','PCRS_200002180','projected_crs','IAU_2015',200002180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200002185,'Lutetia (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200002100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200002185','projected_crs','IAU_2015',200002185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200002190,'Lutetia (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200002100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200002190,'Lutetia (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',200002100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200002190','projected_crs','IAU_2015',200002190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 2000052, '52 Europa', 157500.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 200005200, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4739,7 +4739,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200005280,'52 Europa (2015) - Sphere
 INSERT INTO usage VALUES('IAU_2015','PCRS_200005280','projected_crs','IAU_2015',200005280,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200005285,'52 Europa (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200005200,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200005285','projected_crs','IAU_2015',200005285,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200005290,'52 Europa (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200005200,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200005290,'52 Europa (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',200005200,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200005290','projected_crs','IAU_2015',200005290,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 2000216, 'Kleopatra', 65333.333333);
 INSERT INTO prime_meridian VALUES('IAU_2015', 200021600, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4780,7 +4780,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200021680,'Kleopatra (2015) - Sphere
 INSERT INTO usage VALUES('IAU_2015','PCRS_200021680','projected_crs','IAU_2015',200021680,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200021685,'Kleopatra (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200021600,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200021685','projected_crs','IAU_2015',200021685,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200021690,'Kleopatra (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200021600,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200021690,'Kleopatra (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',200021600,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200021690','projected_crs','IAU_2015',200021690,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 2000433, 'Eros', 17000.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 200043300, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4821,7 +4821,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200043380,'Eros (2015) - Sphere / Oc
 INSERT INTO usage VALUES('IAU_2015','PCRS_200043380','projected_crs','IAU_2015',200043380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200043385,'Eros (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200043300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200043385','projected_crs','IAU_2015',200043385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200043390,'Eros (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200043300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200043390,'Eros (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',200043300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200043390','projected_crs','IAU_2015',200043390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO ellipsoid VALUES('IAU_2015',200043301,'Eros (2015)',NULL,'IAU_2015',2000433,17000.000000,'EPSG','9001',NULL,5500.000000,0);
 INSERT INTO geodetic_datum VALUES('IAU_2015',200043301,'Eros (2015)','','IAU_2015',200043301,'IAU_2015',200043300,NULL,NULL,NULL,'unnamed crater: 0.0',0);
@@ -4860,7 +4860,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200043381,'Eros (2015) / Ographic / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_200043381','projected_crs','IAU_2015',200043381,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200043386,'Eros (2015) / Ographic / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200043301,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200043386','projected_crs','IAU_2015',200043386,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200043391,'Eros (2015) / Ographic / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200043301,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200043391,'Eros (2015) / Ographic / Mercator',NULL,'EPSG','4400','IAU_2015',200043301,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200043391','projected_crs','IAU_2015',200043391,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO geodetic_crs VALUES('IAU_2015',200043302,'Eros (2015) / Ocentric','Source of IAU Coordinate systems: https://doi.org/10.1007/s10569-017-9805-5','other','PROJ','OCENTRIC_LAT_LON','IAU_2015',200043301,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','GCRS_200043302','geodetic_crs','IAU_2015',200043302,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
@@ -4903,7 +4903,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200051180,'Davida (2015) - Sphere / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_200051180','projected_crs','IAU_2015',200051180,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200051185,'Davida (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200051100,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200051185','projected_crs','IAU_2015',200051185,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200051190,'Davida (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200051100,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200051190,'Davida (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',200051100,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200051190','projected_crs','IAU_2015',200051190,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 2000253, 'Mathilde', 26500.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 200025300, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4944,7 +4944,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200025380,'Mathilde (2015) - Sphere 
 INSERT INTO usage VALUES('IAU_2015','PCRS_200025380','projected_crs','IAU_2015',200025380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200025385,'Mathilde (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200025300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200025385','projected_crs','IAU_2015',200025385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200025390,'Mathilde (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200025300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200025390,'Mathilde (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',200025300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200025390','projected_crs','IAU_2015',200025390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 2002867, 'Steins', 2700.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 200286700, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -4985,7 +4985,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200286780,'Steins (2015) - Sphere / 
 INSERT INTO usage VALUES('IAU_2015','PCRS_200286780','projected_crs','IAU_2015',200286780,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200286785,'Steins (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200286700,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200286785','projected_crs','IAU_2015',200286785,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200286790,'Steins (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200286700,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200286790,'Steins (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',200286700,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200286790','projected_crs','IAU_2015',200286790,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 -- Skip 1992KD has it lacks all axis information
 -- Skip Braille has it lacks all axis information
@@ -5029,7 +5029,7 @@ INSERT INTO projected_crs VALUES('IAU_2015',200417980,'Toutatis (2015) - Sphere 
 INSERT INTO usage VALUES('IAU_2015','PCRS_200417980','projected_crs','IAU_2015',200417980,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',200417985,'Toutatis (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',200417900,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200417985','projected_crs','IAU_2015',200417985,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',200417990,'Toutatis (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',200417900,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',200417990,'Toutatis (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',200417900,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_200417990','projected_crs','IAU_2015',200417990,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO celestial_body VALUES('IAU_2015', 2025143, 'Itokawa', 173.000000);
 INSERT INTO prime_meridian VALUES('IAU_2015', 202514300, 'Reference Meridian', 0.0, 'EPSG', 9102, 0);
@@ -5070,5 +5070,5 @@ INSERT INTO projected_crs VALUES('IAU_2015',202514380,'Itokawa (2015) - Sphere /
 INSERT INTO usage VALUES('IAU_2015','PCRS_202514380','projected_crs','IAU_2015',202514380,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 INSERT INTO projected_crs VALUES('IAU_2015',202514385,'Itokawa (2015) - Sphere / Ocentric / Albers Equal Area',NULL,'EPSG','4400','IAU_2015',202514300,'IAU_2015',85,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_202514385','projected_crs','IAU_2015',202514385,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-INSERT INTO projected_crs VALUES('IAU_2015',202514390,'Itokawa (2015) - Sphere / Ocentric / Popular Visualisation Pseudo-Mercator',NULL,'EPSG','4400','IAU_2015',202514300,'IAU_2015',90,NULL,0);
+INSERT INTO projected_crs VALUES('IAU_2015',202514390,'Itokawa (2015) - Sphere / Ocentric / Mercator',NULL,'EPSG','4400','IAU_2015',202514300,'IAU_2015',90,NULL,0);
 INSERT INTO usage VALUES('IAU_2015','PCRS_202514390','projected_crs','IAU_2015',202514390,'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
