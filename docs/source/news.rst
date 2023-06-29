@@ -1867,7 +1867,7 @@ a geodetic object of the database, import and export geodetic objects from/into
 WKT and PROJ strings, and display coordinate operations available between two
 CRSs.
 
-UPDATES
+Updates
 -------
 
 * Removed projects.h as a public interface (`#835 <https://github.com/OSGeo/proj.4/issues/835>`_)
@@ -1930,7 +1930,7 @@ UPDATES
 * Added :option:`+dt` parameter to deformation as replacement for
   removed ``+t_obs`` (`#1264 <https://github.com/OSGeo/proj.4/issues/1264>`_)
 
-BUG FIXES
+Bug fixes
 ---------
 
 * Read :option:`+towgs84` values correctly on locales not using dot as comma separator (`#1136 <https://github.com/OSGeo/proj.4/issues/1136>`_)
@@ -1957,7 +1957,7 @@ PROJ 5.2.0
 ++++++++++++++++++++++++++++++++++++++++
 *September 15th 2018*
 
-UPDATES
+Updates
 -------
 
 * Added support for deg, rad and grad in unitconvert (`#1054 <https://github.com/OSGeo/proj.4/issues/1054>`_)
@@ -1983,7 +1983,7 @@ UPDATES
   stream (`#1111 <https://github.com/OSGeo/proj.4/issues/1111>`_)
 
 
-BUG FIXES
+Bug fixes
 ------------
 
 * Do not pivot over WGS84 when doing cs2cs-emulation with geocent (`#1026 <https://github.com/OSGeo/proj.4/issues/1026>`_)
@@ -2011,7 +2011,7 @@ PROJ 5.1.0
 *June 1st 2018*
 
 
-UPDATES
+Updates
 -------
 
 * Function :c:func:`proj_errno_string()` added to ``proj.h`` API (`#847 <https://github.com/OSGeo/proj.4/issues/847>`_)
@@ -2040,7 +2040,7 @@ UPDATES
   the temporal domain (`#1015 <https://github.com/OSGeo/proj.4/issues/1015>`_)
 
 
-BUG FIXES
+Bug fixes
 ------------
 
 * Handle ``NaN`` float cast overflow in ``PJ_robin.c`` and ``nad_intr.c`` (`#887 <https://github.com/OSGeo/proj.4/issues/887>`_)
