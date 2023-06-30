@@ -20,7 +20,7 @@ jobs:
         stale-pr-message: >
           The PROJ project highly values your contribution and would love to see
           this work merged!
-          Unfortunately this PR has not had any activity in the last 14 days and
+          Unfortunately this PR has not had any activity in the last two months and
           is being automatically marked as "stale".
           If you think this pull request should be merged, please check
 
