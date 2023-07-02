@@ -46,14 +46,14 @@ Parameters
     Horizontal input units. See :ref:`distance_units` and :ref:`angular_units`
     for a list of available units. Default: meter. `<conversion_factor>` is the conversion factor
     from the input unit to metre for linear units, or to radian for angular
-    units.
+    units. Default if not given: meters.
 
 .. option:: +xy_out=<unit> or <conversion_factor>
 
     Horizontal output units. See :ref:`distance_units` and :ref:`angular_units`
     for a list of available units. Deault: meter. `<conversion_factor>` is the conversion factor
     from the output unit to metre for linear units, or to radian for angular
-    units.
+    units. Default if not given: meters.
 
 .. option:: +z_in=<unit> or <conversion_factor>
 
