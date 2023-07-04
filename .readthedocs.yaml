@@ -30,8 +30,8 @@ build:
     - libcurl4-openssl-dev
 
 formats:
+  - htmlzip
   - pdf
-  - epub
 
 conda:
   environment: docs/environment.yml

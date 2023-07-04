@@ -4,9 +4,22 @@
 Download
 ================================================================================
 
-Here you can download current and previous releases of PROJ. We only supply a
-distribution of the source code and various resource file archives. See
-:ref:`install` for information on how to get pre-built packages of PROJ.
+.. only:: html
+
+    Here you can download current and previous releases of PROJ. We only supply
+    a distribution of the source code and various resource file archives. See
+    :ref:`install` for information on how to get pre-built packages of PROJ.
+
+    Documentation in PDF and zipped HTML can be downloaded using the flyout menu
+    on the left side of the browser window.
+
+.. only:: not html
+
+    Source code for the current and previous releases can be downloaded from
+    https://download.osgeo.org/proj/
+
+    Documentation in PDF and zipped HTML can be downloaded using the flyout menu
+    on the left side of the browser window from https://proj.org/
 
 .. _current_release:
 
