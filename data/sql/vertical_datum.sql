@@ -246,6 +246,12 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1331','Chart Datum UK & Ireland VORF
 INSERT INTO "usage" VALUES('EPSG','18581','vertical_datum','EPSG','1331','EPSG','4668','EPSG','1198');
 INSERT INTO "vertical_datum" VALUES('EPSG','1354','Nivellement General de l''Algerie 2022',NULL,'2022-11-30',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','19359','vertical_datum','EPSG','1354','EPSG','3213','EPSG','1026');
+INSERT INTO "vertical_datum" VALUES('EPSG','1362','Formentera',NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19908','vertical_datum','EPSG','1362','EPSG','4739','EPSG','1178');
+INSERT INTO "vertical_datum" VALUES('EPSG','1363','Alboran',NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19909','vertical_datum','EPSG','1363','EPSG','4741','EPSG','1178');
+INSERT INTO "vertical_datum" VALUES('EPSG','1364','Melilla',NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19910','vertical_datum','EPSG','1364','EPSG','4740','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,NULL,0);

@@ -414,6 +414,10 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1357','Reseau Geodesique de Nouvelle
 INSERT INTO "usage" VALUES('EPSG','19600','geodetic_datum','EPSG','1357','EPSG','1174','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1358','BH_ETRS89',NULL,'EPSG','7019','EPSG','8901','2011-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','19740','geodetic_datum','EPSG','1358','EPSG','1050','EPSG','1027');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1359','Hughes 1980',NULL,'EPSG','7058','EPSG','8901','1980-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19883','geodetic_datum','EPSG','1359','EPSG','1262','EPSG','1110');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1360','NSIDC International 1924 Authalic Sphere',NULL,'EPSG','7057','EPSG','8901',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','19879','geodetic_datum','EPSG','1360','EPSG','1262','EPSG','1195');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,'EPSG','7001','EPSG','8901',NULL,NULL,NULL,NULL,1);
 INSERT INTO "usage" VALUES('EPSG','13422','geodetic_datum','EPSG','6001','EPSG','1263','EPSG','1213');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,'EPSG','7002','EPSG','8901',NULL,NULL,NULL,NULL,1);

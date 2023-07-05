@@ -712,6 +712,10 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1349','KK-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1350','Ostenfeld-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1332','S34J-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1337','S34S-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1360','NSIDC Authalic Sphere','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1362','REDNAP','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1363','REDNAP','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1364','REDNAP','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -7885,3 +7889,6 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10262','Generalstabens S
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10268','OS-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10258','Generalstabens System, østvendt','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10266','Københavns Kommunes System, østvendt','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','10352','REDNAP height','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','10353','REDNAP height','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','10354','REDNAP height','EPSG');

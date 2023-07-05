@@ -3579,7 +3579,7 @@ INSERT INTO "extent" VALUES('EPSG','4600','Spain - Canary Islands onshore east o
 INSERT INTO "extent" VALUES('EPSG','4601','Spain - Canary Islands western east of 18°W','Spain - Canary Islands onshore - El Hierro east of 18°W, La Gomera, La Palma and Tenerife.',27.58,28.9,-18.06,-16.08,0);
 INSERT INTO "extent" VALUES('EPSG','4602','Spain - Balearic Islands - Mallorca','Spain - Balearic Islands - Mallorca onshore.',39.07,40.02,2.23,3.55,0);
 INSERT INTO "extent" VALUES('EPSG','4603','Spain - Balearic Islands - Menorca','Spain - Balearic Islands - Menorca onshore.',39.75,40.15,3.73,4.39,0);
-INSERT INTO "extent" VALUES('EPSG','4604','Spain - Balearic Islands - Ibiza and Formentera','Spain - Balearic Islands - Ibiza and Formentera - onshore.',38.59,39.17,1.12,1.68,0);
+INSERT INTO "extent" VALUES('EPSG','4604','Spain - Balearic Islands - Ibiza','Spain - Balearic Islands - Ibiza - onshore.',38.77,39.17,1.12,1.68,0);
 INSERT INTO "extent" VALUES('EPSG','4605','Spain - mainland onshore and Ceuta','Spain - mainland and Ceuta - onshore.',35.82,43.82,-9.37,3.39,0);
 INSERT INTO "extent" VALUES('EPSG','4606','Europe - British Isles - UK and Ireland onshore, UKCS','United Kingdom (UK) - offshore to boundary of UKCS within 49°45''N to 61°N and 9°W to 2°E; onshore Great Britain (England, Wales and Scotland) and Northern Ireland. Ireland onshore. Isle of Man onshore.',49.75,61.01,-10.85,2.01,0);
 INSERT INTO "extent" VALUES('EPSG','4607','UK - Glasgow to Kilmarnock','United Kingdom (UK) - on or related to the rail route from Glasgow to Kilmarnock via Barrhead and the branch to East Kilbride.',55.55,55.95,-4.65,-4.05,0);
@@ -3701,3 +3701,6 @@ INSERT INTO "extent" VALUES('EPSG','4730','USA - Illinois - Clinton, Jefferson, 
 INSERT INTO "extent" VALUES('EPSG','4731','USA - Illinois - Olney zone','United States (USA) - Illinois - counties of Clay, Edwards, Lawrence, Richland, Wabash and Wayne.',38.23,38.92,-88.71,-87.49,0);
 INSERT INTO "extent" VALUES('EPSG','4732','USA - Illinois - Carbondale zone','United States (USA) - Illinois - counties of Franklin, Gallatin, Hamilton, Jackson, Perry,  Randolph, Saline, White and Williamson.',37.56,38.26,-90.21,-87.91,0);
 INSERT INTO "extent" VALUES('EPSG','4733','USA - Illinois - Metropolis zone','United States (USA) - Illinois - counties of Alexander, Hardin, Johnson, Massac, Pope, Pulaski and Union.',36.97,37.61,-89.53,-88.06,0);
+INSERT INTO "extent" VALUES('EPSG','4739','Spain - Balearic Islands - Formentera','Spain - Balearic Islands - Formentera - onshore.',38.59,38.86,1.31,1.65,0);
+INSERT INTO "extent" VALUES('EPSG','4740','Spain - Melilla','Spain - Melilla onshore.',35.26,35.38,-2.98,-2.88,0);
+INSERT INTO "extent" VALUES('EPSG','4741','Spain - Alboran','Spain - Alboran island - onshore.',35.88,36.0,-3.1,-2.96,0);
