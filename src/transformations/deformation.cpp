@@ -8,26 +8,26 @@
 
 Perform datum shifts by means of a deformation/velocity model.
 
-    X_out = X_in + (T_ct - T_obs)*DX
-    Y_out = Y_in + (T_ct - T_obs)*DY
-    Z_out = Z_in + (T_ct - T_obs)*DZ
-
+    X_out = X_in + (T_obs - T_epoch) * DX
+    Y_out = Y_in + (T_obs - T_epoch) * DY
+    Z_out = Z_in + (T_obs - T_epoch) * DZ
 
 The deformation operation takes cartesian coordinates as input and
 returns cartesian coordinates as well.
 
 Corrections in the gridded model are in east, north, up (ENU) space.
-Hence the input coordinates needs to be converted to ENU-space when
+Hence the input coordinates need to be converted to ENU-space when
 searching for corrections in the grid. The corrections are then converted
 to cartesian PJ_XYZ-space and applied to the input coordinates (also in
 cartesian space).
 
-A full deformation model is described by two grids, one for the horizontal
-components and one for the vertical component. The horizontal grid is
-stored in CTable/CTable2 and the vertical grid is stored in the GTX
-format. The NTv2 format should not be used for this purpose since grid-
-values are scaled upon reading. Both grids are expected to contain
-grid-values in units of mm/year in ENU-space.
+A full deformation model is preferably represented as a 3 channel Geodetic
+TIFF Grid, but was historically described by a set of two grids: One for
+the horizontal components and one for the vertical component.
+
+The east and north components are (were) stored using the CTable/CTable2
+format, up component is (was) stored in the GTX format. Both grids are
+(were) expected to contain grid-values in units of mm/year in ENU-space.
 
 ************************************************************************
 * Copyright (c) 2017, Kristian Evers
