@@ -2017,25 +2017,26 @@ TEST(operation, equidistant_conic_export) {
 
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Equidistant Conic\",\n"
-              "    METHOD[\"Equidistant Conic\"],\n"
-              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "    METHOD[\"Equidistant Conic\",\n"
+              "        ID[\"EPSG\",1119]],\n"
+              "    PARAMETER[\"Latitude of false origin\",1,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
-              "        ID[\"EPSG\",8801]],\n"
-              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ID[\"EPSG\",8821]],\n"
+              "    PARAMETER[\"Longitude of false origin\",2,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
-              "        ID[\"EPSG\",8802]],\n"
+              "        ID[\"EPSG\",8822]],\n"
               "    PARAMETER[\"Latitude of 1st standard parallel\",3,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8823]],\n"
               "    PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8824]],\n"
-              "    PARAMETER[\"False easting\",5,\n"
+              "    PARAMETER[\"Easting at false origin\",5,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
-              "        ID[\"EPSG\",8806]],\n"
-              "    PARAMETER[\"False northing\",6,\n"
+              "        ID[\"EPSG\",8826]],\n"
+              "    PARAMETER[\"Northing at false origin\",6,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
-              "        ID[\"EPSG\",8807]]]");
+              "        ID[\"EPSG\",8827]]]");
 
     EXPECT_EQ(
         conv->exportToWKT(

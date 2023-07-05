@@ -2377,6 +2377,60 @@ TEST(wkt_parse, wkt2_2019_projected_with_base_geocentric) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt2_2019_eqdc_non_epsg) {
+    // Example from WKT2:2019
+    auto wkt = "PROJCRS[\"unknown\",\n"
+               "    BASEGEOGCRS[\"unknown\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1]],\n"
+               "            ID[\"EPSG\",6326]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8901]]],\n"
+               "    CONVERSION[\"unknown\",\n"
+               "        METHOD[\"Equidistant Conic\"],\n"
+               "        PARAMETER[\"Latitude of natural origin\",1,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8801]],\n"
+               "        PARAMETER[\"Longitude of natural origin\",2,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8802]],\n"
+               "        PARAMETER[\"Latitude of 1st standard parallel\",3,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8823]],\n"
+               "        PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8824]],\n"
+               "        PARAMETER[\"False easting\",5,\n"
+               "            LENGTHUNIT[\"metre\",1],\n"
+               "            ID[\"EPSG\",8806]],\n"
+               "        PARAMETER[\"False northing\",6,\n"
+               "            LENGTHUNIT[\"metre\",1],\n"
+               "            ID[\"EPSG\",8807]]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"(E)\",east,\n"
+               "            ORDER[1],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]],\n"
+               "        AXIS[\"(N)\",north,\n"
+               "            ORDER[2],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        "+proj=eqdc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6 "
+        "+datum=WGS84 +units=m +no_defs +type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projected_angular_unit_from_primem) {
     auto obj = WKTParser().createFromWKT(
         "PROJCRS[\"NTF (Paris) / Lambert Nord France\",\n"
@@ -6422,12 +6476,12 @@ static const struct {
       {"Latitude_Of_Origin", 6}},
      "Equidistant Conic",
      {
-         {"Latitude of natural origin", 6},
-         {"Longitude of natural origin", 3},
+         {"Latitude of false origin", 6},
+         {"Longitude of false origin", 3},
          {"Latitude of 1st standard parallel", 4},
          {"Latitude of 2nd standard parallel", 5},
-         {"False easting", 1},
-         {"False northing", 2},
+         {"Easting at false origin", 1},
+         {"Northing at false origin", 2},
      }},
 
     {"Cassini",

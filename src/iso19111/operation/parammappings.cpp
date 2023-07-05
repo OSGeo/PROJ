@@ -171,7 +171,7 @@ static const ParamMapping paramLongFalseOriginLongOfCenter = {
     EPSG_CODE_PARAMETER_LONGITUDE_FALSE_ORIGIN, WKT1_LONGITUDE_OF_CENTER,
     common::UnitOfMeasure::Type::ANGULAR, lon_0};
 
-static const ParamMapping *const paramsAEA[] = {
+static const ParamMapping *const paramsAEA_EQDC[] = {
     &paramLatFalseOriginLatOfCenter,
     &paramLongFalseOriginLongOfCenter,
     &paramLatitude1stStdParallel,
@@ -608,7 +608,7 @@ static const MethodMapping projectionMethodMappings[] = {
      paramsTMG},
 
     {EPSG_NAME_METHOD_ALBERS_EQUAL_AREA, EPSG_CODE_METHOD_ALBERS_EQUAL_AREA,
-     "Albers_Conic_Equal_Area", "aea", nullptr, paramsAEA},
+     "Albers_Conic_Equal_Area", "aea", nullptr, paramsAEA_EQDC},
 
     {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
      EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
@@ -666,6 +666,12 @@ static const MethodMapping projectionMethodMappings[] = {
      EPSG_CODE_METHOD_HYPERBOLIC_CASSINI_SOLDNER, nullptr, "cass", "hyperbolic",
      paramsNatOrigin},
 
+    // Definition to be put before PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC
+    {EPSG_NAME_METHOD_EQUIDISTANT_CONIC, EPSG_CODE_METHOD_EQUIDISTANT_CONIC,
+     "Equidistant_Conic", "eqdc", nullptr, paramsAEA_EQDC},
+
+    // Definition before EPSG codified it. To be put after entry for
+    // EPSG_NAME_METHOD_EQUIDISTANT_CONIC
     {PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC, 0, "Equidistant_Conic", "eqdc",
      nullptr, paramsEQDC},
 
