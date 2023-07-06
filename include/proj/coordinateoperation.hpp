@@ -1105,12 +1105,12 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
 
     PROJ_DLL static ConversionNNPtr
     createEquidistantConic(const util::PropertyMap &properties,
-                           const common::Angle &centerLat,
-                           const common::Angle &centerLong,
+                           const common::Angle &latitudeFalseOrigin,
+                           const common::Angle &longitudeFalseOrigin,
                            const common::Angle &latitudeFirstParallel,
                            const common::Angle &latitudeSecondParallel,
-                           const common::Length &falseEasting,
-                           const common::Length &falseNorthing);
+                           const common::Length &eastingFalseOrigin,
+                           const common::Length &northingFalseOrigin);
 
     PROJ_DLL static ConversionNNPtr
     createEckertI(const util::PropertyMap &properties,

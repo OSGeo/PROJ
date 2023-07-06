@@ -917,31 +917,32 @@ ConversionNNPtr Conversion::createCassiniSoldner(
  * <a href="../../../operations/projections/eqdc.html">
  * Equidistant Conic</a> projection method.
  *
- * There is no equivalent in EPSG.
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_1119/index.html">
+ * EPSG:1119</a>.
  *
- * @note Although not found in EPSG, the order of arguments is conformant with
- * the "spirit" of EPSG and different than OGRSpatialReference::setEC() of GDAL
- *&lt;= 2.3 * @param properties See \ref general_properties of the conversion.
- *If the name
+ * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
- *
- * @param centerLat See \ref center_latitude
- * @param centerLong See \ref center_longitude
+ * @param latitudeFalseOrigin See \ref latitude_false_origin
+ * @param longitudeFalseOrigin See \ref longitude_false_origin
  * @param latitudeFirstParallel See \ref latitude_first_std_parallel
  * @param latitudeSecondParallel See \ref latitude_second_std_parallel
- * @param falseEasting See \ref false_easting
- * @param falseNorthing See \ref false_northing
+ * @param eastingFalseOrigin See \ref easting_false_origin
+ * @param northingFalseOrigin See \ref northing_false_origin
  * @return a new Conversion.
  */
-ConversionNNPtr Conversion::createEquidistantConic(
-    const util::PropertyMap &properties, const common::Angle &centerLat,
-    const common::Angle &centerLong, const common::Angle &latitudeFirstParallel,
-    const common::Angle &latitudeSecondParallel,
-    const common::Length &falseEasting, const common::Length &falseNorthing) {
-    return create(properties, PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC,
-                  createParams(centerLat, centerLong, latitudeFirstParallel,
-                               latitudeSecondParallel, falseEasting,
-                               falseNorthing));
+ConversionNNPtr
+Conversion::createEquidistantConic(const util::PropertyMap &properties,
+                                   const common::Angle &latitudeFalseOrigin,
+                                   const common::Angle &longitudeFalseOrigin,
+                                   const common::Angle &latitudeFirstParallel,
+                                   const common::Angle &latitudeSecondParallel,
+                                   const common::Length &eastingFalseOrigin,
+                                   const common::Length &northingFalseOrigin) {
+    return create(properties, EPSG_CODE_METHOD_EQUIDISTANT_CONIC,
+                  createParams(latitudeFalseOrigin, longitudeFalseOrigin,
+                               latitudeFirstParallel, latitudeSecondParallel,
+                               eastingFalseOrigin, northingFalseOrigin));
 }
 
 // ---------------------------------------------------------------------------

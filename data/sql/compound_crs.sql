@@ -834,6 +834,12 @@ INSERT INTO "compound_crs" VALUES('EPSG','10293','ETRS89/DREF91/2016 + DHHN2016 
 INSERT INTO "usage" VALUES('EPSG','19275','compound_crs','EPSG','10293','EPSG','1103','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','10318','RGNC15 (lon-lat) + NGNC08 height',NULL,'EPSG','10312','EPSG','9351',0);
 INSERT INTO "usage" VALUES('EPSG','19634','compound_crs','EPSG','10318','EPSG','3430','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','10355','ETRS89 + Formentera height',NULL,'EPSG','4258','EPSG','10352',0);
+INSERT INTO "usage" VALUES('EPSG','19914','compound_crs','EPSG','10355','EPSG','4739','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','10356','ETRS89 + Alboran height',NULL,'EPSG','4258','EPSG','10353',0);
+INSERT INTO "usage" VALUES('EPSG','19915','compound_crs','EPSG','10356','EPSG','4741','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','10357','ETRS89 + Melilla height',NULL,'EPSG','4258','EPSG','10354',0);
+INSERT INTO "usage" VALUES('EPSG','19916','compound_crs','EPSG','10357','EPSG','4740','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);

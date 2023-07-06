@@ -399,18 +399,18 @@ static const ESRIParamMapping paramsESRI_Polar_Stereographic_Variant_A[] = {
     {nullptr, nullptr, 0, "0.0", false}};
 
 static const ESRIParamMapping paramsESRI_Equidistant_Conic[] = {
-    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
-     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
-    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
-     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
-    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
-     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"False_Easting", EPSG_NAME_PARAMETER_EASTING_FALSE_ORIGIN,
+     EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_NORTHING_FALSE_ORIGIN,
+     EPSG_CODE_PARAMETER_NORTHING_FALSE_ORIGIN, "0.0", false},
+    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_FALSE_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_FALSE_ORIGIN, "0.0", false},
     {"Standard_Parallel_1", EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
      EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL, "0.0", false},
     {"Standard_Parallel_2", EPSG_NAME_PARAMETER_LATITUDE_2ND_STD_PARALLEL,
      EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL, "0.0", false},
-    {"Latitude_Of_Origin", EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
-     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Latitude_Of_Origin", EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN,
+     EPSG_CODE_PARAMETER_LATITUDE_FALSE_ORIGIN, "0.0", false},
     {nullptr, nullptr, 0, "0.0", false}};
 
 static const ESRIParamMapping paramsESRI_Cassini[] = {
