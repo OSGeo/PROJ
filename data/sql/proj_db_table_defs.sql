@@ -490,6 +490,7 @@ BEGIN
     SELECT RAISE(ABORT, 'insert on conversion violates constraint: method should be known')
         WHERE (NEW.auth_name || '_' || NEW.code || '_' || NEW.name) NOT IN (
             'EPSG_1024_Popular Visualisation Pseudo Mercator',
+            'EPSG_1026_Mercator (Spherical)',
             'EPSG_1027_Lambert Azimuthal Equal Area (Spherical)',
             'EPSG_1028_Equidistant Cylindrical',
             'EPSG_1029_Equidistant Cylindrical (Spherical)',
