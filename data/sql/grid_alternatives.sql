@@ -284,6 +284,7 @@ VALUES
 -- pl_gugik - Główny Urząd Geodezji i Kartografii
 ('gugik-geoid2011-PL-EVRF2007-NH.txt','pl_gugik_geoid2011-PL-EVRF2007-NH.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/pl_gugik_geoid2011-PL-EVRF2007-NH.tif',1,1,NULL),
 ('gugik-geoid2011-PL-KRON86-NH.txt','pl_gugik_geoid2011-PL-KRON86-NH.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/pl_gugik_geoid2011-PL-KRON86-NH.tif',1,1,NULL),
+('Model_quasi-geoidy-PL-geoid2021-PL-EVRF2007-NH.txt','pl_gugik_geoid2021-PL-EVRF2007-NH.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/pl_gugik_geoid2021-PL-EVRF2007-NH.tif',1,1,NULL),
 
 -- pt_dgt - DG Territorio
 ('DLx_ETRS89_geo.gsb','pt_dgt_DLx_ETRS89_geo.tif','DLx_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_DLx_ETRS89_geo.tif',1,1,NULL),
