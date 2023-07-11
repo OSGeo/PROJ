@@ -1830,7 +1830,8 @@ class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
     PROJ_INTERNAL static void
     fixStepsDirection(const crs::CRSNNPtr &concatOpSourceCRS,
                       const crs::CRSNNPtr &concatOpTargetCRS,
-                      std::vector<CoordinateOperationNNPtr> &operationsInOut);
+                      std::vector<CoordinateOperationNNPtr> &operationsInOut,
+                      const io::DatabaseContextPtr &dbContext);
     //! @endcond
 
   protected:

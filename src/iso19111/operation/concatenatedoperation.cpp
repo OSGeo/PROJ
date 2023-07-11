@@ -265,7 +265,8 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
 void ConcatenatedOperation::fixStepsDirection(
     const crs::CRSNNPtr &concatOpSourceCRS,
     const crs::CRSNNPtr &concatOpTargetCRS,
-    std::vector<CoordinateOperationNNPtr> &operationsInOut) {
+    std::vector<CoordinateOperationNNPtr> &operationsInOut,
+    const io::DatabaseContextPtr & /*dbContext*/) {
 
     // Set of heuristics to assign CRS to steps, and possibly reverse them.
 

@@ -6257,7 +6257,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     ->createCoordinateReferenceSystem(source_crs_code),
                 d->createFactory(target_crs_auth_name)
                     ->createCoordinateReferenceSystem(target_crs_code),
-                operations);
+                operations, d->context());
 
             auto props = d->createPropertiesSearchUsages(
                 type, code, name, deprecated, description);
