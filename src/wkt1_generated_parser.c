@@ -68,7 +68,7 @@
 #define yylex           pj_wkt1_lex
 #define yyerror         pj_wkt1_error
 #define yydebug         pj_wkt1_debug
-#define yynerrs         pj_wkt1_nerrs
+/* #define yynerrs         pj_wkt1_nerrs */
 
 /* First part of user prologue.  */
 
@@ -1315,7 +1315,7 @@ YY_INITIAL_VALUE (static YYSTYPE yyval_default;)
 YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
 
     /* Number of syntax errors so far.  */
-    int yynerrs;
+    /* int yynerrs; */
 
     yy_state_fast_t yystate;
     /* Number of tokens to shift before error messages enabled.  */
@@ -1369,7 +1369,7 @@ YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
 
   yystate = 0;
   yyerrstatus = 0;
-  yynerrs = 0;
+  /* yynerrs = 0; */
   yychar = YYEMPTY; /* Cause a token to be read.  */
   goto yysetstate;
 
@@ -1604,7 +1604,7 @@ yyerrlab:
   /* If not already recovering from an error, report this error.  */
   if (!yyerrstatus)
     {
-      ++yynerrs;
+      /* ++yynerrs; */
 #if ! YYERROR_VERBOSE
       yyerror (context, YY_("syntax error"));
 #else
