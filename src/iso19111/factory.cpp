@@ -6772,19 +6772,30 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         const auto &auth_name = row[4];
         const auto &code = row[5];
         const auto &table_name = row[6];
-        auto op = d->createFactory(auth_name)->createCoordinateOperation(
-            code, true, usePROJAlternativeGridNames, table_name);
-        if (tryReverseOrder &&
-            (!sourceCRSAuthName.empty()
-                 ? (source_crs_auth_name != sourceCRSAuthName ||
-                    source_crs_code != sourceCRSCode)
-                 : (target_crs_auth_name != targetCRSAuthName ||
-                    target_crs_code != targetCRSCode))) {
-            op = op->inverse();
-        }
-        if (!discardIfMissingGrid ||
-            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
-            list.emplace_back(op);
+        try {
+            auto op = d->createFactory(auth_name)->createCoordinateOperation(
+                code, true, usePROJAlternativeGridNames, table_name);
+            if (tryReverseOrder &&
+                (!sourceCRSAuthName.empty()
+                     ? (source_crs_auth_name != sourceCRSAuthName ||
+                        source_crs_code != sourceCRSCode)
+                     : (target_crs_auth_name != targetCRSAuthName ||
+                        target_crs_code != targetCRSCode))) {
+                op = op->inverse();
+            }
+            if (!discardIfMissingGrid ||
+                !d->rejectOpDueToMissingGrid(op,
+                                             considerKnownGridsAsAvailable)) {
+                list.emplace_back(op);
+            }
+        } catch (const std::exception &e) {
+            // Mostly for debugging purposes when using an inconsistent
+            // database
+            if (getenv("PROJ_IGNORE_INSTANTIATION_ERRORS")) {
+                fprintf(stderr, "Ignoring invalid operation: %s\n", e.what());
+            } else {
+                throw;
+            }
         }
     }
     d->context()->d->cache(cacheKey, list);
@@ -7184,24 +7195,36 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
         // const auto &accuracy2 = row[7];
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
+        try {
+            auto op1 =
+                d->createFactory(auth_name1)
+                    ->createCoordinateOperation(
+                        code1, true, usePROJAlternativeGridNames, table1);
+            if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
+            auto op2 =
+                d->createFactory(auth_name2)
+                    ->createCoordinateOperation(
+                        code2, true, usePROJAlternativeGridNames, table2);
+            if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
 
-        listTmp.emplace_back(
-            operation::ConcatenatedOperation::createComputeMetadata({op1, op2},
-                                                                    false));
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(
+                    {op1, op2}, false));
+        } catch (const std::exception &e) {
+            // Mostly for debugging purposes when using an inconsistent
+            // database
+            if (getenv("PROJ_IGNORE_INSTANTIATION_ERRORS")) {
+                fprintf(stderr, "Ignoring invalid operation: %s\n", e.what());
+            } else {
+                throw;
+            }
+        }
     }
 
     // Case (source->intermediate) and (target->intermediate)
@@ -7228,24 +7251,36 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
         // const auto &accuracy2 = row[7];
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
+        try {
+            auto op1 =
+                d->createFactory(auth_name1)
+                    ->createCoordinateOperation(
+                        code1, true, usePROJAlternativeGridNames, table1);
+            if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
+            auto op2 =
+                d->createFactory(auth_name2)
+                    ->createCoordinateOperation(
+                        code2, true, usePROJAlternativeGridNames, table2);
+            if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
 
-        listTmp.emplace_back(
-            operation::ConcatenatedOperation::createComputeMetadata(
-                {op1, op2->inverse()}, false));
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(
+                    {op1, op2->inverse()}, false));
+        } catch (const std::exception &e) {
+            // Mostly for debugging purposes when using an inconsistent
+            // database
+            if (getenv("PROJ_IGNORE_INSTANTIATION_ERRORS")) {
+                fprintf(stderr, "Ignoring invalid operation: %s\n", e.what());
+            } else {
+                throw;
+            }
+        }
     }
 
     // Case (intermediate->source) and (intermediate->target)
@@ -7293,24 +7328,36 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
         // const auto &accuracy2 = row[7];
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
+        try {
+            auto op1 =
+                d->createFactory(auth_name1)
+                    ->createCoordinateOperation(
+                        code1, true, usePROJAlternativeGridNames, table1);
+            if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
+            auto op2 =
+                d->createFactory(auth_name2)
+                    ->createCoordinateOperation(
+                        code2, true, usePROJAlternativeGridNames, table2);
+            if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
 
-        listTmp.emplace_back(
-            operation::ConcatenatedOperation::createComputeMetadata(
-                {op1->inverse(), op2}, false));
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(
+                    {op1->inverse(), op2}, false));
+        } catch (const std::exception &e) {
+            // Mostly for debugging purposes when using an inconsistent
+            // database
+            if (getenv("PROJ_IGNORE_INSTANTIATION_ERRORS")) {
+                fprintf(stderr, "Ignoring invalid operation: %s\n", e.what());
+            } else {
+                throw;
+            }
+        }
     }
 
     // Case (intermediate->source) and (target->intermediate)
@@ -7337,24 +7384,36 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
         // const auto &accuracy2 = row[7];
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
+        try {
+            auto op1 =
+                d->createFactory(auth_name1)
+                    ->createCoordinateOperation(
+                        code1, true, usePROJAlternativeGridNames, table1);
+            if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
+            auto op2 =
+                d->createFactory(auth_name2)
+                    ->createCoordinateOperation(
+                        code2, true, usePROJAlternativeGridNames, table2);
+            if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
 
-        listTmp.emplace_back(
-            operation::ConcatenatedOperation::createComputeMetadata(
-                {op1->inverse(), op2->inverse()}, false));
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(
+                    {op1->inverse(), op2->inverse()}, false));
+        } catch (const std::exception &e) {
+            // Mostly for debugging purposes when using an inconsistent
+            // database
+            if (getenv("PROJ_IGNORE_INSTANTIATION_ERRORS")) {
+                fprintf(stderr, "Ignoring invalid operation: %s\n", e.what());
+            } else {
+                throw;
+            }
+        }
     }
 
     std::vector<operation::CoordinateOperationNNPtr> list;
