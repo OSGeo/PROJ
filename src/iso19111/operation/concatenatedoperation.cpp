@@ -274,10 +274,8 @@ void ConcatenatedOperation::fixStepsDirection(
     };
 
     const auto isGeocentric = [](const crs::CRS *crs) -> bool {
-        auto geodCRS = dynamic_cast<const crs::GeodeticCRS *>(crs);
-        if (geodCRS && geodCRS->coordinateSystem()->axisList().size() == 3)
-            return true;
-        return false;
+        const auto geodCRS = dynamic_cast<const crs::GeodeticCRS *>(crs);
+        return (geodCRS && geodCRS->isGeocentric());
     };
 
     // Apply axis order reversal operation on first operation if needed
