@@ -18,9 +18,9 @@ invproj
 
 Synopsis
 ********
-    **proj** [**-beEfiIlmorsStTvVwW**] [args]] [*+opt[=arg]* ...] file ...
+    **proj** [**-beEfiIlmorsStTvVwWC**] [args]] [*+opt[=arg]* ...] file ...
 
-    **invproj** [**-beEfiIlmorsStTvVwW**] [args]] [*+opt[=arg]* ...] file ...
+    **invproj** [**-beEfiIlmorsStTvVwWC**] [args]] [*+opt[=arg]* ...] file ...
 
 
 Description
@@ -156,6 +156,14 @@ The following control parameters can appear in any order
 
     This option causes an expanded annotated listing of the characteristics of
     the projected point. :option:`-v` is implied with this option.
+
+.. option:: -C <crs>
+
+.. versionadded:: 9.3.0
+
+    Where *crs* is a definition of a Projected CRS, as its WKT or code
+    for instance EPSG:32632. This option generates the projection to
+    the underlying geographic system. When used, it ignores *+opt* arguments.
 
 
 The *+opt* run-line arguments are associated with cartographic parameters.

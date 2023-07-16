@@ -1,6 +1,7 @@
 /* <<<< Cartographic projection filter program >>>> */
 #include "proj.h"
 #include "emess.h"
+#include "proj_experimental.h"
 #include "proj_internal.h"
 #include "utils.h"
 #include <ctype.h>
@@ -47,6 +48,8 @@ static char oform_buffer[16]; /* Buffer for oform when using -d */
 static const char *oterr = "*\t*", /* output line for unprojectable input */
     *usage = "%s\nusage: %s [-bdeEfiIlmorsStTvVwW [args]] [+opt[=arg] ...] "
              "[file ...]\n";
+
+static const char *ocrs = nullptr; /* CRS use case */
 
 static PJ_FACTORS facs;
 
@@ -496,6 +499,11 @@ int main(int argc, char **argv) {
                 case 's': /* reverse output */
                     reverseout = 1;
                     continue;
+                case 'C': /* CRS use case */
+                    if (--argc <= 0)
+                        goto noargument;
+                    ocrs = *++argv;
+                    continue;
                 default:
                     emess(1, "invalid option: -%c", *arg);
                     break;
@@ -525,11 +533,46 @@ int main(int argc, char **argv) {
     }
     proj_context_use_proj4_init_rules(nullptr, true);
 
+    if (ocrs) {
+        // logic copied from proj_factors function
+        if (PJ *P = proj_create(nullptr, ocrs)) {
+            const auto type = proj_get_type(P);
+            if (type == PJ_TYPE_PROJECTED_CRS) {
+                auto ctx = P->ctx;
+                auto geodetic_crs = proj_get_source_crs(ctx, P);
+                assert(geodetic_crs);
+                auto datum = proj_crs_get_datum(ctx, geodetic_crs);
+                auto datum_ensemble =
+                    proj_crs_get_datum_ensemble(ctx, geodetic_crs);
+                auto cs = proj_create_ellipsoidal_2D_cs(
+                    ctx, PJ_ELLPS2D_LONGITUDE_LATITUDE, "Radian", 1.0);
+                auto temp = proj_create_geographic_crs_from_datum(
+                    ctx, "unnamed crs", datum ? datum : datum_ensemble, cs);
+                proj_destroy(datum);
+                proj_destroy(datum_ensemble);
+                proj_destroy(cs);
+                proj_destroy(geodetic_crs);
+                Proj = proj_create_crs_to_crs_from_pj(ctx, temp, P, nullptr,
+                                                      nullptr);
+                proj_destroy(temp);
+            } else {
+                emess(3, "CRS must be projected");
+            }
+            proj_destroy(P);
+        } else {
+            emess(3, "-C argument is not parseable");
+        }
+        if (!argvVector.empty()) {
+            emess(-1, "+opt arguments are ignored due to -C option");
+        }
+    }
+
     // proj historically ignores any datum shift specifier, like nadgrids,
     // towgs84, etc
     argvVector.push_back(const_cast<char *>("break_cs2cs_recursion"));
 
-    if (!(Proj = proj_create_argv(nullptr, static_cast<int>(argvVector.size()),
+    if (!Proj &&
+        !(Proj = proj_create_argv(nullptr, static_cast<int>(argvVector.size()),
                                   argvVector.data())))
         emess(3, "projection initialization failure\ncause: %s",
               proj_errno_string(proj_context_errno(nullptr)));
