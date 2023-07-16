@@ -38,8 +38,8 @@ EOF
 #
 echo "Test -C option"
 #
-$EXE -C EPSG:26948 -S >>${OUT} <<EOF
--110.166666666 31
+$EXE -C EPSG:32620 -S >>${OUT} <<EOF
+-63 0
 EOF
 
 #
