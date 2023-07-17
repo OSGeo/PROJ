@@ -265,7 +265,8 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
 void ConcatenatedOperation::fixStepsDirection(
     const crs::CRSNNPtr &concatOpSourceCRS,
     const crs::CRSNNPtr &concatOpTargetCRS,
-    std::vector<CoordinateOperationNNPtr> &operationsInOut) {
+    std::vector<CoordinateOperationNNPtr> &operationsInOut,
+    const io::DatabaseContextPtr & /*dbContext*/) {
 
     // Set of heuristics to assign CRS to steps, and possibly reverse them.
 
@@ -274,10 +275,8 @@ void ConcatenatedOperation::fixStepsDirection(
     };
 
     const auto isGeocentric = [](const crs::CRS *crs) -> bool {
-        auto geodCRS = dynamic_cast<const crs::GeodeticCRS *>(crs);
-        if (geodCRS && geodCRS->coordinateSystem()->axisList().size() == 3)
-            return true;
-        return false;
+        const auto geodCRS = dynamic_cast<const crs::GeodeticCRS *>(crs);
+        return (geodCRS && geodCRS->isGeocentric());
     };
 
     // Apply axis order reversal operation on first operation if needed
@@ -499,6 +498,47 @@ void ConcatenatedOperation::fixStepsDirection(
                 auto newOp(Conversion::createGeographicGeocentric(
                     NN_NO_CHECK(prevOpTarget), NN_NO_CHECK(l_targetCRS)));
                 operationsInOut.insert(operationsInOut.begin() + i, newOp);
+                // Particular case for https://github.com/OSGeo/PROJ/issues/3819
+                // where the antepenultimate transformation goes to A
+                // (geographic 3D) // and the last transformation is a NADCON 3D
+                // but between A (geographic 2D) to B (geographic 2D), and the
+                // concatenated transformation target CRS is B (geographic 3D)
+                // This is due to an oddity of the EPSG database that registers
+                // the NADCON 3D transformation between the 2D geographic CRS
+                // and not the 3D ones.
+            } else if (i + 1 == operationsInOut.size() &&
+                       l_sourceCRS->nameStr() == prevOpTarget->nameStr() &&
+                       l_targetCRS->nameStr() == concatOpTargetCRS->nameStr() &&
+                       isGeographic(l_targetCRS.get()) &&
+                       isGeographic(concatOpTargetCRS.get()) &&
+                       isGeographic(l_sourceCRS.get()) &&
+                       isGeographic(prevOpTarget.get()) &&
+                       dynamic_cast<const crs::GeographicCRS *>(
+                           prevOpTarget.get())
+                               ->coordinateSystem()
+                               ->axisList()
+                               .size() == 3 &&
+                       dynamic_cast<const crs::GeographicCRS *>(
+                           l_sourceCRS.get())
+                               ->coordinateSystem()
+                               ->axisList()
+                               .size() == 2 &&
+                       dynamic_cast<const crs::GeographicCRS *>(
+                           l_targetCRS.get())
+                               ->coordinateSystem()
+                               ->axisList()
+                               .size() == 2) {
+                const auto transf =
+                    dynamic_cast<const Transformation *>(op.get());
+                if (transf &&
+                    (transf->method()->getEPSGCode() ==
+                         EPSG_CODE_METHOD_NADCON5_3D ||
+                     transf->parameterValue(
+                         PROJ_WKT2_PARAMETER_LATITUDE_LONGITUDE_ELLIPOISDAL_HEIGHT_DIFFERENCE_FILE,
+                         0))) {
+                    op->setCRSs(NN_NO_CHECK(prevOpTarget), concatOpTargetCRS,
+                                nullptr);
+                }
             }
         }
     }

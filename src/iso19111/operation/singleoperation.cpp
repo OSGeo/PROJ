@@ -3730,9 +3730,11 @@ bool SingleOperation::exportToPROJStringGeneric(
                 concat("Can apply ", methodName, " only to GeographicCRS"));
         }
 
-        formatter->startInversion();
-        sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
-        formatter->stopInversion();
+        if (!formatter->omitHorizontalConversionInVertTransformation()) {
+            formatter->startInversion();
+            sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+            formatter->stopInversion();
+        }
 
         if (isMethodInverseOf) {
             formatter->startInversion();
@@ -3753,7 +3755,9 @@ bool SingleOperation::exportToPROJStringGeneric(
             formatter->stopInversion();
         }
 
-        targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+        if (!formatter->omitHorizontalConversionInVertTransformation()) {
+            targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+        }
 
         return true;
     }
