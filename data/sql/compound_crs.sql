@@ -557,9 +557,9 @@ INSERT INTO "usage" VALUES('EPSG','6028','compound_crs','EPSG','8912','EPSG','32
 INSERT INTO "compound_crs" VALUES('EPSG','9286','ETRS89 + NAP height',NULL,'EPSG','4258','EPSG','5709',0);
 INSERT INTO "usage" VALUES('EPSG','14121','compound_crs','EPSG','9286','EPSG','1172','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9289','ETRS89 + LAT NL depth',NULL,'EPSG','4258','EPSG','9287',0);
-INSERT INTO "usage" VALUES('EPSG','14124','compound_crs','EPSG','9289','EPSG','1630','EPSG','1198');
+INSERT INTO "usage" VALUES('EPSG','14124','compound_crs','EPSG','9289','EPSG','4742','EPSG','1198');
 INSERT INTO "compound_crs" VALUES('EPSG','9290','ETRS89 + MSL NL depth',NULL,'EPSG','4258','EPSG','9288',0);
-INSERT INTO "usage" VALUES('EPSG','14125','compound_crs','EPSG','9290','EPSG','1630','EPSG','1265');
+INSERT INTO "usage" VALUES('EPSG','14125','compound_crs','EPSG','9290','EPSG','4742','EPSG','1265');
 INSERT INTO "compound_crs" VALUES('EPSG','9306','HS2 Survey Grid + HS2-VRF height',NULL,'EPSG','9300','EPSG','9303',0);
 INSERT INTO "usage" VALUES('EPSG','14050','compound_crs','EPSG','9306','EPSG','4582','EPSG','1260');
 INSERT INTO "compound_crs" VALUES('EPSG','9368','TPEN11 Grid + ODN height',NULL,'EPSG','9367','EPSG','5701',0);
@@ -840,6 +840,8 @@ INSERT INTO "compound_crs" VALUES('EPSG','10356','ETRS89 + Alboran height',NULL,
 INSERT INTO "usage" VALUES('EPSG','19915','compound_crs','EPSG','10356','EPSG','4741','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','10357','ETRS89 + Melilla height',NULL,'EPSG','4258','EPSG','10354',0);
 INSERT INTO "usage" VALUES('EPSG','19916','compound_crs','EPSG','10357','EPSG','4740','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','10365','KGD2002 + KVD1964 height',NULL,'EPSG','4737','EPSG','5193',0);
+INSERT INTO "usage" VALUES('EPSG','20149','compound_crs','EPSG','10365','EPSG','3266','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);

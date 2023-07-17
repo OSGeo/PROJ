@@ -260,3 +260,4 @@ INSERT INTO "scope" VALUES('EPSG','1280','Readjustment of coordinates to account
 INSERT INTO "scope" VALUES('EPSG','1281','Geodesy. Defines LUREF from 2006 to 2014.',0);
 INSERT INTO "scope" VALUES('EPSG','1282','Geodesy. Defines LUREF from 2014 to 2020.',0);
 INSERT INTO "scope" VALUES('EPSG','1283','Geodesy. Defines LUREF from 2020.',0);
+INSERT INTO "scope" VALUES('EPSG','1284','Geodesy. Defines NAD83(CSRS)v8.',0);
