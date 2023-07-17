@@ -49,8 +49,6 @@ static const char *oterr = "*\t*", /* output line for unprojectable input */
     *usage = "%s\nusage: %s [-bdeEfiIlmorsStTvVwW [args]] [+opt[=arg] ...] "
              "[file ...]\n";
 
-static const char *ocrs = nullptr; /* CRS use case */
-
 static PJ_FACTORS facs;
 
 static double (*informat)(const char *,
@@ -499,11 +497,6 @@ int main(int argc, char **argv) {
                 case 's': /* reverse output */
                     reverseout = 1;
                     continue;
-                case 'C': /* CRS use case */
-                    if (--argc <= 0)
-                        goto noargument;
-                    ocrs = *++argv;
-                    continue;
                 default:
                     emess(1, "invalid option: -%c", *arg);
                     break;
@@ -515,8 +508,6 @@ int main(int argc, char **argv) {
         } else /* assumed to be input file name(s) */
             eargv[eargc++] = *argv;
     }
-    if (eargc == 0) /* if no specific files force sysin */
-        eargv[eargc++] = const_cast<char *>("-");
 
     if (oform) {
         if (!validate_form_string_for_numbers(oform)) {
@@ -533,9 +524,13 @@ int main(int argc, char **argv) {
     }
     proj_context_use_proj4_init_rules(nullptr, true);
 
-    if (ocrs) {
+    if (argvVector.empty() && eargc >= 1) {
+        // Consider the next arg as a CRS, not a file.
+        std::string ocrs = eargv[0];
+        eargv++;
+        eargc--;
         // logic copied from proj_factors function
-        if (PJ *P = proj_create(nullptr, ocrs)) {
+        if (PJ *P = proj_create(nullptr, ocrs.c_str())) {
             const auto type = proj_get_type(P);
             if (type == PJ_TYPE_PROJECTED_CRS) {
                 auto ctx = P->ctx;
@@ -560,12 +555,11 @@ int main(int argc, char **argv) {
             }
             proj_destroy(P);
         } else {
-            emess(3, "-C argument is not parseable");
-        }
-        if (!argvVector.empty()) {
-            emess(-1, "+opt arguments are ignored due to -C option");
+            emess(3, "CRS is not parseable");
         }
     }
+    if (eargc == 0) /* if no specific files force sysin */
+        eargv[eargc++] = const_cast<char *>("-");
 
     // proj historically ignores any datum shift specifier, like nadgrids,
     // towgs84, etc

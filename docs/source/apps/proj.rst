@@ -18,9 +18,9 @@ invproj
 
 Synopsis
 ********
-    **proj** [**-beEfiIlmorsStTvVwWC**] [args]] [*+opt[=arg]* ...] file ...
+    **proj** [**-beEfiIlmorsStTvVwW**] [args]] ([*+opt[=arg]* ...] | {crs}) file ...
 
-    **invproj** [**-beEfiIlmorsStTvVwWC**] [args]] [*+opt[=arg]* ...] file ...
+    **invproj** [**-beEfiIlmorsStTvVwW**] [args]] ([*+opt[=arg]* ...] | {crs}) file ...
 
 
 Description
@@ -157,14 +157,6 @@ The following control parameters can appear in any order
     This option causes an expanded annotated listing of the characteristics of
     the projected point. :option:`-v` is implied with this option.
 
-.. option:: -C <crs>
-
-.. versionadded:: 9.3.0
-
-    Where *crs* is a definition of a Projected CRS, as its WKT or code
-    for instance EPSG:32632. This option generates the projection to
-    the underlying geographic system. When used, it ignores *+opt* arguments.
-
 
 The *+opt* run-line arguments are associated with cartographic parameters.
 Additional projection control parameters may be contained in two auxiliary
@@ -180,6 +172,13 @@ also used for supporting files like datum shift files.
     Usage of *+opt* varies with projection and for a complete description
     consult the :ref:`projection pages <projections>`.
 
+.. versionadded:: 9.3.0
+
+    *{crs}* is one of the possibilities accepted by proj_create(), provided it
+    expresses a projected CRS, like a WKT string, an object code (like "EPSG:32632")
+    a PROJJSON string, etc.
+    The projection computed will be those of the map projection implied by
+    the transformation from the base geographic CRS of the projected CRS to the projected CRS.
 
 One or more files (processed in left to right order) specify the source of
 data to be converted. A ``-`` will specify the location of processing standard

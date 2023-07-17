@@ -36,9 +36,9 @@ $EXE +ellps=WGS84 +proj=ob_tran +o_proj=latlon +o_lon_p=0.0 +o_lat_p=90.0 +lon_0
 2 49
 EOF
 #
-echo "Test -C option"
+echo "Test CRS option"
 #
-$EXE -C EPSG:32620 -S >>${OUT} <<EOF
+$EXE EPSG:32620 -S >>${OUT} <<EOF
 -63 0
 EOF
 
