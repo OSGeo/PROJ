@@ -58,7 +58,7 @@ namespace metadata {
  * A citation contains a title.
  *
  * \remark Simplified version of [Citation]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/citation/Citation.html)
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/metadata/citation/Citation.html)
  * from \ref GeoAPI
  */
 class PROJ_GCC_DLL Citation : public util::BaseObject {
@@ -91,7 +91,7 @@ using GeographicExtentNNPtr = util::nn<GeographicExtentPtr>;
 /** \brief Base interface for geographic area of the dataset.
  *
  * \remark Simplified version of [GeographicExtent]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/GeographicExtent.html)
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/metadata/extent/GeographicExtent.html)
  * from \ref GeoAPI
  */
 class PROJ_GCC_DLL GeographicExtent : public util::BaseObject,
@@ -145,7 +145,7 @@ using GeographicBoundingBoxNNPtr = util::nn<GeographicBoundingBoxPtr>;
  * unnecessary.
  *
  * \remark Implements [GeographicBoundingBox]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/GeographicBoundingBox.html)
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/metadata/extent/GeographicBoundingBox.html)
  * from \ref GeoAPI
  */
 class PROJ_GCC_DLL GeographicBoundingBox : public GeographicExtent {
@@ -199,7 +199,7 @@ using TemporalExtentNNPtr = util::nn<TemporalExtentPtr>;
 /** \brief Time period covered by the content of the dataset.
  *
  * \remark Simplified version of [TemporalExtent]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/TemporalExtent.html)
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/metadata/extent/TemporalExtent.html)
  * from \ref GeoAPI
  */
 class PROJ_GCC_DLL TemporalExtent : public util::BaseObject,
@@ -247,7 +247,7 @@ using VerticalExtentNNPtr = util::nn<VerticalExtentPtr>;
 /** \brief Vertical domain of dataset.
  *
  * \remark Simplified version of [VerticalExtent]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/VerticalExtent.html)
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/metadata/extent/VerticalExtent.html)
  * from \ref GeoAPI
  */
 class PROJ_GCC_DLL VerticalExtent : public util::BaseObject,
@@ -297,7 +297,7 @@ using ExtentNNPtr = util::nn<ExtentPtr>;
 /** \brief Information about spatial, vertical, and temporal extent.
  *
  * \remark Simplified version of [Extent]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/Extent.html)
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/metadata/extent/Extent.html)
  * from \ref GeoAPI
  */
 class PROJ_GCC_DLL Extent : public util::BaseObject, public util::IComparable {
@@ -440,7 +440,7 @@ using PositionalAccuracyNNPtr = util::nn<PositionalAccuracyPtr>;
 /** \brief Accuracy of the position of features.
  *
  * \remark Simplified version of [PositionalAccuracy]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/quality/PositionalAccuracy.html)
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/metadata/quality/PositionalAccuracy.html)
  * from \ref GeoAPI, which originates from \ref ISO_19115
  */
 class PROJ_GCC_DLL PositionalAccuracy : public util::BaseObject {

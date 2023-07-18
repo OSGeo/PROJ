@@ -973,7 +973,7 @@ using AuthorityFactoryNNPtr = util::nn<AuthorityFactoryPtr>;
  * A AuthorityFactory should be used only by one thread at a time.
  *
  * \remark Implements [AuthorityFactory]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/referencing/AuthorityFactory.html)
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/referencing/AuthorityFactory.html)
  * from \ref GeoAPI
  */
 class PROJ_GCC_DLL AuthorityFactory {

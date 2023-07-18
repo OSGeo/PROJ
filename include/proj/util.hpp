@@ -556,8 +556,8 @@ using GenericNameNNPtr = util::nn<GenericNamePtr>;
 /** \brief A sequence of identifiers rooted within the context of a namespace.
  *
  * \remark Simplified version of [GenericName]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/GenericName.html) from
- * \ref GeoAPI
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/util/GenericName.html)
+ * from \ref GeoAPI
  */
 class GenericName : public BaseObject {
   public:
@@ -591,8 +591,8 @@ class GenericName : public BaseObject {
 /** \brief A domain in which names given by strings are defined.
  *
  * \remark Simplified version of [NameSpace]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/NameSpace.html) from \ref
- * GeoAPI
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/util/NameSpace.html)
+ * from \ref GeoAPI
  */
 class NameSpace {
   public:
@@ -628,8 +628,8 @@ class NameSpace {
  * NameSpace within which they are local, indicated by the scope.
  *
  * \remark Simplified version of [LocalName]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/LocalName.html) from \ref
- * GeoAPI
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/util/LocalName.html)
+ * from \ref GeoAPI
  */
 class LocalName : public GenericName {
   public:
@@ -659,8 +659,8 @@ class LocalName : public GenericName {
 /** \brief Factory for generic names.
  *
  * \remark Simplified version of [NameFactory]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/NameFactory.html) from
- * \ref GeoAPI
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/util/NameFactory.html)
+ * from \ref GeoAPI
  */
 class NameFactory {
   public:
