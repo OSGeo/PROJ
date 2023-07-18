@@ -9230,7 +9230,7 @@ AuthorityFactory::createProjectedCRSFromExisting(
         const auto &measure = parameterValue->value();
         const auto &unit = measure.unit();
         if (unit == common::UnitOfMeasure::DEGREE &&
-            geogCRS->coordinateSystem()->axisList()[0]->unit() == unit) {
+            baseCRS->coordinateSystem()->axisList()[0]->unit() == unit) {
             if (methodEPSGCode ==
                 EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP) {
                 // Special case for standard parallels of LCC_2SP. See below
