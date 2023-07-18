@@ -472,7 +472,7 @@ INSERT INTO "extent" VALUES('EPSG','1492','Yemen - South Yemen - mainland west o
 INSERT INTO "extent" VALUES('EPSG','1493','Yemen - South Yemen - mainland east of 48°E','Yemen - South Yemen onshore mainland east of 48°E.',13.94,19.0,48.0,53.14,0);
 INSERT INTO "extent" VALUES('EPSG','1494','Vietnam - onshore Vung Tau area','Vietnam - onshore Vung Tau area.',9.03,11.04,105.49,107.58,0);
 INSERT INTO "extent" VALUES('EPSG','1495','Vietnam - offshore Cuu Long basin','Vietnam - offshore - Cuu Long basin and northwestern part of Nam Con Son basin.',7.99,11.15,106.54,110.0,0);
-INSERT INTO "extent" VALUES('EPSG','1496','Korea, Republic of (South Korea) - east of 128°E onshore','Republic of Korea (South Korea) - onshore east of 128°E.',34.49,38.64,128.0,129.65,0);
+INSERT INTO "extent" VALUES('EPSG','1496','Korea, Republic of (South Korea) - 128°E to 130°E onshore','Republic of Korea (South Korea) - onshore between 128°E and 130°E.',34.49,38.64,128.0,129.65,0);
 INSERT INTO "extent" VALUES('EPSG','1497','Korea, Republic of (South Korea) - 126°E to 128°E onshore','Republic of Korea (South Korea) - onshore between 126°E and 128°E.',33.14,38.33,126.0,128.0,0);
 INSERT INTO "extent" VALUES('EPSG','1498','Korea, Republic of (South Korea) - 124°E to 126°E onshore','Republic of Korea (South Korea) - onshore between 124°E and 126°E.',33.99,38.04,124.53,126.0,0);
 INSERT INTO "extent" VALUES('EPSG','1499','Venezuela - Maracaibo - blocks I II and III','Venezuela - Maracaibo area offshore blocks I, II and III.',10.0,10.51,-71.5,-71.17,0);
@@ -3704,3 +3704,4 @@ INSERT INTO "extent" VALUES('EPSG','4733','USA - Illinois - Metropolis zone','Un
 INSERT INTO "extent" VALUES('EPSG','4739','Spain - Balearic Islands - Formentera','Spain - Balearic Islands - Formentera - onshore.',38.59,38.86,1.31,1.65,0);
 INSERT INTO "extent" VALUES('EPSG','4740','Spain - Melilla','Spain - Melilla onshore.',35.26,35.38,-2.98,-2.88,0);
 INSERT INTO "extent" VALUES('EPSG','4741','Spain - Alboran','Spain - Alboran island - onshore.',35.88,36.0,-3.1,-2.96,0);
+INSERT INTO "extent" VALUES('EPSG','4742','Netherlands - offshore and nearshore ','Netherlands - offshore North Sea and nearshore.',51.32,55.77,2.53,7.21,0);

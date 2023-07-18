@@ -10,8 +10,8 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1039','New Zealand Vertical Datum 20
 INSERT INTO "usage" VALUES('EPSG','13091','vertical_datum','EPSG','1039','EPSG','1175','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','1040','Dunedin-Bluff 1960',NULL,'1960-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13092','vertical_datum','EPSG','1040','EPSG','3806','EPSG','1178');
-INSERT INTO "vertical_datum" VALUES('EPSG','1049','Incheon',NULL,'1963-01-01',NULL,NULL,NULL,0);
-INSERT INTO "usage" VALUES('EPSG','13101','vertical_datum','EPSG','1049','EPSG','3739','EPSG','1180');
+INSERT INTO "vertical_datum" VALUES('EPSG','1049','Korean Vertical Datum 1964',NULL,'1963-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','13101','vertical_datum','EPSG','1049','EPSG','3266','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','1050','Trieste',NULL,'1875-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13102','vertical_datum','EPSG','1050','EPSG','2370','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','1051','Genoa 1942',NULL,'1942-01-01',NULL,NULL,NULL,0);
@@ -175,7 +175,7 @@ INSERT INTO "usage" VALUES('EPSG','13981','vertical_datum','EPSG','1267','EPSG',
 INSERT INTO "vertical_datum" VALUES('EPSG','1269','Kingdom of Saudi Arabia Vertical Reference Frame Jeddah 2014',NULL,'2014-10-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13897','vertical_datum','EPSG','1269','EPSG','3303','EPSG','1181');
 INSERT INTO "vertical_datum" VALUES('EPSG','1270','Mean Sea Level Netherlands',NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO "usage" VALUES('EPSG','14119','vertical_datum','EPSG','1270','EPSG','1630','EPSG','1265');
+INSERT INTO "usage" VALUES('EPSG','14119','vertical_datum','EPSG','1270','EPSG','4742','EPSG','1265');
 INSERT INTO "vertical_datum" VALUES('EPSG','1274','European Vertical Reference Frame 2019',NULL,'2020-09-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14738','vertical_datum','EPSG','1274','EPSG','4608','EPSG','1261');
 INSERT INTO "vertical_datum" VALUES('EPSG','1275','Mallorca',NULL,NULL,NULL,NULL,NULL,0);
@@ -203,7 +203,7 @@ INSERT INTO "usage" VALUES('EPSG','14024','vertical_datum','EPSG','1285','EPSG',
 INSERT INTO "vertical_datum" VALUES('EPSG','1287','European Vertical Reference Frame 2019 mean tide',NULL,'2020-09-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14739','vertical_datum','EPSG','1287','EPSG','4608','EPSG','1262');
 INSERT INTO "vertical_datum" VALUES('EPSG','1290','Lowest Astronomical Tide Netherlands',NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO "usage" VALUES('EPSG','14120','vertical_datum','EPSG','1290','EPSG','1630','EPSG','1198');
+INSERT INTO "usage" VALUES('EPSG','14120','vertical_datum','EPSG','1290','EPSG','4742','EPSG','1198');
 INSERT INTO "vertical_datum" VALUES('EPSG','1292','Australian Vertical Working Surface',NULL,'2020-07-14',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14134','vertical_datum','EPSG','1292','EPSG','4177','EPSG','1264');
 INSERT INTO "vertical_datum" VALUES('EPSG','1294','Indonesian Geoid 2020 version 1',NULL,'2020-06-01',NULL,NULL,NULL,0);
