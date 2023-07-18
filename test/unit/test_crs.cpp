@@ -3305,6 +3305,53 @@ TEST(crs, projectedCRS_identify_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 25832);
         EXPECT_EQ(res.front().second, 70);
     }
+    {
+        // Identify a projected CRS whose base CRS is not a geographic CRS but
+        // a geodetic CRS with a spherical -ocentric coordinate system.
+        // Cf https://github.com/OSGeo/PROJ/issues/3828
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCRS[\"unknown\",\n"
+            "    BASEGEODCRS[\"Mercury (2015) / Ocentric\",\n"
+            "        DATUM[\"Mercury (2015)\",\n"
+            "            ELLIPSOID[\"Mercury "
+            "(2015)\",2440530,1075.12334801762,\n"
+            "                LENGTHUNIT[\"metre\",1]],\n"
+            "            ANCHOR[\"Hun Kal: 20 W.0\"]],\n"
+            "        PRIMEM[\"Reference Meridian\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "        ID[\"IAU\",19902,2015]],\n"
+            "    CONVERSION[\"Equirectangular, clon = 0\",\n"
+            "        METHOD[\"Equidistant Cylindrical\",\n"
+            "            ID[\"EPSG\",1028]],\n"
+            "        PARAMETER[\"Latitude of 1st standard parallel\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "            ID[\"EPSG\",8823]],\n"
+            "        PARAMETER[\"Longitude of natural origin\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "            ID[\"EPSG\",8802]],\n"
+            "        PARAMETER[\"False easting\",0,\n"
+            "            LENGTHUNIT[\"metre\",1],\n"
+            "            ID[\"EPSG\",8806]],\n"
+            "        PARAMETER[\"False northing\",0,\n"
+            "            LENGTHUNIT[\"metre\",1],\n"
+            "            ID[\"EPSG\",8807]]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"(E)\",east,\n"
+            "            ORDER[1],\n"
+            "            LENGTHUNIT[\"metre\",1]],\n"
+            "        AXIS[\"(N)\",north,\n"
+            "            ORDER[2],\n"
+            "            LENGTHUNIT[\"metre\",1]]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_GE(res.size(), 1U);
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "19912");
+        EXPECT_EQ(*(res.front().first->identifiers()[0]->codeSpace()),
+                  "IAU_2015");
+        EXPECT_EQ(res.front().second, 90);
+    }
 }
 
 // ---------------------------------------------------------------------------
