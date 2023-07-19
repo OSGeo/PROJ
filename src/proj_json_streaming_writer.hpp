@@ -31,6 +31,7 @@
 
 /*! @cond Doxygen_Suppress */
 
+#include <cstdint>
 #include <vector>
 #include <string>
 
