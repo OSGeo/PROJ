@@ -2894,6 +2894,9 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
         // using the same datum as the one of the projected CRS, and with
         // input coordinates being in longitude, latitude order in radian,
         // to be consistent with the expectations of the lp input parameter.
+        // We also need to create a modified projected CRS with a normalized
+        // easting/northing axis order in metre, so the resulting operation is
+        // just a single step pipeline with no axisswap or unitconvert steps.
 
         auto ctx = P->ctx;
         auto geodetic_crs = proj_get_source_crs(ctx, P);
@@ -2902,16 +2905,27 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
         auto datum_ensemble = proj_crs_get_datum_ensemble(ctx, geodetic_crs);
         auto cs = proj_create_ellipsoidal_2D_cs(
             ctx, PJ_ELLPS2D_LONGITUDE_LATITUDE, "Radian", 1.0);
-        auto temp = proj_create_geographic_crs_from_datum(
+        auto geogCRSNormalized = proj_create_geographic_crs_from_datum(
             ctx, "unnamed crs", datum ? datum : datum_ensemble, cs);
         proj_destroy(datum);
         proj_destroy(datum_ensemble);
         proj_destroy(cs);
+        auto conversion = proj_crs_get_coordoperation(ctx, P);
+        auto projCS = proj_create_cartesian_2D_cs(
+            ctx, PJ_CART2D_EASTING_NORTHING, "metre", 1.0);
+        auto projCRSNormalized = proj_create_projected_crs(
+            ctx, nullptr, geodetic_crs, conversion, projCS);
+        assert(projCRSNormalized);
         proj_destroy(geodetic_crs);
-        auto newOp =
-            proj_create_crs_to_crs_from_pj(ctx, temp, P, nullptr, nullptr);
-        proj_destroy(temp);
+        proj_destroy(conversion);
+        proj_destroy(projCS);
+        auto newOp = proj_create_crs_to_crs_from_pj(
+            ctx, geogCRSNormalized, projCRSNormalized, nullptr, nullptr);
+        proj_destroy(geogCRSNormalized);
+        proj_destroy(projCRSNormalized);
         assert(newOp);
+        // For debugging:
+        // printf("%s\n", proj_as_proj_string(ctx, newOp, PJ_PROJ_5, nullptr));
         auto ret = proj_factors(newOp, lp);
         proj_destroy(newOp);
         return ret;

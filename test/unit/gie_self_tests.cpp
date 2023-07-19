@@ -522,6 +522,72 @@ TEST(gie, info_functions) {
         proj_destroy(P);
     }
 
+    // Test with a projected CRS with feet unit
+    {
+        PJ_COORD c;
+        c.lp.lam = proj_torad(-110);
+        c.lp.phi = proj_torad(30);
+
+        P = proj_create(PJ_DEFAULT_CTX,
+                        "+proj=tmerc +lat_0=31 +lon_0=-110.166666666667 "
+                        "+k=0.9999 +x_0=213360 +y_0=0 +ellps=GRS80 +units=ft");
+        factors = proj_factors(P, c);
+        EXPECT_NEAR(factors.meridional_scale, 0.99990319, 1e-8)
+            << factors.meridional_scale;
+        EXPECT_NEAR(factors.parallel_scale, 0.99990319, 1e-8)
+            << factors.parallel_scale;
+        EXPECT_NEAR(factors.angular_distortion, 0, 1e-7)
+            << factors.angular_distortion;
+        EXPECT_NEAR(factors.meridian_parallel_angle, M_PI_2, 1e-7)
+            << factors.meridian_parallel_angle;
+        proj_destroy(P);
+
+        P = proj_create(PJ_DEFAULT_CTX, "EPSG:2222");
+
+        const auto factors2 = proj_factors(P, c);
+
+        EXPECT_NEAR(factors.meridional_scale, factors2.meridional_scale, 1e-10);
+        EXPECT_NEAR(factors.parallel_scale, factors2.parallel_scale, 1e-10);
+        EXPECT_NEAR(factors.angular_distortion, factors2.angular_distortion,
+                    1e-10);
+        EXPECT_NEAR(factors.meridian_parallel_angle,
+                    factors2.meridian_parallel_angle, 1e-109);
+
+        proj_destroy(P);
+    }
+
+    // Test with a projected CRS with northing, easting axis order
+    {
+        PJ_COORD c;
+        c.lp.lam = proj_torad(9);
+        c.lp.phi = proj_torad(0);
+
+        P = proj_create(PJ_DEFAULT_CTX, "+proj=utm +zone=32 +ellps=GRS80");
+        factors = proj_factors(P, c);
+        EXPECT_NEAR(factors.meridional_scale, 0.9996, 1e-8)
+            << factors.meridional_scale;
+        EXPECT_NEAR(factors.parallel_scale, 0.9996, 1e-8)
+            << factors.parallel_scale;
+        EXPECT_NEAR(factors.angular_distortion, 0, 1e-7)
+            << factors.angular_distortion;
+        EXPECT_NEAR(factors.meridian_parallel_angle, M_PI_2, 1e-7)
+            << factors.meridian_parallel_angle;
+        proj_destroy(P);
+
+        P = proj_create(PJ_DEFAULT_CTX, "EPSG:3044");
+
+        const auto factors2 = proj_factors(P, c);
+
+        EXPECT_NEAR(factors.meridional_scale, factors2.meridional_scale, 1e-10);
+        EXPECT_NEAR(factors.parallel_scale, factors2.parallel_scale, 1e-10);
+        EXPECT_NEAR(factors.angular_distortion, factors2.angular_distortion,
+                    1e-10);
+        EXPECT_NEAR(factors.meridian_parallel_angle,
+                    factors2.meridian_parallel_angle, 1e-109);
+
+        proj_destroy(P);
+    }
+
     // Test with a geographic CRS --> error
     {
         P = proj_create(PJ_DEFAULT_CTX, "EPSG:4326");
