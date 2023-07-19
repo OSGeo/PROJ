@@ -162,6 +162,9 @@ PROJ_FOR_TEST std::string toString(double val, int precision = 15);
 PROJ_FOR_TEST double
 c_locale_stod(const std::string &s); // throw(std::invalid_argument)
 
+// Variant of above that doesn't emit exceptions
+double c_locale_stod(const std::string &s, bool &success);
+
 std::string concat(const std::string &, const std::string &) = delete;
 std::string concat(const char *, const char *) = delete;
 std::string concat(const char *a, const std::string &b);

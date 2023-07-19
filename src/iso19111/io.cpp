@@ -10779,16 +10779,11 @@ SphericalCSNNPtr PROJStringParser::Private::buildSphericalCS(
 
 static double getNumericValue(const std::string &paramValue,
                               bool *pHasError = nullptr) {
-    try {
-        double value = c_locale_stod(paramValue);
-        if (pHasError)
-            *pHasError = false;
-        return value;
-    } catch (const std::invalid_argument &) {
-        if (pHasError)
-            *pHasError = true;
-        return 0.0;
-    }
+    bool success;
+    double value = c_locale_stod(paramValue, success);
+    if (pHasError)
+        *pHasError = !success;
+    return value;
 }
 
 // ---------------------------------------------------------------------------

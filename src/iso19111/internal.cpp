@@ -240,7 +240,17 @@ bool ends_with(const std::string &str, const std::string &suffix) noexcept {
 // ---------------------------------------------------------------------------
 
 double c_locale_stod(const std::string &s) {
+    bool success;
+    double val = c_locale_stod(s, success);
+    if (!success) {
+        throw std::invalid_argument("non double value");
+    }
+    return val;
+}
 
+double c_locale_stod(const std::string &s, bool &success) {
+
+    success = true;
     const auto s_size = s.size();
     // Fast path
     if (s_size > 0 && s_size < 15) {
@@ -277,7 +287,8 @@ double c_locale_stod(const std::string &s) {
     double d;
     iss >> d;
     if (!iss.eof() || iss.fail()) {
-        throw std::invalid_argument("non double value");
+        success = false;
+        d = 0;
     }
     return d;
 }
