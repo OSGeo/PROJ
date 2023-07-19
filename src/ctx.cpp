@@ -35,6 +35,7 @@
 #include <new>
 
 #include "filemanager.hpp"
+#include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 #include "proj_experimental.h"
 #include "proj_internal.h"
@@ -88,11 +89,25 @@ pj_ctx pj_ctx::createDefault() {
 
     const char *projDebug = getenv("PROJ_DEBUG");
     if (projDebug != nullptr) {
-        const int debugLevel = atoi(projDebug);
-        if (debugLevel >= -PJ_LOG_TRACE)
-            ctx.debug_level = debugLevel;
-        else
-            ctx.debug_level = PJ_LOG_TRACE;
+        if (NS_PROJ::internal::ci_equal(projDebug, "ON")) {
+            ctx.debug_level = PJ_LOG_DEBUG;
+        } else if (NS_PROJ::internal::ci_equal(projDebug, "OFF")) {
+            ctx.debug_level = PJ_LOG_ERROR;
+        } else if (projDebug[0] == '-' ||
+                   (projDebug[0] >= '0' && projDebug[0] <= '9')) {
+            const int debugLevel = atoi(projDebug);
+            // Negative debug levels mean that we first start logging when errno
+            // is set Cf
+            // https://github.com/OSGeo/PROJ/commit/1c1d04b45d76366f54e104f9346879fd48bfde8e
+            // This isn't documented for now. Not totally sure we really want
+            // that...
+            if (debugLevel >= -PJ_LOG_TRACE)
+                ctx.debug_level = debugLevel;
+            else
+                ctx.debug_level = PJ_LOG_TRACE;
+        } else {
+            fprintf(stderr, "Invalid value for PROJ_DEBUG: %s\n", projDebug);
+        }
     }
 
     return ctx;

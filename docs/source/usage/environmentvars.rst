@@ -69,9 +69,17 @@ done by setting the variable with no content::
 
 .. envvar:: PROJ_DEBUG
 
-    Set the debug level of PROJ. The default debug level is zero, which results
-    in no debug output when using PROJ. A number from 1-3, with 3 being the most
-    verbose setting.
+    Set the debug level of PROJ.
+
+    The following levels are available:
+    - ``0``: no message.
+    - ``1``: error messages only (default).
+    - ``2``: same as 1, with debug messages.
+    - ``3``: same as 2, with verbose messages.
+    - ``4``: same as 3, with very verbose messages.
+
+    Starting with PROJ 9.3, ``ON`` can be used as an alias for ``2``,
+    and ``OFF`` as an alias for ``1``.
 
 .. envvar:: PROJ_NETWORK
 
