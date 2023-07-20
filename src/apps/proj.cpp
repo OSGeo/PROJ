@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <proj/crs.hpp>
+
 #include <vector>
 
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__WIN32__)
@@ -25,6 +27,7 @@
 
 static PJ *Proj = nullptr;
 static PJ *ProjForFactors = nullptr;
+static bool swapAxisCrs = false;
 static union {
     PJ_XY (*fwd)(PJ_LP, PJ *);
     PJ_LP (*inv)(PJ_XY, PJ *);
@@ -300,10 +303,12 @@ static void vprocess(FILE *fid) {
         (void)fputs(proj_rtodms2(pline, sizeof(pline), dat_ll.phi, 'N', 'S'),
                     stdout);
         (void)printf(" [ %.11g ]\n", dat_ll.phi * RAD_TO_DEG);
-        (void)fputs("Easting (x):   ", stdout);
+        (void)fputs(swapAxisCrs ? "Northing (y):  " : "Easting (x):   ",
+                    stdout);
         (void)printf(oform, dat_xy.x);
         putchar('\n');
-        (void)fputs("Northing (y):  ", stdout);
+        (void)fputs(swapAxisCrs ? "Easting (x):   " : "Northing (y):  ",
+                    stdout);
         (void)printf(oform, dat_xy.y);
         putchar('\n');
         (void)printf("Meridian scale (h) : %.8f  ( %.4g %% error )\n",
@@ -534,6 +539,16 @@ int main(int argc, char **argv) {
         if (PJ *P = proj_create(nullptr, ocrs.c_str())) {
             const auto type = proj_get_type(P);
             if (type == PJ_TYPE_PROJECTED_CRS) {
+                try {
+                    using namespace osgeo::proj;
+                    auto crs = dynamic_cast<const crs::ProjectedCRS *>(
+                        P->iso_obj.get());
+                    auto dir =
+                        crs->coordinateSystem()->axisList()[0]->direction();
+                    swapAxisCrs = dir == cs::AxisDirection::NORTH ||
+                                  dir == cs::AxisDirection::SOUTH;
+                } catch (...) {
+                }
                 auto ctx = P->ctx;
                 auto geodetic_crs = proj_get_source_crs(ctx, P);
                 assert(geodetic_crs);
