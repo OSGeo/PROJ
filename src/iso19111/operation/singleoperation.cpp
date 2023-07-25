@@ -218,8 +218,8 @@ CoordinateOperation::targetCoordinateEpoch() const {
 
 void CoordinateOperation::setWeakSourceTargetCRS(
     std::weak_ptr<crs::CRS> sourceCRSIn, std::weak_ptr<crs::CRS> targetCRSIn) {
-    d->sourceCRSWeak_ = sourceCRSIn;
-    d->targetCRSWeak_ = targetCRSIn;
+    d->sourceCRSWeak_ = std::move(sourceCRSIn);
+    d->targetCRSWeak_ = std::move(targetCRSIn);
 }
 
 // ---------------------------------------------------------------------------

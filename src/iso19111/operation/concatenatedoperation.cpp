@@ -373,7 +373,7 @@ void ConcatenatedOperation::fixStepsDirection(
             auto derivedCRS = extractDerivedCRS(concatOpTargetCRS.get());
             if (derivedCRS) {
                 if (i >= 1) {
-                    // use the sourceCRS of the previous operation as our source
+                    // use the targetCRS of the previous operation as our source
                     // CRS
                     l_sourceCRS = operationsInOut[i - 1]->targetCRS();
                     // except if it looks like the previous operation should
@@ -385,7 +385,9 @@ void ConcatenatedOperation::fixStepsDirection(
                         areCRSMoreOrLessEquivalent(
                             operationsInOut[i - 1]->sourceCRS().get(),
                             derivedCRS->baseCRS().get())) {
-                        l_targetCRS = operationsInOut[i - 1]->sourceCRS();
+                        l_sourceCRS = operationsInOut[i - 1]->sourceCRS();
+                        operationsInOut[i - 1] =
+                            operationsInOut[i - 1]->inverse();
                     }
                 }
                 if (!l_sourceCRS) {
