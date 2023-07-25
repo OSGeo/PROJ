@@ -3462,19 +3462,19 @@ static PJ_LP pj_hgrid_apply_internal(PJ_CONTEXT *ctx, PJ_LP in,
                      toltol)); /* prob. slightly faster than hypot() */
 
     if (i == 0) {
-        /* If we had access to a context, this should go through pj_log, and we
-         * should set ctx->errno */
-        if (getenv("PROJ_DEBUG"))
-            fprintf(stderr,
-                    "Inverse grid shift iterator failed to converge.\n");
+        pj_log(ctx, PJ_LOG_TRACE,
+               "Inverse grid shift iterator failed to converge.\n");
+        proj_context_errno_set(ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_GRID);
         t.lam = t.phi = HUGE_VAL;
         return t;
     }
 
     /* and again: pj_log and ctx->errno */
-    if (del.lam == HUGE_VAL && getenv("PROJ_DEBUG"))
-        fprintf(stderr, "Inverse grid shift iteration failed, presumably at "
-                        "grid edge.\nUsing first approximation.\n");
+    if (del.lam == HUGE_VAL) {
+        pj_log(ctx, PJ_LOG_TRACE,
+               "Inverse grid shift iteration failed, presumably at "
+               "grid edge.\nUsing first approximation.\n");
+    }
 
     in.lam = adjlon(t.lam + extent->west);
     in.phi = t.phi + extent->south;
