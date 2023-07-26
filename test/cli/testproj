@@ -35,6 +35,12 @@ echo "doing tests into file ${OUT}, please wait"
 $EXE +ellps=WGS84 +proj=ob_tran +o_proj=latlon +o_lon_p=0.0 +o_lat_p=90.0 +lon_0=360.0 +to_meter=0.0174532925199433 +no_defs -E -f '%.3f' >${OUT} <<EOF
 2 49
 EOF
+#
+echo "Test CRS option"
+#
+$EXE EPSG:32620 -S >>${OUT} <<EOF
+-63 0
+EOF
 
 #
 # do 'diff' with distribution results

@@ -1,6 +1,7 @@
 /* <<<< Cartographic projection filter program >>>> */
 #include "proj.h"
 #include "emess.h"
+#include "proj_experimental.h"
 #include "proj_internal.h"
 #include "utils.h"
 #include <ctype.h>
@@ -8,6 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <proj/crs.hpp>
 
 #include <vector>
 
@@ -22,7 +25,9 @@
 #define MAX_LINE 1000
 #define PJ_INVERSE(P) (P->inv ? 1 : 0)
 
-static PJ *Proj;
+static PJ *Proj = nullptr;
+static PJ *ProjForFactors = nullptr;
+static bool swapAxisCrs = false;
 static union {
     PJ_XY (*fwd)(PJ_LP, PJ *);
     PJ_LP (*inv)(PJ_XY, PJ *);
@@ -115,16 +120,16 @@ static void process(FILE *fid) {
                 data.uv.v *= fscale;
             }
             if (dofactors && !inverse) {
-                facs = proj_factors(Proj, coord);
-                facs_bad = proj_errno(Proj);
+                facs = proj_factors(ProjForFactors, coord);
+                facs_bad = proj_errno(ProjForFactors);
             }
 
             const auto xy = (*proj.fwd)(data.lp, Proj);
             data.xy = xy;
 
             if (dofactors && inverse) {
-                facs = proj_factors(Proj, coord);
-                facs_bad = proj_errno(Proj);
+                facs = proj_factors(ProjForFactors, coord);
+                facs_bad = proj_errno(ProjForFactors);
             }
 
             if (postscale && data.uv.u != HUGE_VAL) {
@@ -281,8 +286,8 @@ static void vprocess(FILE *fid) {
         if (!*s && (s > line))
             --s; /* assumed we gobbled \n */
         coord.lp = dat_ll;
-        facs = proj_factors(Proj, coord);
-        if (proj_errno(Proj)) {
+        facs = proj_factors(ProjForFactors, coord);
+        if (proj_errno(ProjForFactors)) {
             emess(-1, "failed to compute factors\n\n");
             continue;
         }
@@ -298,10 +303,12 @@ static void vprocess(FILE *fid) {
         (void)fputs(proj_rtodms2(pline, sizeof(pline), dat_ll.phi, 'N', 'S'),
                     stdout);
         (void)printf(" [ %.11g ]\n", dat_ll.phi * RAD_TO_DEG);
-        (void)fputs("Easting (x):   ", stdout);
+        (void)fputs(swapAxisCrs ? "Northing (y):  " : "Easting (x):   ",
+                    stdout);
         (void)printf(oform, dat_xy.x);
         putchar('\n');
-        (void)fputs("Northing (y):  ", stdout);
+        (void)fputs(swapAxisCrs ? "Easting (x):   " : "Northing (y):  ",
+                    stdout);
         (void)printf(oform, dat_xy.y);
         putchar('\n');
         (void)printf("Meridian scale (h) : %.8f  ( %.4g %% error )\n",
@@ -507,8 +514,6 @@ int main(int argc, char **argv) {
         } else /* assumed to be input file name(s) */
             eargv[eargc++] = *argv;
     }
-    if (eargc == 0) /* if no specific files force sysin */
-        eargv[eargc++] = const_cast<char *>("-");
 
     if (oform) {
         if (!validate_form_string_for_numbers(oform)) {
@@ -525,14 +530,80 @@ int main(int argc, char **argv) {
     }
     proj_context_use_proj4_init_rules(nullptr, true);
 
+    if (argvVector.empty() && eargc >= 1) {
+        // Consider the next arg as a CRS, not a file.
+        std::string ocrs = eargv[0];
+        eargv++;
+        eargc--;
+        // logic copied from proj_factors function
+        if (PJ *P = proj_create(nullptr, ocrs.c_str())) {
+            const auto type = proj_get_type(P);
+            if (type == PJ_TYPE_PROJECTED_CRS) {
+                try {
+                    using namespace osgeo::proj;
+                    auto crs = dynamic_cast<const crs::ProjectedCRS *>(
+                        P->iso_obj.get());
+                    auto dir =
+                        crs->coordinateSystem()->axisList()[0]->direction();
+                    swapAxisCrs = dir == cs::AxisDirection::NORTH ||
+                                  dir == cs::AxisDirection::SOUTH;
+                } catch (...) {
+                }
+                auto ctx = P->ctx;
+                auto geodetic_crs = proj_get_source_crs(ctx, P);
+                assert(geodetic_crs);
+                auto datum = proj_crs_get_datum(ctx, geodetic_crs);
+                auto datum_ensemble =
+                    proj_crs_get_datum_ensemble(ctx, geodetic_crs);
+                auto cs = proj_create_ellipsoidal_2D_cs(
+                    ctx, PJ_ELLPS2D_LONGITUDE_LATITUDE, "Radian", 1.0);
+                auto geogCRSNormalized = proj_create_geographic_crs_from_datum(
+                    ctx, "unnamed crs", datum ? datum : datum_ensemble, cs);
+                proj_destroy(datum);
+                proj_destroy(datum_ensemble);
+                proj_destroy(cs);
+                Proj = proj_create_crs_to_crs_from_pj(ctx, geogCRSNormalized, P,
+                                                      nullptr, nullptr);
+
+                auto conversion = proj_crs_get_coordoperation(ctx, P);
+                auto projCS = proj_create_cartesian_2D_cs(
+                    ctx, PJ_CART2D_EASTING_NORTHING, "metre", 1.0);
+                auto projCRSNormalized = proj_create_projected_crs(
+                    ctx, nullptr, geodetic_crs, conversion, projCS);
+                assert(projCRSNormalized);
+                proj_destroy(geodetic_crs);
+                proj_destroy(conversion);
+                proj_destroy(projCS);
+                ProjForFactors = proj_create_crs_to_crs_from_pj(
+                    ctx, geogCRSNormalized, projCRSNormalized, nullptr,
+                    nullptr);
+
+                proj_destroy(geogCRSNormalized);
+                proj_destroy(projCRSNormalized);
+            } else {
+                emess(3, "CRS must be projected");
+            }
+            proj_destroy(P);
+        } else {
+            emess(3, "CRS is not parseable");
+        }
+    }
+    if (eargc == 0) /* if no specific files force sysin */
+        eargv[eargc++] = const_cast<char *>("-");
+
     // proj historically ignores any datum shift specifier, like nadgrids,
     // towgs84, etc
     argvVector.push_back(const_cast<char *>("break_cs2cs_recursion"));
 
-    if (!(Proj = proj_create_argv(nullptr, static_cast<int>(argvVector.size()),
-                                  argvVector.data())))
-        emess(3, "projection initialization failure\ncause: %s",
-              proj_errno_string(proj_context_errno(nullptr)));
+    if (!Proj) {
+        if (!(Proj =
+                  proj_create_argv(nullptr, static_cast<int>(argvVector.size()),
+                                   argvVector.data())))
+            emess(3, "projection initialization failure\ncause: %s",
+                  proj_errno_string(proj_context_errno(nullptr)));
+
+        ProjForFactors = Proj;
+    }
 
     if (!proj_angular_input(Proj, PJ_FWD)) {
         emess(3, "can't initialize operations that take non-angular input "
@@ -616,6 +687,8 @@ int main(int argc, char **argv) {
         emess_dat.File_name = nullptr;
     }
 
+    if (ProjForFactors && ProjForFactors != Proj)
+        proj_destroy(ProjForFactors);
     if (Proj)
         proj_destroy(Proj);
 
