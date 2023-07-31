@@ -540,13 +540,12 @@ int main(int argc, char **argv) {
             const auto type = proj_get_type(P);
             if (type == PJ_TYPE_PROJECTED_CRS) {
                 try {
-                    using namespace osgeo::proj;
-                    auto crs = dynamic_cast<const crs::ProjectedCRS *>(
+                    auto crs = dynamic_cast<const NS_PROJ::crs::ProjectedCRS *>(
                         P->iso_obj.get());
                     auto dir =
                         crs->coordinateSystem()->axisList()[0]->direction();
-                    swapAxisCrs = dir == cs::AxisDirection::NORTH ||
-                                  dir == cs::AxisDirection::SOUTH;
+                    swapAxisCrs = dir == NS_PROJ::cs::AxisDirection::NORTH ||
+                                  dir == NS_PROJ::cs::AxisDirection::SOUTH;
                 } catch (...) {
                 }
                 auto ctx = P->ctx;
