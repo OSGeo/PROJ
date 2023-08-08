@@ -2227,7 +2227,7 @@ TEST_F(CApi, proj_context_guess_wkt_dialect) {
 
     EXPECT_EQ(proj_context_guess_wkt_dialect(
                   nullptr,
-                  "GEOGCRS[\"WGS 84\",\n"
+                  " \n\t\rGEOGCRS[\"WGS 84\",\n"
                   "    DATUM[\"World Geodetic System 1984\",\n"
                   "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
                   "    CS[ellipsoidal,2],\n"

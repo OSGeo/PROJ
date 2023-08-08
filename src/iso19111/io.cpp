@@ -8015,7 +8015,12 @@ WKTParser::attachDatabaseContext(const DatabaseContextPtr &dbContext) {
 /** \brief Guess the "dialect" of the WKT string.
  */
 WKTParser::WKTGuessedDialect
-WKTParser::guessDialect(const std::string &wkt) noexcept {
+WKTParser::guessDialect(const std::string &inputWkt) noexcept {
+    std::string wkt = inputWkt;
+    std::size_t idxFirstCharNotSpace = wkt.find_first_not_of(" \t\r\n");
+    if (idxFirstCharNotSpace > 0 && idxFirstCharNotSpace != std::string::npos) {
+        wkt = wkt.substr(idxFirstCharNotSpace);
+    }
     if (ci_starts_with(wkt, WKTConstants::VERTCS)) {
         return WKTGuessedDialect::WKT1_ESRI;
     }
