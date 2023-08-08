@@ -420,6 +420,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1360','NSIDC International 1924 Auth
 INSERT INTO "usage" VALUES('EPSG','19879','geodetic_datum','EPSG','1360','EPSG','1262','EPSG','1195');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1365','North American Datum of 1983 (CSRS) version 8',NULL,'EPSG','7019','EPSG','8901','2022-11-27',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','20140','geodetic_datum','EPSG','1365','EPSG','1061','EPSG','1027');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1366','COV23 Intermediate Reference Frame',NULL,'EPSG','7019','EPSG','8901','2023-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','20309','geodetic_datum','EPSG','1366','EPSG','4743','EPSG','1141');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,'EPSG','7001','EPSG','8901',NULL,NULL,NULL,NULL,1);
 INSERT INTO "usage" VALUES('EPSG','13422','geodetic_datum','EPSG','6001','EPSG','1263','EPSG','1213');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,'EPSG','7002','EPSG','8901',NULL,NULL,NULL,NULL,1);
