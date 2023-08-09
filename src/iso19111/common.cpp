@@ -761,6 +761,7 @@ void IdentifiedObject::Private::setIdentifiers(
 
         pVal = properties.get(Identifier::CODE_KEY);
         if (pVal) {
+            identifiers.clear();
             identifiers.push_back(
                 Identifier::create(std::string(), properties));
         }
