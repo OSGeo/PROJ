@@ -389,6 +389,7 @@ class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
 
     friend class Conversion;
     friend class SingleOperation;
+    friend class PointMotionOperation;
     PROJ_INTERNAL virtual void _exportToWKT(io::WKTFormatter *formatter,
                                             const MethodMapping *mapping)
         const = 0; // throw(io::FormattingException)
@@ -1765,8 +1766,55 @@ class PROJ_GCC_DLL PointMotionOperation : public SingleOperation {
     PROJ_DLL ~PointMotionOperation() override;
     //! @endcond
 
+    PROJ_DLL CoordinateOperationNNPtr inverse() const override;
+
+    PROJ_DLL static PointMotionOperationNNPtr
+    create(const util::PropertyMap &properties, const crs::CRSNNPtr &crsIn,
+           const OperationMethodNNPtr &methodIn,
+           const std::vector<GeneralParameterValueNNPtr> &values,
+           const std::vector<metadata::PositionalAccuracyNNPtr>
+               &accuracies); // throw InvalidOperation
+
+    PROJ_DLL static PointMotionOperationNNPtr
+    create(const util::PropertyMap &propertiesOperation,
+           const crs::CRSNNPtr &crsIn,
+           const util::PropertyMap &propertiesOperationMethod,
+           const std::vector<OperationParameterNNPtr> &parameters,
+           const std::vector<ParameterValueNNPtr> &values,
+           const std::vector<metadata::PositionalAccuracyNNPtr>
+               &accuracies); // throw InvalidOperation
+
+    PROJ_DLL PointMotionOperationNNPtr substitutePROJAlternativeGridNames(
+        io::DatabaseContextNNPtr databaseContext) const;
+
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL PointMotionOperationNNPtr
+        shallowClone() const;
+
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
+    //! @endcond
+
+  protected:
+    PROJ_INTERNAL PointMotionOperation(
+        const crs::CRSNNPtr &crsIn, const OperationMethodNNPtr &methodIn,
+        const std::vector<GeneralParameterValueNNPtr> &values,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+    PROJ_INTERNAL PointMotionOperation(const PointMotionOperation &other);
+    INLINED_MAKE_SHARED
+
+    PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;
+
   private:
-    PointMotionOperation(const PointMotionOperation &) = delete;
+    PointMotionOperation &operator=(const PointMotionOperation &) = delete;
 };
 
 // ---------------------------------------------------------------------------

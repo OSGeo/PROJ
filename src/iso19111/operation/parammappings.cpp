@@ -1006,6 +1006,8 @@ const struct MethodNameCode methodNameCodes[] = {
     METHOD_NAME_CODE(NADCON5_3D),
     METHOD_NAME_CODE(VERTCON),
     METHOD_NAME_CODE(GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN),
+    // PointMotionOperation
+    METHOD_NAME_CODE(POINT_MOTION_BY_GRID_CANADA_NTV2_VEL),
 };
 
 const MethodNameCode *getMethodNameCodes(size_t &nElts) {
@@ -1089,6 +1091,8 @@ const struct ParamNameCode paramNameCodes[] = {
     PARAM_NAME_CODE(INCLINATION_IN_LONGITUDE),
     PARAM_NAME_CODE(EPSG_CODE_FOR_HORIZONTAL_CRS),
     PARAM_NAME_CODE(EPSG_CODE_FOR_INTERPOLATION_CRS),
+    // Parameters of point motion operations
+    PARAM_NAME_CODE(POINT_MOTION_VELOCITY_GRID_FILE),
 };
 
 const ParamNameCode *getParamNameCodes(size_t &nElts) {
@@ -1385,6 +1389,14 @@ static const ParamMapping paramVerticalOffsetFile = {
 static const ParamMapping *const paramsVERTCON[] = {&paramVerticalOffsetFile,
                                                     nullptr};
 
+static const ParamMapping paramPointMotiionVelocityGridFile = {
+    EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
+    EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE, nullptr,
+    common::UnitOfMeasure::Type::NONE, nullptr};
+
+static const ParamMapping *const paramsPointMotionOperationByVelocityGrid[] = {
+    &paramPointMotiionVelocityGridFile, nullptr};
+
 static const ParamMapping paramSouthPoleLatGRIB = {
     PROJ_WKT2_NAME_PARAMETER_SOUTH_POLE_LATITUDE_GRIB_CONVENTION, 0, nullptr,
     common::UnitOfMeasure::Type::ANGULAR, nullptr};
@@ -1572,6 +1584,10 @@ static const MethodMapping otherMethodMappings[] = {
      nullptr, paramsVERTCON},
     {EPSG_NAME_METHOD_VERTCON_OLDNAME, EPSG_CODE_METHOD_VERTCON, nullptr,
      nullptr, nullptr, paramsVERTCON},
+
+    {EPSG_NAME_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL,
+     EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL, nullptr, nullptr,
+     nullptr, paramsPointMotionOperationByVelocityGrid},
 };
 
 const MethodMapping *getOtherMethodMappings(size_t &nElts) {

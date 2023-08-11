@@ -2082,7 +2082,7 @@ const std::string &Transformation::getHeightToGeographic3DFilename() const {
 
 //! @cond Doxygen_Suppress
 static util::PropertyMap
-createSimilarPropertiesTransformation(TransformationNNPtr obj) {
+createSimilarPropertiesOperation(const CoordinateOperationNNPtr &obj) {
     util::PropertyMap map;
 
     // The domain(s) are unchanged
@@ -2257,7 +2257,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
 
             } else {
                 return Transformation::create(
-                    createSimilarPropertiesTransformation(self), l_sourceCRS,
+                    createSimilarPropertiesOperation(self), l_sourceCRS,
                     l_targetCRS, l_interpolationCRS, methodProperties,
                     parameters, values, l_accuracies);
             }
@@ -2269,7 +2269,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                                   l_accuracies)
                     ->inverseAsTransformation();
             } else {
-                return createNTv1(createSimilarPropertiesTransformation(self),
+                return createNTv1(createSimilarPropertiesOperation(self),
                                   l_sourceCRS, l_targetCRS, projFilename,
                                   l_accuracies);
             }
@@ -2282,7 +2282,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                     ->inverseAsTransformation();
             } else {
                 return Transformation::createNTv2(
-                    createSimilarPropertiesTransformation(self), l_sourceCRS,
+                    createSimilarPropertiesOperation(self), l_sourceCRS,
                     l_targetCRS, projFilename, l_accuracies);
             }
         } else if (projGridFormat == "CTable2") {
@@ -2304,7 +2304,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
 
             } else {
                 return Transformation::create(
-                    createSimilarPropertiesTransformation(self), l_sourceCRS,
+                    createSimilarPropertiesOperation(self), l_sourceCRS,
                     l_targetCRS, l_interpolationCRS, methodProperties,
                     parameters, values, l_accuracies);
             }
@@ -2361,8 +2361,8 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
 #endif
                 {
                     return Transformation::create(
-                        createSimilarPropertiesTransformation(self),
-                        l_sourceCRS, l_targetCRS, l_interpolationCRS,
+                        createSimilarPropertiesOperation(self), l_sourceCRS,
+                        l_targetCRS, l_interpolationCRS,
                         createSimilarPropertiesMethod(method()), parameters,
                         {ParameterValue::createFilename(projFilename)},
                         coordinateOperationAccuracies());
@@ -2402,7 +2402,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                 std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
                     EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE)};
             return Transformation::create(
-                createSimilarPropertiesTransformation(self), l_sourceCRS,
+                createSimilarPropertiesOperation(self), l_sourceCRS,
                 l_targetCRS, l_interpolationCRS,
                 createSimilarPropertiesMethod(method()), parameters,
                 {ParameterValue::createFilename(projFilename)},
@@ -2458,8 +2458,8 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                         ->inverseAsTransformation();
                 } else {
                     return Transformation::create(
-                        createSimilarPropertiesTransformation(self),
-                        l_sourceCRS, l_targetCRS, l_interpolationCRS,
+                        createSimilarPropertiesOperation(self), l_sourceCRS,
+                        l_targetCRS, l_interpolationCRS,
                         createSimilarPropertiesMethod(method()), parameters,
                         {ParameterValue::createFilename(projFilename)},
                         coordinateOperationAccuracies());
@@ -4121,6 +4121,289 @@ bool InverseCoordinateOperation::_isEquivalentTo(
 
 //! @cond Doxygen_Suppress
 PointMotionOperation::~PointMotionOperation() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a point motion operation from a vector of
+ * GeneralParameterValue.
+ *
+ * @param properties See \ref general_properties. At minimum the name should be
+ * defined.
+ * @param crsIn Source and target CRS.
+ * @param methodIn Operation method.
+ * @param values Vector of GeneralOperationParameterNNPtr.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new PointMotionOperation.
+ * @throws InvalidOperation
+ */
+PointMotionOperationNNPtr PointMotionOperation::create(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &crsIn,
+    const OperationMethodNNPtr &methodIn,
+    const std::vector<GeneralParameterValueNNPtr> &values,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    if (methodIn->parameters().size() != values.size()) {
+        throw InvalidOperation(
+            "Inconsistent number of parameters and parameter values");
+    }
+    auto pmo = PointMotionOperation::nn_make_shared<PointMotionOperation>(
+        crsIn, methodIn, values, accuracies);
+    pmo->assignSelf(pmo);
+    pmo->setProperties(properties);
+    return pmo;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a point motion operation and its OperationMethod.
+ *
+ * @param propertiesOperation The \ref general_properties of the
+ * PointMotionOperation.
+ * At minimum the name should be defined.
+ * @param crsIn Source and target CRS.
+ * @param propertiesOperationMethod The \ref general_properties of the
+ * OperationMethod.
+ * At minimum the name should be defined.
+ * @param parameters Vector of parameters of the operation method.
+ * @param values Vector of ParameterValueNNPtr. Constraint:
+ * values.size() == parameters.size()
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new PointMotionOperation.
+ * @throws InvalidOperation
+ */
+PointMotionOperationNNPtr PointMotionOperation::create(
+    const util::PropertyMap &propertiesOperation, const crs::CRSNNPtr &crsIn,
+    const util::PropertyMap &propertiesOperationMethod,
+    const std::vector<OperationParameterNNPtr> &parameters,
+    const std::vector<ParameterValueNNPtr> &values,
+    const std::vector<metadata::PositionalAccuracyNNPtr>
+        &accuracies) // throw InvalidOperation
+{
+    OperationMethodNNPtr op(
+        OperationMethod::create(propertiesOperationMethod, parameters));
+
+    if (parameters.size() != values.size()) {
+        throw InvalidOperation(
+            "Inconsistent number of parameters and parameter values");
+    }
+    std::vector<GeneralParameterValueNNPtr> generalParameterValues;
+    generalParameterValues.reserve(values.size());
+    for (size_t i = 0; i < values.size(); i++) {
+        generalParameterValues.push_back(
+            OperationParameterValue::create(parameters[i], values[i]));
+    }
+    return create(propertiesOperation, crsIn, op, generalParameterValues,
+                  accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+PointMotionOperation::PointMotionOperation(
+    const crs::CRSNNPtr &crsIn, const OperationMethodNNPtr &methodIn,
+    const std::vector<GeneralParameterValueNNPtr> &values,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies)
+    : SingleOperation(methodIn) {
+    setParameterValues(values);
+    setCRSs(crsIn, crsIn, nullptr);
+    setAccuracies(accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+PointMotionOperation::PointMotionOperation(const PointMotionOperation &other)
+    : CoordinateOperation(other), SingleOperation(other) {}
+
+// ---------------------------------------------------------------------------
+
+CoordinateOperationNNPtr PointMotionOperation::inverse() const {
+    return NN_NO_CHECK(std::dynamic_pointer_cast<CoordinateOperation>(
+        shared_from_this().as_nullable()));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return an equivalent transformation to the current one, but using
+ * PROJ alternative grid names.
+ */
+PointMotionOperationNNPtr
+PointMotionOperation::substitutePROJAlternativeGridNames(
+    io::DatabaseContextNNPtr databaseContext) const {
+    auto self = NN_NO_CHECK(std::dynamic_pointer_cast<PointMotionOperation>(
+        shared_from_this().as_nullable()));
+
+    const auto &l_method = method();
+    const int methodEPSGCode = l_method->getEPSGCode();
+
+    std::string filename;
+    if (methodEPSGCode ==
+        EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL) {
+        const auto &fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
+                           EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+            filename = fileParameter->valueFile();
+        }
+    }
+
+    std::string projFilename;
+    std::string projGridFormat;
+    bool inverseDirection = false;
+    if (!filename.empty() &&
+        databaseContext->lookForGridAlternative(
+            filename, projFilename, projGridFormat, inverseDirection)) {
+
+        if (filename == projFilename) {
+            return self;
+        }
+
+        auto l_sourceCRS = NN_NO_CHECK(sourceCRS());
+        auto parameters =
+            std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+        return PointMotionOperation::create(
+            createSimilarPropertiesOperation(self), l_sourceCRS,
+            createSimilarPropertiesMethod(method()), parameters,
+            {ParameterValue::createFilename(projFilename)},
+            coordinateOperationAccuracies());
+    }
+
+    return self;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+PointMotionOperationNNPtr PointMotionOperation::shallowClone() const {
+    auto pmo =
+        PointMotionOperation::nn_make_shared<PointMotionOperation>(*this);
+    pmo->assignSelf(pmo);
+    pmo->setCRSs(this, false);
+    return pmo;
+}
+
+CoordinateOperationNNPtr PointMotionOperation::_shallowClone() const {
+    return util::nn_static_pointer_cast<CoordinateOperation>(shallowClone());
+}
+
+// ---------------------------------------------------------------------------
+
+void PointMotionOperation::_exportToWKT(io::WKTFormatter *formatter) const {
+    if (formatter->version() != io::WKTFormatter::Version::WKT2 ||
+        !formatter->use2019Keywords()) {
+        throw io::FormattingException(
+            "Transformation can only be exported to WKT2:2019");
+    }
+
+    formatter->startNode(io::WKTConstants::POINTMOTIONOPERATION,
+                         !identifiers().empty());
+
+    formatter->addQuotedString(nameStr());
+
+    const auto &version = operationVersion();
+    if (version.has_value()) {
+        formatter->startNode(io::WKTConstants::VERSION, false);
+        formatter->addQuotedString(*version);
+        formatter->endNode();
+    }
+
+    auto l_sourceCRS = sourceCRS();
+    assert(l_sourceCRS);
+    const bool canExportCRSId =
+        !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId());
+
+    const bool hasDomains = !domains().empty();
+    if (hasDomains) {
+        formatter->pushDisableUsage();
+    }
+
+    formatter->startNode(io::WKTConstants::SOURCECRS, false);
+    if (canExportCRSId && !l_sourceCRS->identifiers().empty()) {
+        // fake that top node has no id, so that the sourceCRS id is
+        // considered
+        formatter->pushHasId(false);
+        l_sourceCRS->_exportToWKT(formatter);
+        formatter->popHasId();
+    } else {
+        l_sourceCRS->_exportToWKT(formatter);
+    }
+    formatter->endNode();
+
+    if (hasDomains) {
+        formatter->popDisableUsage();
+    }
+
+    const auto &l_method = method();
+    l_method->_exportToWKT(formatter);
+
+    for (const auto &paramValue : parameterValues()) {
+        paramValue->_exportToWKT(formatter, nullptr);
+    }
+
+    if (!coordinateOperationAccuracies().empty()) {
+        formatter->startNode(io::WKTConstants::OPERATIONACCURACY, false);
+        formatter->add(coordinateOperationAccuracies()[0]->value());
+        formatter->endNode();
+    }
+
+    ObjectUsage::baseExportToWKT(formatter);
+    formatter->endNode();
+}
+
+// ---------------------------------------------------------------------------
+
+void PointMotionOperation::_exportToPROJString(
+    io::PROJStringFormatter * /*formatter*/) const // throw(FormattingException)
+{
+    throw io::FormattingException(
+        "CoordinateOperationNNPtr::_exportToPROJString() unimplemented");
+}
+
+// ---------------------------------------------------------------------------
+
+void PointMotionOperation::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext("PointMotionOperation",
+                                                    !identifiers().empty()));
+
+    writer->AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer->Add("unnamed");
+    } else {
+        writer->Add(l_name);
+    }
+
+    writer->AddObjKey("source_crs");
+    formatter->setAllowIDInImmediateChild();
+    sourceCRS()->_exportToJSON(formatter);
+
+    writer->AddObjKey("method");
+    formatter->setOmitTypeInImmediateChild();
+    formatter->setAllowIDInImmediateChild();
+    method()->_exportToJSON(formatter);
+
+    writer->AddObjKey("parameters");
+    {
+        auto parametersContext(writer->MakeArrayContext(false));
+        for (const auto &genOpParamvalue : parameterValues()) {
+            formatter->setAllowIDInImmediateChild();
+            formatter->setOmitTypeInImmediateChild();
+            genOpParamvalue->_exportToJSON(formatter);
+        }
+    }
+
+    if (!coordinateOperationAccuracies().empty()) {
+        writer->AddObjKey("accuracy");
+        writer->Add(coordinateOperationAccuracies()[0]->value());
+    }
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------

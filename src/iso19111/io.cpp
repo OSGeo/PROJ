@@ -1479,6 +1479,9 @@ struct WKTParser::Private {
 
     TransformationNNPtr buildCoordinateOperation(const WKTNodeNNPtr &node);
 
+    PointMotionOperationNNPtr
+    buildPointMotionOperation(const WKTNodeNNPtr &node);
+
     ConcatenatedOperationNNPtr
     buildConcatenatedOperation(const WKTNodeNNPtr &node);
 
@@ -3622,6 +3625,47 @@ WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+PointMotionOperationNNPtr
+WKTParser::Private::buildPointMotionOperation(const WKTNodeNNPtr &node) {
+    const auto *nodeP = node->GP();
+    auto &methodNode = nodeP->lookForChild(WKTConstants::METHOD);
+    if (isNull(methodNode)) {
+        ThrowMissing(WKTConstants::METHOD);
+    }
+    if (methodNode->GP()->childrenSize() == 0) {
+        ThrowNotEnoughChildren(WKTConstants::METHOD);
+    }
+
+    auto &sourceCRSNode = nodeP->lookForChild(WKTConstants::SOURCECRS);
+    if (sourceCRSNode->GP()->childrenSize() != 1) {
+        ThrowMissing(WKTConstants::SOURCECRS);
+    }
+    auto sourceCRS = buildCRS(sourceCRSNode->GP()->children()[0]);
+    if (!sourceCRS) {
+        throw ParsingException("Invalid content in SOURCECRS node");
+    }
+
+    std::vector<OperationParameterNNPtr> parameters;
+    std::vector<ParameterValueNNPtr> values;
+    auto defaultLinearUnit = UnitOfMeasure::NONE;
+    auto defaultAngularUnit = UnitOfMeasure::NONE;
+    consumeParameters(node, false, parameters, values, defaultLinearUnit,
+                      defaultAngularUnit);
+
+    std::vector<PositionalAccuracyNNPtr> accuracies;
+    auto &accuracyNode = nodeP->lookForChild(WKTConstants::OPERATIONACCURACY);
+    if (/*!isNull(accuracyNode) && */ accuracyNode->GP()->childrenSize() == 1) {
+        accuracies.push_back(PositionalAccuracy::create(
+            stripQuotes(accuracyNode->GP()->children()[0])));
+    }
+
+    return PointMotionOperation::create(
+        buildProperties(node), NN_NO_CHECK(sourceCRS),
+        buildProperties(methodNode), parameters, values, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
 ConcatenatedOperationNNPtr
 WKTParser::Private::buildConcatenatedOperation(const WKTNodeNNPtr &node) {
 
@@ -5601,6 +5645,11 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
             buildConcatenatedOperation(node));
     }
 
+    if (ci_equal(name, WKTConstants::POINTMOTIONOPERATION)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            buildPointMotionOperation(node));
+    }
+
     if (ci_equal(name, WKTConstants::ID) ||
         ci_equal(name, WKTConstants::AUTHORITY)) {
         return util::nn_static_pointer_cast<BaseObject>(
@@ -5658,6 +5707,7 @@ class JSONParser {
     CompoundCRSNNPtr buildCompoundCRS(const json &j);
     BoundCRSNNPtr buildBoundCRS(const json &j);
     TransformationNNPtr buildTransformation(const json &j);
+    PointMotionOperationNNPtr buildPointMotionOperation(const json &j);
     ConcatenatedOperationNNPtr buildConcatenatedOperation(const json &j);
     CoordinateMetadataNNPtr buildCoordinateMetadata(const json &j);
 
@@ -6217,6 +6267,9 @@ BaseObjectNNPtr JSONParser::create(const json &j)
     if (type == "Transformation") {
         return buildTransformation(j);
     }
+    if (type == "PointMotionOperation") {
+        return buildPointMotionOperation(j);
+    }
     if (type == "ConcatenatedOperation") {
         return buildConcatenatedOperation(j);
     }
@@ -6577,6 +6630,43 @@ TransformationNNPtr JSONParser::buildTransformation(const json &j) {
     return Transformation::create(buildProperties(j), sourceCRS, targetCRS,
                                   interpolationCRS, buildProperties(methodJ),
                                   parameters, values, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+PointMotionOperationNNPtr JSONParser::buildPointMotionOperation(const json &j) {
+
+    auto sourceCRS = buildCRS(getObject(j, "source_crs"));
+    auto methodJ = getObject(j, "method");
+    auto parametersJ = getArray(j, "parameters");
+    std::vector<OperationParameterNNPtr> parameters;
+    std::vector<ParameterValueNNPtr> values;
+    for (const auto &param : parametersJ) {
+        if (!param.is_object()) {
+            throw ParsingException(
+                "Unexpected type for a \"parameters\" child");
+        }
+        parameters.emplace_back(
+            OperationParameter::create(buildProperties(param)));
+        if (param.contains("value")) {
+            auto v = param["value"];
+            if (v.is_string()) {
+                values.emplace_back(
+                    ParameterValue::createFilename(v.get<std::string>()));
+                continue;
+            }
+        }
+        values.emplace_back(ParameterValue::create(getMeasure(param)));
+    }
+    std::vector<PositionalAccuracyNNPtr> accuracies;
+    if (j.contains("accuracy")) {
+        accuracies.push_back(
+            PositionalAccuracy::create(getString(j, "accuracy")));
+    }
+
+    return PointMotionOperation::create(buildProperties(j), sourceCRS,
+                                        buildProperties(methodJ), parameters,
+                                        values, accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -8075,7 +8165,8 @@ WKTParser::guessDialect(const std::string &inputWkt) noexcept {
         &WKTConstants::DYNAMIC, &WKTConstants::FRAMEEPOCH, &WKTConstants::MODEL,
         &WKTConstants::VELOCITYGRID, &WKTConstants::ENSEMBLE,
         &WKTConstants::DERIVEDPROJCRS, &WKTConstants::BASEPROJCRS,
-        &WKTConstants::GEOGRAPHICCRS, &WKTConstants::TRF, &WKTConstants::VRF};
+        &WKTConstants::GEOGRAPHICCRS, &WKTConstants::TRF, &WKTConstants::VRF,
+        &WKTConstants::POINTMOTIONOPERATION};
 
     for (const auto &pointerKeyword : wkt2_2019_only_keywords) {
         auto pos = ci_find(wkt, *pointerKeyword);

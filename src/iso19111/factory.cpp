@@ -6082,6 +6082,26 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 accuracies.emplace_back(
                     metadata::PositionalAccuracy::create(accuracy));
             }
+
+            // A bit fragile to detect the operation type with the method name,
+            // but not worth changing the database model
+            if (starts_with(method_name, "Point motion")) {
+                if (!sourceCRS->isEquivalentTo(targetCRS.get())) {
+                    throw operation::InvalidOperation(
+                        "source_crs and target_crs should be the same for a "
+                        "PointMotionOperation");
+                }
+
+                auto pmo = operation::PointMotionOperation::create(
+                    props, sourceCRS, propsMethod, parameters, values,
+                    accuracies);
+                if (usePROJAlternativeGridNames) {
+                    return pmo->substitutePROJAlternativeGridNames(
+                        d->context());
+                }
+                return pmo;
+            }
+
             auto transf = operation::Transformation::create(
                 props, sourceCRS, targetCRS, interpolationCRS, propsMethod,
                 parameters, values, accuracies);
