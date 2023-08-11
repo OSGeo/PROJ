@@ -55,35 +55,45 @@ static PJ_XY bonne_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 static PJ_LP bonne_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
-    double rh;
 
     xy.y = Q->cphi1 - xy.y;
-    rh = hypot(xy.x, xy.y);
+    const double rh = copysign(hypot(xy.x, xy.y), Q->phi1);
     lp.phi = Q->cphi1 + Q->phi1 - rh;
-    if (fabs(lp.phi) > M_HALFPI) {
+    const double abs_phi = fabs(lp.phi);
+    if (abs_phi > M_HALFPI) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
-    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10)
+    if (M_HALFPI - abs_phi <= EPS10)
         lp.lam = 0.;
-    else
-        lp.lam = rh * atan2(xy.x, xy.y) / cos(lp.phi);
+    else {
+        const double lm = rh / cos(lp.phi);
+        if (Q->phi1 > 0) {
+            lp.lam = lm * atan2(xy.x, xy.y);
+        } else {
+            lp.lam = lm * atan2(-xy.x, -xy.y);
+        }
+    }
     return lp;
 }
 
 static PJ_LP bonne_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
-    double s, rh;
 
     xy.y = Q->am1 - xy.y;
-    rh = hypot(xy.x, xy.y);
+    const double rh = copysign(hypot(xy.x, xy.y), Q->phi1);
     lp.phi = pj_inv_mlfn(Q->am1 + Q->m1 - rh, Q->en);
-    if ((s = fabs(lp.phi)) < M_HALFPI) {
-        s = sin(lp.phi);
-        lp.lam =
-            rh * atan2(xy.x, xy.y) * sqrt(1. - P->es * s * s) / cos(lp.phi);
-    } else if (fabs(s - M_HALFPI) <= EPS10)
+    const double abs_phi = fabs(lp.phi);
+    if (abs_phi < M_HALFPI) {
+        const double sinphi = sin(lp.phi);
+        const double lm = rh * sqrt(1. - P->es * sinphi * sinphi) / cos(lp.phi);
+        if (Q->phi1 > 0) {
+            lp.lam = lm * atan2(xy.x, xy.y);
+        } else {
+            lp.lam = lm * atan2(-xy.x, -xy.y);
+        }
+    } else if (abs_phi - M_HALFPI <= EPS10)
         lp.lam = 0.;
     else {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
