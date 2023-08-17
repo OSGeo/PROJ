@@ -3125,6 +3125,21 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
         props.set("IMPLICIT_CS", true);
     }
 
+    const std::string crsName = stripQuotes(nodeP->children()[0]);
+    if (esriStyle_ && dbContext_) {
+        std::string outTableName;
+        std::string authNameFromAlias;
+        std::string codeFromAlias;
+        auto authFactory =
+            AuthorityFactory::create(NN_NO_CHECK(dbContext_), std::string());
+        auto officialName = authFactory->getOfficialNameFromAlias(
+            crsName, "geodetic_crs", "ESRI", false, outTableName,
+            authNameFromAlias, codeFromAlias);
+        if (!officialName.empty()) {
+            props.set(IdentifiedObject::NAME_KEY, officialName);
+        }
+    }
+
     auto datum =
         !isNull(datumNode)
             ? buildGeodeticReferenceFrame(datumNode, primeMeridian, dynamicNode)

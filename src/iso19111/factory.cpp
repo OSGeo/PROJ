@@ -3404,6 +3404,25 @@ std::string DatabaseContext::getOldProjGridName(const std::string &gridName) {
 
 // ---------------------------------------------------------------------------
 
+// scripts/build_db_from_esri.py adds a second alias for
+// names that have '[' in them. See get_old_esri_name()
+// in scripts/build_db_from_esri.py
+// So if we only have two aliases detect that situation to get the official
+// new name
+static std::string getUniqueEsriAlias(const std::list<std::string> &l) {
+    std::string first = l.front();
+    std::string second = *(std::next(l.begin()));
+    if (second.find('[') != std::string::npos)
+        std::swap(first, second);
+    if (replaceAll(replaceAll(replaceAll(first, "[", ""), "]", ""), "-", "_") ==
+        second) {
+        return first;
+    }
+    return std::string();
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Gets the alias name from an official name.
  *
  * @param officialName Official name. Mandatory
@@ -3452,6 +3471,14 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
                    "auth_name = ? AND code = ? AND source = ?",
                    {genuineTableName, row[0], row[1], source});
         if (!res2.empty()) {
+            if (res2.size() == 2 && source == "ESRI") {
+                std::list<std::string> l;
+                l.emplace_back(res2.front()[0]);
+                l.emplace_back((*(std::next(res2.begin())))[0]);
+                const auto uniqueEsriAlias = getUniqueEsriAlias(l);
+                if (!uniqueEsriAlias.empty())
+                    return uniqueEsriAlias;
+            }
             return res2.front()[0];
         }
     }
@@ -3527,6 +3554,15 @@ std::list<std::string> DatabaseContext::getAliases(
     for (const auto &row : resSql) {
         res.emplace_back(row[0]);
     }
+
+    if (res.size() == 2 && source == "ESRI") {
+        const auto uniqueEsriAlias = getUniqueEsriAlias(res);
+        if (!uniqueEsriAlias.empty()) {
+            res.clear();
+            res.emplace_back(uniqueEsriAlias);
+        }
+    }
+
     d->cacheAliasNames_.insert(key, res);
     return res;
 }

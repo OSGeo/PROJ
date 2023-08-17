@@ -2407,6 +2407,121 @@ TEST(crs, projectedCRS_from_WKT1_ESRI_as_WKT1_ESRI) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_from_WKT1_ESRI_as_WKT1_ESRI_s_jtsk03_krovak_east_north) {
+    // EPSG:8353
+    auto wkt = "PROJCS[\"S-JTSK_[JTSK03]_Krovak_East_North\","
+               "GEOGCS[\"S-JTSK_[JTSK03]\",DATUM[\"S-JTSK_[JTSK03]\","
+               "SPHEROID[\"Bessel_1841\",6377397.155,299.1528128]],"
+               "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Krovak\"],"
+               "PARAMETER[\"False_Easting\",0.0],"
+               "PARAMETER[\"False_Northing\",0.0],"
+               "PARAMETER[\"Pseudo_Standard_Parallel_1\",78.5],"
+               "PARAMETER[\"Scale_Factor\",0.9999],"
+               "PARAMETER[\"Azimuth\",30.2881397527778],"
+               "PARAMETER[\"Longitude_Of_Center\",24.8333333333333],"
+               "PARAMETER[\"Latitude_Of_Center\",49.5],"
+               "PARAMETER[\"X_Scale\",-1.0],"
+               "PARAMETER[\"Y_Scale\",1.0],"
+               "PARAMETER[\"XY_Plane_Rotation\",90.0],"
+               "UNIT[\"Meter\",1.0]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected_wkt2 =
+        "PROJCRS[\"S-JTSK [JTSK03] / Krovak East North\",\n"
+        "    BASEGEOGCRS[\"S-JTSK [JTSK03]\",\n"
+        "        DATUM[\"System of the Unified Trigonometrical Cadastral "
+        "Network [JTSK03]\",\n"
+        "            ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",1201]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433]]],\n"
+        "    CONVERSION[\"unnamed\",\n"
+        "        METHOD[\"Krovak (North Orientated)\",\n"
+        "            ID[\"EPSG\",1041]],\n"
+        "        PARAMETER[\"Latitude of projection centre\",49.5,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8811]],\n"
+        "        PARAMETER[\"Longitude of origin\",24.8333333333333,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8833]],\n"
+        "        PARAMETER[\"Co-latitude of cone axis\",30.2881397527778,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",1036]],\n"
+        "        PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8818]],\n"
+        "        PARAMETER[\"Scale factor on pseudo standard "
+        "parallel\",0.9999,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8819]],\n"
+        "        PARAMETER[\"False easting\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]],\n"
+        "        AXIS[\"(N)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]]]";
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019, dbContext)
+                .get()),
+        expected_wkt2);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projectedCRS_from_EPSG_as_WKT1_ESRI_s_jtsk03_krovak_east_north) {
+    auto dbContext = DatabaseContext::create();
+    auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto crs = factoryEPSG->createProjectedCRS("8353");
+
+    auto wkt = "PROJCS[\"S-JTSK_[JTSK03]_Krovak_East_North\","
+               "GEOGCS[\"S-JTSK_[JTSK03]\",DATUM[\"S-JTSK_[JTSK03]\","
+               "SPHEROID[\"Bessel_1841\",6377397.155,299.1528128]],"
+               "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Krovak\"],"
+               "PARAMETER[\"False_Easting\",0.0],"
+               "PARAMETER[\"False_Northing\",0.0],"
+               "PARAMETER[\"Pseudo_Standard_Parallel_1\",78.5],"
+               "PARAMETER[\"Scale_Factor\",0.9999],"
+               "PARAMETER[\"Azimuth\",30.2881397527778],"
+               "PARAMETER[\"Longitude_Of_Center\",24.8333333333333],"
+               "PARAMETER[\"Latitude_Of_Center\",49.5],"
+               "PARAMETER[\"X_Scale\",-1.0],"
+               "PARAMETER[\"Y_Scale\",1.0],"
+               "PARAMETER[\"XY_Plane_Rotation\",90.0],"
+               "UNIT[\"Meter\",1.0]]";
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_as_PROJ_string) {
     auto crs = createProjected();
 
