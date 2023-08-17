@@ -405,7 +405,7 @@ def get_old_esri_name(s):
     """Massage datum/CRS name like old ESRI software did"""
 
     # Needed for EPSG:8353 S_JTSK_JTSK03_Krovak_East_North
-    # Cf https://github.com/OSGeo/gdal/issues/75054
+    # Cf https://github.com/OSGeo/gdal/issues/7505
     if '[' in s:
         s = s.replace('-', '_')
         s = s.replace('[', '')
