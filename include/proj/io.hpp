@@ -1244,6 +1244,11 @@ class PROJ_GCC_DLL AuthorityFactory {
                                const std::string &datum_code,
                                const std::string &geodetic_crs_type) const;
 
+    PROJ_INTERNAL std::list<crs::GeodeticCRSNNPtr>
+    createGeodeticCRSFromDatum(const datum::GeodeticReferenceFrameNNPtr &datum,
+                               const std::string &preferredAuthName,
+                               const std::string &geodetic_crs_type) const;
+
     PROJ_INTERNAL std::list<crs::VerticalCRSNNPtr>
     createVerticalCRSFromDatum(const std::string &datum_auth_name,
                                const std::string &datum_code) const;

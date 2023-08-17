@@ -9093,6 +9093,54 @@ std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
+    const datum::GeodeticReferenceFrameNNPtr &datum,
+    const std::string &preferredAuthName,
+    const std::string &geodetic_crs_type) const {
+    std::list<crs::GeodeticCRSNNPtr> candidates;
+    const auto &ids = datum->identifiers();
+    const auto &datumName = datum->nameStr();
+    if (!ids.empty()) {
+        for (const auto &id : ids) {
+            const auto &authName = *(id->codeSpace());
+            const auto &code = id->code();
+            if (!authName.empty()) {
+                const auto tmpFactory =
+                    (preferredAuthName == authName)
+                        ? create(databaseContext(), authName)
+                        : NN_NO_CHECK(d->getSharedFromThis());
+                auto l_candidates = tmpFactory->createGeodeticCRSFromDatum(
+                    authName, code, geodetic_crs_type);
+                for (const auto &candidate : l_candidates) {
+                    candidates.emplace_back(candidate);
+                }
+            }
+        }
+    } else if (datumName != "unknown" && datumName != "unnamed") {
+        auto matches = createObjectsFromName(
+            datumName,
+            {io::AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME}, false,
+            2);
+        if (matches.size() == 1) {
+            const auto &match = matches.front();
+            if (datum->_isEquivalentTo(match.get(),
+                                       util::IComparable::Criterion::EQUIVALENT,
+                                       databaseContext().as_nullable()) &&
+                !match->identifiers().empty()) {
+                return createGeodeticCRSFromDatum(
+                    util::nn_static_pointer_cast<datum::GeodeticReferenceFrame>(
+                        match),
+                    preferredAuthName, geodetic_crs_type);
+            }
+        }
+    }
+    return candidates;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 std::list<crs::VerticalCRSNNPtr> AuthorityFactory::createVerticalCRSFromDatum(
     const std::string &datum_auth_name, const std::string &datum_code) const {
     std::string sql(
