@@ -549,6 +549,7 @@ struct CoordinateOperationFactory::Private {
         bool inCreateOperationsGeogToVertWithIntermediateVert = false;
         bool skipHorizontalTransformation = false;
         int nRecLevelCreateOperations = 0;
+        int ignoreCoordinateEpochCounter = 0;
         std::map<std::pair<io::AuthorityFactory::ObjectType, std::string>,
                  std::list<std::pair<std::string, std::string>>>
             cacheNameToCRS{};
@@ -624,7 +625,7 @@ struct CoordinateOperationFactory::Private {
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
         Private::Context &context, const crs::GeodeticCRS *geodSrc,
         const crs::GeodeticCRS *geodDst,
-        std::vector<CoordinateOperationNNPtr> &res);
+        std::vector<CoordinateOperationNNPtr> &res, bool forceBallpark);
 
     static void createOperationsFromSphericalPlanetocentric(
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
@@ -705,7 +706,7 @@ struct CoordinateOperationFactory::Private {
         std::vector<CoordinateOperationNNPtr> &res,
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
         Private::Context &context, const crs::GeographicCRS *geogSrc,
-        const crs::GeographicCRS *geogDst);
+        const crs::GeographicCRS *geogDst, bool forceBallpark);
 
     static void createOperationsWithDatumPivot(
         std::vector<CoordinateOperationNNPtr> &res,
@@ -719,6 +720,17 @@ struct CoordinateOperationFactory::Private {
 
     static void setCRSs(CoordinateOperation *co, const crs::CRSNNPtr &sourceCRS,
                         const crs::CRSNNPtr &targetCRS);
+
+    struct CoordinateEpochIgnorer {
+        Context &context;
+
+        explicit CoordinateEpochIgnorer(Context &contextIn)
+            : context(contextIn) {
+            ++context.ignoreCoordinateEpochCounter;
+        }
+
+        ~CoordinateEpochIgnorer() { --context.ignoreCoordinateEpochCounter; }
+    };
 };
 //! @endcond
 
@@ -2103,17 +2115,16 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-static TransformationNNPtr
-createBallparkGeographicOffset(const crs::CRSNNPtr &sourceCRS,
-                               const crs::CRSNNPtr &targetCRS,
-                               const io::DatabaseContextPtr &dbContext) {
+static TransformationNNPtr createBallparkGeographicOffset(
+    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+    const io::DatabaseContextPtr &dbContext, bool forceBallpark) {
 
     const crs::GeographicCRS *geogSrc =
         dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
     const crs::GeographicCRS *geogDst =
         dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
     const bool isSameDatum =
-        geogSrc && geogDst &&
+        !forceBallpark && geogSrc && geogDst &&
         isSameGeodeticDatum(geogSrc->datumNonNull(dbContext),
                             geogDst->datumNonNull(dbContext), dbContext);
 
@@ -2447,9 +2458,12 @@ createGeodToGeodPROJBased(const crs::CRSNNPtr &geodSrc,
         util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(geodSrc),
         util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(geodDst));
 
-    auto properties = util::PropertyMap().set(
-        common::IdentifiedObject::NAME_KEY,
-        buildTransfName(geodSrc->nameStr(), geodDst->nameStr()));
+    auto properties =
+        util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY,
+                 buildTransfName(geodSrc->nameStr(), geodDst->nameStr()))
+            .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                 metadata::Extent::WORLD);
     return createPROJBased(properties, exportable, geodSrc, geodDst, nullptr,
                            {}, false);
 }
@@ -2710,7 +2724,8 @@ std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::Private::createOperationsGeogToGeog(
     std::vector<CoordinateOperationNNPtr> &res, const crs::CRSNNPtr &sourceCRS,
     const crs::CRSNNPtr &targetCRS, Private::Context &context,
-    const crs::GeographicCRS *geogSrc, const crs::GeographicCRS *geogDst) {
+    const crs::GeographicCRS *geogSrc, const crs::GeographicCRS *geogDst,
+    bool forceBallpark) {
 
     assert(sourceCRS.get() == geogSrc);
     assert(targetCRS.get() == geogDst);
@@ -2745,6 +2760,7 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
         authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
 
     const bool sameDatum =
+        !forceBallpark &&
         isSameGeodeticDatum(geogSrc->datumNonNull(dbContext),
                             geogDst->datumNonNull(dbContext), dbContext);
 
@@ -2840,8 +2856,8 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
                          metadata::Extent::WORLD),
                 datum, dstCS));
 
-        steps.emplace_back(
-            createBallparkGeographicOffset(sourceCRS, interm_crs, dbContext));
+        steps.emplace_back(createBallparkGeographicOffset(
+            sourceCRS, interm_crs, dbContext, forceBallpark));
 
         steps.emplace_back(Transformation::createLongitudeRotation(
             util::PropertyMap()
@@ -2876,10 +2892,10 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
                          metadata::Extent::WORLD),
                 sourceCRS, interm_crs, offset_pm));
             steps.emplace_back(createBallparkGeographicOffset(
-                interm_crs, targetCRS, dbContext));
+                interm_crs, targetCRS, dbContext, forceBallpark));
         } else {
             steps.emplace_back(createBallparkGeographicOffset(
-                sourceCRS, targetCRS, dbContext));
+                sourceCRS, targetCRS, dbContext, forceBallpark));
         }
     }
 
@@ -3379,7 +3395,7 @@ CoordinateOperationFactory::Private::createOperations(
     // Special case if both CRS are geodetic
     if (geodSrc && geodDst && !derivedSrc && !derivedDst) {
         createOperationsGeodToGeod(sourceCRS, targetCRS, context, geodSrc,
-                                   geodDst, res);
+                                   geodDst, res, /*forceBallpark=*/false);
         return res;
     }
 
@@ -3588,6 +3604,75 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
 
     if (!res.empty()) {
         return true;
+    }
+
+    // Use PointMotionOperations if appropriate and available
+    if (geodSrc && geodDst && context.ignoreCoordinateEpochCounter == 0 &&
+        context.context->getSourceCoordinateEpoch().has_value() &&
+        context.context->getTargetCoordinateEpoch().has_value() &&
+        !context.context->getSourceCoordinateEpoch()
+             ->coordinateEpoch()
+             ._isEquivalentTo(context.context->getTargetCoordinateEpoch()
+                                  ->coordinateEpoch())) {
+        CoordinateEpochIgnorer guard(context);
+
+        const auto pmoSrc =
+            context.context->getAuthorityFactory()->getPointMotionOperationsFor(
+                NN_NO_CHECK(
+                    util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(sourceCRS)),
+                true);
+        if (!pmoSrc.empty()) {
+            const auto pmoDst =
+                context.context->getAuthorityFactory()
+                    ->getPointMotionOperationsFor(
+                        NN_NO_CHECK(
+                            util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
+                                targetCRS)),
+                        true);
+            if (pmoDst.size() == pmoSrc.size()) {
+                bool ok = true;
+                for (size_t i = 0; i < pmoSrc.size(); ++i) {
+                    if (pmoSrc[i]->_isEquivalentTo(pmoDst[i].get())) {
+                        auto pmo = pmoSrc[i]->cloneWithEpochs(
+                            *(context.context->getSourceCoordinateEpoch()),
+                            *(context.context->getTargetCoordinateEpoch()));
+                        std::vector<operation::CoordinateOperationNNPtr> ops;
+                        if (!pmo->sourceCRS()->_isEquivalentTo(
+                                sourceCRS.get(),
+                                util::IComparable::Criterion::EQUIVALENT)) {
+                            auto tmp = createOperations(
+                                sourceCRS, pmo->sourceCRS(), context);
+                            assert(!tmp.empty());
+                            ops.emplace_back(tmp.front());
+                        }
+                        ops.emplace_back(pmo);
+                        // pmo->sourceCRS() == pmo->targetCRS() by definition
+                        if (!pmo->sourceCRS()->_isEquivalentTo(
+                                targetCRS.get(),
+                                util::IComparable::Criterion::EQUIVALENT)) {
+                            auto tmp = createOperations(pmo->sourceCRS(),
+                                                        targetCRS, context);
+                            assert(!tmp.empty());
+                            ops.emplace_back(tmp.front());
+                        }
+                        res.emplace_back(
+                            ConcatenatedOperation::createComputeMetadata(
+                                ops, disallowEmptyIntersection));
+                    } else {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (ok) {
+                    std::vector<CoordinateOperationNNPtr> resTmp;
+                    createOperationsGeodToGeod(sourceCRS, targetCRS, context,
+                                               geodSrc, geodDst, resTmp,
+                                               /*forceBallpark=*/true);
+                    res.insert(res.end(), resTmp.begin(), resTmp.end());
+                    return true;
+                }
+            }
+        }
     }
 
     bool resFindDirectNonEmptyBeforeFiltering = false;
@@ -3812,7 +3897,7 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
                 opsUnitConvert, tmpCRSWithSrcZ, NN_NO_CHECK(op->sourceCRS()),
                 context,
                 dynamic_cast<const crs::GeographicCRS *>(tmpCRSWithSrcZ.get()),
-                opSourceCRSGeog);
+                opSourceCRSGeog, /*forceBallpark=*/false);
             assert(opsUnitConvert.size() == 1);
             opPtr = opsUnitConvert.front().as_nullable();
         }
@@ -4102,7 +4187,7 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
                     NN_NO_CHECK(op->sourceCRS()), context,
                     dynamic_cast<const crs::GeographicCRS *>(
                         tmpCRSWithSrcZ.get()),
-                    tmpCRS);
+                    tmpCRS, /*forceBallpark=*/false);
                 assert(opsUnitConvert.size() == 1);
                 auto concat = ConcatenatedOperation::createComputeMetadata(
                     {opsUnitConvert.front(), op}, disallowEmptyIntersection);
@@ -4200,8 +4285,8 @@ void CoordinateOperationFactory::Private::
 void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
     Private::Context &context, const crs::GeodeticCRS *geodSrc,
-    const crs::GeodeticCRS *geodDst,
-    std::vector<CoordinateOperationNNPtr> &res) {
+    const crs::GeodeticCRS *geodDst, std::vector<CoordinateOperationNNPtr> &res,
+    bool forceBallpark) {
 
     ENTER_FUNCTION();
 
@@ -4236,7 +4321,7 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
 
     if (geogSrc && geogDst) {
         createOperationsGeogToGeog(res, sourceCRS, targetCRS, context, geogSrc,
-                                   geogDst);
+                                   geogDst, forceBallpark);
         return;
     }
 
@@ -4261,8 +4346,14 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
 
         // Same datum ?
         if (IsSameDatum()) {
-            res.emplace_back(
-                Conversion::createGeographicGeocentric(sourceCRS, targetCRS));
+            if (forceBallpark) {
+                auto op = createGeodToGeodPROJBased(sourceCRS, targetCRS);
+                op->setHasBallparkTransformation(true);
+                res.emplace_back(op);
+            } else {
+                res.emplace_back(Conversion::createGeographicGeocentric(
+                    sourceCRS, targetCRS));
+            }
         } else if (isSrcGeocentric && geogDst) {
 #if 0
             // The below logic was used between PROJ >= 6.0 and < 9.2
@@ -4317,7 +4408,7 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
             // Apply previous case in reverse way
             std::vector<CoordinateOperationNNPtr> resTmp;
             createOperationsGeodToGeod(targetCRS, sourceCRS, context, geodDst,
-                                       geodSrc, resTmp);
+                                       geodSrc, resTmp, forceBallpark);
             resTmp = applyInverse(resTmp);
             res.insert(res.end(), resTmp.begin(), resTmp.end());
         }
@@ -4326,9 +4417,10 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
     }
 
     if (isSrcGeocentric && isTargetGeocentric) {
-        if (sourceCRS->_isEquivalentTo(
-                targetCRS.get(), util::IComparable::Criterion::EQUIVALENT) ||
-            IsSameDatum()) {
+        if (!forceBallpark &&
+            (sourceCRS->_isEquivalentTo(
+                 targetCRS.get(), util::IComparable::Criterion::EQUIVALENT) ||
+             IsSameDatum())) {
             std::string name(NULL_GEOCENTRIC_TRANSLATION);
             name += " from ";
             name += sourceCRS->nameStr();
@@ -5562,6 +5654,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
         std::map<std::string, PairOfTransforms>
             cacheHorizToInterpAndInterpToTarget;
 
+        CoordinateEpochIgnorer guard(context);
         for (const auto &verticalTransform : verticalTransforms) {
 #ifdef TRACE_CREATE_OPERATIONS
             ENTER_BLOCK("Considering vertical transform " +
@@ -6167,6 +6260,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                         compSrc0BoundCrs->hubCRS()));
             }
         }
+        CoordinateEpochIgnorer guard(context);
         auto opSrcCRSToGeogCRS =
             createOperations(componentsSrc[0], interpolationGeogCRS, context);
         auto opGeogCRStoDstCRS =
@@ -6527,6 +6621,36 @@ CoordinateOperationFactory::createOperations(
         targetCoordinateMetadata->coordinateEpoch());
     return createOperations(sourceCRS, targetCoordinateMetadata->crs(),
                             newContext);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Find a list of CoordinateOperation from a source coordinate metadata
+ * to a target coordinate metadata.
+ *
+ * Both source_crs and target_crs can be a CoordinateMetadata
+ * with an associated coordinate epoch, to perform changes of coordinate epochs.
+ * Note however than this is in practice limited to use of velocity grids inside
+ * the same dynamic CRS.
+ *
+ * @param sourceCoordinateMetadata source CoordinateMetadata.
+ * @param targetCoordinateMetadata target CoordinateMetadata.
+ * @param context Search context.
+ * @return a list
+ * @since 9.4
+ */
+std::vector<CoordinateOperationNNPtr>
+CoordinateOperationFactory::createOperations(
+    const coordinates::CoordinateMetadataNNPtr &sourceCoordinateMetadata,
+    const coordinates::CoordinateMetadataNNPtr &targetCoordinateMetadata,
+    const CoordinateOperationContextNNPtr &context) const {
+    auto newContext = context->clone();
+    newContext->setSourceCoordinateEpoch(
+        sourceCoordinateMetadata->coordinateEpoch());
+    newContext->setTargetCoordinateEpoch(
+        targetCoordinateMetadata->coordinateEpoch());
+    return createOperations(sourceCoordinateMetadata->crs(),
+                            targetCoordinateMetadata->crs(), newContext);
 }
 
 // ---------------------------------------------------------------------------

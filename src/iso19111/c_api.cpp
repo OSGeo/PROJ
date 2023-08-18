@@ -208,13 +208,15 @@ PJ *pj_obj_create(PJ_CONTEXT *ctx, const BaseObjectNNPtr &objIn) {
                 pj->iso_obj = objIn;
                 pj->iso_obj_is_coordinate_operation = true;
                 auto sourceEpoch = coordop->sourceCoordinateEpoch();
+                auto targetEpoch = coordop->targetCoordinateEpoch();
                 if (sourceEpoch.has_value()) {
-                    pj->hasCoordinateEpoch = true;
-                    pj->coordinateEpoch =
-                        sourceEpoch->coordinateEpoch().convertToUnit(
-                            common::UnitOfMeasure::YEAR);
+                    if (!targetEpoch.has_value()) {
+                        pj->hasCoordinateEpoch = true;
+                        pj->coordinateEpoch =
+                            sourceEpoch->coordinateEpoch().convertToUnit(
+                                common::UnitOfMeasure::YEAR);
+                    }
                 } else {
-                    auto targetEpoch = coordop->targetCoordinateEpoch();
                     if (targetEpoch.has_value()) {
                         pj->hasCoordinateEpoch = true;
                         pj->coordinateEpoch =

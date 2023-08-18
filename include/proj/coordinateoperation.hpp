@@ -1766,6 +1766,8 @@ class PROJ_GCC_DLL PointMotionOperation : public SingleOperation {
     PROJ_DLL ~PointMotionOperation() override;
     //! @endcond
 
+    PROJ_DLL const crs::CRSNNPtr &sourceCRS() PROJ_PURE_DECL;
+
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 
     PROJ_DLL static PointMotionOperationNNPtr
@@ -1791,6 +1793,10 @@ class PROJ_GCC_DLL PointMotionOperation : public SingleOperation {
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL PointMotionOperationNNPtr
         shallowClone() const;
+
+    PROJ_INTERNAL PointMotionOperationNNPtr
+    cloneWithEpochs(const common::DataEpoch &sourceEpoch,
+                    const common::DataEpoch &targetEpoch) const;
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
@@ -2094,6 +2100,11 @@ class PROJ_GCC_DLL CoordinateOperationFactory {
 
     PROJ_DLL std::vector<CoordinateOperationNNPtr> createOperations(
         const crs::CRSNNPtr &sourceCRS,
+        const coordinates::CoordinateMetadataNNPtr &targetCoordinateMetadata,
+        const CoordinateOperationContextNNPtr &context) const;
+
+    PROJ_DLL std::vector<CoordinateOperationNNPtr> createOperations(
+        const coordinates::CoordinateMetadataNNPtr &sourceCoordinateMetadata,
         const coordinates::CoordinateMetadataNNPtr &targetCoordinateMetadata,
         const CoordinateOperationContextNNPtr &context) const;
 

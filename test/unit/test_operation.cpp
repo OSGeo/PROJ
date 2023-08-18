@@ -5777,3 +5777,69 @@ TEST(operation, export_of_boundCRS_with_proj_string_method) {
               "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, PointMotionOperation_with_epochs) {
+    auto wkt =
+        "POINTMOTIONOPERATION[\"Canada velocity grid v7 from epoch 2010 to "
+        "epoch 2002\",\n"
+        "    SOURCECRS[\n"
+        "        GEOGCRS[\"NAD83(CSRS)v7\",\n"
+        "            DATUM[\"North American Datum of 1983 (CSRS) version 7\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,3],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"ellipsoidal height (h)\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",8254]]],\n"
+        "    METHOD[\"Point motion by grid (Canada NTv2_Vel)\",\n"
+        "        ID[\"EPSG\",1070]],\n"
+        "    PARAMETERFILE[\"Point motion velocity grid "
+        "file\",\"ca_nrc_NAD83v70VG.tif\"],\n"
+        "    OPERATIONACCURACY[0.01],\n"
+        "    ID[\"DERIVED_FROM(EPSG)\",9483],\n"
+        "    REMARK[\"File initially published with name cvg70.cvb, later "
+        "renamed to NAD83v70VG.gvb with no change of content.\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto pmo = nn_dynamic_pointer_cast<PointMotionOperation>(obj);
+    ASSERT_TRUE(pmo != nullptr);
+    EXPECT_EQ(pmo->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=set +v_4=2010 +omit_fwd "
+              "+step +proj=deformation +dt=-8 +grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +proj=set +v_4=2002 +omit_inv "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+
+    EXPECT_EQ(pmo->inverse()->nameStr(),
+              "Canada velocity grid v7 from epoch 2002 to epoch 2010");
+    EXPECT_EQ(
+        pmo->inverse()->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+        "+step +proj=cart +ellps=GRS80 "
+        "+step +proj=set +v_4=2002 +omit_fwd "
+        "+step +proj=deformation +dt=8 +grids=ca_nrc_NAD83v70VG.tif "
+        "+ellps=GRS80 "
+        "+step +proj=set +v_4=2010 +omit_inv "
+        "+step +inv +proj=cart +ellps=GRS80 "
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+        "+step +proj=axisswap +order=2,1");
+}

@@ -4150,6 +4150,25 @@ PointMotionOperationNNPtr PointMotionOperation::create(
         crsIn, methodIn, values, accuracies);
     pmo->assignSelf(pmo);
     pmo->setProperties(properties);
+
+    const std::string l_name = pmo->nameStr();
+    auto pos = l_name.find(" from epoch ");
+    if (pos != std::string::npos) {
+        pos += strlen(" from epoch ");
+        const auto pos2 = l_name.find(" to epoch ", pos);
+        if (pos2 != std::string::npos) {
+            const double sourceYear = std::stod(l_name.substr(pos, pos2 - pos));
+            const double targetYear =
+                std::stod(l_name.substr(pos2 + strlen(" to epoch ")));
+            pmo->setSourceCoordinateEpoch(
+                util::optional<common::DataEpoch>(common::DataEpoch(
+                    common::Measure(sourceYear, common::UnitOfMeasure::YEAR))));
+            pmo->setTargetCoordinateEpoch(
+                util::optional<common::DataEpoch>(common::DataEpoch(
+                    common::Measure(targetYear, common::UnitOfMeasure::YEAR))));
+        }
+    }
+
     return pmo;
 }
 
@@ -4216,8 +4235,33 @@ PointMotionOperation::PointMotionOperation(const PointMotionOperation &other)
 // ---------------------------------------------------------------------------
 
 CoordinateOperationNNPtr PointMotionOperation::inverse() const {
-    return NN_NO_CHECK(std::dynamic_pointer_cast<CoordinateOperation>(
-        shared_from_this().as_nullable()));
+    auto inverse = shallowClone();
+    if (sourceCoordinateEpoch().has_value()) {
+        // Switch source and target epochs
+        inverse->setSourceCoordinateEpoch(targetCoordinateEpoch());
+        inverse->setTargetCoordinateEpoch(sourceCoordinateEpoch());
+
+        auto l_name = inverse->nameStr();
+        auto pos = l_name.find(" from epoch ");
+        if (pos != std::string::npos)
+            l_name.resize(pos);
+
+        const double sourceYear = getRoundedEpochInDecimalYear(
+            inverse->sourceCoordinateEpoch()->coordinateEpoch().convertToUnit(
+                common::UnitOfMeasure::YEAR));
+        const double targetYear = getRoundedEpochInDecimalYear(
+            inverse->targetCoordinateEpoch()->coordinateEpoch().convertToUnit(
+                common::UnitOfMeasure::YEAR));
+
+        l_name += " from epoch ";
+        l_name += toString(sourceYear);
+        l_name += " to epoch ";
+        l_name += toString(targetYear);
+        util::PropertyMap newProperties;
+        newProperties.set(IdentifiedObject::NAME_KEY, l_name);
+        inverse->setProperties(newProperties);
+    }
+    return inverse;
 }
 
 // ---------------------------------------------------------------------------
@@ -4257,18 +4301,27 @@ PointMotionOperation::substitutePROJAlternativeGridNames(
             return self;
         }
 
-        auto l_sourceCRS = NN_NO_CHECK(sourceCRS());
         auto parameters =
             std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
                 EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
         return PointMotionOperation::create(
-            createSimilarPropertiesOperation(self), l_sourceCRS,
+            createSimilarPropertiesOperation(self), sourceCRS(),
             createSimilarPropertiesMethod(method()), parameters,
             {ParameterValue::createFilename(projFilename)},
             coordinateOperationAccuracies());
     }
 
     return self;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the source crs::CRS of the operation.
+ *
+ * @return the source CRS.
+ */
+const crs::CRSNNPtr &PointMotionOperation::sourceCRS() PROJ_PURE_DEFN {
+    return CoordinateOperation::getPrivate()->strongRef_->sourceCRS_;
 }
 
 // ---------------------------------------------------------------------------
@@ -4285,6 +4338,41 @@ PointMotionOperationNNPtr PointMotionOperation::shallowClone() const {
 
 CoordinateOperationNNPtr PointMotionOperation::_shallowClone() const {
     return util::nn_static_pointer_cast<CoordinateOperation>(shallowClone());
+}
+
+// ---------------------------------------------------------------------------
+
+PointMotionOperationNNPtr PointMotionOperation::cloneWithEpochs(
+    const common::DataEpoch &sourceEpoch,
+    const common::DataEpoch &targetEpoch) const {
+    auto pmo =
+        PointMotionOperation::nn_make_shared<PointMotionOperation>(*this);
+
+    pmo->assignSelf(pmo);
+    pmo->setCRSs(this, false);
+
+    pmo->setSourceCoordinateEpoch(
+        util::optional<common::DataEpoch>(sourceEpoch));
+    pmo->setTargetCoordinateEpoch(
+        util::optional<common::DataEpoch>(targetEpoch));
+
+    const double sourceYear = getRoundedEpochInDecimalYear(
+        sourceEpoch.coordinateEpoch().convertToUnit(
+            common::UnitOfMeasure::YEAR));
+    const double targetYear = getRoundedEpochInDecimalYear(
+        targetEpoch.coordinateEpoch().convertToUnit(
+            common::UnitOfMeasure::YEAR));
+
+    auto l_name = nameStr();
+    l_name += " from epoch ";
+    l_name += toString(sourceYear);
+    l_name += " to epoch ";
+    l_name += toString(targetYear);
+    util::PropertyMap newProperties;
+    newProperties.set(IdentifiedObject::NAME_KEY, l_name);
+    pmo->setProperties(newProperties);
+
+    return pmo;
 }
 
 // ---------------------------------------------------------------------------
@@ -4309,7 +4397,6 @@ void PointMotionOperation::_exportToWKT(io::WKTFormatter *formatter) const {
     }
 
     auto l_sourceCRS = sourceCRS();
-    assert(l_sourceCRS);
     const bool canExportCRSId =
         !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId());
 
@@ -4354,10 +4441,89 @@ void PointMotionOperation::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 void PointMotionOperation::_exportToPROJString(
-    io::PROJStringFormatter * /*formatter*/) const // throw(FormattingException)
+    io::PROJStringFormatter *formatter) const // throw(FormattingException)
 {
-    throw io::FormattingException(
-        "CoordinateOperationNNPtr::_exportToPROJString() unimplemented");
+    if (formatter->convention() ==
+        io::PROJStringFormatter::Convention::PROJ_4) {
+        throw io::FormattingException(
+            "PointMotionOperation cannot be exported as a PROJ.4 string");
+    }
+
+    const int methodEPSGCode = method()->getEPSGCode();
+    if (methodEPSGCode ==
+        EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL) {
+        if (!sourceCoordinateEpoch().has_value()) {
+            throw io::FormattingException(
+                "CoordinateOperationNNPtr::_exportToPROJString() unimplemented "
+                "when source coordinate epoch is missing");
+        }
+        if (!targetCoordinateEpoch().has_value()) {
+            throw io::FormattingException(
+                "CoordinateOperationNNPtr::_exportToPROJString() unimplemented "
+                "when target coordinate epoch is missing");
+        }
+
+        auto l_sourceCRS = dynamic_cast<crs::GeodeticCRS *>(sourceCRS().get());
+
+        if (!l_sourceCRS->isGeocentric()) {
+            formatter->startInversion();
+            l_sourceCRS->_exportToPROJString(formatter);
+            formatter->stopInversion();
+
+            formatter->addStep("cart");
+            l_sourceCRS->ellipsoid()->_exportToPROJString(formatter);
+        } else {
+            formatter->startInversion();
+            l_sourceCRS->addGeocentricUnitConversionIntoPROJString(formatter);
+            formatter->stopInversion();
+        }
+
+        const double sourceYear = getRoundedEpochInDecimalYear(
+            sourceCoordinateEpoch()->coordinateEpoch().convertToUnit(
+                common::UnitOfMeasure::YEAR));
+        const double targetYear = getRoundedEpochInDecimalYear(
+            targetCoordinateEpoch()->coordinateEpoch().convertToUnit(
+                common::UnitOfMeasure::YEAR));
+
+        formatter->addStep("set");
+        formatter->addParam("v_4", sourceYear);
+        formatter->addParam("omit_fwd");
+
+        formatter->addStep("deformation");
+        formatter->addParam("dt", targetYear - sourceYear);
+        const auto &fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
+                           EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+            formatter->addParam("grids", fileParameter->valueFile());
+        } else {
+            throw io::FormattingException(
+                "CoordinateOperationNNPtr::_exportToPROJString(): missing "
+                "velocity grid file parameter");
+        }
+        l_sourceCRS->ellipsoid()->_exportToPROJString(formatter);
+
+        formatter->addStep("set");
+        formatter->addParam("v_4", targetYear);
+        formatter->addParam("omit_inv");
+
+        if (!l_sourceCRS->isGeocentric()) {
+            formatter->startInversion();
+            formatter->addStep("cart");
+            l_sourceCRS->ellipsoid()->_exportToPROJString(formatter);
+            formatter->stopInversion();
+
+            l_sourceCRS->_exportToPROJString(formatter);
+        } else {
+            l_sourceCRS->addGeocentricUnitConversionIntoPROJString(formatter);
+        }
+
+    } else {
+        throw io::FormattingException(
+            "CoordinateOperationNNPtr::_exportToPROJString() unimplemented for "
+            "this method");
+    }
 }
 
 // ---------------------------------------------------------------------------
