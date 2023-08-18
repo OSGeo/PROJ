@@ -34,7 +34,8 @@ Synopsis
     |    --searchpaths | --remote-data |
     |    --list-crs [list-crs-filter] |
     |    --dump-db-structure [{object_definition} | {object_reference}] |
-    |    {object_definition} | {object_reference} | (-s {srs_def} -t {srs_def})
+    |    {object_definition} | {object_reference} |
+    |    [--s_epoch {epoch}] -t {srs_def} [--t_epoch {epoch}])
     |
 
     where {object_definition} or {srs_def} is one of the possibilities accepted
@@ -355,6 +356,20 @@ The following control parameters can appear in any order:
 
     Display information regarding if :ref:`network` is enabled, and the
     related URL.
+
+.. option:: --s_epoch
+
+    .. versionadded:: 9.4
+
+    Epoch of coordinates in the source CRS, as decimal year.
+    Only applies to a dynamic CRS.
+
+.. option:: --t_epoch
+
+    .. versionadded:: 9.4
+
+    Epoch of coordinates in the target CRS, as decimal year.
+    Only applies to a dynamic CRS.
 
 Examples
 ********

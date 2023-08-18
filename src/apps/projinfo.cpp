@@ -119,8 +119,10 @@ struct OutputOptions {
         << "                --dump-db-structure [{object_definition} | "
            "{object_reference}] |"
         << std::endl
-        << "                {object_definition} | {object_reference} | "
-           "(-s {srs_def} -t {srs_def})"
+        << "                {object_definition} | {object_reference} |"
+        << std::endl
+        << "                (-s {srs_def} [--s_epoch {epoch}] "
+           "-t {srs_def} [--t_epoch {epoch}])"
         << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
@@ -256,8 +258,8 @@ static ExtentPtr makeBboxFilter(DatabaseContextPtr dbContext,
 
 static BaseObjectNNPtr buildObject(
     DatabaseContextPtr dbContext, const std::string &user_string,
-    const std::string &kind, const std::string &context,
-    bool buildBoundCRSToWGS84,
+    const std::string &epoch, const std::string &kind,
+    const std::string &context, bool buildBoundCRSToWGS84,
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     bool promoteTo3D, bool normalizeAxisOrder, bool quiet) {
     BaseObjectPtr obj;
@@ -416,6 +418,19 @@ static BaseObjectNNPtr buildObject(
         auto crs = std::dynamic_pointer_cast<CRS>(obj);
         if (crs) {
             obj = crs->normalizeForVisualization().as_nullable();
+        }
+    }
+
+    if (!epoch.empty()) {
+        auto crs = std::dynamic_pointer_cast<CRS>(obj);
+        if (crs) {
+            obj = CoordinateMetadata::create(NN_NO_CHECK(crs), std::stod(epoch),
+                                             dbContext)
+                      .as_nullable();
+        } else {
+            std::cerr << context << ": applying epoch to a non-CRS object"
+                      << std::endl;
+            std::exit(1);
         }
     }
 
@@ -827,7 +842,8 @@ static bool is3DCRS(const CRSPtr &crs) {
 
 static void outputOperations(
     DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
-    const std::string &targetCRSStr, const ExtentPtr &bboxFilter,
+    const std::string &sourceEpoch, const std::string &targetCRSStr,
+    const std::string &targetEpoch, const ExtentPtr &bboxFilter,
     CoordinateOperationContext::SpatialCriterion spatialCriterion,
     bool spatialCriterionExplicitlySpecified,
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse,
@@ -837,10 +853,10 @@ static void outputOperations(
     const std::string &authority, bool usePROJGridAlternatives,
     bool showSuperseded, bool promoteTo3D, bool normalizeAxisOrder,
     double minimumAccuracy, const OutputOptions &outputOpt, bool summary) {
-    auto sourceObj =
-        buildObject(dbContext, sourceCRSStr, "crs", "source CRS", false,
-                    CoordinateOperationContext::IntermediateCRSUse::NEVER,
-                    promoteTo3D, normalizeAxisOrder, outputOpt.quiet);
+    auto sourceObj = buildObject(
+        dbContext, sourceCRSStr, sourceEpoch, "crs", "source CRS", false,
+        CoordinateOperationContext::IntermediateCRSUse::NEVER, promoteTo3D,
+        normalizeAxisOrder, outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     CoordinateMetadataPtr sourceCoordinateMetadata;
     if (!sourceCRS) {
@@ -858,10 +874,10 @@ static void outputOperations(
         }
     }
 
-    auto targetObj =
-        buildObject(dbContext, targetCRSStr, "crs", "target CRS", false,
-                    CoordinateOperationContext::IntermediateCRSUse::NEVER,
-                    promoteTo3D, normalizeAxisOrder, outputOpt.quiet);
+    auto targetObj = buildObject(
+        dbContext, targetCRSStr, targetEpoch, "crs", "target CRS", false,
+        CoordinateOperationContext::IntermediateCRSUse::NEVER, promoteTo3D,
+        normalizeAxisOrder, outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     CoordinateMetadataPtr targetCoordinateMetadata;
     if (!targetCRS) {
@@ -1023,7 +1039,9 @@ int main(int argc, char **argv) {
     std::string user_string;
     bool user_string_specified = false;
     std::string sourceCRSStr;
+    std::string sourceEpoch;
     std::string targetCRSStr;
+    std::string targetEpoch;
     bool outputSwitchSpecified = false;
     OutputOptions outputOpt;
     std::string objectKind;
@@ -1196,9 +1214,15 @@ int main(int argc, char **argv) {
         } else if ((arg == "-s" || arg == "--source-crs") && i + 1 < argc) {
             i++;
             sourceCRSStr = argv[i];
+        } else if (arg == "--s_epoch" && i + 1 < argc) {
+            i++;
+            sourceEpoch = argv[i];
         } else if ((arg == "-t" || arg == "--target-crs") && i + 1 < argc) {
             i++;
             targetCRSStr = argv[i];
+        } else if (arg == "--t_epoch" && i + 1 < argc) {
+            i++;
+            targetEpoch = argv[i];
         } else if (arg == "-q" || arg == "--quiet") {
             outputOpt.quiet = true;
         } else if (arg == "--c-ify") {
@@ -1577,10 +1601,10 @@ int main(int argc, char **argv) {
 
     if (!user_string.empty()) {
         try {
-            auto obj(buildObject(dbContext, user_string, objectKind,
-                                 "input string", buildBoundCRSToWGS84,
-                                 allowUseIntermediateCRS, promoteTo3D,
-                                 normalizeAxisOrder, outputOpt.quiet));
+            auto obj(buildObject(
+                dbContext, user_string, std::string(), objectKind,
+                "input string", buildBoundCRSToWGS84, allowUseIntermediateCRS,
+                promoteTo3D, normalizeAxisOrder, outputOpt.quiet));
             if (guessDialect) {
                 auto dialect = WKTParser().guessDialect(user_string);
                 std::cout << "Guessed WKT dialect: ";
@@ -1674,8 +1698,8 @@ int main(int argc, char **argv) {
     } else {
         auto bboxFilter = makeBboxFilter(dbContext, bboxStr, area, true);
         try {
-            outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
-                             spatialCriterion,
+            outputOperations(dbContext, sourceCRSStr, sourceEpoch, targetCRSStr,
+                             targetEpoch, bboxFilter, spatialCriterion,
                              spatialCriterionExplicitlySpecified, crsExtentUse,
                              gridAvailabilityUse, allowUseIntermediateCRS,
                              pivots, authority, usePROJGridAlternatives,
