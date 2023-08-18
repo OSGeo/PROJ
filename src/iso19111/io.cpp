@@ -7328,11 +7328,53 @@ static BaseObjectNNPtr createFromURNPart(const DatabaseContextPtr &dbContext,
 static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                            const DatabaseContextPtr &dbContext,
                                            bool usePROJ4InitRules,
-                                           PJ_CONTEXT *ctx) {
+                                           PJ_CONTEXT *ctx,
+                                           bool ignoreCoordinateEpoch) {
     std::size_t idxFirstCharNotSpace = text.find_first_not_of(" \t\r\n");
     if (idxFirstCharNotSpace > 0 && idxFirstCharNotSpace != std::string::npos) {
         return createFromUserInput(text.substr(idxFirstCharNotSpace), dbContext,
-                                   usePROJ4InitRules, ctx);
+                                   usePROJ4InitRules, ctx,
+                                   ignoreCoordinateEpoch);
+    }
+
+    // Parse strings like "ITRF2014 @ 2025.0"
+    const auto posAt = text.find('@');
+    if (!ignoreCoordinateEpoch && posAt != std::string::npos) {
+
+        // Try first as if belonged to the name
+        try {
+            return createFromUserInput(text, dbContext, usePROJ4InitRules, ctx,
+                                       /* ignoreCoordinateEpoch = */ true);
+        } catch (...) {
+        }
+
+        std::string leftPart = text.substr(0, posAt);
+        while (!leftPart.empty() && leftPart.back() == ' ')
+            leftPart.resize(leftPart.size() - 1);
+        const auto nonSpacePos = text.find_first_not_of(' ', posAt + 1);
+        if (nonSpacePos != std::string::npos) {
+            auto obj =
+                createFromUserInput(leftPart, dbContext, usePROJ4InitRules, ctx,
+                                    /* ignoreCoordinateEpoch = */ true);
+            auto crs = nn_dynamic_pointer_cast<CRS>(obj);
+            if (crs) {
+                double epoch;
+                try {
+                    epoch = c_locale_stod(text.substr(nonSpacePos));
+                } catch (const std::exception &) {
+                    throw ParsingException("non-numeric value after @");
+                }
+                try {
+                    return CoordinateMetadata::create(NN_NO_CHECK(crs), epoch,
+                                                      dbContext);
+                } catch (const std::exception &e) {
+                    throw ParsingException(
+                        std::string(
+                            "CoordinateMetadata::create() failed with: ") +
+                        e.what());
+                }
+            }
+        }
     }
 
     if (!text.empty() && text[0] == '{') {
@@ -7861,37 +7903,6 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         }
     }
 
-    // Parse strings like "ITRF2014 @ 2025.0"
-    const auto posAt = text.find('@');
-    if (posAt != std::string::npos) {
-        std::string leftPart = text.substr(0, posAt);
-        while (!leftPart.empty() && leftPart.back() == ' ')
-            leftPart.resize(leftPart.size() - 1);
-        const auto nonSpacePos = text.find_first_not_of(' ', posAt + 1);
-        if (nonSpacePos != std::string::npos) {
-            auto obj = createFromUserInput(leftPart, dbContext,
-                                           usePROJ4InitRules, ctx);
-            auto crs = nn_dynamic_pointer_cast<CRS>(obj);
-            if (crs) {
-                double epoch;
-                try {
-                    epoch = c_locale_stod(text.substr(nonSpacePos));
-                } catch (const std::exception &) {
-                    throw ParsingException("non-numeric value after @");
-                }
-                try {
-                    return CoordinateMetadata::create(NN_NO_CHECK(crs), epoch,
-                                                      dbContext);
-                } catch (const std::exception &e) {
-                    throw ParsingException(
-                        std::string(
-                            "CoordinateMetadata::create() failed with: ") +
-                        e.what());
-                }
-            }
-        }
-    }
-
     throw ParsingException("unrecognized format / unknown name");
 }
 //! @endcond
@@ -7952,7 +7963,8 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
 BaseObjectNNPtr createFromUserInput(const std::string &text,
                                     const DatabaseContextPtr &dbContext,
                                     bool usePROJ4InitRules) {
-    return createFromUserInput(text, dbContext, usePROJ4InitRules, nullptr);
+    return createFromUserInput(text, dbContext, usePROJ4InitRules, nullptr,
+                               /* ignoreCoordinateEpoch = */ false);
 }
 
 // ---------------------------------------------------------------------------
@@ -8005,7 +8017,8 @@ BaseObjectNNPtr createFromUserInput(const std::string &text, PJ_CONTEXT *ctx) {
         }
     } catch (const std::exception &) {
     }
-    return createFromUserInput(text, dbContext, false, ctx);
+    return createFromUserInput(text, dbContext, false, ctx,
+                               /* ignoreCoordinateEpoch = */ false);
 }
 
 // ---------------------------------------------------------------------------
