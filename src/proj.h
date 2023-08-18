@@ -1491,6 +1491,9 @@ PJ PROJ_DLL *proj_concatoperation_get_step(PJ_CONTEXT *ctx,
                                            const PJ *concatoperation,
                                            int i_step);
 
+PJ PROJ_DLL *proj_coordinate_metadata_create(PJ_CONTEXT *ctx, const PJ *crs,
+                                             double epoch);
+
 double PROJ_DLL proj_coordinate_metadata_get_epoch(PJ_CONTEXT *ctx,
                                                    const PJ *obj);
 

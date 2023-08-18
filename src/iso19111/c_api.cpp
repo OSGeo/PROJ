@@ -9566,6 +9566,36 @@ proj_get_geoid_models_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a CoordinateMetadata object
+ *
+ * @since 9.4
+ */
+
+PJ *proj_coordinate_metadata_create(PJ_CONTEXT *ctx, const PJ *crs,
+                                    double epoch) {
+    SANITIZE_CTX(ctx);
+    if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return nullptr;
+    }
+    auto crsCast = std::dynamic_pointer_cast<CRS>(crs->iso_obj);
+    if (!crsCast) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CRS");
+        return nullptr;
+    }
+    try {
+        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+        return pj_obj_create(ctx, CoordinateMetadata::create(
+                                      NN_NO_CHECK(crsCast), epoch, dbContext));
+    } catch (const std::exception &e) {
+        proj_log_debug(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the coordinate epoch associated with a CoordinateMetadata.
  *
  * It may return a NaN value if there is no associated coordinate epoch.

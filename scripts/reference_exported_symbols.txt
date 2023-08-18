@@ -876,6 +876,7 @@ proj_context_use_proj4_init_rules
 proj_convert_conversion_to_other_method
 proj_coord
 proj_coord_error()
+proj_coordinate_metadata_create
 proj_coordinate_metadata_get_epoch
 proj_coordoperation_create_inverse
 proj_coordoperation_get_accuracy
