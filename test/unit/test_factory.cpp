@@ -4704,4 +4704,16 @@ TEST(factory, ogc_crs) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, getPointMotionOperationsFor) {
+    auto ctxt = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // "NAD83(CSRS)v7"
+    auto crs = factory->createGeodeticCRS("8255");
+    auto opList = factory->getPointMotionOperationsFor(crs, false);
+    ASSERT_TRUE(!opList.empty());
+    EXPECT_EQ(opList.front()->identifiers().front()->code(), "9483");
+}
+
+// ---------------------------------------------------------------------------
+
 } // namespace

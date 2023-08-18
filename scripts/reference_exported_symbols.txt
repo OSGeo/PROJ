@@ -97,7 +97,9 @@ osgeo::proj::coordinates::CoordinateMetadata::coordinateEpoch() const
 osgeo::proj::coordinates::CoordinateMetadata::~CoordinateMetadata()
 osgeo::proj::coordinates::CoordinateMetadata::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&)
 osgeo::proj::coordinates::CoordinateMetadata::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double)
+osgeo::proj::coordinates::CoordinateMetadata::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&)
 osgeo::proj::coordinates::CoordinateMetadata::crs() const
+osgeo::proj::coordinates::CoordinateMetadata::promoteTo3D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::BoundCRS::baseCRS() const
 osgeo::proj::crs::BoundCRS::baseCRSWithCanonicalBoundCRS() const
 osgeo::proj::crs::BoundCRS::~BoundCRS()
@@ -376,6 +378,7 @@ osgeo::proj::io::AuthorityFactory::getCRSInfoList() const
 osgeo::proj::io::AuthorityFactory::getDescriptionText(std::string const&) const
 osgeo::proj::io::AuthorityFactory::getGeoidModels(std::string const&) const
 osgeo::proj::io::AuthorityFactory::getOfficialNameFromAlias(std::string const&, std::string const&, std::string const&, bool, std::string&, std::string&, std::string&) const
+osgeo::proj::io::AuthorityFactory::getPointMotionOperationsFor(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::GeodeticCRS> > const&, bool) const
 osgeo::proj::io::AuthorityFactory::getUnitList() const
 osgeo::proj::io::AuthorityFactory::identifyBodyFromSemiMajorAxis(double, double) const
 osgeo::proj::io::AuthorityFactory::listAreaOfUseFromName(std::string const&, bool) const

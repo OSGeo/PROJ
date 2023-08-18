@@ -7880,7 +7880,8 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                     throw ParsingException("non-numeric value after @");
                 }
                 try {
-                    return CoordinateMetadata::create(NN_NO_CHECK(crs), epoch);
+                    return CoordinateMetadata::create(NN_NO_CHECK(crs), epoch,
+                                                      dbContext);
                 } catch (const std::exception &e) {
                     throw ParsingException(
                         std::string(

@@ -126,6 +126,10 @@ using ConversionNNPtr = util::nn<ConversionPtr>;
 class CoordinateOperation;
 using CoordinateOperationPtr = std::shared_ptr<CoordinateOperation>;
 using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
+
+class PointMotionOperation;
+using PointMotionOperationPtr = std::shared_ptr<PointMotionOperation>;
+using PointMotionOperationNNPtr = util::nn<PointMotionOperationPtr>;
 } // namespace operation
 
 /** osgeo.proj.io namespace.
@@ -1291,6 +1295,10 @@ class PROJ_GCC_DLL AuthorityFactory {
                                 std::vector<ObjectType>(),
                             bool approximateMatch = true,
                             size_t limitResultCount = 0) const;
+
+    PROJ_FOR_TEST std::vector<operation::PointMotionOperationNNPtr>
+    getPointMotionOperationsFor(const crs::GeodeticCRSNNPtr &crs,
+                                bool usePROJAlternativeGridNames) const;
 
     //! @endcond
 

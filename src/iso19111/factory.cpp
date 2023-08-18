@@ -9635,6 +9635,55 @@ AuthorityFactory::getTransformationsForGeoid(
 
     return res;
 }
+
+// ---------------------------------------------------------------------------
+
+std::vector<operation::PointMotionOperationNNPtr>
+AuthorityFactory::getPointMotionOperationsFor(
+    const crs::GeodeticCRSNNPtr &crs, bool usePROJAlternativeGridNames) const {
+    std::vector<operation::PointMotionOperationNNPtr> res;
+    const auto crsList =
+        createGeodeticCRSFromDatum(crs->datumNonNull(d->context()),
+                                   /* preferredAuthName = */ std::string(),
+                                   /* geodetic_crs_type = */ std::string());
+    if (crsList.empty())
+        return res;
+    std::string sql("SELECT auth_name, code FROM coordinate_operation_view "
+                    "WHERE source_crs_auth_name = target_crs_auth_name AND "
+                    "source_crs_code = target_crs_code AND deprecated = 0 AND "
+                    "(");
+    bool addOr = false;
+    ListOfParams params;
+    for (const auto &candidateCrs : crsList) {
+        if (addOr)
+            sql += " OR ";
+        addOr = true;
+        sql += "(source_crs_auth_name = ? AND source_crs_code = ?)";
+        const auto &ids = candidateCrs->identifiers();
+        params.emplace_back(*(ids[0]->codeSpace()));
+        params.emplace_back(ids[0]->code());
+    }
+    sql += ")";
+    if (d->hasAuthorityRestriction()) {
+        sql += " AND auth_name = ?";
+        params.emplace_back(d->authority());
+    }
+
+    auto sqlRes = d->run(sql, params);
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        auto pmo =
+            util::nn_dynamic_pointer_cast<operation::PointMotionOperation>(
+                d->createFactory(auth_name)->createCoordinateOperation(
+                    code, usePROJAlternativeGridNames));
+        if (pmo) {
+            res.emplace_back(NN_NO_CHECK(pmo));
+        }
+    }
+    return res;
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------

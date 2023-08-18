@@ -404,6 +404,11 @@ static BaseObjectNNPtr buildObject(
         auto crs = std::dynamic_pointer_cast<CRS>(obj);
         if (crs) {
             obj = crs->promoteTo3D(std::string(), dbContext).as_nullable();
+        } else {
+            auto cm = std::dynamic_pointer_cast<CoordinateMetadata>(obj);
+            if (cm) {
+                obj = cm->promoteTo3D(std::string(), dbContext).as_nullable();
+            }
         }
     }
 

@@ -196,3 +196,32 @@ TEST(coordinateMetadata, dynamic_crs) {
     EXPECT_NEAR(coordinateMetadataFromJson->coordinateEpochAsDecimalYear(),
                 2023.5, 1e-10);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(coordinateMetadata, crs_with_point_motion_operation_and_promote_to_3D) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    {
+        // "NAD83(CSRS)v7"
+        auto crs = factory->createCoordinateReferenceSystem("8255");
+        EXPECT_THROW(CoordinateMetadata::create(crs, 2023.5), Exception);
+        EXPECT_NO_THROW(CoordinateMetadata::create(crs, 2023.5, dbContext));
+        auto cm = CoordinateMetadata::create(crs, 2023.5, dbContext)
+                      ->promoteTo3D(std::string(), dbContext);
+        EXPECT_TRUE(cm->crs()->isEquivalentTo(
+            crs->promoteTo3D(std::string(), dbContext).get()));
+        EXPECT_TRUE(cm->coordinateEpoch().has_value());
+        EXPECT_NEAR(cm->coordinateEpochAsDecimalYear(), 2023.5, 1e-10);
+    }
+    {
+        auto crs = factory->createCoordinateReferenceSystem("4267");
+        EXPECT_THROW(CoordinateMetadata::create(crs, 2023.5, dbContext),
+                     Exception);
+        auto cm = CoordinateMetadata::create(crs)->promoteTo3D(std::string(),
+                                                               dbContext);
+        EXPECT_TRUE(cm->crs()->isEquivalentTo(
+            crs->promoteTo3D(std::string(), dbContext).get()));
+        EXPECT_TRUE(!cm->coordinateEpoch().has_value());
+    }
+}
