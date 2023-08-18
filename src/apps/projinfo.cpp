@@ -879,14 +879,6 @@ static void outputOperations(
         }
     }
 
-    if (sourceCoordinateMetadata != nullptr &&
-        targetCoordinateMetadata != nullptr) {
-        std::cerr << "CoordinateMetadata with epoch to CoordinateMetadata "
-                     "with epoch not supported currently."
-                  << std::endl;
-        std::exit(1);
-    }
-
     // TODO: handle promotion of CoordinateMetadata
     if (sourceCRS && targetCRS && dbContext && !promoteTo3D) {
         // Auto-promote source/target CRS if it is specified by its name,
@@ -927,6 +919,12 @@ static void outputOperations(
 
         const auto createOperations = [&]() {
             if (sourceCoordinateMetadata) {
+                if (targetCoordinateMetadata) {
+                    return CoordinateOperationFactory::create()
+                        ->createOperations(
+                            NN_NO_CHECK(sourceCoordinateMetadata),
+                            NN_NO_CHECK(targetCoordinateMetadata), ctxt);
+                }
                 return CoordinateOperationFactory::create()->createOperations(
                     NN_NO_CHECK(sourceCoordinateMetadata),
                     NN_NO_CHECK(targetCRS), ctxt);
