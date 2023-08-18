@@ -8468,22 +8468,19 @@ proj_create_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
         }
     }
 
-    if (sourceCoordinateMetadata != nullptr &&
-        targetCoordinateMetadata != nullptr) {
-        proj_log_error(ctx, __FUNCTION__,
-                       "CoordinateMetadata with epoch to CoordinateMetadata "
-                       "with epoch not supported currently");
-        return nullptr;
-    }
-
     try {
         auto factory = CoordinateOperationFactory::create();
         std::vector<IdentifiedObjectNNPtr> objects;
         auto ops = sourceCoordinateMetadata != nullptr
-                       ? factory->createOperations(
-                             NN_NO_CHECK(sourceCoordinateMetadata),
-                             NN_NO_CHECK(targetCRS),
-                             operationContext->operationContext)
+                       ? (targetCoordinateMetadata != nullptr
+                              ? factory->createOperations(
+                                    NN_NO_CHECK(sourceCoordinateMetadata),
+                                    NN_NO_CHECK(targetCoordinateMetadata),
+                                    operationContext->operationContext)
+                              : factory->createOperations(
+                                    NN_NO_CHECK(sourceCoordinateMetadata),
+                                    NN_NO_CHECK(targetCRS),
+                                    operationContext->operationContext))
                    : targetCoordinateMetadata != nullptr
                        ? factory->createOperations(
                              NN_NO_CHECK(sourceCRS),
