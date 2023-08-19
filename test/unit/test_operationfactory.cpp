@@ -5582,7 +5582,7 @@ TEST(operation, compoundCRS_to_compoundCRS_issue_3328) {
               "+ry=-0.0096500989602704 +rz=-0.0116599432323421 +s=0 "
               "+convention=coordinate_frame "
               "+step +inv +proj=cart +ellps=GRS80 "
-              "+step +inv +proj=vgridshift +grids=ca_nrc_HT2_2010v70.tif "
+              "+step +inv +proj=vgridshift +grids=ca_nrc_HT2_1997.tif "
               "+multiplier=1 "
               "+step +proj=push +v_3 "
               "+step +proj=cart +ellps=GRS80 "

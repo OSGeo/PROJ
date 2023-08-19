@@ -51,9 +51,12 @@ VALUES
 ('CGG2013an83.byn','ca_nrc_CGG2013an83.tif','CGG2013an83.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_CGG2013an83.tif',1,1,NULL),
 ('CGG2013i08.byn','ca_nrc_CGG2013i08.tif','CGG2013i08.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_CGG2013i08.tif',1,1,NULL),
 ('CGG2013n83.byn','ca_nrc_CGG2013n83.tif','CGG2013n83.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_CGG2013n83.tif',1,1,NULL),
-('HT2_0.byn','ca_nrc_HT2_2010v70.tif','HT2_2010v70.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70.tif',1,1,NULL), -- deprecated name. dubious mapping !!!
-('HT2_1997.byn','ca_nrc_HT2_2010v70.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70.tif',1,1,NULL), -- dubious mapping !!!
+('HT2_0.byn','ca_nrc_HT2_1997.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_1997.tif',1,1,NULL),
+('HT2_1997.byn','ca_nrc_HT2_1997.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_1997.tif',1,1,NULL),
+('HT2_2002v70.byn','ca_nrc_HT2_2002v70.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2002v70.tif',1,1,NULL),
 ('HT2_2010v70.byn','ca_nrc_HT2_2010v70.tif','HT2_2010v70.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70.tif',1,1,NULL),
+('HT2_1997_CGG2013a.byn','ca_nrc_HT2_1997_CGG2013a.tif',NULL,'GTiff','vgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_1997_CGG2013a.tif',1,1,NULL),
+('HT2_2002v70_CGG2013a.byn','ca_nrc_HT2_2002v70_CGG2013a.tif',NULL,'GTiff','vgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2002v70_CGG2013a.tif',1,1,NULL),
 ('HT2_2010v70_CGG2013a.byn','ca_nrc_HT2_2010v70_CGG2013a.tif',NULL,'GTiff','vgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70_CGG2013a.tif',1,1,NULL),
 -- the PROJ grid is the reverse way of the EPSG one
 ('NTv1_0.gsb','ca_nrc_ntv1_can.tif','ntv1_can.dat','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_ntv1_can.tif',1,1,NULL),
