@@ -4045,8 +4045,19 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
         const auto &models = vertDst->geoidModel();
         for (const auto &model : models) {
             const auto &modelName = model->nameStr();
+            const auto &modelIds = model->identifiers();
             const auto transformations =
-                starts_with(modelName, "PROJ ")
+                !modelIds.empty()
+                    ? std::vector<
+                          CoordinateOperationNNPtr>{io::AuthorityFactory::create(
+                                                        authFactory
+                                                            ->databaseContext(),
+                                                        *(modelIds[0]
+                                                              ->codeSpace()))
+                                                        ->createCoordinateOperation(
+                                                            modelIds[0]->code(),
+                                                            true)}
+                : starts_with(modelName, "PROJ ")
                     ? std::vector<
                           CoordinateOperationNNPtr>{getProjGeoidTransformation(
                           model, modelName.substr(strlen("PROJ ")))}
