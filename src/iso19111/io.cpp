@@ -5407,13 +5407,14 @@ WKTParser::Private::buildCoordinateMetadata(const WKTNodeNNPtr &node) {
         if (epochChildren.empty()) {
             ThrowMissing(WKTConstants::EPOCH);
         }
+        double coordinateEpoch;
         try {
-            const double coordinateEpoch = asDouble(epochChildren[0]);
-            return CoordinateMetadata::create(NN_NO_CHECK(crs),
-                                              coordinateEpoch);
+            coordinateEpoch = asDouble(epochChildren[0]);
         } catch (const std::exception &) {
             throw ParsingException("Invalid EPOCH node");
         }
+        return CoordinateMetadata::create(NN_NO_CHECK(crs), coordinateEpoch,
+                                          dbContext_);
     }
 
     return CoordinateMetadata::create(NN_NO_CHECK(crs));
@@ -6715,8 +6716,8 @@ CoordinateMetadataNNPtr JSONParser::buildCoordinateMetadata(const json &j) {
     if (j.contains("coordinateEpoch")) {
         auto jCoordinateEpoch = j["coordinateEpoch"];
         if (jCoordinateEpoch.is_number()) {
-            return CoordinateMetadata::create(crs,
-                                              jCoordinateEpoch.get<double>());
+            return CoordinateMetadata::create(
+                crs, jCoordinateEpoch.get<double>(), dbContext_);
         }
         throw ParsingException(
             "Unexpected type for value of \"coordinateEpoch\"");
