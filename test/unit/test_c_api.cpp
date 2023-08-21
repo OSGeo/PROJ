@@ -4983,6 +4983,35 @@ TEST_F(CApi, proj_crs_promote_to_3D) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_crs_promote_to_3D_on_coordinate_metadata) {
+
+    auto cm_crs2D = proj_create(m_ctxt, "ITRF2014@2010.0");
+    ObjectKeeper keeper_cm_crs2D(cm_crs2D);
+    EXPECT_NE(cm_crs2D, nullptr);
+
+    auto cm_crs3D = proj_crs_promote_to_3D(m_ctxt, nullptr, cm_crs2D);
+    ObjectKeeper keeper_cm_crs3D(cm_crs3D);
+    EXPECT_NE(cm_crs3D, nullptr);
+
+    EXPECT_NEAR(proj_coordinate_metadata_get_epoch(m_ctxt, cm_crs3D), 2010.0,
+                1e-10);
+
+    auto crs3D = proj_get_source_crs(m_ctxt, cm_crs3D);
+    ObjectKeeper keeper_crs3D(crs3D);
+    EXPECT_NE(crs3D, nullptr);
+
+    auto cs = proj_crs_get_coordinate_system(m_ctxt, crs3D);
+    ASSERT_NE(cs, nullptr);
+    ObjectKeeper keeperCs(cs);
+    EXPECT_EQ(proj_cs_get_axis_count(m_ctxt, cs), 3);
+
+    auto code = proj_get_id_code(crs3D, 0);
+    ASSERT_TRUE(code != nullptr);
+    EXPECT_EQ(code, std::string("7912"));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_crs_demote_to_2D) {
 
     auto crs3D =

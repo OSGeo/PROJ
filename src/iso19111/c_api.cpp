@@ -4155,18 +4155,44 @@ PJ *proj_crs_promote_to_3D(PJ_CONTEXT *ctx, const char *crs_3D_name,
     }
     auto cpp_2D_crs = dynamic_cast<const CRS *>(crs_2D->iso_obj.get());
     if (!cpp_2D_crs) {
-        proj_log_error(ctx, __FUNCTION__, "crs_2D is not a CRS");
-        return nullptr;
-    }
-    try {
-        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
-        return pj_obj_create(
-            ctx, cpp_2D_crs->promoteTo3D(crs_3D_name ? std::string(crs_3D_name)
-                                                     : cpp_2D_crs->nameStr(),
-                                         dbContext));
-    } catch (const std::exception &e) {
-        proj_log_error(ctx, __FUNCTION__, e.what());
-        return nullptr;
+        auto coordinateMetadata =
+            dynamic_cast<const CoordinateMetadata *>(crs_2D->iso_obj.get());
+        if (!coordinateMetadata) {
+            proj_log_error(ctx, __FUNCTION__,
+                           "crs_2D is not a CRS or a CoordinateMetadata");
+            return nullptr;
+        }
+
+        try {
+            auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+            auto crs = coordinateMetadata->crs();
+            auto crs_3D = crs->promoteTo3D(
+                crs_3D_name ? std::string(crs_3D_name) : crs->nameStr(),
+                dbContext);
+            if (coordinateMetadata->coordinateEpoch().has_value()) {
+                return pj_obj_create(
+                    ctx, CoordinateMetadata::create(
+                             crs_3D,
+                             coordinateMetadata->coordinateEpochAsDecimalYear(),
+                             dbContext));
+            } else {
+                return pj_obj_create(ctx, CoordinateMetadata::create(crs_3D));
+            }
+        } catch (const std::exception &e) {
+            proj_log_error(ctx, __FUNCTION__, e.what());
+            return nullptr;
+        }
+    } else {
+        try {
+            auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+            return pj_obj_create(ctx, cpp_2D_crs->promoteTo3D(
+                                          crs_3D_name ? std::string(crs_3D_name)
+                                                      : cpp_2D_crs->nameStr(),
+                                          dbContext));
+        } catch (const std::exception &e) {
+            proj_log_error(ctx, __FUNCTION__, e.what());
+            return nullptr;
+        }
     }
 }
 
