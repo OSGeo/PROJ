@@ -5931,6 +5931,52 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         return;
     }
 
+    // Use PointMotionOperations if appropriate and available
+    const auto &authFactory = context.context->getAuthorityFactory();
+    if (authFactory && context.ignoreCoordinateEpochCounter == 0 &&
+        context.context->getSourceCoordinateEpoch().has_value() &&
+        context.context->getTargetCoordinateEpoch().has_value() &&
+        !context.context->getSourceCoordinateEpoch()
+             ->coordinateEpoch()
+             ._isEquivalentTo(context.context->getTargetCoordinateEpoch()
+                                  ->coordinateEpoch()) &&
+        srcGeog->_isEquivalentTo(dstGeog.get(),
+                                 util::IComparable::Criterion::EQUIVALENT)) {
+        const auto pmoSrc = authFactory->getPointMotionOperationsFor(
+            NN_NO_CHECK(srcGeog), true);
+        if (!pmoSrc.empty()) {
+            auto geog3D = srcGeog->promoteTo3D(
+                std::string(), authFactory->databaseContext().as_nullable());
+            auto pmoOps = createOperations(geog3D, geog3D, context);
+            CoordinateEpochIgnorer guard(context);
+            auto opsFirst = createOperations(sourceCRS, geog3D, context);
+            auto opsLast = createOperations(geog3D, targetCRS, context);
+            for (const auto &opFirst : opsFirst) {
+                if (!opFirst->hasBallparkTransformation()) {
+                    for (const auto &opMiddle : pmoOps) {
+                        if (!opMiddle->hasBallparkTransformation()) {
+                            for (const auto &opLast : opsLast) {
+                                if (!opLast->hasBallparkTransformation()) {
+                                    try {
+                                        res.emplace_back(
+                                            ConcatenatedOperation::
+                                                createComputeMetadata(
+                                                    {opFirst, opMiddle, opLast},
+                                                    disallowEmptyIntersection));
+                                    } catch (const std::exception &) {
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!res.empty()) {
+                return;
+            }
+        }
+    }
+
     // Deal with "+proj=something +geoidgrids +nadgrids/+towgs84" to
     // "+proj=something +geoidgrids +nadgrids/+towgs84", using WGS 84 as an
     // intermediate.
@@ -5949,7 +5995,6 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 util::IComparable::Criterion::EQUIVALENT) &&
             !comp1SrcBound->isEquivalentTo(
                 comp1DstBound, util::IComparable::Criterion::EQUIVALENT)) {
-            const auto &authFactory = context.context->getAuthorityFactory();
             auto dbContext = authFactory
                                  ? authFactory->databaseContext().as_nullable()
                                  : nullptr;
@@ -5984,7 +6029,6 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
     // the 2 vertical CRS, then try through intermediate geographic CRS
     if (verticalTransforms.size() == 1 &&
         verticalTransforms.front()->hasBallparkTransformation()) {
-        const auto &authFactory = context.context->getAuthorityFactory();
         auto dbContext = authFactory
                              ? authFactory->databaseContext().as_nullable()
                              : nullptr;
