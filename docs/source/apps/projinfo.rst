@@ -55,6 +55,8 @@ Synopsis
       e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)":
       "urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031"
       (*added in 6.2*)
+    - Extension of OGC URN for CoordinateMetadata.
+      e.g. "urn:ogc:def:CoordinateMetadata:NRCAN::NAD83_CSRS_1997_MTM11_HT2_1997"
     - a OGC URN combining references for concatenated operations
       (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
     - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.4/projjson.schema.json (*added in 6.2*)

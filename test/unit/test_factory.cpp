@@ -51,6 +51,7 @@
 #endif
 
 using namespace osgeo::proj::common;
+using namespace osgeo::proj::coordinates;
 using namespace osgeo::proj::crs;
 using namespace osgeo::proj::cs;
 using namespace osgeo::proj::datum;
@@ -3159,6 +3160,15 @@ TEST_F(FactoryWithTmpDatabase, CoordinateMetadata) {
         auto cm = factory->createCoordinateMetadata("TEST_NO_EPOCH");
         EXPECT_TRUE(cm->crs()->isEquivalentTo(crs_4326.get()));
         EXPECT_FALSE(cm->coordinateEpoch().has_value());
+    }
+    {
+        auto obj = createFromUserInput(
+            "urn:ogc:def:coordinateMetadata:TEST_NS::TEST", dbContext, true);
+        auto cm = dynamic_cast<CoordinateMetadata *>(obj.get());
+        ASSERT_TRUE(cm != nullptr);
+        EXPECT_TRUE(cm->crs()->isEquivalentTo(crs_4326.get()));
+        EXPECT_TRUE(cm->coordinateEpoch().has_value());
+        EXPECT_NEAR(cm->coordinateEpochAsDecimalYear(), 2020.1, 1e-10);
     }
 }
 

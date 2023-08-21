@@ -7300,6 +7300,10 @@ static BaseObjectNNPtr createFromURNPart(const DatabaseContextPtr &dbContext,
         if (type == "meridian") {
             return factory->createPrimeMeridian(code);
         }
+        // Extension of OGC URN syntax to CoordinateMetadata
+        if (type == "coordinateMetadata") {
+            return factory->createCoordinateMetadata(code);
+        }
         throw ParsingException(concat("unhandled object type: ", type));
     } catch (...) {
         if (version.empty()) {
@@ -7931,6 +7935,9 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  *      e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)"
  *      "urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031"
  * </li>
+ * <li>Extension of OGC URN for CoordinateMetadata.
+ *     e.g.
+ * "urn:ogc:def:coordinateMetadata:NRCAN::NAD83_CSRS_1997_MTM11_HT2_1997"</li>
  * <li> OGC URN combining references for concatenated operations
  *      e.g.
  * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
@@ -7990,6 +7997,9 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  *      e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)"
  *      "urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031"
  * </li>
+ * <li>Extension of OGC URN for CoordinateMetadata.
+ *     e.g.
+ * "urn:ogc:def:coordinateMetadata:NRCAN::NAD83_CSRS_1997_MTM11_HT2_1997"</li>
  * <li> OGC URN combining references for concatenated operations
  *      e.g.
  * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
