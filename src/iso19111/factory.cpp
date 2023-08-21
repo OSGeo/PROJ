@@ -32,6 +32,7 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#include "proj/coordinates.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -118,7 +119,7 @@ namespace io {
 constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 // If the code depends on the new additions, then DATABASE_LAYOUT_VERSION_MINOR
 // must be incremented.
-constexpr int DATABASE_LAYOUT_VERSION_MINOR = 2;
+constexpr int DATABASE_LAYOUT_VERSION_MINOR = 3;
 
 constexpr size_t N_MAX_PARAMS = 7;
 
@@ -5663,6 +5664,61 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
 }
 
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a coordinates::CoordinateMetadata from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ * @since 9.4
+ */
+
+coordinates::CoordinateMetadataNNPtr
+AuthorityFactory::createCoordinateMetadata(const std::string &code) const {
+    auto res = d->runWithCodeParam(
+        "SELECT crs_auth_name, crs_code, crs_text_definition, coordinate_epoch "
+        "FROM coordinate_metadata WHERE auth_name = ? AND code = ?",
+        code);
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("coordinate_metadata not found",
+                                           d->authority(), code);
+    }
+    try {
+        const auto &row = res.front();
+        const auto &crs_auth_name = row[0];
+        const auto &crs_code = row[1];
+        const auto &crs_text_definition = row[2];
+        const auto &coordinate_epoch = row[3];
+
+        auto l_context = d->context();
+        DatabaseContext::Private::RecursionDetector detector(l_context);
+        auto crs =
+            !crs_auth_name.empty()
+                ? d->createFactory(crs_auth_name)
+                      ->createCoordinateReferenceSystem(crs_code)
+                      .as_nullable()
+                : util::nn_dynamic_pointer_cast<crs::CRS>(
+                      createFromUserInput(crs_text_definition, l_context));
+        if (!crs) {
+            throw FactoryException(
+                std::string("cannot build CoordinateMetadata ") +
+                d->authority() + ":" + code + ": cannot build CRS");
+        }
+        if (coordinate_epoch.empty()) {
+            return coordinates::CoordinateMetadata::create(NN_NO_CHECK(crs));
+        } else {
+            return coordinates::CoordinateMetadata::create(
+                NN_NO_CHECK(crs), c_locale_stod(coordinate_epoch),
+                l_context.as_nullable());
+        }
+    } catch (const std::exception &ex) {
+        throw buildFactoryException("CoordinateMetadata", d->authority(), code,
+                                    ex);
+    }
+}
 
 // ---------------------------------------------------------------------------
 

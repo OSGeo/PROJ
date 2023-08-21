@@ -348,6 +348,7 @@ osgeo::proj::io::AuthorityFactory::~AuthorityFactory()
 osgeo::proj::io::AuthorityFactory::CelestialBodyInfo::CelestialBodyInfo()
 osgeo::proj::io::AuthorityFactory::createCompoundCRS(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createConversion(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createCoordinateMetadata(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createCoordinateOperation(std::string const&, bool) const
 osgeo::proj::io::AuthorityFactory::createCoordinateReferenceSystem(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createCoordinateSystem(std::string const&) const

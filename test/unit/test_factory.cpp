@@ -32,6 +32,7 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#include "proj/coordinates.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -3085,6 +3086,79 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
             }
         }
         EXPECT_TRUE(found);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(FactoryWithTmpDatabase, CoordinateMetadata) {
+    createStructure();
+    populateWithFakeEPSG();
+
+    ASSERT_TRUE(execute("INSERT INTO coordinate_metadata "
+                        "VALUES('TEST_NS','TEST','my desc','EPSG',4326,"
+                        "NULL,2020.1,0);"))
+        << last_error();
+
+    const std::string wkt =
+        "GEOGCRS[\"WGS 84\",\n"
+        "    ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n"
+        "        MEMBER[\"World Geodetic System 1984 (Transit)\"],\n"
+        "        MEMBER[\"World Geodetic System 1984 (G730)\"],\n"
+        "        MEMBER[\"World Geodetic System 1984 (G873)\"],\n"
+        "        MEMBER[\"World Geodetic System 1984 (G1150)\"],\n"
+        "        MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
+        "        MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
+        "        MEMBER[\"World Geodetic System 1984 (G2139)\"],\n"
+        "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        ENSEMBLEACCURACY[2.0]],\n"
+        "    PRIMEM[\"Greenwich\",0,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "    CS[ellipsoidal,2],\n"
+        "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "            ORDER[1],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "            ORDER[2],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "    USAGE[\n"
+        "        SCOPE[\"Horizontal component of 3D system.\"],\n"
+        "        AREA[\"World.\"],\n"
+        "        BBOX[-90,-180,90,180]],\n"
+        "    ID[\"EPSG\",4326]]";
+    ASSERT_TRUE(execute("INSERT INTO coordinate_metadata "
+                        "VALUES('TEST_NS','TEST2','my desc',NULL,NULL,"
+                        "'" +
+                        wkt + "',2021.1,0);"))
+        << last_error();
+
+    ASSERT_TRUE(execute("INSERT INTO coordinate_metadata "
+                        "VALUES('TEST_NS','TEST_NO_EPOCH','my desc',"
+                        "'EPSG',4326,NULL,NULL,0);"))
+        << last_error();
+
+    auto dbContext = DatabaseContext::create(m_ctxt);
+    auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto crs_4326 = factoryEPSG->createCoordinateReferenceSystem("4326");
+    auto factory = AuthorityFactory::create(dbContext, "TEST_NS");
+    {
+        auto cm = factory->createCoordinateMetadata("TEST");
+        EXPECT_TRUE(cm->crs()->isEquivalentTo(crs_4326.get()));
+        EXPECT_TRUE(cm->coordinateEpoch().has_value());
+        EXPECT_NEAR(cm->coordinateEpochAsDecimalYear(), 2020.1, 1e-10);
+    }
+    {
+        auto cm = factory->createCoordinateMetadata("TEST2");
+        EXPECT_TRUE(cm->crs()->isEquivalentTo(
+            crs_4326.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_TRUE(cm->coordinateEpoch().has_value());
+        EXPECT_NEAR(cm->coordinateEpochAsDecimalYear(), 2021.1, 1e-10);
+    }
+    {
+        auto cm = factory->createCoordinateMetadata("TEST_NO_EPOCH");
+        EXPECT_TRUE(cm->crs()->isEquivalentTo(crs_4326.get()));
+        EXPECT_FALSE(cm->coordinateEpoch().has_value());
     }
 }
 

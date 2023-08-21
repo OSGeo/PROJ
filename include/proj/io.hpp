@@ -118,6 +118,14 @@ using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
 using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
 } // namespace crs
 
+namespace coordinates {
+class CoordinateMetadata;
+/** Shared pointer of CoordinateMetadata */
+using CoordinateMetadataPtr = std::shared_ptr<CoordinateMetadata>;
+/** Non-null shared pointer of CoordinateMetadata */
+using CoordinateMetadataNNPtr = util::nn<CoordinateMetadataPtr>;
+} // namespace coordinates
+
 namespace operation {
 class Conversion;
 using ConversionPtr = std::shared_ptr<Conversion>;
@@ -1037,6 +1045,9 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_DLL crs::CRSNNPtr
     createCoordinateReferenceSystem(const std::string &code) const;
+
+    PROJ_DLL coordinates::CoordinateMetadataNNPtr
+    createCoordinateMetadata(const std::string &code) const;
 
     PROJ_DLL operation::CoordinateOperationNNPtr
     createCoordinateOperation(const std::string &code,
