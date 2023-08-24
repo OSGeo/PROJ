@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coordinate conversions &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgtutorials/EUREF2019/exercises/conversions.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Transformation pipelines" href="pipelines.html" />
+    <link rel="prev" title="The Helmert transformation" href="helmert.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../community/index.html">Community</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Transformation tutorial</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#how-to-fill-out-the-proj-tutorial-exercises">How to fill out the PROJ tutorial exercises</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#exercises">Exercises</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="projections1.html">The UTM projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projections2.html">The Lambert Conic Conformal projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ellipsoids.html">Specifying ellipsoid models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gridshift.html">Gridshifting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="helmert.html">The Helmert transformation</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Coordinate conversions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipelines.html">Transformation pipelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projections3.html">The Transverse Mercator projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../answers.html">Answers to the PROJ tutorial exercises</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../geodesics.html">Geodesics and planar approximations using PROJ and geod</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Tutorials</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Transformation tutorial</a></li>
+      <li class="breadcrumb-item active">Coordinate conversions</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/tutorials/EUREF2019/exercises/conversions.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="helmert.html" class="btn btn-neutral float-left" title="The Helmert transformation" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pipelines.html" class="btn btn-neutral float-right" title="Transformation pipelines" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="coordinate-conversions">
+<span id="euref2019-conversions"></span><h1>Coordinate conversions<a class="headerlink" href="#coordinate-conversions" title="Permalink to this heading">¶</a></h1>
+<p>In ISO19111 terms, a coordinate conversion is an operation that changes
+coordinates in a source coordinate reference system to coordinates in a target
+coordinate reference system in which both coordinate reference systems are based
+on the same datum. Technically this is also true for PROJ although the term is
+usually narrowed a bit, excluding projections since those are the origin of
+PROJ they get special treatment.</p>
+<p>In this exercise we will be looking at three coordinate conversions that in
+combination with other operations are very powerful: Unit conversions, axis
+swapping and geodetic to cartesian conversion.  Here we only look at the
+conversions by themselves which isn't particularly useful, apart from the
+educational purpose. When used in transformation pipelines they reveal their
+true power. We will explore that further in the pipelines.gie exercises.</p>
+<p>See <a class="reference internal" href="../../../operations/conversions/index.html#conversions-list"><span class="std std-ref">Conversions</span></a> for a list of all conversions available in PROJ.</p>
+<p>Download the <a class="reference internal" href="../../../apps/gie.html#gie"><span class="std std-ref">gie</span></a> file for the exercise: <a class="reference download internal" download="" href="../../../_downloads/776f6ed90b9312354047b81f3dc1b60c/conversions.gie"><code class="xref download docutils literal notranslate"><span class="pre">conversions.gie</span></code></a>.</p>
+<section id="unit-conversion-from-meters-to-feet">
+<h2>1. Unit conversion from meters to feet<a class="headerlink" href="#unit-conversion-from-meters-to-feet" title="Permalink to this heading">¶</a></h2>
+<p>Many projected coordinate systems are defined in terms of units other than the
+meter. In this exercise we will transform the horizontal part of a coordinate
+from meters to feet.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Consult <a class="reference internal" href="../../../operations/conversions/unitconvert.html#unitconvert"><span class="std std-ref">Unit conversion</span></a> to find out how to set up the transformation</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>You can use <code class="docutils literal notranslate"><span class="pre">proj</span> <span class="pre">-lu</span></code> to learn which units is supported by PROJ.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Note that the horizontal, vertical and temporal parts are treated
+separately by the unit convert operator.</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 mm
+
+accept      100.0       123.0       432.0
+expect      328.0833    403.5425    432.0
+</pre></div>
+</div>
+</section>
+<section id="swapping-axes">
+<h2>2. Swapping axes<a class="headerlink" href="#swapping-axes" title="Permalink to this heading">¶</a></h2>
+<p>Many coordinate reference systems are defined such that the axis order is
+different than the (east, north, up, time) PROJ defaults to. An example of this
+is the standard representation of a latitude/longitude-pair, where the north
+component of the coordinate comes first. For this reason we need an operation
+that can swap the axes around so that a given coordinate reference system can
+be represented correctly, conforming to the intention of the defining authority.</p>
+<p>Set up an operation that puts a longitude/latitude pair on the standard
+latitude/longitude form.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Consult <a class="reference internal" href="../../../operations/conversions/axisswap.html#axisswap"><span class="std std-ref">Axis swap</span></a> to find out how to set up the transformation</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Remember that the axisswap operation doesn't know anything about the
+nature of the coordinate that is passed to it - it only cares about the
+the order of the input.</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 mm
+
+accept      140.0     75.0    # somewhere in Siberia
+expect       75.0    140.0
+</pre></div>
+</div>
+</section>
+<section id="geodetic-to-cartesian-conversion">
+<h2>3. Geodetic to cartesian conversion<a class="headerlink" href="#geodetic-to-cartesian-conversion" title="Permalink to this heading">¶</a></h2>
+<p>Some transformations, most notably the Helmert transformation, operate on
+cartesian geocentric coordinates. Geodetic coordinates (latitude and longitude)
+is the most commonly used coordinate representation. It is only natural to have
+a way to convert between the two representations.</p>
+<p>Set up a transformation that convert geodetic coordinates to cartesian
+geocentric coordinates on the Hayford ellipsoid.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Consult <a class="reference internal" href="../../../operations/conversions/cart.html#cart"><span class="std std-ref">Geodetic to cartesian conversion</span></a> to find out how to set up the transformation</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Remember that <cite>proj -le</cite> returns a list of available ellipsoid models</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Remember that the Hayford ellipsoid is known under a number of other
+names - most of them including the term &quot;international&quot;.</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 mm
+
+accept      24.745          59.437          0  # Talinn, Estonia
+expect      2952883.7000    1360985.5908    5468966.6589
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="helmert.html" class="btn btn-neutral float-left" title="The Helmert transformation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pipelines.html" class="btn btn-neutral float-right" title="Transformation pipelines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

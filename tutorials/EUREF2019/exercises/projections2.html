@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Lambert Conic Conformal projection &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgtutorials/EUREF2019/exercises/projections2.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Specifying ellipsoid models" href="ellipsoids.html" />
+    <link rel="prev" title="The UTM projection" href="projections1.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../community/index.html">Community</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Transformation tutorial</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#how-to-fill-out-the-proj-tutorial-exercises">How to fill out the PROJ tutorial exercises</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#exercises">Exercises</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="projections1.html">The UTM projection</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">The Lambert Conic Conformal projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ellipsoids.html">Specifying ellipsoid models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gridshift.html">Gridshifting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="helmert.html">The Helmert transformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="conversions.html">Coordinate conversions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipelines.html">Transformation pipelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projections3.html">The Transverse Mercator projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../answers.html">Answers to the PROJ tutorial exercises</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../geodesics.html">Geodesics and planar approximations using PROJ and geod</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Tutorials</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Transformation tutorial</a></li>
+      <li class="breadcrumb-item active">The Lambert Conic Conformal projection</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/tutorials/EUREF2019/exercises/projections2.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="projections1.html" class="btn btn-neutral float-left" title="The UTM projection" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ellipsoids.html" class="btn btn-neutral float-right" title="Specifying ellipsoid models" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="the-lambert-conic-conformal-projection">
+<h1>The Lambert Conic Conformal projection<a class="headerlink" href="#the-lambert-conic-conformal-projection" title="Permalink to this heading">¶</a></h1>
+<p>In this exercise we will introduce the Lambert Conic Conformal (LCC) projection
+as well as general map projection concepts such as projection center, scale
+factor, false easting/northing and ellipsoid models.</p>
+<p>We will do so by defining various versions of the LCC optimised for use in and
+around the Gulf of Finland.</p>
+<p>In case you are not familiar with the LCC projection, <a class="reference external" href="https://en.wikipedia.org/wiki/Lambert_conformal_conic_projection">Wikipedia</a> describes
+the Lambert Conic Conformal projection as:</p>
+<blockquote>
+<div><p>&quot;A Lambert conformal conic projection (LCC) is a conic map projection used for
+aeronautical charts, portions of the State Plane Coordinate System, and many
+national and regional mapping systems. It is one of seven projections introduced
+by Johann Heinrich Lambert in his 1772 publication Anmerkungen und Zusätze zur
+Entwerfung der Land- und Himmelscharten (Notes and Comments on the Composition
+of Terrestrial and Celestial Maps).</p>
+<p>Conceptually, the projection seats a cone over the sphere of the Earth and
+projects the surface conformally onto the cone. The cone is unrolled, and the
+parallel that was touching the sphere is assigned unit scale. That parallel is
+called the reference parallel or standard parallel.</p>
+<p>By scaling the resulting map, two parallels can be assigned unit scale, with
+scale decreasing between the two parallels and increasing outside them. This
+gives the map two standard parallels. In this way, deviation from unit scale can
+be minimized within a region of interest that lies largely between the two
+standard parallels. Unlike other conic projections, no true secant form of the
+projection exists because using a secant cone does not yield the same scale
+along both standard parallels&quot;</p>
+</div></blockquote>
+<p>Download the <a class="reference internal" href="../../../apps/gie.html#gie"><span class="std std-ref">gie</span></a> file for the exercise: <a class="reference download internal" download="" href="../../../_downloads/37b8a90fd4be8c21a1d1703e8ff8e748/projections2.gie"><code class="xref download docutils literal notranslate"><span class="pre">projections2.gie</span></code></a>.</p>
+<section id="exercise-1-standard-parallel">
+<h2>Exercise 1: Standard parallel<a class="headerlink" href="#exercise-1-standard-parallel" title="Permalink to this heading">¶</a></h2>
+<p>Set up a LCC projection with one standard parallel placed halfway between
+Helsinki and Tallinn.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<ul class="simple">
+<li><p>Approximate location of Helsinki: 60.171N 24.938E</p></li>
+<li><p>Approximate location of Tallinn: 59.437N 24.745E</p></li>
+<li><p>Approximate mid point between Helsinki and Tallinn: 59.8N 24.8E</p></li>
+</ul>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>See <a class="reference internal" href="../../../operations/projections/lcc.html#lcc"><span class="std std-ref">Lambert Conformal Conic</span></a> for more on the Lambert Conformal Conic projection</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 cm
+
+accept      24.938              60.171  # Helsinki
+expect      1351962.01          298663.54
+
+accept      24.745              59.437  # Tallinn
+expect      1371811.19          218598.22
+</pre></div>
+</div>
+</section>
+<section id="exercise-2-distance-distortion">
+<h2>Exercise 2: Distance distortion<a class="headerlink" href="#exercise-2-distance-distortion" title="Permalink to this heading">¶</a></h2>
+<p>Improve the distance distortion of the projection.</p>
+<p>The projection defined above is conformal, i.e. has no angular distortions
+for infinitesimal objects - but there is a minor distortion of distances.
+This cannot be avoided in general, but locally distortions can be minimized
+by adjusting the scale factor.</p>
+<p>With the default factor of 1, the distance error is 0  for (infinitesimal)
+line segments at the latitude of the standard parallel.</p>
+<p>By reducing the scale factor, the line of zero distance distortion degenerates
+into two lines, north and south of the standard parallel.</p>
+<p>For the abovementioned point in Tallinn, the distance error is around 0.002%,
+but this can be reduced to zero by varying the scaling factor.</p>
+<p>Even by trial and error it is not hard to reduce it to a few millionths of a
+percent. So try to find a more optimal scaling factor by trial and error using
+the projection analysis functionality of the proj application.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Modify and use the command below to find a better scaling factor:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>echo 24.745 59.437 | proj -V &lt;your projection setup here&gt;
+</pre></div>
+</div>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Look for the lines displaying the meridian and parallel scale.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Consult the LCC documentation to find out how to set the scaling factor.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Scaling factors usually deviates from unity by the order of 1e-3 to 1e-5</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 um
+
+accept      24.745              59.437
+expect      1371783.759883408   218593.850591891
+</pre></div>
+</div>
+</section>
+<section id="exercise-3-using-two-standard-parallels">
+<h2>Exercise 3: Using two standard parallels<a class="headerlink" href="#exercise-3-using-two-standard-parallels" title="Permalink to this heading">¶</a></h2>
+<p>Set up a similar LCC projection, this time using two standard parallels.
+The first passing through Helsinki, the second through Tallinn.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<ul class="simple">
+<li><p>Approximate location of Helsinki: 60.171N 24.938E</p></li>
+<li><p>Approximate location of Talinn:   59.437N 24.745E</p></li>
+</ul>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 cm
+
+accept      24.8                59.8
+expect      1359907.80          8024082.260
+</pre></div>
+</div>
+</section>
+<section id="exercise-4-projection-center">
+<h2>Exercise 4: Projection center<a class="headerlink" href="#exercise-4-projection-center" title="Permalink to this heading">¶</a></h2>
+<p>Change the projection center to the midway point between Helsinki and Tallinn.</p>
+<p>By changing the projection center we move the origin of the output
+coordinates to be coinciding with the position where the projection is
+most accurate.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Start with the projection you designed in exercise 1 above</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The mid point between Helsinki and Tallinn is roughly 59.8N 24.8E</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p><a class="reference internal" href="../../../operations/projections/lcc.html#lcc"><span class="std std-ref">Lambert Conformal Conic</span></a> explains how to change the projection center</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 cm
+
+accept      24.8            59.8
+expect       0.0             0.0
+</pre></div>
+</div>
+</section>
+<section id="exercie-5-false-easting-and-northing">
+<h2>Exercie 5: False easting and northing<a class="headerlink" href="#exercie-5-false-easting-and-northing" title="Permalink to this heading">¶</a></h2>
+<p>Introduce false eastings and northings.</p>
+<p>Oftentimes it is preferable to keep coordinate values positive even when
+moving west and south of the projection center. This can be achieved by
+introducing false easting and northing. Add false easting and northing
+of 1000000</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p><a class="reference internal" href="../../../operations/projections/lcc.html#lcc"><span class="std std-ref">Lambert Conformal Conic</span></a> explains how to set false easting/northing</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 cm
+
+accept      24.8            59.8
+expect      1000000.00      1000000.00
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="projections1.html" class="btn btn-neutral float-left" title="The UTM projection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ellipsoids.html" class="btn btn-neutral float-right" title="Specifying ellipsoid models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

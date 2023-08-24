@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-component time-based deformation model &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgoperations/transformations/defmodel.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Kinematic datum shifting utilizing a deformation model" href="deformation.html" />
+    <link rel="prev" title="Affine transformation" href="affine.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apps/index.html">Applications</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Coordinate operations</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../projections/index.html">Projections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../conversions/index.html">Conversions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Transformations</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="affine.html">Affine transformation</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Multi-component time-based deformation model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="deformation.html">Kinematic datum shifting utilizing a deformation model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geogoffset.html">Geographic offsets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gridshift.html">General grid shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="helmert.html">Helmert transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="horner.html">Horner polynomial evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="molodensky.html">Molodensky transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="molobadekas.html">Molodensky-Badekas transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hgridshift.html">Horizontal grid shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tinshift.html">Triangulated Irregular Network based transformation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vertoffset.html">Vertical Offset And Slope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vgridshift.html">Vertical grid shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="xyzgridshift.html">Geocentric grid shift</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline.html">The pipeline operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../operations_computation.html">Computation of coordinate operations between two CRS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../community/index.html">Community</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Coordinate operations</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Transformations</a></li>
+      <li class="breadcrumb-item active">Multi-component time-based deformation model</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/operations/transformations/defmodel.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="affine.html" class="btn btn-neutral float-left" title="Affine transformation" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="deformation.html" class="btn btn-neutral float-right" title="Kinematic datum shifting utilizing a deformation model" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="multi-component-time-based-deformation-model">
+<span id="defmodel"></span><h1>Multi-component time-based deformation model<a class="headerlink" href="#multi-component-time-based-deformation-model" title="Permalink to this heading">¶</a></h1>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 7.1.0.</span></p>
+</div>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>Alias</strong></p></td>
+<td><p>defmodel</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Input type</strong></p></td>
+<td><p>Geodetic or projected coordinates (horizontal), meters (vertical),
+decimalyear (temporal)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Output type</strong></p></td>
+<td><p>Geodetic or projected coordinates (horizontal), meters (vertical),
+decimalyear (temporal)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Domain</strong></p></td>
+<td><p>4D</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Available forms</strong></p></td>
+<td><p>Forward and inverse</p></td>
+</tr>
+</tbody>
+</table>
+<p>The defmodel transformation can be used to represent most deformation models
+currently in use, in particular for areas subject to complex deformation, including
+large scale secular crustal deformation near plate boundaries and vertical deformation
+due to Glacial Isostatic Adjustment (GIA). These can often be represented by a constant
+velocity model. Additionally, many areas suffer episodic deformation events such as
+earthquakes and aseismic slow slip event.</p>
+<p>The transformation relies on a &quot;master&quot; JSON file, describing general metadata on
+the deformation model, its spatial and temporal extent, and listing spatial
+components whose values are stored in <a class="reference internal" href="../../specifications/geodetictiffgrids.html#geodetictiffgrids"><span class="std std-ref">Geodetic TIFF grids (GTG)</span></a>.
+The valuation of each component is modulated by a time function (constant, step,
+reverse step, velocity, piecewise, exponential).</p>
+<p>All details on the content of this JSON file are given in the <a class="reference external" href="https://github.com/linz/deformation-model-format/blob/master/doc/JsonGeotiffDeformationModelFormat_20200501.pdf">Proposal for encoding
+of a Deformation Model</a></p>
+<p>If input coordinates are given in the geographic domain (resp. projected domain),
+the output will also be in the geographic domain (resp. projected domain).
+The domain should be the corresponding to the source_crs metadata of the model.</p>
+<p>This transformation is a generalization of the <a class="reference internal" href="deformation.html#deformation"><span class="std std-ref">Kinematic datum shifting utilizing a deformation model</span></a> transformation.</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
+<section id="required">
+<h3>Required<a class="headerlink" href="#required" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-model">
+<span class="sig-name descname"><span class="pre">+model</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;filename&gt;</span></span><a class="headerlink" href="#cmdoption-arg-model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filename to the JSON master file for the deformation model. This file must validate
+against the <a class="reference external" href="https://raw.githubusercontent.com/OSGeo/PROJ/master/data/deformation_model.schema.json">deformation_model.schema.json</a>
+JSON schema.</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
+<p>Transforming a point with the LINZ NZGD2000 deformation model:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>echo 166.7133850980 -44.5105886020 293.3700 2007.689 |
+     cct +proj=defmodel +model=nzgd2000-20180701.json
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="affine.html" class="btn btn-neutral float-left" title="Affine transformation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="deformation.html" class="btn btn-neutral float-right" title="Kinematic datum shifting utilizing a deformation model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

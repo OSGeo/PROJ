@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick start &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgdevelopment/quickstart.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Transformations" href="transformations.html" />
+    <link rel="prev" title="Development practices" href="dev_practices.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dev_practices.html">Development practices</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformations.html">Transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="errorhandling.html">Error handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/index.html">Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cmake.html">Using PROJ in CMake projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bindings.html">Language bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration.html">Version 4 to 6 API Migration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration.html#version-4-to-5-api-migration">Version 4 to 5 API Migration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../community/index.html">Community</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Development</a></li>
+      <li class="breadcrumb-item active">Quick start</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/development/quickstart.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="dev_practices.html" class="btn btn-neutral float-left" title="Development practices" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="transformations.html" class="btn btn-neutral float-right" title="Transformations" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="quick-start">
+<span id="dev-quickstart"></span><h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h1>
+<p>This is a short introduction to the PROJ API. In the following section
+we create two simple programs that illustrate how to transform points
+between two different coordinate systems, and how to convert between
+projected and geodetic (geographic) coordinates for a single
+coordinate system. Explanations for individual code sniplets and the
+full programs are provided.</p>
+<p>See the following sections for more in-depth descriptions of different parts of
+the PROJ API or consult the <a class="reference internal" href="reference/index.html"><span class="doc">API reference</span></a> for specifics.</p>
+<p>Before the PROJ API can be used it is necessary to include the <code class="file docutils literal notranslate"><span class="pre">proj.h</span></code> header
+file. Here <code class="file docutils literal notranslate"><span class="pre">stdio.h</span></code> is also included so we can print some text to the screen:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;proj.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+</pre></div>
+</div>
+<p>Let's declare a few variables that'll be used later in the program. Each variable
+will be discussed below.
+See the <a class="reference internal" href="reference/datatypes.html"><span class="doc">reference for more info on data types</span></a>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">PJ_CONTEXT</span><span class="w"> </span><span class="o">*</span><span class="n">C</span><span class="p">;</span>
+<span class="n">PJ</span><span class="w"> </span><span class="o">*</span><span class="n">P</span><span class="p">;</span>
+<span class="n">PJ</span><span class="w"> </span><span class="o">*</span><span class="n">norm</span><span class="p">;</span>
+<span class="n">PJ_COORD</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>For use in multi-threaded programs the <a class="reference internal" href="reference/datatypes.html#c.PJ_CONTEXT" title="PJ_CONTEXT"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ_CONTEXT</span></code></a> threading-context
+is used.  In this particular example it is not needed, but for the sake of
+completeness we demonstrate its use here.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_context_create</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Next we create the <a class="reference internal" href="reference/datatypes.html#c.PJ" title="PJ"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ</span></code></a> transformation object <code class="docutils literal notranslate"><span class="pre">P</span></code> with the function
+<a class="reference internal" href="reference/functions.html#c.proj_create_crs_to_crs" title="proj_create_crs_to_crs"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_create_crs_to_crs()</span></code></a>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_create_crs_to_crs</span><span class="p">(</span>
+<span class="w">    </span><span class="n">C</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;EPSG:4326&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;+proj=utm +zone=32 +datum=WGS84&quot;</span><span class="p">,</span><span class="w"> </span><span class="cm">/* or EPSG:32632 */</span>
+<span class="w">    </span><span class="nb">NULL</span><span class="p">);</span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">P</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to create transformation object.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+</pre></div>
+</div>
+<p>Here we have set up a transformation from geographic coordinates to UTM zone
+32N. In general, this is a transformation between two different coordinate reference systems
+(one of which is here in geographic coordinates).  The related function
+<a class="reference internal" href="reference/functions.html#c.proj_create" title="proj_create"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_create()</span></code></a> can be used to set up transformations that are not available through
+the PROJ database, for instance for converting geodetic coordinates to a custom definition
+of a map projection.</p>
+<p><a class="reference internal" href="reference/functions.html#c.proj_create_crs_to_crs" title="proj_create_crs_to_crs"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_create_crs_to_crs()</span></code></a> takes as its arguments:</p>
+<ul class="simple">
+<li><p>the threading context <code class="docutils literal notranslate"><span class="pre">C</span></code> created above,</p></li>
+<li><p>a string that describes the source coordinate reference system (CRS),</p></li>
+<li><p>a string that describes the target CRS and</p></li>
+<li><p>an optional description of the area of use.</p></li>
+</ul>
+<p>It is recommended to create one threading context per thread used by the
+program.  This ensures that all <a class="reference internal" href="reference/datatypes.html#c.PJ" title="PJ"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ</span></code></a> objects created in the same
+context will be sharing resources such as error-numbers and loaded grids.</p>
+<p>If you are sure that <code class="docutils literal notranslate"><span class="pre">P</span></code> will only be used by a single program thread, you
+may pass <code class="docutils literal notranslate"><span class="pre">NULL</span></code> for the threading context.  This will assign the default
+thread context to <code class="docutils literal notranslate"><span class="pre">P</span></code>.</p>
+<p>The strings for the source and target CRS may be any of:</p>
+<ul class="simple">
+<li><p>PROJ strings, e.g. <code class="docutils literal notranslate"><span class="pre">+proj=longlat</span> <span class="pre">+datum=WGS84</span> <span class="pre">+type=crs</span></code>,</p></li>
+<li><p>CRS identified by their code, e.g. <code class="docutils literal notranslate"><span class="pre">EPSG:4326</span></code> or
+<code class="docutils literal notranslate"><span class="pre">urn:ogc:def:crs:EPSG::4326</span></code>, or</p></li>
+<li><p>a well-known text (WKT) string, e.g.:</p></li>
+</ul>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>GEOGCRS[&quot;WGS 84&quot;,
+    DATUM[&quot;World Geodetic System 1984&quot;,
+        ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+            LENGTHUNIT[&quot;metre&quot;,1]]],
+    PRIMEM[&quot;Greenwich&quot;,0,
+        ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+    CS[ellipsoidal,2],
+        AXIS[&quot;geodetic latitude (Lat)&quot;,north,
+            ORDER[1],
+            ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+        AXIS[&quot;geodetic longitude (Lon)&quot;,east,
+            ORDER[2],
+            ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+    USAGE[
+        SCOPE[&quot;unknown&quot;],
+        AREA[&quot;World&quot;],
+        BBOX[-90,-180,90,180]],
+    ID[&quot;EPSG&quot;,4326]]
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The use of PROJ strings to describe a CRS is not recommended.  One of the
+main weaknesses of PROJ strings is their inability to describe a geodetic
+datum, other than the few ones hardcoded in the <code class="docutils literal notranslate"><span class="pre">+datum</span></code> parameter.</p>
+</div>
+<p><a class="reference internal" href="reference/functions.html#c.proj_create_crs_to_crs" title="proj_create_crs_to_crs"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_create_crs_to_crs()</span></code></a> will return a pointer to a <a class="reference internal" href="reference/datatypes.html#c.PJ" title="PJ"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ</span></code></a>
+object, or a null pointer in the case of an error.  The details of the error
+can be retrieved using <a class="reference internal" href="reference/functions.html#c.proj_context_errno" title="proj_context_errno"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_context_errno()</span></code></a>. See <a class="reference internal" href="errorhandling.html"><span class="doc">Error handling</span></a>
+for further details.</p>
+<p>Now that we have a normalized transformation object in <code class="docutils literal notranslate"><span class="pre">P</span></code>, we can use it
+with <a class="reference internal" href="reference/functions.html#c.proj_trans" title="proj_trans"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_trans()</span></code></a> to transform coordinates from the source CRS to the
+target CRS, but first we will discuss the interpretation of coordinates.</p>
+<p>By default, a <a class="reference internal" href="reference/datatypes.html#c.PJ" title="PJ"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ</span></code></a> transformation object accepts coordinates expressed
+in the units and axis order of the source CRS, and returns transformed
+coordinates in the units and axis order of the target CRS.</p>
+<p>For most geographic CRS, the units will be in degrees.  In rare cases, such as
+EPSG:4807 / NTF (Paris), this can be grads. For geographic CRS defined by the
+EPSG authority, the order of coordinates is latitude first, longitude second.
+When using a PROJ string, the order is the reverse; longitude first, latitude
+second.</p>
+<p>For projected CRS, the units may vary (metre, us-foot, etc.). For projected CRS
+defined by the EPSG authority, and with EAST / NORTH directions, the order
+might be easting first, northing second, or the reverse.  When using a PROJ
+string, the order will be easting first, northing second, except if the
+<code class="docutils literal notranslate"><span class="pre">+axis</span></code> parameter modifies it.</p>
+<p>If you prefer to work with a uniform axis order, regardless of the axis orders
+mandated by the source and target CRS, you can use the
+<a class="reference internal" href="reference/functions.html#c.proj_normalize_for_visualization" title="proj_normalize_for_visualization"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_normalize_for_visualization()</span></code></a> function.</p>
+<p><a class="reference internal" href="reference/functions.html#c.proj_normalize_for_visualization" title="proj_normalize_for_visualization"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_normalize_for_visualization()</span></code></a> takes a threading context and an
+existing <a class="reference internal" href="reference/datatypes.html#c.PJ" title="PJ"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ</span></code></a> object, and generates from it a new <a class="reference internal" href="reference/datatypes.html#c.PJ" title="PJ"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ</span></code></a> that
+accepts as input and returns as output coordinates using the traditional GIS
+order.  That is, longitude followed by latitude, optionally followed by
+elevation and time for geographic CRS, and easting followed by northing for
+most projected CRS.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">norm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to normalize transformation object.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">proj_destroy</span><span class="p">(</span><span class="n">P</span><span class="p">);</span>
+<span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">norm</span><span class="p">;</span>
+
+</pre></div>
+</div>
+<p>Next we create a <a class="reference internal" href="reference/datatypes.html#c.PJ_COORD" title="PJ_COORD"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ_COORD</span></code></a> coordinate object, using the function
+<a class="reference internal" href="reference/functions.html#c.proj_coord" title="proj_coord"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_coord()</span></code></a>.</p>
+<p>The following example creates a coordinate for 55°N 12°E (Copenhagen).</p>
+<p>Because we have normalized the transformation object with
+<a class="reference internal" href="reference/functions.html#c.proj_normalize_for_visualization" title="proj_normalize_for_visualization"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_normalize_for_visualization()</span></code></a>, the order of coordinates is
+longitude followed by latitude, and the units are degrees.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_coord</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">55</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Now we are ready to transform the coordinate into UTM zone 32, using the
+function <a class="reference internal" href="reference/functions.html#c.proj_trans" title="proj_trans"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_trans()</span></code></a>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_trans</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">PJ_FWD</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">);</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">&quot;easting: %.3f, northing: %.3f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">enu</span><span class="p">.</span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">enu</span><span class="p">.</span><span class="n">n</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="reference/functions.html#c.proj_trans" title="proj_trans"><code class="xref c c-func docutils literal notranslate"><span class="pre">proj_trans()</span></code></a> takes as its arguments:</p>
+<ul class="simple">
+<li><p>a <a class="reference internal" href="reference/datatypes.html#c.PJ" title="PJ"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ</span></code></a> transformation object,</p></li>
+<li><p>a <a class="reference internal" href="reference/datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ_DIRECTION</span></code></a> direction, and</p></li>
+<li><p>the <a class="reference internal" href="reference/datatypes.html#c.PJ_COORD" title="PJ_COORD"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ_COORD</span></code></a> coordinate to transform.</p></li>
+</ul>
+<p>The direction argument can be one of:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">PJ_FWD</span></code> -- &quot;forward&quot; transformation from source CRS to target CRS.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PJ_IDENT</span></code> -- &quot;identity&quot;, return the source coordinate unchanged.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PJ_INV</span></code> -- &quot;inverse&quot; transformation from target CRS to source CRS.</p></li>
+</ul>
+<p>It returns the new transformed <a class="reference internal" href="reference/datatypes.html#c.PJ_COORD" title="PJ_COORD"><code class="xref c c-type docutils literal notranslate"><span class="pre">PJ_COORD</span></code></a> coordinate.</p>
+<p>We can perform the transformation in reverse (from UTM zone 32 back to
+geographic) as follows:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_trans</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">PJ_INV</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">&quot;longitude: %g, latitude: %g</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">lam</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">phi</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Before ending the program, we need to release the memory allocated to our
+objects:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">proj_destroy</span><span class="p">(</span><span class="n">P</span><span class="p">);</span>
+<span class="n">proj_context_destroy</span><span class="p">(</span><span class="n">C</span><span class="p">);</span><span class="w"> </span><span class="cm">/* may be omitted in the single threaded case */</span>
+</pre></div>
+</div>
+<p>A complete compilable version of the example code can be seen below:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;proj.h&gt;</span>
+<span class="linenos"> 2</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="n">PJ_CONTEXT</span><span class="w"> </span><span class="o">*</span><span class="n">C</span><span class="p">;</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="n">PJ</span><span class="w"> </span><span class="o">*</span><span class="n">P</span><span class="p">;</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="n">PJ</span><span class="w"> </span><span class="o">*</span><span class="n">norm</span><span class="p">;</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="n">PJ_COORD</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="w">    </span><span class="cm">/* or you may set C=PJ_DEFAULT_CTX if you are sure you will     */</span>
+<span class="linenos">11</span><span class="w">    </span><span class="cm">/* use PJ objects from only one thread                          */</span>
+<span class="linenos">12</span><span class="w">    </span><span class="n">C</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_context_create</span><span class="p">();</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="w">    </span><span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_create_crs_to_crs</span><span class="p">(</span>
+<span class="linenos">15</span><span class="w">        </span><span class="n">C</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;EPSG:4326&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;+proj=utm +zone=32 +datum=WGS84&quot;</span><span class="p">,</span><span class="w"> </span><span class="cm">/* or EPSG:32632 */</span>
+<span class="linenos">16</span><span class="w">        </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">P</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">19</span><span class="w">        </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to create transformation object.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="linenos">20</span><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="linenos">21</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span><span class="w">    </span><span class="cm">/* This will ensure that the order of coordinates for the input CRS */</span>
+<span class="linenos">24</span><span class="w">    </span><span class="cm">/* will be longitude, latitude, whereas EPSG:4326 mandates latitude, */</span>
+<span class="linenos">25</span><span class="w">    </span><span class="cm">/* longitude */</span>
+<span class="linenos">26</span><span class="w">    </span><span class="n">norm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_normalize_for_visualization</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="w"> </span><span class="n">P</span><span class="p">);</span>
+<span class="linenos">27</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">norm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">28</span><span class="w">        </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to normalize transformation object.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="linenos">29</span><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="linenos">30</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">31</span><span class="w">    </span><span class="n">proj_destroy</span><span class="p">(</span><span class="n">P</span><span class="p">);</span>
+<span class="linenos">32</span><span class="w">    </span><span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">norm</span><span class="p">;</span>
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="w">    </span><span class="cm">/* a coordinate union representing Copenhagen: 55d N, 12d E    */</span>
+<span class="linenos">35</span><span class="w">    </span><span class="cm">/* Given that we have used proj_normalize_for_visualization(), the order of</span>
+<span class="linenos">36</span><span class="cm">    /* coordinates is longitude, latitude, and values are expressed in degrees.</span>
+<span class="linenos">37</span><span class="cm">  */</span>
+<span class="linenos">38</span><span class="w">    </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_coord</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">55</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="linenos">39</span>
+<span class="linenos">40</span><span class="w">    </span><span class="cm">/* transform to UTM zone 32, then back to geographical */</span>
+<span class="linenos">41</span><span class="w">    </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_trans</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">PJ_FWD</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">);</span>
+<span class="linenos">42</span><span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;easting: %.3f, northing: %.3f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">enu</span><span class="p">.</span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">enu</span><span class="p">.</span><span class="n">n</span><span class="p">);</span>
+<span class="linenos">43</span>
+<span class="linenos">44</span><span class="w">    </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_trans</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">PJ_INV</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+<span class="linenos">45</span><span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;longitude: %g, latitude: %g</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">lam</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">phi</span><span class="p">);</span>
+<span class="linenos">46</span>
+<span class="linenos">47</span><span class="w">    </span><span class="cm">/* Clean up */</span>
+<span class="linenos">48</span><span class="w">    </span><span class="n">proj_destroy</span><span class="p">(</span><span class="n">P</span><span class="p">);</span>
+<span class="linenos">49</span><span class="w">    </span><span class="n">proj_context_destroy</span><span class="p">(</span><span class="n">C</span><span class="p">);</span><span class="w"> </span><span class="cm">/* may be omitted in the single threaded case */</span>
+<span class="linenos">50</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos">51</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The following example illustrates how to convert between a CRS and
+geodetic coordinates for that CRS.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;math.h&gt;</span>
+<span class="linenos"> 2</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;proj.h&gt;</span>
+<span class="linenos"> 3</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="cm">/* Create the context. */</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="cm">/* You may set C=PJ_DEFAULT_CTX if you are sure you will     */</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="cm">/* use PJ objects from only one thread                       */</span>
+<span class="linenos">10</span><span class="w">    </span><span class="n">PJ_CONTEXT</span><span class="w"> </span><span class="o">*</span><span class="n">C</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_context_create</span><span class="p">();</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="w">    </span><span class="cm">/* Create a projection. */</span>
+<span class="linenos">13</span><span class="w">    </span><span class="n">PJ</span><span class="w"> </span><span class="o">*</span><span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_create</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;+proj=utm +zone=32 +datum=WGS84 +type=crs&quot;</span><span class="p">);</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">P</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">16</span><span class="w">        </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to create transformation object.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="linenos">17</span><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="linenos">18</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span><span class="w">    </span><span class="cm">/* Get the geodetic CRS for that projection. */</span>
+<span class="linenos">21</span><span class="w">    </span><span class="n">PJ</span><span class="w"> </span><span class="o">*</span><span class="n">G</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_crs_get_geodetic_crs</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="w"> </span><span class="n">P</span><span class="p">);</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span><span class="w">    </span><span class="cm">/* Create the transform from geodetic to projected coordinates.*/</span>
+<span class="linenos">24</span><span class="w">    </span><span class="n">PJ_AREA</span><span class="w"> </span><span class="o">*</span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">25</span><span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">26</span><span class="w">    </span><span class="n">PJ</span><span class="w"> </span><span class="o">*</span><span class="n">G2P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_create_crs_to_crs_from_pj</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="w"> </span><span class="n">G</span><span class="p">,</span><span class="w"> </span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">);</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span><span class="w">    </span><span class="cm">/* Longitude and latitude of Copenhagen, in degrees. */</span>
+<span class="linenos">29</span><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">lon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">12.0</span><span class="p">,</span><span class="w"> </span><span class="n">lat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">55.0</span><span class="p">;</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span><span class="w">    </span><span class="cm">/* Prepare the input */</span>
+<span class="linenos">32</span><span class="w">    </span><span class="n">PJ_COORD</span><span class="w"> </span><span class="n">c_in</span><span class="p">;</span>
+<span class="linenos">33</span><span class="w">    </span><span class="n">c_in</span><span class="p">.</span><span class="n">lpzt</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="linenos">34</span><span class="w">    </span><span class="n">c_in</span><span class="p">.</span><span class="n">lpzt</span><span class="p">.</span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HUGE_VAL</span><span class="p">;</span><span class="w"> </span><span class="c1">// important only for time-dependent projections</span>
+<span class="linenos">35</span><span class="w">    </span><span class="n">c_in</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">lam</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lon</span><span class="p">;</span>
+<span class="linenos">36</span><span class="w">    </span><span class="n">c_in</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">phi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lat</span><span class="p">;</span>
+<span class="linenos">37</span><span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Input longitude: %g, latitude: %g (degrees)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">c_in</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">lam</span><span class="p">,</span>
+<span class="linenos">38</span><span class="w">           </span><span class="n">c_in</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">phi</span><span class="p">);</span>
+<span class="linenos">39</span>
+<span class="linenos">40</span><span class="w">    </span><span class="cm">/* Compute easting and northing */</span>
+<span class="linenos">41</span><span class="w">    </span><span class="n">PJ_COORD</span><span class="w"> </span><span class="n">c_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_trans</span><span class="p">(</span><span class="n">G2P</span><span class="p">,</span><span class="w"> </span><span class="n">PJ_FWD</span><span class="p">,</span><span class="w"> </span><span class="n">c_in</span><span class="p">);</span>
+<span class="linenos">42</span><span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Output easting: %g, northing: %g (meters)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">c_out</span><span class="p">.</span><span class="n">enu</span><span class="p">.</span><span class="n">e</span><span class="p">,</span>
+<span class="linenos">43</span><span class="w">           </span><span class="n">c_out</span><span class="p">.</span><span class="n">enu</span><span class="p">.</span><span class="n">n</span><span class="p">);</span>
+<span class="linenos">44</span>
+<span class="linenos">45</span><span class="w">    </span><span class="cm">/* Apply the inverse transform */</span>
+<span class="linenos">46</span><span class="w">    </span><span class="n">PJ_COORD</span><span class="w"> </span><span class="n">c_inv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj_trans</span><span class="p">(</span><span class="n">G2P</span><span class="p">,</span><span class="w"> </span><span class="n">PJ_INV</span><span class="p">,</span><span class="w"> </span><span class="n">c_out</span><span class="p">);</span>
+<span class="linenos">47</span><span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Inverse applied. Longitude: %g, latitude: %g (degrees)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="linenos">48</span><span class="w">           </span><span class="n">c_inv</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">lam</span><span class="p">,</span><span class="w"> </span><span class="n">c_inv</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">phi</span><span class="p">);</span>
+<span class="linenos">49</span>
+<span class="linenos">50</span><span class="w">    </span><span class="cm">/* Clean up */</span>
+<span class="linenos">51</span><span class="w">    </span><span class="n">proj_destroy</span><span class="p">(</span><span class="n">P</span><span class="p">);</span>
+<span class="linenos">52</span><span class="w">    </span><span class="n">proj_destroy</span><span class="p">(</span><span class="n">G</span><span class="p">);</span>
+<span class="linenos">53</span><span class="w">    </span><span class="n">proj_destroy</span><span class="p">(</span><span class="n">G2P</span><span class="p">);</span>
+<span class="linenos">54</span><span class="w">    </span><span class="n">proj_context_destroy</span><span class="p">(</span><span class="n">C</span><span class="p">);</span><span class="w"> </span><span class="cm">/* may be omitted in the single threaded case */</span>
+<span class="linenos">55</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos">56</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dev_practices.html" class="btn btn-neutral float-left" title="Development practices" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="transformations.html" class="btn btn-neutral float-right" title="Transformations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

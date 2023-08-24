@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>General grid shift &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgoperations/transformations/gridshift.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Helmert transform" href="helmert.html" />
+    <link rel="prev" title="Geographic offsets" href="geogoffset.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apps/index.html">Applications</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Coordinate operations</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../projections/index.html">Projections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../conversions/index.html">Conversions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Transformations</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="affine.html">Affine transformation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="defmodel.html">Multi-component time-based deformation model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deformation.html">Kinematic datum shifting utilizing a deformation model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geogoffset.html">Geographic offsets</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">General grid shift</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="helmert.html">Helmert transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="horner.html">Horner polynomial evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="molodensky.html">Molodensky transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="molobadekas.html">Molodensky-Badekas transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hgridshift.html">Horizontal grid shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tinshift.html">Triangulated Irregular Network based transformation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vertoffset.html">Vertical Offset And Slope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vgridshift.html">Vertical grid shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="xyzgridshift.html">Geocentric grid shift</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline.html">The pipeline operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../operations_computation.html">Computation of coordinate operations between two CRS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../community/index.html">Community</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Coordinate operations</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Transformations</a></li>
+      <li class="breadcrumb-item active">General grid shift</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/operations/transformations/gridshift.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="geogoffset.html" class="btn btn-neutral float-left" title="Geographic offsets" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="helmert.html" class="btn btn-neutral float-right" title="Helmert transform" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="general-grid-shift">
+<span id="gridshift"></span><h1>General grid shift<a class="headerlink" href="#general-grid-shift" title="Permalink to this heading">¶</a></h1>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 9.2.0.</span></p>
+</div>
+<p>Translation of geodetic coordinates using a grid shift.</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>Alias</strong></p></td>
+<td><p>gridshift</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Domain</strong></p></td>
+<td><p>2D and 3D</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Input type</strong></p></td>
+<td><p>Geodetic coordinates (horizontal), meters (vertical)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Output type</strong></p></td>
+<td><p>Geodetic coordinates (horizontal), meters (vertical)</p></td>
+</tr>
+</tbody>
+</table>
+<p>The transformation may apply horizontal geodetic offsetting and/or vertical
+(ellipsoidal or orthometric height) offsetting, depending on the type of the
+grid(s).</p>
+<p>This is a generalization of the <a class="reference internal" href="hgridshift.html#hgridshift"><span class="std std-ref">Horizontal grid shift</span></a> and <a class="reference internal" href="vgridshift.html#vgridshift"><span class="std std-ref">Vertical grid shift</span></a> methods,
+that may be used in particular for US NADCON5 grids that contain both horizontal
+geodetic and ellipsoidal height offsets.</p>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
+<p>Transformation of a point from NAD83(NSRS2007) to NAD83(2011) on conterminous USA
+using a NADCON5 grid that contains horizontal and ellipsoidal height offsets.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>+proj=gridshift +grids=us_noaa_nadcon5_nad83_2007_nad83_2011_conus.tif
+</pre></div>
+</div>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h3>
+<section id="required">
+<h4>Required<a class="headerlink" href="#required" title="Permalink to this heading">¶</a></h4>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-grids">
+<span class="sig-name descname"><span class="pre">+grids</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;list&gt;</span></span><a class="headerlink" href="#cmdoption-arg-grids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Comma-separated list of grids to load. If a grid is prefixed by an <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> the
+grid is considered optional and PROJ will the not complain if the grid is
+not available.</p>
+<p>Grids must be in GeoTIFF format (<a class="reference internal" href="../../specifications/geodetictiffgrids.html#geodetictiffgrids"><span class="std std-ref">Geodetic TIFF grids (GTG)</span></a>) and have an
+explicit TYPE metadata item whose value is <code class="docutils literal notranslate"><span class="pre">HORIZONTAL_OFFSET</span></code>,
+<code class="docutils literal notranslate"><span class="pre">GEOGRAPHIC_3D_OFFSET</span></code>, <code class="docutils literal notranslate"><span class="pre">ELLIPSOIDAL_HEIGHT_OFFSET</span></code>
+<code class="docutils literal notranslate"><span class="pre">VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL</span></code> or <code class="docutils literal notranslate"><span class="pre">VERTICAL_OFFSET_VERTICAL_TO_VERTICAL</span></code>.</p>
+</dd></dl>
+
+</section>
+<section id="optional">
+<h4>Optional<a class="headerlink" href="#optional" title="Permalink to this heading">¶</a></h4>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-interpolation">
+<span class="sig-name descname"><span class="pre">+interpolation</span></span><span class="sig-prename descclassname"><span class="pre">=bilinear/biquadratic</span></span><a class="headerlink" href="#cmdoption-arg-interpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default is bilinear, unless the grid contains a <code class="docutils literal notranslate"><span class="pre">interpolation_method</span></code>
+metadata item specifying the method.
+Biquadratic is typically used for NADCON5 grids, and is defined in
+<a class="reference external" href="https://geodesy.noaa.gov/library/pdfs/NOAA_TM_NOS_NGS_0084.pdf">NOAA Technical Memorandum NOS NGS 84 - Biquadratic Interpolation</a></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-no_z_transform">
+<span class="sig-name descname"><span class="pre">+no_z_transform</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-arg-no_z_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>If specified, vertical coordinate transformation will be skipped.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="geogoffset.html" class="btn btn-neutral float-left" title="Geographic offsets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="helmert.html" class="btn btn-neutral float-right" title="Helmert transform" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

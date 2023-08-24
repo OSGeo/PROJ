@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transformation pipelines &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgtutorials/EUREF2019/exercises/pipelines.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="The Transverse Mercator projection" href="projections3.html" />
+    <link rel="prev" title="Coordinate conversions" href="conversions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../community/index.html">Community</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Transformation tutorial</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#how-to-fill-out-the-proj-tutorial-exercises">How to fill out the PROJ tutorial exercises</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#exercises">Exercises</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="projections1.html">The UTM projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projections2.html">The Lambert Conic Conformal projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ellipsoids.html">Specifying ellipsoid models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gridshift.html">Gridshifting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="helmert.html">The Helmert transformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="conversions.html">Coordinate conversions</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Transformation pipelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projections3.html">The Transverse Mercator projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../answers.html">Answers to the PROJ tutorial exercises</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../geodesics.html">Geodesics and planar approximations using PROJ and geod</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Tutorials</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Transformation tutorial</a></li>
+      <li class="breadcrumb-item active">Transformation pipelines</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/tutorials/EUREF2019/exercises/pipelines.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="conversions.html" class="btn btn-neutral float-left" title="Coordinate conversions" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="projections3.html" class="btn btn-neutral float-right" title="The Transverse Mercator projection" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="transformation-pipelines">
+<h1>Transformation pipelines<a class="headerlink" href="#transformation-pipelines" title="Permalink to this heading">¶</a></h1>
+<p>In these exercises we will learn how to use Transformation Pipelines.
+Transformation Pipelines is a powerful construct in PROJ that allow users to
+combine several operations into one &quot;super operation&quot;. Pipelines are used
+extensively internally in PROJ when a user asks for a transformation between
+two CRS's (for example when using <a class="reference internal" href="../../../apps/cs2cs.html#cs2cs"><span class="std std-ref">cs2cs</span></a>).  However, users can also write their
+own custom pipelines for specific purposes.</p>
+<p>Before moving on to the exercises below, familiarize yourself with the
+<a class="reference internal" href="../../../operations/pipeline.html#pipeline"><span class="std std-ref">pipeline operation in the documentation</span></a>. Pay special attention to the rules that
+govern the use of the pipeline operation.</p>
+<p>Download the <a class="reference internal" href="../../../apps/gie.html#gie"><span class="std std-ref">gie</span></a> file for the exercise: <a class="reference download internal" download="" href="../../../_downloads/c7213d6f397258a84606eae7267f3ac7/pipelines.gie"><code class="xref download docutils literal notranslate"><span class="pre">pipelines.gie</span></code></a>.</p>
+<section id="geodetic-helmert-geodetic">
+<h2>1. Geodetic -&gt; Helmert -&gt; Geodetic<a class="headerlink" href="#geodetic-helmert-geodetic" title="Permalink to this heading">¶</a></h2>
+<p>The signature use case for transformation pipelines is the Helmert
+transformation of geodetic coordinates.</p>
+<p>As we have seen in the previous exercises, fundamentally, the Helmert
+operation works on cartesian coordinates. So when the input coordinates
+are geodetic, we must convert them to the cartesian space before
+applying the Helmert transformation.</p>
+<p>Similarly, we must convert the transformed cartesian coordinates back to
+geodetic space to be able to compare the coordinates before and after
+transformation.</p>
+<p>With that in mind, now create a transformation pipeline that take geodetic
+(longitude/latitude) coordinates, applies a Helmert transform, and returns
+geodetic coordinates (in a different datum).</p>
+<p>To keep it simple we will use the GRS80 ellipsoid for both input and output
+datum, and a basic 3 parameter transformation, with translations 100,200,300,
+and using the position vector convention.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Remember that in a pipeline step, the inverse of an operation is
+selected by adding <code class="docutils literal notranslate"><span class="pre">+inv</span></code> to the parameter list of the operation.</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 m
+
+accept      12.0           53.0          75.0
+expect      12.00260406    53.00062190  398.48468
+</pre></div>
+</div>
+</section>
+<section id="sequential-grid-shifts">
+<h2>2. Sequential grid shifts<a class="headerlink" href="#sequential-grid-shifts" title="Permalink to this heading">¶</a></h2>
+<p>Create a transformation that applies both a horizontal and a vertical grid
+adjustment. Use the <code class="docutils literal notranslate"><span class="pre">de_adv_BETA2007.tif</span></code> and the <code class="docutils literal notranslate"><span class="pre">us_nga_egm96_15.tif</span></code> grids.</p>
+<ol class="arabic simple">
+<li><p>Does it matter which grid is applied first?</p></li>
+<li><p>If yes, which goes first? Why?</p></li>
+</ol>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>See <a class="reference internal" href="../../../operations/transformations/hgridshift.html#hgridshift"><span class="std std-ref">Horizontal grid shift</span></a> and <a class="reference internal" href="../../../operations/transformations/vgridshift.html#vgridshift"><span class="std std-ref">Vertical grid shift</span></a></p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 cm
+
+accept      12.0            53.0        75.0
+expect      11.99846399     52.99852627 34.541488647
+</pre></div>
+</div>
+</section>
+<section id="ed50-utm32-etrs89-utm33">
+<h2>3. ED50/UTM32 -&gt; ETRS89/UTM33<a class="headerlink" href="#ed50-utm32-etrs89-utm33" title="Permalink to this heading">¶</a></h2>
+<p>A transformation from one coordinate reference system to another. A very common
+use case of transformation pipelines.</p>
+<p>In this exercise we have UTM Zone 32 coordinates related to the ED50 datum,
+which we want to transform to UTM Zone 33 related to ETRS89.</p>
+<p>The transformation goes</p>
+<ol class="arabic simple">
+<li><p>Back-projection</p></li>
+<li><p>Geodetic to cartesian conversion</p></li>
+<li><p>Helmert transformation</p></li>
+<li><p>Cartesian to geodetic conversion</p></li>
+<li><p>Re-projection</p></li>
+</ol>
+<p>which is a very common recipe for transformations between projected coordinate systems.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Find the relevant Helmert parameters by running:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>projinfo -k operation EPSG:1626 -o WKT2_2019
+</pre></div>
+</div>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>If you can't remember which ellipsoids is used by ED50 and ETRS89
+you can look them up with:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>projinfo &lt;datum&gt;
+</pre></div>
+</div>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Relevant documentation:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p><a class="reference internal" href="../../../operations/projections/utm.html#utm"><span class="std std-ref">Universal Transverse Mercator (UTM)</span></a></p></li>
+<li><p><a class="reference internal" href="../../../operations/conversions/cart.html#cart"><span class="std std-ref">Geodetic to cartesian conversion</span></a></p></li>
+<li><p><a class="reference internal" href="../../../operations/transformations/helmert.html#helmert"><span class="std std-ref">Helmert transform</span></a></p></li>
+</ol>
+</div></blockquote>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 cm
+
+accept      687080.63      6210278.55   0
+expect      312871.16      6210214.58   34.08
+</pre></div>
+</div>
+</section>
+<section id="a-pipeline-from-the-real-world">
+<h2>4. A pipeline from the Real World<a class="headerlink" href="#a-pipeline-from-the-real-world" title="Permalink to this heading">¶</a></h2>
+<p>The transformation between the German DHDN and ETRS89 is a transformation
+pipeline consisting of eight steps. Lookup the transformation with projinfo:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>projinfo -k operation EPSG:1776
+</pre></div>
+</div>
+<p>and copy and paste the pipeline definition as your answer below. Try to decipher
+the pipeline and answer the following questions:</p>
+<ol class="arabic simple">
+<li><p>What is the input coordinate type and units?</p></li>
+<li><p>What is the output coordinate type and units?</p></li>
+<li><p>What is the purpose of the +proj=push and +proj=pop steps?</p></li>
+</ol>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>A pipeline definition can span several lines in the gie format. Use this
+to your advantage and put each step on it's own separate line for easier
+reading</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>You can use projinfo to get more knowledge about a particular CRS:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>projinfo &lt;CRS name or code&gt;
+</pre></div>
+</div>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Look at <a class="reference internal" href="../../../operations/conversions/push.html#push"><span class="std std-ref">Push coordinate value to pipeline stack</span></a> and <a class="reference internal" href="../../../operations/conversions/pop.html#pop"><span class="std std-ref">Pop coordinate value to pipeline stack</span></a> to find out how to set up the transformation</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   3 m
+
+accept      12.0           53.0          75.0
+expect      12.0032        52.9953       75.0000
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="conversions.html" class="btn btn-neutral float-left" title="Coordinate conversions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="projections3.html" class="btn btn-neutral float-right" title="The Transverse Mercator projection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

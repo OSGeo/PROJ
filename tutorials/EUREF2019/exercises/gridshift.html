@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gridshifting &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgtutorials/EUREF2019/exercises/gridshift.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="The Helmert transformation" href="helmert.html" />
+    <link rel="prev" title="Specifying ellipsoid models" href="ellipsoids.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../community/index.html">Community</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Transformation tutorial</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#how-to-fill-out-the-proj-tutorial-exercises">How to fill out the PROJ tutorial exercises</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#exercises">Exercises</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="projections1.html">The UTM projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projections2.html">The Lambert Conic Conformal projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ellipsoids.html">Specifying ellipsoid models</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Gridshifting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="helmert.html">The Helmert transformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="conversions.html">Coordinate conversions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipelines.html">Transformation pipelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projections3.html">The Transverse Mercator projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../answers.html">Answers to the PROJ tutorial exercises</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../geodesics.html">Geodesics and planar approximations using PROJ and geod</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Tutorials</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Transformation tutorial</a></li>
+      <li class="breadcrumb-item active">Gridshifting</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/tutorials/EUREF2019/exercises/gridshift.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="ellipsoids.html" class="btn btn-neutral float-left" title="Specifying ellipsoid models" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="helmert.html" class="btn btn-neutral float-right" title="The Helmert transformation" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gridshifting">
+<h1>Gridshifting<a class="headerlink" href="#gridshifting" title="Permalink to this heading">¶</a></h1>
+<p>Sometimes it is simpler to define a transformation as a gridded model of
+displacements rather than a mathematical model. This approach, pioneered
+by the US National Geodetic Survey in their 1980s era transformation from
+the old NAD27 datum to the (back then) new NAD83, has become increasingly
+popular as disk space and CPU cycles have gotten cheaper.</p>
+<p>Gridded models of displacements offer the ability to make local adjustments
+that are not possible with e.g. a Helmert transformation. This fact is
+especially leveraged in transformations of heights since the geoid is too
+bumpy to retain enough detail with a simple mathematical definition.</p>
+<p>The main problem with grid shifting is availability of the grids needed for a
+given transformation. The PROJ package requires that the
+<a class="reference internal" href="../../../resource_files.html#datumgrid"><span class="std std-ref">PROJ-data package</span></a> is installed alongside it.</p>
+<p>Download the <a class="reference internal" href="../../../apps/gie.html#gie"><span class="std std-ref">gie</span></a> file for the exercise: <a class="reference download internal" download="" href="../../../_downloads/88a4a52f6e152b4349ae8a10ace9a4f0/gridshift.gie"><code class="xref download docutils literal notranslate"><span class="pre">gridshift.gie</span></code></a>.</p>
+<section id="exercises-1-horizontal-gridshifting">
+<h2>Exercises 1. Horizontal gridshifting<a class="headerlink" href="#exercises-1-horizontal-gridshifting" title="Permalink to this heading">¶</a></h2>
+<p>In this exercise we will apply a horizontal grid shift as it is done in the
+transformation from the <a class="reference external" href="http://crs.bkg.bund.de/crseu/crs/descrtrans/BeTA/de_dhdn2etrs_beta.php">German DHDN to ETRS89 transformation</a>.</p>
+<p>Define the operation that converts from DE_DHDN to ETRS89 using a gridshift.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>See <a class="reference internal" href="../../../operations/transformations/hgridshift.html#hgridshift"><span class="std std-ref">Horizontal grid shift</span></a></p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Find the relevant grid name by inspecting the output of</p>
+<blockquote>
+<div><blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">projinfo</span> <span class="pre">-s</span> <span class="pre">DHDN</span> <span class="pre">-t</span> <span class="pre">ETRS89</span> <span class="pre">-o</span> <span class="pre">WKT2_2019</span></code></p>
+</div></blockquote>
+<p>Note that two operations are returned, look for the one which uses the
+&quot;NTv2&quot; method.</p>
+</div></blockquote>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 mm
+
+accept      13.0            52.0            0.0
+expect      12.9983317082   51.9986488216   0.0
+</pre></div>
+</div>
+</section>
+<section id="vertical-gridshifting">
+<h2>2. Vertical gridshifting<a class="headerlink" href="#vertical-gridshifting" title="Permalink to this heading">¶</a></h2>
+<p>The most common use case for vertical grid shifts is transformation from
+ellipsoidal heights to physical heights. In most cases this is equivalent to
+applying an offset from a geoid model, which is exactly what we will do in this
+exercise.</p>
+<p>Set up an operation that transforms ellipsoidal heights to physical heights
+using the EGM96 model.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>See <a class="reference internal" href="../../../operations/transformations/vgridshift.html#vgridshift"><span class="std std-ref">Vertical grid shift</span></a></p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The relevant grid name is &quot;us_nga_egm96_15.tif&quot;</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 mm
+
+accept      13.0            52.0          100.0
+expect      13.0            52.0           58.1917
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ellipsoids.html" class="btn btn-neutral float-left" title="Specifying ellipsoid models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="helmert.html" class="btn btn-neutral float-right" title="The Helmert transformation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

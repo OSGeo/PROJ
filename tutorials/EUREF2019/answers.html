@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Answers to the PROJ tutorial exercises &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgtutorials/EUREF2019/answers.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Geodesics and planar approximations using PROJ and geod" href="../geodesics.html" />
+    <link rel="prev" title="The Transverse Mercator projection" href="exercises/projections3.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../community/index.html">Community</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Transformation tutorial</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#how-to-fill-out-the-proj-tutorial-exercises">How to fill out the PROJ tutorial exercises</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#exercises">Exercises</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="exercises/projections1.html">The UTM projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="exercises/projections2.html">The Lambert Conic Conformal projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="exercises/ellipsoids.html">Specifying ellipsoid models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="exercises/gridshift.html">Gridshifting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="exercises/helmert.html">The Helmert transformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="exercises/conversions.html">Coordinate conversions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="exercises/pipelines.html">Transformation pipelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="exercises/projections3.html">The Transverse Mercator projection</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Answers to the PROJ tutorial exercises</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../geodesics.html">Geodesics and planar approximations using PROJ and geod</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Tutorials</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Transformation tutorial</a></li>
+      <li class="breadcrumb-item active">Answers to the PROJ tutorial exercises</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/tutorials/EUREF2019/answers.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="exercises/projections3.html" class="btn btn-neutral float-left" title="The Transverse Mercator projection" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../geodesics.html" class="btn btn-neutral float-right" title="Geodesics and planar approximations using PROJ and geod" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="answers-to-the-proj-tutorial-exercises">
+<span id="euref2019-answers"></span><h1>Answers to the PROJ tutorial exercises<a class="headerlink" href="#answers-to-the-proj-tutorial-exercises" title="Permalink to this heading">¶</a></h1>
+<section id="projections1-utm">
+<h2>Projections1: UTM<a class="headerlink" href="#projections1-utm" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1.      +proj=utm +zone=35
+2.      +proj=utm +zone=60 +south
+3.      +proj=utm +zone=35 +ellps=intl
+</pre></div>
+</div>
+</section>
+<section id="projections2-lcc">
+<h2>Projections2: LCC<a class="headerlink" href="#projections2-lcc" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1.      +proj=lcc +lat_1=59.8
+2.      +proj=lcc +lat_1=59.8   +k_0=0.99998
+3.      +proj=lcc +lat_1=59.437 +lat_2=60.171
+4.      +proj=lcc +lat_1=59.8   +lat_0=59.8   +lon_0=24.8
+5.      +proj=lcc +lat_1=59.8   +lat_0=59.8   +lon_0=24.8  +x_0=1000000 +y_0=1000000
+</pre></div>
+</div>
+</section>
+<section id="ellipsoids">
+<h2>Ellipsoids<a class="headerlink" href="#ellipsoids" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1.      +R=1
+2.      +ellps=intl
+3.      +a=6378388.0 +rf=297.0
+4.      +a=6378206.4 +b=6356583.8
+</pre></div>
+</div>
+</section>
+<section id="helmert">
+<h2>Helmert<a class="headerlink" href="#helmert" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1.      +proj=helmert +x=-97 +y=-103 +z=-120
+2.      +proj=helmert +x=-81.1 +y=-89.4 +z=-115.8 +rx=0.485 +ry=0.024 +rz=0.413 +s=-0.54 +convention=position_vector
+3a.     +proj=helmert +x=582 +y=105 +z=414 +rx=-1.04 +ry=-0.35 +rz=3.08 +s=8.3
+3b.     +proj=helmert +x=582 +y=105 +z=414 +rx=1.04 +ry=0.35 +rz=-3.08 +s=8.3
+1.      +proj=helmert   +convention=position_vector +x=-0.0016  +y=-0.0019  +z=-0.0024 +s=2e-05 +dz=0.0001 +ds=-3e-05 +t_epoch=2010
+</pre></div>
+</div>
+</section>
+<section id="conversions">
+<h2>Conversions<a class="headerlink" href="#conversions" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1.      +proj=unitconvert +xy_in=m  +xy_out=us-ft
+2.      +proj=axisswap +order=2,1
+3.      +proj=cart +ellps=intl
+</pre></div>
+</div>
+</section>
+<section id="gridshifts">
+<h2>Gridshifts<a class="headerlink" href="#gridshifts" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1.      +proj=hgridshift +grids=de_adv_BETA2007.tif
+2.      +proj=vgridshift +grids=us_nga_egm96_15.tif
+</pre></div>
+</div>
+</section>
+<section id="pipelines">
+<h2>Pipelines<a class="headerlink" href="#pipelines" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1.      +proj=pipeline +ellps=GRS80
+        +step +proj=cart
+        +step +proj=helmert +x=100 +y=200 +z=300 +convention=position_vector
+        +step +inv +proj=cart
+
+2.      +proj=pipeline
+        +step +proj=hgridshift +grids=de_adv_BETA2007.tif
+        +step +proj=vgridshift +grids=us_nga_egm96_15.tif
+
+2.1:    In principle, yes - practically, no.
+2.2:    Which grids is applied first depends on how the systems are defined.
+        If a geoid model is fitted to a certain datum, you need to make sure that
+        the input to the vgridshift operation is in that datum. That is your
+        responsibility to check - PROJ can&#39;t figure that out on its own. In this
+        case, the EGM96 geoid is fitted to WGS84. The BETA2007 grid results in
+        ETRS89 coordinates which for all but the most high accuracy application
+        can be regarded as equivalent to WGS84. Hence we do the horizontal grid
+        shift first.
+
+3.      +proj=pipeline
+        +step +inv +proj=utm +zone=32
+        +step +proj=cart +ellps=intl
+        +step +proj=helmert +x=-81.1 +y=-89.4 +z=-115.8
+        +rx=0.485 +ry=0.024 +rz=0.413 +s=-0.54 +convention=position_vector
+        +step +inv +proj=cart +ellps=GRS80
+        +step +proj=utm +zone=33
+
+
+4.      +proj=pipeline
+        +step +proj=axisswap +order=2,1
+        +step +proj=unitconvert +xy_in=deg +xy_out=rad
+        +step +proj=push +v_3 +step +proj=cart +ellps=bessel
+        +step +proj=helmert +x=598.1 +y=73.7 +z=418.2
+        +rx=0.202 +ry=0.045 +rz=-2.455 +s=6.7 +convention=position_vector
+        +step +inv +proj=cart +ellps=GRS80
+        +step +proj=pop +v_3
+        +step +proj=unitconvert +xy_in=rad +xy_out=deg
+        +step +proj=axisswap +order=2,1
+
+4.1:    Latitude (deg), longitude (deg), height (m)
+4.2:    Latitude (deg), longitude (deg), height (m)
+4.3:    Retain the original height of the input coordinate:
+        Without the push/pop steps the height would be affected by
+        the Helmert step.
+</pre></div>
+</div>
+</section>
+<section id="projections3-tranverse-mercator">
+<h2>Projections3: Tranverse Mercator<a class="headerlink" href="#projections3-tranverse-mercator" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1.      +proj=tmerc
+2.      +proj=tmerc +k_0=0.9996 +lon_0=27 +x_0=500000
+3a.     1 cm
+3b.     250 km
+3c.     100 km
+3d.      10 km
+3e.     500  m
+3f.       2  m
+3g.       5 um
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="exercises/projections3.html" class="btn btn-neutral float-left" title="The Transverse Mercator projection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../geodesics.html" class="btn btn-neutral float-right" title="Geodesics and planar approximations using PROJ and geod" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

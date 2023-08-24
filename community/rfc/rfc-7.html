@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PROJ RFC 7: Drop Autotools, maintain CMake &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgcommunity/rfc/rfc-7.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Tutorials" href="../../tutorials/index.html" />
+    <link rel="prev" title="PROJ RFC 6: Triangulation-based transformations" href="rfc-6.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Community</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../channels.html">Communication channels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code_contributions.html">Guidelines for PROJ code contributors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Request for Comments</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="rfc-1.html">PROJ RFC 1: Project Committee Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rfc-2.html">PROJ RFC 2: Initial integration of &quot;GDAL SRS barn&quot; work</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rfc-3.html">PROJ RFC 3: Dependency management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rfc-4.html">PROJ RFC 4: Remote access to grids and GeoTIFF grids</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rfc-5.html">PROJ RFC 5: Adopt GeoTIFF-based grids for grids delivered with PROJ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rfc-6.html">PROJ RFC 6: Triangulation-based transformations</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">PROJ RFC 7: Drop Autotools, maintain CMake</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#summary">Summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#background">Background</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#motivation">Motivation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#why-drop-autotools">Why drop Autotools?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#why-use-cmake">Why use CMake?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#why-not-cmake">Why not CMake?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#potential-impacts">Potential impacts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transition-plan">Transition plan</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#adoption-status">Adoption status</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Community</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Request for Comments</a></li>
+      <li class="breadcrumb-item active">PROJ RFC 7: Drop Autotools, maintain CMake</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/community/rfc/rfc-7.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="rfc-6.html" class="btn btn-neutral float-left" title="PROJ RFC 6: Triangulation-based transformations" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../tutorials/index.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="proj-rfc-7-drop-autotools-maintain-cmake">
+<span id="rfc7"></span><h1>PROJ RFC 7: Drop Autotools, maintain CMake<a class="headerlink" href="#proj-rfc-7-drop-autotools-maintain-cmake" title="Permalink to this heading">¶</a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Mike Taves</p>
+</dd>
+<dt class="field-even">Contact<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="mailto:mwtoews&#37;&#52;&#48;gmail&#46;com">mwtoews<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+</dd>
+<dt class="field-odd">Status<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Adopted</p>
+</dd>
+<dt class="field-even">Implementation target<span class="colon">:</span></dt>
+<dd class="field-even"><p>PROJ 9.0</p>
+</dd>
+<dt class="field-odd">Last Updated<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2021-10-27</p>
+</dd>
+</dl>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this heading">¶</a></h2>
+<p>This RFC proposes to drop Autotools for PROJ 9.0, and to maintain CMake
+for build automation, testing and packaging. This will reduce the overall
+maintenance for PROJ and will enable the library to be integrated into other
+projects that use CMake.</p>
+</section>
+<section id="background">
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this heading">¶</a></h2>
+<p>Here is a short timeline of the build tools used for PROJ:</p>
+<ul class="simple">
+<li><p>Throughout the mid-1990s, Gerald Evenden maintained a Unix build system with
+a few scripts (some derived from Autoconf), and Makefile templates.</p></li>
+<li><p>In 2000, Frank Warmerdam wrote Autoconf and Automake configurations for
+PROJ 4.4.0.</p></li>
+<li><p>This was followed by a NMake configuration to build PROJ 4.4.2 for Windows.</p></li>
+<li><p>In 2014, a CMake build setup was introduced by Howard Butler for
+PROJ 4.9.0RC1. The CMake configuration was improved for the 4.9.1 release,
+but not considered at feature parity with the Autotools builds at the time.</p></li>
+<li><p>The NMake build setup was removed for PROJ 6.0.0, as its functionality had
+been replaced by CMake.</p></li>
+</ul>
+</section>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this heading">¶</a></h2>
+<p>The primary motivation in removing Autotools is to reduce the burden of
+maintaining multiple build configurations, which requires developers to be
+familiar with different tools and configuration files. There are several other
+benefits in maintaining a single build system:</p>
+<ul class="simple">
+<li><p>Remove extra configuration and m4 macro files from source repository,</p></li>
+<li><p>Simplify scripts used for running tests for CI services (GitHub Actions,
+TravisCI),</p></li>
+<li><p>Reduce compilation time (and carbon footprint) used for testing on CI
+services,</p></li>
+<li><p>Ease development effort, particularly with new contributors.</p></li>
+</ul>
+</section>
+<section id="why-drop-autotools">
+<h2>Why drop Autotools?<a class="headerlink" href="#why-drop-autotools" title="Permalink to this heading">¶</a></h2>
+<p>The GNU Build System or Autotools consist of a suite of tools including
+Autoconf and Automake, which can be used to build software on Unix-like
+systems. These tools are not cross-platform, and do not naively integrate
+with development environments on Microsoft Windows. Furthermore, the existing
+PROJ Autotools builds do not install the CMake configuration files required to
+find PROJ from other projects that use CMake
+(<a class="reference external" href="https://github.com/OSGeo/PROJ/issues/2546">#2546</a>).</p>
+</section>
+<section id="why-use-cmake">
+<h2>Why use CMake?<a class="headerlink" href="#why-use-cmake" title="Permalink to this heading">¶</a></h2>
+<p>CMake is an open source cross-platform tool for build automation, testing and
+packaging of software. It does not directly compile the software, but manages
+the build process using generators, including Unix Makefiles and Ninja among
+other command-based and IDE tools. The CMake software has been under active
+development since its origins in 2000. The CMake language is carefully
+developed with backwards-compatible policies that aim to provide consistent
+behavior across different versions. CMake is currently the preferred build
+tool for PROJ for the following reasons:</p>
+<ul class="simple">
+<li><p>It has existed in the PROJ code base since 2014, and is familiar to active
+PROJ contributors,</p></li>
+<li><p>It can install configuration files that can be used by other software that
+use CMake to find PROJ for linking via <code class="docutils literal notranslate"><span class="pre">find_package()</span></code>,</p></li>
+<li><p>CMake configurations are used in 3rd-party binary packages of PROJ,
+including conda-forge and vcpkg,</p></li>
+<li><p>It can be used to build PROJ on all major operating systems and compiler
+combinations (where compatible),</p></li>
+<li><p>It has integration with modern IDEs and tools, including
+Microsoft Visual Studio and Qt Creator.</p></li>
+</ul>
+</section>
+<section id="why-not-cmake">
+<h2>Why not CMake?<a class="headerlink" href="#why-not-cmake" title="Permalink to this heading">¶</a></h2>
+<p>Other modern cross-platform build systems exist, including Meson and Bazel,
+which have many advantages over CMake. However, they are currently not widely
+used by active PROJ contributors. This RFC should not restrict future build
+system configurations being introduced to PROJ, if they are proven to have
+advantages to CMake over time.</p>
+</section>
+<section id="potential-impacts">
+<h2>Potential impacts<a class="headerlink" href="#potential-impacts" title="Permalink to this heading">¶</a></h2>
+<p>Binary packagers that currently rely on Autotools would obviously need to
+transition building and testing PROJ with CMake. Issues related to
+multiarch builds of PROJ may become apparent, which can be patched and/or
+reported to PROJ developers. One feature of Autotools is that both static and
+dynamic (shared) libraries are built, which packagers may distribute. This
+feature is currently not set-up for PROJ, as it would need to be configured
+and built twice.</p>
+<p>End-users that use binary packages of PROJ should not be impacted. PROJ should
+be discoverable via both pkg-config and CMake's <code class="docutils literal notranslate"><span class="pre">find_package()</span></code>.
+Other projects that use Autotools will continue to work as expected,
+linking statically or dynamically to PROJ built by CMake.</p>
+</section>
+<section id="transition-plan">
+<h2>Transition plan<a class="headerlink" href="#transition-plan" title="Permalink to this heading">¶</a></h2>
+<p>If this proposal is approved, the following tasks should be completed:</p>
+<ul class="simple">
+<li><p>Rewrite CI tests to only use CMake for packaging, building, testing,
+installation and post-install tests,</p></li>
+<li><p>Remove files only used by Autotools, also update <code class="docutils literal notranslate"><span class="pre">.gitignore</span></code>,</p></li>
+<li><p>Update documentation and <code class="docutils literal notranslate"><span class="pre">HOWTORELEASE</span></code> notes.</p></li>
+</ul>
+<p>Related issues will be tracked on GitHub with a tag
+<a class="reference external" href="https://github.com/OSGeo/PROJ/labels/RFC7%3A%20Autotools%E2%86%92CMake">RFC7: Autotools→CMake</a>.</p>
+</section>
+<section id="adoption-status">
+<h2>Adoption status<a class="headerlink" href="#adoption-status" title="Permalink to this heading">¶</a></h2>
+<p>The RFC was adopted on 2021-10-26 with +1's from the following PSC members</p>
+<ul class="simple">
+<li><p>Kristian Evers</p></li>
+<li><p>Even Rouault</p></li>
+<li><p>Howard Butler</p></li>
+<li><p>Thomas Knudsen</p></li>
+<li><p>Kurt Schwehr</p></li>
+<li><p>Charles Karney</p></li>
+<li><p>Thomas Knudsen</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="rfc-6.html" class="btn btn-neutral float-left" title="PROJ RFC 6: Triangulation-based transformations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../tutorials/index.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

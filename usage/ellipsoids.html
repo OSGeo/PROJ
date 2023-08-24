@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ellipsoids &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgusage/ellipsoids.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Environment variables" href="environmentvars.html" />
+    <link rel="prev" title="Geodetic transformation" href="transformation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Using PROJ</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="projections.html">Cartographic projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformation.html">Geodetic transformation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Ellipsoids</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ellipsoid-size-parameters">Ellipsoid size parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ellipsoid-shape-parameters">Ellipsoid shape parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ellipsoid-spherification-parameters">Ellipsoid spherification parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#built-in-ellipsoid-definitions">Built-in ellipsoid definitions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transformation-examples">Transformation examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="environmentvars.html">Environment variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="differences.html">Known differences between versions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="network.html">Network capabilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../community/index.html">Community</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Using PROJ</a></li>
+      <li class="breadcrumb-item active">Ellipsoids</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/usage/ellipsoids.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="transformation.html" class="btn btn-neutral float-left" title="Geodetic transformation" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="environmentvars.html" class="btn btn-neutral float-right" title="Environment variables" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ellipsoids">
+<span id="id1"></span><h1>Ellipsoids<a class="headerlink" href="#ellipsoids" title="Permalink to this heading">¶</a></h1>
+<p>An ellipsoid is a mathematically defined surface which approximates the <em>geoid</em>:
+the surface of the Earth's gravity field, which is approximately the same as
+mean sea level.</p>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="../_images/general_ellipsoid.png"><img alt="Global and local fitting of the ellipsoid" src="../_images/general_ellipsoid.png" style="width: 500px;" /></a>
+<figcaption>
+<p><span class="caption-text">Global and local fitting of the ellipsoid</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>A complete ellipsoid definition comprises a size (primary) and a shape (secondary)
+parameter.</p>
+<section id="ellipsoid-size-parameters">
+<span id="id2"></span><h2>Ellipsoid size parameters<a class="headerlink" href="#ellipsoid-size-parameters" title="Permalink to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-R">
+<span class="sig-name descname"><span class="pre">+R</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-R" title="Permalink to this definition">¶</a></dt>
+<dd><p>Radius of the sphere, <span class="math notranslate nohighlight">\(R\)</span>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-a">
+<span class="sig-name descname"><span class="pre">+a</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-a" title="Permalink to this definition">¶</a></dt>
+<dd><p>Semi-major axis of the ellipsoid, <span class="math notranslate nohighlight">\(a\)</span>.</p>
+</dd></dl>
+
+</section>
+<section id="ellipsoid-shape-parameters">
+<span id="id3"></span><h2>Ellipsoid shape parameters<a class="headerlink" href="#ellipsoid-shape-parameters" title="Permalink to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-rf">
+<span class="sig-name descname"><span class="pre">+rf</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-rf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverse flattening of the ellipsoid, <span class="math notranslate nohighlight">\(1/f\)</span>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-f">
+<span class="sig-name descname"><span class="pre">+f</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattening of the ellipsoid, <span class="math notranslate nohighlight">\(f\)</span>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-es">
+<span class="sig-name descname"><span class="pre">+es</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-es" title="Permalink to this definition">¶</a></dt>
+<dd><p>Eccentricity squared, <span class="math notranslate nohighlight">\(e^2\)</span>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-e">
+<span class="sig-name descname"><span class="pre">+e</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Eccentricity, <span class="math notranslate nohighlight">\(e\)</span>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-b">
+<span class="sig-name descname"><span class="pre">+b</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-b" title="Permalink to this definition">¶</a></dt>
+<dd><p>Semi-minor axis, <span class="math notranslate nohighlight">\(b\)</span>.</p>
+</dd></dl>
+
+<p>The ellipsoid definition may be augmented with a spherification flag, turning
+the ellipsoid into a sphere with features defined by the ellipsoid.</p>
+</section>
+<section id="ellipsoid-spherification-parameters">
+<span id="id4"></span><h2>Ellipsoid spherification parameters<a class="headerlink" href="#ellipsoid-spherification-parameters" title="Permalink to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-R_A">
+<span class="sig-name descname"><span class="pre">+R_A</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-R_A" title="Permalink to this definition">¶</a></dt>
+<dd><p>A sphere with the same surface area as the ellipsoid.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-R_V">
+<span class="sig-name descname"><span class="pre">+R_V</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-R_V" title="Permalink to this definition">¶</a></dt>
+<dd><p>A sphere with the same volume as the ellipsoid.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-R_a">
+<span class="sig-name descname"><span class="pre">+R_a</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-R_a" title="Permalink to this definition">¶</a></dt>
+<dd><p>A sphere with <span class="math notranslate nohighlight">\(R = (a + b)/2\)</span> (arithmetic mean).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-R_g">
+<span class="sig-name descname"><span class="pre">+R_g</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-R_g" title="Permalink to this definition">¶</a></dt>
+<dd><p>A sphere with <span class="math notranslate nohighlight">\(R = \sqrt{ab}\)</span> (geometric mean).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-R_h">
+<span class="sig-name descname"><span class="pre">+R_h</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-R_h" title="Permalink to this definition">¶</a></dt>
+<dd><p>A sphere with <span class="math notranslate nohighlight">\(R = 2ab/(a+b)\)</span> (harmonic mean).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-R_lat_a">
+<span class="sig-name descname"><span class="pre">+R_lat_a</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;phi&gt;</span></span><a class="headerlink" href="#cmdoption-arg-R_lat_a" title="Permalink to this definition">¶</a></dt>
+<dd><p>A sphere with <span class="math notranslate nohighlight">\(R\)</span> being the arithmetic mean of the corresponding
+ellipsoid at latitude <span class="math notranslate nohighlight">\(\phi\)</span>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-R_lat_g">
+<span class="sig-name descname"><span class="pre">+R_lat_g</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;phi&gt;</span></span><a class="headerlink" href="#cmdoption-arg-R_lat_g" title="Permalink to this definition">¶</a></dt>
+<dd><p>A sphere with <span class="math notranslate nohighlight">\(R\)</span> being the geometric mean of the corresponding
+ellipsoid at latitude <span class="math notranslate nohighlight">\(\phi\)</span>.</p>
+</dd></dl>
+
+<p>If <a class="reference internal" href="../operations/projections/adams_hemi.html#cmdoption-arg-R"><code class="xref std std-option docutils literal notranslate"><span class="pre">+R</span></code></a> is given as size parameter, any shape and spherification
+parameters given are ignored.</p>
+</section>
+<section id="built-in-ellipsoid-definitions">
+<span id="ellipsoid-definitions"></span><h2>Built-in ellipsoid definitions<a class="headerlink" href="#built-in-ellipsoid-definitions" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">ellps=xxx</span></code> parameter provides both size and shape for a number of
+built-in ellipsoid definitions.</p>
+<blockquote>
+<div><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ellps</p></th>
+<th class="head"><p>Parameters</p></th>
+<th class="head"><p>Datum name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>GRS80</p></td>
+<td><p>a=6378137.0      rf=298.257222101</p></td>
+<td><p>GRS 1980(IUGG, 1980)</p></td>
+</tr>
+<tr class="row-odd"><td><p>airy</p></td>
+<td><p>a=6377563.396    b=6356256.910</p></td>
+<td><p>Airy 1830</p></td>
+</tr>
+<tr class="row-even"><td><p>bessel</p></td>
+<td><p>a=6377397.155    rf=299.1528128</p></td>
+<td><p>Bessel 1841</p></td>
+</tr>
+<tr class="row-odd"><td><p>clrk66</p></td>
+<td><p>a=6378206.4      b=6356583.8</p></td>
+<td><p>Clarke 1866</p></td>
+</tr>
+<tr class="row-even"><td><p>intl</p></td>
+<td><p>a=6378388.0      rf=297.</p></td>
+<td><p>International 1909 (Hayford)</p></td>
+</tr>
+<tr class="row-odd"><td><p>WGS60</p></td>
+<td><p>a=6378165.0      rf=298.3</p></td>
+<td><p>WGS 60</p></td>
+</tr>
+<tr class="row-even"><td><p>WGS66</p></td>
+<td><p>a=6378145.0      rf=298.25</p></td>
+<td><p>WGS 66</p></td>
+</tr>
+<tr class="row-odd"><td><p>WGS72</p></td>
+<td><p>a=6378135.0      rf=298.26</p></td>
+<td><p>WGS 72</p></td>
+</tr>
+<tr class="row-even"><td><p>WGS84</p></td>
+<td><p>a=6378137.0      rf=298.257223563</p></td>
+<td><p>WGS 84</p></td>
+</tr>
+<tr class="row-odd"><td><p>sphere</p></td>
+<td><p>a=6370997.0      b=6370997.0</p></td>
+<td><p>Normal Sphere (r=6370997)</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>If size and shape are given as <code class="docutils literal notranslate"><span class="pre">ellps=xxx</span></code>, later shape and size parameters
+are are taken into account as modifiers for the built-in ellipsoid definition.</p>
+<p>While this may seem strange, it is in accordance with historical PROJ
+behavior. It can e.g. be used to define coordinates on the ellipsoid
+scaled to unit semimajor axis by specifying <code class="docutils literal notranslate"><span class="pre">+ellps=xxx</span> <span class="pre">+a=1</span></code></p>
+</section>
+<section id="transformation-examples">
+<span id="ellipsoid-transformation-examples"></span><h2>Transformation examples<a class="headerlink" href="#transformation-examples" title="Permalink to this heading">¶</a></h2>
+<p>Spherical earth with radius 7000km:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>+proj=latlon +R=7000000
+</pre></div>
+</div>
+<p>Using the GRS80 ellipsoid:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>+proj=latlon +ellps=GRS80
+</pre></div>
+</div>
+<p>Expressing ellipsoid by semi-major axis and reverse flattening (<span class="math notranslate nohighlight">\(1/f\)</span>):</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>+proj=latlon +a=6378137.0 +rf=298.25
+</pre></div>
+</div>
+<p>Spherical earth based on volume of ellipsoid</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>+proj=latlon +a=6378137.0 +rf=298.25 +R_V
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="transformation.html" class="btn btn-neutral float-left" title="Geodetic transformation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="environmentvars.html" class="btn btn-neutral float-right" title="Environment variables" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

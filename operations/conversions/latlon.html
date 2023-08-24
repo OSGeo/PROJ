@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lat/long (Geodetic alias) &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgoperations/conversions/latlon.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="No operation" href="noop.html" />
+    <link rel="prev" title="Geocentric Latitude" href="geoc.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apps/index.html">Applications</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Coordinate operations</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../projections/index.html">Projections</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Conversions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="axisswap.html">Axis swap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cart.html">Geodetic to cartesian conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geoc.html">Geocentric Latitude</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Lat/long (Geodetic alias)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="noop.html">No operation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pop.html">Pop coordinate value to pipeline stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="push.html">Push coordinate value to pipeline stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="set.html">Set coordinate value</a></li>
+<li class="toctree-l3"><a class="reference internal" href="topocentric.html">Geocentric to topocentric conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="unitconvert.html">Unit conversion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../transformations/index.html">Transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline.html">The pipeline operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../operations_computation.html">Computation of coordinate operations between two CRS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../community/index.html">Community</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Coordinate operations</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Conversions</a></li>
+      <li class="breadcrumb-item active">Lat/long (Geodetic alias)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/operations/conversions/latlon.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="geoc.html" class="btn btn-neutral float-left" title="Geocentric Latitude" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="noop.html" class="btn btn-neutral float-right" title="No operation" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lat-long-geodetic-alias">
+<span id="latlon"></span><h1>Lat/long (Geodetic alias)<a class="headerlink" href="#lat-long-geodetic-alias" title="Permalink to this heading">¶</a></h1>
+<p>Passes geodetic coordinates through unchanged.</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>Aliases</strong></p></td>
+<td><p>latlon, latlong, lonlat, longlat</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Domain</strong></p></td>
+<td><p>2D</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Input type</strong></p></td>
+<td><p>Geodetic coordinates</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Output type</strong></p></td>
+<td><p>Geodetic coordinates</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Can not be used with the <a class="reference internal" href="../../apps/proj.html#proj"><span class="std std-ref">proj</span></a> application.</p>
+</div>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
+<p>No parameters will affect the output of the operation if used on it's own.
+However, the parameters below can be used in a declarative manner when used with
+<a class="reference internal" href="../../apps/cs2cs.html#cs2cs"><span class="std std-ref">cs2cs</span></a> or in a <a class="reference internal" href="../pipeline.html#pipeline"><span class="std std-ref">transformation pipeline</span></a> .</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-ellps">
+<span class="sig-name descname"><span class="pre">+ellps</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-ellps" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of a built-in ellipsoid definition.</p>
+<p>See <a class="reference internal" href="../../usage/ellipsoids.html#ellipsoids"><span class="std std-ref">Ellipsoids</span></a> for more information, or execute
+<a class="reference internal" href="../../apps/proj.html#cmdoption-proj-le"><code class="xref std std-option docutils literal notranslate"><span class="pre">proj</span> <span class="pre">-le</span></code></a> for a list of built-in ellipsoid names.</p>
+<p><em>Defaults to &quot;GRS80&quot;.</em></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-datum">
+<span class="sig-name descname"><span class="pre">+datum</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;value&gt;</span></span><a class="headerlink" href="#cmdoption-arg-datum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Declare the datum used with the coordinates. Available options are:
+<code class="docutils literal notranslate"><span class="pre">WGS84</span></code>, <code class="docutils literal notranslate"><span class="pre">GGRS87</span></code>, <code class="docutils literal notranslate"><span class="pre">NAD38</span></code>, <code class="docutils literal notranslate"><span class="pre">NAD27</span></code>, <code class="docutils literal notranslate"><span class="pre">potsdam</span></code>, <code class="docutils literal notranslate"><span class="pre">carthage</span></code>,
+<code class="docutils literal notranslate"><span class="pre">hermannskogel</span></code>, <code class="docutils literal notranslate"><span class="pre">ire65</span></code>, <code class="docutils literal notranslate"><span class="pre">nzgd49</span></code>, <code class="docutils literal notranslate"><span class="pre">OSGB336</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">+datum</span></code> option is primarily available to support the legacy
+use of PROJ.4 strings as CRS descriptors and should in most cases
+be avoided.</p>
+</div>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-towgs84">
+<span class="sig-name descname"><span class="pre">+towgs84</span></span><span class="sig-prename descclassname"><span class="pre">=&lt;list&gt;</span></span><a class="headerlink" href="#cmdoption-arg-towgs84" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of three or seven comma separated <a class="reference internal" href="../transformations/helmert.html#helmert"><span class="std std-ref">Helmert</span></a> parameters that maps
+the input coordinates to the WGS84 datum.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="geoc.html" class="btn btn-neutral float-left" title="Geocentric Latitude" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="noop.html" class="btn btn-neutral float-right" title="No operation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

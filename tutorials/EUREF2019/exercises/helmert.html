@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Helmert transformation &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgtutorials/EUREF2019/exercises/helmert.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Coordinate conversions" href="conversions.html" />
+    <link rel="prev" title="Gridshifting" href="gridshift.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../community/index.html">Community</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Transformation tutorial</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#how-to-fill-out-the-proj-tutorial-exercises">How to fill out the PROJ tutorial exercises</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#exercises">Exercises</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="projections1.html">The UTM projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projections2.html">The Lambert Conic Conformal projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ellipsoids.html">Specifying ellipsoid models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gridshift.html">Gridshifting</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">The Helmert transformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="conversions.html">Coordinate conversions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipelines.html">Transformation pipelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projections3.html">The Transverse Mercator projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../answers.html">Answers to the PROJ tutorial exercises</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../geodesics.html">Geodesics and planar approximations using PROJ and geod</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Tutorials</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Transformation tutorial</a></li>
+      <li class="breadcrumb-item active">The Helmert transformation</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/tutorials/EUREF2019/exercises/helmert.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="gridshift.html" class="btn btn-neutral float-left" title="Gridshifting" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="conversions.html" class="btn btn-neutral float-right" title="Coordinate conversions" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="the-helmert-transformation">
+<span id="euref2019-helmert"></span><h1>The Helmert transformation<a class="headerlink" href="#the-helmert-transformation" title="Permalink to this heading">¶</a></h1>
+<p>In this set of exercises we investigate the Helmert Transformation and some of
+its properties. The Helmert transformation covers a wide range of configurations,
+from simple translations of coordinates to the fully-fledged spatiotemporal
+transformation. Consult <a class="reference external" href="https://en.wikipedia.org/wiki/Helmert_transformation">Wikipedia</a>
+and <a class="reference internal" href="../../../operations/transformations/helmert.html#helmert"><span class="std std-ref">Helmert transform</span></a> for in-depth technical details on the transformation.</p>
+<p>The Helmert transformation works on geocentric, cartesian coordinates. See the
+<a class="reference internal" href="conversions.html#euref2019-conversions"><span class="std std-ref">Coordinate conversions</span></a> exercise for more info. In this exercise all coordinates are
+already given as cartesian coordinates, so you only need to focus on the actual
+transformation setup.</p>
+<p>Download the <a class="reference internal" href="../../../apps/gie.html#gie"><span class="std std-ref">gie</span></a> file for the exercise: <a class="reference download internal" download="" href="../../../_downloads/0439c24fc032f5bb3c17bc2dddd007bb/helmert.gie"><code class="xref download docutils literal notranslate"><span class="pre">helmert.gie</span></code></a>.</p>
+<section id="simple-coordinate-translation">
+<h2>1. Simple coordinate translation<a class="headerlink" href="#simple-coordinate-translation" title="Permalink to this heading">¶</a></h2>
+<p>The most basic application of the Helmert transformation is a translation of
+the x-, y- and z-components of the coordinate. This is rarely a good fit for
+large areas but locally a 3 parameter Helmert shift can be very effective. Even
+though the 3 parameter translation doesn't fit particularly well in large areas
+of use it is still commonly used between legacy and modern systems. In this
+exercise we will use a transformation between ED50 in Italy (Sardinia) and
+WGS84.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>You can find the transformations parameters by running the following
+command:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>projinfo -o WKT2_2019 -k operation EPSG:1142
+</pre></div>
+</div>
+<p>which returns the WKT2 definition of the transformation.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Remember that the input to the Helmert transform is cartesian geocentric
+coordinates (x, y z).</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>See <a class="reference internal" href="../../../operations/transformations/helmert.html#helmert"><span class="std std-ref">Helmert transform</span></a> to find out how to set up the transformation</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 m
+
+accept      4826177.7574   4049643.9762   991162.2529  # Sardinia (40N, 9E)
+expect      4826080.7574   4049540.9762   991042.2529
+</pre></div>
+</div>
+</section>
+<section id="translation-and-rotation">
+<h2>2.  Translation and rotation<a class="headerlink" href="#translation-and-rotation" title="Permalink to this heading">¶</a></h2>
+<p>For larger areas it is not enough to just rely on translation of coordinates.
+In that case the solution is to include rotations of the axes and a scale
+adjustment.
+The rotational aspect of the transformation is handled by a set of three
+rotation matrices. Two conventions for the application of the rotations are
+in common use: Position Vector and Coordinate Frame. In this exercise we will
+using Position Vector. See the PROJ documentation on the Helmert transformation
+for further detail.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>You can find the transformations parameters by running the following
+command:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>projinfo -o WKT2_2019 -k operation EPSG:1626
+</pre></div>
+</div>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Remember to specify the rotation convention with +convention</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 m
+
+accept      3496723.5936    743251.5442  5264442.2361
+expect      3496639.7297    743156.3657  5264324.9341
+</pre></div>
+</div>
+</section>
+<section id="position-vector-coordinate-frame">
+<h2>3. Position vector/Coordinate frame<a class="headerlink" href="#position-vector-coordinate-frame" title="Permalink to this heading">¶</a></h2>
+<p>Effectively, the difference between the two rotation conventions is the sign of
+the rotation parameters. In this exercise we will examine this property by
+looking at a transformation between the German DHDN reference system and ETRS89.</p>
+<p>First find the parameters for the EPSG:1309 transformation. In 3a below, enter
+the parameters as reported by projinfo (using the coordinate frame convention).
+Adapt the parameters to the position vector convention in 3b.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>You can find the transformations parameters by running the following
+command:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>projinfo -o WKT2_2019 -k operation EPSG:1309
+</pre></div>
+</div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>* 3a:
+operation   &lt;your answer here&gt; +convention=coordinate_frame
+
+accept      4067886.6403    571704.1839  4862789.0376
+expect      4068519.1921    571728.6671  4863239.3787
+
+* 3b:
+operation   &lt;your answer here&gt; +convention=position_vector
+tolerance 1 m
+
+accept      4067886.6403    571704.1839  4862789.0376
+expect      4068519.1921    571728.6671  4863239.3787
+</pre></div>
+</div>
+</section>
+<section id="kinematic-transformation-between-itrf2008-and-itrf2014">
+<h2>4. Kinematic transformation between ITRF2008 and ITRF2014<a class="headerlink" href="#kinematic-transformation-between-itrf2008-and-itrf2014" title="Permalink to this heading">¶</a></h2>
+<p>The Helmert transformation also exists in a kinematic, or spatiotemporal,
+version. This takes the evolution of a coordinate reference system over time
+into account as well. This is done by pivoting about a reference epoch. The
+14-parameter spatiotemporal Helmert is used when super high accuracy
+transformations are needed. A good example of such a use case is transformations
+between various realizations of ITRS and ETRS89. In this exercise we look at the
+transformation from ITRF2008 to ITRF2014.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>You can find the transformations parameters by running the following
+command:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>projinfo -o WKT2_2019 -s ITRF2008 -t ITRF2014
+</pre></div>
+</div>
+<p>which returns the WKT2 definition of the transformation.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Not all parameters need to be set.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Pay attention to the units of the parameters output by projinfo,
+you may have to convert them to standard units (e.g. mm -&gt; m).</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Note that the coordinates in the test now also includes a time tag in the
+form of a decimalyear - This is always needed when doing spatiotemporal
+transformations in PROJ. The time tag is the observation time of the
+coordinate. Note that the time component of the coordinate is never
+affected by the transformation.</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   &lt;your answer here&gt;
+tolerance   1 mm
+
+
+accept      2952736.3768   1360917.6894  5468849.5615       2019.5
+expect      2952736.3744   1360917.6871  5468849.5586       2019.5
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="gridshift.html" class="btn btn-neutral float-left" title="Gridshifting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="conversions.html" class="btn btn-neutral float-right" title="Coordinate conversions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

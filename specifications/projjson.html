@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PROJJSON &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgspecifications/projjson.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Geodetic TIFF grids (GTG)" href="geodetictiffgrids.html" />
+    <link rel="prev" title="Specifications" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Specifications</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">PROJJSON</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#normative-references">Normative references</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#definitions">Definitions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#schema">Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#history-of-the-schema">History of the schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specification">Specification</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#high-level-objects">High level objects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#identifiers">Identifiers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#object-usages">Object usages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#units">Units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#omitted-units-in-measured-parameters">Omitted units in measured parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coordinate-system">Coordinate system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geographiccrs">GeographicCRS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#projectedcrs">ProjectedCRS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compoundcrs">CompoundCRS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#boundcrs">BoundCRS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transformation">Transformation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#deviations-with-the-wkt2-2019-specification">Deviations with the WKT2:2019 specification</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#projjson-extensions">PROJJSON extensions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#projjson-omissions">PROJJSON omissions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#reference-implementation">Reference implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodetictiffgrids.html">Geodetic TIFF grids (GTG)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../community/index.html">Community</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Specifications</a></li>
+      <li class="breadcrumb-item active">PROJJSON</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/specifications/projjson.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="index.html" class="btn btn-neutral float-left" title="Specifications" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="geodetictiffgrids.html" class="btn btn-neutral float-right" title="Geodetic TIFF grids (GTG)" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="projjson">
+<span id="id1"></span><h1>PROJJSON<a class="headerlink" href="#projjson" title="Permalink to this heading">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
+<p>PROJJSON is a JSON encoding of
+<a class="reference external" href="http://docs.opengeospatial.org/is/18-010r7/18-010r7.html">WKT2:2019 / ISO-19162:2019: Geographic information - Well-known text representation of coordinate reference systems</a>,
+which itself implements the model of <span id="id2">[<a class="reference internal" href="../zreferences.html#id21" title="ISO. Geographic information – Referencing by coordinates. Standard, International Organization for Standardization, Geneva, CH, January 2019. URL: http://docs.opengeospatial.org/as/18-005r5/18-005r5.html.">ISO19111</a>]</span>.
+Apart from the difference of encodings, the semantics is intended to be exactly
+the same as WKT2:2019, and PROJJSON can be morphed losslessly from/into WKT2:2019.</p>
+<p>PROJJSON is aimed at encoding definitions of coordinate reference systems (and their composing objects: datums, datum ensembles, coordinate systems, conversion) and coordinate operations.</p>
+</section>
+<section id="normative-references">
+<h2>Normative references<a class="headerlink" href="#normative-references" title="Permalink to this heading">¶</a></h2>
+<p>The PROJJSON specification requires prior knowledge of the following normative
+specifications:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://datatracker.ietf.org/doc/html/rfc7159">The JavaScript Object Notation (JSON) Data Interchange Format / IETF RFC 7159</a></p></li>
+<li><p><a class="reference external" href="http://docs.opengeospatial.org/is/18-010r7/18-010r7.html">WKT2:2019 / ISO-19162:2019: Geographic information - Well-known text representation of coordinate reference systems</a></p></li>
+</ul>
+</section>
+<section id="definitions">
+<h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>JavaScript Object Notation (JSON), and the terms object, member,
+name, value, array, number, true, false, and null, are to be
+interpreted as defined in [RFC7159].</p></li>
+<li><p>integer: JSON number whose value has no fractional/exponent part.</p></li>
+<li><p>All <a class="reference external" href="http://docs.opengeospatial.org/is/18-010r7/18-010r7.html#4">term and definitions</a>
+from WKT2:2019 apply.</p></li>
+</ul>
+</section>
+<section id="schema">
+<h2>Schema<a class="headerlink" href="#schema" title="Permalink to this heading">¶</a></h2>
+<p>A JSON schema of PROJJSON grammar is available at
+<a class="reference external" href="https://proj.org/schemas/v0.6/projjson.schema.json">https://proj.org/schemas/v0.6/projjson.schema.json</a></p>
+<p>This schema defines a minimum set of constraints that apply to well-formed PROJJSON.
+Number of specific CRS and coordinate operation domain constraints are not expressed
+as JSON schema constraints: unless otherwise stated, the constraints (optional/mandatory/conditional
+character of information, restricted set of allowed values, etc.) defined
+in the WKT2:2019 specification also apply, as supplement to the JSON schema constraints.</p>
+</section>
+<section id="history-of-the-schema">
+<h2>History of the schema<a class="headerlink" href="#history-of-the-schema" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>v0.7: added &quot;accuracy&quot; property in ConcatenatedOperation. Implemented in PROJ 9.2.1</p></li>
+<li><dl class="simple">
+<dt>v0.6:</dt><dd><ul>
+<li><p>Implemented in PROJ 9.2</p></li>
+<li><p>Additional optional &quot;source_crs&quot; property in &quot;abridged_transformation&quot;.</p></li>
+<li><p>Added CoordinateMetadata</p></li>
+<li><p>Added &quot;datum_epoch&quot; property to GeodeticReferenceFrame and VerticalReferenceFrame</p></li>
+<li><p>Added &quot;minimum_value&quot;, &quot;maximum_value&quot; and &quot;range_meaning&quot; properties to Axis</p></li>
+<li><p>Added &quot;affine&quot; in the CoordinateSystem.subtype enumeration.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>v0.5:</dt><dd><ul>
+<li><dl class="simple">
+<dt>Implemented in PROJ 9.1:</dt><dd><ul>
+<li><p>add &quot;meridian&quot; member in Axis object type.</p></li>
+<li><p>add &quot;temporal_extent&quot; and &quot;vertical_extent&quot; members in object usage.</p></li>
+<li><p>add &quot;geoid_models&quot; for VerticalCRS if several models are needed.</p></li>
+<li><p>add &quot;deformation_models&quot; members to GeodeticCRS and VerticalCRS (replaces &quot;deformation_model&quot; in DynamicGeodeticReferenceFrame/DynamicVerticalReferenceFrame)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Added in schema, but not implemented in PROJ:</dt><dd><ul>
+<li><p>add top-level object PointMotionOperation</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>v0.4: additional properties allowed in id object (version, authority_citation, uri). Implemented in PROJ 8.2.</p></li>
+<li><p>v0.3: additional properties allowed in BoundCRS object (name, scope, area, bbox, usages, remarks, id, ids). Implemented in PROJ 8.1.</p></li>
+<li><p>v0.2: addition of geoid_model in VerticalCRS object.</p></li>
+<li><p>v0.1: initial version for PROJ 6.2</p></li>
+</ul>
+</section>
+<section id="specification">
+<h2>Specification<a class="headerlink" href="#specification" title="Permalink to this heading">¶</a></h2>
+<p>A PROJJSON text is a JSON object which has, at a minimum, a required <code class="docutils literal notranslate"><span class="pre">type</span></code> member,
+whose value is a string describing the nature of the encoded geodetic object.</p>
+<p>An optional <code class="docutils literal notranslate"><span class="pre">$schema</span></code> member may be present, with its value being a string with
+a URL that points to the JSON schema that applies.</p>
+<p>Objects may be composed of sub-objects (e.g a GeographicCRS is made of a Datum or DatumEnsemble
+and a coordinate system). The <code class="docutils literal notranslate"><span class="pre">type</span></code> member of the sub-objects can be omitted when
+there is no ambiguity. For example, in the object which is the value of a <code class="docutils literal notranslate"><span class="pre">coordinate_system</span></code>
+member, the <code class="docutils literal notranslate"><span class="pre">type</span></code> may be omitted. However, the value of the <code class="docutils literal notranslate"><span class="pre">datum</span></code> object of
+a GeographicCRS the <code class="docutils literal notranslate"><span class="pre">type</span></code> should be specified, as it can be either a GeodeticReferenceFrame
+or a DynamicGeodeticReferenceFrame.
+More formally, the <code class="docutils literal notranslate"><span class="pre">type</span></code> should be specified if the JSON schema specifies alternative
+types for the value of a member using the oneOf construct and those alternative
+types have a <code class="docutils literal notranslate"><span class="pre">type</span></code> member. Otherwise it may be omitted.</p>
+<section id="high-level-objects">
+<h3>High level objects<a class="headerlink" href="#high-level-objects" title="Permalink to this heading">¶</a></h3>
+<p>Objects described at the first level of a PROJJSON text have the following
+potential values of the <code class="docutils literal notranslate"><span class="pre">type</span></code> member:</p>
+<ul class="simple">
+<li><p>Coordinate Reference Systems (CRS):</p>
+<ul>
+<li><p>Common ones:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">GeographicCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GeodeticCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ProjectedCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CompoundCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BoundCRS</span></code></p></li>
+</ul>
+</li>
+<li><p>More esoteric ones:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">VerticalCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EngineeringCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TemporalCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ParametricCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DerivedGeographicCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DerivedGeodeticCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DerivedProjectedCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DerivedVerticalCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DerivedEngineeringCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DerivedTemporalCRS</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DerivedParametricCRS</span></code></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Coordinate operations:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Transformation</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Conversion</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ConcatenatedOperation</span></code></p></li>
+</ul>
+</li>
+<li><p>Others:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">PrimeMeridian</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ellipsoid</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Datum</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DatumEnsemble</span></code></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="identifiers">
+<span id="id4"></span><h3>Identifiers<a class="headerlink" href="#identifiers" title="Permalink to this heading">¶</a></h3>
+<p>All objects mentioned above can have an optional <code class="docutils literal notranslate"><span class="pre">id</span></code> or <code class="docutils literal notranslate"><span class="pre">ids</span></code> member.</p>
+<p>The value of <code class="docutils literal notranslate"><span class="pre">id</span></code> is a JSON object with the following members:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">authority</span></code>: (required) value of type string. e.g &quot;EPSG&quot;, &quot;OGC&quot;, &quot;IGNF&quot;, etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">code</span></code>: (required) value of type string or integer. e.g 4326 or &quot;CRS84&quot;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">authority_citation</span></code>: (optional) value of type string that may be used to give
+further details of the authority.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uri</span></code>: (optional) value of type string that may be used to give reference
+to an online resource.</p></li>
+</ul>
+<p>An object can sometimes be identified in different ways, in which case the <code class="docutils literal notranslate"><span class="pre">ids</span></code>
+member can be used to specify a JSON array of objects with the same type of <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p>
+<p>Identifiers are allowed in top-level objects and inner objects. The WKT2:2019
+specification recommends that if an object has an identifier, its inner objects
+should omit their identifiers, with the exceptions mentioned at
+http://docs.opengeospatial.org/is/18-010r7/18-010r7.html#37.</p>
+</section>
+<section id="object-usages">
+<h3>Object usages<a class="headerlink" href="#object-usages" title="Permalink to this heading">¶</a></h3>
+<p>CRS and coordinate operation objects are derived classes (in object modeling terminology)
+of a &quot;object usage&quot; class. An object usage has the following optional members:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">scope</span></code>: (optional) value of type string describing the purpose or purposes of
+the object. e.g &quot;Geodesy, topographic mapping and cadastre&quot;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">area</span></code>: (optional) value of type string which describes a geographic area
+over which a CRS or coordinate operation is applicable. e.g. &quot;World&quot;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bbox</span></code>: (optional) value of type object, with 4 required members:
+* <code class="docutils literal notranslate"><span class="pre">east_longitude</span></code>: (required) number expressing the longitude in degrees of the eastern most part of the extent, within [-180,180] range.
+* <code class="docutils literal notranslate"><span class="pre">west_longitude</span></code>: (required) number expressing the longitude in degrees of the western most part of the extent, within [-180,180] range.. For an extent crossing the anti-meridian, west_longitude is lower than east_longitude.
+* <code class="docutils literal notranslate"><span class="pre">south_latitude</span></code>: (required) number expressing the latitude in degrees of the southern most part of the extent, within [-90,90] range.
+* <code class="docutils literal notranslate"><span class="pre">north_latitude</span></code>: (required) number expressing the latitude in degrees of the northern most part of the extent, within [-90,90] range.
+The coordinates are expressed in a unspecified datum, with the longitudes
+relative to the international reference meridian.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">remarks</span></code>: (optional) value of type string with an informative text that does
+not modify the defining parameters of the object. e.g &quot;Use NTv2 file for better accuracy&quot;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">id</span></code> (mutually exclusive with <code class="docutils literal notranslate"><span class="pre">ids</span></code>): (optional) Identifier of the object, as defined in <a class="reference internal" href="#identifiers"><span class="std std-ref">Identifiers</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ids</span></code> (mutually exclusive with <code class="docutils literal notranslate"><span class="pre">id</span></code>): (optional) Identifiers of the object, as defined in <a class="reference internal" href="#identifiers"><span class="std std-ref">Identifiers</span></a></p></li>
+</ul>
+<p>If several extents and scopes apply to an object, the <code class="docutils literal notranslate"><span class="pre">scope</span></code>, <code class="docutils literal notranslate"><span class="pre">area</span></code> and <code class="docutils literal notranslate"><span class="pre">bbox</span></code>
+members should not be used. Instead a <code class="docutils literal notranslate"><span class="pre">usages</span></code> member should be used, whose value
+is an array of objects, each of them accepting <code class="docutils literal notranslate"><span class="pre">scope</span></code> and/or <code class="docutils literal notranslate"><span class="pre">area</span></code> and/or <code class="docutils literal notranslate"><span class="pre">bbox</span></code>
+as members. While it is acceptable to use the <code class="docutils literal notranslate"><span class="pre">usages</span></code> construct for a single
+usage, it is recommended to avoid it and rather use instead the
+<code class="docutils literal notranslate"><span class="pre">scope</span></code>, <code class="docutils literal notranslate"><span class="pre">area</span></code> and <code class="docutils literal notranslate"><span class="pre">bbox</span></code> members.</p>
+</section>
+<section id="units">
+<h3>Units<a class="headerlink" href="#units" title="Permalink to this heading">¶</a></h3>
+<p>A unit may be described either as:</p>
+<ul>
+<li><p>an object with the following members:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">type</span></code>: (required) one of the following types:
+<code class="docutils literal notranslate"><span class="pre">LinearUnit</span></code>, <code class="docutils literal notranslate"><span class="pre">AngularUnit</span></code>, <code class="docutils literal notranslate"><span class="pre">ScaleUnit</span></code>, <code class="docutils literal notranslate"><span class="pre">TimeUnit</span></code>, <code class="docutils literal notranslate"><span class="pre">ParametricUnit</span></code>, <code class="docutils literal notranslate"><span class="pre">Unit</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code>: (required) string.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">conversion_factor</span></code>: (required in most cases, except in the temporal quantities of <a class="reference external" href="http://docs.opengeospatial.org/is/18-010r7/18-010r7.html#42">http://docs.opengeospatial.org/is/18-010r7/18-010r7.html#42</a>)
+number that expresses a multiplicative factor to convert from the specified
+unit to a reference unit, as specified in <a class="reference external" href="http://docs.opengeospatial.org/is/18-010r7/18-010r7.html#41">http://docs.opengeospatial.org/is/18-010r7/18-010r7.html#41</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">id</span></code> or <code class="docutils literal notranslate"><span class="pre">ids</span></code>: (optional, mutually exclusive)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>a string among the following enumeration: <code class="docutils literal notranslate"><span class="pre">metre</span></code>, <code class="docutils literal notranslate"><span class="pre">degree</span></code>, <code class="docutils literal notranslate"><span class="pre">unity</span></code></p></li>
+</ul>
+<p>Using a string value, when applicable, is recommended for brevity of
+the object definition.</p>
+</section>
+<section id="omitted-units-in-measured-parameters">
+<h3>Omitted units in measured parameters<a class="headerlink" href="#omitted-units-in-measured-parameters" title="Permalink to this heading">¶</a></h3>
+<p>Most numeric parameters should generally be accompanied with the corresponding unit.</p>
+<p>For example, for a projection parameter:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;False easting&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;metre&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;False easting&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">700000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LinearUnit&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;foot&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;conversion_factor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3048</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>For the following cases, the unit may be omitted if it is metre:
+<code class="docutils literal notranslate"><span class="pre">semi_major_axis</span></code>, <code class="docutils literal notranslate"><span class="pre">semi_minor_axis</span></code> and <code class="docutils literal notranslate"><span class="pre">radius</span></code> members of an ellipsoid</p>
+<p>For the following cases, the unit may be omitted if it is degree:
+<code class="docutils literal notranslate"><span class="pre">longitude</span></code> of a prime meridian.</p>
+</section>
+<section id="coordinate-system">
+<h3>Coordinate system<a class="headerlink" href="#coordinate-system" title="Permalink to this heading">¶</a></h3>
+<p>In WKT, a <a class="reference external" href="http://docs.opengeospatial.org/is/18-010r7/18-010r7.html#49">ORDER</a>
+keyword may be present in an axis definition. As the value of that element
+is equal to the index of axis in the list of axis of the coordinate system
+(with 1 as the value of the first index), it is absent from the PROJJSON encoding,
+to avoid any risk of misuse.</p>
+</section>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h2>
+<section id="geographiccrs">
+<h3>GeographicCRS<a class="headerlink" href="#geographiccrs" title="Permalink to this heading">¶</a></h3>
+<section id="using-a-datum-member-implicit-prime-meridian">
+<h4>Using a datum member, implicit prime meridian<a class="headerlink" href="#using-a-datum-member-implicit-prime-meridian" title="Permalink to this heading">¶</a></h4>
+<p>The EPSG:6318 / &quot;NAD83(2011)&quot; geographic CRS can be expressed as</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://proj.org/schemas/v0.4/projjson.schema.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeographicCRS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NAD83(2011)&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;datum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeodeticReferenceFrame&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NAD83 (National Spatial Reference System 2011)&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;ellipsoid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GRS 1980&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;semi_major_axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6378137</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;inverse_flattening&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">298.257222101</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;subtype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ellipsoidal&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic latitude&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;north&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic longitude&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;east&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Horizontal component of 3D system.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;area&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Puerto Rico - onshore and offshore. United States (USA) onshore and offshore - Alabama; Alaska; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Virgin Islands - onshore and offshore.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;bbox&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;south_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">14.92</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;west_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">167.65</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;north_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">74.71</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;east_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-63.88</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6318</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Note the omission of a prime meridian member, which is conformant with the
+WKT2:2019 conditionality rules, as the prime meridian of the WGS 84 datum is the
+reference meridian / Greenwich.</p>
+</section>
+<section id="using-a-datum-member-with-an-explicit-prime-meridian">
+<h4>Using a datum member with an explicit prime meridian<a class="headerlink" href="#using-a-datum-member-with-an-explicit-prime-meridian" title="Permalink to this heading">¶</a></h4>
+<p>For the EPSG:4806 / &quot;Monte Mario (Rome)&quot; geographic CRS, the prime meridian must
+be specified:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://proj.org/schemas/v0.4/projjson.schema.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeographicCRS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Monte Mario (Rome)&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;datum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeodeticReferenceFrame&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Monte Mario (Rome)&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;ellipsoid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;International 1924&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;semi_major_axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6378388</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;inverse_flattening&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">297</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;prime_meridian&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Rome&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">12.4523333333333</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;subtype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ellipsoidal&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic latitude&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;north&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic longitude&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;east&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodesy, onshore minerals management.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;area&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Italy - onshore and offshore; San Marino, Vatican City State.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;bbox&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;south_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">34.76</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;west_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5.93</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;north_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">47.1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;east_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">18.99</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4806</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="using-a-datum-ensemble-member">
+<h4>Using a datum ensemble member<a class="headerlink" href="#using-a-datum-ensemble-member" title="Permalink to this heading">¶</a></h4>
+<p>The WGS 84 geographic CRS may also be specified using a datum ensemble
+representation of the WGS 84 datum:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://proj.org/schemas/v0.4/projjson.schema.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeographicCRS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WGS 84&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;datum_ensemble&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 ensemble&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (Transit)&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1166</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G730)&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1152</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G873)&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1153</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G1150)&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1154</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G1674)&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1155</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G1762)&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1156</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G2139)&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1309</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;ellipsoid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WGS 84&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;semi_major_axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6378137</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;inverse_flattening&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">298.257223563</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;accuracy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6326</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;subtype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ellipsoidal&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic latitude&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;north&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic longitude&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;east&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Horizontal component of 3D system.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;area&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;bbox&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;south_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-90</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;west_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-180</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;north_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;east_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">180</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4326</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The above is the output of the following invocation of the projinfo utility
+of the PROJ software version 9.0.0</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>projinfo EPSG:4326 -o PROJJSON -q
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>PROJ versions prior to PROJ 8.0.0 used versions of the EPSG dataset that
+did not have the datum ensemble concept. Consequently they used a <code class="docutils literal notranslate"><span class="pre">datum</span></code>
+member instead of a <code class="docutils literal notranslate"><span class="pre">datum_ensemble</span></code>. The number of elements in the
+datum ensemble may also vary over time when new realizations of WGS 84 are
+added to the ensemble.</p>
+</div>
+</section>
+</section>
+<section id="projectedcrs">
+<h3>ProjectedCRS<a class="headerlink" href="#projectedcrs" title="Permalink to this heading">¶</a></h3>
+<p>The EPSG:32631 / &quot;WGS 84 / UTM zone 31N&quot; projected CRS can be expressed as</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://proj.org/schemas/v0.1/projjson.schema.json&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ProjectedCRS&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WGS 84 / UTM zone 31N&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;base_crs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WGS 84&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;datum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeodeticReferenceFrame&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;ellipsoid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WGS 84&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;semi_major_axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6378137</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;inverse_flattening&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">298.257223563</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;subtype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ellipsoidal&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic latitude&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;north&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic longitude&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;east&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4326</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;conversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UTM zone 31N&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Transverse Mercator&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9807</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Latitude of natural origin&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8801</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Longitude of natural origin&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8802</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Scale factor at natural origin&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.9996</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unity&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8805</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;False easting&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500000</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;metre&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8806</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;False northing&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;metre&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8807</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;subtype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cartesian&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Easting&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;east&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;metre&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Northing&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;N&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;north&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;metre&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;area&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World - N hemisphere - 0°E to 6°E - by country&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;bbox&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;south_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;west_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;north_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">84</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;east_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32631</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="compoundcrs">
+<h3>CompoundCRS<a class="headerlink" href="#compoundcrs" title="Permalink to this heading">¶</a></h3>
+<p>The EPSG:9518 / &quot;WGS 84 + EGM2008 height&quot; compound CRS can be expressed as:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://proj.org/schemas/v0.4/projjson.schema.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CompoundCRS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WGS 84 + EGM2008 height&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;components&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeographicCRS&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WGS 84&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;datum_ensemble&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 ensemble&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (Transit)&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1166</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G730)&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1152</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G873)&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1153</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G1150)&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1154</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G1674)&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1155</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G1762)&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1156</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984 (G2139)&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1309</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;ellipsoid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WGS 84&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;semi_major_axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6378137</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;inverse_flattening&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">298.257223563</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;accuracy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6326</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;subtype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ellipsoidal&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic latitude&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;north&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic longitude&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;east&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;VerticalCRS&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EGM2008 height&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;datum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;VerticalReferenceFrame&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EGM2008 geoid&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;subtype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gravity-related height&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;up&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;metre&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Spatial referencing.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;area&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;bbox&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;south_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-90</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;west_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-180</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;north_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;east_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">180</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9518</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="boundcrs">
+<h3>BoundCRS<a class="headerlink" href="#boundcrs" title="Permalink to this heading">¶</a></h3>
+<p>The Bound CRS, using as a base EPSG:4258 &quot;ETRS89&quot; geographic CRS, with an
+explicit transformation to WGS 84 using a null Helmert transformation, can be expressed as</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://proj.org/schemas/v0.4/projjson.schema.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BoundCRS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;source_crs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeographicCRS&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ETRS89&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;datum_ensemble&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference System 1989 ensemble&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference Frame 1989&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference Frame 1990&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference Frame 1991&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference Frame 1992&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference Frame 1993&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference Frame 1994&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference Frame 1996&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference Frame 1997&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference Frame 2000&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference Frame 2005&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;European Terrestrial Reference Frame 2014&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;ellipsoid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GRS 1980&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;semi_major_axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6378137</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;inverse_flattening&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">298.257222101</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;accuracy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.1&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;subtype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ellipsoidal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic latitude&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;north&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic longitude&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;east&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4258</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;target_crs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeographicCRS&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WGS 84&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;datum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeodeticReferenceFrame&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;World Geodetic System 1984&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;ellipsoid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WGS 84&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;semi_major_axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6378137</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;inverse_flattening&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">298.257223563</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;subtype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ellipsoidal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic latitude&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;north&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic longitude&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;east&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4326</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;transformation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Transformation from unknown to WGS84&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Position Vector transformation (geog2D domain)&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9606</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;X-axis translation&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;metre&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8605</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y-axis translation&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;metre&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8606</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Z-axis translation&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;metre&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8607</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;X-axis rotation&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AngularUnit&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arc-second&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;conversion_factor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.84813681109536e-06</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8608</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y-axis rotation&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AngularUnit&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arc-second&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;conversion_factor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.84813681109536e-06</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8609</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Z-axis rotation&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AngularUnit&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arc-second&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;conversion_factor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.84813681109536e-06</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8610</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Scale difference&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ScaleUnit&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;parts per million&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;conversion_factor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-06</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8611</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="transformation">
+<h3>Transformation<a class="headerlink" href="#transformation" title="Permalink to this heading">¶</a></h3>
+<p>The EPSG:8549 / &quot;NAD27 to NAD83 (8)&quot; transformation can be expressed as:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://proj.org/schemas/v0.4/projjson.schema.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Transformation&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NAD27 to NAD83 (8)&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;source_crs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeographicCRS&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NAD27&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;datum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeodeticReferenceFrame&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;North American Datum 1927&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;ellipsoid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Clarke 1866&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;semi_major_axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6378206.4</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;semi_minor_axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6356583.8</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;subtype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ellipsoidal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic latitude&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;north&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic longitude&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;east&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4267</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;target_crs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeographicCRS&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NAD83&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;datum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GeodeticReferenceFrame&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;North American Datum 1983&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;ellipsoid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GRS 1980&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;semi_major_axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6378137</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;inverse_flattening&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">298.257222101</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;subtype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ellipsoidal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;axis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic latitude&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;north&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodetic longitude&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;abbreviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;east&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degree&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4269</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NADCON5 (2D)&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1074</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Latitude difference file&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nadcon5.nad27.nad83_1986.alaska.lat.trn.20160901.b&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8657</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Longitude difference file&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nadcon5.nad27.nad83_1986.alaska.lon.trn.20160901.b&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8658</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;accuracy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.5&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Geodesy.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;area&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;United States (USA) - Alaska.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;bbox&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;south_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">51.3</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;west_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">172.42</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;north_latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">71.4</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;east_longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-129.99</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8549</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;remarks&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Uses NADCON5 method which expects longitudes positive east in range 0-360°; source and target CRSs have longitudes positive east in range -180° to +180°. Accuracy at 67% confidence level is 0.5m onshore, 5m nearshore and undetermined farther offshore.&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="deviations-with-the-wkt2-2019-specification">
+<h2>Deviations with the WKT2:2019 specification<a class="headerlink" href="#deviations-with-the-wkt2-2019-specification" title="Permalink to this heading">¶</a></h2>
+<p>While most of this specification is intended to be interoperable with WKT2:2019,
+there are a few deviations, reflecting the needs of the PROJ software implementation.</p>
+<section id="projjson-extensions">
+<h3>PROJJSON extensions<a class="headerlink" href="#projjson-extensions" title="Permalink to this heading">¶</a></h3>
+<p>This specification allows a Bound CRS to be used wherever a CRS object is allowed
+in the OGC Topic 2 abstract specification / ISO-19111:2019. In particular,
+the members of a compound CRS can be a Bound CRS in this specification, whereas
+OGC Topic 2 abstract specification restricts it to single CRS. A Bound CRS can
+also be used as the source or target of a coordinate operation.</p>
+</section>
+<section id="projjson-omissions">
+<h3>PROJJSON omissions<a class="headerlink" href="#projjson-omissions" title="Permalink to this heading">¶</a></h3>
+<p>This specification does not define an encoding for triaxial ellipsoid (<code class="docutils literal notranslate"><span class="pre">TRIAXIAL</span></code> WKT keyword)</p>
+</section>
+</section>
+<section id="reference-implementation">
+<h2>Reference implementation<a class="headerlink" href="#reference-implementation" title="Permalink to this heading">¶</a></h2>
+<p>PROJJSON is available as input and output of the <a class="reference external" href="https://proj.org">PROJ</a> software since PROJ 6.2.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Specifications" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="geodetictiffgrids.html" class="btn btn-neutral float-right" title="Geodetic TIFF grids (GTG)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

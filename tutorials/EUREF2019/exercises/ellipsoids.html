@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Specifying ellipsoid models &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgtutorials/EUREF2019/exercises/ellipsoids.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Gridshifting" href="gridshift.html" />
+    <link rel="prev" title="The Lambert Conic Conformal projection" href="projections2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../community/index.html">Community</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Transformation tutorial</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#how-to-fill-out-the-proj-tutorial-exercises">How to fill out the PROJ tutorial exercises</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#exercises">Exercises</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="projections1.html">The UTM projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projections2.html">The Lambert Conic Conformal projection</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Specifying ellipsoid models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gridshift.html">Gridshifting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="helmert.html">The Helmert transformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="conversions.html">Coordinate conversions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipelines.html">Transformation pipelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projections3.html">The Transverse Mercator projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../answers.html">Answers to the PROJ tutorial exercises</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../geodesics.html">Geodesics and planar approximations using PROJ and geod</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Tutorials</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Transformation tutorial</a></li>
+      <li class="breadcrumb-item active">Specifying ellipsoid models</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/tutorials/EUREF2019/exercises/ellipsoids.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="projections2.html" class="btn btn-neutral float-left" title="The Lambert Conic Conformal projection" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gridshift.html" class="btn btn-neutral float-right" title="Gridshifting" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="specifying-ellipsoid-models">
+<h1>Specifying ellipsoid models<a class="headerlink" href="#specifying-ellipsoid-models" title="Permalink to this heading">¶</a></h1>
+<p>In this exercise we will introduce some of the many ways one can specify the
+ellipsoid model used in projections and transformations.</p>
+<p>We will be using the Mercator projection to illustrate the different ellipsoid
+settings, but note that the same parameter settings can be used for setting
+the ellipsoid used for most PROJ projections and transformations.</p>
+<p>Download the <a class="reference internal" href="../../../apps/gie.html#gie"><span class="std std-ref">gie</span></a> file for the exercise: <a class="reference download internal" download="" href="../../../_downloads/6a7d58741149985929867b2e5ec6fdbc/ellipsoids.gie"><code class="xref download docutils literal notranslate"><span class="pre">ellipsoids.gie</span></code></a>.</p>
+<section id="exercise-1-ellipsoid-radius">
+<h2>Exercise 1: Ellipsoid radius<a class="headerlink" href="#exercise-1-ellipsoid-radius" title="Permalink to this heading">¶</a></h2>
+<p>Use a sphere of radius 1 as the ellipsoid model</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Check the <a class="reference internal" href="../../../operations/projections/merc.html#merc"><span class="std std-ref">Mercator documentation</span></a> to find out how to specify an ellipsoid</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   +proj=merc  &lt;your answer here&gt;
+tolerance   1 cm
+
+accept      24.745          59.437          # Talinn
+expect      0.4319          1.2975
+</pre></div>
+</div>
+</section>
+<section id="exercise-2-specifying-a-ellipsoid">
+<h2>Exercise 2. Specifying a ellipsoid<a class="headerlink" href="#exercise-2-specifying-a-ellipsoid" title="Permalink to this heading">¶</a></h2>
+<p>Set up a Mercator projection that uses the Hayford (International) ellipsoid</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Check the <a class="reference internal" href="../../../operations/projections/merc.html#merc"><span class="std std-ref">Mercator documentation</span></a> to find out how to specify an ellipsoid</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Running <code class="docutils literal notranslate"><span class="pre">proj</span> <span class="pre">-le</span></code> will return a list of ellipsoids and their parameters.</p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   +proj=merc  &lt;your answer here&gt;
+tolerance   1 cm
+
+accept      24.745          59.437          # Talinn
+expect      2754709.2020    8238786.4803
+</pre></div>
+</div>
+</section>
+<section id="exercise-3-semimajor-axis-and-inverse-flattening">
+<h2>Exercise 3. Semimajor axis and inverse flattening<a class="headerlink" href="#exercise-3-semimajor-axis-and-inverse-flattening" title="Permalink to this heading">¶</a></h2>
+<p>Specify the Hayford ellipsoid by its semimajor axis radius and inverse flattening</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Find the parameters in the list returned by <code class="docutils literal notranslate"><span class="pre">proj</span> <span class="pre">-le</span></code></p>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   +proj=merc  &lt;your answer here&gt;
+tolerance   1 cm
+
+accept      24.745          59.437          # Talinn
+expect      2754709.2020    8238786.4803
+</pre></div>
+</div>
+</section>
+<section id="exercise-4-semimajor-and-semiminor-ellipsoid-axes">
+<h2>Exercise 4. Semimajor and semiminor ellipsoid axes<a class="headerlink" href="#exercise-4-semimajor-and-semiminor-ellipsoid-axes" title="Permalink to this heading">¶</a></h2>
+<p>Set the Clarke 1866 ellipsoid by its semimajor and semiminor axis radii</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>operation   +proj=merc  &lt;your answer here&gt;
+tolerance   1 cm
+
+accept      24.745          59.437          # Talinn
+expect      2754630.7723    8238298.4968
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="projections2.html" class="btn btn-neutral float-left" title="The Lambert Conic Conformal projection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gridshift.html" class="btn btn-neutral float-right" title="Gridshifting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

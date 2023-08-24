@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geodesics and planar approximations using PROJ and geod &mdash; PROJ 9.2.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+    <link rel="canonical" href="https://proj.orgtutorials/geodesics.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=6ebb12ef"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="FAQ" href="../faq.html" />
+    <link rel="prev" title="Answers to the PROJ tutorial exercises" href="EUREF2019/answers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                9.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../community/index.html">Community</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="EUREF2019/index.html">Transformation tutorial</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Geodesics and planar approximations using PROJ and geod</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#objective">1. Objective</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-geodesic">2. The geodesic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-planar-approximation">1. The planar approximation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#suggested-meditations">4. Suggested meditations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#answers">Answers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../zreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #353130" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PROJ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Geodesics and planar approximations using PROJ and geod</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/OSGeo/PROJ/blob/9.2/docs/source/tutorials/geodesics.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="EUREF2019/answers.html" class="btn btn-neutral float-left" title="Answers to the PROJ tutorial exercises" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../faq.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geodesics-and-planar-approximations-using-proj-and-geod">
+<span id="geodesics-tutorial"></span><h1>Geodesics and planar approximations using PROJ and geod<a class="headerlink" href="#geodesics-and-planar-approximations-using-proj-and-geod" title="Permalink to this heading">¶</a></h1>
+<p>The PROJ system supports computations with <a class="reference internal" href="../geodesic.html#geodesic"><span class="std std-ref">Geodesic calculations</span></a>, through API calls or
+through the <a class="reference internal" href="../apps/geod.html#geod"><span class="std std-ref">geod</span></a> command line interface. This exercise will proceed mostly
+by having you copy sample commands from the text onto the command line, and
+noting the results.</p>
+<p>The tutorial is written with the Windows command line in mind but it should
+be straight forward to use it on Unix-based systems as well.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Users of Unix-based systems can replace <code class="docutils literal notranslate"><span class="pre">set</span></code> with <code class="docutils literal notranslate"><span class="pre">export</span></code> and <code class="docutils literal notranslate"><span class="pre">%VAR%</span></code>
+with <code class="docutils literal notranslate"><span class="pre">$VAR</span></code> to follow the tutorial.</p>
+</div>
+<section id="objective">
+<h2>1. Objective<a class="headerlink" href="#objective" title="Permalink to this heading">¶</a></h2>
+<p>The objective of this exercise is to investigate how well a straight line in
+a projected plane approximates the geodesic between the same end points.</p>
+</section>
+<section id="the-geodesic">
+<h2>2. The geodesic<a class="headerlink" href="#the-geodesic" title="Permalink to this heading">¶</a></h2>
+<p>The geodesic we will consider runs from Helsinki to Tallinn, using the
+following coordinates:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Helsinki  60.171 N 24.938 E
+Tallinn   59.437 N 24.745 E
+</pre></div>
+</div>
+<p>So to save some typing, let's define some environment variables. On Windows:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>set HEL=&quot;60.171  24.938&quot;
+set TAL=&quot;59.437  24.745&quot;
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>export HEL=&quot;60.171  24.938&quot;
+export TAL=&quot;59.437  24.745&quot;
+</pre></div>
+</div>
+<p>(i.e. mark, copy, and paste these lines into the command prompt)</p>
+<p>First, we want to solve the &quot;inverse geodetic problem&quot; for the geodesic,
+i.e. finding the azimuth and distance between the two points:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>echo %HEL% %TAL% | geod -I +ellps=GRS80
+</pre></div>
+</div>
+<p>where the <code class="docutils literal notranslate"><span class="pre">-I</span></code> option indicates &quot;the inverse geodetic problem&quot;.</p>
+<p><a class="reference internal" href="../apps/geod.html#geod"><span class="std std-ref">geod</span></a> replies with these 3 numbers:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>-172d22&#39;12.772&quot;    7d27&#39;46.693&quot;    82488.500
+</pre></div>
+</div>
+<p>The first is the forward azimuth from Helsinki to Tallinn, the second is the
+return azimuth, while the third is the distance in meters.</p>
+<p>We would actually rather have the azimuths in fractional degrees, so we provide
+an explicit output format, using the <code class="docutils literal notranslate"><span class="pre">-f</span></code> option to geod:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>echo %HEL% %TAL% | geod -I -f &quot;%.12f&quot; +ellps=GRS80
+</pre></div>
+</div>
+<p>getting us:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>-172.370214337896    7.462970382137    82488.500
+</pre></div>
+</div>
+<p>We assert that the planar approximation is worst at the midpoint of the
+geodesic, i.e. <code class="docutils literal notranslate"><span class="pre">(82488.5</span> <span class="pre">m)</span> <span class="pre">/</span> <span class="pre">2</span>&#160; <span class="pre">=</span>&#160; <span class="pre">41244.25</span> <span class="pre">m</span></code>, from Helsinki. So now, we
+want to find the coordinates of this point, by solving the &quot;direct geodetic
+problem&quot;:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>echo %HEL%  -172.370214337896    41244.25 | geod -f &quot;%.12f&quot; +ellps=GRS80
+</pre></div>
+</div>
+<p>resulting in:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>59.804045696236    24.840439590098    7.545306054713
+</pre></div>
+</div>
+<p>i.e. the latitude, the longitude, and the return azimuth of the mid point
+of the geodesic.</p>
+<p>Now, for convenience, define this environment variable:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>set MID=&quot;59.804045696236  24.840439590098&quot;
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can save a bit of manual copying by capturing the geod output into
+the clipboard, using the &quot;clip&quot; command on Windows, i.e. by appending <code class="docutils literal notranslate"><span class="pre">|</span> <span class="pre">clip</span></code></p>
+</div>
+<p>to the <code class="docutils literal notranslate"><span class="pre">geod</span></code> command above.</p>
+</section>
+<section id="the-planar-approximation">
+<h2>1. The planar approximation<a class="headerlink" href="#the-planar-approximation" title="Permalink to this heading">¶</a></h2>
+<p>We will be working on ETRS89/UTM35 coordinates, so first define an environment
+variable, to save some typing:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>set utm35=proj -rs +proj=utm +zone=35 +ellps=GRS80
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">-rs</span></code> option switches the proj coordinate i/o order to latitude/longitude
+and northing/easting, respectively. We do this to comply with the expected order
+for the geod program.</p>
+</div>
+<p>Now, find the UTM coordinates of the two end points:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>echo %HEL% | %utm35%
+echo %TAL% | %utm35%
+</pre></div>
+</div>
+<p>Note your results and compute the mean of the northings, and the mean of the eastings,
+to obtain the planar approximation of the mid point</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>you can use python as a makeshift command line calculator by saying:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python -c print((4+8)/2)
+</pre></div>
+</div>
+</div>
+<p>Now, compute the geographical coordinates corresponding to the UTM mid point:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>echo &lt;your northing   your easting&gt; | %utm35% -f &quot;%.12f&quot; -I
+</pre></div>
+</div>
+<p>(note the -I option for doing the inverse projection)</p>
+<p>For convenience define:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>set MID_APPROX=&lt;your result here&gt;
+</pre></div>
+</div>
+<p>Finally, compute the distance between the geodesic mid point and its planar
+approximation, by stating it as another case of the inverse geodetic problem:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>echo %MID%  %MID_APPROX% | geod -I +ellps=GRS80
+</pre></div>
+</div>
+<p>resulting in:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>107d0&#39;16.673&quot;    -72d59&#39;43.193&quot;    2.527
+</pre></div>
+</div>
+<p>i.e. a deviation of 2.5 m over a stretch of about 85 km.</p>
+</section>
+<section id="suggested-meditations">
+<h2>4. Suggested meditations<a class="headerlink" href="#suggested-meditations" title="Permalink to this heading">¶</a></h2>
+<p>Consider these aspects:</p>
+<ol class="arabic simple">
+<li><p>Given that geod is available, fast, and reliable - is it really worth the
+effort doing approximate calculations in the projected plane?</p></li>
+<li><p><a class="reference internal" href="../apps/geod.html#geod"><span class="std std-ref">geod</span></a> includes functionality for computing intermediate points along a
+geodesic. Check the manual, especially the description of the
+<code class="docutils literal notranslate"><span class="pre">n_S</span></code> option, and try to compute the geodesic mid point directly, by
+setting <code class="docutils literal notranslate"><span class="pre">n_S=2</span></code>.</p></li>
+<li><p>One should actually expect the result of meditation 2 above to be slightly
+superior to the result obtained in the exercise. Why?</p></li>
+</ol>
+</section>
+<section id="answers">
+<h2>Answers<a class="headerlink" href="#answers" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Helsinki,  UTM:  6672241.54   385592.95
+Tallinn,   UTM:  6590881.40   372106.37
+Mid point, UTM:  6631561.47   378849.66
+Mid point, GEO:  59.804039062602   24.840482644156
+</pre></div>
+</div>
+<p>Meditations:</p>
+<ol class="arabic simple">
+<li><p>Probably not</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">geod</span> <span class="pre">+lat_1=60.171</span> <span class="pre">+lon_1=24.938</span> <span class="pre">+lat_2=59.437</span> <span class="pre">+lon_2=24.745</span> <span class="pre">+n_S=2</span> <span class="pre">+ellps=GRS80</span> <span class="pre">-f</span> <span class="pre">&quot;%.12f&quot;</span></code></p></li>
+<li><p>Avoids a bit of truncation of the azimuth, and <em>may</em> use a slightly superior algorithm (check the code!)</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="EUREF2019/answers.html" class="btn btn-neutral float-left" title="Answers to the PROJ tutorial exercises" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../faq.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1983-2023.
+      <span class="lastupdated">Last updated on 24 Aug 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
