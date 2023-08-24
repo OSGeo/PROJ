@@ -920,10 +920,8 @@ static int cs2cs_emulation_setup(PJ *P) {
     /* We ignore helmert if we have grid shift */
     p = P->hgridshift ? nullptr : pj_param_exists(P->params, "towgs84");
     while (p) {
-        char *def;
-        char *s = p->param;
-        double *d = P->datum_params;
-        size_t n = strlen(s);
+        const char *const s = p->param;
+        const double *const d = P->datum_params;
 
         /* We ignore null helmert shifts (common in auto-translated resource
          * files, e.g. epsg) */
@@ -938,19 +936,17 @@ static int cs2cs_emulation_setup(PJ *P) {
             break;
         }
 
+        const size_t n = strlen(s);
         if (n <= 8) /* 8==strlen ("towgs84=") */
             return 0;
 
-        size_t def_size = 100 + n;
-        def = static_cast<char *>(malloc(def_size));
-        if (nullptr == def)
-            return 0;
-        snprintf(def, def_size,
-                 "break_cs2cs_recursion     proj=helmert exact %s "
-                 "convention=position_vector",
-                 s);
-        Q = pj_create_internal(P->ctx, def);
-        free(def);
+        const size_t def_max_size = 100 + n;
+        std::string def;
+        def.reserve(def_max_size);
+        def += "break_cs2cs_recursion     proj=helmert exact ";
+        def += s;
+        def += " convention=position_vector";
+        Q = pj_create_internal(P->ctx, def.c_str());
         if (nullptr == Q)
             return 0;
         pj_inherit_ellipsoid_def(P, Q);
