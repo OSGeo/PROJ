@@ -5,7 +5,7 @@ Computation of coordinate operations between two CRS
 ================================================================================
 
 :Author: Even Rouault
-:Last Updated: 2021-02-10
+:Last Updated: 2023-08-26
 
 Introduction
 ------------
@@ -785,3 +785,36 @@ Example:
 There are other situations with BoundCRS, involving vertical transformations,
 or transforming to other objects than a geographic CRS, but the curious reader
 will have to inspect the code for the actual gory details.
+
+
+Using Derived Projected for source or target CRS
+---------------------------------------------------------------------------------
+
+The `WKT2` tag ``DERIVEDPROJCRS`` can be useful to define a customized CRS
+adding a ``DERIVINGCONVERSION`` to apply a conversion on top of the projection.
+It can be also done inside a Compound CRS.
+One use case is to describe a local CRS produced in a site calibration,
+as explained in :cite:`JimenezShaw2023`.
+
+Using the WKT2 from that paper (stored in wkt2.txt file for readability) we would get this:
+
+.. code-block:: shell
+
+    projinfo -s EPSG:6319 -t "`cat wkt2.txt`" -o proj
+    Candidate operations found: 1
+    -------------------------------------
+    Operation No. 1:
+
+    unknown id, Inverse of Transformation from Ellipsoid (metre) to NAD83(2011) (ballpark vertical transformation, without ellipsoid height to vertical height correction) + Conv Vertical Offset and Slope + Transverse Mercator + Affine transformation as PROJ-based, unknown accuracy, World, has ballpark transformation
+
+    PROJ string:
+    +proj=pipeline
+    +step +proj=axisswap +order=2,1
+    +step +proj=unitconvert +xy_in=deg +xy_out=rad
+    +step +proj=vertoffset +lat_0=41.2305352787143 +lon_0=-73.1815861874286
+            +dh=31.0121985701957 +slope_lat=-6.12572852418232
+            +slope_lon=-2.67487863214139
+    +step +proj=tmerc +lat_0=41.2305352787143 +lon_0=-73.1815861874286 +k=1 +x_0=0
+            +y_0=0 +ellps=GRS80
+    +step +proj=affine +xoff=265262.95287 +yoff=196619.27389 +s11=1.00003994119
+            +s12=0.00548156923529 +s21=-0.00548156923529 +s22=1.00003994119
