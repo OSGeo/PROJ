@@ -1,7 +1,7 @@
 ##
 # OSGeo/PROJ
 
-FROM ubuntu:20.04 as builder
+FROM ubuntu:22.04 as builder
 
 MAINTAINER Howard Butler <howard@hobu.co>
 
@@ -27,7 +27,7 @@ RUN cd /PROJ \
 
 
 
-FROM ubuntu:20.04 as runner
+FROM ubuntu:22.04 as runner
 
 RUN date
 
