@@ -1,8 +1,58 @@
+9.3.0 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Add C++ API to transform coordinate (#3705)
+
+ o CMake: add PROJ_DB_CACHE_DIR (#3711)
+
+ o Implement EPSG:1026 Mercator (Spherical) method (#3741)
+
+ o CMake: remove useless cross-compiling related checks (#3747)
+
+ o Add mapping of Equidistant Conic to new EPSG:1119 method (#3812)
+
+ o Implement proposal001 from Planetary DWG from OGC (#3816)
+
+ o Add option in proj CLI to use a CRS (#3825)
+
+ o proj_factors(): make it work with projected CRS with non-metre unit and/or
+   northing/easting axis order (#3826)
+
+ o PROJ_DEBUG: make ON an alias of 2, and OFF of 1 (#3835)
+
+ o Database: update to EPSG 10.094 (#3847)
+
+ Bug fixes
+ ---------
+
+ o GeographicBoundingBox::intersection(): avoid infinite recursion and stack
+   overflow on invalid bounding boxes (#3748)
+
+ o Various fixes related to concatenated operations (#3820)
+
+ o Projected CRS identification: fix crash when the base CRS is a
+   non-geographic geodetic CRS (#3830)
+
+ o Avoid C++ exceptions to be thrown (and caught) when parsing strings
+   like '+proj=longlat +datum=WGS84 +type=crs' (#3834)
+
+ o BUG: Handle prefix whitespace when guessing WKT dialiect (#3841)
+
+ o proj_alter_id(): make it replace an existing ID instead
+   of appending a new one (#3846)
+
+ o bonne: fix inverse map projection computations when lat_1 < 0 (#3849)
+
+ o WKT1 ESRI import/export: fix GCS name for EPSG:8353 S-JTSK_[JTSK03]_Krovak_East_North (#3851)
+
 9.2.1 Release Notes
 -------------------
 
  Database updates
- --------
+ ----------------
 
  o Add alias for old ESRI datum/CRS names of EPSG:8353
    S_JTSK_JTSK03_Krovak_East_North (#3678)
@@ -36,7 +86,7 @@
 
  o  CMake: avoid imbalanced cmake_policy push/pop if TIFF or CURL dependency
     cannot be found (#3697)
- 
+
  o  proj_create_crs_to_crs(): restore transformation selection behaviour
     of PROJ 9.1 when grids are missing (#3707)
 
@@ -51,7 +101,7 @@
     in ONLY_BEST=YES mode (#3730)
 
  o  tinshift: raise maximum size of JSON file to 100 MB (#3736)
- 
+
 
 
 9.2.0 Release Notes
