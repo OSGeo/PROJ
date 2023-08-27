@@ -9,7 +9,7 @@ RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 RUN python3 -m pip install "Sphinx<7" breathe \
     sphinx_bootstrap_theme awscli sphinxcontrib-bibtex \
     sphinx_rtd_theme recommonmark sphinx-markdown-tables \
-    sphinxcontrib-spelling!=7.4.0
+    "sphinxcontrib-spelling!=7.4.0,<8"
 
 # Set the locale for spelling
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
