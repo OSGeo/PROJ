@@ -5981,7 +5981,7 @@ IdentifierNNPtr JSONParser::buildId(const json &j, bool removeInverseOf) {
                 static_cast<int>(dblVersion) == dblVersion) {
                 version = internal::toString(static_cast<int>(dblVersion));
             } else {
-                version = internal::toString(dblVersion);
+                version = internal::toString(dblVersion, /*precision=*/15);
             }
         } else {
             throw ParsingException("Unexpected type for value of \"version\"");
