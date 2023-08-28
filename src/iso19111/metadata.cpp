@@ -1142,15 +1142,9 @@ void Identifier::_exportToJSON(JSONFormatter *formatter) const {
         if (!l_version.empty()) {
             writer->AddObjKey("version");
             bool isDouble = false;
-            const double dblVersion = c_locale_stod(l_version, isDouble);
+            (void)c_locale_stod(l_version, isDouble);
             if (isDouble) {
-                if (dblVersion >= std::numeric_limits<int>::min() &&
-                    dblVersion <= std::numeric_limits<int>::max() &&
-                    static_cast<int>(dblVersion) == dblVersion) {
-                    writer->Add(static_cast<int>(dblVersion));
-                } else {
-                    writer->Add(dblVersion, /*precision=*/15);
-                }
+                writer->AddUnquoted(l_version.c_str());
             } else {
                 writer->Add(l_version);
             }

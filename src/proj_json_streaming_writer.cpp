@@ -219,6 +219,11 @@ void CPLJSonStreamingWriter::Add(const char *pszStr) {
     Print(FormatString(pszStr));
 }
 
+void CPLJSonStreamingWriter::AddUnquoted(const char *pszStr) {
+    EmitCommaIfNeeded();
+    Print(pszStr);
+}
+
 void CPLJSonStreamingWriter::Add(GIntBig nVal) {
     EmitCommaIfNeeded();
     Print(CPLSPrintf(CPL_FRMT_GIB, nVal));
