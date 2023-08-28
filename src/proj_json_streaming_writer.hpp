@@ -86,6 +86,7 @@ class CPL_DLL CPLJSonStreamingWriter {
 
     void Add(const std::string &str);
     void Add(const char *pszStr);
+    void AddUnquoted(const char *pszStr);
     void Add(bool bVal);
     void Add(int nVal) { Add(static_cast<GIntBig>(nVal)); }
     void Add(unsigned int nVal) { Add(static_cast<GIntBig>(nVal)); }
