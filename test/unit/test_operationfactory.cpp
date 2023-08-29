@@ -9610,6 +9610,94 @@ TEST(operation,
 
 // ---------------------------------------------------------------------------
 
+TEST(
+    operation,
+    createOperation_compound_to_compound_with_Geographic3D_Offset_by_velocity_grid) {
+    auto dbContext = DatabaseContext::create();
+    auto wkt =
+        "COMPOUNDCRS[\"NAD83(CSRS)v3 / MTM zone 7 + CGVD28 height\",\n"
+        "    PROJCRS[\"NAD83(CSRS)v3 / MTM zone 7\",\n"
+        "        BASEGEOGCRS[\"NAD83(CSRS)v3\",\n"
+        "            DATUM[\"North American Datum of 1983 (CSRS) version 3\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",8240]],\n"
+        "        CONVERSION[\"MTM zone 7\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",-70.5,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural origin\",0.9999,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",304800,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8807]]],\n"
+        "        CS[Cartesian,2],\n"
+        "            AXIS[\"easting (E(X))\",east,\n"
+        "                ORDER[1],\n"
+        "                LENGTHUNIT[\"metre\",1,\n"
+        "                    ID[\"EPSG\",9001]]],\n"
+        "            AXIS[\"northing (N(Y))\",north,\n"
+        "                ORDER[2],\n"
+        "                LENGTHUNIT[\"metre\",1,\n"
+        "                    ID[\"EPSG\",9001]]]],\n"
+        "    VERTCRS[\"CGVD28 height\",\n"
+        "        VDATUM[\"Canadian Geodetic Vertical Datum of 1928\"],\n"
+        "        CS[vertical,1],\n"
+        "            AXIS[\"gravity-related height (H)\",up,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "        GEOIDMODEL[\"HT2_1997\",\n"
+        "            ID[\"EPSG\",9983]],\n"
+        "        ID[\"EPSG\",5713]]]";
+    auto objSrc = WKTParser().createFromWKT(wkt);
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = createFromUserInput(
+        "NAD83(CSRS)v7 / UTM zone 19 + CGVD2013a(2010) height", dbContext);
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDest);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    // Very similar output pipeline as
+    // createOperation_compound_to_compound_with_point_motion_operation
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
+              "+x_0=304800 +y_0=0 +ellps=GRS80 "
+              "+step +proj=vgridshift +grids=ca_nrc_HT2_1997.tif +multiplier=1 "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +inv +proj=deformation +dt=-13 "
+              "+grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +inv +proj=vgridshift +grids=ca_nrc_CGG2013an83.tif "
+              "+multiplier=1 "
+              "+step +proj=utm +zone=19 +ellps=GRS80");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, createOperation_Geographic3D_Offset_by_velocity_grid) {
     auto dbContext = DatabaseContext::create();
     auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");

@@ -6057,18 +6057,30 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
     }
 
     std::vector<CoordinateOperationNNPtr> verticalTransforms;
-    if (componentsSrc.size() >= 2 && componentsSrc[1]->extractVerticalCRS() &&
-        componentsDst[1]->extractVerticalCRS()) {
-        if (!componentsSrc[1]->_isEquivalentTo(componentsDst[1].get())) {
-            verticalTransforms =
-                createOperations(componentsSrc[1], componentsDst[1], context);
+    bool bTryThroughIntermediateGeogCRS = false;
+    if (componentsSrc.size() >= 2) {
+        const auto vertSrc = componentsSrc[1]->extractVerticalCRS();
+        const auto vertDst = componentsDst[1]->extractVerticalCRS();
+        if (vertSrc && vertDst &&
+            !componentsSrc[1]->_isEquivalentTo(componentsDst[1].get())) {
+            if (!vertSrc->geoidModel().empty() ||
+                !vertDst->geoidModel().empty()) {
+                // If we have a geoid model, force using through it
+                bTryThroughIntermediateGeogCRS = true;
+            } else {
+                verticalTransforms = createOperations(
+                    componentsSrc[1], componentsDst[1], context);
+                // If we didn't find a non-ballpark transformation between
+                // the 2 vertical CRS, then try through intermediate geographic
+                // CRS
+                bTryThroughIntermediateGeogCRS =
+                    (verticalTransforms.size() == 1 &&
+                     verticalTransforms.front()->hasBallparkTransformation());
+            }
         }
     }
 
-    // If we didn't find a non-ballpark transformation between
-    // the 2 vertical CRS, then try through intermediate geographic CRS
-    if (verticalTransforms.size() == 1 &&
-        verticalTransforms.front()->hasBallparkTransformation()) {
+    if (bTryThroughIntermediateGeogCRS) {
         auto dbContext = authFactory
                              ? authFactory->databaseContext().as_nullable()
                              : nullptr;
