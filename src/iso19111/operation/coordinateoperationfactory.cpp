@@ -109,6 +109,17 @@ namespace operation {
 static std::string objectAsStr(const common::IdentifiedObject *obj) {
     std::string ret(obj->nameStr());
     const auto &ids = obj->identifiers();
+    if (const auto *geogCRS = dynamic_cast<const crs::GeographicCRS *>(obj)) {
+        if (geogCRS->coordinateSystem()->axisList().size() == 3U)
+            ret += " (geographic3D)";
+        else
+            ret += " (geographic2D)";
+    }
+    if (const auto *geodCRS = dynamic_cast<const crs::GeodeticCRS *>(obj)) {
+        if (geodCRS->isGeocentric()) {
+            ret += " (geocentric)";
+        }
+    }
     if (!ids.empty()) {
         ret += " (";
         ret += (*ids[0]->codeSpace()) + ":" + ids[0]->code();
@@ -3174,12 +3185,16 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     // If RGF93GEO is returned before then we go through WGS84 and use
     // instead a Helmert transformation.
     //
-    // Actually, in the general case, we do the lookup in 2 passes with the 2
+    // Actually, in the general case, we do the lookup in 3 passes with the 2
     // above steps in each pass:
     // - one first pass where we only consider direct transformations (no
     //   other intermediate CRS)
     // - a second pass where we allow transformation through another
-    //   intermediate CRS.
+    //   intermediate CRS, but we make sure the candidate geodetic CRS are of
+    //   the same type
+    // - a third where we allow transformation through another
+    //   intermediate CRS, where the candidate geodetic CRS are of different
+    //   type.
     // ... but when transforming between 2 IGNF CRS, we do just one single pass
     // by allowing directly all transformation. There is no strong reason for
     // that particular case, except that otherwise we'd get different results
@@ -3195,22 +3210,45 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
         const auto &ids = crs->identifiers();
         return !ids.empty() && *(ids.front()->codeSpace()) == "IGNF";
     };
-    const int nIters = (isIGNF(sourceCRS) && isIGNF(targetCRS)) ? 1 : 2;
+    const int nIters = (isIGNF(sourceCRS) && isIGNF(targetCRS)) ? 1 : 3;
+
+    const auto getType = [](const crs::GeodeticCRSNNPtr &crs) {
+        if (auto geogCRS =
+                dynamic_cast<const crs::GeographicCRS *>(crs.get())) {
+            if (geogCRS->coordinateSystem()->axisList().size() == 3)
+                return 1;
+            return 0;
+        }
+        return 2;
+    };
+
     for (int iter = 0; iter < nIters; ++iter) {
-        const bool useOnlyDirectRegistryOp = (iter == 0 && nIters == 2);
+        const bool useOnlyDirectRegistryOp = (iter == 0 && nIters == 3);
         for (const auto &candidateSrcGeod : candidatesSrcGeod) {
             if (candidateSrcGeod->nameStr() == sourceCRS->nameStr()) {
+                const auto typeSource =
+                    (iter >= 1) ? getType(candidateSrcGeod) : -1;
                 auto sourceSrcGeodModified(sourceAndTargetAre3D
                                                ? candidateSrcGeod->promoteTo3D(
                                                      std::string(), dbContext)
                                                : candidateSrcGeod);
                 for (const auto &candidateDstGeod : candidatesDstGeod) {
                     if (candidateDstGeod->nameStr() == targetCRS->nameStr()) {
+                        if (iter == 1) {
+                            if (typeSource != getType(candidateDstGeod)) {
+                                continue;
+                            }
+                        } else if (iter == 2) {
+                            if (typeSource == getType(candidateDstGeod)) {
+                                continue;
+                            }
+                        }
 #ifdef TRACE_CREATE_OPERATIONS
-                        ENTER_BLOCK("try " + objectAsStr(sourceCRS.get()) +
-                                    "->" + objectAsStr(candidateSrcGeod.get()) +
-                                    "->" + objectAsStr(candidateDstGeod.get()) +
-                                    "->" + objectAsStr(targetCRS.get()) + ")");
+                        ENTER_BLOCK("iter=" + toString(iter) + ", try " +
+                                    objectAsStr(sourceCRS.get()) + "->" +
+                                    objectAsStr(candidateSrcGeod.get()) + "->" +
+                                    objectAsStr(candidateDstGeod.get()) + "->" +
+                                    objectAsStr(targetCRS.get()) + ")");
 #endif
                         const auto opsFirst = createOperations(
                             sourceCRS, sourceSrcGeodModified, context);

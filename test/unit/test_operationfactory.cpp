@@ -9639,3 +9639,33 @@ TEST(operation, createOperation_Geographic3D_Offset_by_velocity_grid) {
               "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
               "+step +proj=axisswap +order=2,1");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_test_createOperationsWithDatumPivot_iter_1) {
+    // Test
+    // CoordinateOperationFactory::Private::createOperationsWithDatumPivot()
+    // iter=1, ie getType(candidateSrcGeod) == getType(candidateDstGeod)
+    auto dbContext = DatabaseContext::create();
+    auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    // NAD83(CSRS)v2 (2D)
+    auto sourceCRS = factoryEPSG->createCoordinateReferenceSystem("8237");
+    // NAD83(CSRS)v3 (2D)
+    auto targetCRS = factoryEPSG->createCoordinateReferenceSystem("8240");
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    // Do *NOT* set SpatialCriterion::PARTIAL_INTERSECTION, otherwise we'd
+    // get the direct operations
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        sourceCRS, targetCRS, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_STREQ(list[0]->nameStr().c_str(),
+                 "Inverse of NAD83(CSRS)v8 to NAD83(CSRS)v2 (1) + "
+                 "NAD83(CSRS)v8 to NAD83(CSRS)v3 (1)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
