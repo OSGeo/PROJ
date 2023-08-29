@@ -1965,6 +1965,34 @@ _getGeocentricTranslationFilename(const SingleOperation *op,
 
 //! @cond Doxygen_Suppress
 static const std::string &
+_getGeographic3DOffsetByVelocityGridFilename(const SingleOperation *op,
+                                             bool allowInverse) {
+
+    const auto &l_method = op->method();
+    const auto &methodName = l_method->nameStr();
+    if (l_method->getEPSGCode() ==
+            EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN ||
+        (allowInverse &&
+         ci_equal(
+             methodName,
+             INVERSE_OF +
+                 EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN))) {
+        const auto &fileParameter = op->parameterValue(
+            EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
+            EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+            return fileParameter->valueFile();
+        }
+    }
+    return nullString;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+static const std::string &
 _getHeightToGeographic3DFilename(const SingleOperation *op, bool allowInverse) {
 
     const auto &methodName = op->method()->nameStr();
@@ -2401,6 +2429,45 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
             auto parameters =
                 std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
                     EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE)};
+            return Transformation::create(
+                createSimilarPropertiesOperation(self), l_sourceCRS,
+                l_targetCRS, l_interpolationCRS,
+                createSimilarPropertiesMethod(method()), parameters,
+                {ParameterValue::createFilename(projFilename)},
+                coordinateOperationAccuracies());
+        }
+    }
+
+    const auto &geographic3DOffsetByVelocityGridFilename =
+        _getGeographic3DOffsetByVelocityGridFilename(this, false);
+    if (!geographic3DOffsetByVelocityGridFilename.empty()) {
+        if (databaseContext->lookForGridAlternative(
+                geographic3DOffsetByVelocityGridFilename, projFilename,
+                projGridFormat, inverseDirection)) {
+
+            if (inverseDirection) {
+                throw util::UnsupportedOperationException(
+                    "Inverse direction for "
+                    "Geographic3DOFffsetByVelocityGrid not supported");
+            }
+
+            if (geographic3DOffsetByVelocityGridFilename == projFilename) {
+                return self;
+            }
+
+            const auto l_sourceCRSNull = sourceCRS();
+            const auto l_targetCRSNull = targetCRS();
+            if (l_sourceCRSNull == nullptr) {
+                throw util::UnsupportedOperationException("Missing sourceCRS");
+            }
+            if (l_targetCRSNull == nullptr) {
+                throw util::UnsupportedOperationException("Missing targetCRS");
+            }
+            auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
+            auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
+            auto parameters =
+                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
+                    EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
             return Transformation::create(
                 createSimilarPropertiesOperation(self), l_sourceCRS,
                 l_targetCRS, l_interpolationCRS,
@@ -3827,6 +3894,122 @@ bool SingleOperation::exportToPROJStringGeneric(
 
         formatter->addStep("pop");
         formatter->addParam("v_3");
+
+        if (isMethodInverseOf) {
+            formatter->stopInversion();
+        }
+
+        targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+
+        return true;
+    }
+
+    const auto &geographic3DOffsetByVelocityGridFilename =
+        _getGeographic3DOffsetByVelocityGridFilename(this, true);
+    if (!geographic3DOffsetByVelocityGridFilename.empty()) {
+        auto sourceCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
+        if (!sourceCRSGeog) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName, " only to GeographicCRS"));
+        }
+
+        auto targetCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
+        if (!targetCRSGeog) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName, " only to GeographicCRS"));
+        }
+
+        const auto &interpCRS = interpolationCRS();
+        if (!interpCRS) {
+            throw io::FormattingException(
+                "InterpolationCRS required "
+                "for"
+                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN);
+        }
+        const bool interpIsSrc = interpCRS->_isEquivalentTo(
+            sourceCRS()->demoteTo2D(std::string(), nullptr).get(),
+            util::IComparable::Criterion::EQUIVALENT);
+        const bool interpIsTarget = interpCRS->_isEquivalentTo(
+            targetCRS()->demoteTo2D(std::string(), nullptr).get(),
+            util::IComparable::Criterion::EQUIVALENT);
+        if (!interpIsSrc && !interpIsTarget) {
+            throw io::FormattingException(
+                "For"
+                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN
+                ", interpolation CRS should be the source or target CRS");
+        }
+
+        formatter->startInversion();
+        sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+        formatter->stopInversion();
+
+        if (isMethodInverseOf) {
+            formatter->startInversion();
+        }
+
+        const bool addPushPopV3 =
+            ((sourceCRSGeog &&
+              sourceCRSGeog->coordinateSystem()->axisList().size() == 2) ||
+             (targetCRSGeog &&
+              targetCRSGeog->coordinateSystem()->axisList().size() == 2));
+
+        if (addPushPopV3) {
+            formatter->addStep("push");
+            formatter->addParam("v_3");
+        }
+
+        formatter->addStep("cart");
+        sourceCRSGeog->ellipsoid()->_exportToPROJString(formatter);
+
+        formatter->addStep("deformation");
+        auto srcName = sourceCRS()->nameStr();
+        auto dstName = targetCRS()->nameStr();
+        const struct {
+            const char *name;
+            double epoch;
+        } realizationEpochs[] = {
+            {"NAD83(CSRS)v2", 1997.0}, {"NAD83(CSRS)v3", 1997.0},
+            {"NAD83(CSRS)v4", 2002.0}, {"NAD83(CSRS)v5", 2006.0},
+            {"NAD83(CSRS)v6", 2010.0}, {"NAD83(CSRS)v7", 2010.0},
+            {"NAD83(CSRS)v8", 2010.0},
+        };
+        double sourceYear = 0.0;
+        double targetYear = 0.0;
+        for (const auto &iter : realizationEpochs) {
+            if (iter.name == srcName)
+                sourceYear = iter.epoch;
+            if (iter.name == dstName)
+                targetYear = iter.epoch;
+        }
+        if (sourceYear == 0.0) {
+            throw io::FormattingException(
+                "For"
+                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN
+                ", missing epoch for source CRS");
+        }
+        if (targetYear == 0.0) {
+            throw io::FormattingException(
+                "For"
+                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN
+                ", missing epoch for target CRS");
+        }
+        formatter->addParam("dt", targetYear - sourceYear);
+        formatter->addParam("grids", geographic3DOffsetByVelocityGridFilename);
+        (interpIsTarget ? targetCRSGeog : sourceCRSGeog)
+            ->ellipsoid()
+            ->_exportToPROJString(formatter);
+
+        formatter->startInversion();
+        formatter->addStep("cart");
+        targetCRSGeog->ellipsoid()->_exportToPROJString(formatter);
+        formatter->stopInversion();
+
+        if (addPushPopV3) {
+            formatter->addStep("pop");
+            formatter->addParam("v_3");
+        }
 
         if (isMethodInverseOf) {
             formatter->stopInversion();

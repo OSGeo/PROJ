@@ -590,6 +590,11 @@
     "Point motion velocity grid file"
 
 /* ------------------------------------------------------------------------ */
+#define EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN            \
+    "Geographic3D Offset by velocity grid (NRCan byn)"
+#define EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN 1114
+
+/* ------------------------------------------------------------------------ */
 
 #define PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D                                 \
     "GravityRelatedHeight to Geographic3D"
