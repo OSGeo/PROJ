@@ -1088,10 +1088,11 @@ void Identifier::_exportToWKT(WKTFormatter *formatter) const {
                 formatter->addQuotedString(l_code);
             }
             if (!l_version.empty()) {
-                try {
-                    (void)c_locale_stod(l_version);
+                bool isDouble = false;
+                (void)c_locale_stod(l_version, isDouble);
+                if (isDouble) {
                     formatter->add(l_version);
-                } catch (const std::exception &) {
+                } else {
                     formatter->addQuotedString(l_version);
                 }
             }
@@ -1140,16 +1141,11 @@ void Identifier::_exportToJSON(JSONFormatter *formatter) const {
 
         if (!l_version.empty()) {
             writer->AddObjKey("version");
-            try {
-                const double dblVersion = c_locale_stod(l_version);
-                if (dblVersion >= std::numeric_limits<int>::min() &&
-                    dblVersion <= std::numeric_limits<int>::max() &&
-                    static_cast<int>(dblVersion) == dblVersion) {
-                    writer->Add(static_cast<int>(dblVersion));
-                } else {
-                    writer->Add(dblVersion);
-                }
-            } catch (const std::exception &) {
+            bool isDouble = false;
+            (void)c_locale_stod(l_version, isDouble);
+            if (isDouble) {
+                writer->AddUnquoted(l_version.c_str());
+            } else {
                 writer->Add(l_version);
             }
         }
