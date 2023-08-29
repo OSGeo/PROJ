@@ -2928,17 +2928,19 @@ static bool hasIdentifiers(const CoordinateOperationNNPtr &op) {
 void CoordinateOperationFactory::Private::setCRSs(
     CoordinateOperation *co, const crs::CRSNNPtr &sourceCRS,
     const crs::CRSNNPtr &targetCRS) {
-    co->setCRSs(sourceCRS, targetCRS, nullptr);
+    const auto &interpolationCRS = co->interpolationCRS();
+    co->setCRSs(sourceCRS, targetCRS, interpolationCRS);
 
     auto invCO = dynamic_cast<InverseCoordinateOperation *>(co);
     if (invCO) {
-        invCO->forwardOperation()->setCRSs(targetCRS, sourceCRS, nullptr);
+        invCO->forwardOperation()->setCRSs(targetCRS, sourceCRS,
+                                           interpolationCRS);
     }
 
     auto transf = dynamic_cast<Transformation *>(co);
     if (transf) {
         transf->inverseAsTransformation()->setCRSs(targetCRS, sourceCRS,
-                                                   nullptr);
+                                                   interpolationCRS);
     }
 
     auto concat = dynamic_cast<ConcatenatedOperation *>(co);
