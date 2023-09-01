@@ -1732,6 +1732,8 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
                 esriStyle_ = true;
                 if (name == "GCS_WGS_1984") {
                     name = "WGS 84";
+                } else if (name == "GCS_unknown") {
+                    name = "unknown";
                 } else {
                     tableNameForAlias = "geodetic_crs";
                 }
@@ -2376,6 +2378,8 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             name = "European Terrestrial Reference System 1989";
             authNameFromAlias = Identifier::EPSG;
             codeFromAlias = "6258";
+        } else if (name == "D_unknown") {
+            name = "unknown";
         } else {
             tableNameForAlias = "geodetic_datum";
         }
