@@ -3,6 +3,53 @@
 News
 ###############################################################################
 
+9.3.0 Release Notes
+++++++++++++++++++++
+*September 1st 2023*
+
+Updates
+-------
+
+* Add C++ API to transform coordinate (`#3705 <https://github.com/OSGeo/PROJ/issues/3705>`_)
+
+* CMake: add ``PROJ_DB_CACHE_DIR`` (`#3711 <https://github.com/OSGeo/PROJ/issues/3711>`_)
+
+* Implement EPSG:1026 Mercator (Spherical) method (`#3741 <https://github.com/OSGeo/PROJ/issues/3741>`_)
+
+* CMake: remove useless cross-compiling related checks (`#3747 <https://github.com/OSGeo/PROJ/issues/3747>`_)
+
+* Add mapping of Equidistant Conic to new EPSG:1119 method (`#3812 <https://github.com/OSGeo/PROJ/issues/3812>`_)
+
+* Implement proposal001 from Planetary DWG from OGC (`#3816 <https://github.com/OSGeo/PROJ/issues/3816>`_)
+
+* Add option in :program:`proj` CLI to use a CRS (`#3825 <https://github.com/OSGeo/PROJ/issues/3825>`_)
+
+* :c:func:`proj_factors()`: make it work with projected CRS with non-metre unit and/or northing/easting axis order (`#3826 <https://github.com/OSGeo/PROJ/issues/3826>`_)
+
+* :envvar:`PROJ_DEBUG`: make ON an alias of 2, and OFF of 1 (`#3835 <https://github.com/OSGeo/PROJ/issues/3835>`_)
+
+* Database: update to EPSG 10.094 (`#3847 <https://github.com/OSGeo/PROJ/issues/3847>`_)
+
+Bug fixes
+---------
+
+* :cpp:func:`GeographicBoundingBox::intersection()`: avoid infinite recursion and stack overflow on invalid bounding boxes (`#3748 <https://github.com/OSGeo/PROJ/issues/3748>`_)
+
+* Various fixes related to concatenated operations (`#3820 <https://github.com/OSGeo/PROJ/issues/3820>`_)
+
+* Projected CRS identification: fix crash when the base CRS is a non-geographic geodetic CRS (`#3830 <https://github.com/OSGeo/PROJ/issues/3830>`_)
+
+* Avoid C++ exceptions to be thrown (and caught) when parsing strings like ``+proj=longlat +datum=WGS84 +type=crs`` (`#3834 <https://github.com/OSGeo/PROJ/issues/3834>`_)
+
+* BUG: Handle prefix whitespace when guessing WKT dialiect (`#3841 <https://github.com/OSGeo/PROJ/issues/3841>`_)
+
+* :c:func:`proj_alter_id()`: make it replace an existing ID instead of appending a new one (`#3846 <https://github.com/OSGeo/PROJ/issues/3846>`_)
+
+* bonne: fix inverse map projection computations when lat_1 < 0 (`#3849 <https://github.com/OSGeo/PROJ/issues/3849>`_)
+
+* WKT1 ESRI import/export: fix GCS name for EPSG:8353 S-JTSK_[JTSK03]_Krovak_East_North (`#3851 <https://github.com/OSGeo/PROJ/issues/3851>`_)
+
+
 9.2.1 Release Notes
 ++++++++++++++++++++
 *June 1st 2023*
@@ -206,7 +253,7 @@ Bug fixes
 *December 1st 2022*
 
 Updates
---------
+-------
 
 * Database: register ``at_bev_AT_GIS_GRID_2021_09_28`` grid (`#3442 <https://github.com/OSGeo/PROJ/issues/3442>`_)
 
