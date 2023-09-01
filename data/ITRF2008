@@ -42,7 +42,7 @@
 
 <CARB> +proj=helmert +drx=0.000049 +dry=-0.001088 +drz=0.000664 +convention=position_vector
 
-<EURA> +proj=helmert +drx=-0.000083 +dry=0.000534 +drz=0.000750 +convention=position_vector
+<EURA> +proj=helmert +drx=-0.000083 +dry=-0.000534 +drz=0.000750 +convention=position_vector
 
 <INDI> +proj=helmert +drx=0.001232 +dry=0.000303 +drz=0.001540 +convention=position_vector
 
@@ -75,7 +75,7 @@
 
 <CARB_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=0.000049 +dry=-0.001088 +drz=0.000664 +convention=position_vector
 
-<EURA_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=-0.000083 +dry=0.000534 +drz=0.000750 +convention=position_vector
+<EURA_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=-0.000083 +dry=-0.000534 +drz=0.000750 +convention=position_vector
 
 <INDI_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=0.001232 +dry=0.000303 +drz=0.001540 +convention=position_vector
 
