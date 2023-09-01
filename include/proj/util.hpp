@@ -42,6 +42,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #ifndef NS_PROJ
@@ -203,10 +204,25 @@ using ::dropbox::oxygen::nn_static_pointer_cast;
 
 template <typename T> using nn_shared_ptr = nn<std::shared_ptr<T>>;
 
+// Possible implementation of C++14 std::remove_reference_t
+// (cf https://en.cppreference.com/w/cpp/types/remove_cv)
+template <class T>
+using remove_reference_t = typename std::remove_reference<T>::type;
+
+// Possible implementation of C++14 std::remove_cv_t
+// (cf https://en.cppreference.com/w/cpp/types/remove_cv)
+template <class T> using remove_cv_t = typename std::remove_cv<T>::type;
+
+// Possible implementation of C++20 std::remove_cvref
+// (cf https://en.cppreference.com/w/cpp/types/remove_cvref)
+template <class T> struct remove_cvref {
+    typedef remove_cv_t<remove_reference_t<T>> type;
+};
+
 #define NN_NO_CHECK(p)                                                         \
-    ::dropbox::oxygen::nn<typename std::remove_const<                          \
-        typename std::remove_reference<decltype(p)>::type>::type>(             \
-        dropbox::oxygen::i_promise_i_checked_for_null, (p))
+    ::dropbox::oxygen::nn<                                                     \
+        typename ::NS_PROJ::util::remove_cvref<decltype(p)>::type>(            \
+        ::dropbox::oxygen::i_promise_i_checked_for_null, (p))
 
 //! @endcond
 
