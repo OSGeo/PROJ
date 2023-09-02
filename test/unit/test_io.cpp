@@ -833,6 +833,19 @@ TEST(wkt_parse, wkt1_non_conformant_inf_inverse_flattening) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_esri_GCS_unknown_D_unknown) {
+    auto obj = WKTParser().setStrict(false).createFromWKT(
+        "GEOGCS[\"GCS_unknown\",DATUM[\"D_unknown\","
+        "SPHEROID[\"unknown\",6370997,0]],"
+        "PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->nameStr(), "unknown");
+    EXPECT_EQ(crs->datum()->nameStr(), "unknown");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt2_GEODCRS_EPSG_4326) {
     auto obj = WKTParser().createFromWKT("GEODCRS" + contentWKT2_EPSG_4326);
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
