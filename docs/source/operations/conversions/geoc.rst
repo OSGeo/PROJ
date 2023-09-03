@@ -63,11 +63,11 @@ Usage
 
 Converting from geodetic latitude to geocentric latitude::
 
-    +proj=geoc +ellps=GRS80
+    +proj=geoc
 
 Converting from geocentric latitude to geodetic latitude::
 
-    +proj=pipeline +step +proj=geoc +inv +ellps=GRS80
+    +proj=pipeline +step +proj=geoc +inv
 
 Parameters
 ################################################################################

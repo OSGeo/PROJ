@@ -40,7 +40,7 @@ Usage
 
 To run a forward HEALPix projection on a unit sphere model, use the following command::
 
-    proj +proj=healpix +lon_0=0 +a=1 -E <<EOF
+    proj +proj=healpix +a=1 -E <<EOF
     0 0
     EOF
     # output

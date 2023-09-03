@@ -70,7 +70,9 @@ solutions for a wide spectrum of geodetic tasks.
 
 As a first example, let us take a look at the iconic
 *geodetic → Cartesian → Helmert → geodetic* case (steps 2 to 4 in the example in
-the introduction). In PROJ it can be implemented as
+the introduction). 
+(Note, for the rest of this book the "+"s are removed from the examples.)
+In PROJ it can be implemented as
 
 ::
 

@@ -57,7 +57,7 @@ Convert geocentric coordinates to topocentric coordinates, with the topocentric
 origin specified in geocentric coordinates::
 
     echo 3771793.968 140253.342 5124304.349 2020 | \
-        cct -d 3 +proj=topocentric +ellps=WGS84 +X_0=3652755.3058 +Y_0=319574.6799 +Z_0=5201547.3536
+        cct -d 3 +proj=topocentric +X_0=3652755.3058 +Y_0=319574.6799 +Z_0=5201547.3536
 
     -189013.869    -128642.040     -4220.171     2020.0000
 
@@ -65,8 +65,8 @@ Convert geographic coordinates to topocentric coordinates, with the topocentric
 origin specified in geographic coordinates::
 
     echo 2.12955 53.80939444 73 2020 | cct -d 3 +proj=pipeline \
-        +step +proj=cart +ellps=WGS84 \
-        +step +proj=topocentric +ellps=WGS84 +lon_0=5 +lat_0=55 +h_0=200
+        +step +proj=cart \
+        +step +proj=topocentric +lon_0=5 +lat_0=55 +h_0=200
 
     -189013.869    -128642.040     -4220.171     2020.0000
 

@@ -39,15 +39,15 @@ Examples
 
 Geographic offset from the old Greek geographic 2D CRS to the newer GGRS87 CRS::
 
-    proj=geogoffset dlon=0.28 dlat=-5.86
+    +proj=geogoffset +dlon=0.28 +dlat=-5.86
 
 Conversion from Tokyo + JSLD69 height to WGS 84::
 
-    proj=geogoffset dlon=-13.97 dlat=7.94 dh=26.9
+    +proj=geogoffset +dlon=-13.97 +dlat=7.94 +dh=26.9
 
 Conversion from Baltic 1977 height to Black Sea height::
 
-    proj=geogoffset dh=0.4
+    +proj=geogoffset +dh=0.4
 
 
 Parameters
