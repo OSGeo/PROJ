@@ -34,7 +34,7 @@ satellites like those of the Landsat program.
    :align: center
    :alt:   Space oblique for LANDSAT
 
-   proj-string: ``+proj=lsat +ellps=GRS80 +lat_1=-60 +lat_2=60 +lsat=2 +path=2``
+   proj-string: ``+proj=lsat +lat_1=-60 +lat_2=60 +lsat=2 +path=2``
 
 Parameters
 ################################################################################

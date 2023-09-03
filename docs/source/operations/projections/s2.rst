@@ -82,7 +82,7 @@ Usage
 
 The following example uses S2 on the right face::
 
-    echo 90 0 | ../bin/proj +proj=s2 +lat_0=0 +lon_0=90 +ellps=WGS84 +UVtoST=linear 
+    echo 90 0 | proj +proj=s2 +lat_0=0 +lon_0=90 +ellps=WGS84 +UVtoST=linear 
 
     0.5 0.5
 

@@ -50,7 +50,8 @@ Transforming coordinates from NAD72 to NAD83 using the 4 parameter 2D Helmert:
 
 ::
 
-    proj=helmert convention=coordinate_frame x=-9597.3572 y=.6112 s=0.304794780637 theta=-1.244048
+    proj=helmert convention=coordinate_frame x=-9597.3572 y=.6112 \
+        s=0.304794780637 theta=-1.244048
 
 Simplified transformations from ITRF2008/IGS08 to ETRS89 using 7 parameters:
 

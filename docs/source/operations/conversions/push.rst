@@ -46,10 +46,10 @@ operation but the vertical part is kept exactly as the input was.
 
    $ echo 12 56 12.3 2020 | cct +proj=pipeline  \
    +step +proj=push +v_3                        \
-   +step +proj=cart +ellps=GRS80                \
+   +step +proj=cart                             \
    +step +proj=helmert +x=3000 +y=1000 +z=2000  \
-   +step +proj=cart +ellps=GRS80 +inv           \
-   +step +proj=pop +v_3                         \
+   +step +proj=cart +inv                        \
+   +step +proj=pop +v_3
 
     12.0056753463   55.9866540552       12.3000     2000.0000
 
@@ -58,9 +58,9 @@ Note that the third coordinate component in the output is the same as the input.
 The same transformation without the push and pop operations would look like this::
 
    $ echo 12 56 12.3 2020 | cct +proj=pipeline  \
-   +step +proj=cart +ellps=GRS80                \
+   +step +proj=cart                             \
    +step +proj=helmert +x=3000 +y=1000 +z=2000  \
-   +step +proj=cart +ellps=GRS80 +inv           \
+   +step +proj=cart +inv
 
          12.0057        55.9867     3427.7404     2000.0000
 

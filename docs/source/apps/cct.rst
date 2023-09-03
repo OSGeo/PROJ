@@ -49,8 +49,6 @@ file referenced by the {object_reference} must contain a valid
 
     .. versionadded:: 8.0.0
 
-
-
 Description
 ***********
 

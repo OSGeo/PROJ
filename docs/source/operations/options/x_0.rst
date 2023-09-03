@@ -1,5 +1,5 @@
 .. option:: +x_0=<value>
 
-    False easting.
+    False easting, in meters.
 
     *Defaults to 0.0.*

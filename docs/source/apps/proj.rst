@@ -206,6 +206,7 @@ The following script
     EOF
 
 will perform UTM zone 12 forward projection.
+The default +ellps=GRS80 is used as no +ellps was specified.
 The geographic values of this example are equivalent
 and meant as examples of various forms of DMS input. The x-y output
 data will appear as three lines of::
