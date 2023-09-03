@@ -1320,6 +1320,18 @@ $EXE -d 3 EPSG:25831 EPSG:23031 -E >>${OUT} 2>&1 <<EOF
 299905.060 4499796.515
 EOF
 
+echo "##############################################################" >> ${OUT}
+echo "Test Similarity Transformation through CompoundCRS" >> ${OUT}
+# Cf https://github.com/OSGeo/PROJ/issues/3854#issuecomment-1689964773
+#
+$EXE -d 3 EPSG:3912 EPSG:3794 -E >>${OUT} 2>&1 <<EOF
+477134.28 95134.21
+EOF
+
+$EXE -d 3 EPSG:3912+EPSG:5779 EPSG:3794+EPSG:8690 -E >>${OUT} 2>&1 <<EOF
+477134.28 95134.21 5
+EOF
+
 
 # Done!
 # do 'diff' with distribution results
