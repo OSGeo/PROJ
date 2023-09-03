@@ -1,14 +1,20 @@
 --------------------------------------------------------------------------------
 
 Test 5102 (part 2), Lambert Conic Conformal (1SP), v2-0_2011-06-28.
-
 --------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
+
+use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4807 +inv
+# We need to add this grad->rad step as +init=epsg:4807 assumes
+# degrees (if front operation), or radians (if non-front), as this was the case
+# in PROJ < 6 era
+# Note: "cs2cs EPSG:4807 EPSG:27572" does the right job.
+operation  +proj=pipeline \
+           +step +proj=unitconvert +xy_in=grad +xy_out=rad \
+           +step +init=epsg:4807 +inv \
            +step +init=epsg:27572
 --------------------------------------------------------------------------------
 tolerance  0.03 m
@@ -88,9 +94,13 @@ accept    9.6253009222 58.8888888889
 expect    1183926.705 2923124.876
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:27572 +inv
-           +step +init=epsg:4807
+# We need to add this rad->grad step as +init=epsg:4807 assumes
+# degrees (if last operation), or radians (if non-last), as this was the case
+# in PROJ < 6 era
+operation  +proj=pipeline \
+           +step +init=epsg:27572 +inv \
+           +step +init=epsg:4807 \
+           +step +proj=unitconvert +xy_in=rad +xy_out=grad
 --------------------------------------------------------------------------------
 tolerance  0.03 m
 accept    760724.023 3457334.864
@@ -169,8 +179,12 @@ accept    1183926.705 2923124.876
 expect    9.6253009222 58.8888888889
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4807 +inv
+# We need to add this grad->rad step as +init=epsg:4807 assumes
+# degrees (if front operation), or radians (if non-front), as this was the case
+# in PROJ < 6 era
+operation  +proj=pipeline \
+           +step +proj=unitconvert +xy_in=grad +xy_out=rad \
+           +step +init=epsg:4807 +inv \
            +step +init=epsg:27572
 --------------------------------------------------------------------------------
 tolerance  0.006 m
@@ -249,4 +263,4 @@ tolerance  0.006 m
 accept    9.6253009222 58.8888888889
 roundtrip 1000
 
-</gie>
+</gie-strict>
