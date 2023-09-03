@@ -1384,16 +1384,23 @@ struct FilterResults {
             }
 
 #if 0
-            std::cerr << op->nameStr() << " ";
-            std::cerr << area << " ";
-            std::cerr << getAccuracy(op) << " ";
-            std::cerr << isPROJExportable << " ";
-            std::cerr << hasGrids << " ";
-            std::cerr << gridsAvailable << " ";
-            std::cerr << gridsKnown << " ";
-            std::cerr << stepCount << " ";
-            std::cerr << op->hasBallparkTransformation() << " ";
-            std::cerr << isNullTransformation(op->nameStr()) << " ";
+            std::cerr << "name=" << op->nameStr() << " ";
+            std::cerr << "area=" << area << " ";
+            std::cerr << "accuracy=" << getAccuracy(op) << " ";
+            std::cerr << "isPROJExportable=" << isPROJExportable << " ";
+            std::cerr << "hasGrids=" << hasGrids << " ";
+            std::cerr << "gridsAvailable=" << gridsAvailable << " ";
+            std::cerr << "gridsKnown=" << gridsKnown << " ";
+            std::cerr << "stepCount=" << stepCount << " ";
+            std::cerr << "projStepCount=" << projStepCount << " ";
+            std::cerr << "ballpark=" << op->hasBallparkTransformation() << " ";
+            std::cerr << "vertBallpark="
+                      << (op->nameStr().find(
+                              BALLPARK_VERTICAL_TRANSFORMATION) !=
+                          std::string::npos)
+                      << " ";
+            std::cerr << "isNull=" << isNullTransformation(op->nameStr())
+                      << " ";
             std::cerr << std::endl;
 #endif
             map[op.get()] = PrecomputedOpCharacteristics(
