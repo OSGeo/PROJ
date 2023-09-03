@@ -289,6 +289,28 @@ TEST(datum, datum_with_ANCHOREPOCH) {
 
 // ---------------------------------------------------------------------------
 
+TEST(datum, unknown_datum) {
+    auto datum = GeodeticReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "my_datum"),
+        Ellipsoid::GRS1980, optional<std::string>(), optional<Measure>(),
+        PrimeMeridian::GREENWICH);
+    auto unknown_datum = GeodeticReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+        Ellipsoid::GRS1980, optional<std::string>(), optional<Measure>(),
+        PrimeMeridian::GREENWICH);
+
+    EXPECT_FALSE(datum->isEquivalentTo(unknown_datum.get(),
+                                       IComparable::Criterion::STRICT));
+    EXPECT_TRUE(datum->isEquivalentTo(unknown_datum.get(),
+                                      IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(unknown_datum->isEquivalentTo(datum.get(),
+                                               IComparable::Criterion::STRICT));
+    EXPECT_TRUE(unknown_datum->isEquivalentTo(
+        datum.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(datum, dynamic_geodetic_reference_frame) {
     auto drf = DynamicGeodeticReferenceFrame::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "test"), Ellipsoid::WGS84,
