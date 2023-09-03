@@ -1547,6 +1547,9 @@ bool GeodeticReferenceFrame::_isEquivalentTo(
 bool GeodeticReferenceFrame::hasEquivalentNameToUsingAlias(
     const IdentifiedObject *other,
     const io::DatabaseContextPtr &dbContext) const {
+    if (nameStr() == "unknown" || other->nameStr() == "unknown") {
+        return true;
+    }
     if (dbContext) {
         if (!identifiers().empty()) {
             const auto &id = identifiers().front();
