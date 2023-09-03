@@ -120,6 +120,12 @@ $EXE +proj=utm +zone=11 +datum=WGS84 +pm=3 \
 500000 3000000
 EOF
 echo "##############################################################" >> ${OUT}
+echo Test input in grad >> ${OUT}
+#
+$EXE EPSG:4807 EPSG:27572 -E >>${OUT} <<EOF
+64.44444444 2.9586342556
+EOF
+echo "##############################################################" >> ${OUT}
 echo Test geocentric x/y/z generation. >> ${OUT}
 #
 $EXE +proj=latlong +datum=WGS84  \
