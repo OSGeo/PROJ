@@ -124,6 +124,12 @@ TEST(datum, ellipsoid_from_inverse_flattening) {
 
     EXPECT_FALSE(Ellipsoid::WGS84->isEquivalentTo(
         Ellipsoid::GRS1980.get(), IComparable::Criterion::EQUIVALENT));
+
+    auto sphere = Ellipsoid::createSphere(PropertyMap(), Length(6378137));
+    EXPECT_FALSE(Ellipsoid::WGS84->isEquivalentTo(
+        sphere.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(sphere->isEquivalentTo(Ellipsoid::WGS84.get(),
+                                        IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------

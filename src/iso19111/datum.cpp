@@ -1156,7 +1156,7 @@ bool Ellipsoid::_isEquivalentTo(const util::IComparable *other,
         }
 
     } else {
-        if (!otherEllipsoid->computeSemiMinorAxis()._isEquivalentTo(
+        if (!computeSemiMinorAxis()._isEquivalentTo(
                 otherEllipsoid->computeSemiMinorAxis(), criterion)) {
             return false;
         }
