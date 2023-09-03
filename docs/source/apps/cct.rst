@@ -48,7 +48,6 @@ file referenced by the {object_reference} must contain a valid
 {object_definition}.
 
     .. versionadded:: 8.0.0
-    
 
 Description
 ***********
