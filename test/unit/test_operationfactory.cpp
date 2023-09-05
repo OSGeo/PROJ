@@ -9696,6 +9696,44 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
+TEST(
+    operation,
+    createOperation_compound_to_compound_with_point_motion_operation_special_case_CGVD2013a) {
+    auto dbContext = DatabaseContext::create();
+    auto factoryNRCAN = AuthorityFactory::create(dbContext, "NRCAN");
+    auto sourceCM = factoryNRCAN->createCoordinateMetadata(
+        "NAD83_CSRS_1997_UTM17_CGVD2013_1997");
+    auto targetCM = factoryNRCAN->createCoordinateMetadata(
+        "NAD83_CSRS_2002_UTM17_CGVD2013_2002");
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        sourceCM, targetCM, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=utm +zone=17 +ellps=GRS80 "
+              "+step +proj=vgridshift +grids=ca_nrc_CGG2013an83.tif "
+              "+multiplier=1 "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=set +v_4=1997 +omit_fwd "
+              "+step +proj=deformation +dt=5 +grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +proj=set +v_4=2002 +omit_inv "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +inv +proj=vgridshift +grids=ca_nrc_CGG2013an83.tif "
+              "+multiplier=1 "
+              "+step +proj=utm +zone=17 +ellps=GRS80");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, createOperation_Geographic3D_Offset_by_velocity_grid) {
     auto dbContext = DatabaseContext::create();
     auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");

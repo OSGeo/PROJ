@@ -5576,6 +5576,10 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
     const auto &componentsSrc = compoundSrc->componentReferenceSystems();
     if (!componentsSrc.empty()) {
 
+        const auto dbContext =
+            authFactory ? authFactory->databaseContext().as_nullable()
+                        : nullptr;
+
         if (componentsSrc.size() == 2) {
             auto derivedHSrc =
                 dynamic_cast<const crs::DerivedCRS *>(componentsSrc[0].get());
@@ -5605,6 +5609,82 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                     }
                 }
                 return;
+            }
+
+            auto geogSrc = dynamic_cast<const crs::GeographicCRS *>(
+                componentsSrc[0].get());
+            // Sorry for this hack... aimed at transforming
+            // "NAD83(CSRS)v7 + CGVD2013a(1997) height @ 1997" to "NAD83(CSRS)v7
+            // @ 1997" to "NAD83(CSRS)v3 + CGVD2013a(1997) height" to
+            // "NAD83(CSRS)v3" OR "NAD83(CSRS)v7 + CGVD2013a(2002) height @
+            // 2002" to "NAD83(CSRS)v7 @ 2002" to "NAD83(CSRS)v4 +
+            // CGVD2013a(2002) height" to "NAD83(CSRS)v4"
+            if (dbContext && geogSrc && geogSrc->nameStr() == "NAD83(CSRS)v7" &&
+                sourceEpoch.has_value() &&
+                geogDst->coordinateSystem()->axisList().size() == 3U &&
+                geogDst->nameStr() == geogSrc->nameStr() &&
+                targetEpoch.has_value() &&
+                sourceEpoch->coordinateEpoch()._isEquivalentTo(
+                    targetEpoch->coordinateEpoch())) {
+                const bool is1997 =
+                    std::abs(sourceEpoch->coordinateEpoch().convertToUnit(
+                                 common::UnitOfMeasure::YEAR) -
+                             1997) < 1e-10;
+                const bool is2002 =
+                    std::abs(sourceEpoch->coordinateEpoch().convertToUnit(
+                                 common::UnitOfMeasure::YEAR) -
+                             2002) < 1e-10;
+                try {
+                    auto authFactoryEPSG = io::AuthorityFactory::create(
+                        authFactory->databaseContext(), "EPSG");
+                    if (geogSrc->_isEquivalentTo(
+                            authFactoryEPSG
+                                ->createCoordinateReferenceSystem("8255")
+                                .get(),
+                            util::IComparable::Criterion::
+                                EQUIVALENT) && // NAD83(CSRS)v7
+                                               // 2D
+                        geogDst->_isEquivalentTo(
+                            authFactoryEPSG
+                                ->createCoordinateReferenceSystem("8254")
+                                .get(),
+                            util::IComparable::Criterion::
+                                EQUIVALENT) && // NAD83(CSRS)v7
+                                               // 3D
+                        ((is1997 && componentsSrc[1]->nameStr() ==
+                                        "CGVD2013a(1997) height") ||
+                         (is2002 && componentsSrc[1]->nameStr() ==
+                                        "CGVD2013a(2002) height"))) {
+                        const auto newGeogCRS_2D(
+                            authFactoryEPSG->createCoordinateReferenceSystem(
+                                is1997 ? "8240" : // NAD83(CSRS)v3 2D
+                                    "8246"        // NAD83(CSRS)v4 2D
+                                ));
+                        const auto newGeogCRS_3D(
+                            authFactoryEPSG->createCoordinateReferenceSystem(
+                                is1997 ? "8239" : // NAD83(CSRS)v3 3D
+                                    "8244"        // NAD83(CSRS)v4 3D
+                                ));
+                        std::vector<crs::CRSNNPtr> intermComponents{
+                            newGeogCRS_2D, componentsSrc[1]};
+                        auto properties = util::PropertyMap().set(
+                            common::IdentifiedObject::NAME_KEY,
+                            intermComponents[0]->nameStr() + " + " +
+                                intermComponents[1]->nameStr());
+                        auto newCompound = crs::CompoundCRS::create(
+                            properties, intermComponents);
+                        auto ops = createOperations(newCompound, sourceEpoch,
+                                                    newGeogCRS_3D, sourceEpoch,
+                                                    context);
+                        for (const auto &op : ops) {
+                            auto opClone = op->shallowClone();
+                            setCRSs(opClone.get(), sourceCRS, targetCRS);
+                            res.emplace_back(opClone);
+                        }
+                        return;
+                    }
+                } catch (const std::exception &) {
+                }
             }
 
             auto boundSrc =
@@ -5644,10 +5724,6 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                 }
             }
         }
-
-        const auto dbContext =
-            authFactory ? authFactory->databaseContext().as_nullable()
-                        : nullptr;
 
         // Deal with "+proj=something +geoidgrids +nadgrids/+towgs84" to
         // another CRS whose datum is not the same as the horizontal datum
