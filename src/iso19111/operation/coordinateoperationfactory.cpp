@@ -1946,6 +1946,20 @@ findCandidateGeodCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
 
 //! @cond Doxygen_Suppress
 
+static bool
+isSameGeodeticDatum(const datum::GeodeticReferenceFrameNNPtr &datum1,
+                    const datum::GeodeticReferenceFrameNNPtr &datum2,
+                    const io::DatabaseContextPtr &dbContext) {
+    if (datum1->nameStr() == "unknown" && datum2->nameStr() != "unknown")
+        return false;
+    if (datum2->nameStr() == "unknown" && datum1->nameStr() != "unknown")
+        return false;
+    return datum1->_isEquivalentTo(
+        datum2.get(), util::IComparable::Criterion::EQUIVALENT, dbContext);
+}
+
+// ---------------------------------------------------------------------------
+
 // Look in the authority registry for operations from sourceCRS to targetCRS
 // using an intermediate pivot
 std::vector<CoordinateOperationNNPtr>
@@ -1985,10 +1999,7 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
                             candidateSrcGeod->datumNonNull(dbContext);
                         const auto dstDatum = geodDst->datumNonNull(dbContext);
                         const bool sameGeodeticDatum =
-                            srcDatum->_isEquivalentTo(
-                                dstDatum.get(),
-                                util::IComparable::Criterion::EQUIVALENT,
-                                dbContext);
+                            isSameGeodeticDatum(srcDatum, dstDatum, dbContext);
                         if (sameGeodeticDatum) {
                             continue;
                         }
@@ -2140,9 +2151,8 @@ createBallparkGeographicOffset(const crs::CRSNNPtr &sourceCRS,
         dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
     const bool isSameDatum =
         geogSrc && geogDst &&
-        geogSrc->datumNonNull(dbContext)->_isEquivalentTo(
-            geogDst->datumNonNull(dbContext).get(),
-            util::IComparable::Criterion::EQUIVALENT, dbContext);
+        isSameGeodeticDatum(geogSrc->datumNonNull(dbContext),
+                            geogDst->datumNonNull(dbContext), dbContext);
 
     auto name = buildOpName(isSameDatum ? NULL_GEOGRAPHIC_OFFSET
                                         : BALLPARK_GEOGRAPHIC_OFFSET,
@@ -2771,9 +2781,9 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
     const auto dbContext =
         authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
 
-    const bool sameDatum = geogSrc->datumNonNull(dbContext)->_isEquivalentTo(
-        geogDst->datumNonNull(dbContext).get(),
-        util::IComparable::Criterion::EQUIVALENT, dbContext);
+    const bool sameDatum =
+        isSameGeodeticDatum(geogSrc->datumNonNull(dbContext),
+                            geogDst->datumNonNull(dbContext), dbContext);
 
     // Do the CRS differ by their axis order ?
     bool axisReversal2D = false;
@@ -3675,9 +3685,8 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
 
         const auto srcDatum = geodSrc->datumNonNull(dbContext);
         const auto dstDatum = geodDst->datumNonNull(dbContext);
-        sameGeodeticDatum = srcDatum->_isEquivalentTo(
-            dstDatum.get(), util::IComparable::Criterion::EQUIVALENT,
-            dbContext);
+
+        sameGeodeticDatum = isSameGeodeticDatum(srcDatum, dstDatum, dbContext);
 
         if (res.empty() && !sameGeodeticDatum &&
             !context.inCreateOperationsWithDatumPivotAntiRecursion) {
