@@ -9622,3 +9622,35 @@ double proj_coordinate_metadata_get_epoch(PJ_CONTEXT *ctx, const PJ *obj) {
 }
 
 // ---------------------------------------------------------------------------
+
+/** \brief Return whether a CRS has an associated PointMotionOperation
+ *
+ * @since 9.4
+ */
+int proj_crs_has_point_motion_operation(PJ_CONTEXT *ctx, const PJ *crs) {
+    SANITIZE_CTX(ctx);
+    if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return false;
+    }
+    auto l_crs = dynamic_cast<const CRS *>(crs->iso_obj.get());
+    if (!l_crs) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CRS");
+        return false;
+    }
+    auto geodeticCRS = l_crs->extractGeodeticCRS();
+    if (!geodeticCRS)
+        return false;
+    try {
+        auto factory =
+            AuthorityFactory::create(getDBcontext(ctx), std::string());
+        return !factory
+                    ->getPointMotionOperationsFor(NN_NO_CHECK(geodeticCRS),
+                                                  false)
+                    .empty();
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return false;
+}

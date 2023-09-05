@@ -6447,6 +6447,31 @@ TEST_F(CApi, proj_trans_bounds__south_pole) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_crs_has_point_motion_operation) {
+    auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+
+    {
+        auto crs = proj_create_from_database(
+            m_ctxt, "EPSG", "4267", PJ_CATEGORY_CRS, false, nullptr); // NAD27
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper_crs(crs);
+        EXPECT_FALSE(proj_crs_has_point_motion_operation(m_ctxt, crs));
+    }
+
+    {
+        // NAD83(CSRS)v7
+        auto crs = proj_create_from_database(m_ctxt, "EPSG", "8255",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper_crs(crs);
+        EXPECT_TRUE(proj_crs_has_point_motion_operation(m_ctxt, crs));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 #if !defined(_WIN32)
 TEST_F(CApi, open_plenty_of_contexts) {
     // Test that we only consume 1 file handle for the connection to the

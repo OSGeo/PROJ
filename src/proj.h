@@ -1395,6 +1395,9 @@ PJ PROJ_DLL *proj_crs_get_datum_ensemble(PJ_CONTEXT *ctx, const PJ *crs);
 
 PJ PROJ_DLL *proj_crs_get_datum_forced(PJ_CONTEXT *ctx, const PJ *crs);
 
+int PROJ_DLL proj_crs_has_point_motion_operation(PJ_CONTEXT *ctx,
+                                                 const PJ *crs);
+
 int PROJ_DLL proj_datum_ensemble_get_member_count(PJ_CONTEXT *ctx,
                                                   const PJ *datum_ensemble);
 

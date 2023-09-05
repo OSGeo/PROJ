@@ -1002,6 +1002,7 @@ proj_crs_get_datum_forced
 proj_crs_get_geodetic_crs
 proj_crs_get_horizontal_datum
 proj_crs_get_sub_crs
+proj_crs_has_point_motion_operation
 proj_crs_info_list_destroy
 proj_crs_is_derived
 proj_crs_promote_to_3D
