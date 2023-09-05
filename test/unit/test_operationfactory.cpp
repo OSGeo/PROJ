@@ -9546,7 +9546,7 @@ TEST(operation,
             IGNORE_GRID_AVAILABILITY);
     auto list = CoordinateOperationFactory::create()->createOperations(
         crs_2002, crs_2005, ctxt);
-    ASSERT_EQ(list.size(), 2U);
+    ASSERT_GE(list.size(), 2U);
     EXPECT_FALSE(list[0]->hasBallparkTransformation());
     EXPECT_EQ(
         list[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -9567,8 +9567,6 @@ TEST(operation,
         "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
         "+step +proj=axisswap +order=2,1");
     EXPECT_TRUE(list[1]->hasBallparkTransformation());
-    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=noop");
 }
 
 // ---------------------------------------------------------------------------
