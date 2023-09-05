@@ -6298,8 +6298,40 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         const auto vertDst = componentsDst[1]->extractVerticalCRS();
         if (vertSrc && vertDst &&
             !componentsSrc[1]->_isEquivalentTo(componentsDst[1].get())) {
-            if (!vertSrc->geoidModel().empty() ||
-                !vertDst->geoidModel().empty()) {
+            if ((!vertSrc->geoidModel().empty() ||
+                 !vertDst->geoidModel().empty()) &&
+                // To be able to use "CGVD28 height to
+                // CGVD2013a(1997|2002|2010)" single grid
+                !(vertSrc->nameStr() == "CGVD28 height" &&
+                  !vertSrc->geoidModel().empty() &&
+                  vertSrc->geoidModel().front()->nameStr() == "HT2_1997" &&
+                  vertDst->nameStr() == "CGVD2013a(1997) height" &&
+                  vertDst->geoidModel().empty()) &&
+                !(vertSrc->nameStr() == "CGVD28 height" &&
+                  !vertSrc->geoidModel().empty() &&
+                  vertSrc->geoidModel().front()->nameStr() == "HT2_2002" &&
+                  vertDst->nameStr() == "CGVD2013a(2002) height" &&
+                  vertDst->geoidModel().empty()) &&
+                !(vertSrc->nameStr() == "CGVD28 height" &&
+                  !vertSrc->geoidModel().empty() &&
+                  vertSrc->geoidModel().front()->nameStr() == "HT2_2010" &&
+                  vertDst->nameStr() == "CGVD2013a(2010) height" &&
+                  vertDst->geoidModel().empty()) &&
+                !(vertDst->nameStr() == "CGVD28 height" &&
+                  !vertDst->geoidModel().empty() &&
+                  vertDst->geoidModel().front()->nameStr() == "HT2_1997" &&
+                  vertSrc->nameStr() == "CGVD2013a(1997) height" &&
+                  vertSrc->geoidModel().empty()) &&
+                !(vertDst->nameStr() == "CGVD28 height" &&
+                  !vertDst->geoidModel().empty() &&
+                  vertDst->geoidModel().front()->nameStr() == "HT2_2002" &&
+                  vertSrc->nameStr() == "CGVD2013a(2002) height" &&
+                  vertSrc->geoidModel().empty()) &&
+                !(vertDst->nameStr() == "CGVD28 height" &&
+                  !vertDst->geoidModel().empty() &&
+                  vertDst->geoidModel().front()->nameStr() == "HT2_2010" &&
+                  vertSrc->nameStr() == "CGVD2013a(2010) height" &&
+                  vertSrc->geoidModel().empty())) {
                 // If we have a geoid model, force using through it
                 bTryThroughIntermediateGeogCRS = true;
             } else {
@@ -6607,10 +6639,49 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
             }
         }
 
-        auto opSrcCRSToGeogCRS = createOperations(
+        // Hack for
+        // NAD83_CSRS_1997_xxxx_HT2_1997 to NAD83_CSRS_1997_yyyy_CGVD2013_1997
+        // NAD83_CSRS_2002_xxxx_HT2_2002 to NAD83_CSRS_2002_yyyy_CGVD2013_2002
+        if (sourceEpoch.has_value() && targetEpoch.has_value() &&
+            sourceEpoch->coordinateEpoch()._isEquivalentTo(
+                targetEpoch->coordinateEpoch()) &&
+            srcGeog->_isEquivalentTo(
+                dstGeog.get(), util::IComparable::Criterion::EQUIVALENT) &&
+            srcGeog->nameStr() == "NAD83(CSRS)v7") {
+            const bool is1997 =
+                std::abs(sourceEpoch->coordinateEpoch().convertToUnit(
+                             common::UnitOfMeasure::YEAR) -
+                         1997) < 1e-10;
+            const bool is2002 =
+                std::abs(sourceEpoch->coordinateEpoch().convertToUnit(
+                             common::UnitOfMeasure::YEAR) -
+                         2002) < 1e-10;
+            try {
+                auto authFactoryEPSG = io::AuthorityFactory::create(
+                    authFactory->databaseContext(), "EPSG");
+                auto nad83CSRSv7 = authFactoryEPSG->createGeographicCRS("8255");
+                if (srcGeog->_isEquivalentTo(nad83CSRSv7.get(),
+                                             util::IComparable::Criterion::
+                                                 EQUIVALENT) && // NAD83(CSRS)v7
+                                                                // 2D
+                    ((is1997 &&
+                      verticalTransform->nameStr().find(
+                          "CGVD28 height to CGVD2013a(1997) height (1)") !=
+                          std::string::npos) ||
+                     (is2002 &&
+                      verticalTransform->nameStr().find(
+                          "CGVD28 height to CGVD2013a(2002) height (1)") !=
+                          std::string::npos))) {
+                    interpolationGeogCRS = nad83CSRSv7;
+                }
+            } catch (const std::exception &) {
+            }
+        }
+
+        const auto opSrcCRSToGeogCRS = createOperations(
             componentsSrc[0], util::optional<common::DataEpoch>(),
             interpolationGeogCRS, util::optional<common::DataEpoch>(), context);
-        auto opGeogCRStoDstCRS = createOperations(
+        const auto opGeogCRStoDstCRS = createOperations(
             interpolationGeogCRS, util::optional<common::DataEpoch>(),
             componentsDst[0], util::optional<common::DataEpoch>(), context);
         for (const auto &opSrc : opSrcCRSToGeogCRS) {
