@@ -1384,16 +1384,23 @@ struct FilterResults {
             }
 
 #if 0
-            std::cerr << op->nameStr() << " ";
-            std::cerr << area << " ";
-            std::cerr << getAccuracy(op) << " ";
-            std::cerr << isPROJExportable << " ";
-            std::cerr << hasGrids << " ";
-            std::cerr << gridsAvailable << " ";
-            std::cerr << gridsKnown << " ";
-            std::cerr << stepCount << " ";
-            std::cerr << op->hasBallparkTransformation() << " ";
-            std::cerr << isNullTransformation(op->nameStr()) << " ";
+            std::cerr << "name=" << op->nameStr() << " ";
+            std::cerr << "area=" << area << " ";
+            std::cerr << "accuracy=" << getAccuracy(op) << " ";
+            std::cerr << "isPROJExportable=" << isPROJExportable << " ";
+            std::cerr << "hasGrids=" << hasGrids << " ";
+            std::cerr << "gridsAvailable=" << gridsAvailable << " ";
+            std::cerr << "gridsKnown=" << gridsKnown << " ";
+            std::cerr << "stepCount=" << stepCount << " ";
+            std::cerr << "projStepCount=" << projStepCount << " ";
+            std::cerr << "ballpark=" << op->hasBallparkTransformation() << " ";
+            std::cerr << "vertBallpark="
+                      << (op->nameStr().find(
+                              BALLPARK_VERTICAL_TRANSFORMATION) !=
+                          std::string::npos)
+                      << " ";
+            std::cerr << "isNull=" << isNullTransformation(op->nameStr())
+                      << " ";
             std::cerr << std::endl;
 #endif
             map[op.get()] = PrecomputedOpCharacteristics(
@@ -2378,6 +2385,29 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
 MyPROJStringExportableHorizVerticalHorizPROJBased::
     ~MyPROJStringExportableHorizVerticalHorizPROJBased() = default;
 
+// ---------------------------------------------------------------------------
+
+struct MyPROJStringExportableHorizNullVertical final
+    : public io::IPROJStringExportable {
+    CoordinateOperationPtr horizTransform{};
+
+    MyPROJStringExportableHorizNullVertical(
+        const CoordinateOperationPtr &horizTransformIn)
+        : horizTransform(horizTransformIn) {}
+
+    ~MyPROJStringExportableHorizNullVertical() override;
+
+    void
+    // cppcheck-suppress functionStatic
+    _exportToPROJString(io::PROJStringFormatter *formatter) const override {
+
+        horizTransform->_exportToPROJString(formatter);
+    }
+};
+
+MyPROJStringExportableHorizNullVertical::
+    ~MyPROJStringExportableHorizNullVertical() = default;
+
 //! @endcond
 
 } // namespace operation
@@ -2388,6 +2418,7 @@ namespace dropbox{ namespace oxygen {
 template<> nn<std::shared_ptr<NS_PROJ::operation::MyPROJStringExportableGeodToGeod>>::~nn() = default;
 template<> nn<std::shared_ptr<NS_PROJ::operation::MyPROJStringExportableHorizVertical>>::~nn() = default;
 template<> nn<std::shared_ptr<NS_PROJ::operation::MyPROJStringExportableHorizVerticalHorizPROJBased>>::~nn() = default;
+template<> nn<std::shared_ptr<NS_PROJ::operation::MyPROJStringExportableHorizNullVertical>>::~nn() = default;
 }}
 #endif
 
@@ -2660,6 +2691,40 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
 
     return createPROJBased(properties, exportable, sourceCRS, targetCRS,
                            nullptr, accuracies, hasBallparkTransformation);
+}
+
+// ---------------------------------------------------------------------------
+
+static CoordinateOperationNNPtr createHorizNullVerticalPROJBased(
+    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+    const operation::CoordinateOperationNNPtr &horizTransform,
+    const operation::CoordinateOperationNNPtr &verticalTransform) {
+
+    auto exportable =
+        util::nn_make_shared<MyPROJStringExportableHorizNullVertical>(
+            horizTransform);
+
+    std::vector<CoordinateOperationNNPtr> ops = {horizTransform,
+                                                 verticalTransform};
+    const std::string opName = computeConcatenatedName(ops);
+
+    auto properties = util::PropertyMap();
+    properties.set(common::IdentifiedObject::NAME_KEY, opName);
+
+    bool emptyIntersection = false;
+    auto extent = getExtent(ops, false, emptyIntersection);
+    if (extent) {
+        properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                       NN_NO_CHECK(extent));
+    }
+
+    const auto remarks = getRemarks(ops);
+    if (!remarks.empty()) {
+        properties.set(common::IdentifiedObject::REMARKS_KEY, remarks);
+    }
+
+    return createPROJBased(properties, exportable, sourceCRS, targetCRS,
+                           nullptr, {}, /*hasBallparkTransformation=*/true);
 }
 
 //! @endcond
@@ -4829,6 +4894,18 @@ void CoordinateOperationFactory::Private::createOperationsBoundToVert(
 
 // ---------------------------------------------------------------------------
 
+static std::string
+getBallparkTransformationVertToVert(const crs::CRSNNPtr &sourceCRS,
+                                    const crs::CRSNNPtr &targetCRS) {
+    auto name = buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
+    name += " (";
+    name += BALLPARK_VERTICAL_TRANSFORMATION;
+    name += ')';
+    return name;
+}
+
+// ---------------------------------------------------------------------------
+
 void CoordinateOperationFactory::Private::createOperationsVertToVert(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
     Private::Context &context, const crs::VerticalCRS *vertSrc,
@@ -4874,10 +4951,8 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
                        : metadata::Extent::WORLD);
 
     if (!equivalentVDatum) {
-        auto name = buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
-        name += " (";
-        name += BALLPARK_VERTICAL_TRANSFORMATION;
-        name += ')';
+        const auto name =
+            getBallparkTransformationVertToVert(sourceCRS, targetCRS);
         auto conv = Transformation::createChangeVerticalUnit(
             map.set(common::IdentifiedObject::NAME_KEY, name), sourceCRS,
             targetCRS,
@@ -6096,6 +6171,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
     }
 
     for (const auto &verticalTransform : verticalTransforms) {
+
         auto interpolationGeogCRS = NN_NO_CHECK(srcGeog);
         auto interpTransformCRS = verticalTransform->interpolationCRS();
         if (interpTransformCRS) {
@@ -6136,6 +6212,37 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 } catch (const InvalidOperationEmptyIntersection &) {
                 } catch (const io::FormattingException &) {
                 }
+            }
+        }
+
+        if (verticalTransforms.size() == 1U &&
+            verticalTransform->hasBallparkTransformation() &&
+            context.context->getAuthorityFactory() &&
+            dynamic_cast<crs::ProjectedCRS *>(componentsSrc[0].get()) &&
+            dynamic_cast<crs::ProjectedCRS *>(componentsDst[0].get()) &&
+            verticalTransform->nameStr() ==
+                getBallparkTransformationVertToVert(componentsSrc[1],
+                                                    componentsDst[1])) {
+            // e.g EPSG:3912+EPSG:5779 to EPSG:3794+EPSG:8690
+            // "MGI 1901 / Slovene National Grid + SVS2000 height" to
+            // "Slovenia 1996 / Slovene National Grid + SVS2010 height"
+            // using the "D48/GK to D96/TM (xx)" family of horizontal
+            // transformatoins between the projected CRS
+            // Cf
+            // https://github.com/OSGeo/PROJ/issues/3854#issuecomment-1689964773
+            // We restrict to a ballpark vertical transformation for now,
+            // but ideally we should deal with a regular vertical transformation
+            // but that would involve doing a transformation to its
+            // interpolation CRS and we don't have such cases for now.
+
+            std::vector<CoordinateOperationNNPtr> opsHoriz;
+            createOperationsFromDatabase(
+                componentsSrc[0], componentsDst[0], context, srcGeog.get(),
+                dstGeog.get(), srcGeog.get(), dstGeog.get(),
+                /*vertSrc=*/nullptr, /*vertDst=*/nullptr, opsHoriz);
+            for (const auto &opHoriz : opsHoriz) {
+                res.emplace_back(createHorizNullVerticalPROJBased(
+                    sourceCRS, targetCRS, opHoriz, verticalTransform));
             }
         }
     }

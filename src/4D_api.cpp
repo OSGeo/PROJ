@@ -322,22 +322,14 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
             // onshore and offshore Tunisia area of uses, but is slightly
             // onshore. So in a general way, prefer a onshore area to a
             // offshore one.
-            if (iBest < 0 || (alt.accuracy >= 0 &&
-                              (alt.accuracy < bestAccuracy ||
-                               // If two operations have the same accuracy, use
-                               // the one that is contained within a larger one
-                               (alt.accuracy == bestAccuracy &&
-                                alt.minxSrc >= opList[iBest].minxSrc &&
-                                alt.minySrc >= opList[iBest].minySrc &&
-                                alt.maxxSrc <= opList[iBest].maxxSrc &&
-                                alt.maxySrc <= opList[iBest].maxySrc &&
-                                // check that this is not equality
-                                !(alt.minxSrc == opList[iBest].minxSrc &&
-                                  alt.minySrc == opList[iBest].minySrc &&
-                                  alt.maxxSrc == opList[iBest].maxxSrc &&
-                                  alt.maxySrc == opList[iBest].maxySrc) &&
-                                !opList[iBest].isPriorityOp)) &&
-                              !alt.isOffshore)) {
+            if (iBest < 0 ||
+                (((alt.accuracy >= 0 && alt.accuracy < bestAccuracy) ||
+                  // If two operations have the same accuracy, use
+                  // the one that has the smallest area
+                  (alt.accuracy == bestAccuracy &&
+                   alt.pseudoArea < opList[iBest].pseudoArea &&
+                   !opList[iBest].isPriorityOp)) &&
+                 !alt.isOffshore)) {
 
                 if (skipNonInstantiable && !alt.isInstantiable()) {
                     continue;
@@ -1713,6 +1705,16 @@ static PJ *add_coord_op_to_list(
     double maxxDst;
     double maxyDst;
 
+    double w = west_lon / 180 * M_PI;
+    double s = south_lat / 180 * M_PI;
+    double e = east_lon / 180 * M_PI;
+    double n = north_lat / 180 * M_PI;
+    if (w > e) {
+        e += 2 * M_PI;
+    }
+    // Integrate cos(lat) between south_lat and north_lat
+    const double pseudoArea = (e - w) * (std::sin(n) - std::sin(s));
+
     if (pjSrcGeocentricToLonLat) {
         minxSrc = west_lon;
         minySrc = south_lat;
@@ -1740,8 +1742,8 @@ static PJ *add_coord_op_to_list(
         const double accuracy = proj_coordoperation_get_accuracy(op->ctx, op);
         altCoordOps.emplace_back(
             idxInOriginalList, minxSrc, minySrc, maxxSrc, maxySrc, minxDst,
-            minyDst, maxxDst, maxyDst, op, name, accuracy, isOffshore,
-            pjSrcGeocentricToLonLat, pjDstGeocentricToLonLat);
+            minyDst, maxxDst, maxyDst, op, name, accuracy, pseudoArea,
+            isOffshore, pjSrcGeocentricToLonLat, pjDstGeocentricToLonLat);
         op = nullptr;
     }
     return op;
@@ -2987,13 +2989,13 @@ PJCoordOperation::PJCoordOperation(
     int idxInOriginalListIn, double minxSrcIn, double minySrcIn,
     double maxxSrcIn, double maxySrcIn, double minxDstIn, double minyDstIn,
     double maxxDstIn, double maxyDstIn, PJ *pjIn, const std::string &nameIn,
-    double accuracyIn, bool isOffshoreIn, const PJ *pjSrcGeocentricToLonLatIn,
-    const PJ *pjDstGeocentricToLonLatIn)
+    double accuracyIn, double pseudoAreaIn, bool isOffshoreIn,
+    const PJ *pjSrcGeocentricToLonLatIn, const PJ *pjDstGeocentricToLonLatIn)
     : idxInOriginalList(idxInOriginalListIn), minxSrc(minxSrcIn),
       minySrc(minySrcIn), maxxSrc(maxxSrcIn), maxySrc(maxySrcIn),
       minxDst(minxDstIn), minyDst(minyDstIn), maxxDst(maxxDstIn),
       maxyDst(maxyDstIn), pj(pjIn), name(nameIn), accuracy(accuracyIn),
-      isOffshore(isOffshoreIn),
+      pseudoArea(pseudoAreaIn), isOffshore(isOffshoreIn),
       isPriorityOp(isSpecialCaseForNAD83_to_NAD83HARN(name) ||
                    isSpecialCaseForGDA94_to_WGS84(name) ||
                    isSpecialCaseForWGS84_to_GDA2020(name)),

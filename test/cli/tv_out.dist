@@ -633,3 +633,7 @@ Test Similarity Transformation (example from EPSG Guidance Note 7.2)
 ##############################################################
 Test inverse of Similarity Transformation (example from EPSG Guidance Note 7.2)
 299905.060 4499796.515	300000.000	4500000.000 0.000
+##############################################################
+Test Similarity Transformation through CompoundCRS
+477134.28 95134.21	476763.303	95620.222 0.000
+477134.28 95134.21 5	476763.303	95620.222 5.000
