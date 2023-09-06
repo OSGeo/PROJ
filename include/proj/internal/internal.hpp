@@ -181,6 +181,9 @@ std::string concat(const std::string &, const std::string &,
                    const char *) = delete;
 std::string concat(const std::string &, const std::string &,
                    const std::string &) = delete;
+
+double getRoundedEpochInDecimalYear(double year);
+
 } // namespace internal
 
 NS_PROJ_END
