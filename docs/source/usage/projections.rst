@@ -23,17 +23,17 @@ documenting the individual :doc:`projections<../operations/projections/index>`.
     +ellps       Ellipsoid name (see ``proj -le``)
     +k           Scaling factor (deprecated)
     +k_0         Scaling factor
-    +lat_0       Latitude of origin
-    +lon_0       Central meridian
+    +lat_0       Latitude of origin (in degree if no angular unit specified)
+    +lon_0       Central meridian (in degree if no angular unit specified)
     +lon_wrap    Center longitude to use for wrapping (see below)
     +over        Allow longitude output outside -180 to 180 range, disables
                  wrapping (see below)
     +pm          Alternate prime meridian (typically a city name, see below)
     +proj        Projection name (see ``proj -l``)
-    +units       meters, US survey feet, etc.
-    +vunits      vertical units.
-    +x_0         False easting
-    +y_0         False northing
+    +units       Horizontal coordinate system units (meters, US survey feet, etc.)
+    +vunits      Vertical coordinate system units.
+    +x_0         False easting (always in meters)
+    +y_0         False northing (always in meters)
     ==========   ================================================================
 
 In the sections below most of the parameters are explained in details.
@@ -43,13 +43,16 @@ In the sections below most of the parameters are explained in details.
 Units
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Horizontal units can be specified using the ``+units`` keyword with a symbolic
-name for a unit (i.e. ``us-ft``).  Alternatively the translation to meters can be
+Horizontal coordinate system units can be specified using the ``+units`` keyword
+with a symbolic me for a unit (i.e. ``us-ft``).
+Alternatively the translation to meters can be
 specified with the ``+to_meter`` keyword (i.e. 0.304800609601219 for US feet).  The
 ``-lu`` argument to :program:`cs2cs` or :program:`proj` can be used to list
 symbolic unit names. The default unit for projected coordinates is the meter.
 A few special projections deviate from this behavior, most notably the
 latlong pseudo-projection that returns degrees.
+Note that this does *not* affect the units of linear parameters such as ``+x_0``
+or ``+y_0`` which should always be specified in degree
 
 Vertical (Z) units can be specified using the ``+vunits`` keyword with a
 symbolic name for a unit (i.e. ``us-ft``).  Alternatively the translation to
@@ -62,15 +65,15 @@ vertical units will default to be the same as the horizontal coordinates.
     :program:`proj` does not handle vertical units at all and hence the
     ``+vto_meter`` argument will be ignored.
 
-Scaling of output units can be done by applying the ``+k_0`` argument. The
-returned coordinates are scaled by the value assigned with the ``+k_0``
-parameter.
+Scaling of output units can be done by applying the ``+k_0`` argument (unitless).
+The returned coordinates are scaled by the value assigned with the ``+k_0``
+parameter. This parameter is only used by projections that mention using it,
+and its exact effect is projection dependent.
 
-Input units for parameters that can be understood to be either decimal degrees or
-radians are interpreted to be decimal degrees by convention.
-
-Explicit specification of input units can be accomplished by adding the appropriate
-suffix to input values.
+Input units for angular parameters (``+lon_0``, ``+lat_0``, etc.) are
+interpreted to be decimal degrees by convention.
+Explicit specification of input angular units can be accomplished by adding the
+appropriate ruffix to input values.
 
 
     +----------------+---------------------+
@@ -117,9 +120,17 @@ to a straight line, ``+over`` will have no effect or will not lead to expected
 results.
 
 The ``+lon_wrap`` option can be used to provide an alternative means of doing
-longitude wrapping within ``pj_transform()``.  The argument to this option is a
+longitude wrapping. It has only effect with operations that output angular
+coordinates, such as ``+proj=longlat``  The argument to this option is a
 center longitude.  So ``+lon_wrap=180`` means wrap longitudes in the range 0 to
-360.  Note that ``+over`` does **not** disable ``+lon_wrap``.
+360.
+
+::
+
+    $ echo -1 0 cs2cs +proj=longlat +to +proj=longlat +lon_wrap=180
+    359dE	0dN 0.000
+
+Note that ``+over`` does **not** disable ``+lon_wrap``.
 
 Prime Meridian
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -129,8 +140,8 @@ meridian of the declared coordinate system and that of greenwich.  A prime
 meridian is declared using the "pm" parameter, and may be assigned a symbolic
 name, or the longitude of the alternative prime meridian relative to greenwich.
 
-Currently prime meridian declarations are only utilized by the
-``pj_transform()`` API call, not the ``pj_inv()`` and ``pj_fwd()`` calls.
+Currently prime meridian declarations are not used by the ``pj_inv()`` and
+``pj_fwd()`` calls.
 Consequently the user utility :program:`cs2cs` does honour prime meridians but
 the :program:`proj` user utility ignores them.
 
@@ -193,3 +204,29 @@ They can be combined in +axis in forms like:
 
     The ``+axis`` argument does not work with the :program:`proj` command line
     utility.
+
+
+Order of applications of parameters
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+In the forward direction (from geodetic to projected coordinates), steps
+are performed in the following order:
+
+- subtracting prime meridian (``+pm``) to input coordinate longitude
+- subtracting central meridian (``+lon_0``) to input coordinate longitude
+- normalizing input coordinate longitude to [-180, 180], unless ``+over`` is
+  specified
+- application of map projection formula on a spheroid of radius 1 and with
+  the eccentricity of the target spheroid specified. Includes taking into account
+  projection parameters such as ``+k_0``, ``+lat_0``, and other projection specific
+  parameters
+- scaling of output x, y values by the semimajor axis
+- addition of false easting ``+x_0`` to x and false northing ``+y_0`` to y
+- scaling of output x, y by the output horizontal unit (``+units`` / ``+to_meter``)
+- scaling of output z by the output vertical unit (``+vunits`` / ``+vto_meter``)
+- application of axis orientation and order (``+axis``)
+
+This is implemented mostly in :source_file:`src/fwd.cpp`
+
+For the reverse direction (from projected coordinates to geodetic coordinates),
+reverse steps are performed in the reverse order.
