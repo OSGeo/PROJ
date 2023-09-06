@@ -171,7 +171,7 @@ static void process(FILE *fid)
 
         if (data.u != HUGE_VAL) {
 
-            if (srcIsLongLat) {
+            if (srcIsLongLat && fabs(srcToRadians - M_PI / 180) < 1e-10) {
                 /* dmstor gives values to radians. Convert now to the SRS unit
                  */
                 data.u /= srcToRadians;
@@ -922,10 +922,10 @@ int main(int argc, char **argv) {
     }
 
     /* set input formatting control */
-    if (!srcIsLongLat)
-        informat = strtod;
-    else {
+    if (srcIsLongLat && fabs(srcToRadians - M_PI / 180) < 1e-10)
         informat = dmstor;
+    else {
+        informat = strtod;
     }
 
     if (!destIsLongLat && !oform)
