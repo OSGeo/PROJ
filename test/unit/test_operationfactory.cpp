@@ -9403,6 +9403,7 @@ TEST(operation, createOperation_point_motion_operation_geog2D) {
     EXPECT_FALSE(list[0]->hasBallparkTransformation());
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
+              "+step +proj=set +v_4=2002 "
               "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
               "+step +proj=cart +ellps=GRS80 "
@@ -9412,7 +9413,8 @@ TEST(operation, createOperation_point_motion_operation_geog2D) {
               "+step +proj=set +v_4=2010 +omit_inv "
               "+step +inv +proj=cart +ellps=GRS80 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
-              "+step +proj=axisswap +order=2,1");
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=set +v_4=2010");
     EXPECT_TRUE(list[1]->hasBallparkTransformation());
     EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=noop");
@@ -9477,10 +9479,21 @@ TEST(operation, createOperation_point_motion_operation_geocentric) {
     EXPECT_FALSE(list[0]->hasBallparkTransformation());
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
+              "+step +proj=set +v_4=2002 "
               "+step +proj=set +v_4=2002 +omit_fwd "
               "+step +proj=deformation +dt=8 +grids=ca_nrc_NAD83v70VG.tif "
               "+ellps=GRS80 "
-              "+step +proj=set +v_4=2010 +omit_inv");
+              "+step +proj=set +v_4=2010 +omit_inv "
+              "+step +proj=set +v_4=2010");
+    EXPECT_EQ(list[0]->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=set +v_4=2010 "
+              "+step +proj=set +v_4=2010 +omit_fwd "
+              "+step +proj=deformation +dt=-8 +grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +proj=set +v_4=2002 +omit_inv "
+              "+step +proj=set +v_4=2002");
     EXPECT_TRUE(list[1]->hasBallparkTransformation());
     EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=noop");
@@ -9510,13 +9523,15 @@ TEST(operation, createOperation_point_motion_operation_geocentric_to_geog3D) {
     EXPECT_FALSE(list[0]->hasBallparkTransformation());
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
+              "+step +proj=set +v_4=2002 "
               "+step +proj=set +v_4=2002 +omit_fwd "
               "+step +proj=deformation +dt=8 +grids=ca_nrc_NAD83v70VG.tif "
               "+ellps=GRS80 "
               "+step +proj=set +v_4=2010 +omit_inv "
               "+step +inv +proj=cart +ellps=GRS80 "
               "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
-              "+step +proj=axisswap +order=2,1");
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=set +v_4=2010");
     EXPECT_TRUE(list[1]->hasBallparkTransformation());
     EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
@@ -9551,6 +9566,7 @@ TEST(operation,
     EXPECT_EQ(
         list[0]->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline "
+        "+step +proj=set +v_4=2002 "
         "+step +proj=axisswap +order=2,1 "
         "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
         "+step +proj=cart +ellps=GRS80 "
@@ -9565,7 +9581,53 @@ TEST(operation,
         "+ds=-7.201e-05 +t_epoch=2010 +convention=position_vector "
         "+step +inv +proj=cart +ellps=GRS80 "
         "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
-        "+step +proj=axisswap +order=2,1");
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=set +v_4=2005");
+    EXPECT_TRUE(list[1]->hasBallparkTransformation());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     createOperation_point_motion_operation_ITRF2014_to_NAD83_CSRS_v7) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    // ITRF2014
+    auto sourceCRS = factory->createCoordinateReferenceSystem("7912");
+    auto crs_2005 = CoordinateMetadata::create(sourceCRS, 2005.0, dbContext);
+    // "NAD83(CSRS)v7"
+    auto targetCRS = factory->createCoordinateReferenceSystem("8254");
+    auto crs_2002 = CoordinateMetadata::create(targetCRS, 2002.0, dbContext);
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        crs_2005, crs_2002, ctxt);
+    ASSERT_GE(list.size(), 2U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(
+        list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline "
+        "+step +proj=set +v_4=2005 "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+        "+step +proj=cart +ellps=GRS80 "
+        "+step +proj=helmert +x=1.0053 +y=-1.90921 +z=-0.54157 +rx=-0.02678138 "
+        "+ry=0.00042027 +rz=-0.01093206 +s=0.00036891 +dx=0.00079 +dy=-0.0006 "
+        "+dz=-0.00144 +drx=-6.667e-05 +dry=0.00075744 +drz=5.133e-05 "
+        "+ds=-7.201e-05 +t_epoch=2010 +convention=position_vector "
+        "+step +proj=set +v_4=2005 +omit_fwd "
+        "+step +proj=deformation +dt=-3 +grids=ca_nrc_NAD83v70VG.tif "
+        "+ellps=GRS80 "
+        "+step +proj=set +v_4=2002 +omit_inv "
+        "+step +inv +proj=cart +ellps=GRS80 "
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=set +v_4=2002");
     EXPECT_TRUE(list[1]->hasBallparkTransformation());
 }
 
@@ -9592,6 +9654,7 @@ TEST(operation,
     EXPECT_FALSE(list[0]->hasBallparkTransformation());
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
+              "+step +proj=set +v_4=1997 "
               "+step +inv +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
               "+x_0=304800 +y_0=0 +ellps=GRS80 "
               "+step +proj=vgridshift +grids=ca_nrc_HT2_1997.tif +multiplier=1 "
@@ -9603,7 +9666,8 @@ TEST(operation,
               "+step +inv +proj=cart +ellps=GRS80 "
               "+step +inv +proj=vgridshift +grids=ca_nrc_CGG2013an83.tif "
               "+multiplier=1 "
-              "+step +proj=utm +zone=19 +ellps=GRS80");
+              "+step +proj=utm +zone=19 +ellps=GRS80 "
+              "+step +proj=set +v_4=2010");
 }
 
 // ---------------------------------------------------------------------------
@@ -9862,6 +9926,7 @@ TEST(
     EXPECT_FALSE(list[0]->hasBallparkTransformation());
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
+              "+step +proj=set +v_4=1997 "
               "+step +inv +proj=utm +zone=17 +ellps=GRS80 "
               "+step +proj=vgridshift +grids=ca_nrc_CGG2013an83.tif "
               "+multiplier=1 "
@@ -9873,7 +9938,8 @@ TEST(
               "+step +inv +proj=cart +ellps=GRS80 "
               "+step +inv +proj=vgridshift +grids=ca_nrc_CGG2013an83.tif "
               "+multiplier=1 "
-              "+step +proj=utm +zone=17 +ellps=GRS80");
+              "+step +proj=utm +zone=17 +ellps=GRS80 "
+              "+step +proj=set +v_4=2002");
 }
 
 // ---------------------------------------------------------------------------

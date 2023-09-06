@@ -3075,21 +3075,35 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
         bool resNonEmptyBeforeFiltering;
 
         // Deal with potential epoch change
-        std::vector<CoordinateOperationNNPtr> opsEpochChange;
+        std::vector<CoordinateOperationNNPtr> opsEpochChangeSrc;
+        std::vector<CoordinateOperationNNPtr> opsEpochChangeDst;
         if (sourceEpoch.has_value() && targetEpoch.has_value() &&
             !sourceEpoch->coordinateEpoch()._isEquivalentTo(
                 targetEpoch->coordinateEpoch())) {
-            const auto pmo =
+            const auto pmoSrc =
                 context.context->getAuthorityFactory()
                     ->getPointMotionOperationsFor(
                         NN_NO_CHECK(
                             util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
                                 candidateSrcGeod)),
                         true);
-            if (!pmo.empty()) {
-                opsEpochChange =
+            if (!pmoSrc.empty()) {
+                opsEpochChangeSrc =
                     createOperations(candidateSrcGeod, sourceEpoch,
                                      candidateSrcGeod, targetEpoch, context);
+            } else {
+                const auto pmoDst =
+                    context.context->getAuthorityFactory()
+                        ->getPointMotionOperationsFor(
+                            NN_NO_CHECK(
+                                util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
+                                    candidateDstGeod)),
+                            true);
+                if (!pmoDst.empty()) {
+                    opsEpochChangeDst = createOperations(
+                        candidateDstGeod, sourceEpoch, candidateDstGeod,
+                        targetEpoch, context);
+                }
             }
         }
 
@@ -3107,9 +3121,9 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
         assert(!opsThird.empty());
         const CoordinateOperationNNPtr &opThird(opsThird[0]);
 
-        for (size_t iEpochChange = 0;
-             iEpochChange < std::max<size_t>(1, opsEpochChange.size());
-             ++iEpochChange) {
+        const auto nIters = std::max<size_t>(
+            1, std::max(opsEpochChangeSrc.size(), opsEpochChangeDst.size()));
+        for (size_t iEpochChange = 0; iEpochChange < nIters; ++iEpochChange) {
             for (auto &opSecond : opsSecond) {
                 // Check that it is not a transformation synthetized by
                 // ourselves
@@ -3185,25 +3199,29 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                                     std::string(), dbContext));
                     }
                 }
-                if (isNullFirst) {
-                    auto oldTarget(
-                        NN_CHECK_ASSERT(opSecondCloned->targetCRS()));
-                    setCRSs(opSecondCloned.get(), sourceCRS, oldTarget);
-                } else {
+                if (!isNullFirst) {
                     subOps.emplace_back(opFirst);
                 }
-                if (!opsEpochChange.empty()) {
-                    subOps.emplace_back(opsEpochChange[iEpochChange]);
+                if (!opsEpochChangeSrc.empty()) {
+                    subOps.emplace_back(opsEpochChangeSrc[iEpochChange]);
                 }
-                if (isNullThird) {
-                    auto oldSource(
-                        NN_CHECK_ASSERT(opSecondCloned->sourceCRS()));
-                    setCRSs(opSecondCloned.get(), oldSource, targetCRS);
-                    subOps.emplace_back(opSecondCloned);
-                } else {
-                    subOps.emplace_back(opSecondCloned);
+                subOps.emplace_back(opSecondCloned);
+                if (!opsEpochChangeDst.empty()) {
+                    subOps.emplace_back(opsEpochChangeDst[iEpochChange]);
+                }
+                if (!isNullThird) {
                     subOps.emplace_back(opThird);
                 }
+
+                subOps[0] = subOps[0]->shallowClone();
+                if (subOps[0]->targetCRS())
+                    setCRSs(subOps[0].get(), sourceCRS,
+                            NN_NO_CHECK(subOps[0]->targetCRS()));
+                subOps.back() = subOps.back()->shallowClone();
+                if (subOps[0]->sourceCRS())
+                    setCRSs(subOps.back().get(),
+                            NN_NO_CHECK(subOps.back()->sourceCRS()), targetCRS);
+
 #ifdef TRACE_CREATE_OPERATIONS
                 std::string debugStr;
                 for (const auto &op : subOps) {
