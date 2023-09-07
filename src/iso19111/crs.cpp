@@ -3137,12 +3137,20 @@ bool GeographicCRS::_isEquivalentTo(
     const auto standardCriterion = getStandardCriterion(criterion);
     if (GeodeticCRS::_isEquivalentToNoTypeCheck(other, standardCriterion,
                                                 dbContext)) {
+        // Make sure GeoPackage "Undefined geographic SRS" != EPSG:4326
+        const auto otherGeogCRS = dynamic_cast<const GeographicCRS *>(other);
+        if ((nameStr() == "Undefined geographic SRS" ||
+             otherGeogCRS->nameStr() == "Undefined geographic SRS") &&
+            otherGeogCRS->nameStr() != nameStr()) {
+            return false;
+        }
         return true;
     }
     if (criterion !=
         util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS) {
         return false;
     }
+
     const auto axisOrder = coordinateSystem()->axisOrder();
     if (axisOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH ||
         axisOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST) {
