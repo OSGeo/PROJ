@@ -37,10 +37,12 @@ if(NOT MSVC)
 
 else()
 
+  if(NOT WINDOWS_STORE)
     # Linking to setargv.obj enables wildcard globbing for the
     # command line utilities, when compiling with MSVC
     # https://docs.microsoft.com/cpp/c-language/expanding-wildcard-arguments
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} setargv.obj")
+  endif()
 
 endif()
 
