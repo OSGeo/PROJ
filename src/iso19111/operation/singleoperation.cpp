@@ -2187,12 +2187,20 @@ createSimilarPropertiesMethod(common::IdentifiedObjectNNPtr obj) {
 
 // ---------------------------------------------------------------------------
 
-static bool isRegularVerticalGridMethod(int methodEPSGCode) {
+static bool isRegularVerticalGridMethod(int methodEPSGCode,
+                                        bool &reverseOffsetSign) {
+    if (methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NRCAN_BYN) {
+        // NRCAN vertical shift grids use a reverse convention from other
+        // grids: the value in the grid is the value to subtract from the
+        // source vertical CRS to get the target value.
+        reverseOffsetSign = true;
+        return true;
+    }
+    reverseOffsetSign = false;
     return methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ||
            methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_BEV_AT ||
            methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX ||
-           methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_PL_TXT ||
-           methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NRCAN_BYN;
+           methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_PL_TXT;
 }
 
 // ---------------------------------------------------------------------------
@@ -2477,8 +2485,9 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
         }
     }
 
+    bool reverseOffsetSign = false;
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTCON ||
-        isRegularVerticalGridMethod(methodEPSGCode)) {
+        isRegularVerticalGridMethod(methodEPSGCode, reverseOffsetSign)) {
         auto fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
                            EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
@@ -4146,7 +4155,8 @@ bool SingleOperation::exportToPROJStringGeneric(
         }
     }
 
-    if (isRegularVerticalGridMethod(methodEPSGCode)) {
+    bool reverseOffsetSign = false;
+    if (isRegularVerticalGridMethod(methodEPSGCode, reverseOffsetSign)) {
         auto fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
                            EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
@@ -4154,7 +4164,7 @@ bool SingleOperation::exportToPROJStringGeneric(
             fileParameter->type() == ParameterValue::Type::FILENAME) {
             formatter->addStep("vgridshift");
             formatter->addParam("grids", fileParameter->valueFile());
-            formatter->addParam("multiplier", 1.0);
+            formatter->addParam("multiplier", reverseOffsetSign ? -1.0 : 1.0);
             return true;
         }
     }

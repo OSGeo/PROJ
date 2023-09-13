@@ -9698,7 +9698,7 @@ TEST(operation,
             "+step +inv +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
             "+x_0=304800 +y_0=0 +ellps=GRS80 "
             "+step +proj=vgridshift +grids=ca_nrc_HT2_1997_CGG2013a.tif "
-            "+multiplier=1 "
+            "+multiplier=-1 "
             "+step +proj=utm +zone=19 +ellps=GRS80");
     }
     {
@@ -9712,7 +9712,7 @@ TEST(operation,
             "+step +inv +proj=utm +zone=19 +ellps=GRS80 "
             "+step +inv +proj=vgridshift "
             "+grids=ca_nrc_HT2_1997_CGG2013a.tif "
-            "+multiplier=1 "
+            "+multiplier=-1 "
             "+step +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
             "+x_0=304800 +y_0=0 +ellps=GRS80");
     }
@@ -9746,7 +9746,7 @@ TEST(operation,
             "+step +inv +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
             "+x_0=304800 +y_0=0 +ellps=GRS80 "
             "+step +proj=vgridshift +grids=ca_nrc_HT2_2002v70_CGG2013a.tif "
-            "+multiplier=1 "
+            "+multiplier=-1 "
             "+step +proj=utm +zone=19 +ellps=GRS80");
     }
     {
@@ -9760,7 +9760,7 @@ TEST(operation,
             "+step +inv +proj=utm +zone=19 +ellps=GRS80 "
             "+step +inv +proj=vgridshift "
             "+grids=ca_nrc_HT2_2002v70_CGG2013a.tif "
-            "+multiplier=1 "
+            "+multiplier=-1 "
             "+step +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
             "+x_0=304800 +y_0=0 +ellps=GRS80");
     }
@@ -9794,7 +9794,7 @@ TEST(operation,
             "+step +inv +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
             "+x_0=304800 +y_0=0 +ellps=GRS80 "
             "+step +proj=vgridshift +grids=ca_nrc_HT2_2010v70_CGG2013a.tif "
-            "+multiplier=1 "
+            "+multiplier=-1 "
             "+step +proj=utm +zone=19 +ellps=GRS80");
     }
     {
@@ -9808,7 +9808,7 @@ TEST(operation,
             "+step +inv +proj=utm +zone=19 +ellps=GRS80 "
             "+step +inv +proj=vgridshift "
             "+grids=ca_nrc_HT2_2010v70_CGG2013a.tif "
-            "+multiplier=1 "
+            "+multiplier=-1 "
             "+step +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
             "+x_0=304800 +y_0=0 +ellps=GRS80");
     }
