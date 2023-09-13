@@ -51,6 +51,7 @@ extensions = [
     "redirects",
     "replacements",
     "program_with_link",
+    "source_file",
 ]
 
 # File extensions of source files
@@ -261,3 +262,8 @@ texinfo_documents = [
         False,
     ),
 ]
+
+# -- Source file links ------------------------------------------
+
+source_file_root = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
+source_file_url_template = "https://github.com/OSGeo/PROJ/blob/master/{}"
