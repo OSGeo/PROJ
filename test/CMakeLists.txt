@@ -72,7 +72,7 @@ proj_add_gie_test("GIGS-5101.4-jhs-etmerc" "gigs/5101.4-jhs-etmerc.gie")
 # Same as above, but using etmerc instead of tmerc
 #proj_add_gie_test("GIGS-5101.4-jhs" "gigs/5101.4-jhs.gie")
 proj_add_gie_test("GIGS-5102.1" "gigs/5102.1.gie")
-#proj_add_gie_test("GIGS-5102.2" "gigs/5102.2.gie")
+proj_add_gie_test("GIGS-5102.2" "gigs/5102.2.gie")
 proj_add_gie_test("GIGS-5103.1" "gigs/5103.1.gie")
 proj_add_gie_test("GIGS-5103.2" "gigs/5103.2.gie")
 proj_add_gie_test("GIGS-5103.3" "gigs/5103.3.gie")
