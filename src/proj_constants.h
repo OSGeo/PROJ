@@ -596,6 +596,12 @@
 
 /* ------------------------------------------------------------------------ */
 
+#define EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN                \
+    "Vertical Offset by velocity grid (NRCan byn)"
+#define EPSG_CODE_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN 1113
+
+/* ------------------------------------------------------------------------ */
+
 #define PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D                                 \
     "GravityRelatedHeight to Geographic3D"
 

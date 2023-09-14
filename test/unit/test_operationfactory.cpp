@@ -10003,3 +10003,43 @@ TEST(operation, createOperation_test_createOperationsWithDatumPivot_iter_1) {
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=noop");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_Vrtical_Offset_by_velocity_grid) {
+    auto dbContext = DatabaseContext::create();
+
+    auto objSrc = createFromUserInput("NAD83(CSRS)v7 + CGVD2013a(2002) height",
+                                      dbContext);
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = createFromUserInput("NAD83(CSRS)v7 + CGVD2013a(2010) height",
+                                       dbContext);
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDest);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=push +v_1 +v_2 "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +inv +proj=deformation +dt=-8 "
+              "+grids=ca_nrc_NAD83v70VG.tif +ellps=GRS80 "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=pop +v_1 +v_2 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
