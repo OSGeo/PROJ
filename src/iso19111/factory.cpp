@@ -330,10 +330,10 @@ std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
     }
     sqlite3 *sqlite_handle = nullptr;
     // SQLITE_OPEN_FULLMUTEX as this will be used from concurrent threads
-    if (sqlite3_open_v2(path.c_str(), &sqlite_handle,
-                        SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX,
-                        vfsName.empty() ? nullptr : vfsName.c_str()) !=
-            SQLITE_OK ||
+    if (sqlite3_open_v2(
+            path.c_str(), &sqlite_handle,
+            SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX | SQLITE_OPEN_URI,
+            vfsName.empty() ? nullptr : vfsName.c_str()) != SQLITE_OK ||
         !sqlite_handle) {
         if (sqlite_handle != nullptr) {
             sqlite3_close(sqlite_handle);
