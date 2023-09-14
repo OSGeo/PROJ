@@ -2019,7 +2019,7 @@ Updates
 
 * Added "require_grid" option to gie (`#1088 <https://github.com/OSGeo/proj.4/issues/1088>`_)
 
-* Replace :option:`+transpose` option of Helmert transform with :option:`+convention`.
+* Replace ``transpose`` option of Helmert transform with :option:`+convention`.
   From now on the convention used should be explicitly written. An
   error will be returned when using the +transpose option (`#1091 <https://github.com/OSGeo/proj.4/issues/1091>`_)
 
