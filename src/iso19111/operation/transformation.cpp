@@ -1851,7 +1851,7 @@ void Transformation::_exportToPROJString(
         return;
     }
 
-    throw io::FormattingException("Unimplemented");
+    throw io::FormattingException("Unimplemented " + nameStr());
 }
 
 } // namespace operation

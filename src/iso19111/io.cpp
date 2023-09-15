@@ -1479,6 +1479,9 @@ struct WKTParser::Private {
 
     TransformationNNPtr buildCoordinateOperation(const WKTNodeNNPtr &node);
 
+    PointMotionOperationNNPtr
+    buildPointMotionOperation(const WKTNodeNNPtr &node);
+
     ConcatenatedOperationNNPtr
     buildConcatenatedOperation(const WKTNodeNNPtr &node);
 
@@ -3622,6 +3625,47 @@ WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+PointMotionOperationNNPtr
+WKTParser::Private::buildPointMotionOperation(const WKTNodeNNPtr &node) {
+    const auto *nodeP = node->GP();
+    auto &methodNode = nodeP->lookForChild(WKTConstants::METHOD);
+    if (isNull(methodNode)) {
+        ThrowMissing(WKTConstants::METHOD);
+    }
+    if (methodNode->GP()->childrenSize() == 0) {
+        ThrowNotEnoughChildren(WKTConstants::METHOD);
+    }
+
+    auto &sourceCRSNode = nodeP->lookForChild(WKTConstants::SOURCECRS);
+    if (sourceCRSNode->GP()->childrenSize() != 1) {
+        ThrowMissing(WKTConstants::SOURCECRS);
+    }
+    auto sourceCRS = buildCRS(sourceCRSNode->GP()->children()[0]);
+    if (!sourceCRS) {
+        throw ParsingException("Invalid content in SOURCECRS node");
+    }
+
+    std::vector<OperationParameterNNPtr> parameters;
+    std::vector<ParameterValueNNPtr> values;
+    auto defaultLinearUnit = UnitOfMeasure::NONE;
+    auto defaultAngularUnit = UnitOfMeasure::NONE;
+    consumeParameters(node, false, parameters, values, defaultLinearUnit,
+                      defaultAngularUnit);
+
+    std::vector<PositionalAccuracyNNPtr> accuracies;
+    auto &accuracyNode = nodeP->lookForChild(WKTConstants::OPERATIONACCURACY);
+    if (/*!isNull(accuracyNode) && */ accuracyNode->GP()->childrenSize() == 1) {
+        accuracies.push_back(PositionalAccuracy::create(
+            stripQuotes(accuracyNode->GP()->children()[0])));
+    }
+
+    return PointMotionOperation::create(
+        buildProperties(node), NN_NO_CHECK(sourceCRS),
+        buildProperties(methodNode), parameters, values, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
 ConcatenatedOperationNNPtr
 WKTParser::Private::buildConcatenatedOperation(const WKTNodeNNPtr &node) {
 
@@ -5363,13 +5407,14 @@ WKTParser::Private::buildCoordinateMetadata(const WKTNodeNNPtr &node) {
         if (epochChildren.empty()) {
             ThrowMissing(WKTConstants::EPOCH);
         }
+        double coordinateEpoch;
         try {
-            const double coordinateEpoch = asDouble(epochChildren[0]);
-            return CoordinateMetadata::create(NN_NO_CHECK(crs),
-                                              coordinateEpoch);
+            coordinateEpoch = asDouble(epochChildren[0]);
         } catch (const std::exception &) {
             throw ParsingException("Invalid EPOCH node");
         }
+        return CoordinateMetadata::create(NN_NO_CHECK(crs), coordinateEpoch,
+                                          dbContext_);
     }
 
     return CoordinateMetadata::create(NN_NO_CHECK(crs));
@@ -5601,6 +5646,11 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
             buildConcatenatedOperation(node));
     }
 
+    if (ci_equal(name, WKTConstants::POINTMOTIONOPERATION)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            buildPointMotionOperation(node));
+    }
+
     if (ci_equal(name, WKTConstants::ID) ||
         ci_equal(name, WKTConstants::AUTHORITY)) {
         return util::nn_static_pointer_cast<BaseObject>(
@@ -5658,6 +5708,7 @@ class JSONParser {
     CompoundCRSNNPtr buildCompoundCRS(const json &j);
     BoundCRSNNPtr buildBoundCRS(const json &j);
     TransformationNNPtr buildTransformation(const json &j);
+    PointMotionOperationNNPtr buildPointMotionOperation(const json &j);
     ConcatenatedOperationNNPtr buildConcatenatedOperation(const json &j);
     CoordinateMetadataNNPtr buildCoordinateMetadata(const json &j);
 
@@ -6217,6 +6268,9 @@ BaseObjectNNPtr JSONParser::create(const json &j)
     if (type == "Transformation") {
         return buildTransformation(j);
     }
+    if (type == "PointMotionOperation") {
+        return buildPointMotionOperation(j);
+    }
     if (type == "ConcatenatedOperation") {
         return buildConcatenatedOperation(j);
     }
@@ -6581,6 +6635,43 @@ TransformationNNPtr JSONParser::buildTransformation(const json &j) {
 
 // ---------------------------------------------------------------------------
 
+PointMotionOperationNNPtr JSONParser::buildPointMotionOperation(const json &j) {
+
+    auto sourceCRS = buildCRS(getObject(j, "source_crs"));
+    auto methodJ = getObject(j, "method");
+    auto parametersJ = getArray(j, "parameters");
+    std::vector<OperationParameterNNPtr> parameters;
+    std::vector<ParameterValueNNPtr> values;
+    for (const auto &param : parametersJ) {
+        if (!param.is_object()) {
+            throw ParsingException(
+                "Unexpected type for a \"parameters\" child");
+        }
+        parameters.emplace_back(
+            OperationParameter::create(buildProperties(param)));
+        if (param.contains("value")) {
+            auto v = param["value"];
+            if (v.is_string()) {
+                values.emplace_back(
+                    ParameterValue::createFilename(v.get<std::string>()));
+                continue;
+            }
+        }
+        values.emplace_back(ParameterValue::create(getMeasure(param)));
+    }
+    std::vector<PositionalAccuracyNNPtr> accuracies;
+    if (j.contains("accuracy")) {
+        accuracies.push_back(
+            PositionalAccuracy::create(getString(j, "accuracy")));
+    }
+
+    return PointMotionOperation::create(buildProperties(j), sourceCRS,
+                                        buildProperties(methodJ), parameters,
+                                        values, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
 ConcatenatedOperationNNPtr
 JSONParser::buildConcatenatedOperation(const json &j) {
 
@@ -6625,8 +6716,8 @@ CoordinateMetadataNNPtr JSONParser::buildCoordinateMetadata(const json &j) {
     if (j.contains("coordinateEpoch")) {
         auto jCoordinateEpoch = j["coordinateEpoch"];
         if (jCoordinateEpoch.is_number()) {
-            return CoordinateMetadata::create(crs,
-                                              jCoordinateEpoch.get<double>());
+            return CoordinateMetadata::create(
+                crs, jCoordinateEpoch.get<double>(), dbContext_);
         }
         throw ParsingException(
             "Unexpected type for value of \"coordinateEpoch\"");
@@ -7209,6 +7300,10 @@ static BaseObjectNNPtr createFromURNPart(const DatabaseContextPtr &dbContext,
         if (type == "meridian") {
             return factory->createPrimeMeridian(code);
         }
+        // Extension of OGC URN syntax to CoordinateMetadata
+        if (type == "coordinateMetadata") {
+            return factory->createCoordinateMetadata(code);
+        }
         throw ParsingException(concat("unhandled object type: ", type));
     } catch (...) {
         if (version.empty()) {
@@ -7238,11 +7333,53 @@ static BaseObjectNNPtr createFromURNPart(const DatabaseContextPtr &dbContext,
 static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                            const DatabaseContextPtr &dbContext,
                                            bool usePROJ4InitRules,
-                                           PJ_CONTEXT *ctx) {
+                                           PJ_CONTEXT *ctx,
+                                           bool ignoreCoordinateEpoch) {
     std::size_t idxFirstCharNotSpace = text.find_first_not_of(" \t\r\n");
     if (idxFirstCharNotSpace > 0 && idxFirstCharNotSpace != std::string::npos) {
         return createFromUserInput(text.substr(idxFirstCharNotSpace), dbContext,
-                                   usePROJ4InitRules, ctx);
+                                   usePROJ4InitRules, ctx,
+                                   ignoreCoordinateEpoch);
+    }
+
+    // Parse strings like "ITRF2014 @ 2025.0"
+    const auto posAt = text.find('@');
+    if (!ignoreCoordinateEpoch && posAt != std::string::npos) {
+
+        // Try first as if belonged to the name
+        try {
+            return createFromUserInput(text, dbContext, usePROJ4InitRules, ctx,
+                                       /* ignoreCoordinateEpoch = */ true);
+        } catch (...) {
+        }
+
+        std::string leftPart = text.substr(0, posAt);
+        while (!leftPart.empty() && leftPart.back() == ' ')
+            leftPart.resize(leftPart.size() - 1);
+        const auto nonSpacePos = text.find_first_not_of(' ', posAt + 1);
+        if (nonSpacePos != std::string::npos) {
+            auto obj =
+                createFromUserInput(leftPart, dbContext, usePROJ4InitRules, ctx,
+                                    /* ignoreCoordinateEpoch = */ true);
+            auto crs = nn_dynamic_pointer_cast<CRS>(obj);
+            if (crs) {
+                double epoch;
+                try {
+                    epoch = c_locale_stod(text.substr(nonSpacePos));
+                } catch (const std::exception &) {
+                    throw ParsingException("non-numeric value after @");
+                }
+                try {
+                    return CoordinateMetadata::create(NN_NO_CHECK(crs), epoch,
+                                                      dbContext);
+                } catch (const std::exception &e) {
+                    throw ParsingException(
+                        std::string(
+                            "CoordinateMetadata::create() failed with: ") +
+                        e.what());
+                }
+            }
+        }
     }
 
     if (!text.empty() && text[0] == '{') {
@@ -7771,36 +7908,6 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         }
     }
 
-    // Parse strings like "ITRF2014 @ 2025.0"
-    const auto posAt = text.find('@');
-    if (posAt != std::string::npos) {
-        std::string leftPart = text.substr(0, posAt);
-        while (!leftPart.empty() && leftPart.back() == ' ')
-            leftPart.resize(leftPart.size() - 1);
-        const auto nonSpacePos = text.find_first_not_of(' ', posAt + 1);
-        if (nonSpacePos != std::string::npos) {
-            auto obj = createFromUserInput(leftPart, dbContext,
-                                           usePROJ4InitRules, ctx);
-            auto crs = nn_dynamic_pointer_cast<CRS>(obj);
-            if (crs) {
-                double epoch;
-                try {
-                    epoch = c_locale_stod(text.substr(nonSpacePos));
-                } catch (const std::exception &) {
-                    throw ParsingException("non-numeric value after @");
-                }
-                try {
-                    return CoordinateMetadata::create(NN_NO_CHECK(crs), epoch);
-                } catch (const std::exception &e) {
-                    throw ParsingException(
-                        std::string(
-                            "CoordinateMetadata::create() failed with: ") +
-                        e.what());
-                }
-            }
-        }
-    }
-
     throw ParsingException("unrecognized format / unknown name");
 }
 //! @endcond
@@ -7828,6 +7935,9 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  *      e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)"
  *      "urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031"
  * </li>
+ * <li>Extension of OGC URN for CoordinateMetadata.
+ *     e.g.
+ * "urn:ogc:def:coordinateMetadata:NRCAN::NAD83_CSRS_1997_MTM11_HT2_1997"</li>
  * <li> OGC URN combining references for concatenated operations
  *      e.g.
  * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
@@ -7861,7 +7971,8 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
 BaseObjectNNPtr createFromUserInput(const std::string &text,
                                     const DatabaseContextPtr &dbContext,
                                     bool usePROJ4InitRules) {
-    return createFromUserInput(text, dbContext, usePROJ4InitRules, nullptr);
+    return createFromUserInput(text, dbContext, usePROJ4InitRules, nullptr,
+                               /* ignoreCoordinateEpoch = */ false);
 }
 
 // ---------------------------------------------------------------------------
@@ -7886,6 +7997,9 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  *      e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)"
  *      "urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031"
  * </li>
+ * <li>Extension of OGC URN for CoordinateMetadata.
+ *     e.g.
+ * "urn:ogc:def:coordinateMetadata:NRCAN::NAD83_CSRS_1997_MTM11_HT2_1997"</li>
  * <li> OGC URN combining references for concatenated operations
  *      e.g.
  * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
@@ -7914,7 +8028,8 @@ BaseObjectNNPtr createFromUserInput(const std::string &text, PJ_CONTEXT *ctx) {
         }
     } catch (const std::exception &) {
     }
-    return createFromUserInput(text, dbContext, false, ctx);
+    return createFromUserInput(text, dbContext, false, ctx,
+                               /* ignoreCoordinateEpoch = */ false);
 }
 
 // ---------------------------------------------------------------------------
@@ -8075,7 +8190,8 @@ WKTParser::guessDialect(const std::string &inputWkt) noexcept {
         &WKTConstants::DYNAMIC, &WKTConstants::FRAMEEPOCH, &WKTConstants::MODEL,
         &WKTConstants::VELOCITYGRID, &WKTConstants::ENSEMBLE,
         &WKTConstants::DERIVEDPROJCRS, &WKTConstants::BASEPROJCRS,
-        &WKTConstants::GEOGRAPHICCRS, &WKTConstants::TRF, &WKTConstants::VRF};
+        &WKTConstants::GEOGRAPHICCRS, &WKTConstants::TRF, &WKTConstants::VRF,
+        &WKTConstants::POINTMOTIONOPERATION};
 
     for (const auto &pointerKeyword : wkt2_2019_only_keywords) {
         auto pos = ci_find(wkt, *pointerKeyword);

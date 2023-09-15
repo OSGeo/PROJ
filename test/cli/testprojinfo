@@ -390,6 +390,9 @@ echo 'Testing EPSG:9945 -o PROJ -q' >> ${OUT}
 $EXE EPSG:9945 -o PROJ -q >> ${OUT}
 echo "" >>${OUT}
 
+echo 'Testing -s "NAD83(CSRS)v7" --s_epoch 1997 -t "NAD83(CSRS)v7" --t_epoch 2010 --summary --hide-ballpark' >> ${OUT}
+$EXE -s "NAD83(CSRS)v7" --s_epoch 1997 -t "NAD83(CSRS)v7" --t_epoch 2010 --summary --hide-ballpark >> ${OUT}
+echo "" >>${OUT}
 
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"

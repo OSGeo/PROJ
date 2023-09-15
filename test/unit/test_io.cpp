@@ -12689,6 +12689,14 @@ TEST(io, createFromUserInput) {
         ASSERT_TRUE(coordinateMetadata != nullptr);
         EXPECT_EQ(coordinateMetadata->coordinateEpochAsDecimalYear(), 2025.1);
     }
+
+    {
+        auto obj = createFromUserInput("EPSG:9000 @ 2025.1", dbContext);
+        auto coordinateMetadata =
+            nn_dynamic_pointer_cast<CoordinateMetadata>(obj);
+        ASSERT_TRUE(coordinateMetadata != nullptr);
+        EXPECT_EQ(coordinateMetadata->coordinateEpochAsDecimalYear(), 2025.1);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -16882,4 +16890,130 @@ TEST(io, EXTENSION_PROJ4) {
                                "+datum=NAD27 +zone=11 +over. Suffix");
     EXPECT_EQ(crs3->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=utm +datum=NAD27 +zone=11 +over +type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, PointMotionOperation) {
+    auto wkt =
+        "POINTMOTIONOPERATION[\"Canada velocity grid v7\",\n"
+        "    SOURCECRS[\n"
+        "        GEOGCRS[\"NAD83(CSRS)v7\",\n"
+        "            DATUM[\"North American Datum of 1983 (CSRS) version 7\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,3],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"ellipsoidal height (h)\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",8254]]],\n"
+        "    METHOD[\"Point motion by grid (Canada NTv2_Vel)\",\n"
+        "        ID[\"EPSG\",1070]],\n"
+        "    PARAMETERFILE[\"Point motion velocity grid file\",\"foo.tif\"],\n"
+        "    OPERATIONACCURACY[0.01],\n"
+        "    USAGE[\n"
+        "        SCOPE[\"scope\"],\n"
+        "        AREA[\"area\"],\n"
+        "        BBOX[38.21,-141.01,86.46,-40.73]],\n"
+        "    ID[\"DERIVED_FROM(EPSG)\",9483],\n"
+        "    REMARK[\"remark.\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto pmo = nn_dynamic_pointer_cast<PointMotionOperation>(obj);
+    ASSERT_TRUE(pmo != nullptr);
+    EXPECT_EQ(
+        pmo->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, PointMotionOperation) {
+    auto json =
+        "{\n"
+        "  \"$schema\": \"foo\",\n"
+        "  \"type\": \"PointMotionOperation\",\n"
+        "  \"name\": \"Canada velocity grid v7\",\n"
+        "  \"source_crs\": {\n"
+        "    \"type\": \"GeographicCRS\",\n"
+        "    \"name\": \"NAD83(CSRS)v7\",\n"
+        "    \"datum\": {\n"
+        "      \"type\": \"GeodeticReferenceFrame\",\n"
+        "      \"name\": \"North American Datum of 1983 (CSRS) version 7\",\n"
+        "      \"ellipsoid\": {\n"
+        "        \"name\": \"GRS 1980\",\n"
+        "        \"semi_major_axis\": 6378137,\n"
+        "        \"inverse_flattening\": 298.257222101\n"
+        "      }\n"
+        "    },\n"
+        "    \"coordinate_system\": {\n"
+        "      \"subtype\": \"ellipsoidal\",\n"
+        "      \"axis\": [\n"
+        "        {\n"
+        "          \"name\": \"Geodetic latitude\",\n"
+        "          \"abbreviation\": \"Lat\",\n"
+        "          \"direction\": \"north\",\n"
+        "          \"unit\": \"degree\"\n"
+        "        },\n"
+        "        {\n"
+        "          \"name\": \"Geodetic longitude\",\n"
+        "          \"abbreviation\": \"Lon\",\n"
+        "          \"direction\": \"east\",\n"
+        "          \"unit\": \"degree\"\n"
+        "        },\n"
+        "        {\n"
+        "          \"name\": \"Ellipsoidal height\",\n"
+        "          \"abbreviation\": \"h\",\n"
+        "          \"direction\": \"up\",\n"
+        "          \"unit\": \"metre\"\n"
+        "        }\n"
+        "      ]\n"
+        "    },\n"
+        "    \"id\": {\n"
+        "      \"authority\": \"EPSG\",\n"
+        "      \"code\": 8254\n"
+        "    }\n"
+        "  },\n"
+        "  \"method\": {\n"
+        "    \"name\": \"Point motion by grid (Canada NTv2_Vel)\",\n"
+        "    \"id\": {\n"
+        "      \"authority\": \"EPSG\",\n"
+        "      \"code\": 1070\n"
+        "    }\n"
+        "  },\n"
+        "  \"parameters\": [\n"
+        "    {\n"
+        "      \"name\": \"Point motion velocity grid file\",\n"
+        "      \"value\": \"foo.tif\"\n"
+        "    }\n"
+        "  ],\n"
+        "  \"accuracy\": \"0.01\",\n"
+        "  \"scope\": \"scope\",\n"
+        "  \"area\": \"area\",\n"
+        "  \"bbox\": {\n"
+        "    \"south_latitude\": 38.21,\n"
+        "    \"west_longitude\": -141.01,\n"
+        "    \"north_latitude\": 86.46,\n"
+        "    \"east_longitude\": -40.73\n"
+        "  },\n"
+        "  \"id\": {\n"
+        "    \"authority\": \"DERIVED_FROM(EPSG)\",\n"
+        "    \"code\": 9483\n"
+        "  },\n"
+        "  \"remarks\": \"remark.\"\n"
+        "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto pmo = nn_dynamic_pointer_cast<PointMotionOperation>(obj);
+    ASSERT_TRUE(pmo != nullptr);
+    EXPECT_EQ(pmo->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }

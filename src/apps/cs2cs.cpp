@@ -82,6 +82,7 @@ static const char *usage =
     "              [--authority {name}] [--3d]\n"
     "              [--accuracy {accuracy}] [--only-best[=yes|=no]] "
     "[--no-ballpark]\n"
+    "              [--s_epoch {epoch}] [--t_epoch {epoch}]\n"
     "              [+opt[=arg] ...] [+to +opt[=arg] ...] [file ...]\n";
 
 static double (*informat)(const char *,
@@ -424,6 +425,8 @@ int main(int argc, char **argv) {
     bool onlyBestSet = false;
     bool errorIfBestTransformationNotAvailable = false;
     bool promoteTo3D = false;
+    std::string sourceEpoch;
+    std::string targetEpoch;
 
     /* process run line arguments */
     while (--argc > 0) { /* collect run line arguments */
@@ -493,6 +496,22 @@ int main(int argc, char **argv) {
             errorIfBestTransformationNotAvailable = false;
         } else if (strcmp(*argv, "--3d") == 0) {
             promoteTo3D = true;
+        } else if (strcmp(*argv, "--s_epoch") == 0) {
+            ++argv;
+            --argc;
+            if (argc == 0) {
+                emess(1, "missing argument for --s_epoch");
+                std::exit(1);
+            }
+            sourceEpoch = *argv;
+        } else if (strcmp(*argv, "--t_epoch") == 0) {
+            ++argv;
+            --argc;
+            if (argc == 0) {
+                emess(1, "missing argument for --t_epoch");
+                std::exit(1);
+            }
+            targetEpoch = *argv;
         } else if (**argv == '-') {
             for (arg = *argv;;) {
                 switch (*++arg) {
@@ -871,6 +890,42 @@ int main(int argc, char **argv) {
                 }
             }
         }
+    }
+
+    if (!sourceEpoch.empty()) {
+        PJ *srcMetadata = nullptr;
+        double sourceEpochDbl;
+        try {
+            sourceEpochDbl = c_locale_stod(sourceEpoch);
+        } catch (const std::exception &e) {
+            sourceEpochDbl = 0;
+            emess(3, e.what());
+        }
+        srcMetadata =
+            proj_coordinate_metadata_create(nullptr, src, sourceEpochDbl);
+        if (!srcMetadata) {
+            emess(3, "cannot instantiate source coordinate system");
+        }
+        proj_destroy(src);
+        src = srcMetadata;
+    }
+
+    if (!targetEpoch.empty()) {
+        PJ *dstMetadata = nullptr;
+        double targetEpochDbl;
+        try {
+            targetEpochDbl = c_locale_stod(targetEpoch);
+        } catch (const std::exception &e) {
+            targetEpochDbl = 0;
+            emess(3, e.what());
+        }
+        dstMetadata =
+            proj_coordinate_metadata_create(nullptr, dst, targetEpochDbl);
+        if (!dstMetadata) {
+            emess(3, "cannot instantiate target coordinate system");
+        }
+        proj_destroy(dst);
+        dst = dstMetadata;
     }
 
     std::string authorityOption; /* keep this variable in this outer scope ! */

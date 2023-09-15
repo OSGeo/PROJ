@@ -706,6 +706,8 @@ CoordinateOperationNNPtr ConcatenatedOperation::inverse() const {
         create(properties, inversedOperations, coordinateOperationAccuracies());
     op->d->computedName_ = d->computedName_;
     op->setHasBallparkTransformation(hasBallparkTransformation());
+    op->setSourceCoordinateEpoch(targetCoordinateEpoch());
+    op->setTargetCoordinateEpoch(sourceCoordinateEpoch());
     return op;
 }
 
@@ -838,8 +840,32 @@ CoordinateOperationNNPtr ConcatenatedOperation::_shallowClone() const {
 void ConcatenatedOperation::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(FormattingException)
 {
+    double sourceYear =
+        sourceCoordinateEpoch().has_value()
+            ? getRoundedEpochInDecimalYear(
+                  sourceCoordinateEpoch()->coordinateEpoch().convertToUnit(
+                      common::UnitOfMeasure::YEAR))
+            : 0;
+    double targetYear =
+        targetCoordinateEpoch().has_value()
+            ? getRoundedEpochInDecimalYear(
+                  targetCoordinateEpoch()->coordinateEpoch().convertToUnit(
+                      common::UnitOfMeasure::YEAR))
+            : 0;
+    if (sourceYear > 0 && targetYear == 0)
+        targetYear = sourceYear;
+    else if (targetYear > 0 && sourceYear == 0)
+        sourceYear = targetYear;
+    if (sourceYear > 0) {
+        formatter->addStep("set");
+        formatter->addParam("v_4", sourceYear);
+    }
     for (const auto &operation : operations()) {
         operation->_exportToPROJString(formatter);
+    }
+    if (targetYear > 0) {
+        formatter->addStep("set");
+        formatter->addParam("v_4", targetYear);
     }
 }
 

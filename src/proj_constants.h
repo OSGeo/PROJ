@@ -581,6 +581,27 @@
 
 /* ------------------------------------------------------------------------ */
 
+#define EPSG_NAME_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL                  \
+    "Point motion by grid (Canada NTv2_Vel)"
+#define EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL 1070
+
+#define EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE 1050
+#define EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE                    \
+    "Point motion velocity grid file"
+
+/* ------------------------------------------------------------------------ */
+#define EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN            \
+    "Geographic3D Offset by velocity grid (NRCan byn)"
+#define EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN 1114
+
+/* ------------------------------------------------------------------------ */
+
+#define EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN                \
+    "Vertical Offset by velocity grid (NRCan byn)"
+#define EPSG_CODE_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN 1113
+
+/* ------------------------------------------------------------------------ */
+
 #define PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D                                 \
     "GravityRelatedHeight to Geographic3D"
 

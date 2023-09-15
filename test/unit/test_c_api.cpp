@@ -1445,10 +1445,12 @@ TEST_F(CApi, proj_get_authorities_from_database) {
     ASSERT_TRUE(list[4] != nullptr);
     EXPECT_EQ(list[4], std::string("NKG"));
     ASSERT_TRUE(list[5] != nullptr);
-    EXPECT_EQ(list[5], std::string("OGC"));
+    EXPECT_EQ(list[5], std::string("NRCAN"));
     ASSERT_TRUE(list[6] != nullptr);
-    EXPECT_EQ(list[6], std::string("PROJ"));
-    EXPECT_EQ(list[7], nullptr);
+    EXPECT_EQ(list[6], std::string("OGC"));
+    ASSERT_TRUE(list[7] != nullptr);
+    EXPECT_EQ(list[7], std::string("PROJ"));
+    EXPECT_EQ(list[8], nullptr);
 }
 
 // ---------------------------------------------------------------------------
@@ -4983,6 +4985,35 @@ TEST_F(CApi, proj_crs_promote_to_3D) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_crs_promote_to_3D_on_coordinate_metadata) {
+
+    auto cm_crs2D = proj_create(m_ctxt, "ITRF2014@2010.0");
+    ObjectKeeper keeper_cm_crs2D(cm_crs2D);
+    EXPECT_NE(cm_crs2D, nullptr);
+
+    auto cm_crs3D = proj_crs_promote_to_3D(m_ctxt, nullptr, cm_crs2D);
+    ObjectKeeper keeper_cm_crs3D(cm_crs3D);
+    EXPECT_NE(cm_crs3D, nullptr);
+
+    EXPECT_NEAR(proj_coordinate_metadata_get_epoch(m_ctxt, cm_crs3D), 2010.0,
+                1e-10);
+
+    auto crs3D = proj_get_source_crs(m_ctxt, cm_crs3D);
+    ObjectKeeper keeper_crs3D(crs3D);
+    EXPECT_NE(crs3D, nullptr);
+
+    auto cs = proj_crs_get_coordinate_system(m_ctxt, crs3D);
+    ASSERT_NE(cs, nullptr);
+    ObjectKeeper keeperCs(cs);
+    EXPECT_EQ(proj_cs_get_axis_count(m_ctxt, cs), 3);
+
+    auto code = proj_get_id_code(crs3D, 0);
+    ASSERT_TRUE(code != nullptr);
+    EXPECT_EQ(code, std::string("7912"));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_crs_demote_to_2D) {
 
     auto crs3D =
@@ -6412,6 +6443,31 @@ TEST_F(CApi, proj_trans_bounds__south_pole) {
     EXPECT_NEAR(out_bottom_inv, -1371213.76, 1);
     EXPECT_NEAR(out_right_inv, 5405880.72, 1);
     EXPECT_NEAR(out_top_inv, 5371213.76, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_crs_has_point_motion_operation) {
+    auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+
+    {
+        auto crs = proj_create_from_database(
+            m_ctxt, "EPSG", "4267", PJ_CATEGORY_CRS, false, nullptr); // NAD27
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper_crs(crs);
+        EXPECT_FALSE(proj_crs_has_point_motion_operation(m_ctxt, crs));
+    }
+
+    {
+        // NAD83(CSRS)v7
+        auto crs = proj_create_from_database(m_ctxt, "EPSG", "8255",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper_crs(crs);
+        EXPECT_TRUE(proj_crs_has_point_motion_operation(m_ctxt, crs));
+    }
 }
 
 // ---------------------------------------------------------------------------

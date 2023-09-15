@@ -777,6 +777,34 @@ FOR EACH ROW BEGIN
         WHERE EXISTS (SELECT 1 FROM vertical_crs WHERE vertical_crs.auth_name = NEW.vertical_crs_auth_name AND vertical_crs.code = NEW.vertical_crs_code AND vertical_crs.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
+CREATE TABLE coordinate_metadata(
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code INTEGER_OR_TEXT NOT NULL CHECK (length(code) >= 1),
+    description TEXT,
+    crs_auth_name TEXT,
+    crs_code INTEGER_OR_TEXT,
+    crs_text_definition TEXT, -- WKT string or PROJJSON string. Mutually exclusive with (crs_auth_name, crs_code)
+    coordinate_epoch DOUBLE, -- may be NULL
+    deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
+    CONSTRAINT pk_coordinate_metadata PRIMARY KEY (auth_name, code)
+) WITHOUT ROWID;
+
+CREATE TRIGGER coordinate_metadata_insert_trigger
+BEFORE INSERT ON coordinate_metadata
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on coordinate_metadata violates constraint: (crs_auth_name, crs_code) must already exist in crs_view')
+        WHERE NOT EXISTS (
+            SELECT 1 FROM crs_view WHERE
+                NEW.crs_auth_name IS NOT NULL AND
+                crs_view.auth_name = NEW.crs_auth_name AND
+                crs_view.code = NEW.crs_code
+            UNION ALL SELECT 1 WHERE NEW.crs_auth_name IS NULL);
+    SELECT RAISE(ABORT, 'insert on coordinate_metadata violates constraint: (crs_auth_name, crs_code) and crs_text_definition are mutually exclusive')
+        WHERE NEW.crs_auth_name IS NOT NULL AND NEW.crs_text_definition IS NOT NULL;
+    SELECT RAISE(ABORT, 'insert on coordinate_metadata violates constraint: one of (crs_auth_name, crs_code) or crs_text_definition must be set')
+        WHERE NEW.crs_auth_name IS NULL AND NEW.crs_text_definition IS NULL;
+END;
+
 CREATE TABLE coordinate_operation_method(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
     code INTEGER_OR_TEXT NOT NULL CHECK (length(code) >= 1),

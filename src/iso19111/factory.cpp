@@ -32,6 +32,7 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#include "proj/coordinates.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -118,7 +119,7 @@ namespace io {
 constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 // If the code depends on the new additions, then DATABASE_LAYOUT_VERSION_MINOR
 // must be incremented.
-constexpr int DATABASE_LAYOUT_VERSION_MINOR = 2;
+constexpr int DATABASE_LAYOUT_VERSION_MINOR = 3;
 
 constexpr size_t N_MAX_PARAMS = 7;
 
@@ -5666,6 +5667,61 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns a coordinates::CoordinateMetadata from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ * @since 9.4
+ */
+
+coordinates::CoordinateMetadataNNPtr
+AuthorityFactory::createCoordinateMetadata(const std::string &code) const {
+    auto res = d->runWithCodeParam(
+        "SELECT crs_auth_name, crs_code, crs_text_definition, coordinate_epoch "
+        "FROM coordinate_metadata WHERE auth_name = ? AND code = ?",
+        code);
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("coordinate_metadata not found",
+                                           d->authority(), code);
+    }
+    try {
+        const auto &row = res.front();
+        const auto &crs_auth_name = row[0];
+        const auto &crs_code = row[1];
+        const auto &crs_text_definition = row[2];
+        const auto &coordinate_epoch = row[3];
+
+        auto l_context = d->context();
+        DatabaseContext::Private::RecursionDetector detector(l_context);
+        auto crs =
+            !crs_auth_name.empty()
+                ? d->createFactory(crs_auth_name)
+                      ->createCoordinateReferenceSystem(crs_code)
+                      .as_nullable()
+                : util::nn_dynamic_pointer_cast<crs::CRS>(
+                      createFromUserInput(crs_text_definition, l_context));
+        if (!crs) {
+            throw FactoryException(
+                std::string("cannot build CoordinateMetadata ") +
+                d->authority() + ":" + code + ": cannot build CRS");
+        }
+        if (coordinate_epoch.empty()) {
+            return coordinates::CoordinateMetadata::create(NN_NO_CHECK(crs));
+        } else {
+            return coordinates::CoordinateMetadata::create(
+                NN_NO_CHECK(crs), c_locale_stod(coordinate_epoch),
+                l_context.as_nullable());
+        }
+    } catch (const std::exception &ex) {
+        throw buildFactoryException("CoordinateMetadata", d->authority(), code,
+                                    ex);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
 static util::PropertyMap createMapNameEPSGCode(const std::string &name,
@@ -6082,6 +6138,26 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 accuracies.emplace_back(
                     metadata::PositionalAccuracy::create(accuracy));
             }
+
+            // A bit fragile to detect the operation type with the method name,
+            // but not worth changing the database model
+            if (starts_with(method_name, "Point motion")) {
+                if (!sourceCRS->isEquivalentTo(targetCRS.get())) {
+                    throw operation::InvalidOperation(
+                        "source_crs and target_crs should be the same for a "
+                        "PointMotionOperation");
+                }
+
+                auto pmo = operation::PointMotionOperation::create(
+                    props, sourceCRS, propsMethod, parameters, values,
+                    accuracies);
+                if (usePROJAlternativeGridNames) {
+                    return pmo->substitutePROJAlternativeGridNames(
+                        d->context());
+                }
+                return pmo;
+            }
+
             auto transf = operation::Transformation::create(
                 props, sourceCRS, targetCRS, interpolationCRS, propsMethod,
                 parameters, values, accuracies);
@@ -9073,6 +9149,54 @@ std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
+    const datum::GeodeticReferenceFrameNNPtr &datum,
+    const std::string &preferredAuthName,
+    const std::string &geodetic_crs_type) const {
+    std::list<crs::GeodeticCRSNNPtr> candidates;
+    const auto &ids = datum->identifiers();
+    const auto &datumName = datum->nameStr();
+    if (!ids.empty()) {
+        for (const auto &id : ids) {
+            const auto &authName = *(id->codeSpace());
+            const auto &code = id->code();
+            if (!authName.empty()) {
+                const auto tmpFactory =
+                    (preferredAuthName == authName)
+                        ? create(databaseContext(), authName)
+                        : NN_NO_CHECK(d->getSharedFromThis());
+                auto l_candidates = tmpFactory->createGeodeticCRSFromDatum(
+                    authName, code, geodetic_crs_type);
+                for (const auto &candidate : l_candidates) {
+                    candidates.emplace_back(candidate);
+                }
+            }
+        }
+    } else if (datumName != "unknown" && datumName != "unnamed") {
+        auto matches = createObjectsFromName(
+            datumName,
+            {io::AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME}, false,
+            2);
+        if (matches.size() == 1) {
+            const auto &match = matches.front();
+            if (datum->_isEquivalentTo(match.get(),
+                                       util::IComparable::Criterion::EQUIVALENT,
+                                       databaseContext().as_nullable()) &&
+                !match->identifiers().empty()) {
+                return createGeodeticCRSFromDatum(
+                    util::nn_static_pointer_cast<datum::GeodeticReferenceFrame>(
+                        match),
+                    preferredAuthName, geodetic_crs_type);
+            }
+        }
+    }
+    return candidates;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 std::list<crs::VerticalCRSNNPtr> AuthorityFactory::createVerticalCRSFromDatum(
     const std::string &datum_auth_name, const std::string &datum_code) const {
     std::string sql(
@@ -9567,6 +9691,55 @@ AuthorityFactory::getTransformationsForGeoid(
 
     return res;
 }
+
+// ---------------------------------------------------------------------------
+
+std::vector<operation::PointMotionOperationNNPtr>
+AuthorityFactory::getPointMotionOperationsFor(
+    const crs::GeodeticCRSNNPtr &crs, bool usePROJAlternativeGridNames) const {
+    std::vector<operation::PointMotionOperationNNPtr> res;
+    const auto crsList =
+        createGeodeticCRSFromDatum(crs->datumNonNull(d->context()),
+                                   /* preferredAuthName = */ std::string(),
+                                   /* geodetic_crs_type = */ std::string());
+    if (crsList.empty())
+        return res;
+    std::string sql("SELECT auth_name, code FROM coordinate_operation_view "
+                    "WHERE source_crs_auth_name = target_crs_auth_name AND "
+                    "source_crs_code = target_crs_code AND deprecated = 0 AND "
+                    "(");
+    bool addOr = false;
+    ListOfParams params;
+    for (const auto &candidateCrs : crsList) {
+        if (addOr)
+            sql += " OR ";
+        addOr = true;
+        sql += "(source_crs_auth_name = ? AND source_crs_code = ?)";
+        const auto &ids = candidateCrs->identifiers();
+        params.emplace_back(*(ids[0]->codeSpace()));
+        params.emplace_back(ids[0]->code());
+    }
+    sql += ")";
+    if (d->hasAuthorityRestriction()) {
+        sql += " AND auth_name = ?";
+        params.emplace_back(d->authority());
+    }
+
+    auto sqlRes = d->run(sql, params);
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        auto pmo =
+            util::nn_dynamic_pointer_cast<operation::PointMotionOperation>(
+                d->createFactory(auth_name)->createCoordinateOperation(
+                    code, usePROJAlternativeGridNames));
+        if (pmo) {
+            res.emplace_back(NN_NO_CHECK(pmo));
+        }
+    }
+    return res;
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------

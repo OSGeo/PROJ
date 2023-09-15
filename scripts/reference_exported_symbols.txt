@@ -97,7 +97,9 @@ osgeo::proj::coordinates::CoordinateMetadata::coordinateEpoch() const
 osgeo::proj::coordinates::CoordinateMetadata::~CoordinateMetadata()
 osgeo::proj::coordinates::CoordinateMetadata::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&)
 osgeo::proj::coordinates::CoordinateMetadata::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double)
+osgeo::proj::coordinates::CoordinateMetadata::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&)
 osgeo::proj::coordinates::CoordinateMetadata::crs() const
+osgeo::proj::coordinates::CoordinateMetadata::promoteTo3D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::BoundCRS::baseCRS() const
 osgeo::proj::crs::BoundCRS::baseCRSWithCanonicalBoundCRS() const
 osgeo::proj::crs::BoundCRS::~BoundCRS()
@@ -346,6 +348,7 @@ osgeo::proj::io::AuthorityFactory::~AuthorityFactory()
 osgeo::proj::io::AuthorityFactory::CelestialBodyInfo::CelestialBodyInfo()
 osgeo::proj::io::AuthorityFactory::createCompoundCRS(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createConversion(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createCoordinateMetadata(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createCoordinateOperation(std::string const&, bool) const
 osgeo::proj::io::AuthorityFactory::createCoordinateReferenceSystem(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createCoordinateSystem(std::string const&) const
@@ -376,6 +379,7 @@ osgeo::proj::io::AuthorityFactory::getCRSInfoList() const
 osgeo::proj::io::AuthorityFactory::getDescriptionText(std::string const&) const
 osgeo::proj::io::AuthorityFactory::getGeoidModels(std::string const&) const
 osgeo::proj::io::AuthorityFactory::getOfficialNameFromAlias(std::string const&, std::string const&, std::string const&, bool, std::string&, std::string&, std::string&) const
+osgeo::proj::io::AuthorityFactory::getPointMotionOperationsFor(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::GeodeticCRS> > const&, bool) const
 osgeo::proj::io::AuthorityFactory::getUnitList() const
 osgeo::proj::io::AuthorityFactory::identifyBodyFromSemiMajorAxis(double, double) const
 osgeo::proj::io::AuthorityFactory::listAreaOfUseFromName(std::string const&, bool) const
@@ -662,6 +666,7 @@ osgeo::proj::operation::CoordinateOperation::coordinateTransformer(pj_ctx*) cons
 osgeo::proj::operation::CoordinateOperationFactory::~CoordinateOperationFactory()
 osgeo::proj::operation::CoordinateOperationFactory::create()
 osgeo::proj::operation::CoordinateOperationFactory::createOperation(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&) const
+osgeo::proj::operation::CoordinateOperationFactory::createOperations(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::coordinates::CoordinateMetadata> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::coordinates::CoordinateMetadata> > const&, dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::operation::CoordinateOperationContext, std::default_delete<osgeo::proj::operation::CoordinateOperationContext> > > const&) const
 osgeo::proj::operation::CoordinateOperationFactory::createOperations(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::coordinates::CoordinateMetadata> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::operation::CoordinateOperationContext, std::default_delete<osgeo::proj::operation::CoordinateOperationContext> > > const&) const
 osgeo::proj::operation::CoordinateOperationFactory::createOperations(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::coordinates::CoordinateMetadata> > const&, dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::operation::CoordinateOperationContext, std::default_delete<osgeo::proj::operation::CoordinateOperationContext> > > const&) const
 osgeo::proj::operation::CoordinateOperationFactory::createOperations(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::operation::CoordinateOperationContext, std::default_delete<osgeo::proj::operation::CoordinateOperationContext> > > const&) const
@@ -713,7 +718,12 @@ osgeo::proj::operation::ParameterValue::stringValue() const
 osgeo::proj::operation::ParameterValue::type() const
 osgeo::proj::operation::ParameterValue::value() const
 osgeo::proj::operation::ParameterValue::valueFile() const
+osgeo::proj::operation::PointMotionOperation::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationMethod> > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::GeneralParameterValue> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::GeneralParameterValue> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::PointMotionOperation::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationParameter> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationParameter> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::ParameterValue> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::ParameterValue> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::PointMotionOperation::inverse() const
 osgeo::proj::operation::PointMotionOperation::~PointMotionOperation()
+osgeo::proj::operation::PointMotionOperation::sourceCRS() const
+osgeo::proj::operation::PointMotionOperation::substitutePROJAlternativeGridNames(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> >) const
 osgeo::proj::operation::SingleOperation::createPROJBased(osgeo::proj::util::PropertyMap const&, std::string const&, std::shared_ptr<osgeo::proj::crs::CRS> const&, std::shared_ptr<osgeo::proj::crs::CRS> const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
 osgeo::proj::operation::SingleOperation::gridsNeeded(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, bool) const
 osgeo::proj::operation::SingleOperation::method() const
@@ -867,6 +877,7 @@ proj_context_use_proj4_init_rules
 proj_convert_conversion_to_other_method
 proj_coord
 proj_coord_error()
+proj_coordinate_metadata_create
 proj_coordinate_metadata_get_epoch
 proj_coordoperation_create_inverse
 proj_coordoperation_get_accuracy
@@ -991,6 +1002,7 @@ proj_crs_get_datum_forced
 proj_crs_get_geodetic_crs
 proj_crs_get_horizontal_datum
 proj_crs_get_sub_crs
+proj_crs_has_point_motion_operation
 proj_crs_info_list_destroy
 proj_crs_is_derived
 proj_crs_promote_to_3D

@@ -74,6 +74,13 @@ class PROJ_GCC_DLL CoordinateMetadata : public util::BaseObject,
     PROJ_DLL static CoordinateMetadataNNPtr create(const crs::CRSNNPtr &crsIn);
     PROJ_DLL static CoordinateMetadataNNPtr
     create(const crs::CRSNNPtr &crsIn, double coordinateEpochAsDecimalYear);
+    PROJ_DLL static CoordinateMetadataNNPtr
+    create(const crs::CRSNNPtr &crsIn, double coordinateEpochAsDecimalYear,
+           const io::DatabaseContextPtr &dbContext);
+
+    PROJ_DLL CoordinateMetadataNNPtr
+    promoteTo3D(const std::string &newName,
+                const io::DatabaseContextPtr &dbContext) const;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress

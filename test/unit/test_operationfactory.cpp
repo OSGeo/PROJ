@@ -37,6 +37,7 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#include "proj/coordinates.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -52,6 +53,7 @@
 #include <vector>
 
 using namespace osgeo::proj::common;
+using namespace osgeo::proj::coordinates;
 using namespace osgeo::proj::crs;
 using namespace osgeo::proj::cs;
 using namespace osgeo::proj::datum;
@@ -7216,6 +7218,77 @@ TEST(operation,
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_of_vertCRS_with_geoid_model_by_id_to_geogCRS) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto wkt =
+        "COMPOUNDCRS[\"NAD83(CSRS) / MTM zone 7 + CGVD28 height\",\n"
+        "    PROJCRS[\"NAD83(CSRS) / MTM zone 7\",\n"
+        "        BASEGEOGCRS[\"NAD83(CSRS)\",\n"
+        "            DATUM[\"North American Datum of 1983 (CSRS)\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        CONVERSION[\"MTM zone 7\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",-70.5,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural origin\",0.9999,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",304800,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8807]]],\n"
+        "        CS[Cartesian,2],\n"
+        "            AXIS[\"easting (E(X))\",east,\n"
+        "                ORDER[1],\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            AXIS[\"northing (N(Y))\",north,\n"
+        "                ORDER[2],\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "    VERTCRS[\"CGVD28 height\",\n"
+        "        VDATUM[\"Canadian Geodetic Vertical Datum of 1928\"],\n"
+        "        CS[vertical,1],\n"
+        "            AXIS[\"gravity-related height (H)\",up,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "        GEOIDMODEL[\"HT2_2002v70\",\n"
+        "            ID[\"EPSG\",9985]],\n"
+        "        ID[\"EPSG\",5713]]]";
+    auto srcObj =
+        createFromUserInput(wkt, authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("4955")->promoteTo3D(
+            std::string(), authFactory->databaseContext()); // NAD83(CSRS) 3d
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), dst, ctxt);
+    ASSERT_TRUE(!list.empty());
+    EXPECT_EQ(list[0]->nameStr(),
+              "Inverse of MTM zone 7 + "
+              "Ballpark geographic offset from NAD83(CSRS) to NAD83(CSRS)v4 + "
+              "Inverse of NAD83(CSRS)v4 to CGVD28 height (1) + "
+              "Ballpark geographic offset from NAD83(CSRS)v4 to NAD83(CSRS)");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_of_bound_horizCRS_and_bound_vertCRS_to_geogCRS) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
@@ -9305,5 +9378,668 @@ TEST(operation,
               "+k=0.99995 +x_0=300000 +y_0=0 +ellps=GRS80 "
               "+step +proj=unitconvert +xy_in=m +xy_out=us-ft "
               "+step +proj=affine +xoff=20 "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_point_motion_operation_geog2D) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    // "NAD83(CSRS)v7"
+    auto crs = factory->createCoordinateReferenceSystem("8255");
+    auto crs_2002 = CoordinateMetadata::create(crs, 2002.0, dbContext);
+    auto crs_2010 = CoordinateMetadata::create(crs, 2010.0, dbContext);
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        crs_2002, crs_2010, ctxt);
+    ASSERT_EQ(list.size(), 2U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=set +v_4=2002 "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=set +v_4=2002 +omit_fwd "
+              "+step +proj=deformation +dt=8 +grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +proj=set +v_4=2010 +omit_inv "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=set +v_4=2010");
+    EXPECT_TRUE(list[1]->hasBallparkTransformation());
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_point_motion_operation_geog3D) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    // "NAD83(CSRS)v7"
+    auto crs = factory->createCoordinateReferenceSystem("8254");
+    auto crs_2002 = CoordinateMetadata::create(crs, 2002.0, dbContext);
+    auto crs_2010 = CoordinateMetadata::create(crs, 2010.0, dbContext);
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        crs_2002, crs_2010, ctxt);
+    ASSERT_EQ(list.size(), 2U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=set +v_4=2002 +omit_fwd "
+              "+step +proj=deformation +dt=8 +grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +proj=set +v_4=2010 +omit_inv "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+    EXPECT_TRUE(list[1]->hasBallparkTransformation());
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_point_motion_operation_geocentric) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    // "NAD83(CSRS)v7"
+    auto crs = factory->createCoordinateReferenceSystem("8253");
+    auto crs_2002 = CoordinateMetadata::create(crs, 2002.0, dbContext);
+    auto crs_2010 = CoordinateMetadata::create(crs, 2010.0, dbContext);
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        crs_2002, crs_2010, ctxt);
+    ASSERT_EQ(list.size(), 2U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=set +v_4=2002 "
+              "+step +proj=set +v_4=2002 +omit_fwd "
+              "+step +proj=deformation +dt=8 +grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +proj=set +v_4=2010 +omit_inv "
+              "+step +proj=set +v_4=2010");
+    EXPECT_EQ(list[0]->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=set +v_4=2010 "
+              "+step +proj=set +v_4=2010 +omit_fwd "
+              "+step +proj=deformation +dt=-8 +grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +proj=set +v_4=2002 +omit_inv "
+              "+step +proj=set +v_4=2002");
+    EXPECT_TRUE(list[1]->hasBallparkTransformation());
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_point_motion_operation_geocentric_to_geog3D) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    // "NAD83(CSRS)v7"
+    auto crs_geocentric = factory->createCoordinateReferenceSystem("8253");
+    auto crs_2002 =
+        CoordinateMetadata::create(crs_geocentric, 2002.0, dbContext);
+    auto crs_geog3d = factory->createCoordinateReferenceSystem("8254");
+    auto crs_2010 = CoordinateMetadata::create(crs_geog3d, 2010.0, dbContext);
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        crs_2002, crs_2010, ctxt);
+    ASSERT_EQ(list.size(), 2U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=set +v_4=2002 "
+              "+step +proj=set +v_4=2002 +omit_fwd "
+              "+step +proj=deformation +dt=8 +grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +proj=set +v_4=2010 +omit_inv "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=set +v_4=2010");
+    EXPECT_TRUE(list[1]->hasBallparkTransformation());
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     createOperation_point_motion_operation_NAD83_CSRS_v7_TO_ITRF2014) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    // "NAD83(CSRS)v7"
+    auto sourceCRS = factory->createCoordinateReferenceSystem("8254");
+    auto crs_2002 = CoordinateMetadata::create(sourceCRS, 2002.0, dbContext);
+    // ITRF2014
+    auto targetCRS = factory->createCoordinateReferenceSystem("7912");
+    auto crs_2005 = CoordinateMetadata::create(targetCRS, 2005.0, dbContext);
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        crs_2002, crs_2005, ctxt);
+    ASSERT_GE(list.size(), 2U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(
+        list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline "
+        "+step +proj=set +v_4=2002 "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+        "+step +proj=cart +ellps=GRS80 "
+        "+step +proj=set +v_4=2002 +omit_fwd "
+        "+step +proj=deformation +dt=3 +grids=ca_nrc_NAD83v70VG.tif "
+        "+ellps=GRS80 "
+        "+step +proj=set +v_4=2005 +omit_inv "
+        "+step +inv +proj=helmert "
+        "+x=1.0053 +y=-1.90921 +z=-0.54157 +rx=-0.02678138 "
+        "+ry=0.00042027 +rz=-0.01093206 +s=0.00036891 +dx=0.00079 +dy=-0.0006 "
+        "+dz=-0.00144 +drx=-6.667e-05 +dry=0.00075744 +drz=5.133e-05 "
+        "+ds=-7.201e-05 +t_epoch=2010 +convention=position_vector "
+        "+step +inv +proj=cart +ellps=GRS80 "
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=set +v_4=2005");
+    EXPECT_TRUE(list[1]->hasBallparkTransformation());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     createOperation_point_motion_operation_ITRF2014_to_NAD83_CSRS_v7) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    // ITRF2014
+    auto sourceCRS = factory->createCoordinateReferenceSystem("7912");
+    auto crs_2005 = CoordinateMetadata::create(sourceCRS, 2005.0, dbContext);
+    // "NAD83(CSRS)v7"
+    auto targetCRS = factory->createCoordinateReferenceSystem("8254");
+    auto crs_2002 = CoordinateMetadata::create(targetCRS, 2002.0, dbContext);
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        crs_2005, crs_2002, ctxt);
+    ASSERT_GE(list.size(), 2U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(
+        list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline "
+        "+step +proj=set +v_4=2005 "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+        "+step +proj=cart +ellps=GRS80 "
+        "+step +proj=helmert +x=1.0053 +y=-1.90921 +z=-0.54157 +rx=-0.02678138 "
+        "+ry=0.00042027 +rz=-0.01093206 +s=0.00036891 +dx=0.00079 +dy=-0.0006 "
+        "+dz=-0.00144 +drx=-6.667e-05 +dry=0.00075744 +drz=5.133e-05 "
+        "+ds=-7.201e-05 +t_epoch=2010 +convention=position_vector "
+        "+step +proj=set +v_4=2005 +omit_fwd "
+        "+step +proj=deformation +dt=-3 +grids=ca_nrc_NAD83v70VG.tif "
+        "+ellps=GRS80 "
+        "+step +proj=set +v_4=2002 +omit_inv "
+        "+step +inv +proj=cart +ellps=GRS80 "
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=set +v_4=2002");
+    EXPECT_TRUE(list[1]->hasBallparkTransformation());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     createOperation_compound_to_compound_with_point_motion_operation) {
+    auto dbContext = DatabaseContext::create();
+    auto factoryNRCAN = AuthorityFactory::create(dbContext, "NRCAN");
+    auto sourceCM =
+        factoryNRCAN->createCoordinateMetadata("NAD83_CSRS_1997_MTM7_HT2_1997");
+    auto targetCM = factoryNRCAN->createCoordinateMetadata(
+        "NAD83_CSRS_2010_UTM19_CGVD2013_2010");
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        sourceCM, targetCM, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=set +v_4=1997 "
+              "+step +inv +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
+              "+x_0=304800 +y_0=0 +ellps=GRS80 "
+              "+step +proj=vgridshift +grids=ca_nrc_HT2_1997.tif +multiplier=1 "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=set +v_4=1997 +omit_fwd "
+              "+step +proj=deformation +dt=13 +grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +proj=set +v_4=2010 +omit_inv "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +inv +proj=vgridshift +grids=ca_nrc_CGG2013an83.tif "
+              "+multiplier=1 "
+              "+step +proj=utm +zone=19 +ellps=GRS80 "
+              "+step +proj=set +v_4=2010");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     createOperation_compound_to_compound_with_epoch_HT2_1997_CGG2013a) {
+    auto dbContext = DatabaseContext::create();
+    auto factoryNRCAN = AuthorityFactory::create(dbContext, "NRCAN");
+    auto sourceCM =
+        factoryNRCAN->createCoordinateMetadata("NAD83_CSRS_1997_MTM7_HT2_1997");
+    auto targetCM = factoryNRCAN->createCoordinateMetadata(
+        "NAD83_CSRS_1997_UTM19_CGVD2013_1997");
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            sourceCM, targetCM, ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_FALSE(list[0]->hasBallparkTransformation());
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +inv +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
+            "+x_0=304800 +y_0=0 +ellps=GRS80 "
+            "+step +proj=vgridshift +grids=ca_nrc_HT2_1997_CGG2013a.tif "
+            "+multiplier=-1 "
+            "+step +proj=utm +zone=19 +ellps=GRS80");
+    }
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            targetCM, sourceCM, ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_FALSE(list[0]->hasBallparkTransformation());
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +inv +proj=utm +zone=19 +ellps=GRS80 "
+            "+step +inv +proj=vgridshift "
+            "+grids=ca_nrc_HT2_1997_CGG2013a.tif "
+            "+multiplier=-1 "
+            "+step +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
+            "+x_0=304800 +y_0=0 +ellps=GRS80");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     createOperation_compound_to_compound_with_epoch_HT2_2002_CGG2013a) {
+    auto dbContext = DatabaseContext::create();
+    auto factoryNRCAN = AuthorityFactory::create(dbContext, "NRCAN");
+    auto sourceCM =
+        factoryNRCAN->createCoordinateMetadata("NAD83_CSRS_2002_MTM7_HT2_2002");
+    auto targetCM = factoryNRCAN->createCoordinateMetadata(
+        "NAD83_CSRS_2002_UTM19_CGVD2013_2002");
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            sourceCM, targetCM, ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_FALSE(list[0]->hasBallparkTransformation());
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +inv +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
+            "+x_0=304800 +y_0=0 +ellps=GRS80 "
+            "+step +proj=vgridshift +grids=ca_nrc_HT2_2002v70_CGG2013a.tif "
+            "+multiplier=-1 "
+            "+step +proj=utm +zone=19 +ellps=GRS80");
+    }
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            targetCM, sourceCM, ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_FALSE(list[0]->hasBallparkTransformation());
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +inv +proj=utm +zone=19 +ellps=GRS80 "
+            "+step +inv +proj=vgridshift "
+            "+grids=ca_nrc_HT2_2002v70_CGG2013a.tif "
+            "+multiplier=-1 "
+            "+step +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
+            "+x_0=304800 +y_0=0 +ellps=GRS80");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     createOperation_compound_to_compound_with_epoch_HT2_2010_CGG2013a) {
+    auto dbContext = DatabaseContext::create();
+    auto factoryNRCAN = AuthorityFactory::create(dbContext, "NRCAN");
+    auto sourceCM =
+        factoryNRCAN->createCoordinateMetadata("NAD83_CSRS_2010_MTM7_HT2_2010");
+    auto targetCM = factoryNRCAN->createCoordinateMetadata(
+        "NAD83_CSRS_2010_UTM19_CGVD2013_2010");
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            sourceCM, targetCM, ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_FALSE(list[0]->hasBallparkTransformation());
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +inv +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
+            "+x_0=304800 +y_0=0 +ellps=GRS80 "
+            "+step +proj=vgridshift +grids=ca_nrc_HT2_2010v70_CGG2013a.tif "
+            "+multiplier=-1 "
+            "+step +proj=utm +zone=19 +ellps=GRS80");
+    }
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            targetCM, sourceCM, ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_FALSE(list[0]->hasBallparkTransformation());
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +inv +proj=utm +zone=19 +ellps=GRS80 "
+            "+step +inv +proj=vgridshift "
+            "+grids=ca_nrc_HT2_2010v70_CGG2013a.tif "
+            "+multiplier=-1 "
+            "+step +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
+            "+x_0=304800 +y_0=0 +ellps=GRS80");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    createOperation_compound_to_compound_with_Geographic3D_Offset_by_velocity_grid) {
+    auto dbContext = DatabaseContext::create();
+    auto wkt =
+        "COMPOUNDCRS[\"NAD83(CSRS)v3 / MTM zone 7 + CGVD28 height\",\n"
+        "    PROJCRS[\"NAD83(CSRS)v3 / MTM zone 7\",\n"
+        "        BASEGEOGCRS[\"NAD83(CSRS)v3\",\n"
+        "            DATUM[\"North American Datum of 1983 (CSRS) version 3\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",8240]],\n"
+        "        CONVERSION[\"MTM zone 7\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",-70.5,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural origin\",0.9999,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",304800,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8807]]],\n"
+        "        CS[Cartesian,2],\n"
+        "            AXIS[\"easting (E(X))\",east,\n"
+        "                ORDER[1],\n"
+        "                LENGTHUNIT[\"metre\",1,\n"
+        "                    ID[\"EPSG\",9001]]],\n"
+        "            AXIS[\"northing (N(Y))\",north,\n"
+        "                ORDER[2],\n"
+        "                LENGTHUNIT[\"metre\",1,\n"
+        "                    ID[\"EPSG\",9001]]]],\n"
+        "    VERTCRS[\"CGVD28 height\",\n"
+        "        VDATUM[\"Canadian Geodetic Vertical Datum of 1928\"],\n"
+        "        CS[vertical,1],\n"
+        "            AXIS[\"gravity-related height (H)\",up,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "        GEOIDMODEL[\"HT2_1997\",\n"
+        "            ID[\"EPSG\",9983]],\n"
+        "        ID[\"EPSG\",5713]]]";
+    auto objSrc = WKTParser().createFromWKT(wkt);
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = createFromUserInput(
+        "NAD83(CSRS)v7 / UTM zone 19 + CGVD2013a(2010) height", dbContext);
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDest);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    // Very similar output pipeline as
+    // createOperation_compound_to_compound_with_point_motion_operation
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=tmerc +lat_0=0 +lon_0=-70.5 +k=0.9999 "
+              "+x_0=304800 +y_0=0 +ellps=GRS80 "
+              "+step +proj=vgridshift +grids=ca_nrc_HT2_1997.tif +multiplier=1 "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +inv +proj=deformation +dt=-13 "
+              "+grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +inv +proj=vgridshift +grids=ca_nrc_CGG2013an83.tif "
+              "+multiplier=1 "
+              "+step +proj=utm +zone=19 +ellps=GRS80");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    createOperation_compound_to_compound_with_point_motion_operation_special_case_CGVD2013a) {
+    auto dbContext = DatabaseContext::create();
+    auto factoryNRCAN = AuthorityFactory::create(dbContext, "NRCAN");
+    auto sourceCM = factoryNRCAN->createCoordinateMetadata(
+        "NAD83_CSRS_1997_UTM17_CGVD2013_1997");
+    auto targetCM = factoryNRCAN->createCoordinateMetadata(
+        "NAD83_CSRS_2002_UTM17_CGVD2013_2002");
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        sourceCM, targetCM, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=set +v_4=1997 "
+              "+step +inv +proj=utm +zone=17 +ellps=GRS80 "
+              "+step +proj=vgridshift +grids=ca_nrc_CGG2013an83.tif "
+              "+multiplier=1 "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=set +v_4=1997 +omit_fwd "
+              "+step +proj=deformation +dt=5 +grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +proj=set +v_4=2002 +omit_inv "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +inv +proj=vgridshift +grids=ca_nrc_CGG2013an83.tif "
+              "+multiplier=1 "
+              "+step +proj=utm +zone=17 +ellps=GRS80 "
+              "+step +proj=set +v_4=2002");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_Geographic3D_Offset_by_velocity_grid) {
+    auto dbContext = DatabaseContext::create();
+    auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto sourceCRS =
+        factoryEPSG->createCoordinateReferenceSystem("8254"); // NAD83(CSRS)v7
+    auto targetCRS =
+        factoryEPSG->createCoordinateReferenceSystem("8239"); // NAD83(CSRS)v3
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        sourceCRS, targetCRS, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=deformation +dt=-13 +grids=ca_nrc_NAD83v70VG.tif "
+              "+ellps=GRS80 "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_test_createOperationsWithDatumPivot_iter_1) {
+    // Test
+    // CoordinateOperationFactory::Private::createOperationsWithDatumPivot()
+    // iter=1, ie getType(candidateSrcGeod) == getType(candidateDstGeod)
+    auto dbContext = DatabaseContext::create();
+    auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    // NAD83(CSRS)v2 (2D)
+    auto sourceCRS = factoryEPSG->createCoordinateReferenceSystem("8237");
+    // NAD83(CSRS)v3 (2D)
+    auto targetCRS = factoryEPSG->createCoordinateReferenceSystem("8240");
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    // Do *NOT* set SpatialCriterion::PARTIAL_INTERSECTION, otherwise we'd
+    // get the direct operations
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        sourceCRS, targetCRS, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_STREQ(list[0]->nameStr().c_str(),
+                 "Inverse of NAD83(CSRS)v8 to NAD83(CSRS)v2 (1) + "
+                 "NAD83(CSRS)v8 to NAD83(CSRS)v3 (1)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_Vrtical_Offset_by_velocity_grid) {
+    auto dbContext = DatabaseContext::create();
+
+    auto objSrc = createFromUserInput("NAD83(CSRS)v7 + CGVD2013a(2002) height",
+                                      dbContext);
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = createFromUserInput("NAD83(CSRS)v7 + CGVD2013a(2010) height",
+                                       dbContext);
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDest);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=push +v_1 +v_2 "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +inv +proj=deformation +dt=-8 "
+              "+grids=ca_nrc_NAD83v70VG.tif +ellps=GRS80 "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=pop +v_1 +v_2 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
 }

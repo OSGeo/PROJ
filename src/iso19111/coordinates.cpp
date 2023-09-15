@@ -115,9 +115,41 @@ CoordinateMetadataNNPtr CoordinateMetadata::create(const crs::CRSNNPtr &crsIn) {
 CoordinateMetadataNNPtr CoordinateMetadata::create(const crs::CRSNNPtr &crsIn,
                                                    double coordinateEpochIn) {
 
+    return create(crsIn, coordinateEpochIn, nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a CoordinateMetadata from a dynamic CRS and an associated
+ * coordinate epoch.
+ *
+ * @param crsIn a dynamic CRS
+ * @param coordinateEpochIn coordinate epoch expressed in decimal year.
+ * @param dbContext Database context (may be null)
+ * @return new CoordinateMetadata.
+ * @throw util::Exception if crsIn is a static CRS.
+ */
+CoordinateMetadataNNPtr
+CoordinateMetadata::create(const crs::CRSNNPtr &crsIn, double coordinateEpochIn,
+                           const io::DatabaseContextPtr &dbContext) {
+
     if (!crsIn->isDynamic(/*considerWGS84AsDynamic=*/true)) {
-        throw util::Exception(
-            "Coordinate epoch should not be provided for a static CRS");
+        bool ok = false;
+        if (dbContext) {
+            auto geodCrs = crsIn->extractGeodeticCRS();
+            if (geodCrs) {
+                auto factory = io::AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), std::string());
+                ok = !factory
+                          ->getPointMotionOperationsFor(NN_NO_CHECK(geodCrs),
+                                                        false)
+                          .empty();
+            }
+        }
+        if (!ok) {
+            throw util::Exception(
+                "Coordinate epoch should not be provided for a static CRS");
+        }
     }
 
     auto coordinateMetadata(
@@ -150,17 +182,6 @@ CoordinateMetadata::coordinateEpoch() PROJ_PURE_DEFN {
 
 // ---------------------------------------------------------------------------
 
-// Avoid rounding issues due to year -> second (SI unit) -> year roundtrips
-static double getRoundedEpochInDecimalYear(double year) {
-    // Try to see if the value is close to xxxx.yyy decimal year.
-    if (std::fabs(1000 * year - std::round(1000 * year)) <= 1e-3) {
-        year = std::round(1000 * year) / 1000.0;
-    }
-    return year;
-}
-
-// ---------------------------------------------------------------------------
-
 /** \brief Get the coordinate epoch associated with this CoordinateMetadata
  * object, as decimal year.
  *
@@ -174,6 +195,31 @@ double CoordinateMetadata::coordinateEpochAsDecimalYear() PROJ_PURE_DEFN {
                 common::UnitOfMeasure::YEAR));
     }
     return std::numeric_limits<double>::quiet_NaN();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a variant of this CoordinateMetadata "promoted" to a 3D one,
+ * if not already the case.
+ *
+ * @param newName Name of the new underlying CRS. If empty, nameStr() will be
+ * used.
+ * @param dbContext Database context to look for potentially already registered
+ *                  3D CRS. May be nullptr.
+ * @return a new CoordinateMetadata object promoted to 3D, or the current one if
+ * already 3D or not applicable.
+ */
+CoordinateMetadataNNPtr
+CoordinateMetadata::promoteTo3D(const std::string &newName,
+                                const io::DatabaseContextPtr &dbContext) const {
+    auto crs = d->crs_->promoteTo3D(newName, dbContext);
+    auto coordinateMetadata(
+        d->coordinateEpoch_.has_value()
+            ? CoordinateMetadata::nn_make_shared<CoordinateMetadata>(
+                  crs, coordinateEpochAsDecimalYear())
+            : CoordinateMetadata::nn_make_shared<CoordinateMetadata>(crs));
+    coordinateMetadata->assignSelf(coordinateMetadata);
+    return coordinateMetadata;
 }
 
 // ---------------------------------------------------------------------------

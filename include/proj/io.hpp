@@ -118,6 +118,14 @@ using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
 using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
 } // namespace crs
 
+namespace coordinates {
+class CoordinateMetadata;
+/** Shared pointer of CoordinateMetadata */
+using CoordinateMetadataPtr = std::shared_ptr<CoordinateMetadata>;
+/** Non-null shared pointer of CoordinateMetadata */
+using CoordinateMetadataNNPtr = util::nn<CoordinateMetadataPtr>;
+} // namespace coordinates
+
 namespace operation {
 class Conversion;
 using ConversionPtr = std::shared_ptr<Conversion>;
@@ -126,6 +134,10 @@ using ConversionNNPtr = util::nn<ConversionPtr>;
 class CoordinateOperation;
 using CoordinateOperationPtr = std::shared_ptr<CoordinateOperation>;
 using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
+
+class PointMotionOperation;
+using PointMotionOperationPtr = std::shared_ptr<PointMotionOperation>;
+using PointMotionOperationNNPtr = util::nn<PointMotionOperationPtr>;
 } // namespace operation
 
 /** osgeo.proj.io namespace.
@@ -1034,6 +1046,9 @@ class PROJ_GCC_DLL AuthorityFactory {
     PROJ_DLL crs::CRSNNPtr
     createCoordinateReferenceSystem(const std::string &code) const;
 
+    PROJ_DLL coordinates::CoordinateMetadataNNPtr
+    createCoordinateMetadata(const std::string &code) const;
+
     PROJ_DLL operation::CoordinateOperationNNPtr
     createCoordinateOperation(const std::string &code,
                               bool usePROJAlternativeGridNames) const;
@@ -1244,6 +1259,11 @@ class PROJ_GCC_DLL AuthorityFactory {
                                const std::string &datum_code,
                                const std::string &geodetic_crs_type) const;
 
+    PROJ_INTERNAL std::list<crs::GeodeticCRSNNPtr>
+    createGeodeticCRSFromDatum(const datum::GeodeticReferenceFrameNNPtr &datum,
+                               const std::string &preferredAuthName,
+                               const std::string &geodetic_crs_type) const;
+
     PROJ_INTERNAL std::list<crs::VerticalCRSNNPtr>
     createVerticalCRSFromDatum(const std::string &datum_auth_name,
                                const std::string &datum_code) const;
@@ -1286,6 +1306,10 @@ class PROJ_GCC_DLL AuthorityFactory {
                                 std::vector<ObjectType>(),
                             bool approximateMatch = true,
                             size_t limitResultCount = 0) const;
+
+    PROJ_FOR_TEST std::vector<operation::PointMotionOperationNNPtr>
+    getPointMotionOperationsFor(const crs::GeodeticCRSNNPtr &crs,
+                                bool usePROJAlternativeGridNames) const;
 
     //! @endcond
 

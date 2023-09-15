@@ -1338,6 +1338,20 @@ $EXE -d 3 EPSG:3912+EPSG:5779 EPSG:3794+EPSG:8690 -E >>${OUT} 2>&1 <<EOF
 477134.28 95134.21 5
 EOF
 
+echo "##############################################################" >> ${OUT}
+echo "Test --s_epoch" >> ${OUT}
+#
+$EXE -d 8 --s_epoch 2022 "ITRF2014" "GDA2020" -E >>${OUT} 2>&1 <<EOF
+-30 150
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test --t_epoch" >> ${OUT}
+#
+$EXE -d 8 --t_epoch 2022 "GDA2020" "ITRF2014" -E >>${OUT} 2>&1 <<EOF
+-30 150
+EOF
+
 
 # Done!
 # do 'diff' with distribution results

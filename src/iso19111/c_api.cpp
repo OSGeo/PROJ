@@ -208,13 +208,15 @@ PJ *pj_obj_create(PJ_CONTEXT *ctx, const BaseObjectNNPtr &objIn) {
                 pj->iso_obj = objIn;
                 pj->iso_obj_is_coordinate_operation = true;
                 auto sourceEpoch = coordop->sourceCoordinateEpoch();
+                auto targetEpoch = coordop->targetCoordinateEpoch();
                 if (sourceEpoch.has_value()) {
-                    pj->hasCoordinateEpoch = true;
-                    pj->coordinateEpoch =
-                        sourceEpoch->coordinateEpoch().convertToUnit(
-                            common::UnitOfMeasure::YEAR);
+                    if (!targetEpoch.has_value()) {
+                        pj->hasCoordinateEpoch = true;
+                        pj->coordinateEpoch =
+                            sourceEpoch->coordinateEpoch().convertToUnit(
+                                common::UnitOfMeasure::YEAR);
+                    }
                 } else {
-                    auto targetEpoch = coordop->targetCoordinateEpoch();
                     if (targetEpoch.has_value()) {
                         pj->hasCoordinateEpoch = true;
                         pj->coordinateEpoch =
@@ -4155,18 +4157,44 @@ PJ *proj_crs_promote_to_3D(PJ_CONTEXT *ctx, const char *crs_3D_name,
     }
     auto cpp_2D_crs = dynamic_cast<const CRS *>(crs_2D->iso_obj.get());
     if (!cpp_2D_crs) {
-        proj_log_error(ctx, __FUNCTION__, "crs_2D is not a CRS");
-        return nullptr;
-    }
-    try {
-        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
-        return pj_obj_create(
-            ctx, cpp_2D_crs->promoteTo3D(crs_3D_name ? std::string(crs_3D_name)
-                                                     : cpp_2D_crs->nameStr(),
-                                         dbContext));
-    } catch (const std::exception &e) {
-        proj_log_error(ctx, __FUNCTION__, e.what());
-        return nullptr;
+        auto coordinateMetadata =
+            dynamic_cast<const CoordinateMetadata *>(crs_2D->iso_obj.get());
+        if (!coordinateMetadata) {
+            proj_log_error(ctx, __FUNCTION__,
+                           "crs_2D is not a CRS or a CoordinateMetadata");
+            return nullptr;
+        }
+
+        try {
+            auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+            auto crs = coordinateMetadata->crs();
+            auto crs_3D = crs->promoteTo3D(
+                crs_3D_name ? std::string(crs_3D_name) : crs->nameStr(),
+                dbContext);
+            if (coordinateMetadata->coordinateEpoch().has_value()) {
+                return pj_obj_create(
+                    ctx, CoordinateMetadata::create(
+                             crs_3D,
+                             coordinateMetadata->coordinateEpochAsDecimalYear(),
+                             dbContext));
+            } else {
+                return pj_obj_create(ctx, CoordinateMetadata::create(crs_3D));
+            }
+        } catch (const std::exception &e) {
+            proj_log_error(ctx, __FUNCTION__, e.what());
+            return nullptr;
+        }
+    } else {
+        try {
+            auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+            return pj_obj_create(ctx, cpp_2D_crs->promoteTo3D(
+                                          crs_3D_name ? std::string(crs_3D_name)
+                                                      : cpp_2D_crs->nameStr(),
+                                          dbContext));
+        } catch (const std::exception &e) {
+            proj_log_error(ctx, __FUNCTION__, e.what());
+            return nullptr;
+        }
     }
 }
 
@@ -8440,22 +8468,19 @@ proj_create_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
         }
     }
 
-    if (sourceCoordinateMetadata != nullptr &&
-        targetCoordinateMetadata != nullptr) {
-        proj_log_error(ctx, __FUNCTION__,
-                       "CoordinateMetadata with epoch to CoordinateMetadata "
-                       "with epoch not supported currently");
-        return nullptr;
-    }
-
     try {
         auto factory = CoordinateOperationFactory::create();
         std::vector<IdentifiedObjectNNPtr> objects;
         auto ops = sourceCoordinateMetadata != nullptr
-                       ? factory->createOperations(
-                             NN_NO_CHECK(sourceCoordinateMetadata),
-                             NN_NO_CHECK(targetCRS),
-                             operationContext->operationContext)
+                       ? (targetCoordinateMetadata != nullptr
+                              ? factory->createOperations(
+                                    NN_NO_CHECK(sourceCoordinateMetadata),
+                                    NN_NO_CHECK(targetCoordinateMetadata),
+                                    operationContext->operationContext)
+                              : factory->createOperations(
+                                    NN_NO_CHECK(sourceCoordinateMetadata),
+                                    NN_NO_CHECK(targetCRS),
+                                    operationContext->operationContext))
                    : targetCoordinateMetadata != nullptr
                        ? factory->createOperations(
                              NN_NO_CHECK(sourceCRS),
@@ -9541,6 +9566,36 @@ proj_get_geoid_models_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a CoordinateMetadata object
+ *
+ * @since 9.4
+ */
+
+PJ *proj_coordinate_metadata_create(PJ_CONTEXT *ctx, const PJ *crs,
+                                    double epoch) {
+    SANITIZE_CTX(ctx);
+    if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return nullptr;
+    }
+    auto crsCast = std::dynamic_pointer_cast<CRS>(crs->iso_obj);
+    if (!crsCast) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CRS");
+        return nullptr;
+    }
+    try {
+        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+        return pj_obj_create(ctx, CoordinateMetadata::create(
+                                      NN_NO_CHECK(crsCast), epoch, dbContext));
+    } catch (const std::exception &e) {
+        proj_log_debug(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the coordinate epoch associated with a CoordinateMetadata.
  *
  * It may return a NaN value if there is no associated coordinate epoch.
@@ -9567,3 +9622,35 @@ double proj_coordinate_metadata_get_epoch(PJ_CONTEXT *ctx, const PJ *obj) {
 }
 
 // ---------------------------------------------------------------------------
+
+/** \brief Return whether a CRS has an associated PointMotionOperation
+ *
+ * @since 9.4
+ */
+int proj_crs_has_point_motion_operation(PJ_CONTEXT *ctx, const PJ *crs) {
+    SANITIZE_CTX(ctx);
+    if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return false;
+    }
+    auto l_crs = dynamic_cast<const CRS *>(crs->iso_obj.get());
+    if (!l_crs) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CRS");
+        return false;
+    }
+    auto geodeticCRS = l_crs->extractGeodeticCRS();
+    if (!geodeticCRS)
+        return false;
+    try {
+        auto factory =
+            AuthorityFactory::create(getDBcontext(ctx), std::string());
+        return !factory
+                    ->getPointMotionOperationsFor(NN_NO_CHECK(geodeticCRS),
+                                                  false)
+                    .empty();
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return false;
+}

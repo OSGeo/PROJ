@@ -1395,6 +1395,9 @@ PJ PROJ_DLL *proj_crs_get_datum_ensemble(PJ_CONTEXT *ctx, const PJ *crs);
 
 PJ PROJ_DLL *proj_crs_get_datum_forced(PJ_CONTEXT *ctx, const PJ *crs);
 
+int PROJ_DLL proj_crs_has_point_motion_operation(PJ_CONTEXT *ctx,
+                                                 const PJ *crs);
+
 int PROJ_DLL proj_datum_ensemble_get_member_count(PJ_CONTEXT *ctx,
                                                   const PJ *datum_ensemble);
 
@@ -1490,6 +1493,9 @@ int PROJ_DLL proj_concatoperation_get_step_count(PJ_CONTEXT *ctx,
 PJ PROJ_DLL *proj_concatoperation_get_step(PJ_CONTEXT *ctx,
                                            const PJ *concatoperation,
                                            int i_step);
+
+PJ PROJ_DLL *proj_coordinate_metadata_create(PJ_CONTEXT *ctx, const PJ *crs,
+                                             double epoch);
 
 double PROJ_DLL proj_coordinate_metadata_get_epoch(PJ_CONTEXT *ctx,
                                                    const PJ *obj);

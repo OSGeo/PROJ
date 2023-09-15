@@ -1593,7 +1593,7 @@ CREATE TABLE unit_of_measure(
 
 Testing projinfo --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | tail -n 4
 INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MAJOR',1);
-INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MINOR',2);
+INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MINOR',3);
 INSERT INTO geodetic_crs VALUES('HOBU','XXXX','WGS 84','','geographic 2D','EPSG','6422','EPSG','6326',NULL,0);
 INSERT INTO usage VALUES('HOBU','USAGE_GEODETIC_CRS_XXXX','geodetic_crs','HOBU','XXXX','EPSG','1262','EPSG','1183');
 
@@ -1696,4 +1696,8 @@ EPSG:2154 "RGF93 v1 / Lambert-93"
 
 Testing EPSG:9945 -o PROJ -q
 +proj=tmerc +lat_0=0 +lon_0=21 +k=0.9999 +x_0=500000 +y_0=-4000000 +ellps=bessel +towgs84=521.748,229.489,590.921,4.029,4.488,-15.521,-9.78 +units=m +no_defs +type=crs
+
+Testing -s "NAD83(CSRS)v7" --s_epoch 1997 -t "NAD83(CSRS)v7" --t_epoch 2010 --summary --hide-ballpark
+Candidate operations found: 1
+unknown id, Null geographic offset from NAD83(CSRS)v7 (geog2D) to NAD83(CSRS)v7 (geog3D) + Canada velocity grid v7 from epoch 1997 to epoch 2010 + Null geographic offset from NAD83(CSRS)v7 (geog3D) to NAD83(CSRS)v7 (geog2D), 0.01 m, Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.
 
