@@ -4804,7 +4804,12 @@ void PointMotionOperation::_exportToPROJString(
                 "when target coordinate epoch is missing");
         }
 
-        auto l_sourceCRS = dynamic_cast<crs::GeodeticCRS *>(sourceCRS().get());
+        auto l_sourceCRS =
+            dynamic_cast<const crs::GeodeticCRS *>(sourceCRS().get());
+        if (!l_sourceCRS) {
+            throw io::FormattingException("Can apply PointMotionOperation "
+                                          "VelocityGrid only to GeodeticCRS");
+        }
 
         if (!l_sourceCRS->isGeocentric()) {
             formatter->startInversion();

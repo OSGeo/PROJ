@@ -6226,6 +6226,9 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
 
     // Use PointMotionOperations if appropriate and available
     const auto &authFactory = context.context->getAuthorityFactory();
+    auto dbContext =
+        authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
+
     if (authFactory && sourceEpoch.has_value() && targetEpoch.has_value() &&
         !sourceEpoch->coordinateEpoch()._isEquivalentTo(
             targetEpoch->coordinateEpoch()) &&
@@ -6286,9 +6289,6 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 util::IComparable::Criterion::EQUIVALENT) &&
             !comp1SrcBound->isEquivalentTo(
                 comp1DstBound, util::IComparable::Criterion::EQUIVALENT)) {
-            auto dbContext = authFactory
-                                 ? authFactory->databaseContext().as_nullable()
-                                 : nullptr;
             auto hub3D =
                 comp0SrcBound->hubCRS()->promoteTo3D(std::string(), dbContext);
             const auto ops1 = createOperations(sourceCRS, sourceEpoch, hub3D,
@@ -6367,10 +6367,6 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
     }
 
     if (bTryThroughIntermediateGeogCRS) {
-        auto dbContext = authFactory
-                             ? authFactory->databaseContext().as_nullable()
-                             : nullptr;
-
         const auto createWithIntermediateCRS =
             [&sourceCRS, &sourceEpoch, &targetCRS, &targetEpoch, &context,
              &res](const crs::CRSNNPtr &intermCRS) {
@@ -6660,7 +6656,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         // Hack for
         // NAD83_CSRS_1997_xxxx_HT2_1997 to NAD83_CSRS_1997_yyyy_CGVD2013_1997
         // NAD83_CSRS_2002_xxxx_HT2_2002 to NAD83_CSRS_2002_yyyy_CGVD2013_2002
-        if (sourceEpoch.has_value() && targetEpoch.has_value() &&
+        if (dbContext && sourceEpoch.has_value() && targetEpoch.has_value() &&
             sourceEpoch->coordinateEpoch()._isEquivalentTo(
                 targetEpoch->coordinateEpoch()) &&
             srcGeog->_isEquivalentTo(
@@ -6676,7 +6672,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                          2002) < 1e-10;
             try {
                 auto authFactoryEPSG = io::AuthorityFactory::create(
-                    authFactory->databaseContext(), "EPSG");
+                    NN_NO_CHECK(dbContext), "EPSG");
                 auto nad83CSRSv7 = authFactoryEPSG->createGeographicCRS("8255");
                 if (srcGeog->_isEquivalentTo(nad83CSRSv7.get(),
                                              util::IComparable::Criterion::
