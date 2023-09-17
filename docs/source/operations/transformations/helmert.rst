@@ -4,8 +4,6 @@
 Helmert transform
 ================================================================================
 
-.. versionadded:: 5.0.0
-
 The Helmert transformation changes coordinates from one reference frame to
 another by means of 3-, 4-and 7-parameter shifts, or one of their 6-, 8- and
 14-parameter kinematic counterparts.
@@ -80,8 +78,6 @@ Parameters
     operation will return the coordinates unchanged.
 
 .. option:: +convention=coordinate_frame/position_vector
-
-    .. versionadded:: 5.2.0
 
     Indicates the convention to express the rotational terms when a 3D-Helmert /
     7-parameter more transform is involved. As soon as a rotational parameter
@@ -181,15 +177,6 @@ Parameters
     Use exact transformation equations.
 
     See :eq:`rot_exact`
-
-.. option:: +transpose
-
-    .. deprecated:: 5.2.0 (removed)
-
-    Transpose rotation matrix and follow the **Position Vector** rotation
-    convention. If :option:`+transpose` is not added the **Coordinate Frame**
-    rotation convention is used.
-
 
 
 Mathematical description
