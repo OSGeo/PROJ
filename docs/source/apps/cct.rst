@@ -184,7 +184,7 @@ Should give results comparable to the classic :program:`proj` command
 
       cct -t 0 -z 0 +proj=utm +ellps=GRS80 +zone=32
 
-6. Auxiliary data following the coordinate input is forward to the output
+6. Auxiliary data following the coordinate input is forwarded to the output
    stream:
 
 .. code-block:: console
