@@ -1,6 +1,8 @@
 .. option:: +lon_0=<value>
 
-    Longitude of projection center.
+    Longitude of central meridian/longitude of natural origin, longitude of
+    origin or longitude of false origin (naming and semantic depend on the
+    projection method).
 
     *Defaults to 0.0.*
 
