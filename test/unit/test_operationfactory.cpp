@@ -2118,6 +2118,63 @@ TEST(operation, geogCRS_different_from_baseCRS_to_projCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_with_towgs84_to_geocentric) {
+
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+
+    auto objSrc = WKTParser().createFromWKT(
+        "GEOGCS[\"WGS84 Coordinate System\",DATUM[\"WGS_1984\","
+        "SPHEROID[\"WGS 1984\",6378137,298.257223563],"
+        "TOWGS84[0,0,0,0,0,0,0],AUTHORITY[\"EPSG\",\"6326\"]],"
+        "PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],"
+        "AXIS[\"Latitude\",NORTH],AXIS[\"Longitude\",EAST],"
+        "AUTHORITY[\"EPSG\",\"4326\"]]");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto src3D = src->promoteTo3D(std::string(), dbContext);
+
+    auto objDst = WKTParser().createFromWKT(
+        "GEOCCS[\"WGS 84\",DATUM[\"WGS_1984\","
+        "SPHEROID[\"WGS 84\",6378137,298.257223563,"
+        "AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],"
+        "PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],"
+        "UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],"
+        "AXIS[\"Geocentric X\",OTHER],AXIS[\"Geocentric Y\",OTHER],"
+        "AXIS[\"Geocentric Z\",NORTH],AUTHORITY[\"EPSG\",\"4978\"]]");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            src3D, NN_NO_CHECK(dst), ctxt);
+        ASSERT_EQ(list.size(), 1U);
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +z_in=m "
+            "+xy_out=rad +z_out=m "
+            "+step +proj=cart +ellps=WGS84");
+    }
+
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            NN_NO_CHECK(dst), src3D, ctxt);
+        ASSERT_EQ(list.size(), 1U);
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +inv +proj=cart +ellps=WGS84 "
+            "+step +proj=unitconvert +xy_in=rad +z_in=m "
+            "+xy_out=deg +z_out=m "
+            "+step +proj=axisswap +order=2,1");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation,
      geogCRS_different_from_baseCRS_to_projCRS_context_compatible_area) {
     auto authFactory =
