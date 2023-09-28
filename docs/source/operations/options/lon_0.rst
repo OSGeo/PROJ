@@ -1,7 +1,7 @@
 .. option:: +lon_0=<value>
 
     Central meridian/longitude of natural origin, longitude of
-    origin or longitude of false origin (naming and semantic depend on the
+    origin or longitude of false origin (naming and meaning depend on the
     projection method).
 
     *Defaults to 0.0.*
