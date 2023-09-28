@@ -117,6 +117,31 @@ TEST_F(GridTest, HorizontalShiftGridSet_null) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(GridTest, GenericShiftGridSet_null) {
+    auto gridSet = NS_PROJ::GenericShiftGridSet::open(m_ctxt, "null");
+    ASSERT_NE(gridSet, nullptr);
+    auto grid = gridSet->gridAt(0.0, 0.0);
+    ASSERT_NE(grid, nullptr);
+    EXPECT_EQ(grid->width(), 3);
+    EXPECT_EQ(grid->height(), 3);
+    EXPECT_EQ(grid->extentAndRes().west, -M_PI);
+    EXPECT_TRUE(grid->isNullGrid());
+    EXPECT_FALSE(grid->hasChanged());
+    float out = -1.0f;
+    EXPECT_TRUE(grid->valueAt(0, 0, 0, out));
+    EXPECT_EQ(out, 0.0f);
+    EXPECT_EQ(grid->unit(0), "");
+    EXPECT_EQ(grid->description(0), "");
+    EXPECT_EQ(grid->metadataItem("foo"), "");
+    EXPECT_EQ(grid->samplesPerPixel(), 0);
+    gridSet->reassign_context(m_ctxt2);
+    gridSet->reopen(m_ctxt2);
+}
+
+#ifdef TIFF_ENABLED
+
+// ---------------------------------------------------------------------------
+
 TEST_F(GridTest, HorizontalShiftGridSet_gtiff) {
     auto gridSet =
         NS_PROJ::HorizontalShiftGridSet::open(m_ctxt, "tests/test_hgrid.tif");
@@ -143,29 +168,6 @@ TEST_F(GridTest, HorizontalShiftGridSet_gtiff) {
     gridSet->reopen(m_ctxt2);
     grid = gridSet->gridAt(5.5 / 180 * M_PI, 53.5 / 180 * M_PI);
     EXPECT_NE(grid, nullptr);
-}
-
-// ---------------------------------------------------------------------------
-
-TEST_F(GridTest, GenericShiftGridSet_null) {
-    auto gridSet = NS_PROJ::GenericShiftGridSet::open(m_ctxt, "null");
-    ASSERT_NE(gridSet, nullptr);
-    auto grid = gridSet->gridAt(0.0, 0.0);
-    ASSERT_NE(grid, nullptr);
-    EXPECT_EQ(grid->width(), 3);
-    EXPECT_EQ(grid->height(), 3);
-    EXPECT_EQ(grid->extentAndRes().west, -M_PI);
-    EXPECT_TRUE(grid->isNullGrid());
-    EXPECT_FALSE(grid->hasChanged());
-    float out = -1.0f;
-    EXPECT_TRUE(grid->valueAt(0, 0, 0, out));
-    EXPECT_EQ(out, 0.0f);
-    EXPECT_EQ(grid->unit(0), "");
-    EXPECT_EQ(grid->description(0), "");
-    EXPECT_EQ(grid->metadataItem("foo"), "");
-    EXPECT_EQ(grid->samplesPerPixel(), 0);
-    gridSet->reassign_context(m_ctxt2);
-    gridSet->reopen(m_ctxt2);
 }
 
 // ---------------------------------------------------------------------------
@@ -334,5 +336,7 @@ TEST_F(GridTest, GenericShiftGridSet_gtiff_projected) {
     EXPECT_EQ(grid->extentAndRes().resX, 1000);
     EXPECT_EQ(grid->extentAndRes().resY, 1000);
 }
+
+#endif // TIFF_ENABLED
 
 } // namespace
