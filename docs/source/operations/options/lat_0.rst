@@ -1,7 +1,7 @@
 .. option:: +lat_0=<value>
 
     Latitude of natural origin, latitude of false origin or latitude of
-    projection centre (naming and semantic depend on the
+    projection centre (naming and meaning depend on the
     projection method).
 
     *Defaults to 0.0.*

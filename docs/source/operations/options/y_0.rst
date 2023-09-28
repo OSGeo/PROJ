@@ -1,6 +1,6 @@
 .. option:: +y_0=<value>
 
     False northing, northing at false origin or northing at projection centre (naming
-    and semantic depend on the projection method). Always in meters.
+    and meaning depend on the projection method). Always in meters.
 
     *Defaults to 0.0.*
