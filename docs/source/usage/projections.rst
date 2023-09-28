@@ -52,7 +52,7 @@ symbolic unit names. The default unit for projected coordinates is the meter.
 A few special projections deviate from this behavior, most notably the
 latlong pseudo-projection that returns degrees.
 Note that this does *not* affect the units of linear parameters such as ``+x_0``
-or ``+y_0`` which should always be specified in degree
+or ``+y_0`` which should always be specified in meters.
 
 Vertical (Z) units can be specified using the ``+vunits`` keyword with a
 symbolic name for a unit (i.e. ``us-ft``).  Alternatively the translation to
