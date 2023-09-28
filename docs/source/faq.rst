@@ -136,7 +136,7 @@ internally PROJ expects an longitude/latitude ordering for all projections. This
 is generally hidden for users but in a few cases it is exposed at the surface
 level of PROJ, most prominently in the :program:`proj` utility which expects
 longitude/latitude ordering of input data (unless :option:`proj -r` is used).
-(And `geod`, which on the contrary expects latitude/longetude, and lacks any
+(And :program:`geod`, which on the contrary expects latitude/longitude, and lacks any
 `-r` style workarounds.)
 
 In case of doubt about the axis order of a specific CRS :program:`projinfo` is
