@@ -1661,6 +1661,7 @@ TEST_F(CApi, proj_coordoperation_get_grid_used) {
 
 // ---------------------------------------------------------------------------
 
+#ifdef TIFF_ENABLED
 TEST_F(CApi, proj_coordoperation_get_grid_used_fullname_caching) {
     // Test bugfix for
     // https://github.com/OSGeo/PROJ/issues/3444#issuecomment-1309499342
@@ -1688,6 +1689,7 @@ TEST_F(CApi, proj_coordoperation_get_grid_used_fullname_caching) {
             << std::string(fullName);
     }
 }
+#endif
 
 // ---------------------------------------------------------------------------
 

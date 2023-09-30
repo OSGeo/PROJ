@@ -17,6 +17,21 @@ jobs:
 
   clang_linux:
     runs-on: ubuntu-latest
+    env:
+      PROJ_CMAKE_BUILD_OPTIONS: ${{ matrix.PROJ_CMAKE_BUILD_OPTIONS }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Regular
+            id: regular
+            PROJ_CMAKE_BUILD_OPTIONS: ""
+
+          - name: Without TIFF
+            id: without_tiff
+            PROJ_CMAKE_BUILD_OPTIONS: "-DENABLE_TIFF=OFF"
+
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - name: Checkout
@@ -28,8 +43,8 @@ jobs:
         with:
           path: |
                 ${{ github.workspace }}/ccache.tar.gz
-          key: ${{ runner.os }}-cache-clang-${{ github.run_id }}
-          restore-keys: ${{ runner.os }}-cache-clang-
+          key: ${{ runner.os }}-cache-clang-${{ matrix.id }}-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-cache-clang-${{ matrix.id }}-
 
       - name: Run
-        run: docker run -e CI -e TRAVIS_BUILD_DIR="$PWD" -e WORK_DIR="$PWD" -e TRAVIS_OS_NAME=linux -e BUILD_NAME=linux_clang -v $PWD:$PWD ubuntu:20.04 $PWD/.github/workflows/clang_linux/start.sh
+        run: docker run -e CI -e TRAVIS_BUILD_DIR="$PWD" -e PROJ_CMAKE_BUILD_OPTIONS="$PROJ_CMAKE_BUILD_OPTIONS" -e WORK_DIR="$PWD" -e TRAVIS_OS_NAME=linux -e BUILD_NAME=linux_clang -v $PWD:$PWD ubuntu:20.04 $PWD/.github/workflows/clang_linux/start.sh

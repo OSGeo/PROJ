@@ -407,6 +407,7 @@ TEST(gie, info_functions) {
 
     proj_destroy(P);
 
+#ifdef TIFF_ENABLED
     /* proj_grid_info() */
     grid_info = proj_grid_info("tests/test_hgrid.tif");
     ASSERT_NE(std::string(grid_info.filename), "");
@@ -420,6 +421,7 @@ TEST(gie, info_functions) {
     EXPECT_NEAR(grid_info.lowerleft.phi, 0.90757121103705141, 1e-15);
     EXPECT_NEAR(grid_info.upperright.lam, 0.12217304763960307, 1e-15);
     EXPECT_NEAR(grid_info.upperright.phi, 0.95993108859688125, 1e-15);
+#endif
 
     grid_info = proj_grid_info("nonexistinggrid");
     ASSERT_EQ(std::string(grid_info.filename), "");
