@@ -261,3 +261,5 @@ INSERT INTO "scope" VALUES('EPSG','1281','Geodesy. Defines LUREF from 2006 to 20
 INSERT INTO "scope" VALUES('EPSG','1282','Geodesy. Defines LUREF from 2014 to 2020.',0);
 INSERT INTO "scope" VALUES('EPSG','1283','Geodesy. Defines LUREF from 2020.',0);
 INSERT INTO "scope" VALUES('EPSG','1284','Geodesy. Defines NAD83(CSRS)v8.',0);
+INSERT INTO "scope" VALUES('EPSG','1285','Engineering survey and mapping for the Brenner base tunnel (BBT) railway project.',0);
+INSERT INTO "scope" VALUES('EPSG','1286','Mapping and data analysis for Texas Water Development Board groundwater modeling.',0);
