@@ -726,6 +726,9 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1361','Zero Hidrográfi
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1365','NAD83(CSRS)v8','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1365','NAD83(CSRS) 2010','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1366','COV23-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1367','BBT2000','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1367','Brenner basistunnel','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1367','Galleria di base del Brennero','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
