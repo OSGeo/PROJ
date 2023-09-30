@@ -3641,15 +3641,31 @@ bool SingleOperation::exportToPROJStringGeneric(
         auto sourceCRSGeog =
             dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
         if (!sourceCRSGeog) {
-            throw io::FormattingException(
-                "Can apply Geographic 3D offsets only to GeographicCRS");
+            auto boundCRS =
+                dynamic_cast<const crs::BoundCRS *>(sourceCRS().get());
+            if (boundCRS) {
+                sourceCRSGeog = dynamic_cast<crs::GeographicCRS *>(
+                    boundCRS->baseCRS().get());
+            }
+            if (!sourceCRSGeog) {
+                throw io::FormattingException(
+                    "Can apply Geographic 3D offsets only to GeographicCRS");
+            }
         }
 
         auto targetCRSGeog =
             dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
         if (!targetCRSGeog) {
-            throw io::FormattingException(
-                "Can apply Geographic 3D offsets only to GeographicCRS");
+            auto boundCRS =
+                dynamic_cast<const crs::BoundCRS *>(targetCRS().get());
+            if (boundCRS) {
+                targetCRSGeog = dynamic_cast<const crs::GeographicCRS *>(
+                    boundCRS->baseCRS().get());
+            }
+            if (!targetCRSGeog) {
+                throw io::FormattingException(
+                    "Can apply Geographic 3D offsets only to GeographicCRS");
+            }
         }
 
         formatter->startInversion();
