@@ -1,5 +1,6 @@
 .. option:: +x_0=<value>
 
-    False easting, in meters.
+    False easting, easting at false origin or easting at projection centre (naming
+    and meaning depend on the projection method). Always in meters.
 
     *Defaults to 0.0.*
