@@ -154,6 +154,9 @@ target_link_libraries(proj_test_cpp_api
 add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)
 set_property(TEST proj_test_cpp_api
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+if(TIFF_ENABLED)
+  target_compile_definitions(proj_test_cpp_api PRIVATE -DTIFF_ENABLED)
+endif()
 
 add_executable(gie_self_tests
   main.cpp
@@ -161,9 +164,13 @@ add_executable(gie_self_tests
 target_link_libraries(gie_self_tests
   PRIVATE GTest::gtest
   PRIVATE ${PROJ_LIBRARIES})
+  
 add_test(NAME gie_self_tests COMMAND gie_self_tests)
 set_property(TEST gie_self_tests
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+if(TIFF_ENABLED)
+  target_compile_definitions(gie_self_tests PRIVATE -DTIFF_ENABLED)
+endif()
 
 add_executable(test_network
   main.cpp
@@ -183,9 +190,11 @@ target_link_libraries(test_network
   PRIVATE GTest::gtest
   PRIVATE ${PROJ_LIBRARIES}
   PRIVATE ${SQLITE3_LIBRARY})
+if(TIFF_ENABLED)
 add_test(NAME test_network COMMAND test_network)
 set_property(TEST test_network
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+endif()
 
 add_executable(test_defmodel
   main.cpp
