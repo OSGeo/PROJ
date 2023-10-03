@@ -3719,3 +3719,4 @@ INSERT INTO "extent" VALUES('EPSG','4740','Spain - Melilla','Spain - Melilla ons
 INSERT INTO "extent" VALUES('EPSG','4741','Spain - Alboran','Spain - Alboran island - onshore.',35.88,36.0,-3.1,-2.96,0);
 INSERT INTO "extent" VALUES('EPSG','4742','Netherlands - offshore and nearshore ','Netherlands - offshore North Sea and nearshore.',51.32,55.77,2.53,7.21,0);
 INSERT INTO "extent" VALUES('EPSG','4743','UK - Coventry','United Kingdom (UK) - in and around the area of Coventry city centre and the route to Birmingham airport.',52.3,52.5,-1.85,-1.3,0);
+INSERT INTO "extent" VALUES('EPSG','4744','Europe - Brenner','Austria and Italy - on or related to the Brenner Base Tunnel rail route from Innsbruck to Fortezza (Franzensfeste).',46.45,47.32,11.04,11.9,0);
