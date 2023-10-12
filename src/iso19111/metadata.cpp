@@ -343,6 +343,13 @@ bool GeographicBoundingBox::Private::intersects(const Private &other) const {
             return false;
         }
 
+        // Bail out on longitudes not in [-180,180]. We could probably make
+        // some sense of them, but this check at least avoid potential infinite
+        // recursion.
+        if (oW > 180 || oE < -180) {
+            return false;
+        }
+
         return intersects(Private(oW, oS, 180.0, oN)) ||
                intersects(Private(-180.0, oS, oE, oN));
 
