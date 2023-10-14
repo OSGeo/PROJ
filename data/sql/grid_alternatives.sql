@@ -105,6 +105,9 @@ VALUES
 -- de_adv - Arbeitsgemeinschaft der Vermessungsverwaltungender der Länder der Bundesrepublik Deutschland (AdV)
 ('BETA2007.gsb','de_adv_BETA2007.tif','BETA2007.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/de_adv_BETA2007.tif',1,1,NULL),
 
+-- de_bkg - Bundesamt für Kartographie und Geodäsie (BKG)
+('GCG2016.txt','de_bkg_gcg2016.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/de_bkg_gcg2016.tif',1,1,NULL),
+
 -- de_geosn - Staatsbetrieb Geobasisinformation und Vermessung Sachsen GeoSN
 ('NTv2_SN.gsb','de_geosn_NTv2_SN.tif','NTv2_SN.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/de_geosn_NTv2_SN.tif',1,1,NULL),
 
