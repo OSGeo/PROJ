@@ -115,6 +115,13 @@ namespace io {
 #define GEOG_3D_SINGLE_QUOTED "'geographic 3D'"
 #define GEOCENTRIC_SINGLE_QUOTED "'geocentric'"
 
+// Coordinate system types
+constexpr const char *CS_TYPE_ELLIPSOIDAL = cs::EllipsoidalCS::WKT2_TYPE;
+constexpr const char *CS_TYPE_CARTESIAN = cs::CartesianCS::WKT2_TYPE;
+constexpr const char *CS_TYPE_SPHERICAL = cs::SphericalCS::WKT2_TYPE;
+constexpr const char *CS_TYPE_VERTICAL = cs::VerticalCS::WKT2_TYPE;
+constexpr const char *CS_TYPE_ORDINAL = cs::OrdinalCS::WKT2_TYPE;
+
 // See data/sql/metadata.sql for the semantics of those constants
 constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 // If the code depends on the new additions, then DATABASE_LAYOUT_VERSION_MINOR
@@ -1605,11 +1612,11 @@ identifyFromNameOrCode(const DatabaseContextNNPtr &dbContext,
 
 static const char *getCSDatabaseType(const cs::CoordinateSystemNNPtr &obj) {
     if (dynamic_cast<const cs::EllipsoidalCS *>(obj.get())) {
-        return "ellipsoidal";
+        return CS_TYPE_ELLIPSOIDAL;
     } else if (dynamic_cast<const cs::CartesianCS *>(obj.get())) {
-        return "Cartesian";
+        return CS_TYPE_CARTESIAN;
     } else if (dynamic_cast<const cs::VerticalCS *>(obj.get())) {
-        return "vertical";
+        return CS_TYPE_VERTICAL;
     }
     return nullptr;
 }
@@ -4917,7 +4924,7 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
         const auto &orientation = row[2];
         const auto &uom_auth_name = row[3];
         const auto &uom_code = row[4];
-        if (uom_auth_name.empty() && csType != "ordinal") {
+        if (uom_auth_name.empty() && csType != CS_TYPE_ORDINAL) {
             throw FactoryException("no unit of measure for an axis is only "
                                    "supported for ordinatal CS");
         }
@@ -4966,7 +4973,7 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
     auto props = util::PropertyMap()
                      .set(metadata::Identifier::CODESPACE_KEY, d->authority())
                      .set(metadata::Identifier::CODE_KEY, code);
-    if (csType == "ellipsoidal") {
+    if (csType == CS_TYPE_ELLIPSOIDAL) {
         if (axisList.size() == 2) {
             return cacheAndRet(
                 cs::EllipsoidalCS::create(props, axisList[0], axisList[1]));
@@ -4977,7 +4984,7 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
         }
         throw FactoryException("invalid number of axis for EllipsoidalCS");
     }
-    if (csType == "Cartesian") {
+    if (csType == CS_TYPE_CARTESIAN) {
         if (axisList.size() == 2) {
             return cacheAndRet(
                 cs::CartesianCS::create(props, axisList[0], axisList[1]));
@@ -4988,7 +4995,7 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
         }
         throw FactoryException("invalid number of axis for CartesianCS");
     }
-    if (csType == "spherical") {
+    if (csType == CS_TYPE_SPHERICAL) {
         if (axisList.size() == 2) {
             return cacheAndRet(
                 cs::SphericalCS::create(props, axisList[0], axisList[1]));
@@ -4999,13 +5006,13 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
         }
         throw FactoryException("invalid number of axis for SphericalCS");
     }
-    if (csType == "vertical") {
+    if (csType == CS_TYPE_VERTICAL) {
         if (axisList.size() == 1) {
             return cacheAndRet(cs::VerticalCS::create(props, axisList[0]));
         }
         throw FactoryException("invalid number of axis for VerticalCS");
     }
-    if (csType == "ordinal") {
+    if (csType == CS_TYPE_ORDINAL) {
         return cacheAndRet(cs::OrdinalCS::create(props, axisList));
     }
     throw FactoryException("unhandled coordinate system type: " + csType);

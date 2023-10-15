@@ -1527,7 +1527,7 @@ DateTimeTemporalCS::create(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 std::string DateTimeTemporalCS::getWKT2Type(bool use2019Keywords) const {
-    return use2019Keywords ? "TemporalDateTime" : "temporal";
+    return use2019Keywords ? WKT2_2019_TYPE : WKT2_2015_TYPE;
 }
 
 // ---------------------------------------------------------------------------
@@ -1560,7 +1560,7 @@ TemporalCountCS::create(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 std::string TemporalCountCS::getWKT2Type(bool use2019Keywords) const {
-    return use2019Keywords ? "TemporalCount" : "temporal";
+    return use2019Keywords ? WKT2_2019_TYPE : WKT2_2015_TYPE;
 }
 
 // ---------------------------------------------------------------------------
@@ -1593,7 +1593,7 @@ TemporalMeasureCS::create(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 std::string TemporalMeasureCS::getWKT2Type(bool use2019Keywords) const {
-    return use2019Keywords ? "TemporalMeasure" : "temporal";
+    return use2019Keywords ? WKT2_2019_TYPE : WKT2_2015_TYPE;
 }
 
 } // namespace cs
