@@ -31,6 +31,14 @@ matrix:
         - DETAILS="linux, arm64"
         - NPROC=4
 
+    - os: linux
+      dist: bionic
+      compiler: gcc
+      arch: ppc64le
+      env:
+        - BUILD_NAME=linux_generic
+        - DETAILS="linux, ppc64le"
+
   allow_failures:
       - env: BUILD_NAME=mingw32
 

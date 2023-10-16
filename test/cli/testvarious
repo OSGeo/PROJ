@@ -1352,6 +1352,17 @@ $EXE -d 8 --t_epoch 2022 "GDA2020" "ITRF2014" -E >>${OUT} 2>&1 <<EOF
 -30 150
 EOF
 
+echo "##############################################################" >> ${OUT}
+echo "Test PROJ_NETWORK=ON -d 3 EPSG:26915 +to EPSG:26715" >> ${OUT}
+PROJ_NETWORK=ON $EXE -d 3 EPSG:26915 +to EPSG:26715 -E >>${OUT} 2>&1 <<EOF
+569704.57 4269024.67
+EOF
+
+PROJ_NETWORK=ON $EXE -d 3 EPSG:26915 +to EPSG:26715 -E >>${OUT} 2>&1 <<EOF
+569704.57 4269024.67
+EOF
+
+
 
 # Done!
 # do 'diff' with distribution results
