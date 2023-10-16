@@ -2776,7 +2776,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         const char *csTypeCStr = "";
         const auto &parentNodeName = parentNode->GP()->value();
         if (ci_equal(parentNodeName, WKTConstants::GEOCCS)) {
-            csTypeCStr = "Cartesian";
+            csTypeCStr = CartesianCS::WKT2_TYPE;
             isGeocentric = true;
             if (axisCount == 0) {
                 auto unit =
@@ -2787,7 +2787,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 return CartesianCS::createGeocentric(unit);
             }
         } else if (ci_equal(parentNodeName, WKTConstants::GEOGCS)) {
-            csTypeCStr = "Ellipsoidal";
+            csTypeCStr = EllipsoidalCS::WKT2_TYPE;
             if (axisCount == 0) {
                 // Missing axis with GEOGCS ? Presumably Long/Lat order
                 // implied
@@ -2812,7 +2812,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
             }
         } else if (ci_equal(parentNodeName, WKTConstants::BASEGEODCRS) ||
                    ci_equal(parentNodeName, WKTConstants::BASEGEOGCRS)) {
-            csTypeCStr = "Ellipsoidal";
+            csTypeCStr = EllipsoidalCS::WKT2_TYPE;
             if (axisCount == 0) {
                 auto unit = buildUnitInSubNode(parentNode,
                                                UnitOfMeasure::Type::ANGULAR);
@@ -2825,7 +2825,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         } else if (ci_equal(parentNodeName, WKTConstants::PROJCS) ||
                    ci_equal(parentNodeName, WKTConstants::BASEPROJCRS) ||
                    ci_equal(parentNodeName, WKTConstants::BASEENGCRS)) {
-            csTypeCStr = "Cartesian";
+            csTypeCStr = CartesianCS::WKT2_TYPE;
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
@@ -2841,7 +2841,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         } else if (ci_equal(parentNodeName, WKTConstants::VERT_CS) ||
                    ci_equal(parentNodeName, WKTConstants::VERTCS) ||
                    ci_equal(parentNodeName, WKTConstants::BASEVERTCRS)) {
-            csTypeCStr = "vertical";
+            csTypeCStr = VerticalCS::WKT2_TYPE;
 
             bool downDirection = false;
             if (ci_equal(parentNodeName, WKTConstants::VERTCS)) // ESRI
@@ -2901,15 +2901,15 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 }
                 return CartesianCS::createEastingNorthing(unit);
             } else if (axisCount == 1) {
-                csTypeCStr = "vertical";
+                csTypeCStr = VerticalCS::WKT2_TYPE;
             } else if (axisCount == 2) {
-                csTypeCStr = "Cartesian";
+                csTypeCStr = CartesianCS::WKT2_TYPE;
             } else {
                 throw ParsingException(
                     "buildCS: unexpected AXIS count for LOCAL_CS");
             }
         } else if (ci_equal(parentNodeName, WKTConstants::BASEPARAMCRS)) {
-            csTypeCStr = "parametric";
+            csTypeCStr = ParametricCS::WKT2_TYPE;
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
@@ -2925,7 +2925,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                         std::string(), AxisDirection::UNSPECIFIED, unit));
             }
         } else if (ci_equal(parentNodeName, WKTConstants::BASETIMECRS)) {
-            csTypeCStr = "temporal";
+            csTypeCStr = TemporalCS::WKT2_2015_TYPE;
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::TIME);
@@ -2957,16 +2957,19 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
     }
 
     const auto unitType =
-        ci_equal(csType, "ellipsoidal")  ? UnitOfMeasure::Type::ANGULAR
-        : ci_equal(csType, "ordinal")    ? UnitOfMeasure::Type::NONE
-        : ci_equal(csType, "parametric") ? UnitOfMeasure::Type::PARAMETRIC
-        : ci_equal(csType, "Cartesian") || ci_equal(csType, "vertical") ||
-                ci_equal(csType, "affine")
+        ci_equal(csType, EllipsoidalCS::WKT2_TYPE)
+            ? UnitOfMeasure::Type::ANGULAR
+        : ci_equal(csType, OrdinalCS::WKT2_TYPE) ? UnitOfMeasure::Type::NONE
+        : ci_equal(csType, ParametricCS::WKT2_TYPE)
+            ? UnitOfMeasure::Type::PARAMETRIC
+        : ci_equal(csType, CartesianCS::WKT2_TYPE) ||
+                ci_equal(csType, VerticalCS::WKT2_TYPE) ||
+                ci_equal(csType, AffineCS::WKT2_TYPE)
             ? UnitOfMeasure::Type::LINEAR
-        : (ci_equal(csType, "temporal") ||
-           ci_equal(csType, "TemporalDateTime") ||
-           ci_equal(csType, "TemporalCount") ||
-           ci_equal(csType, "TemporalMeasure"))
+        : (ci_equal(csType, TemporalCS::WKT2_2015_TYPE) ||
+           ci_equal(csType, DateTimeTemporalCS::WKT2_2019_TYPE) ||
+           ci_equal(csType, TemporalCountCS::WKT2_2019_TYPE) ||
+           ci_equal(csType, TemporalMeasureCS::WKT2_2019_TYPE))
             ? UnitOfMeasure::Type::TIME
             : UnitOfMeasure::Type::UNKNOWN;
     UnitOfMeasure unit = buildUnitInSubNode(parentNode, unitType);
@@ -2979,32 +2982,32 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
     }
 
     const PropertyMap &csMap = emptyPropertyMap;
-    if (ci_equal(csType, "ellipsoidal")) {
+    if (ci_equal(csType, EllipsoidalCS::WKT2_TYPE)) {
         if (axisCount == 2) {
             return EllipsoidalCS::create(csMap, axisList[0], axisList[1]);
         } else if (axisCount == 3) {
             return EllipsoidalCS::create(csMap, axisList[0], axisList[1],
                                          axisList[2]);
         }
-    } else if (ci_equal(csType, "Cartesian")) {
+    } else if (ci_equal(csType, CartesianCS::WKT2_TYPE)) {
         if (axisCount == 2) {
             return CartesianCS::create(csMap, axisList[0], axisList[1]);
         } else if (axisCount == 3) {
             return CartesianCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
         }
-    } else if (ci_equal(csType, "affine")) {
+    } else if (ci_equal(csType, AffineCS::WKT2_TYPE)) {
         if (axisCount == 2) {
             return AffineCS::create(csMap, axisList[0], axisList[1]);
         } else if (axisCount == 3) {
             return AffineCS::create(csMap, axisList[0], axisList[1],
                                     axisList[2]);
         }
-    } else if (ci_equal(csType, "vertical")) {
+    } else if (ci_equal(csType, VerticalCS::WKT2_TYPE)) {
         if (axisCount == 1) {
             return VerticalCS::create(csMap, axisList[0]);
         }
-    } else if (ci_equal(csType, "spherical")) {
+    } else if (ci_equal(csType, SphericalCS::WKT2_TYPE)) {
         if (axisCount == 2) {
             // Extension to ISO19111 to support (planet)-ocentric CS with
             // geocentric latitude
@@ -3013,13 +3016,13 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
             return SphericalCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
         }
-    } else if (ci_equal(csType, "ordinal")) { // WKT2-2019
+    } else if (ci_equal(csType, OrdinalCS::WKT2_TYPE)) { // WKT2-2019
         return OrdinalCS::create(csMap, axisList);
-    } else if (ci_equal(csType, "parametric")) {
+    } else if (ci_equal(csType, ParametricCS::WKT2_TYPE)) {
         if (axisCount == 1) {
             return ParametricCS::create(csMap, axisList[0]);
         }
-    } else if (ci_equal(csType, "temporal")) { // WKT2-2015
+    } else if (ci_equal(csType, TemporalCS::WKT2_2015_TYPE)) {
         if (axisCount == 1) {
             if (isNull(
                     parentNode->GP()->lookForChild(WKTConstants::TIMEUNIT)) &&
@@ -3031,15 +3034,15 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 return TemporalMeasureCS::create(csMap, axisList[0]);
             }
         }
-    } else if (ci_equal(csType, "TemporalDateTime")) { // WKT2-2019
+    } else if (ci_equal(csType, DateTimeTemporalCS::WKT2_2019_TYPE)) {
         if (axisCount == 1) {
             return DateTimeTemporalCS::create(csMap, axisList[0]);
         }
-    } else if (ci_equal(csType, "TemporalCount")) { // WKT2-2019
+    } else if (ci_equal(csType, TemporalCountCS::WKT2_2019_TYPE)) {
         if (axisCount == 1) {
             return TemporalCountCS::create(csMap, axisList[0]);
         }
-    } else if (ci_equal(csType, "TemporalMeasure")) { // WKT2-2019
+    } else if (ci_equal(csType, TemporalMeasureCS::WKT2_2019_TYPE)) {
         if (axisCount == 1) {
             return TemporalMeasureCS::create(csMap, axisList[0]);
         }
@@ -4589,7 +4592,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
         }
     }
     if (!cartesianCS) {
-        ThrowNotExpectedCSType("Cartesian");
+        ThrowNotExpectedCSType(CartesianCS::WKT2_TYPE);
     }
 
     if (cartesianCS->axisList().size() == 3 &&
@@ -4842,7 +4845,7 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     auto verticalCS = nn_dynamic_pointer_cast<VerticalCS>(
         buildCS(csNode, node, UnitOfMeasure::NONE));
     if (!verticalCS) {
-        ThrowNotExpectedCSType("vertical");
+        ThrowNotExpectedCSType(VerticalCS::WKT2_TYPE);
     }
 
     if (vdatum && vdatum->getWKT1DatumType() == "2002" &&
@@ -5179,7 +5182,7 @@ WKTParser::Private::buildTemporalCS(const WKTNodeNNPtr &parentNode) {
     auto cs = buildCS(csNode, parentNode, UnitOfMeasure::NONE);
     auto temporalCS = nn_dynamic_pointer_cast<TemporalCS>(cs);
     if (!temporalCS) {
-        ThrowNotExpectedCSType("temporal");
+        ThrowNotExpectedCSType(TemporalCS::WKT2_2015_TYPE);
     }
     return NN_NO_CHECK(temporalCS);
 }
@@ -5304,7 +5307,7 @@ WKTParser::Private::buildParametricCS(const WKTNodeNNPtr &parentNode) {
     auto cs = buildCS(csNode, parentNode, UnitOfMeasure::NONE);
     auto parametricCS = nn_dynamic_pointer_cast<ParametricCS>(cs);
     if (!parametricCS) {
-        ThrowNotExpectedCSType("parametric");
+        ThrowNotExpectedCSType(ParametricCS::WKT2_TYPE);
     }
     return NN_NO_CHECK(parametricCS);
 }
@@ -6804,7 +6807,7 @@ CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
     }
     const PropertyMap &csMap = emptyPropertyMap;
     const auto axisCount = axisList.size();
-    if (subtype == "ellipsoidal") {
+    if (subtype == EllipsoidalCS::WKT2_TYPE) {
         if (axisCount == 2) {
             return EllipsoidalCS::create(csMap, axisList[0], axisList[1]);
         }
@@ -6814,7 +6817,7 @@ CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
         }
         throw ParsingException("Expected 2 or 3 axis");
     }
-    if (subtype == "Cartesian") {
+    if (subtype == CartesianCS::WKT2_TYPE) {
         if (axisCount == 2) {
             return CartesianCS::create(csMap, axisList[0], axisList[1]);
         }
@@ -6824,7 +6827,7 @@ CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
         }
         throw ParsingException("Expected 2 or 3 axis");
     }
-    if (subtype == "affine") {
+    if (subtype == AffineCS::WKT2_TYPE) {
         if (axisCount == 2) {
             return AffineCS::create(csMap, axisList[0], axisList[1]);
         }
@@ -6834,13 +6837,13 @@ CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
         }
         throw ParsingException("Expected 2 or 3 axis");
     }
-    if (subtype == "vertical") {
+    if (subtype == VerticalCS::WKT2_TYPE) {
         if (axisCount == 1) {
             return VerticalCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
-    if (subtype == "spherical") {
+    if (subtype == SphericalCS::WKT2_TYPE) {
         if (axisCount == 2) {
             // Extension to ISO19111 to support (planet)-ocentric CS with
             // geocentric latitude
@@ -6851,28 +6854,28 @@ CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
         }
         throw ParsingException("Expected 2 or 3 axis");
     }
-    if (subtype == "ordinal") {
+    if (subtype == OrdinalCS::WKT2_TYPE) {
         return OrdinalCS::create(csMap, axisList);
     }
-    if (subtype == "parametric") {
+    if (subtype == ParametricCS::WKT2_TYPE) {
         if (axisCount == 1) {
             return ParametricCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
-    if (subtype == "TemporalDateTime") {
+    if (subtype == DateTimeTemporalCS::WKT2_2019_TYPE) {
         if (axisCount == 1) {
             return DateTimeTemporalCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
-    if (subtype == "TemporalCount") {
+    if (subtype == TemporalCountCS::WKT2_2019_TYPE) {
         if (axisCount == 1) {
             return TemporalCountCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
-    if (subtype == "TemporalMeasure") {
+    if (subtype == TemporalMeasureCS::WKT2_2019_TYPE) {
         if (axisCount == 1) {
             return TemporalMeasureCS::create(csMap, axisList[0]);
         }
