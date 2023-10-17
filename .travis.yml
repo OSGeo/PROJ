@@ -15,23 +15,6 @@ matrix:
   include:
 
     - os: linux
-      dist: bionic
-      compiler: gcc
-      arch: s390x
-      env:
-        - BUILD_NAME=linux_generic
-        - DETAILS="linux, s390x"
-
-    - os: linux
-      dist: bionic
-      compiler: gcc
-      arch: arm64
-      env:
-        - BUILD_NAME=linux_generic
-        - DETAILS="linux, arm64"
-        - NPROC=4
-
-    - os: linux
       dist: jammy
       compiler: gcc
       arch: ppc64le
