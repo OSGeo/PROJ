@@ -32,7 +32,7 @@ matrix:
         - NPROC=4
 
     - os: linux
-      dist: bionic
+      dist: jammy
       compiler: gcc
       arch: ppc64le
       env:
