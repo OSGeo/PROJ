@@ -10415,6 +10415,12 @@ static bool isGeocentricStep(const std::string &name) {
 
 // ---------------------------------------------------------------------------
 
+static bool isTopocentricStep(const std::string &name) {
+    return name == "topocentric";
+}
+
+// ---------------------------------------------------------------------------
+
 static bool isProjectedStep(const std::string &name) {
     if (name == "etmerc" || name == "utm" ||
         !getMappingsFromPROJName(name).empty()) {
@@ -11091,7 +11097,7 @@ GeodeticCRSNNPtr
 PROJStringParser::Private::buildGeocentricCRS(int iStep, int iUnitConvert) {
     auto &step = steps_[iStep];
 
-    assert(isGeocentricStep(step.name));
+    assert(isGeocentricStep(step.name) || isTopocentricStep(step.name));
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
 
@@ -11743,6 +11749,13 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
                   ? CartesianCS::create(emptyPropertyMap, axis[0], axis[1])
                   : CartesianCS::create(emptyPropertyMap, axis[0], axis[1],
                                         csGeodCRS->axisList()[2]);
+    if (isTopocentricStep(step.name)) {
+        cs = CartesianCS::create(
+            emptyPropertyMap,
+            createAxis("topocentric East", "U", AxisDirection::EAST, unit),
+            createAxis("topocentric North", "V", AxisDirection::NORTH, unit),
+            createAxis("topocentric Up", "W", AxisDirection::UP, unit));
+    }
 
     auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
                                    title.empty() ? "unknown" : title);
@@ -11848,6 +11861,10 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
           d->getParamValue(d->steps_[0], "type") == "crs") ||
          (d->steps_.size() == 2 && d->steps_[1].name == "unitconvert")) &&
         !d->steps_[0].inverted && isGeocentricStep(d->steps_[0].name);
+
+    const bool isTopocentricCRS =
+        (d->steps_.size() == 1 && isTopocentricStep(d->steps_[0].name) &&
+         d->getParamValue(d->steps_[0], "type") == "crs");
 
     // +init=xxxx:yyyy syntax
     if (d->steps_.size() == 1 && d->steps_[0].isInit &&
@@ -12235,6 +12252,18 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                                              d->steps_[1].name == "unitconvert")
                                                 ? 1
                                                 : -1));
+            if (iter == 1) {
+                return nn_static_pointer_cast<BaseObject>(obj);
+            }
+        }
+    }
+
+    if (isTopocentricCRS) {
+        // First run is dry run to mark all recognized/unrecognized tokens
+        for (int iter = 0; iter < 2; iter++) {
+            auto obj = d->buildBoundOrCompoundCRSIfNeeded(
+                0,
+                d->buildProjectedCRS(0, d->buildGeocentricCRS(0, -1), -1, -1));
             if (iter == 1) {
                 return nn_static_pointer_cast<BaseObject>(obj);
             }
