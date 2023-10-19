@@ -785,6 +785,24 @@ TEST(wkt_parse, wkt1_geographic_epsg_org_api_4258) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_geographic_missing_unit_and_axis) {
+    auto wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\","
+               "SPHEROID[\"WGS 84\",6378137,298.257223563]]]]";
+
+    // Missing UNIT[] is illegal in strict mode
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+
+    auto obj = WKTParser().setStrict(false).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 2U);
+    EXPECT_EQ(cs->axisList()[0]->unit(), UnitOfMeasure::DEGREE);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt1_geocentric_with_PROJ4_extension) {
     auto wkt = "GEOCCS[\"WGS 84\",\n"
                "    DATUM[\"unknown\",\n"
@@ -813,6 +831,24 @@ TEST(wkt_parse, wkt1_geocentric_with_PROJ4_extension) {
     EXPECT_TRUE(
         crs->exportToWKT(WKTFormatter::create().get()).find("EXTENSION") ==
         std::string::npos);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_geocentric_missing_unit_and_axis) {
+    auto wkt = "GEOCCS[\"WGS 84\",DATUM[\"WGS_1984\","
+               "SPHEROID[\"WGS 84\",6378137,298.257223563]]]]";
+
+    // Missing UNIT[] is illegal in strict mode
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+
+    auto obj = WKTParser().setStrict(false).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 3U);
+    EXPECT_EQ(cs->axisList()[0]->unit(), UnitOfMeasure::METRE);
 }
 
 // ---------------------------------------------------------------------------
@@ -1461,6 +1497,35 @@ TEST(wkt_parse, wkt1_projected_with_PROJ4_extension) {
         crs->exportToWKT(
                WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI).get())
             .find("EXTENSION") == std::string::npos);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_projected_missing_unit_and_axis) {
+    auto wkt = "PROJCS[\"WGS 84 / UTM zone 31N\",GEOGCS[\"WGS 84\","
+               "DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,"
+               "AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],"
+               "PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],"
+               "UNIT[\"degree\",0.0174532925199433,"
+               "AUTHORITY[\"EPSG\",\"9122\"]],"
+               "AUTHORITY[\"EPSG\",\"4326\"]],"
+               "PROJECTION[\"Transverse_Mercator\"],"
+               "PARAMETER[\"latitude_of_origin\",0],"
+               "PARAMETER[\"central_meridian\",3],"
+               "PARAMETER[\"scale_factor\",0.9996],"
+               "PARAMETER[\"false_easting\",500000],"
+               "PARAMETER[\"false_northing\",0]]";
+
+    // Missing UNIT[] is illegal in strict mode
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+
+    auto obj = WKTParser().setStrict(false).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 2U);
+    EXPECT_EQ(cs->axisList()[0]->unit(), UnitOfMeasure::METRE);
 }
 
 // ---------------------------------------------------------------------------
@@ -2857,6 +2922,54 @@ TEST(wkt_parse, vertcrs_WKT1_GDAL_minimum) {
     ASSERT_EQ(cs->axisList().size(), 1U);
     EXPECT_EQ(cs->axisList()[0]->nameStr(), "Gravity-related height");
     EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::UP);
+    EXPECT_EQ(cs->axisList()[0]->unit(), UnitOfMeasure::METRE);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, vertcrs_WKT1_GDAL_missing_unit_and_axis) {
+    auto wkt = "VERT_CS[\"ODN height\",\n"
+               "    VERT_DATUM[\"Ordnance Datum Newlyn\",2005]]";
+
+    // Missing UNIT[] is illegal in strict mode
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+
+    auto obj = WKTParser().setStrict(false).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    EXPECT_EQ(crs->nameStr(), "ODN height");
+
+    auto datum = crs->datum();
+    EXPECT_EQ(datum->nameStr(), "Ordnance Datum Newlyn");
+
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 1U);
+    EXPECT_EQ(cs->axisList()[0]->nameStr(), "Gravity-related height");
+    EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::UP);
+    EXPECT_EQ(cs->axisList()[0]->unit(), UnitOfMeasure::METRE);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, vertcrs_WKT1_GDAl_missing_unit_with_axis) {
+    auto wkt = "VERT_CS[\"ODN height\",\n"
+               "    VERT_DATUM[\"Ordnance Datum Newlyn\",2005],\n"
+               "    AXIS[\"gravity-related height\",UP]]";
+
+    // Missing UNIT[] is illegal in strict mode
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+
+    auto obj = WKTParser().setStrict(false).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    EXPECT_EQ(crs->nameStr(), "ODN height");
+
+    auto datum = crs->datum();
+    EXPECT_EQ(datum->nameStr(), "Ordnance Datum Newlyn");
+
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 1U);
+    EXPECT_EQ(cs->axisList()[0]->nameStr(), "Gravity-related height");
+    EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::UP);
+    EXPECT_EQ(cs->axisList()[0]->unit(), UnitOfMeasure::METRE);
 }
 
 // ---------------------------------------------------------------------------
