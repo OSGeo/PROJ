@@ -5735,6 +5735,26 @@ TEST(wkt_parse, LOCAL_CS_long_two_axis) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, LOCAL_CS_long_three_axis) {
+    auto wkt = "LOCAL_CS[\"Engineering CRS\",\n"
+               "    LOCAL_DATUM[\"Engineering datum\",12345],\n"
+               "    UNIT[\"meter\",1],\n"
+               "    AXIS[\"Easting\",EAST],\n"
+               "    AXIS[\"Northing\",NORTH],\n"
+               "    AXIS[\"Elevation\",UP]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->nameStr(), "Engineering CRS");
+    EXPECT_EQ(crs->datum()->nameStr(), "Engineering datum");
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 3U);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, PDATUM) {
     auto wkt = "PDATUM[\"Parametric datum\",\n"
                "    ANCHOR[\"my anchor\"]]";

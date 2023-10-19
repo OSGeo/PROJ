@@ -2899,7 +2899,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 return CartesianCS::createEastingNorthing(unit);
             } else if (axisCount == 1) {
                 csTypeCStr = "vertical";
-            } else if (axisCount == 2) {
+            } else if (axisCount == 2 || axisCount == 3) {
                 csTypeCStr = "Cartesian";
             } else {
                 throw ParsingException(
