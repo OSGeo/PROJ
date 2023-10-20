@@ -30,6 +30,7 @@ Proprietary licensed software
 - `FME <http://www.safe.com>`_  A GIS translator package. Includes a PROJ based transformer.
 - `Avenza Maps <https://www.avenzamaps.com>`_  Top mobile mapping app for offline navigation and data collection.
 - `Bunting Labs <https://buntinglabs.com/>`_ No-code GIS infrastructure
+- `Pix4D <https://www.pix4d.com>`_ Cloud, desktop and mobile photogrammetry processing and data capture software.
 
 Geodetic organizations
 ----------------------
