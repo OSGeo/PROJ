@@ -1716,6 +1716,10 @@ void CoordinateOperationFactory::Private::buildCRSIds(
         std::vector<io::AuthorityFactory::ObjectType> allowedObjects;
         auto geogCRS = dynamic_cast<const crs::GeographicCRS *>(crs.get());
         if (geogCRS) {
+            if (geogCRS->datumNonNull(authFactory->databaseContext())
+                    ->nameStr() == "unknown") {
+                return;
+            }
             allowedObjects.push_back(
                 geogCRS->coordinateSystem()->axisList().size() == 2
                     ? io::AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS
@@ -6117,14 +6121,16 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                     }
                 }
 
+                const bool hasOnlyOneOp =
+                    srcToInterpOps.size() == 1 && interpToTargetOps.size() == 1;
                 for (const auto &srcToInterp : srcToInterpOps) {
                     for (const auto &interpToTarget : interpToTargetOps) {
-
-                        if ((srcAndTargetGeogAreSame &&
-                             mapSetDatumsUsed[srcToInterp.get()] !=
-                                 mapSetDatumsUsed[interpToTarget.get()]) ||
-                            !useCompatibleTransformationsForSameSourceTarget(
-                                srcToInterp, interpToTarget)) {
+                        if (!hasOnlyOneOp &&
+                            ((srcAndTargetGeogAreSame &&
+                              mapSetDatumsUsed[srcToInterp.get()] !=
+                                  mapSetDatumsUsed[interpToTarget.get()]) ||
+                             !useCompatibleTransformationsForSameSourceTarget(
+                                 srcToInterp, interpToTarget))) {
 #ifdef TRACE_CREATE_OPERATIONS
                             logTrace(
                                 "Considering that '" + srcToInterp->nameStr() +
