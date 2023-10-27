@@ -1308,6 +1308,8 @@ struct WKTParser::Private {
     Private &operator=(const Private &) = delete;
 
     void emitRecoverableWarning(const std::string &errorMsg);
+    void emitRecoverableMissingUNIT(const std::string &parentNodeName,
+                                    const UnitOfMeasure &fallbackUnit);
 
     BaseObjectNNPtr build(const WKTNodeNNPtr &node);
 
@@ -2740,15 +2742,35 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
 
 static const PropertyMap emptyPropertyMap{};
 
+// ---------------------------------------------------------------------------
+
 PROJ_NO_RETURN static void ThrowParsingException(const std::string &msg) {
     throw ParsingException(msg);
 }
+
+// ---------------------------------------------------------------------------
 
 static ParsingException
 buildParsingExceptionInvalidAxisCount(const std::string &csType) {
     return ParsingException(
         concat("buildCS: invalid CS axis count for ", csType));
 }
+
+// ---------------------------------------------------------------------------
+
+void WKTParser::Private::emitRecoverableMissingUNIT(
+    const std::string &parentNodeName, const UnitOfMeasure &fallbackUnit) {
+    std::string msg("buildCS: missing UNIT in ");
+    msg += parentNodeName;
+    if (!strict_ && fallbackUnit == UnitOfMeasure::METRE) {
+        msg += ". Assuming metre";
+    } else if (!strict_ && fallbackUnit == UnitOfMeasure::DEGREE) {
+        msg += ". Assuming degree";
+    }
+    emitRecoverableWarning(msg);
+}
+
+// ---------------------------------------------------------------------------
 
 CoordinateSystemNNPtr
 WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
@@ -2759,6 +2781,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
     const int numberOfAxis =
         parentNode->countChildrenOfName(WKTConstants::AXIS);
     int axisCount = numberOfAxis;
+    const auto &parentNodeName = parentNode->GP()->value();
     if (!isNull(node)) {
         const auto *nodeP = node->GP();
         const auto &children = nodeP->children();
@@ -2774,7 +2797,6 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         }
     } else {
         const char *csTypeCStr = "";
-        const auto &parentNodeName = parentNode->GP()->value();
         if (ci_equal(parentNodeName, WKTConstants::GEOCCS)) {
             csTypeCStr = CartesianCS::WKT2_TYPE;
             isGeocentric = true;
@@ -2782,7 +2804,8 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
                 if (unit == UnitOfMeasure::NONE) {
-                    ThrowParsingExceptionMissingUNIT();
+                    unit = UnitOfMeasure::METRE;
+                    emitRecoverableMissingUNIT(parentNodeName, unit);
                 }
                 return CartesianCS::createGeocentric(unit);
             }
@@ -2794,7 +2817,8 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 auto unit = buildUnitInSubNode(parentNode,
                                                UnitOfMeasure::Type::ANGULAR);
                 if (unit == UnitOfMeasure::NONE) {
-                    ThrowParsingExceptionMissingUNIT();
+                    unit = defaultAngularUnit;
+                    emitRecoverableMissingUNIT(parentNodeName, unit);
                 }
 
                 // ESRI WKT for geographic 3D CRS
@@ -2830,10 +2854,9 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
                 if (unit == UnitOfMeasure::NONE) {
+                    unit = UnitOfMeasure::METRE;
                     if (ci_equal(parentNodeName, WKTConstants::PROJCS)) {
-                        ThrowParsingExceptionMissingUNIT();
-                    } else {
-                        unit = UnitOfMeasure::METRE;
+                        emitRecoverableMissingUNIT(parentNodeName, unit);
                     }
                 }
                 return CartesianCS::createEastingNorthing(unit);
@@ -2875,11 +2898,10 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
                 if (unit == UnitOfMeasure::NONE) {
+                    unit = UnitOfMeasure::METRE;
                     if (ci_equal(parentNodeName, WKTConstants::VERT_CS) ||
                         ci_equal(parentNodeName, WKTConstants::VERTCS)) {
-                        ThrowParsingExceptionMissingUNIT();
-                    } else {
-                        unit = UnitOfMeasure::METRE;
+                        emitRecoverableMissingUNIT(parentNodeName, unit);
                     }
                 }
                 if (downDirection) {
@@ -2973,6 +2995,14 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
             ? UnitOfMeasure::Type::TIME
             : UnitOfMeasure::Type::UNKNOWN;
     UnitOfMeasure unit = buildUnitInSubNode(parentNode, unitType);
+
+    if (unit == UnitOfMeasure::NONE) {
+        if (ci_equal(parentNodeName, WKTConstants::VERT_CS) ||
+            ci_equal(parentNodeName, WKTConstants::VERTCS)) {
+            unit = UnitOfMeasure::METRE;
+            emitRecoverableMissingUNIT(parentNodeName, unit);
+        }
+    }
 
     std::vector<CoordinateSystemAxisNNPtr> axisList;
     for (int i = 0; i < axisCount; i++) {
