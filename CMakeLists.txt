@@ -228,6 +228,13 @@ if(ENABLE_CURL)
         INTERFACE_LINK_LIBRARIES      "${CURL_LIBRARIES}"
       )
     endif()
+
+    # Curl SSL options are described in
+    #   https://curl.se/libcurl/c/CURLOPT_SSL_OPTIONS.html
+    #set(CURLSSLOPT_NO_REVOKE 2)
+    #set(SSL_OPTIONS ${CURLSSLOPT_NO_REVOKE})
+    #add_compile_definitions(SSL_OPTIONS=${SSL_OPTIONS})
+
   else()
     message(SEND_ERROR "curl dependency not found!")
   endif()

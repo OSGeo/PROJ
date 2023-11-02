@@ -1620,6 +1620,13 @@ CurlFileHandle::CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle)
         CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, 0L));
     }
 
+#if defined(SSL_OPTIONS)
+    // https://curl.se/libcurl/c/CURLOPT_SSL_OPTIONS.html
+    auto ssl_options = static_cast<long>(SSL_OPTIONS);
+    CHECK_RET(ctx,
+              curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS, ssl_options));
+#endif
+
     const auto ca_bundle_path = pj_context_get_bundle_path(ctx);
     if (!ca_bundle_path.empty()) {
         CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_CAINFO,
