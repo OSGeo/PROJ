@@ -9541,6 +9541,98 @@ TEST(io, projstringformatter_axisswap_two_minus_one_followed_one_minus_two) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projstringformatter_unitconvert) {
+    // +step +proj=unitconvert +xy_in=X1 +xy_out=X2
+    // +step +proj=unitconvert +xy_in=X2 +z_in=Z1 +xy_out=X1 +z_out=Z2
+    // ==>
+    // +step +proj=unitconvert +z_in=Z1 +z_out=Z2
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(
+            "+proj=pipeline "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=ft");
+        EXPECT_EQ(fmt->toString(), "+proj=unitconvert +z_in=m +z_out=ft");
+    }
+
+    // +step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X2 +z_out=Z2
+    // +step +proj=unitconvert +z_in=Z2 +z_out=Z3
+    // ==> +step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X2 // +z_out=Z3
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(
+            "+proj=pipeline "
+            "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=ft "
+            "+step +proj=unitconvert +z_in=ft +z_out=us-ft");
+        EXPECT_EQ(
+            fmt->toString(),
+            "+proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=us-ft");
+    }
+
+    // +step +proj=unitconvert +z_in=Z1 +z_out=Z2
+    // +step +proj=unitconvert +xy_in=X1 +z_in=Z2 +xy_out=X2 +z_out=Z3
+    // ==> +step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X2
+    // +z_out=Z3
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString("+proj=pipeline "
+                              "+step +proj=unitconvert +z_in=ft +z_out=m "
+                              "+step +proj=unitconvert +xy_in=deg +z_in=m "
+                              "+xy_out=rad +z_out=us-ft ");
+        EXPECT_EQ(
+            fmt->toString(),
+            "+proj=unitconvert +xy_in=deg +z_in=ft +xy_out=rad +z_out=us-ft");
+    }
+
+    // +step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X2 +z_out=Z2
+    // +step +proj=unitconvert +xy_in=X2 +xy_out=X3
+    // ==> +step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X3
+    // +z_out=Z2
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(
+            "+proj=pipeline "
+            "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=ft "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=grad");
+        EXPECT_EQ(
+            fmt->toString(),
+            "+proj=unitconvert +xy_in=deg +z_in=m +xy_out=grad +z_out=ft");
+    }
+
+    // +step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X2 +z_out=Z2
+    // +step +proj=unitconvert +xy_in=X2 +z_in=Z3 +xy_out=X3 +z_out=Z3
+    // ==> +step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X3 +z_out=Z2
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(
+            "+proj=pipeline "
+            "+step +proj=unitconvert +xy_in=deg +z_in=ft +xy_out=rad "
+            "+z_out=us-ft "
+            "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=grad +z_out=m");
+        EXPECT_EQ(
+            fmt->toString(),
+            "+proj=unitconvert +xy_in=deg +z_in=ft +xy_out=grad +z_out=us-ft");
+    }
+
+    // +step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X2 +z_out=Z1
+    //  +step +proj=unitconvert +xy_in=X2 +z_in=Z2 +xy_out=X3 +z_out=Z3
+    // ==> +step +proj=unitconvert +xy_in=X1 +z_in=Z2 +xy_out=X3 +z_out=Z3
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(
+            "+proj=pipeline "
+            "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad "
+            "+z_out=m "
+            "+step +proj=unitconvert +xy_in=rad +z_in=ft +xy_out=grad "
+            "+z_out=us-ft");
+        EXPECT_EQ(
+            fmt->toString(),
+            "+proj=unitconvert +xy_in=deg +z_in=ft +xy_out=grad +z_out=us-ft");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projstringformatter_unmodified) {
     const char *const strs[] = {"+proj=pipeline "
                                 "+step +proj=axisswap +order=2,-1 "

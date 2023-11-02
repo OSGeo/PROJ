@@ -3025,7 +3025,7 @@ TEST(operation, boundCRS_to_geogCRS_hubCRS_and_targetCRS_same_but_baseCRS_not) {
         NN_NO_CHECK(boundCRS), GeographicCRS::EPSG_4979, ctxt);
     ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=unitconvert +z_in=us-ft +z_out=m");
+              "+proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=deg +z_out=m");
 }
 
 // ---------------------------------------------------------------------------
@@ -6278,14 +6278,13 @@ TEST(operation, projCRS_3D_to_geogCRS_3D) {
             NN_CHECK_ASSERT(geogcrs_m), NN_CHECK_ASSERT(proj3DCRS_ft));
         ASSERT_TRUE(op != nullptr);
         EXPECT_FALSE(op->hasBallparkTransformation());
-        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+proj=pipeline "
-                  "+step +proj=unitconvert +z_in=m +z_out=ft "
-                  "+step +proj=unitconvert +xy_in=deg +z_in=ft "
-                  "+xy_out=rad +z_out=m "
-                  "+step +proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 "
-                  "+step +proj=unitconvert +xy_in=m +z_in=m "
-                  "+xy_out=m +z_out=ft");
+        EXPECT_EQ(
+            op->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+            "+step +proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 "
+            "+step +proj=unitconvert +xy_in=m +z_in=m "
+            "+xy_out=m +z_out=ft");
     }
 }
 
