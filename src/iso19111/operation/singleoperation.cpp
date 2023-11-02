@@ -3001,6 +3001,50 @@ static void setupPROJGeodeticTargetCRS(io::PROJStringFormatter *formatter,
 
 // ---------------------------------------------------------------------------
 
+/* static */
+void SingleOperation::exportToPROJStringChangeVerticalUnit(
+    io::PROJStringFormatter *formatter, double convFactor) {
+
+    const auto uom = common::UnitOfMeasure(std::string(), convFactor,
+                                           common::UnitOfMeasure::Type::LINEAR)
+                         .exportToPROJString();
+    const auto reverse_uom =
+        convFactor == 0.0
+            ? std::string()
+            : common::UnitOfMeasure(std::string(), 1.0 / convFactor,
+                                    common::UnitOfMeasure::Type::LINEAR)
+                  .exportToPROJString();
+    if (uom == "m") {
+        // do nothing
+    } else if (!uom.empty()) {
+        formatter->addStep("unitconvert");
+        formatter->addParam("z_in", uom);
+        formatter->addParam("z_out", "m");
+    } else if (!reverse_uom.empty()) {
+        formatter->addStep("unitconvert");
+        formatter->addParam("z_in", "m");
+        formatter->addParam("z_out", reverse_uom);
+    } else if (fabs(convFactor -
+                    common::UnitOfMeasure::FOOT.conversionToSI() /
+                        common::UnitOfMeasure::US_FOOT.conversionToSI()) <
+               1e-10) {
+        formatter->addStep("unitconvert");
+        formatter->addParam("z_in", "ft");
+        formatter->addParam("z_out", "us-ft");
+    } else if (fabs(convFactor -
+                    common::UnitOfMeasure::US_FOOT.conversionToSI() /
+                        common::UnitOfMeasure::FOOT.conversionToSI()) < 1e-10) {
+        formatter->addStep("unitconvert");
+        formatter->addParam("z_in", "us-ft");
+        formatter->addParam("z_out", "ft");
+    } else {
+        formatter->addStep("affine");
+        formatter->addParam("s33", convFactor);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 bool SingleOperation::exportToPROJStringGeneric(
     io::PROJStringFormatter *formatter) const {
     const int methodEPSGCode = method()->getEPSGCode();
@@ -3124,30 +3168,7 @@ bool SingleOperation::exportToPROJStringGeneric(
     if (methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
         const double convFactor = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
-        const auto uom =
-            common::UnitOfMeasure(std::string(), convFactor,
-                                  common::UnitOfMeasure::Type::LINEAR)
-                .exportToPROJString();
-        const auto reverse_uom =
-            convFactor == 0.0
-                ? std::string()
-                : common::UnitOfMeasure(std::string(), 1.0 / convFactor,
-                                        common::UnitOfMeasure::Type::LINEAR)
-                      .exportToPROJString();
-        if (uom == "m") {
-            // do nothing
-        } else if (!uom.empty()) {
-            formatter->addStep("unitconvert");
-            formatter->addParam("z_in", uom);
-            formatter->addParam("z_out", "m");
-        } else if (!reverse_uom.empty()) {
-            formatter->addStep("unitconvert");
-            formatter->addParam("z_in", "m");
-            formatter->addParam("z_out", reverse_uom);
-        } else {
-            formatter->addStep("affine");
-            formatter->addParam("s33", convFactor);
-        }
+        exportToPROJStringChangeVerticalUnit(formatter, convFactor);
         return true;
     }
 
