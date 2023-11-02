@@ -697,9 +697,10 @@ TEST(crs, EPSG_4807_as_WKT1_ESRI_with_database) {
     WKTFormatterNNPtr f(WKTFormatter::create(
         WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
     EXPECT_EQ(crs->exportToWKT(f.get()),
-              "GEOGCS[\"GCS_NTF_Paris\",DATUM[\"D_NTF\",SPHEROID[\"Clarke_1880_"
-              "IGN\",6378249.2,293.466021293627]],PRIMEM[\"Paris\",2.33722917],"
-              "UNIT[\"Grad\",0.015707963267949]]");
+              "GEOGCS[\"GCS_NTF_Paris\","
+              "DATUM[\"Nouvelle_Triangulation_Francaise_(Paris)\","
+              "SPHEROID[\"Clarke_1880_IGN\",6378249.2,293.466021293627]],"
+              "PRIMEM[\"Paris\",2.33722917],UNIT[\"Grad\",0.015707963267949]]");
 }
 
 // ---------------------------------------------------------------------------
@@ -993,20 +994,20 @@ TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string_and_WKT1) {
         WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
                              DatabaseContext::create())
             .get());
-    EXPECT_EQ(
-        wkt1_esri,
-        "PROJCS[\"NTF_Paris_Lambert_Nord_France\",GEOGCS[\"GCS_NTF_Paris\","
-        "DATUM[\"D_NTF\",SPHEROID[\"Clarke_1880_IGN\",6378249.2,"
-        "293.4660213]],PRIMEM[\"Paris\",2.33722917000759],"
-        "UNIT[\"Grad\",0.015707963268]],"
-        "PROJECTION[\"Lambert_Conformal_Conic\"],"
-        "PARAMETER[\"False_Easting\",600000.0],"
-        "PARAMETER[\"False_Northing\",200000.0],"
-        "PARAMETER[\"Central_Meridian\",0.0],"
-        "PARAMETER[\"Standard_Parallel_1\",55.0],"
-        "PARAMETER[\"Scale_Factor\",0.999877341],"
-        "PARAMETER[\"Latitude_Of_Origin\",55.0],"
-        "UNIT[\"Meter\",1.0]]");
+    EXPECT_EQ(wkt1_esri, "PROJCS[\"NTF_Paris_Lambert_Nord_France\","
+                         "GEOGCS[\"GCS_NTF_Paris\","
+                         "DATUM[\"Nouvelle_Triangulation_Francaise_(Paris)\","
+                         "SPHEROID[\"Clarke_1880_IGN\",6378249.2,293.4660213]],"
+                         "PRIMEM[\"Paris\",2.33722917000759],"
+                         "UNIT[\"Grad\",0.015707963268]],"
+                         "PROJECTION[\"Lambert_Conformal_Conic\"],"
+                         "PARAMETER[\"False_Easting\",600000.0],"
+                         "PARAMETER[\"False_Northing\",200000.0],"
+                         "PARAMETER[\"Central_Meridian\",0.0],"
+                         "PARAMETER[\"Standard_Parallel_1\",55.0],"
+                         "PARAMETER[\"Scale_Factor\",0.999877341],"
+                         "PARAMETER[\"Latitude_Of_Origin\",55.0],"
+                         "UNIT[\"Meter\",1.0]]");
 }
 
 // ---------------------------------------------------------------------------
