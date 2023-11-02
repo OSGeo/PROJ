@@ -234,7 +234,6 @@ if(ENABLE_CURL)
     #set(CURLSSLOPT_NO_REVOKE 2)
     #set(SSL_OPTIONS ${CURLSSLOPT_NO_REVOKE})
     #add_compile_definitions(SSL_OPTIONS=${SSL_OPTIONS})
-    #mark_as_advanced(SSL_OPTIONS)
 
   else()
     message(SEND_ERROR "curl dependency not found!")
