@@ -569,12 +569,15 @@ def import_geogcs():
 
         datum_written = set()
 
+        # last 2 ones epoch,model are actually missing in most records...
+        assert nfields == 17
+
         while True:
             try:
                 row = next(reader)
             except StopIteration:
                 break
-            assert len(row) == nfields, row
+            assert len(row) in (nfields, nfields -2), (row, header, len(row), nfields)
 
             code = row[idx_wkid]
             latestWkid = row[idx_latestWkid]
@@ -917,6 +920,10 @@ def get_wkt_unit(UNIT_NAME, UNIT_VALUE, is_rate=False) -> Unit:
         uom_auth_name = 'EPSG'
         uom_code = '1041' if is_rate else '9202'
         assert UNIT_VALUE == '0.000001', UNIT_VALUE
+    elif UNIT_NAME == 'Parts_Per_Billion':
+        uom_auth_name = 'EPSG'
+        uom_code = '1030' if is_rate else '1028'
+        assert UNIT_VALUE == '0.000000001', UNIT_VALUE
     elif UNIT_NAME == 'Unity':
         assert not is_rate
         uom_auth_name = 'EPSG'
@@ -1451,8 +1458,6 @@ def import_projcs():
                             'Lambert Conic Conformal (1SP)']
                         assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale unit {}'.format(
                             params['Scale_Factor'].unit.uom_code)
-                        assert params['Standard_Parallel_1'].value == params['Latitude_Of_Origin'].value
-                        assert params['Standard_Parallel_1'].unit == params['Latitude_Of_Origin'].unit
 
                     elif method == 'Lambert_Conformal_Conic' and 'Standard_Parallel_2' in params:
                         conversion_mapping = MAPPED_PROJCS_WITH_EXTRA_LOGIC['Lambert_Conformal_Conic']['Lambert Conic Conformal (2SP)']
@@ -1647,6 +1652,8 @@ def import_vertcs():
         idx_rlon = header.index('rlon')
         assert idx_rlon >= 0
 
+        assert nfields == 17
+
         vdatum_written = set()
 
         sql = """-- vertical coordinate system for ellipsoidal height. Not really ISO 19111 valid..."""
@@ -1661,7 +1668,7 @@ def import_vertcs():
                 row = next(reader)
             except StopIteration:
                 break
-            assert len(row) == nfields, row
+            assert len(row) in (nfields, nfields - 2), (row, len(row), nfields)
 
             code = row[idx_wkid]
             latestWkid = row[idx_latestWkid]
