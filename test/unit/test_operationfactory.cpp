@@ -6169,7 +6169,14 @@ TEST(operation, vertCRS_to_vertCRS) {
             NN_CHECK_ASSERT(vertcrs_ft), NN_CHECK_ASSERT(vertcrs_us_ft));
         ASSERT_TRUE(op != nullptr);
         EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+proj=affine +s33=0.999998");
+                  "+proj=unitconvert +z_in=ft +z_out=us-ft");
+    }
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(vertcrs_us_ft), NN_CHECK_ASSERT(vertcrs_ft));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=unitconvert +z_in=us-ft +z_out=ft");
     }
 
     auto vertCRSMetreUp =

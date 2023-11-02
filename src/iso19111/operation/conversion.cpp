@@ -4144,29 +4144,7 @@ void Conversion::_exportToPROJString(
                     "requires an input and output vertical CRS");
             }
         }
-        auto uom = common::UnitOfMeasure(std::string(), convFactor,
-                                         common::UnitOfMeasure::Type::LINEAR)
-                       .exportToPROJString();
-        auto reverse_uom =
-            convFactor == 0.0
-                ? std::string()
-                : common::UnitOfMeasure(std::string(), 1.0 / convFactor,
-                                        common::UnitOfMeasure::Type::LINEAR)
-                      .exportToPROJString();
-        if (uom == "m") {
-            // do nothing
-        } else if (!uom.empty()) {
-            formatter->addStep("unitconvert");
-            formatter->addParam("z_in", uom);
-            formatter->addParam("z_out", "m");
-        } else if (!reverse_uom.empty()) {
-            formatter->addStep("unitconvert");
-            formatter->addParam("z_in", "m");
-            formatter->addParam("z_out", reverse_uom);
-        } else {
-            formatter->addStep("affine");
-            formatter->addParam("s33", convFactor);
-        }
+        exportToPROJStringChangeVerticalUnit(formatter, convFactor);
         bConversionDone = true;
         bEllipsoidParametersDone = true;
     } else if (methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_TOPOCENTRIC) {
