@@ -2259,15 +2259,11 @@ struct MyPROJStringExportableHorizVertical final
     // cppcheck-suppress functionStatic
     _exportToPROJString(io::PROJStringFormatter *formatter) const override {
 
-        formatter->pushOmitZUnitConversion();
-
         horizTransform->_exportToPROJString(formatter);
 
         formatter->startInversion();
         geogDst->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
-
-        formatter->popOmitZUnitConversion();
 
         formatter->pushOmitHorizontalConversionInVertTransformation();
         verticalTransform->_exportToPROJString(formatter);
