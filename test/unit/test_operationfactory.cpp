@@ -7132,6 +7132,213 @@ TEST(operation, compoundCRS_to_geogCRS_with_vertical_unit_change) {
 
 // ---------------------------------------------------------------------------
 
+// Use case of https://github.com/OSGeo/PROJ/issues/3938
+TEST(operation, compoundCRS_ftUS_to_geogCRS_ft) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // NAD83(2011) + NAVD88 height (ftUS)
+    auto srcObj = createFromUserInput("EPSG:6318+6360",
+                                      authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto nnSrc = NN_NO_CHECK(src);
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("6319")->alterCSLinearUnit(
+            UnitOfMeasure::FOOT); // NAD83(2011) with foot
+
+    auto res = CoordinateOperationFactory::create()->createOperations(
+        nnSrc, dst, ctxt);
+    ASSERT_TRUE(!res.empty());
+
+    EXPECT_EQ(
+        res[0]->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=rad +z_out=m "
+        "+step +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 "
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=ft "
+        "+step +proj=axisswap +order=2,1");
+
+    EXPECT_EQ(
+        res.back()->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=deg +z_out=ft");
+
+    auto resInv = CoordinateOperationFactory::create()->createOperations(
+        dst, nnSrc, ctxt);
+    ASSERT_TRUE(!resInv.empty());
+
+    EXPECT_EQ(
+        resInv[0]->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +z_in=ft +xy_out=rad +z_out=m "
+        "+step +inv +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 "
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=us-ft "
+        "+step +proj=axisswap +order=2,1");
+
+    EXPECT_EQ(
+        resInv.back()->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=unitconvert +xy_in=deg +z_in=ft +xy_out=deg +z_out=us-ft");
+}
+
+// ---------------------------------------------------------------------------
+
+// Use case of https://github.com/OSGeo/PROJ/issues/3938
+TEST(operation, compoundCRS_ft_to_geogCRS_ft) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // NAD83(2011) + NAVD88 height (ft)
+    auto srcObj = createFromUserInput("EPSG:6318+8228",
+                                      authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto nnSrc = NN_NO_CHECK(src);
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("6319")->alterCSLinearUnit(
+            UnitOfMeasure::FOOT); // NAD83(2011) with foot
+
+    auto res = CoordinateOperationFactory::create()->createOperations(
+        nnSrc, dst, ctxt);
+    ASSERT_TRUE(!res.empty());
+
+    EXPECT_EQ(
+        res[0]->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +z_in=ft +xy_out=rad +z_out=m "
+        "+step +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 "
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=ft "
+        "+step +proj=axisswap +order=2,1");
+
+    EXPECT_EQ(
+        res.back()->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=noop");
+
+    auto resInv = CoordinateOperationFactory::create()->createOperations(
+        dst, nnSrc, ctxt);
+    ASSERT_TRUE(!resInv.empty());
+
+    EXPECT_EQ(
+        resInv[0]->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +z_in=ft +xy_out=rad +z_out=m "
+        "+step +inv +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 "
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=ft "
+        "+step +proj=axisswap +order=2,1");
+
+    EXPECT_EQ(
+        resInv.back()->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
+// Use case of https://github.com/OSGeo/PROJ/issues/3938
+TEST(operation, compoundCRS_m_to_geogCRS_ft) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // NAD83(2011) + NAVD88 height
+    auto srcObj = createFromUserInput("EPSG:6318+5703",
+                                      authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto nnSrc = NN_NO_CHECK(src);
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("6319")->alterCSLinearUnit(
+            UnitOfMeasure::FOOT); // NAD83(2011) with foot
+
+    auto res = CoordinateOperationFactory::create()->createOperations(
+        nnSrc, dst, ctxt);
+    ASSERT_TRUE(!res.empty());
+
+    EXPECT_EQ(
+        res[0]->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 "
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=ft "
+        "+step +proj=axisswap +order=2,1");
+
+    EXPECT_EQ(
+        res.back()->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=unitconvert +z_in=m +z_out=ft");
+
+    auto resInv = CoordinateOperationFactory::create()->createOperations(
+        dst, nnSrc, ctxt);
+    ASSERT_TRUE(!resInv.empty());
+
+    EXPECT_EQ(
+        resInv[0]->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +z_in=ft +xy_out=rad +z_out=m "
+        "+step +inv +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+        "+step +proj=axisswap +order=2,1");
+
+    EXPECT_EQ(
+        resInv.back()->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        "+proj=unitconvert +z_in=ft +z_out=m");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(
     operation,
     compoundCRS_to_geogCRS_with_vertical_unit_change_and_complex_horizontal_change) {
