@@ -1623,8 +1623,7 @@ CurlFileHandle::CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle)
 #if defined(SSL_OPTIONS)
     // https://curl.se/libcurl/c/CURLOPT_SSL_OPTIONS.html
     auto ssl_options = static_cast<long>(SSL_OPTIONS);
-    CHECK_RET(ctx,
-              curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS, ssl_options));
+    CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS, ssl_options));
 #endif
 
     const auto ca_bundle_path = pj_context_get_bundle_path(ctx);
