@@ -596,6 +596,18 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geocentric) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_createGeographicCRS) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto crs = factory->createGeographicCRS("4979");
+    ASSERT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) != nullptr);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "4979");
+
+    EXPECT_THROW(factory->createGeographicCRS("4978"), FactoryException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createVerticalCRS) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createVerticalCRS("-1"),

@@ -5037,8 +5037,13 @@ AuthorityFactory::createGeodeticCRS(const std::string &code) const {
 
 crs::GeographicCRSNNPtr
 AuthorityFactory::createGeographicCRS(const std::string &code) const {
-    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+    auto crs(util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
         createGeodeticCRS(code, true)));
+    if (!crs) {
+        throw NoSuchAuthorityCodeException("geographicCRS not found",
+                                           d->authority(), code);
+    }
+    return NN_NO_CHECK(crs);
 }
 
 // ---------------------------------------------------------------------------
