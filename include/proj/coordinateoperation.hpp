@@ -726,6 +726,10 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
     createOperationParameterValueFromInterpolationCRS(int methodEPSGCode,
                                                       int crsEPSGCode);
 
+    PROJ_INTERNAL static void
+    exportToPROJStringChangeVerticalUnit(io::PROJStringFormatter *formatter,
+                                         double convFactor);
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     SingleOperation &operator=(const SingleOperation &other) = delete;
