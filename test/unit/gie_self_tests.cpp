@@ -590,6 +590,34 @@ TEST(gie, info_functions) {
         proj_destroy(P);
     }
 
+    // Test with a projected CRS whose datum has a non-Greenwich prime meridian
+    {
+        P = proj_create(PJ_DEFAULT_CTX, "EPSG:27571");
+
+        PJ_COORD c;
+        c.lp.lam = proj_torad(0.0689738);
+        c.lp.phi = proj_torad(49.508567);
+        const auto factors2 = proj_factors(P, c);
+
+        EXPECT_NEAR(factors2.meridional_scale, 1 - 12.26478760 * 1e-5, 1e-8);
+
+        proj_destroy(P);
+    }
+
+    // Test with a compound CRS of a projected CRS
+    {
+        P = proj_create(PJ_DEFAULT_CTX, "EPSG:5972");
+
+        PJ_COORD c;
+        c.lp.lam = proj_torad(10.729030600);
+        c.lp.phi = proj_torad(59.916494500);
+        const auto factors2 = proj_factors(P, c);
+
+        EXPECT_NEAR(factors2.meridional_scale, 1 - 28.54587730 * 1e-5, 1e-8);
+
+        proj_destroy(P);
+    }
+
     // Test with a geographic CRS --> error
     {
         P = proj_create(PJ_DEFAULT_CTX, "EPSG:4326");
