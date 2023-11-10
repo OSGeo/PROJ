@@ -41,6 +41,21 @@ echo "Test CRS option"
 $EXE EPSG:32620 -S >>${OUT} <<EOF
 -63 0
 EOF
+echo "Test projection factors on projected CRS with non-Greenwhich prime meridian"
+#
+$EXE EPSG:27571 -S >>${OUT} <<EOF
+2.33722917 49.5
+EOF
+echo "Test projection factors on compound CRS with a projected CRS"
+#
+$EXE EPSG:5972 -S >>${OUT} <<EOF
+9 0
+EOF
+
+# On some architectures the angular distortion (omega) of EPSG:27571 is
+# not exactly 0, but 8.53878e-07
+cat ${OUT} | sed "s/8.53878e-07/0/" > ${OUT}.tmp
+mv ${OUT}.tmp ${OUT}
 
 #
 # do 'diff' with distribution results
