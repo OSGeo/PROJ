@@ -640,3 +640,7 @@ Test inverse of Similarity Transformation (example from EPSG Guidance Note 7.2)
 Test Similarity Transformation through CompoundCRS
 477134.28 95134.21	476763.303	95620.222 0.000
 477134.28 95134.21 5	476763.303	95620.222 5.000
+##############################################################
+Test cs2cs EPSG:5488 (RGAF09) to EPSG:4559+5757 (RRAF 1991 / UTM zone 20N + Guadeloupe 1988 height)
+Check that we use the horizontal transformation for Guadeloupe (RRAF 1991 to RGAF09 (2)), and not the one for Martinique
+661991.318	1796999.201 93.846

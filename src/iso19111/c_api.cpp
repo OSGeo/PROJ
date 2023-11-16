@@ -9110,7 +9110,7 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
                         alt.idxInOriginalList, minxSrc, minySrc, maxxSrc,
                         maxySrc, minxDst, minyDst, maxxDst, maxyDst,
                         pjNormalized, co->nameStr(), alt.accuracy,
-                        alt.pseudoArea, alt.isOffshore,
+                        alt.pseudoArea, alt.areaName.c_str(),
                         alt.pjSrcGeocentricToLonLat,
                         alt.pjDstGeocentricToLonLat);
                 }
