@@ -343,7 +343,9 @@ struct PJCoordOperation {
     std::string name{};
     double accuracy = -1.0;
     double pseudoArea = 0.0;
+    std::string areaName{};
     bool isOffshore = false;
+    bool isUnknownAreaName = false;
     bool isPriorityOp = false;
     bool srcIsLonLatDegree = false;
     bool srcIsLatLonDegree = false;
@@ -364,8 +366,8 @@ struct PJCoordOperation {
                      double minySrcIn, double maxxSrcIn, double maxySrcIn,
                      double minxDstIn, double minyDstIn, double maxxDstIn,
                      double maxyDstIn, PJ *pjIn, const std::string &nameIn,
-                     double accuracyIn, double pseudoAreaIn, bool isOffshoreIn,
-                     const PJ *pjSrcGeocentricToLonLatIn,
+                     double accuracyIn, double pseudoAreaIn,
+                     const char *areaName, const PJ *pjSrcGeocentricToLonLatIn,
                      const PJ *pjDstGeocentricToLonLatIn);
 
     PJCoordOperation(const PJCoordOperation &) = delete;
@@ -377,7 +379,9 @@ struct PJCoordOperation {
           minyDst(other.minyDst), maxxDst(other.maxxDst),
           maxyDst(other.maxyDst), pj(proj_clone(ctx, other.pj)),
           name(std::move(other.name)), accuracy(other.accuracy),
-          pseudoArea(other.pseudoArea), isOffshore(other.isOffshore),
+          pseudoArea(other.pseudoArea), areaName(other.areaName),
+          isOffshore(other.isOffshore),
+          isUnknownAreaName(other.isUnknownAreaName),
           isPriorityOp(other.isPriorityOp),
           srcIsLonLatDegree(other.srcIsLonLatDegree),
           srcIsLatLonDegree(other.srcIsLatLonDegree),
@@ -399,7 +403,9 @@ struct PJCoordOperation {
           minyDst(other.minyDst), maxxDst(other.maxxDst),
           maxyDst(other.maxyDst), name(std::move(other.name)),
           accuracy(other.accuracy), pseudoArea(other.pseudoArea),
-          isOffshore(other.isOffshore), isPriorityOp(other.isPriorityOp),
+          areaName(std::move(other.areaName)), isOffshore(other.isOffshore),
+          isUnknownAreaName(other.isUnknownAreaName),
+          isPriorityOp(other.isPriorityOp),
           srcIsLonLatDegree(other.srcIsLonLatDegree),
           srcIsLatLonDegree(other.srcIsLatLonDegree),
           dstIsLonLatDegree(other.dstIsLonLatDegree),
@@ -422,7 +428,7 @@ struct PJCoordOperation {
                maxxDst == other.maxxDst && maxyDst == other.maxyDst &&
                name == other.name &&
                proj_is_equivalent_to(pj, other.pj, PJ_COMP_STRICT) &&
-               accuracy == other.accuracy && isOffshore == other.isOffshore;
+               accuracy == other.accuracy && areaName == other.areaName;
     }
 
     bool operator!=(const PJCoordOperation &other) const {

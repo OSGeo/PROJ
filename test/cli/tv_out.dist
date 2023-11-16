@@ -649,3 +649,7 @@ Test --t_epoch
 ##############################################################
 Test +proj=topocentric +datum=WGS84 +X_0=-3982059.42 +Y_0=3331314.88 +Z_0=3692463.58 +no_defs +type=crs +to EPSG:4978
 0 0 0	-3982059.420	3331314.880 3692463.580
+##############################################################
+Test cs2cs EPSG:5488 (RGAF09) to EPSG:4559+5757 (RRAF 1991 / UTM zone 20N + Guadeloupe 1988 height)
+Check that we use the horizontal transformation for Guadeloupe (RRAF 1991 to RGAF09 (2)), and not the one for Martinique
+661991.318	1796999.201 93.846

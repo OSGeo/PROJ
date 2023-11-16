@@ -3,10 +3,15 @@
 #
 
 function(proj_test_set_properties TESTNAME)
-  set_property(TEST ${TESTNAME}
-    PROPERTY ENVIRONMENT
-      "PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES"
+  set(_env "PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES"
       "PROJ_DATA=${PROJ_BINARY_DIR}/data/for_tests")
+  if(TIFF_ENABLED)
+      set(_env ${_env} "TIFF_ENABLED=YES")
+  else()
+      set(_env ${_env} "TIFF_ENABLED=NO")
+  endif()
+  set_property(TEST ${TESTNAME}
+    PROPERTY ENVIRONMENT ${_env})
 endfunction()
 
 function(proj_add_test_script_sh SH_NAME BIN_USE)
