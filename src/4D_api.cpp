@@ -328,6 +328,8 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
                   // the one that has the smallest area
                   (alt.accuracy == bestAccuracy &&
                    alt.pseudoArea < opList[iBest].pseudoArea &&
+                   !(alt.isUnknownAreaName &&
+                     !opList[iBest].isUnknownAreaName) &&
                    !opList[iBest].isPriorityOp)) &&
                  !alt.isOffshore)) {
 
@@ -1693,7 +1695,7 @@ static PJ *add_coord_op_to_list(
     int idxInOriginalList, PJ *op, double west_lon, double south_lat,
     double east_lon, double north_lat, PJ *pjGeogToSrc, PJ *pjGeogToDst,
     const PJ *pjSrcGeocentricToLonLat, const PJ *pjDstGeocentricToLonLat,
-    bool isOffshore, std::vector<PJCoordOperation> &altCoordOps) {
+    const char *areaName, std::vector<PJCoordOperation> &altCoordOps) {
     /*****************************************************************************/
 
     double minxSrc;
@@ -1742,8 +1744,8 @@ static PJ *add_coord_op_to_list(
         const double accuracy = proj_coordoperation_get_accuracy(op->ctx, op);
         altCoordOps.emplace_back(
             idxInOriginalList, minxSrc, minySrc, maxxSrc, maxySrc, minxDst,
-            minyDst, maxxDst, maxyDst, op, name, accuracy, pseudoArea,
-            isOffshore, pjSrcGeocentricToLonLat, pjDstGeocentricToLonLat);
+            minyDst, maxxDst, maxyDst, op, name, accuracy, pseudoArea, areaName,
+            pjSrcGeocentricToLonLat, pjDstGeocentricToLonLat);
         op = nullptr;
     }
     return op;
@@ -2018,23 +2020,22 @@ pj_create_prepared_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
                 north_lat = 90;
             }
 
-            const bool isOffshore = areaName && strstr(areaName, "- offshore");
             if (west_lon <= east_lon) {
                 op = add_coord_op_to_list(
                     i, op, west_lon, south_lat, east_lon, north_lat,
                     pjGeogToSrc, pjGeogToDst, pjSrcGeocentricToLonLat,
-                    pjDstGeocentricToLonLat, isOffshore, preparedOpList);
+                    pjDstGeocentricToLonLat, areaName, preparedOpList);
             } else {
                 auto op_clone = proj_clone(ctx, op);
 
                 op = add_coord_op_to_list(
                     i, op, west_lon, south_lat, 180, north_lat, pjGeogToSrc,
                     pjGeogToDst, pjSrcGeocentricToLonLat,
-                    pjDstGeocentricToLonLat, isOffshore, preparedOpList);
+                    pjDstGeocentricToLonLat, areaName, preparedOpList);
                 op_clone = add_coord_op_to_list(
                     i, op_clone, -180, south_lat, east_lon, north_lat,
                     pjGeogToSrc, pjGeogToDst, pjSrcGeocentricToLonLat,
-                    pjDstGeocentricToLonLat, isOffshore, preparedOpList);
+                    pjDstGeocentricToLonLat, areaName, preparedOpList);
                 proj_destroy(op_clone);
             }
 
@@ -3019,13 +3020,15 @@ PJCoordOperation::PJCoordOperation(
     int idxInOriginalListIn, double minxSrcIn, double minySrcIn,
     double maxxSrcIn, double maxySrcIn, double minxDstIn, double minyDstIn,
     double maxxDstIn, double maxyDstIn, PJ *pjIn, const std::string &nameIn,
-    double accuracyIn, double pseudoAreaIn, bool isOffshoreIn,
+    double accuracyIn, double pseudoAreaIn, const char *areaNameIn,
     const PJ *pjSrcGeocentricToLonLatIn, const PJ *pjDstGeocentricToLonLatIn)
     : idxInOriginalList(idxInOriginalListIn), minxSrc(minxSrcIn),
       minySrc(minySrcIn), maxxSrc(maxxSrcIn), maxySrc(maxySrcIn),
       minxDst(minxDstIn), minyDst(minyDstIn), maxxDst(maxxDstIn),
       maxyDst(maxyDstIn), pj(pjIn), name(nameIn), accuracy(accuracyIn),
-      pseudoArea(pseudoAreaIn), isOffshore(isOffshoreIn),
+      pseudoArea(pseudoAreaIn), areaName(areaNameIn ? areaNameIn : ""),
+      isOffshore(areaName.find("- offshore") != std::string::npos),
+      isUnknownAreaName(areaName.empty() || areaName == "unknown"),
       isPriorityOp(isSpecialCaseForNAD83_to_NAD83HARN(name) ||
                    isSpecialCaseForGDA94_to_WGS84(name) ||
                    isSpecialCaseForWGS84_to_GDA2020(name)),
