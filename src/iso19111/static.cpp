@@ -66,6 +66,10 @@ NS_PROJ_START
 
 // ---------------------------------------------------------------------------
 
+const NameSpaceNNPtr NameSpace::GLOBAL(NameSpace::createGLOBAL());
+
+// ---------------------------------------------------------------------------
+
 /** \brief Key to set the authority citation of a metadata::Identifier.
  *
  * The value is to be provided as a string or a metadata::Citation.
