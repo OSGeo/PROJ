@@ -494,10 +494,6 @@ NameSpaceNNPtr NameSpace::createGLOBAL() {
 
 // ---------------------------------------------------------------------------
 
-const NameSpaceNNPtr NameSpace::GLOBAL(NameSpace::createGLOBAL());
-
-// ---------------------------------------------------------------------------
-
 //! @cond Doxygen_Suppress
 struct LocalName::Private {
     NameSpacePtr scope{};
