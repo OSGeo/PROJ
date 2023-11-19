@@ -1363,12 +1363,12 @@ echo "##############################################################" >> ${OUT}
 echo "Test cs2cs EPSG:5488 (RGAF09) to EPSG:4559+5757 (RRAF 1991 / UTM zone 20N + Guadeloupe 1988 height)" >> ${OUT}
 echo "Check that we use the horizontal transformation for Guadeloupe (RRAF 1991 to RGAF09 (2)), and not the one for Martinique" >> ${OUT}
 #
-if test "${TIFF_ENABLED}" = "yes"; then
+if test "${TIFF_ENABLED}" = "YES"; then
 PROJ_DATA=${PROJ_DATA}:${PROJ_DATA}/tests $EXE -d 3 EPSG:5488 EPSG:4559+5757 >> ${OUT} <<EOF
 16.248285304 -61.484212843 53.073
 EOF
 else
-printf "661991.318\t1796999.201 93.846" >> ${OUT}
+printf "661991.318\t1796999.201 93.846\n" >> ${OUT}
 fi
 
 
