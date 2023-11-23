@@ -133,7 +133,7 @@ else()
     PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
 endif()
 
-add_executable(proj_test_cpp_api
+set(PROJ_TEST_CPP_API_SOURCES
   main.cpp
   test_util.cpp
   test_common.cpp
@@ -147,6 +147,11 @@ add_executable(proj_test_cpp_api
   test_factory.cpp
   test_c_api.cpp
   test_grids.cpp)
+add_executable(proj_test_cpp_api ${PROJ_TEST_CPP_API_SOURCES})
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+  set_property(SOURCE ${PROJ_TEST_CPP_API_SOURCES} PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
+endif ()
+
 target_link_libraries(proj_test_cpp_api
   PRIVATE GTest::gtest
   PRIVATE ${PROJ_LIBRARIES}
@@ -157,7 +162,7 @@ set_property(TEST proj_test_cpp_api
 if(TIFF_ENABLED)
   target_compile_definitions(proj_test_cpp_api PRIVATE -DTIFF_ENABLED)
 endif()
-
+ 
 add_executable(gie_self_tests
   main.cpp
   gie_self_tests.cpp)
