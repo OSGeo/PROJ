@@ -10,8 +10,6 @@
  * slower, but more accurate implementation.
  */
 
-#define PJ_LIB_
-
 #include <errno.h>
 #include <math.h>
 

@@ -47,8 +47,6 @@
  * https://github.com/google/s2geometry/blob/0c4c460bdfe696da303641771f9def900b3e440f/src/s2/util/math/vector.h
  ****************************************************************************/
 
-#define PJ_LIB_
-
 /* enable predefined math constants M_* for MS Visual Studio */
 #if defined(_MSC_VER) || defined(_WIN32)
 #ifndef _USE_MATH_DEFINES

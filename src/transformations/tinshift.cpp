@@ -25,7 +25,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
 #define PROJ_COMPILATION
 
 #include "tinshift.hpp"

@@ -25,7 +25,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
 #include "geodesic.h"
 #include "proj.h"
 #include "proj_internal.h"

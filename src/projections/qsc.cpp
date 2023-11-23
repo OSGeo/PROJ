@@ -39,8 +39,6 @@
  * pj_qsc_ns::AREA_0.
  */
 
-#define PJ_LIB_
-
 #include <errno.h>
 #include <math.h>
 

@@ -51,7 +51,7 @@ format, up component is (was) stored in the GTX format. Both grids are
 * DEALINGS IN THE SOFTWARE.
 *
 ***********************************************************************/
-#define PJ_LIB_
+
 #include "grids.hpp"
 #include "proj.h"
 #include "proj_internal.h"

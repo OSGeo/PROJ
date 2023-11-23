@@ -1,5 +1,5 @@
 /* based upon Snyder and Linck, USGS-NMD */
-#define PJ_LIB_
+
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>

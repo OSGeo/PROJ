@@ -27,7 +27,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>

@@ -26,8 +26,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
-
 #include <math.h>
 
 #include "proj.h"

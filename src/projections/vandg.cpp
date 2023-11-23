@@ -1,6 +1,5 @@
 // Changes to handle +over are: Copyright 2011-2014 Morelli Informatik
 
-#define PJ_LIB_
 #include "proj.h"
 #include "proj_internal.h"
 

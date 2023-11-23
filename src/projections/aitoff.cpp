@@ -28,8 +28,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
-
 #include <errno.h>
 #include <math.h>
 

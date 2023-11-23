@@ -76,8 +76,6 @@ Engsager
  *
  *****************************************************************************/
 
-#define PJ_LIB_
-
 #include <cassert>
 #include <complex>
 #include <cstdint>

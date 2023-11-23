@@ -43,7 +43,6 @@
  *
  *****************************************************************************/
 /* based upon Snyder and Linck, USGS-NMD */
-#define PJ_LIB_
 
 #include <errno.h>
 #include <math.h>

@@ -29,8 +29,6 @@
  * Flattening the Earth, Snyder, J.P., 1993, p.213-214.
  *****************************************************************************/
 
-#define PJ_LIB_
-
 #include <math.h>
 
 #include "proj.h"

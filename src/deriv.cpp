@@ -1,5 +1,4 @@
 /* dervative of (*P->fwd) projection */
-#define PJ_LIB_
 
 #include <math.h>
 
