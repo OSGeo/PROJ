@@ -559,7 +559,7 @@ PJ *PROJECTION(horner) {
     P->inv3d = nullptr;
     P->fwd = nullptr;
     P->inv = nullptr;
-    P->left = P->right = PJ_IO_UNITS_PROJECTED;
+    P->left = P->right = PJ_IO_UNITS_WHATEVER;
     P->destructor = horner_freeup;
 
     /* Polynomial degree specified? */
