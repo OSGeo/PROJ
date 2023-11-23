@@ -93,7 +93,7 @@ PROJ_HEAD(krovak, "Krovak") "\n\tPCyl, Ell";
 #define MAX_ITER 100
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_krovak_data {
     double alpha;
     double k;
     double n;
@@ -104,7 +104,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 static PJ_XY krovak_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_krovak_data *Q = static_cast<struct pj_krovak_data *>(P->opaque);
     PJ_XY xy = {0.0, 0.0};
 
     double gfi, u, deltav, s, d, eps, rho;
@@ -139,7 +139,7 @@ static PJ_XY krovak_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 }
 
 static PJ_LP krovak_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_krovak_data *Q = static_cast<struct pj_krovak_data *>(P->opaque);
     PJ_LP lp = {0.0, 0.0};
 
     double u, deltav, s, d, eps, rho, fi1, xy0;
@@ -191,10 +191,10 @@ static PJ_LP krovak_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(krovak) {
+PJ *PJ_PROJECTION(krovak) {
     double u0, n0, g;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_krovak_data *Q = static_cast<struct pj_krovak_data *>(
+        calloc(1, sizeof(struct pj_krovak_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -245,3 +245,8 @@ PJ *PROJECTION(krovak) {
 
     return P;
 }
+
+#undef EPS
+#undef UQ
+#undef S0
+#undef MAX_ITER

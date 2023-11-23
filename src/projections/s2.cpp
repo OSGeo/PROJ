@@ -83,7 +83,7 @@ static std::map<std::string, S2ProjectionType> stringToS2ProjectionType{
     {"none", NoUVtoST}};
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_s2 {
     enum Face face;
     double a_squared;
     double one_minus_f;
@@ -336,7 +336,7 @@ inline bool UVtoSphereXYZ(int face, double u, double v, PJ_XYZ *xyz) {
 //
 // ============================================
 static PJ_XY s2_forward(PJ_LP lp, PJ *P) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_s2 *Q = static_cast<struct pj_s2 *>(P->opaque);
     double lat;
 
     /* Convert the geodetic latitude to a geocentric latitude.
@@ -372,7 +372,7 @@ static PJ_XY s2_forward(PJ_LP lp, PJ *P) {
 
 static PJ_LP s2_inverse(PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_s2 *Q = static_cast<struct pj_s2 *>(P->opaque);
 
     // Do the S2 projections to get from s,t to u,v to x,y,z
     double u = STtoUV(xy.x, Q->UVtoST);
@@ -405,9 +405,9 @@ static PJ_LP s2_inverse(PJ_XY xy, PJ *P) {
     return lp;
 }
 
-PJ *PROJECTION(s2) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(s2) {
+    struct pj_s2 *Q =
+        static_cast<struct pj_s2 *>(calloc(1, sizeof(struct pj_s2)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

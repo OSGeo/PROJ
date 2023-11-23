@@ -130,7 +130,7 @@ static PJ_LP calcofi_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(calcofi) {
+PJ *PJ_PROJECTION(calcofi) {
     P->opaque = nullptr;
 
     /* if the user has specified +lon_0 or +k0 for some reason,

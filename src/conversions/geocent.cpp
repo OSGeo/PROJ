@@ -50,7 +50,7 @@ static PJ_LP inverse(PJ_XY xy, PJ *P) {
     return lp;
 }
 
-PJ *CONVERSION(geocent, 0) {
+PJ *PJ_CONVERSION(geocent, 0) {
     P->is_geocent = 1;
     P->x0 = 0.0;
     P->y0 = 0.0;

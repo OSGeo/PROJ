@@ -75,7 +75,7 @@ static PJ_LP comill_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(comill) {
+PJ *PJ_PROJECTION(comill) {
     P->es = 0;
 
     P->inv = comill_s_inverse;
@@ -83,3 +83,13 @@ PJ *PROJECTION(comill) {
 
     return P;
 }
+
+#undef K1
+#undef K2
+#undef K3
+#undef C1
+#undef C2
+#undef C3
+#undef EPS
+#undef MAX_Y
+#undef MAX_ITER

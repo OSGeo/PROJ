@@ -33,7 +33,7 @@ PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl, Sph&Ell";
 #define MAX_ITER 12
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_eqearth {
     double qp;
     double rqda;
     double *apa;
@@ -43,7 +43,7 @@ struct pj_opaque {
 static PJ_XY eqearth_e_forward(PJ_LP lp,
                                PJ *P) { /* Ellipsoidal/spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_eqearth *Q = static_cast<struct pj_eqearth *>(P->opaque);
     double sbeta;
     double psi, psi2, psi6;
 
@@ -78,7 +78,7 @@ static PJ_XY eqearth_e_forward(PJ_LP lp,
 static PJ_LP eqearth_e_inverse(PJ_XY xy,
                                PJ *P) { /* Ellipsoidal/spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_eqearth *Q = static_cast<struct pj_eqearth *>(P->opaque);
     double yc, y2, y6;
     int i;
 
@@ -141,13 +141,13 @@ static PJ *destructor(PJ *P, int errlev) { /* Destructor */
     if (nullptr == P->opaque)
         return pj_default_destructor(P, errlev);
 
-    free(static_cast<struct pj_opaque *>(P->opaque)->apa);
+    free(static_cast<struct pj_eqearth *>(P->opaque)->apa);
     return pj_default_destructor(P, errlev);
 }
 
-PJ *PROJECTION(eqearth) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(eqearth) {
+    struct pj_eqearth *Q =
+        static_cast<struct pj_eqearth *>(calloc(1, sizeof(struct pj_eqearth)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -167,3 +167,13 @@ PJ *PROJECTION(eqearth) {
 
     return P;
 }
+
+#undef A1
+#undef A2
+#undef A3
+#undef A4
+#undef M
+
+#undef MAX_Y
+#undef EPS
+#undef MAX_ITER

@@ -922,7 +922,7 @@ const MethodMapping *getProjectionMethodMappings(size_t &nElts) {
 #define METHOD_NAME_CODE(method)                                               \
     { EPSG_NAME_METHOD_##method, EPSG_CODE_METHOD_##method }
 
-const struct MethodNameCode methodNameCodes[] = {
+const struct MethodNameCode methodNameCodesList[] = {
     // Projection methods
     METHOD_NAME_CODE(TRANSVERSE_MERCATOR),
     METHOD_NAME_CODE(TRANSVERSE_MERCATOR_SOUTH_ORIENTATED),
@@ -1011,8 +1011,8 @@ const struct MethodNameCode methodNameCodes[] = {
 };
 
 const MethodNameCode *getMethodNameCodes(size_t &nElts) {
-    nElts = sizeof(methodNameCodes) / sizeof(methodNameCodes[0]);
-    return methodNameCodes;
+    nElts = sizeof(methodNameCodesList) / sizeof(methodNameCodesList[0]);
+    return methodNameCodesList;
 }
 
 #define PARAM_NAME_CODE(method)                                                \

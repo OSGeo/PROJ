@@ -555,7 +555,7 @@ static PJ *read_convention(PJ *P) {
 }
 
 /***********************************************************************/
-PJ *TRANSFORMATION(helmert, 0) {
+PJ *PJ_TRANSFORMATION(helmert, 0) {
     /***********************************************************************/
 
     struct pj_opaque_helmert *Q;
@@ -698,7 +698,7 @@ PJ *TRANSFORMATION(helmert, 0) {
 }
 
 /***********************************************************************/
-PJ *TRANSFORMATION(molobadekas, 0) {
+PJ *PJ_TRANSFORMATION(molobadekas, 0) {
     /***********************************************************************/
 
     struct pj_opaque_helmert *Q;

@@ -224,7 +224,7 @@ static PJ_LP cart_reverse(PJ_XY xy, PJ *P) {
 }
 
 /*********************************************************************/
-PJ *CONVERSION(cart, 1) {
+PJ *PJ_CONVERSION(cart, 1) {
     /*********************************************************************/
     P->fwd3d = cartesian;
     P->inv3d = geodetic;

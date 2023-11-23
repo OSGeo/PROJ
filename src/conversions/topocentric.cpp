@@ -75,7 +75,7 @@ static void topocentric_inv(PJ_COORD &coo, PJ *P) {
 }
 
 /*********************************************************************/
-PJ *CONVERSION(topocentric, 1) {
+PJ *PJ_CONVERSION(topocentric, 1) {
     /*********************************************************************/
     struct pj_opaque *Q =
         static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));

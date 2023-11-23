@@ -437,7 +437,7 @@ static double get_unit_conversion_factor(const char *name, int *p_is_linear,
 }
 
 /***********************************************************************/
-PJ *CONVERSION(unitconvert, 0) {
+PJ *PJ_CONVERSION(unitconvert, 0) {
     /***********************************************************************/
     struct pj_opaque_unitconvert *Q =
         static_cast<struct pj_opaque_unitconvert *>(

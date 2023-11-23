@@ -258,6 +258,20 @@ set(SRC_LIBPROJ_CORE
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+  set_property(SOURCE list.cpp # because if sets DO_NOT_DEFINE_PROJ_HEAD
+                      transformations/defmodel.cpp # Evaluator class conflict
+                      transformations/tinshift.cpp # Evaluator class conflict
+                      wkt1_parser.cpp
+                      wkt2_parser.cpp
+                      wkt1_generated_parser.c
+                      wkt2_generated_parser.c
+               PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
+  if(WIN32)
+      set_property(SOURCE networkfilemanager.cpp PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
+  endif()
+endif ()
+
 set(HEADERS_LIBPROJ
   proj.h
   proj_experimental.h

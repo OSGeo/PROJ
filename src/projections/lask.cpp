@@ -29,7 +29,7 @@ static PJ_XY lask_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-PJ *PROJECTION(lask) {
+PJ *PJ_PROJECTION(lask) {
 
     P->fwd = lask_s_forward;
     P->es = 0.;

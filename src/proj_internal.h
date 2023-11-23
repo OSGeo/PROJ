@@ -838,7 +838,7 @@ struct pj_ctx {
     static pj_ctx createDefault();
 };
 
-#ifdef PJ_LIB_
+#ifndef DO_NOT_DEFINE_PROJ_HEAD
 #define PROJ_HEAD(name, desc) static const char des_##name[] = desc
 
 #define OPERATION(name, NEED_ELLPS)                                            \
@@ -865,14 +865,14 @@ struct pj_ctx {
     PJ *pj_projection_specific_setup_##name(PJ *P)
 
 /* In ISO19000 lingo, an operation is either a conversion or a transformation */
-#define CONVERSION(name, need_ellps) OPERATION(name, need_ellps)
-#define TRANSFORMATION(name, need_ellps) OPERATION(name, need_ellps)
+#define PJ_CONVERSION(name, need_ellps) OPERATION(name, need_ellps)
+#define PJ_TRANSFORMATION(name, need_ellps) OPERATION(name, need_ellps)
 
 /* In PROJ.4 a projection is a conversion taking angular input and giving scaled
  * linear output */
-#define PROJECTION(name) CONVERSION(name, 1)
+#define PJ_PROJECTION(name) PJ_CONVERSION(name, 1)
 
-#endif /* def PJ_LIB_ */
+#endif /* DO_NOT_DEFINE_PROJ_HEAD */
 
 /* procedure prototypes */
 double PROJ_DLL dmstor(const char *, char **);

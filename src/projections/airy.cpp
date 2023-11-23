@@ -38,7 +38,7 @@ enum Mode { N_POLE = 0, S_POLE = 1, EQUIT = 2, OBLIQ = 3 };
 } // anonymous namespace
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_airy {
     double p_halfpi;
     double sinph0;
     double cosph0;
@@ -52,7 +52,7 @@ struct pj_opaque {
 
 static PJ_XY airy_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_airy *Q = static_cast<struct pj_airy *>(P->opaque);
     double sinlam, coslam, cosphi, sinphi, t, s, Krho, cosz;
 
     sinlam = sin(lp.lam);
@@ -107,11 +107,11 @@ static PJ_XY airy_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-PJ *PROJECTION(airy) {
+PJ *PJ_PROJECTION(airy) {
     double beta;
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_airy *Q =
+        static_cast<struct pj_airy *>(calloc(1, sizeof(struct pj_airy)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
@@ -147,3 +147,5 @@ PJ *PROJECTION(airy) {
     P->es = 0.;
     return P;
 }
+
+#undef EPS

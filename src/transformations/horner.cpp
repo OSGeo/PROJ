@@ -551,7 +551,7 @@ static int parse_coefs(PJ *P, double *coefs, const char *param, int ncoefs) {
 }
 
 /*********************************************************************/
-PJ *PROJECTION(horner) {
+PJ *PJ_PROJECTION(horner) {
     /*********************************************************************/
     int degree = 0;
     HORNER *Q;
