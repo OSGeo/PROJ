@@ -87,7 +87,7 @@ VALUES
 ('PE7783V2.gsb','ca_nrc_PE7783V2.tif','PE7783V2.GSB','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_PE7783V2.tif',1,1,NULL),
 ('SK27-98.gsb','ca_nrc_SK27-98.tif','SK27-98.GSB','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_SK27-98.tif',1,1,NULL),
 ('SK83-98.gsb','ca_nrc_SK83-98.tif','SK83-98.GSB','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_SK83-98.tif',1,1,NULL),
-('TOR27CSv1.GSB','ca_nrc_TO27CSv1.tif','TO27CSv1.GSB','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_TO27CSv1.tif',1,1,NULL),
+('TO27CSv1.GSB','ca_nrc_TO27CSv1.tif','TO27CSv1.GSB','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_TO27CSv1.tif',1,1,NULL),
 ('NAD83v6VG.gvb','ca_nrc_NAD83v6VG.tif',NULL,'GTiff','velocity_grid',0,NULL,'https://cdn.proj.org/ca_nrc_NAD83v6VG.tif',1,1,NULL),
 ('NAD83v70VG.gvb','ca_nrc_NAD83v70VG.tif',NULL,'GTiff','velocity_grid',0,NULL,'https://cdn.proj.org/ca_nrc_NAD83v70VG.tif',1,1,NULL),
 
