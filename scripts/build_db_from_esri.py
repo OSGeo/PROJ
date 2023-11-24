@@ -657,6 +657,13 @@ def import_geogcs():
                 assert is_degree or is_grad, row
                 cs_code = '6422' if is_degree else '6403'
 
+                if "CS[ellipsoidal,3]" in wkt2:
+                    assert 'AXIS["Ellipsoidal height (h)",up,ORDER[3],LENGTHUNIT["Meter",1.0]' in wkt2
+                    cs_code = '6423'
+                    geodetic_crs_type = "geographic 3D"
+                else:
+                    geodetic_crs_type = "geographic 2D"
+
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
                 extent_auth_name, extent_code = find_extent(
@@ -712,7 +719,7 @@ def import_geogcs():
                 if esri_name not in map_geogcs_esri_name_to_auth_code:
                     map_geogcs_esri_name_to_auth_code[esri_name] = ['ESRI', code]
 
-                sql = """INSERT INTO "geodetic_crs" VALUES('ESRI','%s','%s',NULL,'geographic 2D','EPSG','%s','%s','%s',NULL,%d);""" % (
+                sql = f"""INSERT INTO "geodetic_crs" VALUES('ESRI','%s','%s',NULL,'{geodetic_crs_type}','EPSG','%s','%s','%s',NULL,%d);""" % (
                     code, esri_name, cs_code, datum_auth_name, datum_code, deprecated)
                 all_sql.append(sql)
                 sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','geodetic_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
