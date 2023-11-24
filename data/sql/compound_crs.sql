@@ -844,6 +844,14 @@ INSERT INTO "compound_crs" VALUES('EPSG','10365','KGD2002 + KVD1964 height',NULL
 INSERT INTO "usage" VALUES('EPSG','20149','compound_crs','EPSG','10365','EPSG','3266','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','10472','COV23 Grid + ODN height',NULL,'EPSG','10471','EPSG','5701',0);
 INSERT INTO "usage" VALUES('EPSG','20315','compound_crs','EPSG','10472','EPSG','4743','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','10497','RGF93 v2 / Lambert-93 + NGF-IGN69 height',NULL,'EPSG','9793','EPSG','5720',0);
+INSERT INTO "usage" VALUES('EPSG','20475','compound_crs','EPSG','10497','EPSG','1326','EPSG','1178');
+INSERT INTO "compound_crs" VALUES('EPSG','10498','RGF93 v2 / Lambert-93 + NGF-IGN78 height',NULL,'EPSG','9793','EPSG','5721',0);
+INSERT INTO "usage" VALUES('EPSG','20473','compound_crs','EPSG','10498','EPSG','1327','EPSG','1178');
+INSERT INTO "compound_crs" VALUES('EPSG','10499','RGF93 v2b / Lambert-93 + NGF-IGN69 height',NULL,'EPSG','9794','EPSG','5720',0);
+INSERT INTO "usage" VALUES('EPSG','20472','compound_crs','EPSG','10499','EPSG','1326','EPSG','1178');
+INSERT INTO "compound_crs" VALUES('EPSG','10500','RGF93 v2b / Lambert-93 + NGF-IGN78 height',NULL,'EPSG','9794','EPSG','5721',0);
+INSERT INTO "usage" VALUES('EPSG','20476','compound_crs','EPSG','10500','EPSG','1327','EPSG','1178');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);

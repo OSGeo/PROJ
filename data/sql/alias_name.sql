@@ -7943,3 +7943,13 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','22821','NAD83(CSRS) 2010
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','22822','NAD83(CSRS) 2010 / UTM zone 22N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10471','ETRS89 / COV23 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10472','ETRS89 / COV23 SnakeGrid + Newlyn height','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4162','1011','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4162','Korean 1985 - LatLon','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4926','1008','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4926','KGD2002 - XYZ','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4927','1007','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4927','KGD2002 - LatLonEHt','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4737','1009','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4737','KGD2002 - LatLon','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5193','1010','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5193','KVD1964 - NOHt','EPSG');
