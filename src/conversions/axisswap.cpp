@@ -258,7 +258,7 @@ PJ *CONVERSION(axisswap, 0) {
             if (i == j)
                 continue;
             if (Q->axis[i] == Q->axis[j]) {
-                proj_log_error(P, _("swapaxis: duplicate axes specified"));
+                proj_log_error(P, _("axisswap: duplicate axes specified"));
                 return pj_default_destructor(
                     P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
@@ -285,7 +285,7 @@ PJ *CONVERSION(axisswap, 0) {
     }
 
     if (P->fwd4d == nullptr && P->fwd3d == nullptr && P->fwd == nullptr) {
-        proj_log_error(P, _("swapaxis: bad axis order"));
+        proj_log_error(P, _("axisswap: bad axis order"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
