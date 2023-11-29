@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -7,7 +7,7 @@
 #include "proj_internal.h"
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_putp6 {
     double C_x, C_y, A, B, D;
 };
 } // anonymous namespace
@@ -21,7 +21,7 @@ PROJ_HEAD(putp6p, "Putnins P6'") "\n\tPCyl, Sph";
 
 static PJ_XY putp6_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_putp6 *Q = static_cast<struct pj_putp6 *>(P->opaque);
     int i;
 
     const double p = Q->B * sin(lp.phi);
@@ -53,7 +53,7 @@ static PJ_XY putp6_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP putp6_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_putp6 *Q = static_cast<struct pj_putp6 *>(P->opaque);
     double r;
 
     lp.phi = xy.y / Q->C_y;
@@ -64,9 +64,9 @@ static PJ_LP putp6_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(putp6) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(putp6) {
+    struct pj_putp6 *Q =
+        static_cast<struct pj_putp6 *>(calloc(1, sizeof(struct pj_putp6)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -84,9 +84,9 @@ PJ *PROJECTION(putp6) {
     return P;
 }
 
-PJ *PROJECTION(putp6p) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(putp6p) {
+    struct pj_putp6 *Q =
+        static_cast<struct pj_putp6 *>(calloc(1, sizeof(struct pj_putp6)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -103,3 +103,7 @@ PJ *PROJECTION(putp6p) {
 
     return P;
 }
+
+#undef EPS
+#undef NITER
+#undef CON_POLE

@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include <errno.h>
 #include <math.h>
 #include <stddef.h>
@@ -8,7 +8,7 @@
 #include "proj_internal.h"
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_ob_tran_data {
     struct PJconsts *link;
     double lamp;
     double cphip, sphip;
@@ -25,7 +25,8 @@ PROJ_HEAD(ob_tran, "General Oblique Transformation")
 #define TOL 1e-10
 
 static PJ_XY o_forward(PJ_LP lp, PJ *P) { /* spheroid */
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ob_tran_data *Q =
+        static_cast<struct pj_ob_tran_data *>(P->opaque);
     double coslam, sinphi, cosphi;
 
     coslam = cos(lp.lam);
@@ -42,7 +43,8 @@ static PJ_XY o_forward(PJ_LP lp, PJ *P) { /* spheroid */
 }
 
 static PJ_XY t_forward(PJ_LP lp, PJ *P) { /* spheroid */
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ob_tran_data *Q =
+        static_cast<struct pj_ob_tran_data *>(P->opaque);
     double cosphi, coslam;
 
     cosphi = cos(lp.phi);
@@ -55,7 +57,8 @@ static PJ_XY t_forward(PJ_LP lp, PJ *P) { /* spheroid */
 
 static PJ_LP o_inverse(PJ_XY xy, PJ *P) { /* spheroid */
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ob_tran_data *Q =
+        static_cast<struct pj_ob_tran_data *>(P->opaque);
     double coslam, sinphi, cosphi;
 
     PJ_LP lp = Q->link->inv(xy, Q->link);
@@ -75,7 +78,8 @@ static PJ_LP o_inverse(PJ_XY xy, PJ *P) { /* spheroid */
 
 static PJ_LP t_inverse(PJ_XY xy, PJ *P) { /* spheroid */
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ob_tran_data *Q =
+        static_cast<struct pj_ob_tran_data *>(P->opaque);
     double cosphi, t;
 
     PJ_LP lp = Q->link->inv(xy, Q->link);
@@ -94,9 +98,9 @@ static PJ *destructor(PJ *P, int errlev) {
     if (nullptr == P->opaque)
         return pj_default_destructor(P, errlev);
 
-    if (static_cast<struct pj_opaque *>(P->opaque)->link)
-        static_cast<struct pj_opaque *>(P->opaque)->link->destructor(
-            static_cast<struct pj_opaque *>(P->opaque)->link, errlev);
+    if (static_cast<struct pj_ob_tran_data *>(P->opaque)->link)
+        static_cast<struct pj_ob_tran_data *>(P->opaque)->link->destructor(
+            static_cast<struct pj_ob_tran_data *>(P->opaque)->link, errlev);
 
     return pj_default_destructor(P, errlev);
 }
@@ -168,13 +172,13 @@ static ARGS ob_tran_target_params(paralist *params) {
     return args;
 }
 
-PJ *PROJECTION(ob_tran) {
+PJ *PJ_PROJECTION(ob_tran) {
     double phip;
     ARGS args;
     PJ *R; /* projection to rotate */
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_ob_tran_data *Q = static_cast<struct pj_ob_tran_data *>(
+        calloc(1, sizeof(struct pj_ob_tran_data)));
     if (nullptr == Q)
         return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
@@ -291,3 +295,5 @@ PJ *PROJECTION(ob_tran) {
 
     return P;
 }
+
+#undef TOL

@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -50,10 +50,17 @@ static PJ_LP putp2_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(putp2) {
+PJ *PJ_PROJECTION(putp2) {
     P->es = 0.;
     P->inv = putp2_s_inverse;
     P->fwd = putp2_s_forward;
 
     return P;
 }
+
+#undef C_x
+#undef C_y
+#undef C_p
+#undef EPS
+#undef NITER
+#undef PI_DIV_3

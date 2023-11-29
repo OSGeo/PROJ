@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -21,7 +21,7 @@ enum Mode {
 } // anonymous namespace
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_imw_p_data {
     double P, Pp, Q, Qp, R_1, R_2, sphi_1, sphi_2, C2;
     double phi_1, phi_2, lam_1;
     double *en;
@@ -30,7 +30,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 static int phi12(PJ *P, double *del, double *sig) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_imw_p_data *Q = static_cast<struct pj_imw_p_data *>(P->opaque);
     int err = 0;
 
     if (!pj_param(P->ctx, P->params, "tlat_1").i) {
@@ -57,7 +57,7 @@ static int phi12(PJ *P, double *del, double *sig) {
 }
 
 static PJ_XY loc_for(PJ_LP lp, PJ *P, double *yc) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_imw_p_data *Q = static_cast<struct pj_imw_p_data *>(P->opaque);
     PJ_XY xy;
 
     if (lp.phi == 0.0) {
@@ -113,7 +113,7 @@ static PJ_XY imw_p_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_LP imw_p_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_imw_p_data *Q = static_cast<struct pj_imw_p_data *>(P->opaque);
     PJ_XY t;
     double yc = 0.0;
     int i = 0;
@@ -151,29 +151,29 @@ static void xy(PJ *P, double phi, double *x, double *y, double *sp, double *R) {
 
     *sp = sin(phi);
     *R = 1. / (tan(phi) * sqrt(1. - P->es * *sp * *sp));
-    F = static_cast<struct pj_opaque *>(P->opaque)->lam_1 * *sp;
+    F = static_cast<struct pj_imw_p_data *>(P->opaque)->lam_1 * *sp;
     *y = *R * (1 - cos(F));
     *x = *R * sin(F);
 }
 
-static PJ *destructor(PJ *P, int errlev) {
+static PJ *pj_imw_p_destructor(PJ *P, int errlev) {
     if (nullptr == P)
         return nullptr;
 
     if (nullptr == P->opaque)
         return pj_default_destructor(P, errlev);
 
-    if (static_cast<struct pj_opaque *>(P->opaque)->en)
-        free(static_cast<struct pj_opaque *>(P->opaque)->en);
+    if (static_cast<struct pj_imw_p_data *>(P->opaque)->en)
+        free(static_cast<struct pj_imw_p_data *>(P->opaque)->en);
 
     return pj_default_destructor(P, errlev);
 }
 
-PJ *PROJECTION(imw_p) {
+PJ *PJ_PROJECTION(imw_p) {
     double del, sig, s, t, x1, x2, T2, y1, m1, m2, y2;
     int err;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_imw_p_data *Q = static_cast<struct pj_imw_p_data *>(
+        calloc(1, sizeof(struct pj_imw_p_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -181,7 +181,7 @@ PJ *PROJECTION(imw_p) {
     if (!(Q->en = pj_enfn(P->n)))
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     if ((err = phi12(P, &del, &sig)) != 0) {
-        return destructor(P, err);
+        return pj_imw_p_destructor(P, err);
     }
     if (Q->phi_2 < Q->phi_1) { /* make sure P->phi_1 most southerly */
         del = Q->phi_1;
@@ -229,7 +229,10 @@ PJ *PROJECTION(imw_p) {
 
     P->fwd = imw_p_e_forward;
     P->inv = imw_p_e_inverse;
-    P->destructor = destructor;
+    P->destructor = pj_imw_p_destructor;
 
     return P;
 }
+
+#undef TOL
+#undef EPS

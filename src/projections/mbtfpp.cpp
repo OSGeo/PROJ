@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -54,7 +54,7 @@ static PJ_LP mbtfpp_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(mbtfpp) {
+PJ *PJ_PROJECTION(mbtfpp) {
 
     P->es = 0.;
     P->inv = mbtfpp_s_inverse;
@@ -62,3 +62,10 @@ PJ *PROJECTION(mbtfpp) {
 
     return P;
 }
+
+#undef CSy
+#undef FXC
+#undef FYC
+#undef C23
+#undef C13
+#undef ONEEPS

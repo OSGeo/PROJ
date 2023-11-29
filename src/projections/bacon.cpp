@@ -1,14 +1,15 @@
-#define HLFPI2 2.46740110027233965467 /* (pi/2)^2 */
-#define EPS 1e-10
-#define PJ_LIB_
+
 #include <errno.h>
 #include <math.h>
 
 #include "proj.h"
 #include "proj_internal.h"
 
+#define HLFPI2 2.46740110027233965467 /* (pi/2)^2 */
+#define EPS 1e-10
+
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_bacon {
     int bacn;
     int ortl;
 };
@@ -20,7 +21,7 @@ PROJ_HEAD(bacon, "Bacon Globular") "\n\tMisc Sph, no inv";
 
 static PJ_XY bacon_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_bacon *Q = static_cast<struct pj_bacon *>(P->opaque);
     double ax, f;
 
     xy.y = Q->bacn ? M_HALFPI * sin(lp.phi) : lp.phi;
@@ -39,9 +40,9 @@ static PJ_XY bacon_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return (xy);
 }
 
-PJ *PROJECTION(bacon) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(bacon) {
+    struct pj_bacon *Q =
+        static_cast<struct pj_bacon *>(calloc(1, sizeof(struct pj_bacon)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -53,9 +54,9 @@ PJ *PROJECTION(bacon) {
     return P;
 }
 
-PJ *PROJECTION(apian) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(apian) {
+    struct pj_bacon *Q =
+        static_cast<struct pj_bacon *>(calloc(1, sizeof(struct pj_bacon)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -66,9 +67,9 @@ PJ *PROJECTION(apian) {
     return P;
 }
 
-PJ *PROJECTION(ortel) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(ortel) {
+    struct pj_bacon *Q =
+        static_cast<struct pj_bacon *>(calloc(1, sizeof(struct pj_bacon)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -79,3 +80,6 @@ PJ *PROJECTION(ortel) {
     P->fwd = bacon_s_forward;
     return P;
 }
+
+#undef HLFPI2
+#undef EPS

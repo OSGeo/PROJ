@@ -27,7 +27,6 @@
 ** SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#define PJ_LIB_
 #include <errno.h>
 #include <math.h>
 #include <stddef.h>
@@ -37,7 +36,7 @@
 #include <math.h>
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_geos_data {
     double h;
     double radius_p;
     double radius_p2;
@@ -53,7 +52,7 @@ PROJ_HEAD(geos, "Geostationary Satellite View") "\n\tAzi, Sph&Ell\n\th=";
 
 static PJ_XY geos_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_geos_data *Q = static_cast<struct pj_geos_data *>(P->opaque);
     double Vx, Vy, Vz, tmp;
 
     /* Calculation of the three components of the vector from satellite to
@@ -81,7 +80,7 @@ static PJ_XY geos_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_XY geos_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_geos_data *Q = static_cast<struct pj_geos_data *>(P->opaque);
     double r, Vx, Vy, Vz, tmp;
 
     /* Calculation of geocentric latitude. */
@@ -116,7 +115,7 @@ static PJ_XY geos_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_LP geos_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_geos_data *Q = static_cast<struct pj_geos_data *>(P->opaque);
     double Vx, Vy, Vz, a, b, k;
 
     /* Setting three components of vector from satellite to position.*/
@@ -153,7 +152,7 @@ static PJ_LP geos_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
 
 static PJ_LP geos_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_geos_data *Q = static_cast<struct pj_geos_data *>(P->opaque);
     double Vx, Vy, Vz, a, b, k;
 
     /* Setting three components of vector from satellite to position.*/
@@ -191,10 +190,10 @@ static PJ_LP geos_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(geos) {
+PJ *PJ_PROJECTION(geos) {
     char *sweep_axis;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_geos_data *Q = static_cast<struct pj_geos_data *>(
+        calloc(1, sizeof(struct pj_geos_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

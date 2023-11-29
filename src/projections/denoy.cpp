@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include <math.h>
 
 #include "proj.h"
@@ -23,9 +23,15 @@ static PJ_XY denoy_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-PJ *PROJECTION(denoy) {
+PJ *PJ_PROJECTION(denoy) {
     P->es = 0.0;
     P->fwd = denoy_s_forward;
 
     return P;
 }
+
+#undef C0
+#undef C1
+#undef C3
+#undef D1
+#undef D5

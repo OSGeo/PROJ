@@ -21,7 +21,6 @@
 ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 ** SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#define PJ_LIB_
 
 #include <errno.h>
 #include <math.h>
@@ -34,7 +33,7 @@ PROJ_HEAD(omerc, "Oblique Mercator")
     "alpha= [gamma=] [no_off] lonc= or\n\t lon_1= lat_1= lon_2= lat_2=";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_omerc_data {
     double A, B, E, AB, ArB, BrA, rB, singam, cosgam, sinrot, cosrot;
     double v_pole_n, v_pole_s, u_0;
     int no_rot;
@@ -46,7 +45,7 @@ struct pj_opaque {
 
 static PJ_XY omerc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_omerc_data *Q = static_cast<struct pj_omerc_data *>(P->opaque);
     double u, v;
 
     if (fabs(fabs(lp.phi) - M_HALFPI) > EPS) {
@@ -84,7 +83,7 @@ static PJ_XY omerc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_LP omerc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_omerc_data *Q = static_cast<struct pj_omerc_data *>(P->opaque);
     double u, v, Qp, Sp, Tp, Vp, Up;
 
     if (Q->no_rot) {
@@ -119,14 +118,14 @@ static PJ_LP omerc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(omerc) {
+PJ *PJ_PROJECTION(omerc) {
     double con, com, cosph0, D, F, H, L, sinph0, p, J,
         gamma = 0, gamma0, lamc = 0, lam1 = 0, lam2 = 0, phi1 = 0, phi2 = 0,
         alpha_c = 0;
     int alp, gam, no_off = 0;
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_omerc_data *Q = static_cast<struct pj_omerc_data *>(
+        calloc(1, sizeof(struct pj_omerc_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -298,3 +297,6 @@ PJ *PROJECTION(omerc) {
 
     return P;
 }
+
+#undef TOL
+#undef EPS

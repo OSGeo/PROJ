@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -8,7 +8,7 @@
 #include <math.h>
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_eqdc_data {
     double phi1;
     double phi2;
     double n;
@@ -26,7 +26,7 @@ PROJ_HEAD(eqdc, "Equidistant Conic")
 
 static PJ_XY eqdc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_eqdc_data *Q = static_cast<struct pj_eqdc_data *>(P->opaque);
 
     Q->rho =
         Q->c -
@@ -40,7 +40,7 @@ static PJ_XY eqdc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_LP eqdc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_eqdc_data *Q = static_cast<struct pj_eqdc_data *>(P->opaque);
 
     if ((Q->rho = hypot(xy.x, xy.y = Q->rho0 - xy.y)) != 0.0) {
         if (Q->n < 0.) {
@@ -59,27 +59,27 @@ static PJ_LP eqdc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-static PJ *destructor(PJ *P, int errlev) { /* Destructor */
+static PJ *pj_eqdc_destructor(PJ *P, int errlev) { /* Destructor */
     if (nullptr == P)
         return nullptr;
 
     if (nullptr == P->opaque)
         return pj_default_destructor(P, errlev);
 
-    free(static_cast<struct pj_opaque *>(P->opaque)->en);
+    free(static_cast<struct pj_eqdc_data *>(P->opaque)->en);
     return pj_default_destructor(P, errlev);
 }
 
-PJ *PROJECTION(eqdc) {
+PJ *PJ_PROJECTION(eqdc) {
     double cosphi, sinphi;
     int secant;
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_eqdc_data *Q = static_cast<struct pj_eqdc_data *>(
+        calloc(1, sizeof(struct pj_eqdc_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
-    P->destructor = destructor;
+    P->destructor = pj_eqdc_destructor;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     Q->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
@@ -87,22 +87,22 @@ PJ *PROJECTION(eqdc) {
     if (fabs(Q->phi1) > M_HALFPI) {
         proj_log_error(P,
                        _("Invalid value for lat_1: |lat_1| should be <= 90°"));
-        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return pj_eqdc_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     if (fabs(Q->phi2) > M_HALFPI) {
         proj_log_error(P,
                        _("Invalid value for lat_2: |lat_2| should be <= 90°"));
-        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return pj_eqdc_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     if (fabs(Q->phi1 + Q->phi2) < EPS10) {
         proj_log_error(P, _("Invalid value for lat_1 and lat_2: |lat_1 + "
                             "lat_2| should be > 0"));
-        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return pj_eqdc_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     if (!(Q->en = pj_enfn(P->n)))
-        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+        return pj_eqdc_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     sinphi = sin(Q->phi1);
     Q->n = sinphi;
@@ -120,13 +120,15 @@ PJ *PROJECTION(eqdc) {
             const double ml2 = pj_mlfn(Q->phi2, sinphi, cosphi, Q->en);
             if (ml1 == ml2) {
                 proj_log_error(P, _("Eccentricity too close to 1"));
-                return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+                return pj_eqdc_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
             Q->n = (m1 - pj_msfn(sinphi, cosphi, P->es)) / (ml2 - ml1);
             if (Q->n == 0) {
                 // Not quite, but es is very close to 1...
                 proj_log_error(P, _("Invalid value for eccentricity"));
-                return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+                return pj_eqdc_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
         Q->c = ml1 + m1 / Q->n;
@@ -137,7 +139,7 @@ PJ *PROJECTION(eqdc) {
         if (Q->n == 0) {
             proj_log_error(P, _("Invalid value for lat_1 and lat_2: lat_1 + "
                                 "lat_2 should be > 0"));
-            return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            return pj_eqdc_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
         Q->c = Q->phi1 + cos(Q->phi1) / Q->n;
         Q->rho0 = Q->c - P->phi0;
@@ -148,3 +150,5 @@ PJ *PROJECTION(eqdc) {
 
     return P;
 }
+
+#undef EPS10

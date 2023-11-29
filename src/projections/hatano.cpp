@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -72,10 +72,24 @@ static PJ_LP hatano_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return (lp);
 }
 
-PJ *PROJECTION(hatano) {
+PJ *PJ_PROJECTION(hatano) {
     P->es = 0.;
     P->inv = hatano_s_inverse;
     P->fwd = hatano_s_forward;
 
     return P;
 }
+
+#undef NITER
+#undef EPS
+#undef ONETOL
+#undef CN
+#undef CSz
+#undef RCN
+#undef RCS
+#undef FYCN
+#undef FYCS
+#undef RYCN
+#undef RYCS
+#undef FXC
+#undef RXC

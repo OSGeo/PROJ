@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -28,9 +28,14 @@ static PJ_LP wag2_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return (lp);
 }
 
-PJ *PROJECTION(wag2) {
+PJ *PJ_PROJECTION(wag2) {
     P->es = 0.;
     P->inv = wag2_s_inverse;
     P->fwd = wag2_s_forward;
     return P;
 }
+
+#undef C_x
+#undef C_y
+#undef C_p1
+#undef C_p2

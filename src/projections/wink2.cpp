@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -9,7 +9,7 @@
 PROJ_HEAD(wink2, "Winkel II") "\n\tPCyl, Sph\n\tlat_1=";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_wink2_data {
     double cosphi1;
 };
 } // anonymous namespace
@@ -34,8 +34,9 @@ static PJ_XY wink2_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
         lp.phi = (lp.phi < 0.) ? -M_HALFPI : M_HALFPI;
     else
         lp.phi *= 0.5;
-    xy.x = 0.5 * lp.lam *
-           (cos(lp.phi) + static_cast<struct pj_opaque *>(P->opaque)->cosphi1);
+    xy.x =
+        0.5 * lp.lam *
+        (cos(lp.phi) + static_cast<struct pj_wink2_data *>(P->opaque)->cosphi1);
     xy.y = M_FORTPI * (sin(lp.phi) + xy.y);
     return xy;
 }
@@ -50,14 +51,14 @@ static PJ_LP wink2_s_inverse(PJ_XY xy, PJ *P) {
     return pj_generic_inverse_2d(xy, P, lpInit, deltaXYTolerance);
 }
 
-PJ *PROJECTION(wink2) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(wink2) {
+    struct pj_wink2_data *Q = static_cast<struct pj_wink2_data *>(
+        calloc(1, sizeof(struct pj_wink2_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    static_cast<struct pj_opaque *>(P->opaque)->cosphi1 =
+    static_cast<struct pj_wink2_data *>(P->opaque)->cosphi1 =
         cos(pj_param(P->ctx, P->params, "rlat_1").f);
     P->es = 0.;
     P->fwd = wink2_s_forward;
@@ -65,3 +66,6 @@ PJ *PROJECTION(wink2) {
 
     return P;
 }
+
+#undef MAX_ITER
+#undef LOOP_TOL

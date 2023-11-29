@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -48,7 +48,7 @@ static PJ_XY vandg4_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-PJ *PROJECTION(vandg4) {
+PJ *PJ_PROJECTION(vandg4) {
     P->es = 0.;
     P->fwd = vandg4_s_forward;
 

@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -7,7 +7,7 @@
 #include "proj_internal.h"
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_rpoly_data {
     double phi1;
     double fxa;
     double fxb;
@@ -22,7 +22,7 @@ PROJ_HEAD(rpoly, "Rectangular Polyconic")
 
 static PJ_XY rpoly_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_rpoly_data *Q = static_cast<struct pj_rpoly_data *>(P->opaque);
     double fa;
 
     if (Q->mode)
@@ -41,9 +41,9 @@ static PJ_XY rpoly_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-PJ *PROJECTION(rpoly) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(rpoly) {
+    struct pj_rpoly_data *Q = static_cast<struct pj_rpoly_data *>(
+        calloc(1, sizeof(struct pj_rpoly_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -59,3 +59,5 @@ PJ *PROJECTION(rpoly) {
 
     return P;
 }
+
+#undef EPS

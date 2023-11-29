@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <float.h>
 #include <math.h>
@@ -42,7 +42,7 @@ static PJ_LP merc_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(merc) {
+PJ *PJ_PROJECTION(merc) {
     double phits = 0.0;
     int is_phits;
 
@@ -73,7 +73,7 @@ PJ *PROJECTION(merc) {
     return P;
 }
 
-PJ *PROJECTION(webmerc) {
+PJ *PJ_PROJECTION(webmerc) {
 
     /* Overriding k_0 with fixed parameter */
     P->k0 = 1.0;

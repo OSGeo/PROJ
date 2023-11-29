@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>
@@ -10,7 +10,7 @@ PROJ_HEAD(lcc, "Lambert Conformal Conic")
 #define EPS10 1.e-10
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_lcc_data {
     double phi1;
     double phi2;
     double n;
@@ -21,7 +21,7 @@ struct pj_opaque {
 
 static PJ_XY lcc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0., 0.};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_lcc_data *Q = static_cast<struct pj_lcc_data *>(P->opaque);
     double rho;
 
     if (fabs(fabs(lp.phi) - M_HALFPI) < EPS10) {
@@ -43,7 +43,7 @@ static PJ_XY lcc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_LP lcc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0., 0.};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_lcc_data *Q = static_cast<struct pj_lcc_data *>(P->opaque);
     double rho;
 
     xy.x /= P->k0;
@@ -75,11 +75,11 @@ static PJ_LP lcc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(lcc) {
+PJ *PJ_PROJECTION(lcc) {
     double cosphi, sinphi;
     int secant;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_lcc_data *Q = static_cast<struct pj_lcc_data *>(
+        calloc(1, sizeof(struct pj_lcc_data)));
 
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
@@ -169,3 +169,5 @@ PJ *PROJECTION(lcc) {
 
     return P;
 }
+
+#undef EPS10

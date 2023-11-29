@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -26,7 +26,7 @@ static PJ_LP tcea_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(tcea) {
+PJ *PJ_PROJECTION(tcea) {
     P->inv = tcea_s_inverse;
     P->fwd = tcea_s_forward;
     P->es = 0.;

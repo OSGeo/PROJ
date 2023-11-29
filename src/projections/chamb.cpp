@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -10,7 +10,7 @@ typedef struct {
     double r, Az;
 } VECT;
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_chamb {
     struct { /* control point data */
         double phi, lam;
         double cosphi, sinphi;
@@ -58,7 +58,7 @@ static double lc(PJ_CONTEXT *ctx, double b, double c, double a) {
 
 static PJ_XY chamb_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy;
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_chamb *Q = static_cast<struct pj_chamb *>(P->opaque);
     double sinphi, cosphi, a;
     VECT v[3];
     int i, j;
@@ -100,11 +100,11 @@ static PJ_XY chamb_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-PJ *PROJECTION(chamb) {
+PJ *PJ_PROJECTION(chamb) {
     int i, j;
     char line[10];
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_chamb *Q =
+        static_cast<struct pj_chamb *>(calloc(1, sizeof(struct pj_chamb)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -149,3 +149,6 @@ PJ *PROJECTION(chamb) {
 
     return P;
 }
+
+#undef THIRD
+#undef TOL

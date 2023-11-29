@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -44,7 +44,7 @@ static PJ_XY nicol_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return (xy);
 }
 
-PJ *PROJECTION(nicol) {
+PJ *PJ_PROJECTION(nicol) {
     P->es = 0.;
     P->fwd = nicol_s_forward;
 

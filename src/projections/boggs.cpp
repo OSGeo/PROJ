@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include <math.h>
 
 #include "proj.h"
@@ -35,8 +35,14 @@ static PJ_XY boggs_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return (xy);
 }
 
-PJ *PROJECTION(boggs) {
+PJ *PJ_PROJECTION(boggs) {
     P->es = 0.;
     P->fwd = boggs_s_forward;
     return P;
 }
+
+#undef NITER
+#undef EPS
+#undef FXC
+#undef FXC2
+#undef FYC

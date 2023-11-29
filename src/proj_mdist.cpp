@@ -27,7 +27,6 @@
 ** and inverse on unit ellipsoid.
 ** Precision commensurate with double precision.
 */
-#define PJ_LIB_
 
 #include <math.h>
 #include <stdlib.h>

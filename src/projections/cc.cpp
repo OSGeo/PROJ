@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -27,7 +27,7 @@ static PJ_LP cc_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(cc) {
+PJ *PJ_PROJECTION(cc) {
     P->es = 0.;
 
     P->inv = cc_s_inverse;

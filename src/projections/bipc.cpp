@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include <errno.h>
 #include <math.h>
 
@@ -29,14 +29,14 @@ PROJ_HEAD(bipc, "Bipolar conic of western hemisphere") "\n\tConic Sph";
 #define R104 1.81514242207410275904
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_bipc_data {
     int noskew;
 };
 } // anonymous namespace
 
 static PJ_XY bipc_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_bipc_data *Q = static_cast<struct pj_bipc_data *>(P->opaque);
     double cphi, sphi, tphi, t, al, Az, z, Av, cdlam, sdlam, r;
     int tag;
 
@@ -117,7 +117,7 @@ static PJ_XY bipc_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP bipc_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_bipc_data *Q = static_cast<struct pj_bipc_data *>(P->opaque);
     double t, r, rp, rl, al, z = 0.0, fAz, Az, s, c, Av;
     int neg, i;
 
@@ -164,9 +164,9 @@ static PJ_LP bipc_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return (lp);
 }
 
-PJ *PROJECTION(bipc) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(bipc) {
+    struct pj_bipc_data *Q = static_cast<struct pj_bipc_data *>(
+        calloc(1, sizeof(struct pj_bipc_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -177,3 +177,23 @@ PJ *PROJECTION(bipc) {
     P->es = 0.;
     return P;
 }
+
+#undef EPS
+#undef EPS10
+#undef ONEEPS
+#undef NITER
+#undef lamB
+#undef n
+#undef F
+#undef Azab
+#undef Azba
+#undef T
+#undef rhoc
+#undef cAzc
+#undef sAzc
+#undef C45
+#undef S45
+#undef C20
+#undef S20
+#undef R110
+#undef R104

@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>
@@ -12,7 +12,7 @@ enum Mode { S_POLE = 0, N_POLE = 1, OBLIQ = 2, EQUIT = 3 };
 } // anonymous namespace
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_stere {
     double phits;
     double sinX1;
     double cosX1;
@@ -21,8 +21,8 @@ struct pj_opaque {
 };
 } // anonymous namespace
 
-#define sinph0 static_cast<struct pj_opaque *>(P->opaque)->sinX1
-#define cosph0 static_cast<struct pj_opaque *>(P->opaque)->cosX1
+#define sinph0 static_cast<struct pj_stere *>(P->opaque)->sinX1
+#define cosph0 static_cast<struct pj_stere *>(P->opaque)->cosX1
 #define EPS10 1.e-10
 #define TOL 1.e-8
 #define NITER 8
@@ -36,7 +36,7 @@ static double ssfn_(double phit, double sinphi, double eccen) {
 
 static PJ_XY stere_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_stere *Q = static_cast<struct pj_stere *>(P->opaque);
     double coslam, sinlam, sinX = 0.0, cosX = 0.0, A = 0.0, sinphi;
 
     coslam = cos(lp.lam);
@@ -93,7 +93,7 @@ static PJ_XY stere_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_XY stere_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_stere *Q = static_cast<struct pj_stere *>(P->opaque);
     double sinphi, cosphi, coslam, sinlam;
 
     sinphi = sin(lp.phi);
@@ -136,7 +136,7 @@ static PJ_XY stere_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP stere_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_stere *Q = static_cast<struct pj_stere *>(P->opaque);
     double cosphi, sinphi, tp = 0.0, phi_l = 0.0, rho, halfe = 0.0,
                            halfpi = 0.0;
 
@@ -189,7 +189,7 @@ static PJ_LP stere_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
 
 static PJ_LP stere_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_stere *Q = static_cast<struct pj_stere *>(P->opaque);
     double c, sinc, cosc;
 
     const double rh = hypot(xy.x, xy.y);
@@ -230,9 +230,9 @@ static PJ_LP stere_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-static PJ *setup(PJ *P) { /* general initialization */
+static PJ *stere_setup(PJ *P) { /* general initialization */
     double t;
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_stere *Q = static_cast<struct pj_stere *>(P->opaque);
 
     if (fabs((t = fabs(P->phi0)) - M_HALFPI) < EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
@@ -292,9 +292,9 @@ static PJ *setup(PJ *P) { /* general initialization */
     return P;
 }
 
-PJ *PROJECTION(stere) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(stere) {
+    struct pj_stere *Q =
+        static_cast<struct pj_stere *>(calloc(1, sizeof(struct pj_stere)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -303,12 +303,12 @@ PJ *PROJECTION(stere) {
                    ? pj_param(P->ctx, P->params, "rlat_ts").f
                    : M_HALFPI;
 
-    return setup(P);
+    return stere_setup(P);
 }
 
-PJ *PROJECTION(ups) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(ups) {
+    struct pj_stere *Q =
+        static_cast<struct pj_stere *>(calloc(1, sizeof(struct pj_stere)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -327,5 +327,12 @@ PJ *PROJECTION(ups) {
     Q->phits = M_HALFPI;
     P->lam0 = 0.;
 
-    return setup(P);
+    return stere_setup(P);
 }
+
+#undef sinph0
+#undef cosph0
+#undef EPS10
+#undef TOL
+#undef NITER
+#undef CONV

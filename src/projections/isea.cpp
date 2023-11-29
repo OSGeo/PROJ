@@ -12,7 +12,6 @@
 
 #include <limits>
 
-#define PJ_LIB_
 #include "proj.h"
 #include "proj_internal.h"
 #include <math.h>
@@ -985,14 +984,14 @@ static struct isea_pt isea_forward(struct isea_dgg *g, struct isea_geo *in) {
 PROJ_HEAD(isea, "Icosahedral Snyder Equal Area") "\n\tSph";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_isea_data {
     struct isea_dgg dgg;
 };
 } // anonymous namespace
 
 static PJ_XY isea_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_isea_data *Q = static_cast<struct pj_isea_data *>(P->opaque);
     struct isea_pt out;
     struct isea_geo in;
 
@@ -1012,10 +1011,10 @@ static PJ_XY isea_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-PJ *PROJECTION(isea) {
+PJ *PJ_PROJECTION(isea) {
     char *opt;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_isea_data *Q = static_cast<struct pj_isea_data *>(
+        calloc(1, sizeof(struct pj_isea_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -1092,3 +1091,19 @@ PJ *PROJECTION(isea) {
 
     return P;
 }
+
+#undef DEG36
+#undef DEG72
+#undef DEG90
+#undef DEG108
+#undef DEG120
+#undef DEG144
+#undef DEG180
+#undef ISEA_SCALE
+#undef V_LAT
+#undef E_RAD
+#undef F_RAD
+#undef TABLE_G
+#undef TABLE_H
+#undef ISEA_STD_LAT
+#undef ISEA_STD_LONG

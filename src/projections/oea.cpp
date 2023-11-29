@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>
@@ -7,7 +7,7 @@
 PROJ_HEAD(oea, "Oblated Equal Area") "\n\tMisc Sph\n\tn= m= theta=";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_oea {
     double theta;
     double m, n;
     double two_r_m, two_r_n, rm, rn, hm, hn;
@@ -17,7 +17,7 @@ struct pj_opaque {
 
 static PJ_XY oea_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_oea *Q = static_cast<struct pj_oea *>(P->opaque);
 
     const double cp = cos(lp.phi);
     const double sp = sin(lp.phi);
@@ -36,7 +36,7 @@ static PJ_XY oea_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP oea_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_oea *Q = static_cast<struct pj_oea *>(P->opaque);
 
     const double N = Q->hn * aasin(P->ctx, xy.y * Q->rn);
     const double M =
@@ -54,9 +54,9 @@ static PJ_LP oea_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(oea) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(oea) {
+    struct pj_oea *Q =
+        static_cast<struct pj_oea *>(calloc(1, sizeof(struct pj_oea)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

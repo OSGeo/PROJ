@@ -25,8 +25,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
-
 #include <errno.h>
 #include <mutex>
 #include <stddef.h>
@@ -710,7 +708,7 @@ PJ_LPZ gridshiftData::apply(PJ *P, PJ_DIRECTION direction, PJ_LPZ lpz) {
 
 // ---------------------------------------------------------------------------
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ pj_gridshift_forward_3d(PJ_LPZ lpz, PJ *P) {
     auto Q = static_cast<gridshiftData *>(P->opaque);
     PJ_COORD point = {{0, 0, 0, 0}};
 
@@ -721,7 +719,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 
 // ---------------------------------------------------------------------------
 
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ pj_gridshift_reverse_3d(PJ_XYZ xyz, PJ *P) {
     auto Q = static_cast<gridshiftData *>(P->opaque);
     PJ_COORD point = {{0, 0, 0, 0}};
     point.xyz = xyz;
@@ -733,7 +731,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 
 // ---------------------------------------------------------------------------
 
-static PJ *destructor(PJ *P, int errlev) {
+static PJ *pj_gridshift_destructor(PJ *P, int errlev) {
     if (nullptr == P)
         return nullptr;
 
@@ -745,7 +743,7 @@ static PJ *destructor(PJ *P, int errlev) {
 
 // ---------------------------------------------------------------------------
 
-static void reassign_context(PJ *P, PJ_CONTEXT *ctx) {
+static void pj_gridshift_reassign_context(PJ *P, PJ_CONTEXT *ctx) {
     auto Q = (struct gridshiftData *)P->opaque;
     for (auto &grid : Q->m_grids) {
         grid->reassign_context(ctx);
@@ -754,14 +752,14 @@ static void reassign_context(PJ *P, PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
-PJ *TRANSFORMATION(gridshift, 0) {
+PJ *PJ_TRANSFORMATION(gridshift, 0) {
     auto Q = new gridshiftData;
     P->opaque = (void *)Q;
-    P->destructor = destructor;
-    P->reassign_context = reassign_context;
+    P->destructor = pj_gridshift_destructor;
+    P->reassign_context = pj_gridshift_reassign_context;
 
-    P->fwd3d = forward_3d;
-    P->inv3d = reverse_3d;
+    P->fwd3d = pj_gridshift_forward_3d;
+    P->inv3d = pj_gridshift_reverse_3d;
     P->fwd = nullptr;
     P->inv = nullptr;
 
@@ -770,7 +768,7 @@ PJ *TRANSFORMATION(gridshift, 0) {
 
     if (0 == pj_param(P->ctx, P->params, "tgrids").i) {
         proj_log_error(P, _("+grids parameter missing."));
-        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        return pj_gridshift_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     if (P->ctx->defer_grid_opening) {
@@ -788,11 +786,11 @@ PJ *TRANSFORMATION(gridshift, 0) {
             /* Was gridlist compiled properly? */
             if (proj_errno(P)) {
                 proj_log_error(P, _("could not find required grid(s)."));
-                return destructor(
+                return pj_gridshift_destructor(
                     P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
             }
             if (!Q->checkGridTypes(P)) {
-                return destructor(
+                return pj_gridshift_destructor(
                     P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
             }
 
@@ -810,7 +808,8 @@ PJ *TRANSFORMATION(gridshift, 0) {
             Q->m_interpolation = interpolation;
         } else {
             proj_log_error(P, _("Unsupported value for +interpolation."));
-            return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            return pj_gridshift_destructor(
+                P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
     }
 

@@ -23,7 +23,6 @@
 ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 ** SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#define PJ_LIB_
 
 #include <errno.h>
 #include <math.h>
@@ -32,7 +31,7 @@
 #include "proj_internal.h"
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_rouss_data {
     double s0;
     double A1, A2, A3, A4, A5, A6;
     double B1, B2, B3, B4, B5, B6, B7, B8;
@@ -45,7 +44,7 @@ PROJ_HEAD(rouss, "Roussilhe Stereographic") "\n\tAzi, Ell";
 
 static PJ_XY rouss_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_rouss_data *Q = static_cast<struct pj_rouss_data *>(P->opaque);
     double s, al, cp, sp, al2, s2;
 
     cp = cos(lp.phi);
@@ -67,7 +66,7 @@ static PJ_XY rouss_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_LP rouss_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_rouss_data *Q = static_cast<struct pj_rouss_data *>(P->opaque);
     double s, al, x = xy.x / P->k0, y = xy.y / P->k0, x2, y2;
 
     x2 = x * x;
@@ -86,24 +85,24 @@ static PJ_LP rouss_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-static PJ *destructor(PJ *P, int errlev) {
+static PJ *pj_rouss_destructor(PJ *P, int errlev) {
     if (nullptr == P)
         return nullptr;
 
     if (nullptr == P->opaque)
         return pj_default_destructor(P, errlev);
 
-    if (static_cast<struct pj_opaque *>(P->opaque)->en)
-        free(static_cast<struct pj_opaque *>(P->opaque)->en);
+    if (static_cast<struct pj_rouss_data *>(P->opaque)->en)
+        free(static_cast<struct pj_rouss_data *>(P->opaque)->en);
 
     return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 }
 
-PJ *PROJECTION(rouss) {
+PJ *PJ_PROJECTION(rouss) {
     double N0, es2, t, t2, R_R0_2, R_R0_4;
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_rouss_data *Q = static_cast<struct pj_rouss_data *>(
+        calloc(1, sizeof(struct pj_rouss_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -153,7 +152,7 @@ PJ *PROJECTION(rouss) {
 
     P->fwd = rouss_e_forward;
     P->inv = rouss_e_inverse;
-    P->destructor = destructor;
+    P->destructor = pj_rouss_destructor;
 
     return P;
 }

@@ -63,7 +63,8 @@ jobs:
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
             # Not directly linked to BUILD_SHARED_LIBS, but a way to test different C++ standard versions
             if "${{ env.BUILD_SHARED_LIBS }}"=="ON" (set EXTRA_CXX_FLAGS="/std:c++20")
-            cmake -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DBUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX %EXTRA_CXX_FLAGS%" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%" -DPROJ_DB_CACHE_DIR=%PROJ_DB_CACHE_DIR% ..
+            if "${{ env.BUILD_TYPE }}"=="Release" (set CMAKE_UNITY_BUILD_OPT="-DCMAKE_UNITY_BUILD=ON")
+            cmake -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DBUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX %EXTRA_CXX_FLAGS%" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%" -DPROJ_DB_CACHE_DIR=%PROJ_DB_CACHE_DIR% %CMAKE_UNITY_BUILD_OPT% ..
             ninja -v
             ninja install
             dir %PROJ_DIR%\bin
@@ -136,7 +137,7 @@ jobs:
             PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
             mkdir ${PROJ_BUILD}
             cd ${PROJ_BUILD}
-            cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_CXX_FLAGS="-Werror" -DUSE_CCACHE=ON -DPROJ_DB_CACHE_DIR=$HOME/.ccache ..
+            cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_CXX_FLAGS="-Werror" -DUSE_CCACHE=ON -DCMAKE_UNITY_BUILD=ON -DPROJ_DB_CACHE_DIR=$HOME/.ccache ..
             make -j 2
             make install
             ls ${PROJ_DIR}/bin

@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include "proj.h"
 #include "proj_internal.h"
 #include <math.h>
@@ -153,7 +153,7 @@ static PJ_LP robin_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(robin) {
+PJ *PJ_PROJECTION(robin) {
     P->es = 0.;
     P->inv = robin_s_inverse;
     P->fwd = robin_s_forward;

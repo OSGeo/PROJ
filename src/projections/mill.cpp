@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -27,7 +27,7 @@ static PJ_LP mill_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return (lp);
 }
 
-PJ *PROJECTION(mill) {
+PJ *PJ_PROJECTION(mill) {
     P->es = 0.;
     P->inv = mill_s_inverse;
     P->fwd = mill_s_forward;

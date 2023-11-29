@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -7,7 +7,7 @@
 #include "proj_internal.h"
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_cea_data {
     double qp;
     double *apa;
 };
@@ -33,8 +33,8 @@ static PJ_XY cea_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 static PJ_LP cea_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
     lp.phi = pj_authlat(asin(2. * xy.y * P->k0 /
-                             static_cast<struct pj_opaque *>(P->opaque)->qp),
-                        static_cast<struct pj_opaque *>(P->opaque)->apa);
+                             static_cast<struct pj_cea_data *>(P->opaque)->qp),
+                        static_cast<struct pj_cea_data *>(P->opaque)->apa);
     lp.lam = xy.x / P->k0;
     return lp;
 }
@@ -57,25 +57,25 @@ static PJ_LP cea_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return (lp);
 }
 
-static PJ *destructor(PJ *P, int errlev) { /* Destructor */
+static PJ *pj_cea_destructor(PJ *P, int errlev) { /* Destructor */
     if (nullptr == P)
         return nullptr;
 
     if (nullptr == P->opaque)
         return pj_default_destructor(P, errlev);
 
-    free(static_cast<struct pj_opaque *>(P->opaque)->apa);
+    free(static_cast<struct pj_cea_data *>(P->opaque)->apa);
     return pj_default_destructor(P, errlev);
 }
 
-PJ *PROJECTION(cea) {
+PJ *PJ_PROJECTION(cea) {
     double t = 0.0;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_cea_data *Q = static_cast<struct pj_cea_data *>(
+        calloc(1, sizeof(struct pj_cea_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
-    P->destructor = destructor;
+    P->destructor = pj_cea_destructor;
 
     if (pj_param(P->ctx, P->params, "tlat_ts").i) {
         t = pj_param(P->ctx, P->params, "rlat_ts").f;
@@ -105,3 +105,5 @@ PJ *PROJECTION(cea) {
 
     return P;
 }
+
+#undef EPS

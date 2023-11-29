@@ -20,7 +20,6 @@
  * DEALINGS IN THE SOFTWARE.
  *
  ***********************************************************************/
-#define PJ_LIB_
 
 #include <errno.h>
 #include <math.h>
@@ -177,7 +176,7 @@ static void computeReverseParameters(PJ *P) {
     }
 }
 
-PJ *TRANSFORMATION(affine, 0 /* no need for ellipsoid */) {
+PJ *PJ_TRANSFORMATION(affine, 0 /* no need for ellipsoid */) {
     struct pj_opaque_affine *Q = initQ();
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
@@ -226,7 +225,7 @@ PJ *TRANSFORMATION(affine, 0 /* no need for ellipsoid */) {
 /* Arcsecond to radians */
 #define ARCSEC_TO_RAD (DEG_TO_RAD / 3600.0)
 
-PJ *TRANSFORMATION(geogoffset, 0 /* no need for ellipsoid */) {
+PJ *PJ_TRANSFORMATION(geogoffset, 0 /* no need for ellipsoid */) {
     struct pj_opaque_affine *Q = initQ();
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);

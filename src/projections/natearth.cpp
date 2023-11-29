@@ -12,7 +12,6 @@ where they meet the horizontal pole line. This improvement is by intention
 and designed in collaboration with Tom Patterson.
 Port to PROJ.4 by Bernhard Jenny, 6 June 2011
 */
-#define PJ_LIB_
 
 #include <math.h>
 
@@ -93,10 +92,28 @@ static PJ_LP natearth_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(natearth) {
+PJ *PJ_PROJECTION(natearth) {
     P->es = 0;
     P->inv = natearth_s_inverse;
     P->fwd = natearth_s_forward;
 
     return P;
 }
+
+#undef A0
+#undef A1
+#undef A2
+#undef A3
+#undef A4
+#undef A5
+#undef B0
+#undef B1
+#undef B2
+#undef B3
+#undef C0
+#undef C1
+#undef C2
+#undef C3
+#undef EPS
+#undef MAX_Y
+#undef MAX_ITER

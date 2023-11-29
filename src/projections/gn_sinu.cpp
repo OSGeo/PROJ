@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -16,7 +16,7 @@ PROJ_HEAD(mbtfps, "McBryde-Thomas Flat-Polar Sinusoidal") "\n\tPCyl, Sph";
 #define LOOP_TOL 1e-7
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_gn_sinu_data {
     double *en;
     double m, n, C_x, C_y;
 };
@@ -27,8 +27,8 @@ static PJ_XY gn_sinu_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
     const double s = sin(lp.phi);
     const double c = cos(lp.phi);
-    xy.y =
-        pj_mlfn(lp.phi, s, c, static_cast<struct pj_opaque *>(P->opaque)->en);
+    xy.y = pj_mlfn(lp.phi, s, c,
+                   static_cast<struct pj_gn_sinu_data *>(P->opaque)->en);
     xy.x = lp.lam * c / sqrt(1. - P->es * s * s);
     return xy;
 }
@@ -37,7 +37,8 @@ static PJ_LP gn_sinu_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
     double s;
 
-    lp.phi = pj_inv_mlfn(xy.y, static_cast<struct pj_opaque *>(P->opaque)->en);
+    lp.phi =
+        pj_inv_mlfn(xy.y, static_cast<struct pj_gn_sinu_data *>(P->opaque)->en);
     s = fabs(lp.phi);
     if (s < M_HALFPI) {
         s = sin(lp.phi);
@@ -53,7 +54,8 @@ static PJ_LP gn_sinu_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
 
 static PJ_XY gn_sinu_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_gn_sinu_data *Q =
+        static_cast<struct pj_gn_sinu_data *>(P->opaque);
 
     if (Q->m == 0.0)
         lp.phi = Q->n != 1. ? aasin(P->ctx, Q->n * sin(lp.phi)) : lp.phi;
@@ -81,7 +83,8 @@ static PJ_XY gn_sinu_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP gn_sinu_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_gn_sinu_data *Q =
+        static_cast<struct pj_gn_sinu_data *>(P->opaque);
 
     xy.y /= Q->C_y;
     lp.phi = (Q->m != 0.0)
@@ -91,20 +94,21 @@ static PJ_LP gn_sinu_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-static PJ *destructor(PJ *P, int errlev) { /* Destructor */
+static PJ *pj_gn_sinu_destructor(PJ *P, int errlev) { /* Destructor */
     if (nullptr == P)
         return nullptr;
 
     if (nullptr == P->opaque)
         return pj_default_destructor(P, errlev);
 
-    free(static_cast<struct pj_opaque *>(P->opaque)->en);
+    free(static_cast<struct pj_gn_sinu_data *>(P->opaque)->en);
     return pj_default_destructor(P, errlev);
 }
 
 /* for spheres, only */
-static void setup(PJ *P) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+static void pj_gn_sinu_setup(PJ *P) {
+    struct pj_gn_sinu_data *Q =
+        static_cast<struct pj_gn_sinu_data *>(P->opaque);
     P->es = 0;
     P->inv = gn_sinu_s_inverse;
     P->fwd = gn_sinu_s_forward;
@@ -113,13 +117,13 @@ static void setup(PJ *P) {
     Q->C_x = Q->C_y / (Q->m + 1.);
 }
 
-PJ *PROJECTION(sinu) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(sinu) {
+    struct pj_gn_sinu_data *Q = static_cast<struct pj_gn_sinu_data *>(
+        calloc(1, sizeof(struct pj_gn_sinu_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
-    P->destructor = destructor;
+    P->destructor = pj_gn_sinu_destructor;
 
     if (!(Q->en = pj_enfn(P->n)))
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
@@ -130,48 +134,48 @@ PJ *PROJECTION(sinu) {
     } else {
         Q->n = 1.;
         Q->m = 0.;
-        setup(P);
+        pj_gn_sinu_setup(P);
     }
     return P;
 }
 
-PJ *PROJECTION(eck6) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(eck6) {
+    struct pj_gn_sinu_data *Q = static_cast<struct pj_gn_sinu_data *>(
+        calloc(1, sizeof(struct pj_gn_sinu_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
-    P->destructor = destructor;
+    P->destructor = pj_gn_sinu_destructor;
 
     Q->m = 1.;
     Q->n = 2.570796326794896619231321691;
-    setup(P);
+    pj_gn_sinu_setup(P);
 
     return P;
 }
 
-PJ *PROJECTION(mbtfps) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(mbtfps) {
+    struct pj_gn_sinu_data *Q = static_cast<struct pj_gn_sinu_data *>(
+        calloc(1, sizeof(struct pj_gn_sinu_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
-    P->destructor = destructor;
+    P->destructor = pj_gn_sinu_destructor;
 
     Q->m = 0.5;
     Q->n = 1.785398163397448309615660845;
-    setup(P);
+    pj_gn_sinu_setup(P);
 
     return P;
 }
 
-PJ *PROJECTION(gn_sinu) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(gn_sinu) {
+    struct pj_gn_sinu_data *Q = static_cast<struct pj_gn_sinu_data *>(
+        calloc(1, sizeof(struct pj_gn_sinu_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
-    P->destructor = destructor;
+    P->destructor = pj_gn_sinu_destructor;
 
     if (!pj_param(P->ctx, P->params, "tn").i) {
         proj_log_error(P, _("Missing parameter n."));
@@ -193,7 +197,7 @@ PJ *PROJECTION(gn_sinu) {
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
-    setup(P);
+    pj_gn_sinu_setup(P);
 
     return P;
 }

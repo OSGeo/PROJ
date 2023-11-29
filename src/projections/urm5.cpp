@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -9,14 +9,14 @@
 PROJ_HEAD(urm5, "Urmaev V") "\n\tPCyl, Sph, no inv\n\tn= q= alpha=";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_urm5 {
     double m, rmn, q3, n;
 };
 } // anonymous namespace
 
 static PJ_XY urm5_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_urm5 *Q = static_cast<struct pj_urm5 *>(P->opaque);
     double t;
 
     t = lp.phi = aasin(P->ctx, Q->n * sin(lp.phi));
@@ -26,10 +26,10 @@ static PJ_XY urm5_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-PJ *PROJECTION(urm5) {
+PJ *PJ_PROJECTION(urm5) {
     double alpha, t;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_urm5 *Q =
+        static_cast<struct pj_urm5 *>(calloc(1, sizeof(struct pj_urm5)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

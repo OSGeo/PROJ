@@ -5,7 +5,6 @@ developed by Bojan Savric and Bernhard Jenny, College of Earth, Ocean,
 and Atmospheric Sciences, Oregon State University.
 Port to PROJ.4 by Bojan Savric, 4 April 2016
 */
-#define PJ_LIB_
 
 #include <math.h>
 
@@ -90,10 +89,28 @@ static PJ_LP natearth2_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(natearth2) {
+PJ *PJ_PROJECTION(natearth2) {
     P->es = 0;
     P->inv = natearth2_s_inverse;
     P->fwd = natearth2_s_forward;
 
     return P;
 }
+
+#undef A0
+#undef A1
+#undef A2
+#undef A3
+#undef A4
+#undef A5
+#undef B0
+#undef B1
+#undef B2
+#undef B3
+#undef C0
+#undef C1
+#undef C2
+#undef C3
+#undef EPS
+#undef MAX_Y
+#undef MAX_ITER

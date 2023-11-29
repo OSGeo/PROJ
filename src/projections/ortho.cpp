@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>
@@ -6,18 +6,18 @@
 
 PROJ_HEAD(ortho, "Orthographic") "\n\tAzi, Sph&Ell";
 
-namespace { // anonymous namespace
+namespace pj_ortho_ns {
 enum Mode { N_POLE = 0, S_POLE = 1, EQUIT = 2, OBLIQ = 3 };
-} // anonymous namespace
+}
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_ortho_data {
     double sinph0;
     double cosph0;
     double nu0;
     double y_shift;
     double y_scale;
-    enum Mode mode;
+    enum pj_ortho_ns::Mode mode;
 };
 } // anonymous namespace
 
@@ -33,7 +33,7 @@ static PJ_XY forward_error(PJ *P, PJ_LP lp, PJ_XY xy) {
 
 static PJ_XY ortho_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy;
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ortho_data *Q = static_cast<struct pj_ortho_data *>(P->opaque);
     double coslam, cosphi, sinphi;
 
     xy.x = HUGE_VAL;
@@ -42,12 +42,12 @@ static PJ_XY ortho_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     cosphi = cos(lp.phi);
     coslam = cos(lp.lam);
     switch (Q->mode) {
-    case EQUIT:
+    case pj_ortho_ns::EQUIT:
         if (cosphi * coslam < -EPS10)
             return forward_error(P, lp, xy);
         xy.y = sin(lp.phi);
         break;
-    case OBLIQ:
+    case pj_ortho_ns::OBLIQ:
         sinphi = sin(lp.phi);
 
         // Is the point visible from the projection plane ?
@@ -62,10 +62,10 @@ static PJ_XY ortho_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
             return forward_error(P, lp, xy);
         xy.y = Q->cosph0 * sinphi - Q->sinph0 * cosphi * coslam;
         break;
-    case N_POLE:
+    case pj_ortho_ns::N_POLE:
         coslam = -coslam;
         PROJ_FALLTHROUGH;
-    case S_POLE:
+    case pj_ortho_ns::S_POLE:
         if (fabs(lp.phi - P->phi0) - EPS10 > M_HALFPI)
             return forward_error(P, lp, xy);
         xy.y = cosphi * coslam;
@@ -77,7 +77,7 @@ static PJ_XY ortho_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP ortho_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp;
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ortho_data *Q = static_cast<struct pj_ortho_data *>(P->opaque);
     double sinc;
 
     lp.lam = HUGE_VAL;
@@ -98,19 +98,19 @@ static PJ_LP ortho_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
         lp.lam = 0.0;
     } else {
         switch (Q->mode) {
-        case N_POLE:
+        case pj_ortho_ns::N_POLE:
             xy.y = -xy.y;
             lp.phi = acos(sinc);
             break;
-        case S_POLE:
+        case pj_ortho_ns::S_POLE:
             lp.phi = -acos(sinc);
             break;
-        case EQUIT:
+        case pj_ortho_ns::EQUIT:
             lp.phi = xy.y * sinc / rh;
             xy.x *= sinc;
             xy.y = cosc * rh;
             goto sinchk;
-        case OBLIQ:
+        case pj_ortho_ns::OBLIQ:
             lp.phi = cosc * Q->sinph0 + xy.y * sinc * Q->cosph0 / rh;
             xy.y = (cosc - Q->sinph0 * lp.phi) * rh;
             xy.x *= sinc * Q->cosph0;
@@ -121,7 +121,8 @@ static PJ_LP ortho_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
                 lp.phi = asin(lp.phi);
             break;
         }
-        lp.lam = (xy.y == 0. && (Q->mode == OBLIQ || Q->mode == EQUIT))
+        lp.lam = (xy.y == 0. && (Q->mode == pj_ortho_ns::OBLIQ ||
+                                 Q->mode == pj_ortho_ns::EQUIT))
                      ? (xy.x == 0.  ? 0.
                         : xy.x < 0. ? -M_HALFPI
                                     : M_HALFPI)
@@ -132,7 +133,7 @@ static PJ_LP ortho_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
 
 static PJ_XY ortho_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy;
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ortho_data *Q = static_cast<struct pj_ortho_data *>(P->opaque);
 
     // From EPSG guidance note 7.2, March 2020, §3.3.5 Orthographic
     const double cosphi = cos(lp.phi);
@@ -158,11 +159,11 @@ static PJ_XY ortho_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_LP ortho_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp;
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ortho_data *Q = static_cast<struct pj_ortho_data *>(P->opaque);
 
     const auto SQ = [](double x) { return x * x; };
 
-    if (Q->mode == N_POLE || Q->mode == S_POLE) {
+    if (Q->mode == pj_ortho_ns::N_POLE || Q->mode == pj_ortho_ns::S_POLE) {
         // Polar case. Forward case equations can be simplified as:
         // xy.x = nu * cosphi * sinlam
         // xy.y = nu * -cosphi * coslam * sign(phi0)
@@ -183,13 +184,13 @@ static PJ_LP ortho_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
             lp.phi = 0;
         } else {
             lp.phi = acos(sqrt(rh2 * P->one_es / (1 - P->es * rh2))) *
-                     (Q->mode == N_POLE ? 1 : -1);
+                     (Q->mode == pj_ortho_ns::N_POLE ? 1 : -1);
         }
-        lp.lam = atan2(xy.x, xy.y * (Q->mode == N_POLE ? -1 : 1));
+        lp.lam = atan2(xy.x, xy.y * (Q->mode == pj_ortho_ns::N_POLE ? -1 : 1));
         return lp;
     }
 
-    if (Q->mode == EQUIT) {
+    if (Q->mode == pj_ortho_ns::EQUIT) {
         // Equatorial case. Forward case equations can be simplified as:
         // xy.x = nu * cosphi * sinlam
         // xy.y  = nu * sinphi * (1 - P->es)
@@ -282,9 +283,9 @@ static PJ_LP ortho_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(ortho) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(ortho) {
+    struct pj_ortho_data *Q = static_cast<struct pj_ortho_data *>(
+        calloc(1, sizeof(struct pj_ortho_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -292,11 +293,11 @@ PJ *PROJECTION(ortho) {
     Q->sinph0 = sin(P->phi0);
     Q->cosph0 = cos(P->phi0);
     if (fabs(fabs(P->phi0) - M_HALFPI) <= EPS10)
-        Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
+        Q->mode = P->phi0 < 0. ? pj_ortho_ns::S_POLE : pj_ortho_ns::N_POLE;
     else if (fabs(P->phi0) > EPS10) {
-        Q->mode = OBLIQ;
+        Q->mode = pj_ortho_ns::OBLIQ;
     } else
-        Q->mode = EQUIT;
+        Q->mode = pj_ortho_ns::EQUIT;
     if (P->es == 0) {
         P->inv = ortho_s_inverse;
         P->fwd = ortho_s_forward;
@@ -310,3 +311,5 @@ PJ *PROJECTION(ortho) {
 
     return P;
 }
+
+#undef EPS10

@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -38,7 +38,7 @@ static PJ_LP nell_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(nell) {
+PJ *PJ_PROJECTION(nell) {
 
     P->es = 0;
     P->inv = nell_s_inverse;
@@ -46,3 +46,6 @@ PJ *PROJECTION(nell) {
 
     return P;
 }
+
+#undef MAX_ITER
+#undef LOOP_TOL

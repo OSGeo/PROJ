@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -7,7 +7,7 @@
 #include "proj_internal.h"
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_vandg2 {
     int vdg3;
 };
 } // anonymous namespace
@@ -19,7 +19,7 @@ PROJ_HEAD(vandg3, "van der Grinten III") "\n\tMisc Sph, no inv";
 
 static PJ_XY vandg2_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_vandg2 *Q = static_cast<struct pj_vandg2 *>(P->opaque);
     double x1, at, bt, ct;
 
     bt = fabs(M_TWO_D_PI * lp.phi);
@@ -52,9 +52,9 @@ static PJ_XY vandg2_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-PJ *PROJECTION(vandg2) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(vandg2) {
+    struct pj_vandg2 *Q =
+        static_cast<struct pj_vandg2 *>(calloc(1, sizeof(struct pj_vandg2)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -65,9 +65,9 @@ PJ *PROJECTION(vandg2) {
     return P;
 }
 
-PJ *PROJECTION(vandg3) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(vandg3) {
+    struct pj_vandg2 *Q =
+        static_cast<struct pj_vandg2 *>(calloc(1, sizeof(struct pj_vandg2)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -78,3 +78,5 @@ PJ *PROJECTION(vandg3) {
 
     return P;
 }
+
+#undef TOL

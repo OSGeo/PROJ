@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include <errno.h>
 #include <math.h>
 
@@ -10,7 +10,7 @@ PROJ_HEAD(lagrng, "Lagrange") "\n\tMisc Sph\n\tW=";
 #define TOL 1e-10
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_lagrng {
     double a1;
     double a2;
     double hrw;
@@ -22,7 +22,7 @@ struct pj_opaque {
 
 static PJ_XY lagrng_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_lagrng *Q = static_cast<struct pj_lagrng *>(P->opaque);
     double v, c;
 
     const double sin_phi = sin(lp.phi);
@@ -45,7 +45,7 @@ static PJ_XY lagrng_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP lagrng_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_lagrng *Q = static_cast<struct pj_lagrng *>(P->opaque);
     double c, x2, y2p, y2m;
 
     if (fabs(fabs(xy.y) - 2.) < TOL) {
@@ -68,10 +68,10 @@ static PJ_LP lagrng_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(lagrng) {
+PJ *PJ_PROJECTION(lagrng) {
     double sin_phi1;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_lagrng *Q =
+        static_cast<struct pj_lagrng *>(calloc(1, sizeof(struct pj_lagrng)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

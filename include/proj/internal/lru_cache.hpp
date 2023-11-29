@@ -73,7 +73,7 @@ template <typename K, typename V> struct KeyValuePair {
     K key;
     V value;
 
-    KeyValuePair(const K &k, const V &v) : key(k), value(v) {}
+    KeyValuePair(const K &keyIn, const V &v) : key(keyIn), value(v) {}
 };
 
 /**
@@ -122,17 +122,17 @@ class Cache {
         cache_.clear();
         keys_.clear();
     }
-    void insert(const Key &k, const Value &v) {
+    void insert(const Key &key, const Value &v) {
         Guard g(lock_);
-        const auto iter = cache_.find(k);
+        const auto iter = cache_.find(key);
         if (iter != cache_.end()) {
             iter->second->value = v;
             keys_.splice(keys_.begin(), keys_, iter->second);
             return;
         }
 
-        keys_.emplace_front(k, v);
-        cache_[k] = keys_.begin();
+        keys_.emplace_front(key, v);
+        cache_[key] = keys_.begin();
         prune();
     }
     bool tryGet(const Key &kIn, Value &vOut) {
@@ -149,9 +149,9 @@ class Cache {
      *	The const reference returned here is only
      *    guaranteed to be valid till the next insert/delete
      */
-    const Value &get(const Key &k) {
+    const Value &get(const Key &key) {
         Guard g(lock_);
-        const auto iter = cache_.find(k);
+        const auto iter = cache_.find(key);
         if (iter == cache_.end()) {
             throw KeyNotFound();
         }
@@ -163,9 +163,9 @@ class Cache {
      *	The const reference returned here is only
      *    guaranteed to be valid till the next insert/delete
      */
-    const Value *getPtr(const Key &k) {
+    const Value *getPtr(const Key &key) {
         Guard g(lock_);
-        const auto iter = cache_.find(k);
+        const auto iter = cache_.find(key);
         if (iter == cache_.end()) {
             return nullptr;
         }
@@ -176,10 +176,10 @@ class Cache {
     /**
      * returns a copy of the stored object (if found)
      */
-    Value getCopy(const Key &k) { return get(k); }
-    bool remove(const Key &k) {
+    Value getCopy(const Key &key) { return get(key); }
+    bool remove(const Key &key) {
         Guard g(lock_);
-        auto iter = cache_.find(k);
+        auto iter = cache_.find(key);
         if (iter == cache_.end()) {
             return false;
         }
@@ -187,9 +187,9 @@ class Cache {
         cache_.erase(iter);
         return true;
     }
-    bool contains(const Key &k) {
+    bool contains(const Key &key) {
         Guard g(lock_);
-        return cache_.find(k) != cache_.end();
+        return cache_.find(key) != cache_.end();
     }
 
     size_t getMaxSize() const { return maxSize_; }

@@ -25,8 +25,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
-
 #include <errno.h>
 #include <stddef.h>
 #include <string.h>
@@ -168,7 +166,7 @@ static PJ_COORD direct_adjustment(PJ *P, xyzgridshiftData *Q, PJ_COORD point,
 
 // ---------------------------------------------------------------------------
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ pj_xyzgridshift_forward_3d(PJ_LPZ lpz, PJ *P) {
     auto Q = static_cast<xyzgridshiftData *>(P->opaque);
     PJ_COORD point = {{0, 0, 0, 0}};
     point.lpz = lpz;
@@ -182,7 +180,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     return point.xyz;
 }
 
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ pj_xyzgridshift_reverse_3d(PJ_XYZ xyz, PJ *P) {
     auto Q = static_cast<xyzgridshiftData *>(P->opaque);
     PJ_COORD point = {{0, 0, 0, 0}};
     point.xyz = xyz;
@@ -196,7 +194,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     return point.lpz;
 }
 
-static PJ *destructor(PJ *P, int errlev) {
+static PJ *pj_xyzgridshift_destructor(PJ *P, int errlev) {
     if (nullptr == P)
         return nullptr;
 
@@ -211,23 +209,23 @@ static PJ *destructor(PJ *P, int errlev) {
     return pj_default_destructor(P, errlev);
 }
 
-static void reassign_context(PJ *P, PJ_CONTEXT *ctx) {
+static void pj_xyzgridshift_reassign_context(PJ *P, PJ_CONTEXT *ctx) {
     auto Q = (struct xyzgridshiftData *)P->opaque;
     for (auto &grid : Q->grids) {
         grid->reassign_context(ctx);
     }
 }
 
-PJ *TRANSFORMATION(xyzgridshift, 0) {
+PJ *PJ_TRANSFORMATION(xyzgridshift, 0) {
     auto Q = new xyzgridshiftData;
     P->opaque = (void *)Q;
-    P->destructor = destructor;
-    P->reassign_context = reassign_context;
+    P->destructor = pj_xyzgridshift_destructor;
+    P->reassign_context = pj_xyzgridshift_reassign_context;
 
     P->fwd4d = nullptr;
     P->inv4d = nullptr;
-    P->fwd3d = forward_3d;
-    P->inv3d = reverse_3d;
+    P->fwd3d = pj_xyzgridshift_forward_3d;
+    P->inv3d = pj_xyzgridshift_reverse_3d;
     P->fwd = nullptr;
     P->inv = nullptr;
 
@@ -237,7 +235,7 @@ PJ *TRANSFORMATION(xyzgridshift, 0) {
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     Q->cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (Q->cart == nullptr)
-        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+        return pj_xyzgridshift_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def(P, Q->cart);
@@ -253,13 +251,14 @@ PJ *TRANSFORMATION(xyzgridshift, 0) {
             Q->grid_ref_is_input = false;
         } else {
             proj_log_error(P, _("unusupported value for grid_ref"));
-            return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            return pj_xyzgridshift_destructor(
+                P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
     }
 
     if (0 == pj_param(P->ctx, P->params, "tgrids").i) {
         proj_log_error(P, _("+grids parameter missing."));
-        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        return pj_xyzgridshift_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     /* multiplier for delta x,y,z */
@@ -274,7 +273,8 @@ PJ *TRANSFORMATION(xyzgridshift, 0) {
         /* Was gridlist compiled properly? */
         if (proj_errno(P)) {
             proj_log_error(P, _("could not find required grid(s)."));
-            return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+            return pj_xyzgridshift_destructor(
+                P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
         }
     }
 

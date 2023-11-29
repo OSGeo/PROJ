@@ -45,8 +45,6 @@
 
 *****************************************************************************/
 
-#define PJ_LIB_
-
 #include <errno.h>
 #include <math.h>
 
@@ -60,7 +58,7 @@ PROJ_HEAD(lcca, "Lambert Conformal Conic Alternative")
 #define DEL_TOL 1e-12
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_lcca_data {
     double *en;
     double r0, l, M0;
     double C;
@@ -79,7 +77,7 @@ static double fSp(double S, double C) { /* deriv of fs */
 
 static PJ_XY lcca_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_lcca_data *Q = static_cast<struct pj_lcca_data *>(P->opaque);
     double S, r, dr;
 
     S = pj_mlfn(lp.phi, sin(lp.phi), cos(lp.phi), Q->en) - Q->M0;
@@ -93,7 +91,7 @@ static PJ_XY lcca_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_LP lcca_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_lcca_data *Q = static_cast<struct pj_lcca_data *>(P->opaque);
     double theta, dr, S, dif;
     int i;
 
@@ -117,21 +115,21 @@ static PJ_LP lcca_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-static PJ *destructor(PJ *P, int errlev) {
+static PJ *pj_lcca_destructor(PJ *P, int errlev) {
     if (nullptr == P)
         return nullptr;
 
     if (nullptr == P->opaque)
         return pj_default_destructor(P, errlev);
 
-    free(static_cast<struct pj_opaque *>(P->opaque)->en);
+    free(static_cast<struct pj_lcca_data *>(P->opaque)->en);
     return pj_default_destructor(P, errlev);
 }
 
-PJ *PROJECTION(lcca) {
+PJ *PJ_PROJECTION(lcca) {
     double s2p0, N0, R0, tan0;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_lcca_data *Q = static_cast<struct pj_lcca_data *>(
+        calloc(1, sizeof(struct pj_lcca_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -143,7 +141,7 @@ PJ *PROJECTION(lcca) {
     if (P->phi0 == 0.) {
         proj_log_error(
             P, _("Invalid value for lat_0: it should be different from 0."));
-        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return pj_lcca_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     Q->l = sin(P->phi0);
     Q->M0 = pj_mlfn(P->phi0, Q->l, cos(P->phi0), Q->en);
@@ -157,7 +155,10 @@ PJ *PROJECTION(lcca) {
 
     P->inv = lcca_e_inverse;
     P->fwd = lcca_e_forward;
-    P->destructor = destructor;
+    P->destructor = pj_lcca_destructor;
 
     return P;
 }
+
+#undef MAX_ITER
+#undef DEL_TOL

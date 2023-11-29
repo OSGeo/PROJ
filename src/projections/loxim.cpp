@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -11,7 +11,7 @@ PROJ_HEAD(loxim, "Loximuthal") "\n\tPCyl Sph";
 #define EPS 1e-8
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_loxim_data {
     double phi1;
     double cosphi1;
     double tanphi1;
@@ -20,7 +20,7 @@ struct pj_opaque {
 
 static PJ_XY loxim_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_loxim_data *Q = static_cast<struct pj_loxim_data *>(P->opaque);
 
     xy.y = lp.phi - Q->phi1;
     if (fabs(xy.y) < EPS)
@@ -37,7 +37,7 @@ static PJ_XY loxim_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP loxim_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_loxim_data *Q = static_cast<struct pj_loxim_data *>(P->opaque);
 
     lp.phi = xy.y + Q->phi1;
     if (fabs(xy.y) < EPS) {
@@ -52,9 +52,9 @@ static PJ_LP loxim_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(loxim) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(loxim) {
+    struct pj_loxim_data *Q = static_cast<struct pj_loxim_data *>(
+        calloc(1, sizeof(struct pj_loxim_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -75,3 +75,5 @@ PJ *PROJECTION(loxim) {
 
     return P;
 }
+
+#undef EPS

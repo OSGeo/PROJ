@@ -28,7 +28,7 @@
  *****************************************************************************/
 
 /* very loosely based upon DMA code by Bradford W. Drew */
-#define PJ_LIB_
+
 #include "proj_internal.h"
 
 PROJ_HEAD(lonlat, "Lat/long (Geodetic)") "\n\t";
@@ -89,10 +89,10 @@ static PJ *latlong_setup(PJ *P) {
     return P;
 }
 
-PJ *PROJECTION(latlong) { return latlong_setup(P); }
+PJ *PJ_PROJECTION(latlong) { return latlong_setup(P); }
 
-PJ *PROJECTION(longlat) { return latlong_setup(P); }
+PJ *PJ_PROJECTION(longlat) { return latlong_setup(P); }
 
-PJ *PROJECTION(latlon) { return latlong_setup(P); }
+PJ *PJ_PROJECTION(latlon) { return latlong_setup(P); }
 
-PJ *PROJECTION(lonlat) { return latlong_setup(P); }
+PJ *PJ_PROJECTION(lonlat) { return latlong_setup(P); }

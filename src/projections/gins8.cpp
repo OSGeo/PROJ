@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -22,7 +22,7 @@ static PJ_XY gins8_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-PJ *PROJECTION(gins8) {
+PJ *PJ_PROJECTION(gins8) {
     P->es = 0.0;
     P->inv = nullptr;
     P->fwd = gins8_s_forward;

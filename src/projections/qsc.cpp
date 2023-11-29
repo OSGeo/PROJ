@@ -34,11 +34,10 @@
  *
  * Furthermore, the projection is originally only defined for theta angles
  * between (-1/4 * PI) and (+1/4 * PI) on the current cube face. This area
- * of definition is named AREA_0 in the projection code below. The other
- * three areas of a cube face are handled by rotation of AREA_0.
+ * of definition is named pj_qsc_ns::AREA_0 in the projection code below. The
+ * other three areas of a cube face are handled by rotation of
+ * pj_qsc_ns::AREA_0.
  */
-
-#define PJ_LIB_
 
 #include <errno.h>
 #include <math.h>
@@ -47,7 +46,7 @@
 #include "proj_internal.h"
 
 /* The six cube faces. */
-namespace { // anonymous namespace
+namespace pj_qsc_ns {
 enum Face {
     FACE_FRONT = 0,
     FACE_RIGHT = 1,
@@ -56,11 +55,11 @@ enum Face {
     FACE_TOP = 4,
     FACE_BOTTOM = 5
 };
-} // anonymous namespace
+}
 
 namespace { // anonymous namespace
-struct pj_opaque {
-    enum Face face;
+struct pj_qsc_data {
+    enum pj_qsc_ns::Face face;
     double a_squared;
     double b;
     double one_minus_f;
@@ -73,31 +72,31 @@ PROJ_HEAD(qsc, "Quadrilateralized Spherical Cube") "\n\tAzi, Sph";
 
 /* The four areas on a cube face. AREA_0 is the area of definition,
  * the other three areas are counted counterclockwise. */
-namespace { // anonymous namespace
+namespace pj_qsc_ns {
 enum Area { AREA_0 = 0, AREA_1 = 1, AREA_2 = 2, AREA_3 = 3 };
-} // anonymous namespace
+}
 
 /* Helper function for forward projection: compute the theta angle
  * and determine the area number. */
 static double qsc_fwd_equat_face_theta(double phi, double y, double x,
-                                       enum Area *area) {
+                                       enum pj_qsc_ns::Area *area) {
     double theta;
     if (phi < EPS10) {
-        *area = AREA_0;
+        *area = pj_qsc_ns::AREA_0;
         theta = 0.0;
     } else {
         theta = atan2(y, x);
         if (fabs(theta) <= M_FORTPI) {
-            *area = AREA_0;
+            *area = pj_qsc_ns::AREA_0;
         } else if (theta > M_FORTPI && theta <= M_HALFPI + M_FORTPI) {
-            *area = AREA_1;
+            *area = pj_qsc_ns::AREA_1;
             theta -= M_HALFPI;
         } else if (theta > M_HALFPI + M_FORTPI ||
                    theta <= -(M_HALFPI + M_FORTPI)) {
-            *area = AREA_2;
+            *area = pj_qsc_ns::AREA_2;
             theta = (theta >= 0.0 ? theta - M_PI : theta + M_PI);
         } else {
-            *area = AREA_3;
+            *area = pj_qsc_ns::AREA_3;
             theta += M_HALFPI;
         }
     }
@@ -117,11 +116,11 @@ static double qsc_shift_longitude_origin(double longitude, double offset) {
 
 static PJ_XY qsc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_qsc_data *Q = static_cast<struct pj_qsc_data *>(P->opaque);
     double lat, longitude;
     double theta, phi;
     double t, mu; /* nu; */
-    enum Area area;
+    enum pj_qsc_ns::Area area;
 
     /* Convert the geodetic latitude to a geocentric latitude.
      * This corresponds to the shift from the ellipsoid to the sphere
@@ -138,37 +137,37 @@ static PJ_XY qsc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
      * directly from phi, lam. For the other faces, we must use
      * unit sphere cartesian coordinates as an intermediate step. */
     longitude = lp.lam;
-    if (Q->face == FACE_TOP) {
+    if (Q->face == pj_qsc_ns::FACE_TOP) {
         phi = M_HALFPI - lat;
         if (longitude >= M_FORTPI && longitude <= M_HALFPI + M_FORTPI) {
-            area = AREA_0;
+            area = pj_qsc_ns::AREA_0;
             theta = longitude - M_HALFPI;
         } else if (longitude > M_HALFPI + M_FORTPI ||
                    longitude <= -(M_HALFPI + M_FORTPI)) {
-            area = AREA_1;
+            area = pj_qsc_ns::AREA_1;
             theta = (longitude > 0.0 ? longitude - M_PI : longitude + M_PI);
         } else if (longitude > -(M_HALFPI + M_FORTPI) &&
                    longitude <= -M_FORTPI) {
-            area = AREA_2;
+            area = pj_qsc_ns::AREA_2;
             theta = longitude + M_HALFPI;
         } else {
-            area = AREA_3;
+            area = pj_qsc_ns::AREA_3;
             theta = longitude;
         }
-    } else if (Q->face == FACE_BOTTOM) {
+    } else if (Q->face == pj_qsc_ns::FACE_BOTTOM) {
         phi = M_HALFPI + lat;
         if (longitude >= M_FORTPI && longitude <= M_HALFPI + M_FORTPI) {
-            area = AREA_0;
+            area = pj_qsc_ns::AREA_0;
             theta = -longitude + M_HALFPI;
         } else if (longitude < M_FORTPI && longitude >= -M_FORTPI) {
-            area = AREA_1;
+            area = pj_qsc_ns::AREA_1;
             theta = -longitude;
         } else if (longitude < -M_FORTPI &&
                    longitude >= -(M_HALFPI + M_FORTPI)) {
-            area = AREA_2;
+            area = pj_qsc_ns::AREA_2;
             theta = -longitude - M_HALFPI;
         } else {
-            area = AREA_3;
+            area = pj_qsc_ns::AREA_3;
             theta = (longitude > 0.0 ? -longitude + M_PI : -longitude - M_PI);
         }
     } else {
@@ -176,11 +175,11 @@ static PJ_XY qsc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
         double sinlat, coslat;
         double sinlon, coslon;
 
-        if (Q->face == FACE_RIGHT) {
+        if (Q->face == pj_qsc_ns::FACE_RIGHT) {
             longitude = qsc_shift_longitude_origin(longitude, +M_HALFPI);
-        } else if (Q->face == FACE_BACK) {
+        } else if (Q->face == pj_qsc_ns::FACE_BACK) {
             longitude = qsc_shift_longitude_origin(longitude, +M_PI);
-        } else if (Q->face == FACE_LEFT) {
+        } else if (Q->face == pj_qsc_ns::FACE_LEFT) {
             longitude = qsc_shift_longitude_origin(longitude, -M_HALFPI);
         }
         sinlat = sin(lat);
@@ -191,22 +190,22 @@ static PJ_XY qsc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
         r = coslat * sinlon;
         s = sinlat;
 
-        if (Q->face == FACE_FRONT) {
+        if (Q->face == pj_qsc_ns::FACE_FRONT) {
             phi = acos(q);
             theta = qsc_fwd_equat_face_theta(phi, s, r, &area);
-        } else if (Q->face == FACE_RIGHT) {
+        } else if (Q->face == pj_qsc_ns::FACE_RIGHT) {
             phi = acos(r);
             theta = qsc_fwd_equat_face_theta(phi, s, -q, &area);
-        } else if (Q->face == FACE_BACK) {
+        } else if (Q->face == pj_qsc_ns::FACE_BACK) {
             phi = acos(-q);
             theta = qsc_fwd_equat_face_theta(phi, s, -r, &area);
-        } else if (Q->face == FACE_LEFT) {
+        } else if (Q->face == pj_qsc_ns::FACE_LEFT) {
             phi = acos(-r);
             theta = qsc_fwd_equat_face_theta(phi, s, q, &area);
         } else {
             /* Impossible */
             phi = theta = 0.0;
-            area = AREA_0;
+            area = pj_qsc_ns::AREA_0;
         }
     }
 
@@ -220,11 +219,11 @@ static PJ_XY qsc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     /* nu = atan(t);        We don't really need nu, just t, see below. */
 
     /* Apply the result to the real area. */
-    if (area == AREA_1) {
+    if (area == pj_qsc_ns::AREA_1) {
         mu += M_HALFPI;
-    } else if (area == AREA_2) {
+    } else if (area == pj_qsc_ns::AREA_2) {
         mu += M_PI;
-    } else if (area == AREA_3) {
+    } else if (area == pj_qsc_ns::AREA_3) {
         mu += M_PI_HALFPI;
     }
 
@@ -237,7 +236,7 @@ static PJ_XY qsc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_LP qsc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_qsc_data *Q = static_cast<struct pj_qsc_data *>(P->opaque);
     double mu, nu, cosmu, tannu;
     double tantheta, theta, cosphi, phi;
     double t;
@@ -248,15 +247,15 @@ static PJ_LP qsc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     nu = atan(sqrt(xy.x * xy.x + xy.y * xy.y));
     mu = atan2(xy.y, xy.x);
     if (xy.x >= 0.0 && xy.x >= fabs(xy.y)) {
-        area = AREA_0;
+        area = pj_qsc_ns::AREA_0;
     } else if (xy.y >= 0.0 && xy.y >= fabs(xy.x)) {
-        area = AREA_1;
+        area = pj_qsc_ns::AREA_1;
         mu -= M_HALFPI;
     } else if (xy.x < 0.0 && -xy.x >= fabs(xy.y)) {
-        area = AREA_2;
+        area = pj_qsc_ns::AREA_2;
         mu = (mu < 0.0 ? mu + M_PI : mu - M_PI);
     } else {
-        area = AREA_3;
+        area = pj_qsc_ns::AREA_3;
         mu += M_HALFPI;
     }
 
@@ -282,28 +281,28 @@ static PJ_LP qsc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
      * For the top and bottom face, we can compute phi and lam directly.
      * For the other faces, we must use unit sphere cartesian coordinates
      * as an intermediate step. */
-    if (Q->face == FACE_TOP) {
+    if (Q->face == pj_qsc_ns::FACE_TOP) {
         phi = acos(cosphi);
         lp.phi = M_HALFPI - phi;
-        if (area == AREA_0) {
+        if (area == pj_qsc_ns::AREA_0) {
             lp.lam = theta + M_HALFPI;
-        } else if (area == AREA_1) {
+        } else if (area == pj_qsc_ns::AREA_1) {
             lp.lam = (theta < 0.0 ? theta + M_PI : theta - M_PI);
-        } else if (area == AREA_2) {
+        } else if (area == pj_qsc_ns::AREA_2) {
             lp.lam = theta - M_HALFPI;
-        } else /* area == AREA_3 */ {
+        } else /* area == pj_qsc_ns::AREA_3 */ {
             lp.lam = theta;
         }
-    } else if (Q->face == FACE_BOTTOM) {
+    } else if (Q->face == pj_qsc_ns::FACE_BOTTOM) {
         phi = acos(cosphi);
         lp.phi = phi - M_HALFPI;
-        if (area == AREA_0) {
+        if (area == pj_qsc_ns::AREA_0) {
             lp.lam = -theta + M_HALFPI;
-        } else if (area == AREA_1) {
+        } else if (area == pj_qsc_ns::AREA_1) {
             lp.lam = -theta;
-        } else if (area == AREA_2) {
+        } else if (area == pj_qsc_ns::AREA_2) {
             lp.lam = -theta - M_HALFPI;
-        } else /* area == AREA_3 */ {
+        } else /* area == pj_qsc_ns::AREA_3 */ {
             lp.lam = (theta < 0.0 ? -theta - M_PI : -theta + M_PI);
         }
     } else {
@@ -323,27 +322,27 @@ static PJ_LP qsc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
             r = sqrt(1.0 - t);
         }
         /* Rotate q,r,s into the correct area. */
-        if (area == AREA_1) {
+        if (area == pj_qsc_ns::AREA_1) {
             t = r;
             r = -s;
             s = t;
-        } else if (area == AREA_2) {
+        } else if (area == pj_qsc_ns::AREA_2) {
             r = -r;
             s = -s;
-        } else if (area == AREA_3) {
+        } else if (area == pj_qsc_ns::AREA_3) {
             t = r;
             r = s;
             s = -t;
         }
         /* Rotate q,r,s into the correct cube face. */
-        if (Q->face == FACE_RIGHT) {
+        if (Q->face == pj_qsc_ns::FACE_RIGHT) {
             t = q;
             q = -r;
             r = t;
-        } else if (Q->face == FACE_BACK) {
+        } else if (Q->face == pj_qsc_ns::FACE_BACK) {
             q = -q;
             r = -r;
-        } else if (Q->face == FACE_LEFT) {
+        } else if (Q->face == pj_qsc_ns::FACE_LEFT) {
             t = q;
             q = r;
             r = -t;
@@ -351,11 +350,11 @@ static PJ_LP qsc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
         /* Now compute phi and lam from the unit sphere coordinates. */
         lp.phi = acos(-s) - M_HALFPI;
         lp.lam = atan2(r, q);
-        if (Q->face == FACE_RIGHT) {
+        if (Q->face == pj_qsc_ns::FACE_RIGHT) {
             lp.lam = qsc_shift_longitude_origin(lp.lam, -M_HALFPI);
-        } else if (Q->face == FACE_BACK) {
+        } else if (Q->face == pj_qsc_ns::FACE_BACK) {
             lp.lam = qsc_shift_longitude_origin(lp.lam, -M_PI);
-        } else if (Q->face == FACE_LEFT) {
+        } else if (Q->face == pj_qsc_ns::FACE_LEFT) {
             lp.lam = qsc_shift_longitude_origin(lp.lam, +M_HALFPI);
         }
     }
@@ -376,9 +375,9 @@ static PJ_LP qsc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(qsc) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(qsc) {
+    struct pj_qsc_data *Q = static_cast<struct pj_qsc_data *>(
+        calloc(1, sizeof(struct pj_qsc_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -387,15 +386,16 @@ PJ *PROJECTION(qsc) {
     P->fwd = qsc_e_forward;
     /* Determine the cube face from the center of projection. */
     if (P->phi0 >= M_HALFPI - M_FORTPI / 2.0) {
-        Q->face = FACE_TOP;
+        Q->face = pj_qsc_ns::FACE_TOP;
     } else if (P->phi0 <= -(M_HALFPI - M_FORTPI / 2.0)) {
-        Q->face = FACE_BOTTOM;
+        Q->face = pj_qsc_ns::FACE_BOTTOM;
     } else if (fabs(P->lam0) <= M_FORTPI) {
-        Q->face = FACE_FRONT;
+        Q->face = pj_qsc_ns::FACE_FRONT;
     } else if (fabs(P->lam0) <= M_HALFPI + M_FORTPI) {
-        Q->face = (P->lam0 > 0.0 ? FACE_RIGHT : FACE_LEFT);
+        Q->face =
+            (P->lam0 > 0.0 ? pj_qsc_ns::FACE_RIGHT : pj_qsc_ns::FACE_LEFT);
     } else {
-        Q->face = FACE_BACK;
+        Q->face = pj_qsc_ns::FACE_BACK;
     }
     /* Fill in useful values for the ellipsoid <-> sphere shift
      * described in [LK12]. */
@@ -408,3 +408,5 @@ PJ *PROJECTION(qsc) {
 
     return P;
 }
+
+#undef EPS10

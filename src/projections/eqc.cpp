@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -7,7 +7,7 @@
 #include "proj_internal.h"
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_eqc_data {
     double rc;
 };
 } // anonymous namespace
@@ -17,7 +17,7 @@ PROJ_HEAD(eqc, "Equidistant Cylindrical (Plate Carree)")
 
 static PJ_XY eqc_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_eqc_data *Q = static_cast<struct pj_eqc_data *>(P->opaque);
 
     xy.x = Q->rc * lp.lam;
     xy.y = lp.phi - P->phi0;
@@ -27,7 +27,7 @@ static PJ_XY eqc_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP eqc_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_eqc_data *Q = static_cast<struct pj_eqc_data *>(P->opaque);
 
     lp.lam = xy.x / Q->rc;
     lp.phi = xy.y + P->phi0;
@@ -35,9 +35,9 @@ static PJ_LP eqc_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(eqc) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(eqc) {
+    struct pj_eqc_data *Q = static_cast<struct pj_eqc_data *>(
+        calloc(1, sizeof(struct pj_eqc_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

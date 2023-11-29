@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -30,7 +30,7 @@ static PJ_LP fahey_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(fahey) {
+PJ *PJ_PROJECTION(fahey) {
     P->es = 0.;
     P->inv = fahey_s_inverse;
     P->fwd = fahey_s_forward;

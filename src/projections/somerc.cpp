@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -9,7 +9,7 @@
 PROJ_HEAD(somerc, "Swiss. Obl. Mercator") "\n\tCyl, Ell\n\tFor CH1903";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_somerc {
     double K, c, hlf_e, kR, cosp0, sinp0;
 };
 } // anonymous namespace
@@ -20,7 +20,7 @@ struct pj_opaque {
 static PJ_XY somerc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
     double phip, lamp, phipp, lampp, sp, cp;
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_somerc *Q = static_cast<struct pj_somerc *>(P->opaque);
 
     sp = P->e * sin(lp.phi);
     phip = 2. * atan(exp(Q->c * (log(tan(M_FORTPI + 0.5 * lp.phi)) -
@@ -38,7 +38,7 @@ static PJ_XY somerc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_LP somerc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_somerc *Q = static_cast<struct pj_somerc *>(P->opaque);
     double phip, lamp, phipp, lampp, cp, esp, con, delp;
     int i;
 
@@ -67,10 +67,10 @@ static PJ_LP somerc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return (lp);
 }
 
-PJ *PROJECTION(somerc) {
+PJ *PJ_PROJECTION(somerc) {
     double cp, phip0, sp;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_somerc *Q =
+        static_cast<struct pj_somerc *>(calloc(1, sizeof(struct pj_somerc)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -92,3 +92,6 @@ PJ *PROJECTION(somerc) {
     P->fwd = somerc_e_forward;
     return P;
 }
+
+#undef EPS
+#undef NITER

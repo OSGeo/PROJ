@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <float.h>
 #include <math.h>
@@ -40,7 +40,7 @@ static PJ_LP tobmerc_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(tobmerc) {
+PJ *PJ_PROJECTION(tobmerc) {
     P->inv = tobmerc_s_inverse;
     P->fwd = tobmerc_s_forward;
     return P;

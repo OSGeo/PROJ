@@ -25,7 +25,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
 #define PROJ_COMPILATION
 
 #include "defmodel.hpp"
@@ -374,7 +373,7 @@ static void reassign_context(PJ *P, PJ_CONTEXT *ctx) {
     }
 }
 
-PJ *TRANSFORMATION(defmodel, 1) {
+PJ *PJ_TRANSFORMATION(defmodel, 1) {
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     auto cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (cart == nullptr)
