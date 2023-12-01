@@ -293,7 +293,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6653','IERS Terrestrial
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5204','IGLD 1955','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5205','IGLD 1985','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1271','MML07-IRF','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5206','DVR90','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5206','DVR90(2000)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1140','SHD','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6758','JAD2001','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6760','WGS 66','EPSG');
@@ -729,6 +729,11 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1366','COV23-IRF','EPSG
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1367','BBT2000','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1367','Brenner basistunnel','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1367','Galleria di base del Brennero','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5206','Dansk Vertikal Reference 1990','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1371','DVR90 ensemble','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1368','DVR90(2002)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1369','DVR90(2013)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1370','DVR90(2023)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -7943,6 +7948,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','22821','NAD83(CSRS) 2010
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','22822','NAD83(CSRS) 2010 / UTM zone 22N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10471','ETRS89 / COV23 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10472','ETRS89 / COV23 SnakeGrid + Newlyn height','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5799','DVR90 ensemble height','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4162','1011','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4162','Korean 1985 - LatLon','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4926','1008','EPSG');
