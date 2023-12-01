@@ -34,7 +34,7 @@ release = "9.3.1"
 data_version = "1.16"
 
 #today_date = date.today()
-today_date = date(2023, 9, 1)  # or use a specific date
+today_date = date(2023, 12, 1)  # or use a specific date
 today_fmt = "%d %b %Y"
 
 copyright = "1983-{}, PROJ contributors".format(today_date.year)
