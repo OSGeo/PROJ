@@ -28,10 +28,10 @@ author = "PROJ contributors"
 version = "9.3"
 
 # The full project version, used as the replacement for |release|
-release = "9.3.0"
+release = "9.3.1"
 
 # PROJ-data version
-data_version = "1.15"
+data_version = "1.16"
 
 #today_date = date.today()
 today_date = date(2023, 9, 1)  # or use a specific date
