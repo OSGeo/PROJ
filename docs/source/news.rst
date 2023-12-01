@@ -3,6 +3,66 @@
 News
 ###############################################################################
 
+
+9.3.1 Release Notes
+++++++++++++++++++++
+*December 1st 2023*
+
+Updates
+-------
+
+* Update to EPSG 10.098 (`#3968 <https://github.com/OSGeo/PROJ/issues/3968>`_)
+
+* Update ESRI objects to v3.2.0 (`#3944 <https://github.com/OSGeo/PROJ/issues/3944>`_)
+
+Bug fixes
+---------
+
+* ITRF2008: fix wrong sign for ``dry`` parameter of EURA and EURA_T  (`#3870 <https://github.com/OSGeo/PROJ/issues/3870>`_)
+
+* Fix build error with MSVC 2019 in ``/std:c++20`` on ``NN_NO_CHECK()`` (`#3872 <https://github.com/OSGeo/PROJ/issues/3872>`_)
+
+* ESRI WKT import: normalize GCS_unknown to unknown and D_unknown to unknown (`#3874 <https://github.com/OSGeo/PROJ/issues/3874>`_)
+
+* :cpp:func:`CoordinateOperationFactory`: deal with CompoundToCompound with a horizontal similarity transformation and a ballpark vertical (`#3881 <https://github.com/OSGeo/PROJ/issues/3881>`_)
+
+* :cpp:func:`Ellipsoid::_isEquivalentTo()`: fix so that an ellipsoid of semi-major axis A (and non-zero inv flattening) isn't equivalent to a sphere of radius A (`#3882 <https://github.com/OSGeo/PROJ/issues/3882>`_)
+
+* :cpp:func:`isEquivalentTo()`: make a datum name 'unknown' equivalent to another one (`#3883 <https://github.com/OSGeo/PROJ/issues/3883>`_)
+
+* :program:`cs2cs`: fix handling of input coordinates in grad (`#3886 <https://github.com/OSGeo/PROJ/issues/3886>`_)
+
+* Make ``setargv.obj`` available on Universal Windows Platform (`#3891 <https://github.com/OSGeo/PROJ/issues/3891>`_)
+
+* Allow opening proj.db with a URI (`#3892 <https://github.com/OSGeo/PROJ/issues/3892>`_)
+
+* :cpp:func:`createOperations()`: fix GeogCRS 3D with TOWGS84 to geocentric CRS (`#3915 <https://github.com/OSGeo/PROJ/issues/3915>`_)
+
+* Fix test suite so that it can pass with ``ENABLE_TIFF=OFF`` (`#3916 <https://github.com/OSGeo/PROJ/issues/3916>`_)
+
+* :cpp:func:`GeographicBoundingBox::intersects()`: avoid infinite recursion and stack overflow on invalid bounding boxes (`#3919 <https://github.com/OSGeo/PROJ/issues/3919>`_)
+
+* Fix importing ``'+proj=topocentric ... +type=crs'`` by using a geocentric CRS as the base CRS (`#3924 <https://github.com/OSGeo/PROJ/issues/3924>`_)
+
+* Allow LOCAL_CS with 3 axes (`#3928 <https://github.com/OSGeo/PROJ/issues/3928>`_)
+
+* WKT1 parser: in non-strict mode, accept missing UNIT[] in GEOGCS, GEOCCS, PROJCS and VERT_CS elements (`#3933 <https://github.com/OSGeo/PROJ/issues/3933>`_)
+
+* :cpp:func:`createOperations()`: fix issue with a obscure case involving CompoundCRS of unknown horizontal datum + boundCRS of vertical (`#3934 <https://github.com/OSGeo/PROJ/issues/3934>`_)
+
+* :cpp:func:`createOperations()`: fix bad PROJ pipeline when converting between Geog3D with non-metre height to CompoundCRS (`#3943 <https://github.com/OSGeo/PROJ/issues/3943>`_)
+
+* :cpp:func:`createOperations()`: Fix possible null dereference on invalid WKT input (`#3946 <https://github.com/OSGeo/PROJ/issues/3946>`_)
+
+* :c:func:`proj_factor`: fix when input is a compound CRS of a projected CRS (`#3950 <https://github.com/OSGeo/PROJ/issues/3950>`_)
+
+* :c:func:`pj_get_suggested_operation()`: tune it to give correct result for RGAF09 to RRAF 1991 / UTM zone 20N + Guadeloupe 1988 height transformation (`#3954 <https://github.com/OSGeo/PROJ/issues/3954>`_)
+
+* Move static ``NameSpace::GLOBAL`` definition in ``static.cpp`` to avoid 'static initialization fiasco' (`#3956 <https://github.com/OSGeo/PROJ/issues/3956>`_)
+
+* horner: allow arbitrary input type of coordinate (`#3961 <https://github.com/OSGeo/PROJ/issues/3961>`_)
+
+
 9.3.0 Release Notes
 ++++++++++++++++++++
 *September 1st 2023*
