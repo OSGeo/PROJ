@@ -170,7 +170,7 @@ PJ *PJ_CONVERSION(axisswap, 0) {
     if (!pj_param_exists(P->params, "order") ==
         !pj_param_exists(P->params, "axis")) {
         proj_log_error(P,
-                       _("order and axis parameters are mutually exclusive."));
+                       _("must provide EITHER 'order' OR 'axis' parameter."));
         return pj_default_destructor(
             P, PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS);
     }
