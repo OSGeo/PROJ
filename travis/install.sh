@@ -55,6 +55,7 @@ mkdir shared_build
 cd shared_build
 cmake \
   -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+  -DCMAKE_UNITY_BUILD=ON \
   -D USE_CCACHE=${USE_CCACHE} \
   ${PROJ_CMAKE_BUILD_OPTIONS:-} \
   -D PROJ_DB_CACHE_DIR=$HOME/.ccache \

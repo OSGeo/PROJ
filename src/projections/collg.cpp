@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -44,10 +44,14 @@ static PJ_LP collg_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return (lp);
 }
 
-PJ *PROJECTION(collg) {
+PJ *PJ_PROJECTION(collg) {
     P->es = 0.0;
     P->inv = collg_s_inverse;
     P->fwd = collg_s_forward;
 
     return P;
 }
+
+#undef FXC
+#undef FYC
+#undef ONEEPS

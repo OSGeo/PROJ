@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include <math.h>
 
 #include "proj.h"
@@ -29,7 +29,7 @@ static PJ_LP crast_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(crast) {
+PJ *PJ_PROJECTION(crast) {
     P->es = 0.0;
     P->inv = crast_s_inverse;
     P->fwd = crast_s_forward;

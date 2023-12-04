@@ -25,19 +25,18 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
 #include "geodesic.h"
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>
 #include <math.h>
 
-namespace { // anonymous namespace
+namespace pj_aeqd_ns {
 enum Mode { N_POLE = 0, S_POLE = 1, EQUIT = 2, OBLIQ = 3 };
-} // anonymous namespace
+}
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_aeqd_data {
     double sinph0;
     double cosph0;
     double *en;
@@ -46,7 +45,7 @@ struct pj_opaque {
     double Mp;
     double He;
     double G;
-    enum Mode mode;
+    enum ::pj_aeqd_ns::Mode mode;
     struct geod_geodesic g;
 };
 } // anonymous namespace
@@ -63,13 +62,13 @@ static PJ *destructor(PJ *P, int errlev) { /* Destructor */
     if (nullptr == P->opaque)
         return pj_default_destructor(P, errlev);
 
-    free(static_cast<struct pj_opaque *>(P->opaque)->en);
+    free(static_cast<struct pj_aeqd_data *>(P->opaque)->en);
     return pj_default_destructor(P, errlev);
 }
 
 static PJ_XY e_guam_fwd(PJ_LP lp, PJ *P) { /* Guam elliptical */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_aeqd_data *Q = static_cast<struct pj_aeqd_data *>(P->opaque);
     double cosphi, sinphi, t;
 
     cosphi = cos(lp.phi);
@@ -84,25 +83,25 @@ static PJ_XY e_guam_fwd(PJ_LP lp, PJ *P) { /* Guam elliptical */
 
 static PJ_XY aeqd_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_aeqd_data *Q = static_cast<struct pj_aeqd_data *>(P->opaque);
     double coslam, cosphi, sinphi, rho;
     double azi1, azi2, s12;
     double lat1, lon1, lat2, lon2;
 
     coslam = cos(lp.lam);
     switch (Q->mode) {
-    case N_POLE:
+    case pj_aeqd_ns::N_POLE:
         coslam = -coslam;
         PROJ_FALLTHROUGH;
-    case S_POLE:
+    case pj_aeqd_ns::S_POLE:
         cosphi = cos(lp.phi);
         sinphi = sin(lp.phi);
         rho = fabs(Q->Mp - pj_mlfn(lp.phi, sinphi, cosphi, Q->en));
         xy.x = rho * sin(lp.lam);
         xy.y = rho * coslam;
         break;
-    case EQUIT:
-    case OBLIQ:
+    case pj_aeqd_ns::EQUIT:
+    case pj_aeqd_ns::OBLIQ:
         if (fabs(lp.lam) < EPS10 && fabs(lp.phi - P->phi0) < EPS10) {
             xy.x = xy.y = 0.;
             break;
@@ -124,9 +123,9 @@ static PJ_XY aeqd_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_XY aeqd_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_aeqd_data *Q = static_cast<struct pj_aeqd_data *>(P->opaque);
 
-    if (Q->mode == EQUIT) {
+    if (Q->mode == pj_aeqd_ns::EQUIT) {
         const double cosphi = cos(lp.phi);
         const double sinphi = sin(lp.phi);
         const double coslam = cos(lp.lam);
@@ -147,7 +146,7 @@ static PJ_XY aeqd_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
             xy.x = xy.y * cosphi * sinlam;
             xy.y *= sinphi;
         }
-    } else if (Q->mode == OBLIQ) {
+    } else if (Q->mode == pj_aeqd_ns::OBLIQ) {
         const double cosphi = cos(lp.phi);
         const double sinphi = sin(lp.phi);
         const double coslam = cos(lp.lam);
@@ -172,7 +171,7 @@ static PJ_XY aeqd_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     } else {
         double coslam = cos(lp.lam);
         double sinlam = sin(lp.lam);
-        if (Q->mode == N_POLE) {
+        if (Q->mode == pj_aeqd_ns::N_POLE) {
             lp.phi = -lp.phi;
             coslam = -coslam;
         }
@@ -189,7 +188,7 @@ static PJ_XY aeqd_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP e_guam_inv(PJ_XY xy, PJ *P) { /* Guam elliptical */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_aeqd_data *Q = static_cast<struct pj_aeqd_data *>(P->opaque);
     double x2, t = 0.0;
     int i;
 
@@ -206,7 +205,7 @@ static PJ_LP e_guam_inv(PJ_XY xy, PJ *P) { /* Guam elliptical */
 
 static PJ_LP aeqd_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_aeqd_data *Q = static_cast<struct pj_aeqd_data *>(P->opaque);
     double azi1, azi2, s12, lat1, lon1, lat2, lon2;
 
     if ((s12 = hypot(xy.x, xy.y)) < EPS10) {
@@ -214,7 +213,7 @@ static PJ_LP aeqd_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
         lp.lam = 0.;
         return (lp);
     }
-    if (Q->mode == OBLIQ || Q->mode == EQUIT) {
+    if (Q->mode == pj_aeqd_ns::OBLIQ || Q->mode == pj_aeqd_ns::EQUIT) {
         lat1 = P->phi0 / DEG_TO_RAD;
         lon1 = 0;
         azi1 = atan2(xy.x, xy.y) / DEG_TO_RAD; // Clockwise from north
@@ -222,16 +221,16 @@ static PJ_LP aeqd_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
         lp.phi = lat2 * DEG_TO_RAD;
         lp.lam = lon2 * DEG_TO_RAD;
     } else { /* Polar */
-        lp.phi =
-            pj_inv_mlfn(Q->mode == N_POLE ? Q->Mp - s12 : Q->Mp + s12, Q->en);
-        lp.lam = atan2(xy.x, Q->mode == N_POLE ? -xy.y : xy.y);
+        lp.phi = pj_inv_mlfn(
+            Q->mode == pj_aeqd_ns::N_POLE ? Q->Mp - s12 : Q->Mp + s12, Q->en);
+        lp.lam = atan2(xy.x, Q->mode == pj_aeqd_ns::N_POLE ? -xy.y : xy.y);
     }
     return lp;
 }
 
 static PJ_LP aeqd_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_aeqd_data *Q = static_cast<struct pj_aeqd_data *>(P->opaque);
     double cosc, c_rh, sinc;
 
     c_rh = hypot(xy.x, xy.y);
@@ -246,10 +245,10 @@ static PJ_LP aeqd_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
         lp.lam = 0.;
         return (lp);
     }
-    if (Q->mode == OBLIQ || Q->mode == EQUIT) {
+    if (Q->mode == pj_aeqd_ns::OBLIQ || Q->mode == pj_aeqd_ns::EQUIT) {
         sinc = sin(c_rh);
         cosc = cos(c_rh);
-        if (Q->mode == EQUIT) {
+        if (Q->mode == pj_aeqd_ns::EQUIT) {
             lp.phi = aasin(P->ctx, xy.y * sinc / c_rh);
             xy.x *= sinc;
             xy.y = cosc * c_rh;
@@ -260,7 +259,7 @@ static PJ_LP aeqd_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             xy.x *= sinc * Q->cosph0;
         }
         lp.lam = xy.y == 0. ? 0. : atan2(xy.x, xy.y);
-    } else if (Q->mode == N_POLE) {
+    } else if (Q->mode == pj_aeqd_ns::N_POLE) {
         lp.phi = M_HALFPI - c_rh;
         lp.lam = atan2(xy.x, -xy.y);
     } else {
@@ -270,9 +269,9 @@ static PJ_LP aeqd_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(aeqd) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(aeqd) {
+    struct pj_aeqd_data *Q = static_cast<struct pj_aeqd_data *>(
+        calloc(1, sizeof(struct pj_aeqd_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -281,15 +280,15 @@ PJ *PROJECTION(aeqd) {
     geod_init(&Q->g, 1, P->f);
 
     if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) {
-        Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
+        Q->mode = P->phi0 < 0. ? pj_aeqd_ns::S_POLE : pj_aeqd_ns::N_POLE;
         Q->sinph0 = P->phi0 < 0. ? -1. : 1.;
         Q->cosph0 = 0.;
     } else if (fabs(P->phi0) < EPS10) {
-        Q->mode = EQUIT;
+        Q->mode = pj_aeqd_ns::EQUIT;
         Q->sinph0 = 0.;
         Q->cosph0 = 1.;
     } else {
-        Q->mode = OBLIQ;
+        Q->mode = pj_aeqd_ns::OBLIQ;
         Q->sinph0 = sin(P->phi0);
         Q->cosph0 = cos(P->phi0);
     }
@@ -305,14 +304,14 @@ PJ *PROJECTION(aeqd) {
             P->fwd = e_guam_fwd;
         } else {
             switch (Q->mode) {
-            case N_POLE:
+            case pj_aeqd_ns::N_POLE:
                 Q->Mp = pj_mlfn(M_HALFPI, 1., 0., Q->en);
                 break;
-            case S_POLE:
+            case pj_aeqd_ns::S_POLE:
                 Q->Mp = pj_mlfn(-M_HALFPI, -1., 0., Q->en);
                 break;
-            case EQUIT:
-            case OBLIQ:
+            case pj_aeqd_ns::EQUIT:
+            case pj_aeqd_ns::OBLIQ:
                 Q->N1 = 1. / sqrt(1. - P->es * Q->sinph0 * Q->sinph0);
                 Q->He = P->e / sqrt(P->one_es);
                 Q->G = Q->sinph0 * Q->He;
@@ -326,3 +325,6 @@ PJ *PROJECTION(aeqd) {
 
     return P;
 }
+
+#undef EPS10
+#undef TOL

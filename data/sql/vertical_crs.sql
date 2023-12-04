@@ -246,7 +246,7 @@ INSERT INTO "vertical_crs" VALUES('EPSG','5797','AIOC95 height',NULL,'EPSG','649
 INSERT INTO "usage" VALUES('EPSG','4240','vertical_crs','EPSG','5797','EPSG','2592','EPSG','1136');
 INSERT INTO "vertical_crs" VALUES('EPSG','5798','EGM84 height',NULL,'EPSG','6499','EPSG','5203',0);
 INSERT INTO "usage" VALUES('EPSG','4241','vertical_crs','EPSG','5798','EPSG','1262','EPSG','1027');
-INSERT INTO "vertical_crs" VALUES('EPSG','5799','DVR90 height',NULL,'EPSG','6499','EPSG','5206',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','5799','DVR90 height',NULL,'EPSG','6499','EPSG','1371',0);
 INSERT INTO "usage" VALUES('EPSG','4242','vertical_crs','EPSG','5799','EPSG','3237','EPSG','1142');
 INSERT INTO "vertical_crs" VALUES('EPSG','5829','Instantaneous Water Level height',NULL,'EPSG','6499','EPSG','5113',0);
 INSERT INTO "usage" VALUES('EPSG','4267','vertical_crs','EPSG','5829','EPSG','1262','EPSG','1200');
@@ -480,6 +480,14 @@ INSERT INTO "vertical_crs" VALUES('EPSG','10353','Alboran height',NULL,'EPSG','6
 INSERT INTO "usage" VALUES('EPSG','19926','vertical_crs','EPSG','10353','EPSG','4741','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','10354','Melilla height',NULL,'EPSG','6499','EPSG','1364',0);
 INSERT INTO "usage" VALUES('EPSG','19927','vertical_crs','EPSG','10354','EPSG','4740','EPSG','1178');
+INSERT INTO "vertical_crs" VALUES('EPSG','10482','DVR90(2000) height',NULL,'EPSG','6499','EPSG','5206',0);
+INSERT INTO "usage" VALUES('EPSG','20427','vertical_crs','EPSG','10482','EPSG','3237','EPSG','1142');
+INSERT INTO "vertical_crs" VALUES('EPSG','10483','DVR90(2002) height',NULL,'EPSG','6499','EPSG','1368',0);
+INSERT INTO "usage" VALUES('EPSG','20429','vertical_crs','EPSG','10483','EPSG','3237','EPSG','1142');
+INSERT INTO "vertical_crs" VALUES('EPSG','10484','DVR90(2013) height',NULL,'EPSG','6499','EPSG','1369',0);
+INSERT INTO "usage" VALUES('EPSG','20428','vertical_crs','EPSG','10484','EPSG','3237','EPSG','1142');
+INSERT INTO "vertical_crs" VALUES('EPSG','10485','DVR90(2023) height',NULL,'EPSG','6499','EPSG','1370',0);
+INSERT INTO "usage" VALUES('EPSG','20430','vertical_crs','EPSG','10485','EPSG','3237','EPSG','1142');
 INSERT INTO "vertical_crs" VALUES('EPSG','20000','SVD2006 height',NULL,'EPSG','6499','EPSG','1323',0);
 INSERT INTO "usage" VALUES('EPSG','17962','vertical_crs','EPSG','20000','EPSG','4058','EPSG','1180');
 INSERT INTO "vertical_crs" VALUES('EPSG','20034','CGVD2013a(2002) height',NULL,'EPSG','6499','EPSG','1325',0);

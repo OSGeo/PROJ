@@ -28,22 +28,20 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
-
 #include <errno.h>
 #include <math.h>
 
 #include "proj.h"
 #include "proj_internal.h"
 
-namespace { // anonymous namespace
+namespace pj_aitoff_ns {
 enum Mode { AITOFF = 0, WINKEL_TRIPEL = 1 };
-} // anonymous namespace
+}
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_aitoff_data {
     double cosphi1;
-    enum Mode mode;
+    enum pj_aitoff_ns::Mode mode;
 };
 } // anonymous namespace
 
@@ -56,7 +54,7 @@ FORWARD(aitoff_s_forward); /* spheroid */
 
 static PJ_XY aitoff_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_aitoff_data *Q = static_cast<struct pj_aitoff_data *>(P->opaque);
     double c, d;
 
 #if 0
@@ -74,7 +72,7 @@ static PJ_XY aitoff_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
         xy.y *= d * sin(lp.phi);
     } else
         xy.x = xy.y = 0.;
-    if (Q->mode == WINKEL_TRIPEL) {
+    if (Q->mode == pj_aitoff_ns::WINKEL_TRIPEL) {
         xy.x = (xy.x + lp.lam * Q->cosphi1) * 0.5;
         xy.y = (xy.y + lp.phi) * 0.5;
     }
@@ -105,7 +103,7 @@ static PJ_XY aitoff_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP aitoff_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_aitoff_data *Q = static_cast<struct pj_aitoff_data *>(P->opaque);
     int iter, MAXITER = 10, round = 0, MAXROUND = 20;
     double EPSILON = 1e-12, D, C, f1, f2, f1p, f1l, f2p, f2l, dp, dl, sl, sp,
            cp, cl, x, y;
@@ -141,7 +139,7 @@ static PJ_LP aitoff_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             f1l = cp * cp * sl * sl / C + D * cp * cl * sp * sp;
             f2p = sp * sp * cl / C + D * sl * sl * cp;
             f2l = 0.5 * (sp * cp * sl / C - D * sp * cp * cp * sl * cl);
-            if (Q->mode == WINKEL_TRIPEL) {
+            if (Q->mode == pj_aitoff_ns::WINKEL_TRIPEL) {
                 f1 = 0.5 * (f1 + lp.lam * Q->cosphi1);
                 f2 = 0.5 * (f2 + lp.phi);
                 f1p *= 0.5;
@@ -167,7 +165,8 @@ static PJ_LP aitoff_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             lp.phi -=
                 2. * (lp.phi +
                       M_PI_2); /* correct if symmetrical solution for Aitoff */
-        if ((fabs(fabs(lp.phi) - M_PI_2) < EPSILON) && (Q->mode == AITOFF))
+        if ((fabs(fabs(lp.phi) - M_PI_2) < EPSILON) &&
+            (Q->mode == pj_aitoff_ns::AITOFF))
             lp.lam = 0.; /* if pole in Aitoff, return longitude of 0 */
 
         /* calculate x,y coordinates with solution obtained */
@@ -178,7 +177,7 @@ static PJ_LP aitoff_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             y *= D * sin(lp.phi);
         } else
             x = y = 0.;
-        if (Q->mode == WINKEL_TRIPEL) {
+        if (Q->mode == pj_aitoff_ns::WINKEL_TRIPEL) {
             x = (x + lp.lam * Q->cosphi1) * 0.5;
             y = (y + lp.phi) * 0.5;
         }
@@ -197,32 +196,32 @@ static PJ_LP aitoff_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-static PJ *setup(PJ *P) {
+static PJ *pj_aitoff_setup(PJ *P) {
     P->inv = aitoff_s_inverse;
     P->fwd = aitoff_s_forward;
     P->es = 0.;
     return P;
 }
 
-PJ *PROJECTION(aitoff) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(aitoff) {
+    struct pj_aitoff_data *Q = static_cast<struct pj_aitoff_data *>(
+        calloc(1, sizeof(struct pj_aitoff_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    Q->mode = AITOFF;
-    return setup(P);
+    Q->mode = pj_aitoff_ns::AITOFF;
+    return pj_aitoff_setup(P);
 }
 
-PJ *PROJECTION(wintri) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(wintri) {
+    struct pj_aitoff_data *Q = static_cast<struct pj_aitoff_data *>(
+        calloc(1, sizeof(struct pj_aitoff_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    Q->mode = WINKEL_TRIPEL;
+    Q->mode = pj_aitoff_ns::WINKEL_TRIPEL;
     if (pj_param(P->ctx, P->params, "tlat_1").i) {
         if ((Q->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f)) == 0.) {
             proj_log_error(
@@ -232,5 +231,5 @@ PJ *PROJECTION(wintri) {
         }
     } else /* 50d28' or acos(2/pi) */
         Q->cosphi1 = 0.636619772367581343;
-    return setup(P);
+    return pj_aitoff_setup(P);
 }

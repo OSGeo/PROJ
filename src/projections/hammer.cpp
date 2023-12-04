@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -12,7 +12,7 @@ PROJ_HEAD(hammer, "Hammer & Eckert-Greifendorff")
 #define EPS 1.0e-10
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pq_hammer {
     double w;
     double m, rm;
 };
@@ -20,7 +20,7 @@ struct pj_opaque {
 
 static PJ_XY hammer_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pq_hammer *Q = static_cast<struct pq_hammer *>(P->opaque);
     double cosphi, d;
 
     cosphi = cos(lp.phi);
@@ -38,7 +38,7 @@ static PJ_XY hammer_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP hammer_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pq_hammer *Q = static_cast<struct pq_hammer *>(P->opaque);
     double z;
 
     z = sqrt(1. - 0.25 * Q->w * Q->w * xy.x * xy.x - 0.25 * xy.y * xy.y);
@@ -53,9 +53,9 @@ static PJ_LP hammer_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(hammer) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(hammer) {
+    struct pq_hammer *Q =
+        static_cast<struct pq_hammer *>(calloc(1, sizeof(struct pq_hammer)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -88,3 +88,5 @@ PJ *PROJECTION(hammer) {
 
     return P;
 }
+
+#undef EPS

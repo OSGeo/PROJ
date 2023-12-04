@@ -555,7 +555,7 @@ int main(int argc, char **argv) {
                 try {
                     auto crs = dynamic_cast<const NS_PROJ::crs::ProjectedCRS *>(
                         P->iso_obj.get());
-                    auto dir =
+                    auto& dir =
                         crs->coordinateSystem()->axisList()[0]->direction();
                     swapAxisCrs = dir == NS_PROJ::cs::AxisDirection::NORTH ||
                                   dir == NS_PROJ::cs::AxisDirection::SOUTH;

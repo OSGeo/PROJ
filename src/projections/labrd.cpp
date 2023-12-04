@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -100,7 +100,7 @@ static PJ_LP labrd_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(labrd) {
+PJ *PJ_PROJECTION(labrd) {
     double Az, sinp, R, N, t;
     struct pj_opaque *Q =
         static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));

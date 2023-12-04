@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -26,7 +26,7 @@ static PJ_XY august_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return (xy);
 }
 
-PJ *PROJECTION(august) {
+PJ *PJ_PROJECTION(august) {
     P->inv = nullptr;
     P->fwd = august_s_forward;
     P->es = 0.;

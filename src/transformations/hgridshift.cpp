@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <mutex>
@@ -11,8 +11,8 @@
 
 PROJ_HEAD(hgridshift, "Horizontal grid shift");
 
-static std::mutex gMutex{};
-static std::set<std::string> gKnownGrids{};
+static std::mutex gMutexHGridShift{};
+static std::set<std::string> gKnownGridsHGridShift{};
 
 using namespace NS_PROJ;
 
@@ -25,7 +25,7 @@ struct hgridshiftData {
 };
 } // anonymous namespace
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ pj_hgridshift_forward_3d(PJ_LPZ lpz, PJ *P) {
     auto Q = static_cast<hgridshiftData *>(P->opaque);
     PJ_COORD point = {{0, 0, 0, 0}};
     point.lpz = lpz;
@@ -47,7 +47,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     return point.xyz;
 }
 
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ pj_hgridshift_reverse_3d(PJ_XYZ xyz, PJ *P) {
     auto Q = static_cast<hgridshiftData *>(P->opaque);
     PJ_COORD point = {{0, 0, 0, 0}};
     point.xyz = xyz;
@@ -69,7 +69,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     return point.lpz;
 }
 
-static void forward_4d(PJ_COORD &coo, PJ *P) {
+static void pj_hgridshift_forward_4d(PJ_COORD &coo, PJ *P) {
     struct hgridshiftData *Q = (struct hgridshiftData *)P->opaque;
 
     /* If transformation is not time restricted, we always call it */
@@ -78,7 +78,7 @@ static void forward_4d(PJ_COORD &coo, PJ *P) {
         // "Overlapping read/write of union is undefined behavior"
         // Cf
         // https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-        const auto xyz = forward_3d(coo.lpz, P);
+        const auto xyz = pj_hgridshift_forward_3d(coo.lpz, P);
         coo.xyz = xyz;
         return;
     }
@@ -89,12 +89,12 @@ static void forward_4d(PJ_COORD &coo, PJ *P) {
         // "Overlapping read/write of union is undefined behavior"
         // Cf
         // https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-        const auto xyz = forward_3d(coo.lpz, P);
+        const auto xyz = pj_hgridshift_forward_3d(coo.lpz, P);
         coo.xyz = xyz;
     }
 }
 
-static void reverse_4d(PJ_COORD &coo, PJ *P) {
+static void pj_hgridshift_reverse_4d(PJ_COORD &coo, PJ *P) {
     struct hgridshiftData *Q = (struct hgridshiftData *)P->opaque;
 
     /* If transformation is not time restricted, we always call it */
@@ -103,7 +103,7 @@ static void reverse_4d(PJ_COORD &coo, PJ *P) {
         // "Overlapping read/write of union is undefined behavior"
         // Cf
         // https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-        const auto lpz = reverse_3d(coo.xyz, P);
+        const auto lpz = pj_hgridshift_reverse_3d(coo.xyz, P);
         coo.lpz = lpz;
         return;
     }
@@ -114,12 +114,12 @@ static void reverse_4d(PJ_COORD &coo, PJ *P) {
         // "Overlapping read/write of union is undefined behavior"
         // Cf
         // https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-        const auto lpz = reverse_3d(coo.xyz, P);
+        const auto lpz = pj_hgridshift_reverse_3d(coo.xyz, P);
         coo.lpz = lpz;
     }
 }
 
-static PJ *destructor(PJ *P, int errlev) {
+static PJ *pj_hgridshift_destructor(PJ *P, int errlev) {
     if (nullptr == P)
         return nullptr;
 
@@ -129,23 +129,23 @@ static PJ *destructor(PJ *P, int errlev) {
     return pj_default_destructor(P, errlev);
 }
 
-static void reassign_context(PJ *P, PJ_CONTEXT *ctx) {
+static void pj_hgridshift_reassign_context(PJ *P, PJ_CONTEXT *ctx) {
     auto Q = (struct hgridshiftData *)P->opaque;
     for (auto &grid : Q->grids) {
         grid->reassign_context(ctx);
     }
 }
 
-PJ *TRANSFORMATION(hgridshift, 0) {
+PJ *PJ_TRANSFORMATION(hgridshift, 0) {
     auto Q = new hgridshiftData;
     P->opaque = (void *)Q;
-    P->destructor = destructor;
-    P->reassign_context = reassign_context;
+    P->destructor = pj_hgridshift_destructor;
+    P->reassign_context = pj_hgridshift_reassign_context;
 
-    P->fwd4d = forward_4d;
-    P->inv4d = reverse_4d;
-    P->fwd3d = forward_3d;
-    P->inv3d = reverse_3d;
+    P->fwd4d = pj_hgridshift_forward_4d;
+    P->inv4d = pj_hgridshift_reverse_4d;
+    P->fwd3d = pj_hgridshift_forward_3d;
+    P->inv3d = pj_hgridshift_reverse_3d;
     P->fwd = nullptr;
     P->inv = nullptr;
 
@@ -154,7 +154,7 @@ PJ *TRANSFORMATION(hgridshift, 0) {
 
     if (0 == pj_param(P->ctx, P->params, "tgrids").i) {
         proj_log_error(P, _("+grids parameter missing."));
-        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        return pj_hgridshift_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     /* TODO: Refactor into shared function that can be used  */
@@ -181,10 +181,10 @@ PJ *TRANSFORMATION(hgridshift, 0) {
         Q->defer_grid_opening = true;
     } else {
         const char *gridnames = pj_param(P->ctx, P->params, "sgrids").s;
-        gMutex.lock();
-        const bool isKnownGrid =
-            gKnownGrids.find(gridnames) != gKnownGrids.end();
-        gMutex.unlock();
+        gMutexHGridShift.lock();
+        const bool isKnownGrid = gKnownGridsHGridShift.find(gridnames) !=
+                                 gKnownGridsHGridShift.end();
+        gMutexHGridShift.unlock();
         if (isKnownGrid) {
             Q->defer_grid_opening = true;
         } else {
@@ -192,13 +192,13 @@ PJ *TRANSFORMATION(hgridshift, 0) {
             /* Was gridlist compiled properly? */
             if (proj_errno(P)) {
                 proj_log_error(P, _("could not find required grid(s)."));
-                return destructor(
+                return pj_hgridshift_destructor(
                     P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
             }
 
-            gMutex.lock();
-            gKnownGrids.insert(gridnames);
-            gMutex.unlock();
+            gMutexHGridShift.lock();
+            gKnownGridsHGridShift.insert(gridnames);
+            gMutexHGridShift.unlock();
         }
     }
 
@@ -206,6 +206,6 @@ PJ *TRANSFORMATION(hgridshift, 0) {
 }
 
 void pj_clear_hgridshift_knowngrids_cache() {
-    std::lock_guard<std::mutex> lock(gMutex);
-    gKnownGrids.clear();
+    std::lock_guard<std::mutex> lock(gMutexHGridShift);
+    gKnownGridsHGridShift.clear();
 }

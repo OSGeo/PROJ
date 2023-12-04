@@ -1,6 +1,8 @@
 /* Projection System: default list of projections
  */
 
+#define DO_NOT_DEFINE_PROJ_HEAD
+
 #include "proj.h"
 #include "proj_internal.h"
 

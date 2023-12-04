@@ -1,3 +1,5 @@
+set(CMAKE_UNITY_BUILD OFF)
+
 # Configure executable builds
 option(BUILD_APPS
   "Build PROJ applications (default value for BUILD_CCT, BUILD_CS2CS, etc.)"

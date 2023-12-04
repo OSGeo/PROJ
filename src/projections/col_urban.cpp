@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -14,7 +14,7 @@ PROJ_HEAD(col_urban, "Colombia Urban")
 
 namespace { // anonymous namespace
 
-struct pj_opaque {
+struct pj_col_urban {
     double h0;   // height of projection origin, divided by semi-major axis (a)
     double rho0; // adimensional value, contrary to Guidance note 7.2
     double A;
@@ -26,7 +26,7 @@ struct pj_opaque {
 
 static PJ_XY col_urban_forward(PJ_LP lp, PJ *P) {
     PJ_XY xy;
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_col_urban *Q = static_cast<struct pj_col_urban *>(P->opaque);
 
     const double cosphi = cos(lp.phi);
     const double sinphi = sin(lp.phi);
@@ -45,7 +45,7 @@ static PJ_XY col_urban_forward(PJ_LP lp, PJ *P) {
 
 static PJ_LP col_urban_inverse(PJ_XY xy, PJ *P) {
     PJ_LP lp;
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_col_urban *Q = static_cast<struct pj_col_urban *>(P->opaque);
 
     lp.phi = P->phi0 + xy.y / Q->D - Q->B * (xy.x / Q->C) * (xy.x / Q->C);
     const double sinphi = sin(lp.phi);
@@ -55,9 +55,9 @@ static PJ_LP col_urban_inverse(PJ_XY xy, PJ *P) {
     return lp;
 }
 
-PJ *PROJECTION(col_urban) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(col_urban) {
+    struct pj_col_urban *Q = static_cast<struct pj_col_urban *>(
+        calloc(1, sizeof(struct pj_col_urban)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

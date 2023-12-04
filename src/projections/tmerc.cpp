@@ -10,8 +10,6 @@
  * slower, but more accurate implementation.
  */
 
-#define PJ_LIB_
-
 #include <errno.h>
 #include <math.h>
 
@@ -711,7 +709,7 @@ static bool getAlgoFromParams(PJ *P, TMercAlgo &algo) {
 //
 /*****************************************************************************/
 
-PJ *PROJECTION(tmerc) {
+PJ *PJ_PROJECTION(tmerc) {
     /* exact transverse mercator only exists in ellipsoidal form, */
     /* use approximate version if +a sphere is requested          */
 
@@ -723,7 +721,7 @@ PJ *PROJECTION(tmerc) {
     return setup(P, algo);
 }
 
-PJ *PROJECTION(etmerc) {
+PJ *PJ_PROJECTION(etmerc) {
     if (P->es == 0.0) {
         proj_log_error(
             P, _("Invalid value for eccentricity: it should not be zero"));
@@ -736,7 +734,7 @@ PJ *PROJECTION(etmerc) {
 /* UTM uses the Poder/Engsager implementation for the underlying projection */
 /* UNLESS +approx is set in which case the Evenden/Snyder implementation is
  * used. */
-PJ *PROJECTION(utm) {
+PJ *PJ_PROJECTION(utm) {
     long zone;
     if (P->es == 0.0) {
         proj_log_error(

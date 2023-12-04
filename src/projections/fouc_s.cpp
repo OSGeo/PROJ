@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -12,14 +12,14 @@ PROJ_HEAD(fouc_s, "Foucaut Sinusoidal") "\n\tPCyl, Sph";
 #define LOOP_TOL 1e-7
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_fouc_s_data {
     double n, n1;
 };
 } // anonymous namespace
 
 static PJ_XY fouc_s_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_fouc_s_data *Q = static_cast<struct pj_fouc_s_data *>(P->opaque);
     double t;
 
     t = cos(lp.phi);
@@ -30,7 +30,7 @@ static PJ_XY fouc_s_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP fouc_s_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_fouc_s_data *Q = static_cast<struct pj_fouc_s_data *>(P->opaque);
     int i;
 
     if (Q->n != 0.0) {
@@ -51,9 +51,9 @@ static PJ_LP fouc_s_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(fouc_s) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(fouc_s) {
+    struct pj_fouc_s_data *Q = static_cast<struct pj_fouc_s_data *>(
+        calloc(1, sizeof(struct pj_fouc_s_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -71,3 +71,6 @@ PJ *PROJECTION(fouc_s) {
     P->fwd = fouc_s_s_forward;
     return P;
 }
+
+#undef MAX_ITER
+#undef LOOP_TOL

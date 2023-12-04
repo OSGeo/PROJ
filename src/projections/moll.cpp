@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -14,14 +14,14 @@ PROJ_HEAD(wag5, "Wagner V") "\n\tPCyl, Sph";
 #define LOOP_TOL 1e-7
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_moll_data {
     double C_x, C_y, C_p;
 };
 } // anonymous namespace
 
 static PJ_XY moll_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_moll_data *Q = static_cast<struct pj_moll_data *>(P->opaque);
     int i;
 
     const double k = Q->C_p * sin(lp.phi);
@@ -42,7 +42,7 @@ static PJ_XY moll_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP moll_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_moll_data *Q = static_cast<struct pj_moll_data *>(P->opaque);
     lp.phi = aasin(P->ctx, xy.y / Q->C_y);
     lp.lam = xy.x / (Q->C_x * cos(lp.phi));
     if (fabs(lp.lam) < M_PI) {
@@ -55,7 +55,7 @@ static PJ_LP moll_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
 }
 
 static PJ *setup(PJ *P, double p) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_moll_data *Q = static_cast<struct pj_moll_data *>(P->opaque);
     double r, sp, p2 = p + p;
 
     P->es = 0;
@@ -71,9 +71,9 @@ static PJ *setup(PJ *P, double p) {
     return P;
 }
 
-PJ *PROJECTION(moll) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(moll) {
+    struct pj_moll_data *Q = static_cast<struct pj_moll_data *>(
+        calloc(1, sizeof(struct pj_moll_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -81,9 +81,9 @@ PJ *PROJECTION(moll) {
     return setup(P, M_HALFPI);
 }
 
-PJ *PROJECTION(wag4) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(wag4) {
+    struct pj_moll_data *Q = static_cast<struct pj_moll_data *>(
+        calloc(1, sizeof(struct pj_moll_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -91,9 +91,9 @@ PJ *PROJECTION(wag4) {
     return setup(P, M_PI / 3.);
 }
 
-PJ *PROJECTION(wag5) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(wag5) {
+    struct pj_moll_data *Q = static_cast<struct pj_moll_data *>(
+        calloc(1, sizeof(struct pj_moll_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -108,3 +108,6 @@ PJ *PROJECTION(wag5) {
 
     return P;
 }
+
+#undef MAX_ITER
+#undef LOOP_TOL

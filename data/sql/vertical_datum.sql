@@ -254,6 +254,12 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1363','Alboran',NULL,NULL,NULL,NULL,
 INSERT INTO "usage" VALUES('EPSG','19909','vertical_datum','EPSG','1363','EPSG','4741','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','1364','Melilla',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','19910','vertical_datum','EPSG','1364','EPSG','4740','EPSG','1178');
+INSERT INTO "vertical_datum" VALUES('EPSG','1368','Dansk Vertikal Reference 1990 (2002)',NULL,'2002-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','20431','vertical_datum','EPSG','1368','EPSG','3237','EPSG','1142');
+INSERT INTO "vertical_datum" VALUES('EPSG','1369','Dansk Vertikal Reference 1990 (2013)',NULL,'2013-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','20432','vertical_datum','EPSG','1369','EPSG','3237','EPSG','1142');
+INSERT INTO "vertical_datum" VALUES('EPSG','1370','Dansk Vertikal Reference 1990 (2023)',NULL,'2023-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','20433','vertical_datum','EPSG','1370','EPSG','3237','EPSG','1142');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,NULL,0);
@@ -464,7 +470,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','5204','International Great Lakes Dat
 INSERT INTO "usage" VALUES('EPSG','13410','vertical_datum','EPSG','5204','EPSG','3468','EPSG','1202');
 INSERT INTO "vertical_datum" VALUES('EPSG','5205','International Great Lakes Datum 1985',NULL,'1985-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13411','vertical_datum','EPSG','5205','EPSG','3468','EPSG','1202');
-INSERT INTO "vertical_datum" VALUES('EPSG','5206','Dansk Vertikal Reference 1990',NULL,'1990-01-01',NULL,NULL,NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','5206','Dansk Vertikal Reference 1990 (2000)',NULL,'2000-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13412','vertical_datum','EPSG','5206','EPSG','3237','EPSG','1142');
 INSERT INTO "vertical_datum" VALUES('EPSG','5207','Croatian Vertical Reference Datum 1971',NULL,'1971-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13413','vertical_datum','EPSG','5207','EPSG','3234','EPSG','1027');
@@ -486,3 +492,5 @@ INSERT INTO "vertical_datum" VALUES('EPSG','5215','European Vertical Reference F
 INSERT INTO "usage" VALUES('EPSG','14655','vertical_datum','EPSG','5215','EPSG','3594','EPSG','1027');
 INSERT INTO "vertical_datum" VALUES('EPSG','1288','British Isles height ensemble',NULL,NULL,NULL,0.4,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14086','vertical_datum','EPSG','1288','EPSG','4606','EPSG','1026');
+INSERT INTO "vertical_datum" VALUES('EPSG','1371','Dansk Vertikal Reference 1990 ensemble',NULL,NULL,NULL,0.05,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','20365','vertical_datum','EPSG','1371','EPSG','3237','EPSG','1142');

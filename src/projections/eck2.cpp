@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -45,7 +45,7 @@ static PJ_LP eck2_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return (lp);
 }
 
-PJ *PROJECTION(eck2) {
+PJ *PJ_PROJECTION(eck2) {
     P->es = 0.;
     P->inv = eck2_s_inverse;
     P->fwd = eck2_s_forward;

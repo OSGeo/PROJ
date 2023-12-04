@@ -20,7 +20,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>
@@ -29,7 +28,7 @@
 #define EPS10 1e-10
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_ccon_data {
     double phi1;
     double ctgphi1;
     double sinphi1;
@@ -43,7 +42,7 @@ PROJ_HEAD(ccon, "Central Conic")
 
 static PJ_XY ccon_forward(PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ccon_data *Q = static_cast<struct pj_ccon_data *>(P->opaque);
     double r;
 
     r = Q->ctgphi1 - tan(lp.phi - Q->phi1);
@@ -55,7 +54,7 @@ static PJ_XY ccon_forward(PJ_LP lp, PJ *P) {
 
 static PJ_LP ccon_inverse(PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ccon_data *Q = static_cast<struct pj_ccon_data *>(P->opaque);
 
     xy.y = Q->ctgphi1 - xy.y;
     lp.phi = Q->phi1 - atan(hypot(xy.x, xy.y) - Q->ctgphi1);
@@ -64,33 +63,33 @@ static PJ_LP ccon_inverse(PJ_XY xy, PJ *P) {
     return lp;
 }
 
-static PJ *destructor(PJ *P, int errlev) {
+static PJ *pj_ccon_destructor(PJ *P, int errlev) {
     if (nullptr == P)
         return nullptr;
 
     if (nullptr == P->opaque)
         return pj_default_destructor(P, errlev);
 
-    free(static_cast<struct pj_opaque *>(P->opaque)->en);
+    free(static_cast<struct pj_ccon_data *>(P->opaque)->en);
     return pj_default_destructor(P, errlev);
 }
 
-PJ *PROJECTION(ccon) {
+PJ *PJ_PROJECTION(ccon) {
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_ccon_data *Q = static_cast<struct pj_ccon_data *>(
+        calloc(1, sizeof(struct pj_ccon_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
-    P->destructor = destructor;
+    P->destructor = pj_ccon_destructor;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     if (fabs(Q->phi1) < EPS10) {
         proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be > 0"));
-        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return pj_ccon_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     if (!(Q->en = pj_enfn(P->n)))
-        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+        return pj_ccon_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     Q->sinphi1 = sin(Q->phi1);
     Q->cosphi1 = cos(Q->phi1);
@@ -101,3 +100,5 @@ PJ *PROJECTION(ccon) {
 
     return P;
 }
+
+#undef EPS10

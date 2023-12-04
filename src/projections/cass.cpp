@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -91,7 +91,7 @@ static PJ_LP cass_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-static PJ *destructor(PJ *P, int errlev) { /* Destructor */
+static PJ *pj_cass_destructor(PJ *P, int errlev) { /* Destructor */
     if (nullptr == P)
         return nullptr;
 
@@ -102,7 +102,7 @@ static PJ *destructor(PJ *P, int errlev) { /* Destructor */
     return pj_default_destructor(P, errlev);
 }
 
-PJ *PROJECTION(cass) {
+PJ *PJ_PROJECTION(cass) {
 
     /* Spheroidal? */
     if (0 == P->es) {
@@ -117,7 +117,7 @@ PJ *PROJECTION(cass) {
     P->opaque = Q;
     if (nullptr == P->opaque)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
-    P->destructor = destructor;
+    P->destructor = pj_cass_destructor;
 
     Q->en = pj_enfn(P->n);
     if (nullptr == Q->en)
@@ -131,3 +131,9 @@ PJ *PROJECTION(cass) {
 
     return P;
 }
+
+#undef C1
+#undef C2
+#undef C3
+#undef C4
+#undef C5

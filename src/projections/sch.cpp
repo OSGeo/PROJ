@@ -33,8 +33,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#define PJ_LIB_
-
 #include <errno.h>
 #include <math.h>
 
@@ -42,7 +40,7 @@
 #include "proj_internal.h"
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_sch_data {
     double plat; /*Peg Latitude */
     double plon; /*Peg Longitude*/
     double phdg; /*Peg heading  */
@@ -59,7 +57,7 @@ PROJ_HEAD(sch, "Spherical Cross-track Height")
 "\n\tMisc\n\tplat_0= plon_0= phdg_0= [h_0=]";
 
 static PJ_LPZ sch_inverse3d(PJ_XYZ xyz, PJ *P) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_sch_data *Q = static_cast<struct pj_sch_data *>(P->opaque);
 
     PJ_LPZ lpz;
     lpz.lam = xyz.x * (P->a / Q->rcurv);
@@ -85,7 +83,7 @@ static PJ_LPZ sch_inverse3d(PJ_XYZ xyz, PJ *P) {
 }
 
 static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_sch_data *Q = static_cast<struct pj_sch_data *>(P->opaque);
 
     /* Convert lat long to geocentric coordinates */
     PJ_XYZ xyz = Q->cart->fwd3d(lpz, Q->cart);
@@ -114,11 +112,11 @@ static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
     return xyz;
 }
 
-static PJ *destructor(PJ *P, int errlev) {
+static PJ *pj_sch_destructor(PJ *P, int errlev) {
     if (nullptr == P)
         return nullptr;
 
-    auto Q = static_cast<struct pj_opaque *>(P->opaque);
+    auto Q = static_cast<struct pj_sch_data *>(P->opaque);
     if (Q) {
         if (Q->cart)
             Q->cart->destructor(Q->cart, errlev);
@@ -129,14 +127,14 @@ static PJ *destructor(PJ *P, int errlev) {
     return pj_default_destructor(P, errlev);
 }
 
-static PJ *setup(PJ *P) { /* general initialization */
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+static PJ *pj_sch_setup(PJ *P) { /* general initialization */
+    struct pj_sch_data *Q = static_cast<struct pj_sch_data *>(P->opaque);
 
     /* Setup original geocentric system */
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     Q->cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (Q->cart == nullptr)
-        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+        return pj_sch_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def(P, Q->cart);
@@ -160,7 +158,7 @@ static PJ *setup(PJ *P) { /* general initialization */
     /* Set up local sphere at the given peg point */
     Q->cart_sph = proj_create(P->ctx, "+proj=cart +a=1");
     if (Q->cart_sph == nullptr)
-        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+        return pj_sch_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     pj_calc_ellipsoid_params(Q->cart_sph, Q->rcurv, 0);
 
     /* Set up the transformation matrices */
@@ -188,13 +186,13 @@ static PJ *setup(PJ *P) { /* general initialization */
     return P;
 }
 
-PJ *PROJECTION(sch) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(sch) {
+    struct pj_sch_data *Q = static_cast<struct pj_sch_data *>(
+        calloc(1, sizeof(struct pj_sch_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
-    P->destructor = destructor;
+    P->destructor = pj_sch_destructor;
 
     Q->h0 = 0.0;
 
@@ -226,5 +224,5 @@ PJ *PROJECTION(sch) {
     if (pj_param(P->ctx, P->params, "th_0").i)
         Q->h0 = pj_param(P->ctx, P->params, "dh_0").f;
 
-    return setup(P);
+    return pj_sch_setup(P);
 }

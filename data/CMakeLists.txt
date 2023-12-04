@@ -38,6 +38,8 @@ set(GRIDSHIFT_FILES ${GSB_FILES} ${GTX_FILES})
 
 file(GLOB SCHEMA_FILES *.json)
 
+file(GLOB GEOTIFF_FILES *.tif)
+
 set(ALL_SQL_IN "${CMAKE_CURRENT_BINARY_DIR}/all.sql.in")
 set(PROJ_DB "${CMAKE_CURRENT_BINARY_DIR}/proj.db")
 include(sql_filelist.cmake)
@@ -107,6 +109,7 @@ set(ALL_DATA_FILE
   ${GRIDSHIFT_FILES}
   ${PROJ_DB}
   ${SCHEMA_FILES}
+  ${GEOTIFF_FILES}
 )
 install(
   FILES ${ALL_DATA_FILE}

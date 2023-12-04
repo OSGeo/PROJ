@@ -51,7 +51,7 @@ format, up component is (was) stored in the GTX format. Both grids are
 * DEALINGS IN THE SOFTWARE.
 *
 ***********************************************************************/
-#define PJ_LIB_
+
 #include "grids.hpp"
 #include "proj.h"
 #include "proj_internal.h"
@@ -80,8 +80,9 @@ struct deformationData {
 
 // ---------------------------------------------------------------------------
 
-static bool get_grid_values(PJ *P, deformationData *Q, const PJ_LP &lp,
-                            double &vx, double &vy, double &vz) {
+static bool pj_deformation_get_grid_values(PJ *P, deformationData *Q,
+                                           const PJ_LP &lp, double &vx,
+                                           double &vy, double &vz) {
     GenericShiftGridSet *gridset = nullptr;
     auto grid = pj_find_generic_grid(Q->grids, lp, gridset);
     if (!grid) {
@@ -122,7 +123,7 @@ static bool get_grid_values(PJ *P, deformationData *Q, const PJ_LP &lp,
                                                  sampleN, sampleU, vx, vy, vz,
                                                  must_retry)) {
         if (must_retry)
-            return get_grid_values(P, Q, lp, vx, vy, vz);
+            return pj_deformation_get_grid_values(P, Q, lp, vx, vy, vz);
         return false;
     }
     // divide by 1000 to get m/year
@@ -133,7 +134,7 @@ static bool get_grid_values(PJ *P, deformationData *Q, const PJ_LP &lp,
 }
 
 /********************************************************************************/
-static PJ_XYZ get_grid_shift(PJ *P, const PJ_XYZ &cartesian) {
+static PJ_XYZ pj_deformation_get_grid_shift(PJ *P, const PJ_XYZ &cartesian) {
     /********************************************************************************
         Read correction values from grid. The cartesian input coordinates are
         converted to geodetic coordinates in order look up the correction values
@@ -159,7 +160,7 @@ static PJ_XYZ get_grid_shift(PJ *P, const PJ_XYZ &cartesian) {
         double vx = 0;
         double vy = 0;
         double vz = 0;
-        if (!get_grid_values(P, Q, geodetic.lp, vx, vy, vz)) {
+        if (!pj_deformation_get_grid_values(P, Q, geodetic.lp, vx, vy, vz)) {
             return proj_coord_error().xyz;
         }
         shift.xyz.x = vx;
@@ -201,7 +202,7 @@ static PJ_XYZ get_grid_shift(PJ *P, const PJ_XYZ &cartesian) {
 }
 
 /********************************************************************************/
-static PJ_XYZ reverse_shift(PJ *P, PJ_XYZ input, double dt) {
+static PJ_XYZ pj_deformation_reverse_shift(PJ *P, PJ_XYZ input, double dt) {
     /********************************************************************************
         Iteratively determine the reverse grid shift correction values.
     *********************************************************************************/
@@ -209,7 +210,7 @@ static PJ_XYZ reverse_shift(PJ *P, PJ_XYZ input, double dt) {
     double z0;
     int i = MAX_ITERATIONS;
 
-    delta = get_grid_shift(P, input);
+    delta = pj_deformation_get_grid_shift(P, input);
     if (delta.x == HUGE_VAL) {
         return delta;
     }
@@ -226,7 +227,7 @@ static PJ_XYZ reverse_shift(PJ *P, PJ_XYZ input, double dt) {
     out.z = input.z + dt * delta.z;
 
     do {
-        delta = get_grid_shift(P, out);
+        delta = pj_deformation_get_grid_shift(P, out);
 
         if (delta.x == HUGE_VAL)
             break;
@@ -245,7 +246,7 @@ static PJ_XYZ reverse_shift(PJ *P, PJ_XYZ input, double dt) {
     return out;
 }
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ pj_deformation_forward_3d(PJ_LPZ lpz, PJ *P) {
     struct deformationData *Q = (struct deformationData *)P->opaque;
     PJ_COORD out, in;
     PJ_XYZ shift;
@@ -258,7 +259,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
         return out.xyz;
     }
 
-    shift = get_grid_shift(P, in.xyz);
+    shift = pj_deformation_get_grid_shift(P, in.xyz);
     if (shift.x == HUGE_VAL) {
         return shift;
     }
@@ -270,7 +271,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     return out.xyz;
 }
 
-static void forward_4d(PJ_COORD &coo, PJ *P) {
+static void pj_deformation_forward_4d(PJ_COORD &coo, PJ *P) {
     struct deformationData *Q = (struct deformationData *)P->opaque;
     double dt;
     PJ_XYZ shift;
@@ -281,14 +282,14 @@ static void forward_4d(PJ_COORD &coo, PJ *P) {
         dt = coo.xyzt.t - Q->t_epoch;
     }
 
-    shift = get_grid_shift(P, coo.xyz);
+    shift = pj_deformation_get_grid_shift(P, coo.xyz);
 
     coo.xyzt.x += dt * shift.x;
     coo.xyzt.y += dt * shift.y;
     coo.xyzt.z += dt * shift.z;
 }
 
-static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
+static PJ_LPZ pj_deformation_reverse_3d(PJ_XYZ in, PJ *P) {
     struct deformationData *Q = (struct deformationData *)P->opaque;
     PJ_COORD out;
     out.xyz = in;
@@ -299,12 +300,12 @@ static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
         return out.lpz;
     }
 
-    out.xyz = reverse_shift(P, in, Q->dt);
+    out.xyz = pj_deformation_reverse_shift(P, in, Q->dt);
 
     return out.lpz;
 }
 
-static void reverse_4d(PJ_COORD &coo, PJ *P) {
+static void pj_deformation_reverse_4d(PJ_COORD &coo, PJ *P) {
     struct deformationData *Q = (struct deformationData *)P->opaque;
     double dt;
 
@@ -314,10 +315,10 @@ static void reverse_4d(PJ_COORD &coo, PJ *P) {
         dt = coo.xyzt.t - Q->t_epoch;
     }
 
-    coo.xyz = reverse_shift(P, coo.xyz, dt);
+    coo.xyz = pj_deformation_reverse_shift(P, coo.xyz, dt);
 }
 
-static PJ *destructor(PJ *P, int errlev) {
+static PJ *pj_deformation_destructor(PJ *P, int errlev) {
     if (nullptr == P)
         return nullptr;
 
@@ -332,15 +333,15 @@ static PJ *destructor(PJ *P, int errlev) {
     return pj_default_destructor(P, errlev);
 }
 
-PJ *TRANSFORMATION(deformation, 1) {
+PJ *PJ_TRANSFORMATION(deformation, 1) {
     auto Q = new deformationData;
     P->opaque = (void *)Q;
-    P->destructor = destructor;
+    P->destructor = pj_deformation_destructor;
 
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     Q->cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (Q->cart == nullptr)
-        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+        return pj_deformation_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def(P, Q->cart);
@@ -353,7 +354,7 @@ PJ *TRANSFORMATION(deformation, 1) {
     if (!has_grids && (!has_xy_grids || !has_z_grids)) {
         proj_log_error(P, _("Either +grids or (+xy_grids and +z_grids) should "
                             "be specified."));
-        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        return pj_deformation_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     if (has_grids) {
@@ -361,19 +362,22 @@ PJ *TRANSFORMATION(deformation, 1) {
         /* Was gridlist compiled properly? */
         if (proj_errno(P)) {
             proj_log_error(P, _("could not find required grid(s).)"));
-            return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+            return pj_deformation_destructor(
+                P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
         }
     } else {
         Q->hgrids = pj_hgrid_init(P, "xy_grids");
         if (proj_errno(P)) {
             proj_log_error(P, _("could not find requested xy_grid(s)."));
-            return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+            return pj_deformation_destructor(
+                P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
         }
 
         Q->vgrids = pj_vgrid_init(P, "z_grids");
         if (proj_errno(P)) {
             proj_log_error(P, _("could not find requested z_grid(s)."));
-            return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+            return pj_deformation_destructor(
+                P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
         }
     }
 
@@ -385,7 +389,7 @@ PJ *TRANSFORMATION(deformation, 1) {
     if (pj_param_exists(P->params, "t_obs")) {
         proj_log_error(P,
                        _("+t_obs parameter is deprecated. Use +dt instead."));
-        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        return pj_deformation_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     Q->t_epoch = HUGE_VAL;
@@ -395,18 +399,19 @@ PJ *TRANSFORMATION(deformation, 1) {
 
     if (Q->dt == HUGE_VAL && Q->t_epoch == HUGE_VAL) {
         proj_log_error(P, _("either +dt or +t_epoch needs to be set."));
-        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        return pj_deformation_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     if (Q->dt != HUGE_VALL && Q->t_epoch != HUGE_VALL) {
         proj_log_error(P, _("+dt or +t_epoch are mutually exclusive."));
-        return destructor(P, PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS);
+        return pj_deformation_destructor(
+            P, PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS);
     }
 
-    P->fwd4d = forward_4d;
-    P->inv4d = reverse_4d;
-    P->fwd3d = forward_3d;
-    P->inv3d = reverse_3d;
+    P->fwd4d = pj_deformation_forward_4d;
+    P->inv4d = pj_deformation_reverse_4d;
+    P->fwd3d = pj_deformation_forward_3d;
+    P->inv3d = pj_deformation_reverse_3d;
     P->fwd = nullptr;
     P->inv = nullptr;
 
@@ -415,3 +420,6 @@ PJ *TRANSFORMATION(deformation, 1) {
 
     return P;
 }
+
+#undef TOL
+#undef MAX_ITERATIONS

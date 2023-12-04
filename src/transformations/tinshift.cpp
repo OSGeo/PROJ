@@ -25,7 +25,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
 #define PROJ_COMPILATION
 
 #include "tinshift.hpp"
@@ -49,7 +48,7 @@ struct tinshiftData {
 
 } // namespace
 
-static PJ *destructor(PJ *P, int errlev) {
+static PJ *pj_tinshift_destructor(PJ *P, int errlev) {
     if (nullptr == P)
         return nullptr;
 
@@ -78,18 +77,19 @@ static void tinshift_reverse_4d(PJ_COORD &coo, PJ *P) {
     }
 }
 
-PJ *TRANSFORMATION(tinshift, 1) {
+PJ *PJ_TRANSFORMATION(tinshift, 1) {
 
     const char *filename = pj_param(P->ctx, P->params, "sfile").s;
     if (!filename) {
         proj_log_error(P, _("+file= should be specified."));
-        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        return pj_tinshift_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     auto file = NS_PROJ::FileManager::open_resource_file(P->ctx, filename);
     if (nullptr == file) {
         proj_log_error(P, _("Cannot open %s"), filename);
-        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+        return pj_tinshift_destructor(
+            P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
     file->seek(0, SEEK_END);
     unsigned long long size = file->tell();
@@ -98,7 +98,8 @@ PJ *TRANSFORMATION(tinshift, 1) {
     // large for any valid use !
     if (size > 100 * 1024 * 1024) {
         proj_log_error(P, _("File %s too large"), filename);
-        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+        return pj_tinshift_destructor(
+            P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
     file->seek(0);
     std::string jsonStr;
@@ -106,25 +107,26 @@ PJ *TRANSFORMATION(tinshift, 1) {
         jsonStr.resize(static_cast<size_t>(size));
     } catch (const std::bad_alloc &) {
         proj_log_error(P, _("Cannot read %s. Not enough memory"), filename);
-        return destructor(P, PROJ_ERR_OTHER);
+        return pj_tinshift_destructor(P, PROJ_ERR_OTHER);
     }
     if (file->read(&jsonStr[0], jsonStr.size()) != jsonStr.size()) {
         proj_log_error(P, _("Cannot read %s"), filename);
-        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+        return pj_tinshift_destructor(
+            P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
 
     auto Q = new tinshiftData();
     P->opaque = (void *)Q;
-    P->destructor = destructor;
+    P->destructor = pj_tinshift_destructor;
 
     try {
         Q->evaluator.reset(new Evaluator(TINShiftFile::parse(jsonStr)));
     } catch (const std::exception &e) {
         proj_log_error(P, _("invalid model: %s"), e.what());
-        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+        return pj_tinshift_destructor(
+            P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
 
-    P->destructor = destructor;
     P->fwd4d = tinshift_forward_4d;
     P->inv4d = tinshift_reverse_4d;
     P->left = PJ_IO_UNITS_WHATEVER;

@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>
@@ -8,7 +8,7 @@ PROJ_HEAD(tpeqd, "Two Point Equidistant")
 "\n\tMisc Sph\n\tlat_1= lon_1= lat_2= lon_2=";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_tpeqd {
     double cp1, sp1, cp2, sp2, ccs, cs, sc, r2z0, z02, dlam2;
     double hz0, thz0, rhshz0, ca, sa, lp, lamc;
 };
@@ -16,7 +16,7 @@ struct pj_opaque {
 
 static PJ_XY tpeqd_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_tpeqd *Q = static_cast<struct pj_tpeqd *>(P->opaque);
     double t, z1, z2, dl1, dl2, sp, cp;
 
     sp = sin(lp.phi);
@@ -39,7 +39,7 @@ static PJ_XY tpeqd_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP tpeqd_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_tpeqd *Q = static_cast<struct pj_tpeqd *>(P->opaque);
     double cz1, cz2, s, d, cp, sp;
 
     cz1 = cos(hypot(xy.y, xy.x + Q->hz0));
@@ -60,10 +60,10 @@ static PJ_LP tpeqd_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(tpeqd) {
+PJ *PJ_PROJECTION(tpeqd) {
     double lam_1, lam_2, phi_1, phi_2, A12;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_tpeqd *Q =
+        static_cast<struct pj_tpeqd *>(calloc(1, sizeof(struct pj_tpeqd)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

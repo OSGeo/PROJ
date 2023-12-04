@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <float.h>
@@ -12,22 +12,22 @@ PROJ_HEAD(gnom, "Gnomonic") "\n\tAzi, Sph";
 
 #define EPS10 1.e-10
 
-namespace { // anonymous namespace
+namespace pj_gnom_ns {
 enum Mode { N_POLE = 0, S_POLE = 1, EQUIT = 2, OBLIQ = 3 };
-} // anonymous namespace
+}
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_gnom_data {
     double sinph0;
     double cosph0;
-    enum Mode mode;
+    enum pj_gnom_ns::Mode mode;
     struct geod_geodesic g;
 };
 } // anonymous namespace
 
 static PJ_XY gnom_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_gnom_data *Q = static_cast<struct pj_gnom_data *>(P->opaque);
     double coslam, cosphi, sinphi;
 
     sinphi = sin(lp.phi);
@@ -35,16 +35,16 @@ static PJ_XY gnom_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     coslam = cos(lp.lam);
 
     switch (Q->mode) {
-    case EQUIT:
+    case pj_gnom_ns::EQUIT:
         xy.y = cosphi * coslam;
         break;
-    case OBLIQ:
+    case pj_gnom_ns::OBLIQ:
         xy.y = Q->sinph0 * sinphi + Q->cosph0 * cosphi * coslam;
         break;
-    case S_POLE:
+    case pj_gnom_ns::S_POLE:
         xy.y = -sinphi;
         break;
-    case N_POLE:
+    case pj_gnom_ns::N_POLE:
         xy.y = sinphi;
         break;
     }
@@ -56,16 +56,16 @@ static PJ_XY gnom_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
     xy.x = (xy.y = 1. / xy.y) * cosphi * sin(lp.lam);
     switch (Q->mode) {
-    case EQUIT:
+    case pj_gnom_ns::EQUIT:
         xy.y *= sinphi;
         break;
-    case OBLIQ:
+    case pj_gnom_ns::OBLIQ:
         xy.y *= Q->cosph0 * sinphi - Q->sinph0 * cosphi * coslam;
         break;
-    case N_POLE:
+    case pj_gnom_ns::N_POLE:
         coslam = -coslam;
         PROJ_FALLTHROUGH;
-    case S_POLE:
+    case pj_gnom_ns::S_POLE:
         xy.y *= cosphi * coslam;
         break;
     }
@@ -74,7 +74,7 @@ static PJ_XY gnom_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP gnom_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_gnom_data *Q = static_cast<struct pj_gnom_data *>(P->opaque);
     double rh, cosz, sinz;
 
     rh = hypot(xy.x, xy.y);
@@ -86,7 +86,7 @@ static PJ_LP gnom_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
         lp.lam = 0.;
     } else {
         switch (Q->mode) {
-        case OBLIQ:
+        case pj_gnom_ns::OBLIQ:
             lp.phi = cosz * Q->sinph0 + xy.y * sinz * Q->cosph0 / rh;
             if (fabs(lp.phi) >= 1.)
                 lp.phi = lp.phi > 0. ? M_HALFPI : -M_HALFPI;
@@ -95,7 +95,7 @@ static PJ_LP gnom_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             xy.y = (cosz - Q->sinph0 * sin(lp.phi)) * rh;
             xy.x *= sinz * Q->cosph0;
             break;
-        case EQUIT:
+        case pj_gnom_ns::EQUIT:
             lp.phi = xy.y * sinz / rh;
             if (fabs(lp.phi) >= 1.)
                 lp.phi = lp.phi > 0. ? M_HALFPI : -M_HALFPI;
@@ -104,10 +104,10 @@ static PJ_LP gnom_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             xy.y = cosz * rh;
             xy.x *= sinz;
             break;
-        case S_POLE:
+        case pj_gnom_ns::S_POLE:
             lp.phi -= M_HALFPI;
             break;
-        case N_POLE:
+        case pj_gnom_ns::N_POLE:
             lp.phi = M_HALFPI - lp.phi;
             xy.y = -xy.y;
             break;
@@ -119,7 +119,7 @@ static PJ_LP gnom_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
 
 static PJ_XY gnom_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_gnom_data *Q = static_cast<struct pj_gnom_data *>(P->opaque);
 
     double lat0 = P->phi0 / DEG_TO_RAD, lon0 = 0, lat1 = lp.phi / DEG_TO_RAD,
            lon1 = lp.lam / DEG_TO_RAD, azi0, m, M;
@@ -143,7 +143,7 @@ static PJ_LP gnom_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     static const double eps_ = 0.01 * sqrt(DBL_EPSILON);
 
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_gnom_data *Q = static_cast<struct pj_gnom_data *>(P->opaque);
 
     double lat0 = P->phi0 / DEG_TO_RAD, lon0 = 0,
            azi0 = atan2(xy.x, xy.y) / DEG_TO_RAD, // Clockwise from north
@@ -182,20 +182,20 @@ static PJ_LP gnom_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(gnom) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(gnom) {
+    struct pj_gnom_data *Q = static_cast<struct pj_gnom_data *>(
+        calloc(1, sizeof(struct pj_gnom_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     if (P->es == 0) {
         if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) {
-            Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
+            Q->mode = P->phi0 < 0. ? pj_gnom_ns::S_POLE : pj_gnom_ns::N_POLE;
         } else if (fabs(P->phi0) < EPS10) {
-            Q->mode = EQUIT;
+            Q->mode = pj_gnom_ns::EQUIT;
         } else {
-            Q->mode = OBLIQ;
+            Q->mode = pj_gnom_ns::OBLIQ;
             Q->sinph0 = sin(P->phi0);
             Q->cosph0 = cos(P->phi0);
         }

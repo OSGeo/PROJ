@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -14,7 +14,7 @@ projection that emphasizes ocean areas. The projection is a
 compilation of 12 separate sub-projections. Sinusoidal projections
 are found near the equator and Mollweide projections are found at
 higher latitudes. The transition between the two occurs at 40 degrees
-latitude and is represented by `phi_boundary`.
+latitude and is represented by `igh_o_phi_boundary`.
 
 Each sub-projection is assigned an integer label
 numbered 1 through 12. Most of this code contains logic to assign
@@ -33,31 +33,33 @@ Transition from sinusoidal to Mollweide projection
 Latitude (phi): 40deg 44' 11.8"
 */
 
-static const double phi_boundary = (40 + 44 / 60. + 11.8 / 3600.) * DEG_TO_RAD;
+constexpr double igh_o_phi_boundary =
+    (40 + 44 / 60. + 11.8 / 3600.) * DEG_TO_RAD;
 
-static const double d10 = 10 * DEG_TO_RAD;
-static const double d20 = 20 * DEG_TO_RAD;
-static const double d40 = 40 * DEG_TO_RAD;
-static const double d50 = 50 * DEG_TO_RAD;
-static const double d60 = 60 * DEG_TO_RAD;
-static const double d90 = 90 * DEG_TO_RAD;
-static const double d100 = 100 * DEG_TO_RAD;
-static const double d110 = 110 * DEG_TO_RAD;
-static const double d140 = 140 * DEG_TO_RAD;
-static const double d150 = 150 * DEG_TO_RAD;
-static const double d160 = 160 * DEG_TO_RAD;
-static const double d130 = 130 * DEG_TO_RAD;
-static const double d180 = 180 * DEG_TO_RAD;
-
-static const double EPSLN =
-    1.e-10; /* allow a little 'slack' on zone edge positions */
-
-namespace { // anonymous namespace
-struct pj_opaque {
+namespace pj_igh_o_ns {
+struct pj_igh_o_data {
     struct PJconsts *pj[12];
     double dy0;
 };
-} // anonymous namespace
+
+constexpr double d10 = 10 * DEG_TO_RAD;
+constexpr double d20 = 20 * DEG_TO_RAD;
+constexpr double d40 = 40 * DEG_TO_RAD;
+constexpr double d50 = 50 * DEG_TO_RAD;
+constexpr double d60 = 60 * DEG_TO_RAD;
+constexpr double d90 = 90 * DEG_TO_RAD;
+constexpr double d100 = 100 * DEG_TO_RAD;
+constexpr double d110 = 110 * DEG_TO_RAD;
+constexpr double d140 = 140 * DEG_TO_RAD;
+constexpr double d150 = 150 * DEG_TO_RAD;
+constexpr double d160 = 160 * DEG_TO_RAD;
+constexpr double d130 = 130 * DEG_TO_RAD;
+constexpr double d180 = 180 * DEG_TO_RAD;
+
+constexpr double EPSLN =
+    1.e-10; /* allow a little 'slack' on zone edge positions */
+
+} // namespace pj_igh_o_ns
 
 /*
 Assign an integer index representing each of the 12
@@ -66,11 +68,13 @@ longitude (lam) ranges.
 */
 
 static PJ_XY igh_o_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    using namespace pj_igh_o_ns;
+
     PJ_XY xy;
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_igh_o_data *Q = static_cast<struct pj_igh_o_data *>(P->opaque);
     int z;
 
-    if (lp.phi >= phi_boundary) {
+    if (lp.phi >= igh_o_phi_boundary) {
         if (lp.lam <= -d90)
             z = 1;
         else if (lp.lam >= d60)
@@ -84,7 +88,7 @@ static PJ_XY igh_o_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
             z = 6;
         else
             z = 5;
-    } else if (lp.phi >= -phi_boundary) {
+    } else if (lp.phi >= -igh_o_phi_boundary) {
         if (lp.lam <= -d60)
             z = 7;
         else if (lp.lam >= d90)
@@ -109,15 +113,17 @@ static PJ_XY igh_o_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 }
 
 static PJ_LP igh_o_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    using namespace pj_igh_o_ns;
+
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_igh_o_data *Q = static_cast<struct pj_igh_o_data *>(P->opaque);
     const double y90 =
         Q->dy0 + sqrt(2.0); /* lt=90 corresponds to y=y0+sqrt(2) */
 
     int z = 0;
     if (xy.y > y90 + EPSLN || xy.y < -y90 + EPSLN) /* 0 */
         z = 0;
-    else if (xy.y >= phi_boundary)
+    else if (xy.y >= igh_o_phi_boundary)
         if (xy.x <= -d90)
             z = 1;
         else if (xy.x >= d60)
@@ -131,7 +137,7 @@ static PJ_LP igh_o_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             z = 6;
         else
             z = 5;
-    else if (xy.y >= -phi_boundary) {
+    else if (xy.y >= -igh_o_phi_boundary) {
         if (xy.x <= -d60)
             z = 7;
         else if (xy.x >= d90)
@@ -211,7 +217,9 @@ static PJ_LP igh_o_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-static PJ *destructor(PJ *P, int errlev) {
+static PJ *pj_igh_o_destructor(PJ *P, int errlev) {
+    using namespace pj_igh_o_ns;
+
     int i;
     if (nullptr == P)
         return nullptr;
@@ -219,7 +227,7 @@ static PJ *destructor(PJ *P, int errlev) {
     if (nullptr == P->opaque)
         return pj_default_destructor(P, errlev);
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_igh_o_data *Q = static_cast<struct pj_igh_o_data *>(P->opaque);
 
     for (i = 0; i < 12; ++i) {
         if (Q->pj[i])
@@ -249,8 +257,9 @@ static PJ *destructor(PJ *P, int errlev) {
     -180          -60               90        180
 */
 
-static bool setup_zone(PJ *P, struct pj_opaque *Q, int n, PJ *(*proj_ptr)(PJ *),
-                       double x_0, double y_0, double lon_0) {
+static bool pj_igh_o_setup_zone(PJ *P, struct pj_igh_o_ns::pj_igh_o_data *Q,
+                                int n, PJ *(*proj_ptr)(PJ *), double x_0,
+                                double y_0, double lon_0) {
     if (!(Q->pj[n - 1] = proj_ptr(nullptr)))
         return false;
     if (!(Q->pj[n - 1] = proj_ptr(Q->pj[n - 1])))
@@ -262,28 +271,30 @@ static bool setup_zone(PJ *P, struct pj_opaque *Q, int n, PJ *(*proj_ptr)(PJ *),
     return true;
 }
 
-PJ *PROJECTION(igh_o) {
+PJ *PJ_PROJECTION(igh_o) {
+    using namespace pj_igh_o_ns;
+
     PJ_XY xy1, xy4;
-    PJ_LP lp = {0, phi_boundary};
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    PJ_LP lp = {0, igh_o_phi_boundary};
+    struct pj_igh_o_data *Q = static_cast<struct pj_igh_o_data *>(
+        calloc(1, sizeof(struct pj_igh_o_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     /* sinusoidal zones */
-    if (!setup_zone(P, Q, 4, pj_sinu, -d140, 0, -d140) ||
-        !setup_zone(P, Q, 5, pj_sinu, -d10, 0, -d10) ||
-        !setup_zone(P, Q, 6, pj_sinu, d130, 0, d130) ||
-        !setup_zone(P, Q, 7, pj_sinu, -d110, 0, -d110) ||
-        !setup_zone(P, Q, 8, pj_sinu, d20, 0, d20) ||
-        !setup_zone(P, Q, 9, pj_sinu, d150, 0, d150)) {
-        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    if (!pj_igh_o_setup_zone(P, Q, 4, pj_sinu, -d140, 0, -d140) ||
+        !pj_igh_o_setup_zone(P, Q, 5, pj_sinu, -d10, 0, -d10) ||
+        !pj_igh_o_setup_zone(P, Q, 6, pj_sinu, d130, 0, d130) ||
+        !pj_igh_o_setup_zone(P, Q, 7, pj_sinu, -d110, 0, -d110) ||
+        !pj_igh_o_setup_zone(P, Q, 8, pj_sinu, d20, 0, d20) ||
+        !pj_igh_o_setup_zone(P, Q, 9, pj_sinu, d150, 0, d150)) {
+        return pj_igh_o_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     }
 
     /* mollweide zones */
-    if (!setup_zone(P, Q, 1, pj_moll, -d140, 0, -d140)) {
-        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    if (!pj_igh_o_setup_zone(P, Q, 1, pj_moll, -d140, 0, -d140)) {
+        return pj_igh_o_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     }
 
     /* y0 ? */
@@ -295,17 +306,17 @@ PJ *PROJECTION(igh_o) {
     Q->pj[0]->y0 = Q->dy0;
 
     /* mollweide zones (cont'd) */
-    if (!setup_zone(P, Q, 2, pj_moll, -d10, Q->dy0, -d10) ||
-        !setup_zone(P, Q, 3, pj_moll, d130, Q->dy0, d130) ||
-        !setup_zone(P, Q, 10, pj_moll, -d110, -Q->dy0, -d110) ||
-        !setup_zone(P, Q, 11, pj_moll, d20, -Q->dy0, d20) ||
-        !setup_zone(P, Q, 12, pj_moll, d150, -Q->dy0, d150)) {
-        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    if (!pj_igh_o_setup_zone(P, Q, 2, pj_moll, -d10, Q->dy0, -d10) ||
+        !pj_igh_o_setup_zone(P, Q, 3, pj_moll, d130, Q->dy0, d130) ||
+        !pj_igh_o_setup_zone(P, Q, 10, pj_moll, -d110, -Q->dy0, -d110) ||
+        !pj_igh_o_setup_zone(P, Q, 11, pj_moll, d20, -Q->dy0, d20) ||
+        !pj_igh_o_setup_zone(P, Q, 12, pj_moll, d150, -Q->dy0, d150)) {
+        return pj_igh_o_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     }
 
     P->inv = igh_o_s_inverse;
     P->fwd = igh_o_s_forward;
-    P->destructor = destructor;
+    P->destructor = pj_igh_o_destructor;
     P->es = 0.;
 
     return P;

@@ -1,10 +1,10 @@
-#define PJ_LIB_
+
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>
 #include <math.h>
 
-namespace { // anonymous namespace
+namespace pj_sconics_ns {
 enum Type {
     EULER = 0,
     MURD1 = 1,
@@ -14,16 +14,16 @@ enum Type {
     TISSOT = 5,
     VITK1 = 6
 };
-} // anonymous namespace
+}
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_sconics_data {
     double n;
     double rho_c;
     double rho_0;
     double sig;
     double c1, c2;
-    enum Type type;
+    enum pj_sconics_ns::Type type;
 };
 } // anonymous namespace
 
@@ -55,7 +55,7 @@ static int phi12(PJ *P, double *del) {
         p2 = pj_param(P->ctx, P->params, "rlat_2").f;
         *del = 0.5 * (p2 - p1);
         const double sig = 0.5 * (p2 + p1);
-        static_cast<struct pj_opaque *>(P->opaque)->sig = sig;
+        static_cast<struct pj_sconics_data *>(P->opaque)->sig = sig;
         err = (fabs(*del) < EPS || fabs(sig) < EPS)
                   ? PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE
                   : 0;
@@ -70,14 +70,15 @@ static int phi12(PJ *P, double *del) {
 
 static PJ_XY sconics_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_sconics_data *Q =
+        static_cast<struct pj_sconics_data *>(P->opaque);
     double rho;
 
     switch (Q->type) {
-    case MURD2:
+    case pj_sconics_ns::MURD2:
         rho = Q->rho_c + tan(Q->sig - lp.phi);
         break;
-    case PCONIC:
+    case pj_sconics_ns::PCONIC:
         rho = Q->c2 * (Q->c1 - tan(lp.phi - Q->sig));
         break;
     default:
@@ -94,7 +95,8 @@ static PJ_LP
 sconics_s_inverse(PJ_XY xy,
                   PJ *P) { /* Spheroidal, (and ellipsoidal?) inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_sconics_data *Q =
+        static_cast<struct pj_sconics_data *>(P->opaque);
     double rho;
 
     xy.y = Q->rho_0 - xy.y;
@@ -108,10 +110,10 @@ sconics_s_inverse(PJ_XY xy,
     lp.lam = atan2(xy.x, xy.y) / Q->n;
 
     switch (Q->type) {
-    case PCONIC:
+    case pj_sconics_ns::PCONIC:
         lp.phi = atan(Q->c1 - rho / Q->c2) + Q->sig;
         break;
-    case MURD2:
+    case pj_sconics_ns::MURD2:
         lp.phi = Q->sig - atan(rho - Q->rho_c);
         break;
     default:
@@ -120,11 +122,11 @@ sconics_s_inverse(PJ_XY xy,
     return lp;
 }
 
-static PJ *setup(PJ *P, enum Type type) {
+static PJ *pj_sconics_setup(PJ *P, enum pj_sconics_ns::Type type) {
     double del, cs;
     int err;
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_sconics_data *Q = static_cast<struct pj_sconics_data *>(
+        calloc(1, sizeof(struct pj_sconics_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -136,39 +138,39 @@ static PJ *setup(PJ *P, enum Type type) {
 
     switch (Q->type) {
 
-    case TISSOT:
+    case pj_sconics_ns::TISSOT:
         Q->n = sin(Q->sig);
         cs = cos(del);
         Q->rho_c = Q->n / cs + cs / Q->n;
         Q->rho_0 = sqrt((Q->rho_c - 2 * sin(P->phi0)) / Q->n);
         break;
 
-    case MURD1:
+    case pj_sconics_ns::MURD1:
         Q->rho_c = sin(del) / (del * tan(Q->sig)) + Q->sig;
         Q->rho_0 = Q->rho_c - P->phi0;
         Q->n = sin(Q->sig);
         break;
 
-    case MURD2:
+    case pj_sconics_ns::MURD2:
         Q->rho_c = (cs = sqrt(cos(del))) / tan(Q->sig);
         Q->rho_0 = Q->rho_c + tan(Q->sig - P->phi0);
         Q->n = sin(Q->sig) * cs;
         break;
 
-    case MURD3:
+    case pj_sconics_ns::MURD3:
         Q->rho_c = del / (tan(Q->sig) * tan(del)) + Q->sig;
         Q->rho_0 = Q->rho_c - P->phi0;
         Q->n = sin(Q->sig) * sin(del) * tan(del) / (del * del);
         break;
 
-    case EULER:
+    case pj_sconics_ns::EULER:
         Q->n = sin(Q->sig) * sin(del) / del;
         del *= 0.5;
         Q->rho_c = del / (tan(del) * tan(Q->sig)) + Q->sig;
         Q->rho_0 = Q->rho_c - P->phi0;
         break;
 
-    case PCONIC:
+    case pj_sconics_ns::PCONIC:
         Q->n = sin(Q->sig);
         Q->c2 = cos(del);
         Q->c1 = 1. / tan(Q->sig);
@@ -183,7 +185,7 @@ static PJ *setup(PJ *P, enum Type type) {
         Q->rho_0 = Q->c2 * (Q->c1 - tan(del));
         break;
 
-    case VITK1:
+    case pj_sconics_ns::VITK1:
         cs = tan(del);
         Q->n = cs * sin(Q->sig) / del;
         Q->rho_c = del / (cs * tan(Q->sig)) + Q->sig;
@@ -197,16 +199,20 @@ static PJ *setup(PJ *P, enum Type type) {
     return (P);
 }
 
-PJ *PROJECTION(euler) { return setup(P, EULER); }
+PJ *PJ_PROJECTION(euler) { return pj_sconics_setup(P, pj_sconics_ns::EULER); }
 
-PJ *PROJECTION(tissot) { return setup(P, TISSOT); }
+PJ *PJ_PROJECTION(tissot) { return pj_sconics_setup(P, pj_sconics_ns::TISSOT); }
 
-PJ *PROJECTION(murd1) { return setup(P, MURD1); }
+PJ *PJ_PROJECTION(murd1) { return pj_sconics_setup(P, pj_sconics_ns::MURD1); }
 
-PJ *PROJECTION(murd2) { return setup(P, MURD2); }
+PJ *PJ_PROJECTION(murd2) { return pj_sconics_setup(P, pj_sconics_ns::MURD2); }
 
-PJ *PROJECTION(murd3) { return setup(P, MURD3); }
+PJ *PJ_PROJECTION(murd3) { return pj_sconics_setup(P, pj_sconics_ns::MURD3); }
 
-PJ *PROJECTION(pconic) { return setup(P, PCONIC); }
+PJ *PJ_PROJECTION(pconic) { return pj_sconics_setup(P, pj_sconics_ns::PCONIC); }
 
-PJ *PROJECTION(vitk1) { return setup(P, VITK1); }
+PJ *PJ_PROJECTION(vitk1) { return pj_sconics_setup(P, pj_sconics_ns::VITK1); }
+
+#undef EPS10
+#undef EPS
+#undef LINE2

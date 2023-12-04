@@ -315,6 +315,17 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
     :envvar:`OSGEO4W_ROOT` (if set), otherwise is ``c:/OSGeo4W``.
     Default for Unix-like is ``/usr/local/``.
 
+.. option:: CMAKE_UNITY_BUILD=OFF
+
+    .. versionadded:: 9.4
+
+    Default is OFF. This can be set to ON to build PROJ using the
+    https://cmake.org/cmake/help/latest/variable/CMAKE_UNITY_BUILD.html feature.
+    This helps speeding PROJ build times. This feature is still considered
+    experimental for now, and could hide subtle bugs (we are not aware of
+    any at writing time though). We don't recommend it for mission critical
+    builds.
+
 .. option:: ENABLE_IPO=OFF
 
     Build library using the compiler's `interprocedural optimization

@@ -20,7 +20,6 @@
  * DEALINGS IN THE SOFTWARE.
  *
  ***********************************************************************/
-#define PJ_LIB_
 
 #include <errno.h>
 #include <math.h>
@@ -77,7 +76,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 /* Arcsecond to radians */
 #define ARCSEC_TO_RAD (DEG_TO_RAD / 3600.0)
 
-PJ *TRANSFORMATION(vertoffset, 1) {
+PJ *PJ_TRANSFORMATION(vertoffset, 1) {
     struct pj_opaque_vertoffset *Q = static_cast<struct pj_opaque_vertoffset *>(
         calloc(1, sizeof(struct pj_opaque_vertoffset)));
     if (nullptr == Q)

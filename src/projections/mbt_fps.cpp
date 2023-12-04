@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -45,7 +45,7 @@ static PJ_LP mbt_fps_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return (lp);
 }
 
-PJ *PROJECTION(mbt_fps) {
+PJ *PJ_PROJECTION(mbt_fps) {
 
     P->es = 0;
     P->inv = mbt_fps_s_inverse;
@@ -53,3 +53,12 @@ PJ *PROJECTION(mbt_fps) {
 
     return P;
 }
+
+#undef MAX_ITER
+#undef LOOP_TOL
+#undef C1
+#undef C2
+#undef C3
+#undef C_x
+#undef C_y
+#undef C1_2

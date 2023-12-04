@@ -42,7 +42,6 @@
 * DEALINGS IN THE SOFTWARE.
 *
 ***********************************************************************/
-#define PJ_LIB_
 
 #include <errno.h>
 #include <math.h>
@@ -52,8 +51,8 @@
 
 PROJ_HEAD(molodensky, "Molodensky transform");
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P);
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P);
+static PJ_XYZ pj_molodensky_forward_3d(PJ_LPZ lpz, PJ *P);
+static PJ_LPZ pj_molodensky_reverse_3d(PJ_XYZ xyz, PJ *P);
 
 namespace { // anonymous namespace
 struct pj_opaque_molodensky {
@@ -208,20 +207,20 @@ static PJ_LPZ calc_abridged_params(PJ_LPZ lpz, PJ *P) {
     return lpz;
 }
 
-static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
+static PJ_XY pj_molodensky_forward_2d(PJ_LP lp, PJ *P) {
     PJ_COORD point = {{0, 0, 0, 0}};
 
     point.lp = lp;
     // Assigning in 2 steps avoids cppcheck warning
     // "Overlapping read/write of union is undefined behavior"
     // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-    const auto xyz = forward_3d(point.lpz, P);
+    const auto xyz = pj_molodensky_forward_3d(point.lpz, P);
     point.xyz = xyz;
 
     return point.xy;
 }
 
-static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
+static PJ_LP pj_molodensky_reverse_2d(PJ_XY xy, PJ *P) {
     PJ_COORD point = {{0, 0, 0, 0}};
 
     point.xy = xy;
@@ -229,13 +228,13 @@ static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
     // Assigning in 2 steps avoids cppcheck warning
     // "Overlapping read/write of union is undefined behavior"
     // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-    const auto lpz = reverse_3d(point.xyz, P);
+    const auto lpz = pj_molodensky_reverse_3d(point.xyz, P);
     point.lpz = lpz;
 
     return point.lp;
 }
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ pj_molodensky_forward_3d(PJ_LPZ lpz, PJ *P) {
     struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *)P->opaque;
     PJ_COORD point = {{0, 0, 0, 0}};
 
@@ -260,15 +259,15 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     return point.xyz;
 }
 
-static void forward_4d(PJ_COORD &obs, PJ *P) {
+static void pj_molodensky_forward_4d(PJ_COORD &obs, PJ *P) {
     // Assigning in 2 steps avoids cppcheck warning
     // "Overlapping read/write of union is undefined behavior"
     // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-    const auto xyz = forward_3d(obs.lpz, P);
+    const auto xyz = pj_molodensky_forward_3d(obs.lpz, P);
     obs.xyz = xyz;
 }
 
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ pj_molodensky_reverse_3d(PJ_XYZ xyz, PJ *P) {
     struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *)P->opaque;
     PJ_COORD point = {{0, 0, 0, 0}};
     PJ_LPZ lpz;
@@ -293,27 +292,27 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     return point.lpz;
 }
 
-static void reverse_4d(PJ_COORD &obs, PJ *P) {
+static void pj_molodensky_reverse_4d(PJ_COORD &obs, PJ *P) {
     // Assigning in 2 steps avoids cppcheck warning
     // "Overlapping read/write of union is undefined behavior"
     // Cf https://github.com/OSGeo/PROJ/pull/3527#pullrequestreview-1233332710
-    const auto lpz = reverse_3d(obs.xyz, P);
+    const auto lpz = pj_molodensky_reverse_3d(obs.xyz, P);
     obs.lpz = lpz;
 }
 
-PJ *TRANSFORMATION(molodensky, 1) {
+PJ *PJ_TRANSFORMATION(molodensky, 1) {
     struct pj_opaque_molodensky *Q = static_cast<struct pj_opaque_molodensky *>(
         calloc(1, sizeof(struct pj_opaque_molodensky)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = (void *)Q;
 
-    P->fwd4d = forward_4d;
-    P->inv4d = reverse_4d;
-    P->fwd3d = forward_3d;
-    P->inv3d = reverse_3d;
-    P->fwd = forward_2d;
-    P->inv = reverse_2d;
+    P->fwd4d = pj_molodensky_forward_4d;
+    P->inv4d = pj_molodensky_reverse_4d;
+    P->fwd3d = pj_molodensky_forward_3d;
+    P->inv3d = pj_molodensky_reverse_3d;
+    P->fwd = pj_molodensky_forward_2d;
+    P->inv = pj_molodensky_reverse_2d;
 
     P->left = PJ_IO_UNITS_RADIANS;
     P->right = PJ_IO_UNITS_RADIANS;

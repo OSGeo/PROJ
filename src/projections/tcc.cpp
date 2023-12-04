@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -23,7 +23,7 @@ static PJ_XY tcc_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-PJ *PROJECTION(tcc) {
+PJ *PJ_PROJECTION(tcc) {
     P->es = 0.;
     P->fwd = tcc_s_forward;
     P->inv = nullptr;

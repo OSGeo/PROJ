@@ -35,8 +35,6 @@
  *  https://en.wikipedia.org/wiki/Peirce_quincuncial_projection
  */
 
-#define PJ_LIB_
-
 #include <errno.h>
 #include <math.h>
 
@@ -70,7 +68,7 @@ enum peirce_shape {
     PEIRCE_Q_VERTICAL,
 };
 
-struct pj_opaque {
+struct pj_adams_data {
     projection_type mode;
     peirce_shape pqshape;
     double scrollx = 0.0;
@@ -113,8 +111,8 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
     double a = 0., b = 0.;
     bool sm = false, sn = false;
     PJ_XY xy;
-    const struct pj_opaque *Q =
-        static_cast<const struct pj_opaque *>(P->opaque);
+    const struct pj_adams_data *Q =
+        static_cast<const struct pj_adams_data *>(P->opaque);
 
     switch (Q->mode) {
     case GUYOU:
@@ -386,9 +384,9 @@ static PJ_LP peirce_q_diamond_inverse(PJ_XY xy, PJ *P) {
     return pj_generic_inverse_2d(xy, P, lp, deltaXYTolerance);
 }
 
-static PJ *setup(PJ *P, projection_type mode) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+static PJ *pj_adams_setup(PJ *P, projection_type mode) {
+    struct pj_adams_data *Q = static_cast<struct pj_adams_data *>(
+        calloc(1, sizeof(struct pj_adams_data)));
 
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
@@ -458,12 +456,15 @@ static PJ *setup(PJ *P, projection_type mode) {
     return P;
 }
 
-PJ *PROJECTION(guyou) { return setup(P, GUYOU); }
+PJ *PJ_PROJECTION(guyou) { return pj_adams_setup(P, GUYOU); }
 
-PJ *PROJECTION(peirce_q) { return setup(P, PEIRCE_Q); }
+PJ *PJ_PROJECTION(peirce_q) { return pj_adams_setup(P, PEIRCE_Q); }
 
-PJ *PROJECTION(adams_hemi) { return setup(P, ADAMS_HEMI); }
+PJ *PJ_PROJECTION(adams_hemi) { return pj_adams_setup(P, ADAMS_HEMI); }
 
-PJ *PROJECTION(adams_ws1) { return setup(P, ADAMS_WS1); }
+PJ *PJ_PROJECTION(adams_ws1) { return pj_adams_setup(P, ADAMS_WS1); }
 
-PJ *PROJECTION(adams_ws2) { return setup(P, ADAMS_WS2); }
+PJ *PJ_PROJECTION(adams_ws2) { return pj_adams_setup(P, ADAMS_WS2); }
+
+#undef TOL
+#undef RSQRT2

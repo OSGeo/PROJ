@@ -26,8 +26,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB_
-
 #include <math.h>
 
 #include "proj.h"
@@ -45,7 +43,7 @@ static void inverse(PJ_COORD &coo, PJ *P) {
     coo = pj_geocentric_latitude(P, PJ_INV, coo);
 }
 
-static PJ *CONVERSION(geoc, 1) {
+static PJ *PJ_CONVERSION(geoc, 1) {
     P->inv4d = inverse;
     P->fwd4d = forward;
 

@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <math.h>
 
@@ -32,7 +32,7 @@ static PJ_LP gall_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(gall) {
+PJ *PJ_PROJECTION(gall) {
     P->es = 0.0;
 
     P->inv = gall_s_inverse;

@@ -9,8 +9,6 @@
   Port to PROJ by Philippe Rivière, 21 September 2018
 */
 
-#define PJ_LIB_
-
 #include <errno.h>
 #include <math.h>
 
@@ -21,7 +19,7 @@ PROJ_HEAD(bertin1953, "Bertin 1953")
 "\n\tMisc Sph no inv.";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_bertin1953 {
     double cos_delta_phi, sin_delta_phi, cos_delta_gamma, sin_delta_gamma,
         deltaLambda;
 };
@@ -29,7 +27,7 @@ struct pj_opaque {
 
 static PJ_XY bertin1953_s_forward(PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_bertin1953 *Q = static_cast<struct pj_bertin1953 *>(P->opaque);
 
     double fu = 1.4, k = 12., w = 1.68, d;
 
@@ -73,9 +71,9 @@ static PJ_XY bertin1953_s_forward(PJ_LP lp, PJ *P) {
     return xy;
 }
 
-PJ *PROJECTION(bertin1953) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(bertin1953) {
+    struct pj_bertin1953 *Q = static_cast<struct pj_bertin1953 *>(
+        calloc(1, sizeof(struct pj_bertin1953)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

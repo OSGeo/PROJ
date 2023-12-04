@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -12,7 +12,7 @@ PROJ_HEAD(fouc, "Foucaut") "\n\tPCyl, Sph";
 PROJ_HEAD(mbt_s, "McBryde-Thomas Flat-Polar Sine (No. 1)") "\n\tPCyl, Sph";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_sts {
     double C_x, C_y, C_p;
     int tan_mode;
 };
@@ -20,7 +20,7 @@ struct pj_opaque {
 
 static PJ_XY sts_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_sts *Q = static_cast<struct pj_sts *>(P->opaque);
 
     xy.x = Q->C_x * lp.lam * cos(lp.phi);
     xy.y = Q->C_y;
@@ -38,7 +38,7 @@ static PJ_XY sts_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP sts_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_sts *Q = static_cast<struct pj_sts *>(P->opaque);
 
     xy.y /= Q->C_y;
     lp.phi = Q->tan_mode ? atan(xy.y) : aasin(P->ctx, xy.y);
@@ -56,25 +56,25 @@ static PJ *setup(PJ *P, double p, double q, int mode) {
     P->es = 0.;
     P->inv = sts_s_inverse;
     P->fwd = sts_s_forward;
-    static_cast<struct pj_opaque *>(P->opaque)->C_x = q / p;
-    static_cast<struct pj_opaque *>(P->opaque)->C_y = p;
-    static_cast<struct pj_opaque *>(P->opaque)->C_p = 1 / q;
-    static_cast<struct pj_opaque *>(P->opaque)->tan_mode = mode;
+    static_cast<struct pj_sts *>(P->opaque)->C_x = q / p;
+    static_cast<struct pj_sts *>(P->opaque)->C_y = p;
+    static_cast<struct pj_sts *>(P->opaque)->C_p = 1 / q;
+    static_cast<struct pj_sts *>(P->opaque)->tan_mode = mode;
     return P;
 }
 
-PJ *PROJECTION(fouc) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(fouc) {
+    struct pj_sts *Q =
+        static_cast<struct pj_sts *>(calloc(1, sizeof(struct pj_sts)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     return setup(P, 2., 2., 1);
 }
 
-PJ *PROJECTION(kav5) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(kav5) {
+    struct pj_sts *Q =
+        static_cast<struct pj_sts *>(calloc(1, sizeof(struct pj_sts)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -82,18 +82,18 @@ PJ *PROJECTION(kav5) {
     return setup(P, 1.50488, 1.35439, 0);
 }
 
-PJ *PROJECTION(qua_aut) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(qua_aut) {
+    struct pj_sts *Q =
+        static_cast<struct pj_sts *>(calloc(1, sizeof(struct pj_sts)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     return setup(P, 2., 2., 0);
 }
 
-PJ *PROJECTION(mbt_s) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(mbt_s) {
+    struct pj_sts *Q =
+        static_cast<struct pj_sts *>(calloc(1, sizeof(struct pj_sts)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

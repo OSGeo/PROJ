@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -11,7 +11,7 @@ PROJ_HEAD(ocea, "Oblique Cylindrical Equal Area")
     "lonc= alpha= or\n\tlat_1= lat_2= lon_1= lon_2=";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_ocea {
     double rok;
     double rtk;
     double sinphi;
@@ -21,7 +21,7 @@ struct pj_opaque {
 
 static PJ_XY ocea_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ocea *Q = static_cast<struct pj_ocea *>(P->opaque);
     double t;
     xy.y = sin(lp.lam);
     t = cos(lp.lam);
@@ -35,7 +35,7 @@ static PJ_XY ocea_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP ocea_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_ocea *Q = static_cast<struct pj_ocea *>(P->opaque);
 
     xy.y /= Q->rok;
     xy.x /= Q->rtk;
@@ -46,11 +46,11 @@ static PJ_LP ocea_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(ocea) {
+PJ *PJ_PROJECTION(ocea) {
     double phi_1, phi_2, lam_1, lam_2, lonz, alpha;
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_ocea *Q =
+        static_cast<struct pj_ocea *>(calloc(1, sizeof(struct pj_ocea)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

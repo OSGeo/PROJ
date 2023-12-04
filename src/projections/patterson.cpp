@@ -39,8 +39,6 @@
  * Port to PROJ.4 by Micah Cochran, 26 March 2016
  */
 
-#define PJ_LIB_
-
 #include <math.h>
 
 #include "proj.h"
@@ -110,10 +108,22 @@ static PJ_LP patterson_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(patterson) {
+PJ *PJ_PROJECTION(patterson) {
     P->es = 0.;
     P->inv = patterson_s_inverse;
     P->fwd = patterson_s_forward;
 
     return P;
 }
+
+#undef K1
+#undef K2
+#undef K3
+#undef K4
+#undef C1
+#undef C2
+#undef C3
+#undef C4
+#undef EPS11
+#undef MAX_Y
+#undef MAX_ITER

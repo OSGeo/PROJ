@@ -1,5 +1,5 @@
 /* based upon Snyder and Linck, USGS-NMD */
-#define PJ_LIB_
+
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>
@@ -14,7 +14,7 @@ PROJ_HEAD(gs50, "Modified Stereographic of 50 U.S.") "\n\tAzi(mod)";
 #define EPSLN 1e-12
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_mod_ster_data {
     const COMPLEX *zcoeff;
     double cchio, schio;
     int n;
@@ -23,7 +23,8 @@ struct pj_opaque {
 
 static PJ_XY mod_ster_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_mod_ster_data *Q =
+        static_cast<struct pj_mod_ster_data *>(P->opaque);
     double sinlon, coslon, esphi, chi, schi, cchi, s;
     COMPLEX p;
 
@@ -52,7 +53,8 @@ static PJ_XY mod_ster_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
 
 static PJ_LP mod_ster_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_mod_ster_data *Q =
+        static_cast<struct pj_mod_ster_data *>(P->opaque);
     int nn;
     COMPLEX p, fxy, fpxy, dp;
     double den, rh = 0.0, z, sinz = 0.0, cosz = 0.0, chi, phi = 0.0, esphi;
@@ -106,8 +108,9 @@ static PJ_LP mod_ster_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-static PJ *setup(PJ *P) { /* general initialization */
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+static PJ *mod_ster_setup(PJ *P) { /* general initialization */
+    struct pj_mod_ster_data *Q =
+        static_cast<struct pj_mod_ster_data *>(P->opaque);
     double esphi, chio;
 
     if (P->es != 0.0) {
@@ -126,11 +129,11 @@ static PJ *setup(PJ *P) { /* general initialization */
 }
 
 /* Miller Oblated Stereographic */
-PJ *PROJECTION(mil_os) {
+PJ *PJ_PROJECTION(mil_os) {
     static const COMPLEX AB[] = {{0.924500, 0.}, {0., 0.}, {0.019430, 0.}};
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_mod_ster_data *Q = static_cast<struct pj_mod_ster_data *>(
+        calloc(1, sizeof(struct pj_mod_ster_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -141,16 +144,16 @@ PJ *PROJECTION(mil_os) {
     Q->zcoeff = AB;
     P->es = 0.;
 
-    return setup(P);
+    return mod_ster_setup(P);
 }
 
 /* Lee Oblated Stereographic */
-PJ *PROJECTION(lee_os) {
+PJ *PJ_PROJECTION(lee_os) {
     static const COMPLEX AB[] = {
         {0.721316, 0.}, {0., 0.}, {-0.0088162, -0.00617325}};
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_mod_ster_data *Q = static_cast<struct pj_mod_ster_data *>(
+        calloc(1, sizeof(struct pj_mod_ster_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -161,16 +164,16 @@ PJ *PROJECTION(lee_os) {
     Q->zcoeff = AB;
     P->es = 0.;
 
-    return setup(P);
+    return mod_ster_setup(P);
 }
 
-PJ *PROJECTION(gs48) {
+PJ *PJ_PROJECTION(gs48) {
     static const COMPLEX /* 48 United States */
         AB[] = {
             {0.98879, 0.}, {0., 0.}, {-0.050909, 0.}, {0., 0.}, {0.075528, 0.}};
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_mod_ster_data *Q = static_cast<struct pj_mod_ster_data *>(
+        calloc(1, sizeof(struct pj_mod_ster_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -182,10 +185,10 @@ PJ *PROJECTION(gs48) {
     P->es = 0.;
     P->a = 6370997.;
 
-    return setup(P);
+    return mod_ster_setup(P);
 }
 
-PJ *PROJECTION(alsk) {
+PJ *PJ_PROJECTION(alsk) {
     static const COMPLEX ABe[] = {
         /* Alaska ellipsoid */
         {.9945303, 0.},         {.0052083, -.0027404}, {.0072721, .0048181},
@@ -197,8 +200,8 @@ PJ *PROJECTION(alsk) {
                                   {.0074606, .0048125},  {-.0153783, -.1968253},
                                   {.0636871, -.1408027}, {.3660976, -.2937382}};
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_mod_ster_data *Q = static_cast<struct pj_mod_ster_data *>(
+        calloc(1, sizeof(struct pj_mod_ster_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -215,10 +218,10 @@ PJ *PROJECTION(alsk) {
         P->a = 6370997.;
     }
 
-    return setup(P);
+    return mod_ster_setup(P);
 }
 
-PJ *PROJECTION(gs50) {
+PJ *PJ_PROJECTION(gs50) {
     static const COMPLEX ABe[] = {
         /* GS50 ellipsoid */
         {.9827497, 0.},         {.0210669, .0053804},  {-.1031415, -.0571664},
@@ -233,8 +236,8 @@ PJ *PROJECTION(gs50) {
         {.0007388, -.1435792},  {.0075848, -.1334108}, {-.0216473, .0776645},
         {-.0225161, .0853673}};
 
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_mod_ster_data *Q = static_cast<struct pj_mod_ster_data *>(
+        calloc(1, sizeof(struct pj_mod_ster_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -251,5 +254,7 @@ PJ *PROJECTION(gs50) {
         P->a = 6370997.;
     }
 
-    return setup(P);
+    return mod_ster_setup(P);
 }
+
+#undef EPSLN

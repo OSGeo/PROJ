@@ -26,6 +26,9 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#ifndef TEST_PRIMITIVES_HPP_INCLUDED
+#define TEST_PRIMITIVES_HPP_INCLUDED
+
 #include "gtest_include.h"
 
 #ifndef FROM_PROJ_CPP
@@ -99,3 +102,5 @@ static ::testing::AssertionResult ComparePROJString(const char *m_expr,
            << m_expr << " and " << n_expr << " (" << m << " and " << n
            << ") are different";
 }
+
+#endif /* TEST_PRIMITIVES_HPP_INCLUDED */

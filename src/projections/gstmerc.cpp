@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -11,7 +11,7 @@ PROJ_HEAD(gstmerc,
 "\n\tCyl, Sph&Ell\n\tlat_0= lon_0= k_0=";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_gstmerc_data {
     double lamc;
     double phic;
     double c;
@@ -24,7 +24,8 @@ struct pj_opaque {
 
 static PJ_XY gstmerc_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_gstmerc_data *Q =
+        static_cast<struct pj_gstmerc_data *>(P->opaque);
     double L, Ls, sinLs1, Ls1;
 
     L = Q->n1 * lp.lam;
@@ -39,7 +40,8 @@ static PJ_XY gstmerc_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP gstmerc_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_gstmerc_data *Q =
+        static_cast<struct pj_gstmerc_data *>(P->opaque);
     double L, LC, sinC;
 
     L = atan(sinh((xy.x * P->a - Q->XS) / Q->n2) /
@@ -53,9 +55,9 @@ static PJ_LP gstmerc_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(gstmerc) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(gstmerc) {
+    struct pj_gstmerc_data *Q = static_cast<struct pj_gstmerc_data *>(
+        calloc(1, sizeof(struct pj_gstmerc_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;

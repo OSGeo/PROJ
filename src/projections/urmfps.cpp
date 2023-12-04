@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -10,7 +10,7 @@ PROJ_HEAD(urmfps, "Urmaev Flat-Polar Sinusoidal") "\n\tPCyl, Sph\n\tn=";
 PROJ_HEAD(wag1, "Wagner I (Kavrayskiy VI)") "\n\tPCyl, Sph";
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_urmfps {
     double n, C_y;
 };
 } // anonymous namespace
@@ -21,33 +21,33 @@ struct pj_opaque {
 static PJ_XY urmfps_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
     lp.phi = aasin(P->ctx,
-                   static_cast<struct pj_opaque *>(P->opaque)->n * sin(lp.phi));
+                   static_cast<struct pj_urmfps *>(P->opaque)->n * sin(lp.phi));
     xy.x = C_x * lp.lam * cos(lp.phi);
-    xy.y = static_cast<struct pj_opaque *>(P->opaque)->C_y * lp.phi;
+    xy.y = static_cast<struct pj_urmfps *>(P->opaque)->C_y * lp.phi;
     return xy;
 }
 
 static PJ_LP urmfps_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    xy.y /= static_cast<struct pj_opaque *>(P->opaque)->C_y;
+    xy.y /= static_cast<struct pj_urmfps *>(P->opaque)->C_y;
     lp.phi = aasin(P->ctx,
-                   sin(xy.y) / static_cast<struct pj_opaque *>(P->opaque)->n);
+                   sin(xy.y) / static_cast<struct pj_urmfps *>(P->opaque)->n);
     lp.lam = xy.x / (C_x * cos(xy.y));
     return lp;
 }
 
-static PJ *setup(PJ *P) {
-    static_cast<struct pj_opaque *>(P->opaque)->C_y =
-        Cy / static_cast<struct pj_opaque *>(P->opaque)->n;
+static PJ *urmfps_setup(PJ *P) {
+    static_cast<struct pj_urmfps *>(P->opaque)->C_y =
+        Cy / static_cast<struct pj_urmfps *>(P->opaque)->n;
     P->es = 0.;
     P->inv = urmfps_s_inverse;
     P->fwd = urmfps_s_forward;
     return P;
 }
 
-PJ *PROJECTION(urmfps) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(urmfps) {
+    struct pj_urmfps *Q =
+        static_cast<struct pj_urmfps *>(calloc(1, sizeof(struct pj_urmfps)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
@@ -65,17 +65,20 @@ PJ *PROJECTION(urmfps) {
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
-    return setup(P);
+    return urmfps_setup(P);
 }
 
-PJ *PROJECTION(wag1) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(wag1) {
+    struct pj_urmfps *Q =
+        static_cast<struct pj_urmfps *>(calloc(1, sizeof(struct pj_urmfps)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    static_cast<struct pj_opaque *>(P->opaque)->n =
+    static_cast<struct pj_urmfps *>(P->opaque)->n =
         0.8660254037844386467637231707;
-    return setup(P);
+    return urmfps_setup(P);
 }
+
+#undef C_x
+#undef Cy

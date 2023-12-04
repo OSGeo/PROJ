@@ -52,7 +52,6 @@ operation:
 *
 ***********************************************************************/
 
-#define PJ_LIB_
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -65,7 +64,7 @@ operation:
 PROJ_HEAD(axisswap, "Axis ordering");
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_axisswap_data {
     unsigned int axis[4];
     int sign[4];
 };
@@ -73,8 +72,8 @@ struct pj_opaque {
 
 static int sign(int x) { return (x > 0) - (x < 0); }
 
-static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
+static PJ_XY pj_axisswap_forward_2d(PJ_LP lp, PJ *P) {
+    struct pj_axisswap_data *Q = (struct pj_axisswap_data *)P->opaque;
     PJ_XY xy;
 
     double in[2] = {lp.lam, lp.phi};
@@ -83,8 +82,8 @@ static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
     return xy;
 }
 
-static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
+static PJ_LP pj_axisswap_reverse_2d(PJ_XY xy, PJ *P) {
+    struct pj_axisswap_data *Q = (struct pj_axisswap_data *)P->opaque;
     unsigned int i;
     PJ_COORD out, in;
 
@@ -98,8 +97,8 @@ static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
     return out.lp;
 }
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
+static PJ_XYZ pj_axisswap_forward_3d(PJ_LPZ lpz, PJ *P) {
+    struct pj_axisswap_data *Q = (struct pj_axisswap_data *)P->opaque;
     unsigned int i;
     PJ_COORD out, in;
 
@@ -114,8 +113,8 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     return out.xyz;
 }
 
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
+static PJ_LPZ pj_axisswap_reverse_3d(PJ_XYZ xyz, PJ *P) {
+    struct pj_axisswap_data *Q = (struct pj_axisswap_data *)P->opaque;
     unsigned int i;
     PJ_COORD in, out;
 
@@ -134,8 +133,8 @@ static void swap_xy_4d(PJ_COORD &coo, PJ *) {
     std::swap(coo.xyzt.x, coo.xyzt.y);
 }
 
-static void forward_4d(PJ_COORD &coo, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
+static void pj_axisswap_forward_4d(PJ_COORD &coo, PJ *P) {
+    struct pj_axisswap_data *Q = (struct pj_axisswap_data *)P->opaque;
     unsigned int i;
     PJ_COORD out;
 
@@ -144,8 +143,8 @@ static void forward_4d(PJ_COORD &coo, PJ *P) {
     coo = out;
 }
 
-static void reverse_4d(PJ_COORD &coo, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *)P->opaque;
+static void pj_axisswap_reverse_4d(PJ_COORD &coo, PJ *P) {
+    struct pj_axisswap_data *Q = (struct pj_axisswap_data *)P->opaque;
     unsigned int i;
     PJ_COORD out;
 
@@ -156,10 +155,10 @@ static void reverse_4d(PJ_COORD &coo, PJ *P) {
 }
 
 /***********************************************************************/
-PJ *CONVERSION(axisswap, 0) {
+PJ *PJ_CONVERSION(axisswap, 0) {
     /***********************************************************************/
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    struct pj_axisswap_data *Q = static_cast<struct pj_axisswap_data *>(
+        calloc(1, sizeof(struct pj_axisswap_data)));
     char *s;
     unsigned int i, j, n = 0;
 
@@ -171,7 +170,7 @@ PJ *CONVERSION(axisswap, 0) {
     if (!pj_param_exists(P->params, "order") ==
         !pj_param_exists(P->params, "axis")) {
         proj_log_error(P,
-                       _("order and axis parameters are mutually exclusive."));
+                       _("must provide EITHER 'order' OR 'axis' parameter."));
         return pj_default_destructor(
             P, PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS);
     }
@@ -258,7 +257,7 @@ PJ *CONVERSION(axisswap, 0) {
             if (i == j)
                 continue;
             if (Q->axis[i] == Q->axis[j]) {
-                proj_log_error(P, _("swapaxis: duplicate axes specified"));
+                proj_log_error(P, _("axisswap: duplicate axes specified"));
                 return pj_default_destructor(
                     P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
@@ -266,12 +265,12 @@ PJ *CONVERSION(axisswap, 0) {
 
     /* only map fwd/inv functions that are possible with the given axis setup */
     if (n == 4) {
-        P->fwd4d = forward_4d;
-        P->inv4d = reverse_4d;
+        P->fwd4d = pj_axisswap_forward_4d;
+        P->inv4d = pj_axisswap_reverse_4d;
     }
     if (n == 3 && Q->axis[0] < 3 && Q->axis[1] < 3 && Q->axis[2] < 3) {
-        P->fwd3d = forward_3d;
-        P->inv3d = reverse_3d;
+        P->fwd3d = pj_axisswap_forward_3d;
+        P->inv3d = pj_axisswap_reverse_3d;
     }
     if (n == 2) {
         if (Q->axis[0] == 1 && Q->sign[0] == 1 && Q->axis[1] == 0 &&
@@ -279,13 +278,13 @@ PJ *CONVERSION(axisswap, 0) {
             P->fwd4d = swap_xy_4d;
             P->inv4d = swap_xy_4d;
         } else if (Q->axis[0] < 2 && Q->axis[1] < 2) {
-            P->fwd = forward_2d;
-            P->inv = reverse_2d;
+            P->fwd = pj_axisswap_forward_2d;
+            P->inv = pj_axisswap_reverse_2d;
         }
     }
 
     if (P->fwd4d == nullptr && P->fwd3d == nullptr && P->fwd == nullptr) {
-        proj_log_error(P, _("swapaxis: bad axis order"));
+        proj_log_error(P, _("axisswap: bad axis order"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 

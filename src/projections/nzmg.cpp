@@ -25,7 +25,6 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-#define PJ_LIB_
 
 #include <math.h>
 
@@ -43,14 +42,6 @@ static const COMPLEX bf[] = {
     {-.001541739, 0.041058560}, {-.10162907, 0.01727609},
     {-.26623489, -0.36249218},  {-.6870983, -1.1651967}};
 
-static const double tphi[] = {1.5627014243, .5185406398, -.03333098,
-                              -.1052906,    -.0368594,   .007317,
-                              .01220,       .00394,      -.0013};
-
-static const double tpsi[] = {.6399175073, -.1358797613, .063294409, -.02526853,
-                              .0117879,    -.0055161,    .0026906,   -.001333,
-                              .00067,      -.00034};
-
 #define Nbf 5
 #define Ntpsi 9
 #define Ntphi 8
@@ -60,6 +51,10 @@ static PJ_XY nzmg_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     COMPLEX p;
     const double *C;
     int i;
+
+    static const double tpsi[] = {
+        .6399175073, -.1358797613, .063294409, -.02526853, .0117879,
+        -.0055161,   .0026906,     -.001333,   .00067,     -.00034};
 
     lp.phi = (lp.phi - P->phi0) * RAD_TO_SEC5;
     i = Ntpsi;
@@ -83,6 +78,10 @@ static PJ_LP nzmg_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     COMPLEX p, f, fp, dp;
     double den;
     const double *C;
+
+    static const double tphi[] = {1.5627014243, .5185406398, -.03333098,
+                                  -.1052906,    -.0368594,   .007317,
+                                  .01220,       .00394,      -.0013};
 
     p.r = xy.y;
     p.i = xy.x;
@@ -113,7 +112,7 @@ static PJ_LP nzmg_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(nzmg) {
+PJ *PJ_PROJECTION(nzmg) {
     /* force to International major axis */
     P->ra = 1. / (P->a = 6378388.0);
     P->lam0 = DEG_TO_RAD * 173.;
@@ -126,3 +125,10 @@ PJ *PROJECTION(nzmg) {
 
     return P;
 }
+
+#undef EPSLN
+#undef SEC5_TO_RAD
+#undef RAD_TO_SEC5
+#undef Nbf
+#undef Ntpsi
+#undef Ntphi

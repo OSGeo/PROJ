@@ -1,4 +1,4 @@
-#define PJ_LIB_
+
 
 #include <errno.h>
 #include <math.h>
@@ -7,7 +7,7 @@
 #include "proj_internal.h"
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct pj_putp5_data {
     double A, B;
 };
 } // anonymous namespace
@@ -20,7 +20,7 @@ PROJ_HEAD(putp5p, "Putnins P5'") "\n\tPCyl, Sph";
 
 static PJ_XY putp5_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_putp5_data *Q = static_cast<struct pj_putp5_data *>(P->opaque);
 
     xy.x = C * lp.lam * (Q->A - Q->B * sqrt(1. + D * lp.phi * lp.phi));
     xy.y = C * lp.phi;
@@ -30,7 +30,7 @@ static PJ_XY putp5_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP putp5_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
+    struct pj_putp5_data *Q = static_cast<struct pj_putp5_data *>(P->opaque);
 
     lp.phi = xy.y / C;
     lp.lam = xy.x / (C * (Q->A - Q->B * sqrt(1. + D * lp.phi * lp.phi)));
@@ -38,9 +38,9 @@ static PJ_LP putp5_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(putp5) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(putp5) {
+    struct pj_putp5_data *Q = static_cast<struct pj_putp5_data *>(
+        calloc(1, sizeof(struct pj_putp5_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -55,9 +55,9 @@ PJ *PROJECTION(putp5) {
     return P;
 }
 
-PJ *PROJECTION(putp5p) {
-    struct pj_opaque *Q =
-        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+PJ *PJ_PROJECTION(putp5p) {
+    struct pj_putp5_data *Q = static_cast<struct pj_putp5_data *>(
+        calloc(1, sizeof(struct pj_putp5_data)));
     if (nullptr == Q)
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
@@ -71,3 +71,6 @@ PJ *PROJECTION(putp5p) {
 
     return P;
 }
+
+#undef C
+#undef D

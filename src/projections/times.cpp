@@ -29,8 +29,6 @@
  * Flattening the Earth, Snyder, J.P., 1993, p.213-214.
  *****************************************************************************/
 
-#define PJ_LIB_
-
 #include <math.h>
 
 #include "proj.h"
@@ -68,7 +66,7 @@ static PJ_LP times_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     return lp;
 }
 
-PJ *PROJECTION(times) {
+PJ *PJ_PROJECTION(times) {
     P->es = 0.0;
 
     P->inv = times_s_inverse;
