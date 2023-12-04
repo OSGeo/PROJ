@@ -438,6 +438,13 @@ set_target_properties(proj
 set(PROJ_LIBRARIES proj)
 # hack, required for test/unit
 set(PROJ_LIBRARIES ${PROJ_LIBRARIES} PARENT_SCOPE)
+if(WIN32)
+target_link_libraries (proj
+  PRIVATE
+    shell32.lib
+    ole32.lib
+)
+endif()
 if(UNIX)
   find_library(M_LIB m)
   if(M_LIB)
