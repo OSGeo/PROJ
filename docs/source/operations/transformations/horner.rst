@@ -52,6 +52,34 @@ where
 and :math:`u_{i,j}` and :math:`v_{i,j}` are coefficients that make up
 the polynomial.
 
+The order of coefficients :math:`u_{i,j}` is (example for degree 3):
+
++--------+--------+--------+--------+--------+
+|        | **V⁰** | **V¹** | **V²** | **V³** |
++--------+--------+--------+--------+--------+
+| **U⁰** | 1st    | 5th    | 8rd    | 10th   |
++--------+--------+--------+--------+--------+
+| **U¹** | 2nd    | 6th    | 9th    | –      |
++--------+--------+--------+--------+--------+
+| **U²** | 3rd    | 7th    | –      | –      |
++--------+--------+--------+--------+--------+
+| **U³** | 4th    | –      | –      | –      |
++--------+--------+--------+--------+--------+
+
+The order of coefficients :math:`v_{i,j}` is (example for degree 3):
+
++--------+--------+--------+--------+--------+
+|        | **V⁰** | **V¹** | **V²** | **V³** |
++--------+--------+--------+--------+--------+
+| **U⁰** | 1st    | 2nd    | 3rd    | 4th    |
++--------+--------+--------+--------+--------+
+| **U¹** | 5th    | 6th    | 7th    | –      |
++--------+--------+--------+--------+--------+
+| **U²** | 8th    | 9th    | –      | –      |
++--------+--------+--------+--------+--------+
+| **U³** | 10th   | –      | –      | –      |
++--------+--------+--------+--------+--------+
+
 The final coordinates are determined as
 
 .. math::
@@ -75,8 +103,8 @@ be done by iteratively solving a system of equations. By writing :eq:`real_poly`
             v_{0,0} \\
         \end{bmatrix} +
         \begin{bmatrix}
-             u_{0,1} + u_{0,2} U + ... & u_{1,0} + u_{1,1} U + u_{2,0} V + ... \\
-             v_{1,0} + v_{1,1} V + v_{2,0} U + ... & v_{0,1} + v_{0,2} V \\
+            u_{1,0} + u_{2,0} U + ... & u_{0,1} + u_{1,1} U + u_{0,2} V + ... \\
+            v_{0,1} + v_{1,1} V + v_{0,2} U + ... & v_{1,0} + v_{2,0} V \\
         \end{bmatrix}
         \begin{bmatrix}
             U \\
@@ -200,12 +228,12 @@ of the polynomial:
 
     N = \frac{(d + 1)(d + 2)}{2}
 
-.. option:: +fwd_u=<u_11,u_12,...,u_ij,..,u_mn>
+.. option:: +fwd_u=<u_00,u_10,...,u_ij,..,u_nn>
 
     Coefficients for the forward transformation i.e. latitude to northing
     as described in :eq:`real_poly`.
 
-.. option:: +fwd_v=<v_11,v_12,...,v_ij,..,v_mn>
+.. option:: +fwd_v=<v_00,v_01,...,v_ij,..,v_nn>
 
     Coefficients for the forward transformation i.e. longitude to easting
     as described in :eq:`real_poly`.
@@ -238,7 +266,7 @@ Optional
     Without this option iterative polynomial evaluation is used for
     the inverse transformation.
 
-.. option:: +inv_u=<u_11,u_12,...,u_ij,..,u_mn>
+.. option:: +inv_u=<u_00,u_10,...,u_ij,..,u_nn>
 
     .. versionchanged:: 9.1.0
 
@@ -247,7 +275,7 @@ Optional
     Without this option iterative polynomial evaluation is used for
     the inverse transformation.
 
-.. option:: +inv_v=<v_11,v_12,...,v_ij,..,v_mn>
+.. option:: +inv_v=<v_00,v_01,...,v_ij,..,v_nn>
 
     .. versionchanged:: 9.1.0
 
