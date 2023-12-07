@@ -883,7 +883,7 @@ TEST(operation, geog3DCRS_to_vertCRS_depth_context) {
                   "+step +proj=axisswap +order=2,1 "
                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
                   "+step +inv +proj=vgridshift "
-                  "+grids=no_kv_CD_above_Ell_ETRS89_v2021a.tif +multiplier=1 "
+                  "+grids=no_kv_CD_above_Ell_ETRS89_v2023b.tif +multiplier=1 "
                   "+step +proj=axisswap +order=1,2,-3 "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
                   "+step +proj=axisswap +order=2,1");
@@ -909,7 +909,7 @@ TEST(operation, geog3DCRS_to_vertCRS_depth_context) {
                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
                   "+step +proj=axisswap +order=1,2,-3 "
                   "+step +proj=vgridshift "
-                  "+grids=no_kv_CD_above_Ell_ETRS89_v2021a.tif +multiplier=1 "
+                  "+grids=no_kv_CD_above_Ell_ETRS89_v2023b.tif +multiplier=1 "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
                   "+step +proj=axisswap +order=2,1");
     }
@@ -940,7 +940,7 @@ TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_depth_context) {
                   "+step +proj=axisswap +order=2,1 "
                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
                   "+step +inv +proj=vgridshift "
-                  "+grids=no_kv_CD_above_Ell_ETRS89_v2021a.tif +multiplier=1 "
+                  "+grids=no_kv_CD_above_Ell_ETRS89_v2023b.tif +multiplier=1 "
                   "+step +proj=axisswap +order=1,2,-3 "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
                   "+step +proj=axisswap +order=2,1");
@@ -966,7 +966,7 @@ TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_depth_context) {
                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
                   "+step +proj=axisswap +order=1,2,-3 "
                   "+step +proj=vgridshift "
-                  "+grids=no_kv_CD_above_Ell_ETRS89_v2021a.tif +multiplier=1 "
+                  "+grids=no_kv_CD_above_Ell_ETRS89_v2023b.tif +multiplier=1 "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
                   "+step +proj=axisswap +order=2,1");
     }
