@@ -209,7 +209,7 @@ roundtrip   1
 -------------------------------------------------------------------------------
 operation   +proj=gridshift +grids=tests/us_noaa_nadcon5_nad83_2007_nad83_2011_conus_extract.tif +interpolation=biquadratic
 -------------------------------------------------------------------------------
-tolerance   0.001 mm
+tolerance   0.005 mm
 
 accept      -95.4916666666     37.0083333333    10.000
 expect      -95.49166648893    37.00833334837    9.984340
@@ -223,6 +223,19 @@ tolerance   0.001 mm
 accept      -95.4916666666     37.0083333333    10.000
 expect      -95.49166648893    37.00833334838    9.984341
 roundtrip   1
+
+----------------------------------------------------------------------------------------------------------------------
+# Test case with inverse biquadratic convergence where we are around a location where the interpolation window changes
+----------------------------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+operation   +proj=gridshift +grids=tests/us_noaa_nadcon5_nad83_1986_nad83_harn_conus_extract_sanfrancisco.tif +interpolation=biquadratic
+-------------------------------------------------------------------------------
+direction inverse
+tolerance   0.005 mm
+
+accept      -122.4250009683  37.8286740788
+expect      -122.4249999391  37.8286728006
 
 -------------
 # Error cases

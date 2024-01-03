@@ -80,7 +80,8 @@ struct gridshiftData {
                                      const PJ_LPZ &input,
                                      GenericShiftGridSet *&gridSetOut) const;
     PJ_LPZ grid_interpolate(PJ_CONTEXT *ctx, const std::string &type, PJ_LP lp,
-                            const GenericShiftGrid *grid);
+                            const GenericShiftGrid *grid,
+                            bool &biquadraticInterpolationOut);
     PJ_LPZ grid_apply_internal(PJ_CONTEXT *ctx, const std::string &type,
                                bool isVerticalOnly, const PJ_LPZ in,
                                PJ_DIRECTION direction,
@@ -178,7 +179,8 @@ typedef struct {
 #define REL_TOLERANCE_HGRIDSHIFT 1e-5
 
 PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
-                                       PJ_LP lp, const GenericShiftGrid *grid) {
+                                       PJ_LP lp, const GenericShiftGrid *grid,
+                                       bool &biquadraticInterpolationOut) {
     PJ_LPZ val;
 
     val.lam = val.phi = HUGE_VAL;
@@ -274,6 +276,7 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
     const int idxSampleLong = gridInfo.idxSampleLong;
     const int idxSampleZ = gridInfo.idxSampleZ;
     const bool bilinearInterpolation = gridInfo.bilinearInterpolation;
+    biquadraticInterpolationOut = !bilinearInterpolation;
 
     ILP indx;
     const auto &extent = grid->extentAndRes();
@@ -521,7 +524,9 @@ PJ_LPZ gridshiftData::grid_apply_internal(
     const NS_PROJ::ExtentAndRes *extent;
     PJ_LP normalized_in = normalizeLongitude(grid, in, extent);
 
-    PJ_LPZ shift = grid_interpolate(ctx, type, normalized_in, grid);
+    bool biquadraticInterpolationOut = false;
+    PJ_LPZ shift = grid_interpolate(ctx, type, normalized_in, grid,
+                                    biquadraticInterpolationOut);
     if (grid->hasChanged()) {
         shouldRetry = gridset->reopen(ctx);
         PJ_LPZ out;
@@ -549,57 +554,73 @@ PJ_LPZ gridshiftData::grid_apply_internal(
     guess.lam = normalized_in.lam - shift.lam;
     guess.phi = normalized_in.phi - shift.phi;
 
-    int i = MAX_ITERATIONS;
-    const double toltol = TOL * TOL;
-    PJ_LP diff;
-    do {
-        shift = grid_interpolate(ctx, type, guess, grid);
-        if (grid->hasChanged()) {
-            shouldRetry = gridset->reopen(ctx);
+    // NOAA NCAT transformer tool doesn't do iteration in the reverse path.
+    // Do the same (only for biquadratic, although NCAT applies this logic to
+    // bilinear too)
+    // Cf
+    // https://github.com/noaa-ngs/ncat-lib/blob/77bcff1ce4a78fe06d0312102ada008aefcc2c62/src/gov/noaa/ngs/grid/Transformer.java#L374
+    // When trying to do iterative reverse path with biquadratic, we can
+    // get convergence failures on points that are close to the boundary of
+    // cells or half-cells. For example with
+    // echo -122.4250009683  37.8286740788 0 | bin/cct -I +proj=gridshift
+    // +grids=tests/us_noaa_nadcon5_nad83_1986_nad83_harn_conus_extract_sanfrancisco.tif
+    // +interpolation=biquadratic
+    if (!biquadraticInterpolationOut) {
+        int i = MAX_ITERATIONS;
+        const double toltol = TOL * TOL;
+        PJ_LP diff;
+        do {
+            shift = grid_interpolate(ctx, type, guess, grid,
+                                     biquadraticInterpolationOut);
+            if (grid->hasChanged()) {
+                shouldRetry = gridset->reopen(ctx);
+                PJ_LPZ out;
+                out.lam = out.phi = out.z = HUGE_VAL;
+                return out;
+            }
+
+            /* We can possibly go outside of the initial guessed grid, so try */
+            /* to fetch a new grid into which iterate... */
+            if (shift.lam == HUGE_VAL) {
+                PJ_LPZ lp;
+                lp.lam = guess.lam;
+                lp.phi = guess.phi;
+                auto newGrid = findGrid(type, lp, gridset);
+                if (newGrid == nullptr || newGrid == grid ||
+                    newGrid->isNullGrid())
+                    break;
+                pj_log(ctx, PJ_LOG_TRACE, "Switching from grid %s to grid %s",
+                       grid->name().c_str(), newGrid->name().c_str());
+                grid = newGrid;
+                normalized_in = normalizeLongitude(grid, in, extent);
+                diff.lam = std::numeric_limits<double>::max();
+                diff.phi = std::numeric_limits<double>::max();
+                continue;
+            }
+
+            diff.lam = guess.lam + shift.lam - normalized_in.lam;
+            diff.phi = guess.phi + shift.phi - normalized_in.phi;
+            guess.lam -= diff.lam;
+            guess.phi -= diff.phi;
+
+        } while (--i && (diff.lam * diff.lam + diff.phi * diff.phi >
+                         toltol)); /* prob. slightly faster than hypot() */
+
+        if (i == 0) {
+            pj_log(ctx, PJ_LOG_TRACE,
+                   "Inverse grid shift iterator failed to converge.");
+            proj_context_errno_set(ctx, PROJ_ERR_COORD_TRANSFM_NO_CONVERGENCE);
             PJ_LPZ out;
             out.lam = out.phi = out.z = HUGE_VAL;
             return out;
         }
 
-        /* We can possibly go outside of the initial guessed grid, so try */
-        /* to fetch a new grid into which iterate... */
         if (shift.lam == HUGE_VAL) {
-            PJ_LPZ lp;
-            lp.lam = guess.lam;
-            lp.phi = guess.phi;
-            auto newGrid = findGrid(type, lp, gridset);
-            if (newGrid == nullptr || newGrid == grid || newGrid->isNullGrid())
-                break;
-            pj_log(ctx, PJ_LOG_TRACE, "Switching from grid %s to grid %s",
-                   grid->name().c_str(), newGrid->name().c_str());
-            grid = newGrid;
-            normalized_in = normalizeLongitude(grid, in, extent);
-            diff.lam = std::numeric_limits<double>::max();
-            diff.phi = std::numeric_limits<double>::max();
-            continue;
+            pj_log(
+                ctx, PJ_LOG_TRACE,
+                "Inverse grid shift iteration failed, presumably at grid edge. "
+                "Using first approximation.");
         }
-
-        diff.lam = guess.lam + shift.lam - normalized_in.lam;
-        diff.phi = guess.phi + shift.phi - normalized_in.phi;
-        guess.lam -= diff.lam;
-        guess.phi -= diff.phi;
-
-    } while (--i && (diff.lam * diff.lam + diff.phi * diff.phi >
-                     toltol)); /* prob. slightly faster than hypot() */
-
-    if (i == 0) {
-        pj_log(ctx, PJ_LOG_TRACE,
-               "Inverse grid shift iterator failed to converge.");
-        proj_context_errno_set(ctx, PROJ_ERR_COORD_TRANSFM);
-        PJ_LPZ out;
-        out.lam = out.phi = out.z = HUGE_VAL;
-        return out;
-    }
-
-    if (shift.lam == HUGE_VAL) {
-        pj_log(ctx, PJ_LOG_TRACE,
-               "Inverse grid shift iteration failed, presumably at grid edge. "
-               "Using first approximation.");
     }
 
     PJ_LPZ out;
@@ -667,7 +688,9 @@ PJ_LPZ gridshiftData::apply(PJ *P, PJ_DIRECTION direction, PJ_LPZ lpz) {
     }
 
     if (out.lam == HUGE_VAL || out.phi == HUGE_VAL) {
-        proj_context_errno_set(P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_GRID);
+        if (proj_context_errno(P->ctx) == 0) {
+            proj_context_errno_set(P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_GRID);
+        }
         return out;
     }
 
