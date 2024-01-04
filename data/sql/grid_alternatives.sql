@@ -138,6 +138,9 @@ VALUES
 ('s34j_2022.gsb','dk_sdfi_s34j_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_s34j_2022.tif',1,1,NULL),
 ('s34s_2022.gsb','dk_sdfi_s34s_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_s34s_2022.tif',1,1,NULL),
 ('s45b_2022.gsb','dk_sdfi_s45b_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_s45b_2022.tif',1,1,NULL),
+('dvr90_2002.tif','dk_sdfi_dvr90_2002.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_dvr90_2002.tif',1,1,NULL),
+('dvr90_2013.tif','dk_sdfi_dvr90_2013.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_dvr90_2013.tif',1,1,NULL),
+('dvr90_2023.tif','dk_sdfi_dvr90_2023.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_dvr90_2023.tif',1,1,NULL),
 
 -- es_cat_icgc - Institut Cartogràfic i Geològic de Catalunya (ICGC)
 ('100800401.gsb','es_cat_icgc_100800401.tif','100800401.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_cat_icgc_100800401.tif',1,1,NULL),
