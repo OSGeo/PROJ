@@ -3,26 +3,6 @@
 -- Denmark
 
 INSERT INTO "grid_transformation" VALUES(
-    'PROJ','EPSG_4937_TO_EPSG_5799','ETRS89 to DVR90 height',
-    NULL,
-    'EPSG','9665','Geographic3D to GravityRelatedHeight (gtx)',
-    'EPSG','4937', -- source CRS (ETRS89)
-    'EPSG','5799', -- target CRS (DVR90 height)
-    NULL,
-    'EPSG','8666','Geoid (height correction) model file','dvr90.gtx',
-    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
-
-INSERT INTO "usage" VALUES(
-    'PROJ',
-    'EPSG_4937_TO_EPSG_5799_USAGE',
-    'grid_transformation',
-    'PROJ',
-    'EPSG_4937_TO_EPSG_5799',
-    'EPSG','3237', -- area of use: Denmark onshore
-    'EPSG','1024'  -- unknown
-);
-
-INSERT INTO "grid_transformation" VALUES(
     'PROJ','EPSG_4937_TO_EPSG_5733','ETRS89 to DNN height',
     NULL,
     'EPSG','9665','Geographic3D to GravityRelatedHeight (gtx)',

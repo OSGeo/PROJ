@@ -123,7 +123,6 @@ VALUES
 -- dk_sdfe - Danish Agency for Data Supply and Efficiency
 -- Denmark mainland
 ('dnn.gtx','dk_sdfe_dnn.tif','dnn.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/dk_sdfe_dnn.tif',1,1,NULL),
-('dvr90.gtx','dk_sdfe_dvr90.tif','dvr90.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/dk_sdfe_dvr90.tif',1,1,NULL),
 --  Faroe islands height models
 ('fvr09.gtx','dk_sdfe_fvr09.tif','fvr09.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/dk_sdfe_fvr09.tif',1,1,NULL),
 -- Greenland height models
@@ -139,6 +138,9 @@ VALUES
 ('s34j_2022.gsb','dk_sdfi_s34j_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_s34j_2022.tif',1,1,NULL),
 ('s34s_2022.gsb','dk_sdfi_s34s_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_s34s_2022.tif',1,1,NULL),
 ('s45b_2022.gsb','dk_sdfi_s45b_2022.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_s45b_2022.tif',1,1,NULL),
+('dvr90_2002.tif','dk_sdfi_dvr90_2002.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_dvr90_2002.tif',1,1,NULL),
+('dvr90_2013.tif','dk_sdfi_dvr90_2013.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_dvr90_2013.tif',1,1,NULL),
+('dvr90_2023.tif','dk_sdfi_dvr90_2023.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/dk_sdfi_dvr90_2023.tif',1,1,NULL),
 
 -- es_cat_icgc - Institut Cartogràfic i Geològic de Catalunya (ICGC)
 ('100800401.gsb','es_cat_icgc_100800401.tif','100800401.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_cat_icgc_100800401.tif',1,1,NULL),
