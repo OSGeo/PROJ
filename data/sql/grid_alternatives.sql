@@ -123,7 +123,6 @@ VALUES
 -- dk_sdfe - Danish Agency for Data Supply and Efficiency
 -- Denmark mainland
 ('dnn.gtx','dk_sdfe_dnn.tif','dnn.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/dk_sdfe_dnn.tif',1,1,NULL),
-('dvr90.gtx','dk_sdfe_dvr90.tif','dvr90.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/dk_sdfe_dvr90.tif',1,1,NULL),
 --  Faroe islands height models
 ('fvr09.gtx','dk_sdfe_fvr09.tif','fvr09.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/dk_sdfe_fvr09.tif',1,1,NULL),
 -- Greenland height models
