@@ -34,6 +34,8 @@ static const struct {
     {PROJ_ERR_COORD_TRANSFM_GRID_AT_NODATA,
      _("Coordinate to transform falls into a grid cell that evaluates to "
        "nodata")},
+    {PROJ_ERR_COORD_TRANSFM_NO_CONVERGENCE,
+     _("Iterative method fails to converge on coordinate to transform")},
     {PROJ_ERR_OTHER_API_MISUSE, _("API misuse")},
     {PROJ_ERR_OTHER_NO_INVERSE_OP, _("No inverse operation")},
     {PROJ_ERR_OTHER_NETWORK_ERROR,
