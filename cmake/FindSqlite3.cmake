@@ -66,6 +66,14 @@ endif()
 
 
 if(SQLITE3_FOUND)
+
+  if(NOT TARGET SQLite::SQLite3)
+    add_library(SQLite::SQLite3 UNKNOWN IMPORTED)
+    set_target_properties(SQLite::SQLite3 PROPERTIES
+        IMPORTED_LOCATION             "${SQLITE3_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${SQLITE3_INCLUDE_DIR}")
+  endif()
+
   if(NOT SQLITE3_FIND_QUIETLY)
     message(STATUS "Found Sqlite3: ${SQLITE3_LIBRARY}")
     message(STATUS "Sqlite3 version: ${SQLITE3_VERSION}")
