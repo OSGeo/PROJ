@@ -268,6 +268,16 @@ void Datum::setProperties(
     if (!publicationDateResult.empty()) {
         d->publicationDate = common::DateTime::create(publicationDateResult);
     }
+    std::string anchorEpoch;
+    properties.getStringValue("ANCHOR_EPOCH", anchorEpoch);
+    if (!anchorEpoch.empty()) {
+        bool success = false;
+        const double anchorEpochYear = c_locale_stod(anchorEpoch, success);
+        if (success) {
+            setAnchorEpoch(util::optional<common::Measure>(
+                common::Measure(anchorEpochYear, common::UnitOfMeasure::YEAR)));
+        }
+    }
     ObjectUsage::setProperties(properties);
 }
 

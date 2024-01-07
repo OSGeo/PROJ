@@ -48,6 +48,7 @@ INSERT INTO "geodetic_datum" VALUES (
     2000.0,         -- frame reference epoch
     NULL,           -- ensemble accuracy
     NULL,           -- anchor
+    NULL,           -- anchor_epoch
     0               -- deprecated
 );
 
@@ -93,6 +94,7 @@ INSERT INTO "geodetic_datum" VALUES (
     2000.0,         -- frame reference epoch
     NULL,           -- ensemble accuracy
     NULL,           -- anchor
+    NULL,           -- anchor_epoch
     0               -- deprecated
 );
 

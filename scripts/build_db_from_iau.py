@@ -250,7 +250,7 @@ with open(Path(script_dir_name) / 'data/naifcodes_radii_m_wAsteroids_IAU2015.csv
 
         spherical_datum_code = spherical_ellipsoid_code
         spherical_datum_name = spherical_ellipsoid_name
-        all_sql.append("INSERT INTO geodetic_datum VALUES('%s',%d,'%s','','%s',%d,'%s',%d,NULL,NULL,NULL,%s,0);" % (AUTH_IAU2015, spherical_datum_code, spherical_datum_name, AUTH_IAU2015, spherical_ellipsoid_code, AUTH_IAU2015, prime_meridian_code, anchor))
+        all_sql.append("INSERT INTO geodetic_datum VALUES('%s',%d,'%s','','%s',%d,'%s',%d,NULL,NULL,NULL,%s,NULL,0);" % (AUTH_IAU2015, spherical_datum_code, spherical_datum_name, AUTH_IAU2015, spherical_ellipsoid_code, AUTH_IAU2015, prime_meridian_code, anchor))
         add_usage('geodetic_datum', spherical_datum_code)
 
         spherical_crs_code = Naif_id * 100
@@ -292,7 +292,7 @@ with open(Path(script_dir_name) / 'data/naifcodes_radii_m_wAsteroids_IAU2015.csv
 
         ellipsoidal_datum_code = ellipsoidal_ellipsoid_code
         ellipsoidal_datum_name = ellipsoidal_ellipsoid_name
-        all_sql.append("INSERT INTO geodetic_datum VALUES('%s',%d,'%s','','%s',%d,'%s',%d,NULL,NULL,NULL,%s,0);" % (AUTH_IAU2015, ellipsoidal_datum_code, ellipsoidal_datum_name, AUTH_IAU2015, ellipsoidal_ellipsoid_code, AUTH_IAU2015, prime_meridian_code, anchor))
+        all_sql.append("INSERT INTO geodetic_datum VALUES('%s',%d,'%s','','%s',%d,'%s',%d,NULL,NULL,NULL,%s,NULL,0);" % (AUTH_IAU2015, ellipsoidal_datum_code, ellipsoidal_datum_name, AUTH_IAU2015, ellipsoidal_ellipsoid_code, AUTH_IAU2015, prime_meridian_code, anchor))
         add_usage('geodetic_datum', ellipsoidal_datum_code)
 
         if has_ographic:

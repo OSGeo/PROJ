@@ -154,6 +154,7 @@ CREATE TABLE geodetic_datum (
     frame_reference_epoch FLOAT, --- only set for dynamic datum, and should be set when it is a dynamic datum
     ensemble_accuracy FLOAT CHECK (ensemble_accuracy IS NULL OR ensemble_accuracy > 0), --- only for a datum ensemble. and should be set when it is a datum ensemble
     anchor TEXT,
+    anchor_epoch FLOAT,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_geodetic_datum PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_geodetic_datum_ellipsoid FOREIGN KEY (ellipsoid_auth_name, ellipsoid_code) REFERENCES ellipsoid(auth_name, code) ON DELETE CASCADE,
@@ -191,6 +192,7 @@ CREATE TABLE vertical_datum (
     frame_reference_epoch FLOAT, --- only set for dynamic datum, and should be set when it is a dynamic datum
     ensemble_accuracy FLOAT CHECK (ensemble_accuracy IS NULL OR ensemble_accuracy > 0), --- only for a datum ensemble. and should be set when it is a datum ensemble
     anchor TEXT,
+    anchor_epoch FLOAT,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code)
 ) WITHOUT ROWID;
