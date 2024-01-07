@@ -3447,7 +3447,7 @@ void Conversion::_exportToJSON(
         formatter->MakeObjectContext("Conversion", !identifiers().empty()));
 
     writer->AddObjKey("name");
-    auto l_name = nameStr();
+    const auto &l_name = nameStr();
     if (l_name.empty()) {
         writer->Add("unnamed");
     } else {
@@ -3539,7 +3539,7 @@ static bool createPROJ4WebMercator(const Conversion *conv,
                                   util::IComparable::Criterion::EQUIVALENT)) {
             auto projUnit = unit.exportToPROJString();
             if (!projUnit.empty()) {
-                units = projUnit;
+                units = std::move(projUnit);
             } else {
                 return false;
             }

@@ -1577,7 +1577,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
     }
 
     if (isLongitudeRotation()) {
-        auto offset =
+        const auto &offset =
             parameterValueMeasure(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
         const common::Angle newOffset(negate(offset.value()), offset.unit());
         return Private::registerInv(
@@ -1587,12 +1587,12 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS) {
-        auto offsetLat =
+        const auto &offsetLat =
             parameterValueMeasure(EPSG_CODE_PARAMETER_LATITUDE_OFFSET);
         const common::Angle newOffsetLat(negate(offsetLat.value()),
                                          offsetLat.unit());
 
-        auto offsetLong =
+        const auto &offsetLong =
             parameterValueMeasure(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
         const common::Angle newOffsetLong(negate(offsetLong.value()),
                                           offsetLong.unit());
@@ -1605,17 +1605,17 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSETS) {
-        auto offsetLat =
+        const auto &offsetLat =
             parameterValueMeasure(EPSG_CODE_PARAMETER_LATITUDE_OFFSET);
         const common::Angle newOffsetLat(negate(offsetLat.value()),
                                          offsetLat.unit());
 
-        auto offsetLong =
+        const auto &offsetLong =
             parameterValueMeasure(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
         const common::Angle newOffsetLong(negate(offsetLong.value()),
                                           offsetLong.unit());
 
-        auto offsetHeight =
+        const auto &offsetHeight =
             parameterValueMeasure(EPSG_CODE_PARAMETER_VERTICAL_OFFSET);
         const common::Length newOffsetHeight(negate(offsetHeight.value()),
                                              offsetHeight.unit());
@@ -1633,12 +1633,12 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
         const common::Angle newOffsetLat(negate(offsetLat.value()),
                                          offsetLat.unit());
 
-        auto offsetLong =
+        const auto &offsetLong =
             parameterValueMeasure(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
         const common::Angle newOffsetLong(negate(offsetLong.value()),
                                           offsetLong.unit());
 
-        auto offsetHeight =
+        const auto &offsetHeight =
             parameterValueMeasure(EPSG_CODE_PARAMETER_GEOID_UNDULATION);
         const common::Length newOffsetHeight(negate(offsetHeight.value()),
                                              offsetHeight.unit());
@@ -1652,7 +1652,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
 
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTICAL_OFFSET) {
 
-        auto offsetHeight =
+        const auto &offsetHeight =
             parameterValueMeasure(EPSG_CODE_PARAMETER_VERTICAL_OFFSET);
         const common::Length newOffsetHeight(negate(offsetHeight.value()),
                                              offsetHeight.unit());
@@ -1773,7 +1773,7 @@ void Transformation::_exportToJSON(
         !identifiers().empty()));
 
     writer->AddObjKey("name");
-    auto l_name = nameStr();
+    const auto &l_name = nameStr();
     if (l_name.empty()) {
         writer->Add("unnamed");
     } else {

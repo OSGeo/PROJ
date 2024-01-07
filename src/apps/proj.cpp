@@ -536,6 +536,7 @@ int main(int argc, char **argv) {
         eargv++;
         eargc--;
         // logic copied from proj_factors function
+        // coverity[tainted_data]
         if (PJ *P = proj_create(nullptr, ocrs.c_str())) {
             auto type = proj_get_type(P);
             auto ctx = P->ctx;
@@ -555,7 +556,7 @@ int main(int argc, char **argv) {
                 try {
                     auto crs = dynamic_cast<const NS_PROJ::crs::ProjectedCRS *>(
                         P->iso_obj.get());
-                    auto& dir =
+                    auto &dir =
                         crs->coordinateSystem()->axisList()[0]->direction();
                     swapAxisCrs = dir == NS_PROJ::cs::AxisDirection::NORTH ||
                                   dir == NS_PROJ::cs::AxisDirection::SOUTH;

@@ -392,7 +392,7 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
     formatter->startNode(io::WKTConstants::AXIS, !identifiers().empty());
     const std::string &axisName = nameStr();
     const std::string &abbrev = abbreviation();
-    std::string parenthesizedAbbrev = "(" + abbrev + ")";
+    const std::string parenthesizedAbbrev = "(" + abbrev + ")";
     std::string dir = direction().toString();
     std::string axisDesignation;
 

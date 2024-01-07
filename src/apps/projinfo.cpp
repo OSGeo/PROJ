@@ -467,7 +467,7 @@ static void outputObject(
         std::cout << std::endl;
     }
 
-    auto projStringExportable =
+    const auto projStringExportable =
         nn_dynamic_pointer_cast<IPROJStringExportable>(obj);
     bool alreadyOutputted = false;
     if (projStringExportable) {
@@ -769,7 +769,7 @@ static void outputOperationSummary(
 
     std::cout << ", ";
 
-    auto name = op->nameStr();
+    const auto &name = op->nameStr();
     if (!name.empty()) {
         std::cout << name;
     } else {
@@ -778,7 +778,7 @@ static void outputOperationSummary(
 
     std::cout << ", ";
 
-    auto accuracies = op->coordinateOperationAccuracies();
+    const auto &accuracies = op->coordinateOperationAccuracies();
     if (!accuracies.empty()) {
         std::cout << accuracies[0]->value() << " m";
     } else {
@@ -791,7 +791,7 @@ static void outputOperationSummary(
 
     std::cout << ", ";
 
-    auto domains = op->domains();
+    const auto &domains = op->domains();
     if (!domains.empty() && domains[0]->domainOfValidity() &&
         domains[0]->domainOfValidity()->description().has_value()) {
         std::cout << *(domains[0]->domainOfValidity()->description());
@@ -805,7 +805,7 @@ static void outputOperationSummary(
 
     if (dbContext && getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
         try {
-            auto setGrids = op->gridsNeeded(dbContext, false);
+            const auto setGrids = op->gridsNeeded(dbContext, false);
             for (const auto &grid : setGrids) {
                 if (!grid.available) {
                     std::cout << ", at least one grid missing";
@@ -841,7 +841,7 @@ static bool is3DCRS(const CRSPtr &crs) {
 // ---------------------------------------------------------------------------
 
 static void outputOperations(
-    DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
+    const DatabaseContextPtr &dbContext, const std::string &sourceCRSStr,
     const std::string &sourceEpoch, const std::string &targetCRSStr,
     const std::string &targetEpoch, const ExtentPtr &bboxFilter,
     CoordinateOperationContext::SpatialCriterion spatialCriterion,
@@ -907,7 +907,7 @@ static void outputOperations(
             auto promoted =
                 sourceCRS->promoteTo3D(std::string(), dbContext).as_nullable();
             if (!promoted->identifiers().empty()) {
-                sourceCRS = promoted;
+                sourceCRS = std::move(promoted);
             }
         } else if (is3DCRS(sourceCRS) && !is3DCRS(targetCRS) &&
                    !targetCRS->identifiers().empty() &&
@@ -916,7 +916,7 @@ static void outputOperations(
             auto promoted =
                 targetCRS->promoteTo3D(std::string(), dbContext).as_nullable();
             if (!promoted->identifiers().empty()) {
-                targetCRS = promoted;
+                targetCRS = std::move(promoted);
             }
         }
     }
@@ -1078,7 +1078,7 @@ int main(int argc, char **argv) {
     bool listCRSSpecified = false;
 
     for (int i = 1; i < argc; i++) {
-        std::string arg(argv[i]);
+        const std::string arg(argv[i]);
         if (arg == "-o" && i + 1 < argc) {
             outputSwitchSpecified = true;
             i++;

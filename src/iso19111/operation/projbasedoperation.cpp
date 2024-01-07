@@ -118,7 +118,7 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     if (inverse) {
         formatter->stopInversion();
     }
-    auto projString = formatter->toString();
+    const auto &projString = formatter->toString();
 
     auto method = OperationMethod::create(
         util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
@@ -209,7 +209,7 @@ void PROJBasedOperation::_exportToJSON(
         !identifiers().empty()));
 
     writer->AddObjKey("name");
-    auto l_name = nameStr();
+    const auto &l_name = nameStr();
     if (l_name.empty()) {
         writer->Add("unnamed");
     } else {

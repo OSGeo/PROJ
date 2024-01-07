@@ -1613,7 +1613,7 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     if (!fp) {
         return nullptr;
     }
-    const auto actualName(fp->name());
+    const auto &actualName(fp->name());
     if (ends_with(actualName, "gtx") || ends_with(actualName, "GTX")) {
         auto grid = GTXVerticalShiftGrid::open(ctx, std::move(fp), actualName);
         if (!grid) {
@@ -2657,7 +2657,7 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     if (!fp) {
         return nullptr;
     }
-    const auto actualName(fp->name());
+    const auto &actualName(fp->name());
 
     char header[160];
     /* -------------------------------------------------------------------- */
@@ -3086,7 +3086,6 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     if (!fp) {
         return nullptr;
     }
-    const auto actualName(fp->name());
 
     /* -------------------------------------------------------------------- */
     /*      Load a header, to determine the file type.                      */
@@ -3100,6 +3099,7 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 
     if (IsTIFF(header_size, header)) {
 #ifdef TIFF_ENABLED
+        const std::string actualName(fp->name());
         auto set = std::unique_ptr<GenericShiftGridSet>(
             GTiffGenericGridShiftSet::open(ctx, std::move(fp), actualName));
         if (!set)

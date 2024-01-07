@@ -197,7 +197,7 @@ PJ *pj_obj_create(PJ_CONTEXT *ctx, const BaseObjectNNPtr &objIn) {
         auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
         try {
             auto formatter = PROJStringFormatter::create(
-                PROJStringFormatter::Convention::PROJ_5, dbContext);
+                PROJStringFormatter::Convention::PROJ_5, std::move(dbContext));
             auto projString = coordop->exportToPROJString(formatter.get());
             if (proj_context_is_network_enabled(ctx)) {
                 ctx->defer_grid_opening = true;
@@ -380,7 +380,7 @@ const char *proj_context_get_database_path(PJ_CONTEXT *ctx) {
     try {
         // temporary variable must be used as getDBcontext() might create
         // ctx->cpp_context
-        auto osPath(getDBcontext(ctx)->getPath());
+        const auto osPath(getDBcontext(ctx)->getPath());
         ctx->get_cpp_context()->lastDbPath_ = osPath;
         return ctx->cpp_context->lastDbPath_.c_str();
     } catch (const std::exception &e) {
@@ -1629,7 +1629,7 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
 
     try {
         auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
-        auto formatter = WKTFormatter::create(convention, dbContext);
+        auto formatter = WKTFormatter::create(convention, std::move(dbContext));
         for (auto iter = options; iter && iter[0]; ++iter) {
             const char *value;
             if ((value = getOptionValue(*iter, "MULTILINE="))) {
@@ -1735,7 +1735,8 @@ const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
         static_cast<PROJStringFormatter::Convention>(type);
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        auto formatter = PROJStringFormatter::create(convention, dbContext);
+        auto formatter =
+            PROJStringFormatter::create(convention, std::move(dbContext));
         for (auto iter = options; iter && iter[0]; ++iter) {
             const char *value;
             if ((value = getOptionValue(*iter, "MULTILINE="))) {
@@ -1807,7 +1808,7 @@ const char *proj_as_projjson(PJ_CONTEXT *ctx, const PJ *obj,
 
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        auto formatter = JSONFormatter::create(dbContext);
+        auto formatter = JSONFormatter::create(std::move(dbContext));
         for (auto iter = options; iter && iter[0]; ++iter) {
             const char *value;
             if ((value = getOptionValue(*iter, "MULTILINE="))) {
@@ -4681,12 +4682,13 @@ static CoordinateSystemAxisNNPtr createAxis(const PJ_AXIS_DESCRIPTION &axis) {
         unit_type = UnitOfMeasure::Type::PARAMETRIC;
         break;
     }
-    auto unit = axis.unit_type == PJ_UT_ANGULAR
-                    ? createAngularUnit(axis.unit_name, axis.unit_conv_factor)
-                : axis.unit_type == PJ_UT_LINEAR
-                    ? createLinearUnit(axis.unit_name, axis.unit_conv_factor)
-                    : UnitOfMeasure(axis.unit_name ? axis.unit_name : "unnamed",
-                                    axis.unit_conv_factor, unit_type);
+    const common::UnitOfMeasure unit(
+        axis.unit_type == PJ_UT_ANGULAR
+            ? createAngularUnit(axis.unit_name, axis.unit_conv_factor)
+        : axis.unit_type == PJ_UT_LINEAR
+            ? createLinearUnit(axis.unit_name, axis.unit_conv_factor)
+            : UnitOfMeasure(axis.unit_name ? axis.unit_name : "unnamed",
+                            axis.unit_conv_factor, unit_type));
 
     return CoordinateSystemAxis::create(
         createPropertyMapName(axis.name),
