@@ -506,6 +506,7 @@ BEGIN
             'EPSG_1102_Lambert Conic Conformal (1SP variant B)',
             'EPSG_1111_Transverse Mercator 3D',
             'EPSG_1119_Equidistant Conic',
+            'EPSG_1125_Azimuthal Equidistant',
             'EPSG_9602_Geographic/geocentric conversions',
             'EPSG_9659_Geographic3D to 2D conversion',
             'EPSG_9801_Lambert Conic Conformal (1SP)',
