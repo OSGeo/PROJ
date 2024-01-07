@@ -7959,3 +7959,7 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4737','1009','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4737','KGD2002 - LatLon','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5193','1010','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5193','KVD1964 - NOHt','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10731','ETRS89/DREF91/R16 / UTM 31','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10733','ETRS89/DREF91/R16 / UTM 33','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10516','NAD83(2011) / WISCRS Adjusted Jackson (ftUS)','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10732','ETRS89/DREF91/R16 / UTM 32','EPSG');
