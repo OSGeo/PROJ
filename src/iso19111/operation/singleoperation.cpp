@@ -4154,6 +4154,43 @@ bool SingleOperation::exportToPROJStringGeneric(
                        " only to a GeographicCRS interpolation CRS"));
         }
 
+        const auto vertSrc =
+            dynamic_cast<const crs::VerticalCRS *>(sourceCRS().get());
+        if (!vertSrc) {
+            throw io::FormattingException(concat(
+                "Can apply ", methodName, " only to a source VerticalCRS"));
+        }
+
+        const auto &srcEpoch =
+            vertSrc->datumNonNull(formatter->databaseContext())->anchorEpoch();
+        if (!srcEpoch.has_value()) {
+            throw io::FormattingException(
+                "For"
+                " " EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN
+                ", missing epoch for source CRS");
+        }
+
+        const auto vertDst =
+            dynamic_cast<const crs::VerticalCRS *>(targetCRS().get());
+        if (!vertSrc) {
+            throw io::FormattingException(concat(
+                "Can apply ", methodName, " only to a target VerticalCRS"));
+        }
+
+        const auto &dstEpoch =
+            vertDst->datumNonNull(formatter->databaseContext())->anchorEpoch();
+        if (!dstEpoch.has_value()) {
+            throw io::FormattingException(
+                "For"
+                " " EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN
+                ", missing epoch for target CRS");
+        }
+
+        const double sourceYear =
+            srcEpoch->convertToUnit(common::UnitOfMeasure::YEAR);
+        const double targetYear =
+            dstEpoch->convertToUnit(common::UnitOfMeasure::YEAR);
+
         if (isMethodInverseOf) {
             formatter->startInversion();
         }
@@ -4165,36 +4202,6 @@ bool SingleOperation::exportToPROJStringGeneric(
         interpCRSGeog->ellipsoid()->_exportToPROJString(formatter);
 
         formatter->addStep("deformation");
-        auto srcName = sourceCRS()->nameStr();
-        auto dstName = targetCRS()->nameStr();
-        const struct {
-            const char *name;
-            double epoch;
-        } realizationEpochs[] = {
-            {"CGVD2013a(1997) height", 1997.0},
-            {"CGVD2013a(2002) height", 2002.0},
-            {"CGVD2013a(2010) height", 2010.0},
-        };
-        double sourceYear = 0.0;
-        double targetYear = 0.0;
-        for (const auto &iter : realizationEpochs) {
-            if (iter.name == srcName)
-                sourceYear = iter.epoch;
-            if (iter.name == dstName)
-                targetYear = iter.epoch;
-        }
-        if (sourceYear == 0.0) {
-            throw io::FormattingException(
-                "For"
-                " " EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN
-                ", missing epoch for source CRS");
-        }
-        if (targetYear == 0.0) {
-            throw io::FormattingException(
-                "For"
-                " " EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN
-                ", missing epoch for target CRS");
-        }
         formatter->addParam("dt", targetYear - sourceYear);
         formatter->addParam("grids", verticalOffsetByVelocityGridFilename);
         interpCRSGeog->ellipsoid()->_exportToPROJString(formatter);

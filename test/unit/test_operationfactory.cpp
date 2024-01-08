@@ -10444,8 +10444,11 @@ TEST(operation, createOperation_test_createOperationsWithDatumPivot_iter_1) {
     ASSERT_GE(list.size(), 1U);
     EXPECT_FALSE(list[0]->hasBallparkTransformation());
     EXPECT_STREQ(list[0]->nameStr().c_str(),
-                 "Inverse of NAD83(CSRS)v8 to NAD83(CSRS)v2 (1) + "
-                 "NAD83(CSRS)v8 to NAD83(CSRS)v3 (1)");
+                 "Conversion from NAD83(CSRS)v2 (geog2D) to "
+                 "NAD83(CSRS)v2 (geocentric) + "
+                 "NAD83(CSRS)v2 to NAD83(CSRS)v3 (1) + "
+                 "Conversion from NAD83(CSRS)v3 (geocentric) to "
+                 "NAD83(CSRS)v3 (geog2D)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=noop");
 }

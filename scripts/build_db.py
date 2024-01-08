@@ -196,22 +196,22 @@ def fill_geodetic_datum(proj_db_cursor):
     if res:
         raise Exception('Found unexpected datum_type in epsg_datum: %s' % str(res))
 
-    proj_db_cursor.execute("SELECT datum_code, datum_name, ellipsoid_code, prime_meridian_code, publication_date, frame_reference_epoch, deprecated FROM epsg.epsg_datum WHERE datum_type IN ('geodetic', 'dynamic geodetic')")
+    proj_db_cursor.execute("SELECT datum_code, datum_name, ellipsoid_code, prime_meridian_code, publication_date, frame_reference_epoch, anchor_epoch, deprecated FROM epsg.epsg_datum WHERE datum_type IN ('geodetic', 'dynamic geodetic')")
     res = proj_db_cursor.fetchall()
-    for (datum_code, datum_name, ellipsoid_code, prime_meridian_code, publication_date, frame_reference_epoch, deprecated) in res:
+    for (datum_code, datum_name, ellipsoid_code, prime_meridian_code, publication_date, frame_reference_epoch, anchor_epoch, deprecated) in res:
         publication_date = compute_publication_date(datum_code, datum_name, frame_reference_epoch, publication_date)
         proj_db_cursor.execute(
-        "INSERT INTO geodetic_datum VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)", (EPSG_AUTHORITY, datum_code, datum_name, EPSG_AUTHORITY, ellipsoid_code, EPSG_AUTHORITY, prime_meridian_code, publication_date, frame_reference_epoch, deprecated))
+        "INSERT INTO geodetic_datum VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)", (EPSG_AUTHORITY, datum_code, datum_name, EPSG_AUTHORITY, ellipsoid_code, EPSG_AUTHORITY, prime_meridian_code, publication_date, frame_reference_epoch, anchor_epoch, deprecated))
 
 
 def fill_vertical_datum(proj_db_cursor):
 
-    proj_db_cursor.execute("SELECT datum_code, datum_name, publication_date, frame_reference_epoch, deprecated FROM epsg.epsg_datum WHERE datum_type IN ('vertical')")
+    proj_db_cursor.execute("SELECT datum_code, datum_name, publication_date, frame_reference_epoch, anchor_epoch, deprecated FROM epsg.epsg_datum WHERE datum_type IN ('vertical')")
     res = proj_db_cursor.fetchall()
-    for (datum_code, datum_name, publication_date, frame_reference_epoch, deprecated) in res:
+    for (datum_code, datum_name, publication_date, frame_reference_epoch, anchor_epoch, deprecated) in res:
         publication_date = compute_publication_date(datum_code, datum_name, frame_reference_epoch, publication_date)
         proj_db_cursor.execute(
-        "INSERT INTO vertical_datum VALUES (?, ?, ?, NULL, ?, ?, NULL, NULL, ?)", (EPSG_AUTHORITY, datum_code, datum_name, publication_date, frame_reference_epoch, deprecated))
+        "INSERT INTO vertical_datum VALUES (?, ?, ?, NULL, ?, ?, NULL, NULL, ?, ?)", (EPSG_AUTHORITY, datum_code, datum_name, publication_date, frame_reference_epoch, anchor_epoch, deprecated))
 
 
 def fill_datumensemble(proj_db_cursor):

@@ -6684,7 +6684,7 @@ static const struct {
       {"False_Northing", 2},
       {"Central_Meridian", 3},
       {"Latitude_Of_Origin", 4}},
-     "Modified Azimuthal Equidistant",
+     "Azimuthal Equidistant",
      {
          {"Latitude of natural origin", 4},
          {"Longitude of natural origin", 3},

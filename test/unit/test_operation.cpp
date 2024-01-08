@@ -1547,9 +1547,9 @@ TEST(operation, azimuthal_equidistant_export) {
               "+proj=aeqd +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
 
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
-              "CONVERSION[\"Modified Azimuthal Equidistant\",\n"
-              "    METHOD[\"Modified Azimuthal Equidistant\",\n"
-              "        ID[\"EPSG\",9832]],\n"
+              "CONVERSION[\"Azimuthal Equidistant\",\n"
+              "    METHOD[\"Azimuthal Equidistant\",\n"
+              "        ID[\"EPSG\",1125]],\n"
               "    PARAMETER[\"Latitude of natural origin\",1,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8801]],\n"

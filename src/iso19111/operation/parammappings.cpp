@@ -637,6 +637,13 @@ static const MethodMapping projectionMethodMappings[] = {
      // LCC 2SP
      paramsLCC2SP},
 
+    {EPSG_NAME_METHOD_AZIMUTHAL_EQUIDISTANT,
+     EPSG_CODE_METHOD_AZIMUTHAL_EQUIDISTANT, "Azimuthal_Equidistant", "aeqd",
+     nullptr, paramsAEQD},
+
+    // We don't actually implement the Modified variant of Azimuthal Equidistant
+    // but the exact one. The difference between both is neglectable in a few
+    // hundred of kilometers away from the center of projection
     {EPSG_NAME_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT,
      EPSG_CODE_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT, "Azimuthal_Equidistant",
      "aeqd", nullptr, paramsAEQD},
