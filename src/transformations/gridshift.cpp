@@ -96,7 +96,7 @@ struct gridshiftData {
 bool gridshiftData::checkGridTypes(PJ *P) {
     for (const auto &gridset : m_grids) {
         for (const auto &grid : gridset->grids()) {
-            const auto type = grid->metadataItem("TYPE");
+            const auto &type = grid->metadataItem("TYPE");
             if (type == "HORIZONTAL_OFFSET")
                 m_bHasHorizontalOffset = true;
             else if (type == "GEOGRAPHIC_3D_OFFSET")
@@ -268,8 +268,7 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
         gridInfo.idxSampleLatLongZ[0] = idxSampleLat;
         gridInfo.idxSampleLatLongZ[1] = idxSampleLong;
         gridInfo.idxSampleLatLongZ[2] = idxSampleZ;
-        m_cacheGridInfo[grid] = gridInfo;
-        iterCache = m_cacheGridInfo.find(grid);
+        iterCache = m_cacheGridInfo.emplace(grid, std::move(gridInfo)).first;
     }
     GridInfo &gridInfo = iterCache->second;
     const int idxSampleLat = gridInfo.idxSampleLat;

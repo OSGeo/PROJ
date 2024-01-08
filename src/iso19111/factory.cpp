@@ -392,7 +392,7 @@ SQLResultSet SQLiteHandle::run(sqlite3_stmt *stmt, const std::string &sql,
     for (const auto &param : parameters) {
         const auto &paramType = param.type();
         if (paramType == SQLValues::Type::STRING) {
-            auto strValue = param.stringValue();
+            const auto &strValue = param.stringValue();
             sqlite3_bind_text(stmt, nBindField, strValue.c_str(),
                               static_cast<int>(strValue.size()),
                               SQLITE_TRANSIENT);
@@ -1199,7 +1199,7 @@ void DatabaseContext::Private::open(const std::string &databasePath,
 
     sqlite_handle_ = SQLiteHandleCache::get().getHandle(path, ctx);
 
-    databasePath_ = path;
+    databasePath_ = std::move(path);
 }
 
 // ---------------------------------------------------------------------------
@@ -1253,7 +1253,7 @@ void DatabaseContext::Private::attachExtraDatabases(
             "AND name NOT LIKE 'sqlite_stat%'");
     std::map<std::string, std::vector<std::string>> tableStructure;
     for (const auto &rowTable : tables) {
-        auto tableName = rowTable[0];
+        const auto &tableName = rowTable[0];
         auto tableInfo = run("PRAGMA table_info(\"" +
                              replaceAll(tableName, "\"", "\"\"") + "\")");
         for (const auto &rowCol : tableInfo) {
@@ -1451,7 +1451,7 @@ static void identifyFromNameOrCode(
 
     for (const auto &id : obj->identifiers()) {
         try {
-            const auto idAuthName = *(id->codeSpace());
+            const auto &idAuthName = *(id->codeSpace());
             if (std::find(allowedAuthoritiesTmp.begin(),
                           allowedAuthoritiesTmp.end(),
                           idAuthName) != allowedAuthoritiesTmp.end()) {
@@ -2885,7 +2885,7 @@ DatabaseContext::create(const std::string &databasePath,
     }
     if (!auxDbs.empty()) {
         dbCtxPrivate->attachExtraDatabases(auxDbs);
-        dbCtxPrivate->auxiliaryDatabasePaths_ = auxDbs;
+        dbCtxPrivate->auxiliaryDatabasePaths_ = std::move(auxDbs);
     }
     dbCtxPrivate->self_ = dbCtx.as_nullable();
     return dbCtx;
@@ -3341,7 +3341,7 @@ bool DatabaseContext::lookForGridInfo(
             fullFilenameNewName.resize(strlen(fullFilenameNewName.c_str()));
             if (gridAvailableWithNewName) {
                 gridAvailable = true;
-                fullFilename = fullFilenameNewName;
+                fullFilename = std::move(fullFilenameNewName);
             }
         }
 
@@ -5548,7 +5548,8 @@ AuthorityFactory::createCompoundCRS(const std::string &code) const {
         auto props = d->createPropertiesSearchUsages("compound_crs", code, name,
                                                      deprecated);
         return crs::CompoundCRS::create(
-            props, std::vector<crs::CRSNNPtr>{horizCRS, vertCRS});
+            props, std::vector<crs::CRSNNPtr>{std::move(horizCRS),
+                                              std::move(vertCRS)});
     } catch (const std::exception &ex) {
         throw buildFactoryException("compoundCRS", d->authority(), code, ex);
     }
@@ -7347,7 +7348,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 
             listTmp.emplace_back(
                 operation::ConcatenatedOperation::createComputeMetadata(
-                    {op1, op2}, false));
+                    {std::move(op1), std::move(op2)}, false));
         } catch (const std::exception &e) {
             // Mostly for debugging purposes when using an inconsistent
             // database
@@ -7403,7 +7404,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 
             listTmp.emplace_back(
                 operation::ConcatenatedOperation::createComputeMetadata(
-                    {op1, op2->inverse()}, false));
+                    {std::move(op1), op2->inverse()}, false));
         } catch (const std::exception &e) {
             // Mostly for debugging purposes when using an inconsistent
             // database
@@ -7480,7 +7481,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 
             listTmp.emplace_back(
                 operation::ConcatenatedOperation::createComputeMetadata(
-                    {op1->inverse(), op2}, false));
+                    {op1->inverse(), std::move(op2)}, false));
         } catch (const std::exception &e) {
             // Mostly for debugging purposes when using an inconsistent
             // database

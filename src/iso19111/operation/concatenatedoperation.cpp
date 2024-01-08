@@ -177,7 +177,7 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
         if (interpolationCRSValid) {
             auto subOpInterpCRS = operationsIn[i]->interpolationCRS();
             if (interpolationCRS == nullptr)
-                interpolationCRS = subOpInterpCRS;
+                interpolationCRS = std::move(subOpInterpCRS);
             else if (subOpInterpCRS == nullptr ||
                      !(subOpInterpCRS->isEquivalentTo(
                          interpolationCRS.get(),
@@ -218,7 +218,7 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
                     "Inconsistent chaining of CRS in operations");
             }
         }
-        lastTargetCRS = l_targetCRS;
+        lastTargetCRS = std::move(l_targetCRS);
     }
 
     // When chaining VerticalCRS -> GeographicCRS -> VerticalCRS, use
@@ -784,7 +784,7 @@ void ConcatenatedOperation::_exportToJSON(
                                                     !identifiers().empty()));
 
     writer->AddObjKey("name");
-    auto l_name = nameStr();
+    const auto &l_name = nameStr();
     if (l_name.empty()) {
         writer->Add("unnamed");
     } else {
@@ -828,7 +828,7 @@ CoordinateOperationNNPtr ConcatenatedOperation::_shallowClone() const {
     for (const auto &subOp : d->operations_) {
         ops.emplace_back(subOp->shallowClone());
     }
-    op->d->operations_ = ops;
+    op->d->operations_ = std::move(ops);
     op->assignSelf(op);
     op->setCRSs(this, false);
     return util::nn_static_pointer_cast<CoordinateOperation>(op);

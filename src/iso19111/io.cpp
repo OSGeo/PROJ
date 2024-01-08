@@ -205,7 +205,7 @@ WKTFormatterNNPtr WKTFormatter::create(Convention convention,
                                        // cppcheck-suppress passedByValue
                                        DatabaseContextPtr dbContext) {
     auto ret = NN_NO_CHECK(WKTFormatter::make_unique<WKTFormatter>(convention));
-    ret->d->dbContext_ = dbContext;
+    ret->d->dbContext_ = std::move(dbContext);
     return ret;
 }
 
@@ -1623,7 +1623,7 @@ IdentifierPtr WKTParser::Private::buildId(const WKTNodeNNPtr &node,
                 std::string codeSpaceOut;
                 if (dbContext_->getVersionedAuthority(codeSpace, version,
                                                       codeSpaceOut)) {
-                    codeSpace = codeSpaceOut;
+                    codeSpace = std::move(codeSpaceOut);
                     version.clear();
                 }
             }
@@ -1761,7 +1761,7 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
                 name, tableNameForAlias, "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
             if (!officialName.empty()) {
-                name = officialName;
+                name = std::move(officialName);
 
                 // Clearing authority for geodetic_crs because of
                 // potential axis order mismatch.
@@ -1994,9 +1994,9 @@ UnitOfMeasure WKTParser::Private::buildUnit(const WKTNodeNNPtr &node,
                 unitName, "unit_of_measure", "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
             if (!officialName.empty()) {
-                unitName = officialName;
-                codeSpace = authNameFromAlias;
-                code = codeFromAlias;
+                unitName = std::move(officialName);
+                codeSpace = std::move(authNameFromAlias);
+                code = std::move(codeFromAlias);
             }
         }
 
@@ -2415,10 +2415,10 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                     auto nameWithPM =
                         officialName + " (" + primeMeridian->nameStr() + ")";
                     if (dbContext_->isKnownName(nameWithPM, "geodetic_datum")) {
-                        officialName = nameWithPM;
+                        officialName = std::move(nameWithPM);
                     }
                 }
-                name = officialName;
+                name = std::move(officialName);
             }
         }
 
@@ -3634,8 +3634,8 @@ WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
 
     std::vector<OperationParameterNNPtr> parameters;
     std::vector<ParameterValueNNPtr> values;
-    auto defaultLinearUnit = UnitOfMeasure::NONE;
-    auto defaultAngularUnit = UnitOfMeasure::NONE;
+    const auto &defaultLinearUnit = UnitOfMeasure::NONE;
+    const auto &defaultAngularUnit = UnitOfMeasure::NONE;
     consumeParameters(node, false, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
 
@@ -3680,8 +3680,8 @@ WKTParser::Private::buildPointMotionOperation(const WKTNodeNNPtr &node) {
 
     std::vector<OperationParameterNNPtr> parameters;
     std::vector<ParameterValueNNPtr> values;
-    auto defaultLinearUnit = UnitOfMeasure::NONE;
-    auto defaultAngularUnit = UnitOfMeasure::NONE;
+    const auto &defaultLinearUnit = UnitOfMeasure::NONE;
+    const auto &defaultAngularUnit = UnitOfMeasure::NONE;
     consumeParameters(node, false, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
 
@@ -4511,7 +4511,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
                             false, outTableName, authNameFromAlias,
                             codeFromAlias);
                     if (!officialNameFromFeet.empty()) {
-                        officialName = officialNameFromFeet;
+                        officialName = std::move(officialNameFromFeet);
                     }
                 }
 
@@ -4540,11 +4540,11 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
 
     // For WKT2, if there is no explicit parameter unit, use metre for linear
     // units and degree for angular units
-    auto linearUnit =
+    const UnitOfMeasure linearUnit(
         !isNull(conversionNode)
             ? UnitOfMeasure::METRE
-            : buildUnitInSubNode(node, UnitOfMeasure::Type::LINEAR);
-    auto angularUnit =
+            : buildUnitInSubNode(node, UnitOfMeasure::Type::LINEAR));
+    const auto &angularUnit =
         !isNull(conversionNode)
             ? UnitOfMeasure::DEGREE
             : baseGeodCRS->coordinateSystem()->axisList()[0]->unit();
@@ -5131,7 +5131,7 @@ static TransformationNNPtr buildTransformationForBoundCRS(
             EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME);
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
-            auto filename = fileParameter->valueFile();
+            const auto &filename = fileParameter->valueFile();
 
             transformation =
                 Transformation::createGravityRelatedHeightToGeographic3D(
@@ -5183,8 +5183,8 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
 
     std::vector<OperationParameterNNPtr> parameters;
     std::vector<ParameterValueNNPtr> values;
-    auto defaultLinearUnit = UnitOfMeasure::NONE;
-    auto defaultAngularUnit = UnitOfMeasure::NONE;
+    const auto &defaultLinearUnit = UnitOfMeasure::NONE;
+    const auto &defaultAngularUnit = UnitOfMeasure::NONE;
     consumeParameters(abridgedNode, true, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
 
@@ -5397,7 +5397,7 @@ WKTParser::Private::buildDerivedProjectedCRS(const WKTNodeNNPtr &node) {
     }
 
     auto linearUnit = buildUnitInSubNode(node);
-    auto angularUnit =
+    const auto &angularUnit =
         baseProjCRS->baseCRS()->coordinateSystem()->axisList()[0]->unit();
 
     auto conversion = buildConversion(conversionNode, linearUnit, angularUnit);
@@ -6081,7 +6081,7 @@ IdentifierNNPtr JSONParser::buildId(const json &j, bool removeInverseOf) {
         std::string codeSpaceOut;
         if (dbContext_->getVersionedAuthority(codeSpace, version,
                                               codeSpaceOut)) {
-            codeSpace = codeSpaceOut;
+            codeSpace = std::move(codeSpaceOut);
             version.clear();
         }
     }
@@ -6779,9 +6779,10 @@ MeridianNNPtr JSONParser::buildMeridian(const json &j) {
 CoordinateSystemAxisNNPtr JSONParser::buildAxis(const json &j) {
     auto dirString = getString(j, "direction");
     auto abbreviation = getString(j, "abbreviation");
-    auto unit = j.contains("unit") ? getUnit(j, "unit")
-                                   : UnitOfMeasure(std::string(), 1.0,
-                                                   UnitOfMeasure::Type::NONE);
+    const UnitOfMeasure unit(
+        j.contains("unit")
+            ? getUnit(j, "unit")
+            : UnitOfMeasure(std::string(), 1.0, UnitOfMeasure::Type::NONE));
     auto direction = AxisDirection::valueOf(dirString);
     if (!direction) {
         throw ParsingException(concat("unhandled axis direction: ", dirString));
@@ -7275,7 +7276,7 @@ static CRSNNPtr importFromWMSAUTO(const std::string &text) {
             }
         };
 
-        const auto getUnits = [=]() {
+        const auto getUnits = [=]() -> const UnitOfMeasure & {
             switch (nUnitsId) {
             case 9001:
                 return UnitOfMeasure::METRE;
@@ -7767,7 +7768,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
     // urn:ogc:def:crs:EPSG::4326
     if (tokens.size() == 7 && tolower(tokens[0]) == "urn") {
 
-        const auto type = tokens[3] == "CRS" ? "crs" : tokens[3];
+        const std::string type(tokens[3] == "CRS" ? "crs" : tokens[3]);
         const auto &authName = tokens[4];
         const auto &version = tokens[5];
         const auto &code = tokens[6];
@@ -8751,10 +8752,10 @@ const std::string &PROJStringFormatter::toString() const {
                     first.paramValues[0].keyEquals("z_in") &&
                     first.paramValues[1].keyEquals("z_out")) {
 
-                    auto xy_in = second.paramValues[0].value;
-                    auto xy_out = second.paramValues[1].value;
-                    auto z_in = first.paramValues[0].value;
-                    auto z_out = first.paramValues[1].value;
+                    const std::string xy_in(second.paramValues[0].value);
+                    const std::string xy_out(second.paramValues[1].value);
+                    const std::string z_in(first.paramValues[0].value);
+                    const std::string z_out(first.paramValues[1].value);
 
                     iterCur->paramValues.clear();
                     iterCur->paramValues.emplace_back(
@@ -8793,8 +8794,8 @@ const std::string &PROJStringFormatter::toString() const {
                     second.paramValues[1].keyEquals("xy_out") &&
                     first.paramValues[0].value == second.paramValues[1].value &&
                     first.paramValues[2].value == second.paramValues[0].value) {
-                    auto z_in = first.paramValues[1].value;
-                    auto z_out = first.paramValues[3].value;
+                    const std::string z_in(first.paramValues[1].value);
+                    const std::string z_out(first.paramValues[3].value);
                     if (z_in != z_out) {
                         iterCur->paramValues.clear();
                         iterCur->paramValues.emplace_back(
@@ -8828,10 +8829,10 @@ const std::string &PROJStringFormatter::toString() const {
                 curStep.paramValues[0].keyEquals("z_in") &&
                 curStep.paramValues[1].keyEquals("z_out") &&
                 prevStep.paramValues[3].value == curStep.paramValues[0].value) {
-                auto xy_in = prevStep.paramValues[0].value;
-                auto z_in = prevStep.paramValues[1].value;
-                auto xy_out = prevStep.paramValues[2].value;
-                auto z_out = curStep.paramValues[1].value;
+                const std::string xy_in(prevStep.paramValues[0].value);
+                const std::string z_in(prevStep.paramValues[1].value);
+                const std::string xy_out(prevStep.paramValues[2].value);
+                const std::string z_out(curStep.paramValues[1].value);
 
                 iterCur->paramValues.clear();
                 iterCur->paramValues.emplace_back(
@@ -8861,10 +8862,10 @@ const std::string &PROJStringFormatter::toString() const {
                 curStep.paramValues[2].keyEquals("xy_out") &&
                 curStep.paramValues[3].keyEquals("z_out") &&
                 prevStep.paramValues[1].value == curStep.paramValues[1].value) {
-                auto xy_in = curStep.paramValues[0].value;
-                auto z_in = prevStep.paramValues[0].value;
-                auto xy_out = curStep.paramValues[2].value;
-                auto z_out = curStep.paramValues[3].value;
+                const std::string xy_in(curStep.paramValues[0].value);
+                const std::string z_in(prevStep.paramValues[0].value);
+                const std::string xy_out(curStep.paramValues[2].value);
+                const std::string z_out(curStep.paramValues[3].value);
 
                 iterCur->paramValues.clear();
                 iterCur->paramValues.emplace_back(
@@ -8894,10 +8895,10 @@ const std::string &PROJStringFormatter::toString() const {
                 curStep.paramValues[0].keyEquals("xy_in") &&
                 curStep.paramValues[1].keyEquals("xy_out") &&
                 prevStep.paramValues[2].value == curStep.paramValues[0].value) {
-                auto xy_in = prevStep.paramValues[0].value;
-                auto z_in = prevStep.paramValues[1].value;
-                auto xy_out = curStep.paramValues[1].value;
-                auto z_out = prevStep.paramValues[3].value;
+                const std::string xy_in(prevStep.paramValues[0].value);
+                const std::string z_in(prevStep.paramValues[1].value);
+                const std::string xy_out(curStep.paramValues[1].value);
+                const std::string z_out(prevStep.paramValues[3].value);
 
                 iterCur->paramValues.clear();
                 iterCur->paramValues.emplace_back(
@@ -8940,10 +8941,10 @@ const std::string &PROJStringFormatter::toString() const {
                 curStep.paramValues[3].keyEquals("z_out") &&
                 prevStep.paramValues[2].value == curStep.paramValues[0].value &&
                 curStep.paramValues[1].value == curStep.paramValues[3].value) {
-                auto xy_in = prevStep.paramValues[0].value;
-                auto z_in = prevStep.paramValues[1].value;
-                auto xy_out = curStep.paramValues[2].value;
-                auto z_out = prevStep.paramValues[3].value;
+                const std::string xy_in(prevStep.paramValues[0].value);
+                const std::string z_in(prevStep.paramValues[1].value);
+                const std::string xy_out(curStep.paramValues[2].value);
+                const std::string z_out(prevStep.paramValues[3].value);
 
                 iterCur->paramValues.clear();
                 iterCur->paramValues.emplace_back(
@@ -8979,10 +8980,10 @@ const std::string &PROJStringFormatter::toString() const {
                 prevStep.paramValues[1].value ==
                     prevStep.paramValues[3].value &&
                 curStep.paramValues[0].value == prevStep.paramValues[2].value) {
-                auto xy_in = prevStep.paramValues[0].value;
-                auto z_in = curStep.paramValues[1].value;
-                auto xy_out = curStep.paramValues[2].value;
-                auto z_out = curStep.paramValues[3].value;
+                const std::string xy_in(prevStep.paramValues[0].value);
+                const std::string z_in(curStep.paramValues[1].value);
+                const std::string xy_out(curStep.paramValues[2].value);
+                const std::string z_out(curStep.paramValues[3].value);
 
                 iterCur->paramValues.clear();
                 iterCur->paramValues.emplace_back(
@@ -9532,9 +9533,10 @@ const std::string &PROJStringFormatter::toString() const {
                 }
 
                 if (ok) {
-                    auto stepVgridshift = *iterVgridshift;
+                    Step stepVgridshift(*iterVgridshift);
                     steps.erase(iterPrev, iterPush);
-                    steps.insert(std::next(iterNext), stepVgridshift);
+                    steps.insert(std::next(iterNext),
+                                 std::move(stepVgridshift));
                     iterPrev = iterPush;
                     iterCur = std::next(iterPush);
                     continue;
@@ -9779,9 +9781,10 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                 const auto pos = word.find('=');
                 auto key = word.substr(0, pos);
 
-                auto pair = (pos != std::string::npos)
-                                ? Step::KeyValue(key, word.substr(pos + 1))
-                                : Step::KeyValue(key);
+                const Step::KeyValue pair(
+                    (pos != std::string::npos)
+                        ? Step::KeyValue(key, word.substr(pos + 1))
+                        : Step::KeyValue(key));
                 if (steps.empty()) {
                     globalParamValues.push_back(pair);
                 } else {
@@ -9814,11 +9817,11 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
         } else if (inPipeline && !steps.empty() && starts_with(word, "proj=") &&
                    steps.back().name.empty()) {
             auto stepName = word.substr(strlen("proj="));
-            steps.back().name = stepName;
+            steps.back().name = std::move(stepName);
         } else if (inPipeline && !steps.empty() && starts_with(word, "init=") &&
                    steps.back().name.empty()) {
             auto initName = word.substr(strlen("init="));
-            steps.back().name = initName;
+            steps.back().name = std::move(initName);
             steps.back().isInit = true;
         } else if (!inPipeline && starts_with(word, "title=")) {
             title = word.substr(strlen("title="));
@@ -10999,7 +11002,7 @@ PROJStringParser::Private::processAxisSwap(Step &step,
                                /*: (axisType == AxisType::SOUTH_POLE)
                                      ? AxisDirection::NORTH*/
                                : AxisDirection::NORTH;
-    CoordinateSystemAxisNNPtr north = createAxis(
+    const CoordinateSystemAxisNNPtr north = createAxis(
         northName, northAbbev, northDir, unit,
         isGeographic ? nullMeridian
         : (axisType == AxisType::NORTH_POLE)
@@ -11008,7 +11011,7 @@ PROJStringParser::Private::processAxisSwap(Step &step,
             ? Meridian::create(Angle(0, UnitOfMeasure::DEGREE)).as_nullable()
             : nullMeridian);
 
-    CoordinateSystemAxisNNPtr west =
+    const CoordinateSystemAxisNNPtr west =
         createAxis(isSpherical    ? "Planetocentric longitude"
                    : isGeographic ? AxisName::Longitude
                                   : AxisName::Westing,
@@ -11017,7 +11020,7 @@ PROJStringParser::Private::processAxisSwap(Step &step,
                                   : std::string(),
                    AxisDirection::WEST, unit);
 
-    CoordinateSystemAxisNNPtr south =
+    const CoordinateSystemAxisNNPtr south =
         createAxis(isSpherical    ? "Planetocentric latitude"
                    : isGeographic ? AxisName::Latitude
                                   : AxisName::Southing,
@@ -12321,7 +12324,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 newParamValues.emplace_back(kv);
             }
         }
-        step.paramValues = newParamValues;
+        step.paramValues = std::move(newParamValues);
 
         d->projString_.clear();
         if (!step.name.empty()) {
@@ -12346,13 +12349,13 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
 
     if (!valid) {
         const int l_errno = proj_context_errno(pj_context);
-        std::string prefix("Error " + toString(l_errno) + " (" +
-                           proj_errno_string(l_errno) + ")");
-        if (logger.msg.empty()) {
-            logger.msg = prefix;
-        } else {
-            logger.msg = prefix + ": " + logger.msg;
+        std::string msg("Error " + toString(l_errno) + " (" +
+                        proj_errno_string(l_errno) + ")");
+        if (!logger.msg.empty()) {
+            msg += ": ";
+            msg += logger.msg;
         }
+        logger.msg = std::move(msg);
     }
 
     if (pj_context != d->ctx_) {
@@ -12478,7 +12481,7 @@ struct JSONFormatter::Private {
 JSONFormatterNNPtr JSONFormatter::create( // cppcheck-suppress passedByValue
     DatabaseContextPtr dbContext) {
     auto ret = NN_NO_CHECK(JSONFormatter::make_unique<JSONFormatter>());
-    ret->d->dbContext_ = dbContext;
+    ret->d->dbContext_ = std::move(dbContext);
     return ret;
 }
 

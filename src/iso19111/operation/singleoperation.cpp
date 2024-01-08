@@ -2382,7 +2382,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                            EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME);
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
-            auto filename = fileParameter->valueFile();
+            const auto &filename = fileParameter->valueFile();
             if (databaseContext->lookForGridAlternative(
                     filename, projFilename, projGridFormat, inverseDirection)) {
 
@@ -3152,12 +3152,12 @@ void SingleOperation::exportToPROJStringChangeVerticalUnit(
     const auto uom = common::UnitOfMeasure(std::string(), convFactor,
                                            common::UnitOfMeasure::Type::LINEAR)
                          .exportToPROJString();
-    const auto reverse_uom =
+    const std::string reverse_uom(
         convFactor == 0.0
             ? std::string()
             : common::UnitOfMeasure(std::string(), 1.0 / convFactor,
                                     common::UnitOfMeasure::Type::LINEAR)
-                  .exportToPROJString();
+                  .exportToPROJString());
     if (uom == "m") {
         // do nothing
     } else if (!uom.empty()) {
@@ -4078,8 +4078,8 @@ bool SingleOperation::exportToPROJStringGeneric(
         sourceCRSGeog->ellipsoid()->_exportToPROJString(formatter);
 
         formatter->addStep("deformation");
-        auto srcName = sourceCRS()->nameStr();
-        auto dstName = targetCRS()->nameStr();
+        const std::string srcName(sourceCRS()->nameStr());
+        const std::string dstName(targetCRS()->nameStr());
         const struct {
             const char *name;
             double epoch;
@@ -4260,7 +4260,7 @@ bool SingleOperation::exportToPROJStringGeneric(
                            EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME);
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
-            auto filename = fileParameter->valueFile();
+            const auto &filename = fileParameter->valueFile();
 
             auto l_sourceCRS = sourceCRS();
             auto sourceCRSGeog =
@@ -4920,7 +4920,7 @@ void PointMotionOperation::_exportToJSON(
                                                     !identifiers().empty()));
 
     writer->AddObjKey("name");
-    auto l_name = nameStr();
+    const auto &l_name = nameStr();
     if (l_name.empty()) {
         writer->Add("unnamed");
     } else {
