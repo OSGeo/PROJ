@@ -5886,7 +5886,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                     }
                 }
             }
-            if (!foundRegisteredTransformWithAllGridsAvailable && srcGeogCRS &&
+            if (srcGeogCRS &&
                 !srcGeogCRS->_isEquivalentTo(
                     geogDst, util::IComparable::Criterion::EQUIVALENT) &&
                 !srcGeogCRS->is2DPartOf3D(NN_NO_CHECK(geogDst), dbContext)) {
@@ -5904,7 +5904,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                     componentsSrc[1], util::optional<common::DataEpoch>(),
                     geogCRSTmp, util::optional<common::DataEpoch>(), context);
                 bool foundRegisteredTransform = false;
-                foundRegisteredTransformWithAllGridsAvailable = false;
+                bool foundRegisteredTransformWithAllGridsAvailable2 = false;
                 for (const auto &op : verticalTransformsTmp) {
                     if (hasIdentifiers(op) && dbContext) {
                         bool missingGrid = false;
@@ -5923,13 +5923,14 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                         }
                         foundRegisteredTransform = true;
                         if (!missingGrid) {
-                            foundRegisteredTransformWithAllGridsAvailable =
+                            foundRegisteredTransformWithAllGridsAvailable2 =
                                 true;
                             break;
                         }
                     }
                 }
-                if (foundRegisteredTransformWithAllGridsAvailable) {
+                if (foundRegisteredTransformWithAllGridsAvailable2 &&
+                    !foundRegisteredTransformWithAllGridsAvailable) {
                     verticalTransforms = std::move(verticalTransformsTmp);
                 } else if (foundRegisteredTransform) {
                     verticalTransforms.insert(verticalTransforms.end(),

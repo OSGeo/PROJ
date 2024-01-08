@@ -6942,6 +6942,31 @@ TEST(operation, compoundCRS_of_projCRS_to_geogCRS_3D_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_geogCRS_3D_KNOWN_AVAILABLE_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::KNOWN_AVAILABLE);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem(
+            "9537"), // RGAF09 + Martinique 1987 height
+        authFactory->createCoordinateReferenceSystem("4557"), // RRAF 1991
+        ctxt);
+    ASSERT_GE(list.size(), 2U);
+    // Make sure that "RGAF09 to Martinique 1987 height (2)" (using RAMART2016)
+    // is listed first
+    EXPECT_EQ(list[0]->nameStr(),
+              "Inverse of RGAF09 to Martinique 1987 height (2) + "
+              "Inverse of RRAF 1991 to RGAF09 (1)");
+    EXPECT_EQ(list[1]->nameStr(),
+              "Inverse of RRAF 1991 to RGAF09 (1) + "
+              "Inverse of RRAF 1991 to Martinique 1987 height (1)");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_from_wkt_without_id_to_geogCRS) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
