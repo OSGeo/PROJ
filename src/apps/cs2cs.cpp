@@ -229,19 +229,19 @@ static void process(FILE *fid)
                 data.u *= destToRadians * RAD_TO_DEG;
             }
             if (reverseout) {
-                printf(oform, data.v);
+                limited_fprintf_for_number(stdout, oform, data.v);
                 putchar('\t');
-                printf(oform, data.u);
+                limited_fprintf_for_number(stdout, oform, data.u);
             } else {
-                printf(oform, data.u);
+                limited_fprintf_for_number(stdout, oform, data.u);
                 putchar('\t');
-                printf(oform, data.v);
+                limited_fprintf_for_number(stdout, oform, data.v);
             }
         }
 
         putchar(' ');
         if (oform != nullptr)
-            printf(oform, z);
+            limited_fprintf_for_number(stdout, oform, z);
         else
             printf("%.3f", z);
         if (s)

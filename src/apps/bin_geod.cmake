@@ -3,6 +3,7 @@ set(GEOD_SRC
   geod_set.cpp
   geod_interface.cpp
   emess.cpp
+  utils.cpp
 )
 set(GEOD_INCLUDE geod_interface.h)
 

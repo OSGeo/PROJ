@@ -4,6 +4,7 @@
 #include "geod_interface.h"
 #include "proj.h"
 #include "proj_internal.h"
+#include "utils.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -25,9 +26,9 @@ static const char *usage =
 
 static void printLL(double p, double l) {
     if (oform) {
-        (void)printf(oform, p * RAD_TO_DEG);
+        (void)limited_fprintf_for_number(stdout, oform, p * RAD_TO_DEG);
         TAB;
-        (void)printf(oform, l * RAD_TO_DEG);
+        (void)limited_fprintf_for_number(stdout, oform, l * RAD_TO_DEG);
     } else {
         (void)fputs(rtodms(pline, sizeof(pline), p, 'N', 'S'), stdout);
         TAB;
@@ -108,37 +109,46 @@ process(FILE *fid) {
             printLL(phi2, lam2);
             TAB;
             if (oform) {
-                (void)printf(oform, al12 * RAD_TO_DEG);
+                (void)limited_fprintf_for_number(stdout, oform,
+                                                 al12 * RAD_TO_DEG);
                 TAB;
-                (void)printf(oform, al21 * RAD_TO_DEG);
+                (void)limited_fprintf_for_number(stdout, oform,
+                                                 al21 * RAD_TO_DEG);
                 TAB;
-                (void)printf(osform, geod_S * fr_meter);
+                (void)limited_fprintf_for_number(stdout, osform,
+                                                 geod_S * fr_meter);
             } else {
                 (void)fputs(rtodms(pline, sizeof(pline), al12, 0, 0), stdout);
                 TAB;
                 (void)fputs(rtodms(pline, sizeof(pline), al21, 0, 0), stdout);
                 TAB;
-                (void)printf(osform, geod_S * fr_meter);
+                (void)limited_fprintf_for_number(stdout, osform,
+                                                 geod_S * fr_meter);
             }
         } else if (inverse)
             if (oform) {
-                (void)printf(oform, al12 * RAD_TO_DEG);
+                (void)limited_fprintf_for_number(stdout, oform,
+                                                 al12 * RAD_TO_DEG);
                 TAB;
-                (void)printf(oform, al21 * RAD_TO_DEG);
+                (void)limited_fprintf_for_number(stdout, oform,
+                                                 al21 * RAD_TO_DEG);
                 TAB;
-                (void)printf(osform, geod_S * fr_meter);
+                (void)limited_fprintf_for_number(stdout, osform,
+                                                 geod_S * fr_meter);
             } else {
                 (void)fputs(rtodms(pline, sizeof(pline), al12, 0, 0), stdout);
                 TAB;
                 (void)fputs(rtodms(pline, sizeof(pline), al21, 0, 0), stdout);
                 TAB;
-                (void)printf(osform, geod_S * fr_meter);
+                (void)limited_fprintf_for_number(stdout, osform,
+                                                 geod_S * fr_meter);
             }
         else {
             printLL(phi2, lam2);
             TAB;
             if (oform)
-                (void)printf(oform, al21 * RAD_TO_DEG);
+                (void)limited_fprintf_for_number(stdout, oform,
+                                                 al21 * RAD_TO_DEG);
             else
                 (void)fputs(rtodms(pline, sizeof(pline), al21, 0, 0), stdout);
         }
