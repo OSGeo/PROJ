@@ -266,7 +266,7 @@ int main(int argc, char **argv) {
                 emess_dat.File_name = const_cast<char *>("<stdin>");
             } else {
                 if ((fid = fopen(*eargv, "r")) == nullptr) {
-                    emess(-2, *eargv, "input file");
+                    emess(-2, "input file: %s", *eargv);
                     continue;
                 }
                 emess_dat.File_name = *eargv;
