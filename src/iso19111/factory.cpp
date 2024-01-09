@@ -1282,18 +1282,15 @@ void DatabaseContext::Private::attachExtraDatabases(
         sqlite_handle, true, nLayoutVersionMajor, nLayoutVersionMinor);
     l_handle = sqlite_handle_;
 
-    run("ATTACH DATABASE '" + replaceAll(databasePath_, "'", "''") +
-        "' AS db_0");
+    run("ATTACH DATABASE ? AS db_0", {databasePath_});
     detach_ = true;
     int count = 1;
     for (const auto &otherDbPath : auxiliaryDatabasePaths) {
         const auto attachedDbName("db_" + toString(static_cast<int>(count)));
-        std::string sql = "ATTACH DATABASE '";
-        sql += replaceAll(otherDbPath, "'", "''");
-        sql += "' AS ";
+        std::string sql = "ATTACH DATABASE ? AS ";
         sql += attachedDbName;
         count++;
-        run(sql);
+        run(sql, {otherDbPath});
 
         l_handle->checkDatabaseLayout(databasePath_, otherDbPath,
                                       attachedDbName + '.');
