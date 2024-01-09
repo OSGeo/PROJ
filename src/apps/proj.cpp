@@ -279,7 +279,7 @@ static void vprocess(FILE *fid) {
         }
 
         if (proj_context_errno(nullptr)) {
-            emess(-1, proj_errno_string(proj_context_errno(nullptr)));
+            emess(-1, "%s", proj_errno_string(proj_context_errno(nullptr)));
             continue;
         }
 

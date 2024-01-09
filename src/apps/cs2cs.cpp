@@ -899,7 +899,7 @@ int main(int argc, char **argv) {
             sourceEpochDbl = c_locale_stod(sourceEpoch);
         } catch (const std::exception &e) {
             sourceEpochDbl = 0;
-            emess(3, e.what());
+            emess(3, "%s", e.what());
         }
         srcMetadata =
             proj_coordinate_metadata_create(nullptr, src, sourceEpochDbl);
@@ -917,7 +917,7 @@ int main(int argc, char **argv) {
             targetEpochDbl = c_locale_stod(targetEpoch);
         } catch (const std::exception &e) {
             targetEpochDbl = 0;
-            emess(3, e.what());
+            emess(3, "%s", e.what());
         }
         dstMetadata =
             proj_coordinate_metadata_create(nullptr, dst, targetEpochDbl);
