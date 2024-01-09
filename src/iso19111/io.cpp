@@ -426,7 +426,8 @@ void WKTFormatter::Private::addNewLine() { result_ += '\n'; }
 // ---------------------------------------------------------------------------
 
 void WKTFormatter::Private::addIndentation() {
-    result_ += std::string(indentLevel_ * params_.indentWidth_, ' ');
+    result_ += std::string(
+        static_cast<size_t>(indentLevel_) * params_.indentWidth_, ' ');
 }
 
 // ---------------------------------------------------------------------------
@@ -9626,7 +9627,9 @@ const std::string &PROJStringFormatter::toString() const {
         std::string curLine;
         if (!d->result_.empty()) {
             if (d->multiLine_) {
-                curLine = std::string(d->indentLevel_ * d->indentWidth_, ' ');
+                curLine = std::string(static_cast<size_t>(d->indentLevel_) *
+                                          d->indentWidth_,
+                                      ' ');
                 curLine += "+step";
             } else {
                 curLine = " +step";
@@ -9655,8 +9658,10 @@ const std::string &PROJStringFormatter::toString() const {
                 if (!d->result_.empty())
                     d->result_ += '\n';
                 d->result_ += curLine;
-                curLine = std::string(
-                    d->indentLevel_ * d->indentWidth_ + strlen("+step "), ' ');
+                curLine = std::string(static_cast<size_t>(d->indentLevel_) *
+                                              d->indentWidth_ +
+                                          strlen("+step "),
+                                      ' ');
             } else {
                 if (!curLine.empty())
                     curLine += ' ';
