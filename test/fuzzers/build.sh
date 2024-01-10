@@ -24,8 +24,8 @@ if [ "$LIB_FUZZING_ENGINE" = "" ]; then
     export LIB_FUZZING_ENGINE=-lFuzzingEngine
 fi
 
-I386_PACKAGES="zlib1g-dev:i386 libssl-dev:i386 libpsl-dev:i386 libsqlite3-dev:i386"
-X64_PACKAGES="zlib1g-dev libssl-dev libpsl-dev libsqlite3-dev"
+I386_PACKAGES="zlib1g-dev:i386 libssl-dev:i386 libsqlite3-dev:i386"
+X64_PACKAGES="zlib1g-dev libssl-dev libsqlite3-dev"
 
 if [ "$ARCHITECTURE" = "i386" ]; then
     apt-get install -y $I386_PACKAGES
@@ -36,7 +36,7 @@ fi
 # build libcurl.a (builing against Ubuntu libcurl.a doesn't work easily)
 cd curl
 autoreconf -i
-./configure --disable-shared --with-openssl --prefix=$SRC/install
+./configure --disable-shared --with-openssl --without-libpsl --prefix=$SRC/install
 make clean -s
 make -j$(nproc) -s
 make install
@@ -65,7 +65,7 @@ make -j$(nproc) -s
 make install
 cd ..
 
-EXTRA_LIBS="-lpthread -Wl,-Bstatic -lsqlite3 -L$SRC/install/lib -ltiff -lcurl -lpsl -lunistring -lidn2 -lssl -lcrypto -lz -Wl,-Bdynamic"
+EXTRA_LIBS="-lpthread -Wl,-Bstatic -lsqlite3 -L$SRC/install/lib -ltiff -lcurl -lssl -lcrypto -lz -Wl,-Bdynamic"
 
 build_fuzzer()
 {
