@@ -9,7 +9,7 @@
 ################################################################################
 # General settings
 ################################################################################
-cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16)
 
 project(PROJ
   DESCRIPTION "PROJ coordinate transformation software library"
@@ -218,16 +218,6 @@ if(ENABLE_CURL)
   find_package(CURL REQUIRED)
   if(CURL_FOUND)
     set(CURL_ENABLED TRUE)
-
-    # Target CURL::libcurl only defined since CMake 3.12
-    # TODO: remove this when CMake >= 3.12 required
-    if(NOT TARGET CURL::libcurl)
-      add_library(CURL::libcurl INTERFACE IMPORTED)
-      set_target_properties(CURL::libcurl PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}"
-        INTERFACE_LINK_LIBRARIES      "${CURL_LIBRARIES}"
-      )
-    endif()
 
     # Curl SSL options are described in
     #   https://curl.se/libcurl/c/CURLOPT_SSL_OPTIONS.html

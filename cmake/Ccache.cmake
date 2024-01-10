@@ -7,8 +7,6 @@
 # Add "include(Ccache)" to CMakeLists.txt and enable
 # using the option -D USE_CCACHE=ON
 
-cmake_minimum_required(VERSION 3.9)
-
 
 option(USE_CCACHE
   "Use ccache (or clcache for MSVC) to compile C/C++ objects" OFF)

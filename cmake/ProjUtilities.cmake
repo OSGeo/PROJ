@@ -116,9 +116,10 @@ function(configure_proj_pc)
   if(HAVE_LIBDL)
     list(APPEND EXTRA_LIBS -ldl)
   endif()
-  # Join list with a space; list(JOIN) added CMake 3.12
-  string(REPLACE ";" " " EXTRA_LIBS "${EXTRA_LIBS}")
-  string(REPLACE ";" " " EXTRA_REQUIRES "${EXTRA_REQUIRES}")
+
+  # Join lists with a space
+  list(JOIN EXTRA_LIBS " " EXTRA_LIBS)
+  list(JOIN EXTRA_REQUIRES " " EXTRA_REQUIRES)
 
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/proj.pc.in

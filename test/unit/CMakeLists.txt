@@ -25,49 +25,21 @@ endif()
 
 else()
 
-message(STATUS "Using internal GTest")
+message(STATUS "Fetching GTest")
 
+# Add Google Test
 #
-# Build Google Test
-#
-# Source https://github.com/google/googletest/blob/master/googletest/README.md
-# Download and unpack googletest at configure time
-configure_file(
-  ${PROJ_SOURCE_DIR}/test/googletest/CMakeLists.txt.in
-  ${PROJ_BINARY_DIR}/googletest-download/CMakeLists.txt)
+# Source https://github.com/google/googletest/blob/main/googletest/README.md
 
-if(CYGWIN)
-# needed at least with gcc 11.3.0 Cygwin, otherwise build errors in
-# in googletest-src/googletest/include/gtest/internal/gtest-port.h related to
-# fileno() and other functions, when building gtest or including it
-add_definitions(-D_GNU_SOURCE)
-endif()
-
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${PROJ_BINARY_DIR}/googletest-download)
-if(result)
-  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${PROJ_BINARY_DIR}/googletest-download)
-if(result)
-  message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif()
-# Prevent overriding the parent project's compiler/linker
-# settings on Windows
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  # Specify the commit you depend on and update it regularly.
+  URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-# Add googletest directly to our build. This defines
-# the gtest and gtest_main targets.
-option(INSTALL_GTEST "Enable installation of googletest" OFF)
-add_subdirectory(
-  ${PROJ_BINARY_DIR}/googletest-src
-  ${PROJ_BINARY_DIR}/googletest-build
-  EXCLUDE_FROM_ALL)
-
-# Provide the same target name as find_package(GTest)
-add_library(GTest::gtest ALIAS gtest)
+FetchContent_MakeAvailable(googletest)
 
 endif()  # USE_EXTERNAL_GTEST
 
@@ -148,9 +120,7 @@ set(PROJ_TEST_CPP_API_SOURCES
   test_c_api.cpp
   test_grids.cpp)
 add_executable(proj_test_cpp_api ${PROJ_TEST_CPP_API_SOURCES})
-if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
-  set_property(SOURCE ${PROJ_TEST_CPP_API_SOURCES} PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
-endif ()
+set_property(SOURCE ${PROJ_TEST_CPP_API_SOURCES} PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
 
 target_link_libraries(proj_test_cpp_api
   PRIVATE GTest::gtest
@@ -182,14 +152,7 @@ add_executable(test_network
   test_network.cpp)
 if(CURL_ENABLED)
   target_compile_definitions(test_network PRIVATE -DCURL_ENABLED)
-  if( CMAKE_VERSION VERSION_LESS 3.11 AND CMAKE_CROSSCOMPILING )
-      # Hack needed for ubuntu:18.04 mingw64 cross compiling to avoid
-      # -isystem to be emitted (similar to https://discourse.cmake.org/t/use-of-isystem/1574)
-      target_include_directories(test_network PRIVATE ${CURL_INCLUDE_DIRS})
-      target_link_libraries(test_network PRIVATE ${CURL_LIBRARIES})
-  else()
-      target_link_libraries(test_network PRIVATE CURL::libcurl)
-  endif()
+  target_link_libraries(test_network PRIVATE CURL::libcurl)
 endif()
 target_link_libraries(test_network
   PRIVATE GTest::gtest
