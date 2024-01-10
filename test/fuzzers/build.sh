@@ -65,7 +65,7 @@ make -j$(nproc) -s
 make install
 cd ..
 
-EXTRA_LIBS="-lpthread -Wl,-Bstatic -lsqlite3 -L$SRC/install/lib -ltiff -lcurl -lssl -lcrypto -lz -Wl,-Bdynamic"
+EXTRA_LIBS="-lpthread -Wl,-Bstatic -lsqlite3 -L$SRC/install/lib -ltiff -lcurl -lpsl -lssl -lcrypto -lz -Wl,-Bdynamic"
 
 build_fuzzer()
 {
