@@ -24,8 +24,8 @@ if [ "$LIB_FUZZING_ENGINE" = "" ]; then
     export LIB_FUZZING_ENGINE=-lFuzzingEngine
 fi
 
-I386_PACKAGES="zlib1g-dev:i386 libssl-dev:i386 libsqlite3-dev:i386"
-X64_PACKAGES="zlib1g-dev libssl-dev libsqlite3-dev"
+I386_PACKAGES="zlib1g-dev:i386 libssl-dev:i386 libpsl-dev:i386 libsqlite3-dev:i386"
+X64_PACKAGES="zlib1g-dev libssl-dev libpsl-dev libsqlite3-dev"
 
 if [ "$ARCHITECTURE" = "i386" ]; then
     apt-get install -y $I386_PACKAGES
