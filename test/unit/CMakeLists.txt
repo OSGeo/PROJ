@@ -29,7 +29,11 @@ message(STATUS "Fetching GTest")
 
 # Add Google Test
 #
-# Source https://github.com/google/googletest/blob/main/googletest/README.md
+# See https://github.com/google/googletest/blob/main/googletest/README.md
+
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+  cmake_policy(SET CMP0135 NEW)  # for DOWNLOAD_EXTRACT_TIMESTAMP option
+endif()
 
 include(FetchContent)
 FetchContent_Declare(
