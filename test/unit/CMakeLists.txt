@@ -9,41 +9,54 @@ endif()
 
 if(USE_EXTERNAL_GTEST)
 
-if(NOT GTest_FOUND)
+  if(NOT GTest_FOUND)
     message(FATAL_ERROR "External GTest >= 1.8.1 not found")
-endif()
-message(STATUS "Using external GTest")
+  endif()
+  message(STATUS "Using external GTest")
 
-# CMake < 3.20.0 uses GTest::GTest
-# CMake >= 3.20 uses GTest::gtest, and deprecates GTest::GTest
-# so for older CMake, create an alias from GTest::GTest to GTest::gtest
-if(NOT TARGET GTest::gtest)
+  # CMake < 3.20.0 uses GTest::GTest
+  # CMake >= 3.20 uses GTest::gtest, and deprecates GTest::GTest
+  # so for older CMake, create an alias from GTest::GTest to GTest::gtest
+  if(NOT TARGET GTest::gtest)
     add_library(GTest::gtest INTERFACE IMPORTED)
     set_target_properties(GTest::gtest PROPERTIES
                           INTERFACE_LINK_LIBRARIES "GTest::GTest")
-endif()
+  endif()
 
 else()
 
-message(STATUS "Fetching GTest")
+  message(STATUS "Fetching GTest")
 
-# Add Google Test
-#
-# See https://github.com/google/googletest/blob/main/googletest/README.md
+  # Add Google Test
+  #
+  # See https://github.com/google/googletest/blob/main/googletest/README.md
 
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
-  cmake_policy(SET CMP0135 NEW)  # for DOWNLOAD_EXTRACT_TIMESTAMP option
-endif()
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+    cmake_policy(SET CMP0135 NEW)  # for DOWNLOAD_EXTRACT_TIMESTAMP option
+  endif()
 
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.12.1
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+  include(FetchContent)
+  # Future note: EXCLUDE_FROM_ALL added to FetchContent_Declare() with CMake 3.28
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        release-1.12.1
+    EXCLUDE_FROM_ALL  # ignored before CMake 3.28
+  )
+
+  # For Windows: Prevent overriding the parent project's compiler/linker settings
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.28.0")
+    FetchContent_MakeAvailable(googletest)
+  else()
+    # Pre CMake 3.28 workaround to prevent installing files
+    FetchContent_GetProperties(googletest)
+    if(NOT googletest_POPULATED)
+      FetchContent_Populate(googletest)
+      add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
+  endif()
 
 endif()  # USE_EXTERNAL_GTEST
 
