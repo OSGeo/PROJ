@@ -94,7 +94,7 @@ Mathematical definition
 
 The formulas describing the Equidistant Cylindrical projection are all taken from :cite:`Snyder1987`.
 
-:math:`\phi_{ts}` is the latitude of true scale, that mean the standard parallels where the scale of the projection is true. It can be set with ``+lat_ts``.
+:math:`\phi_{ts}` is the latitude of true scale, i.e., the standard parallel where the scale of the projection is true. It can be set with ``+lat_ts``.
 
 :math:`\phi_0` is the latitude of origin that match the center of the map. It can be set with ``+lat_0``.
 
