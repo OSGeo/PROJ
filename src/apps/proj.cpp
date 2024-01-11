@@ -172,13 +172,13 @@ static void process(FILE *fid) {
             }
 
             if (reverseout) {
-                (void)printf(oform, data.uv.v);
+                limited_fprintf_for_number(stdout, oform, data.uv.v);
                 putchar('\t');
-                (void)printf(oform, data.uv.u);
+                limited_fprintf_for_number(stdout, oform, data.uv.u);
             } else {
-                (void)printf(oform, data.uv.u);
+                limited_fprintf_for_number(stdout, oform, data.uv.u);
                 putchar('\t');
-                (void)printf(oform, data.uv.v);
+                limited_fprintf_for_number(stdout, oform, data.uv.v);
             }
         }
 
@@ -279,7 +279,7 @@ static void vprocess(FILE *fid) {
         }
 
         if (proj_context_errno(nullptr)) {
-            emess(-1, proj_errno_string(proj_context_errno(nullptr)));
+            emess(-1, "%s", proj_errno_string(proj_context_errno(nullptr)));
             continue;
         }
 
@@ -305,11 +305,11 @@ static void vprocess(FILE *fid) {
         (void)printf(" [ %.11g ]\n", dat_ll.phi * RAD_TO_DEG);
         (void)fputs(swapAxisCrs ? "Northing (y):  " : "Easting (x):   ",
                     stdout);
-        (void)printf(oform, dat_xy.x);
+        limited_fprintf_for_number(stdout, oform, dat_xy.x);
         putchar('\n');
         (void)fputs(swapAxisCrs ? "Easting (x):   " : "Northing (y):  ",
                     stdout);
-        (void)printf(oform, dat_xy.y);
+        limited_fprintf_for_number(stdout, oform, dat_xy.y);
         putchar('\n');
         (void)printf("Meridian scale (h) : %.8f  ( %.4g %% error )\n",
                      facs.meridional_scale,
@@ -670,13 +670,15 @@ int main(int argc, char **argv) {
             (void)printf("#Final Earth figure: ");
             if (Proj->es != 0.0) {
                 (void)printf("ellipsoid\n#  Major axis (a): ");
-                (void)printf(oform ? oform : "%.3f", Proj->a);
+                limited_fprintf_for_number(stdout, oform ? oform : "%.3f",
+                                           Proj->a);
                 (void)printf("\n#  1/flattening: %.6f\n",
                              1. / (1. - sqrt(1. - Proj->es)));
                 (void)printf("#  squared eccentricity: %.12f\n", Proj->es);
             } else {
                 (void)printf("sphere\n#  Radius: ");
-                (void)printf(oform ? oform : "%.3f", Proj->a);
+                limited_fprintf_for_number(stdout, oform ? oform : "%.3f",
+                                           Proj->a);
                 (void)putchar('\n');
             }
         }

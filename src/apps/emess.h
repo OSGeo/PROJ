@@ -19,6 +19,13 @@ extern struct EMESS emess_dat;
 
 #endif /* use type */
 
-void emess(int, const char *, ...);
+#if defined(__GNUC__)
+#define EMESS_PRINT_FUNC_FORMAT(format_idx, arg_idx)                           \
+    __attribute__((__format__(__printf__, format_idx, arg_idx)))
+#else
+#define EMESS_PRINT_FUNC_FORMAT(format_idx, arg_idx)
+#endif
+
+void emess(int, const char *, ...) EMESS_PRINT_FUNC_FORMAT(2, 3);
 
 #endif /* end EMESS_H */
