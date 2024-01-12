@@ -1,0 +1,18 @@
+# Source https://github.com/google/googletest/blob/master/googletest/README.md
+cmake_minimum_required(VERSION 2.8.12)
+
+project(googletest-download NONE)
+
+include(ExternalProject)
+ExternalProject_Add(googletest
+  URL https://github.com/google/googletest/archive/release-1.11.0.zip
+  URL_HASH SHA1=9ffb7b5923f4a8fcdabf2f42c6540cce299f44c0
+  DOWNLOAD_NO_PROGRESS ON
+  SOURCE_DIR        "${PROJ_BINARY_DIR}/googletest-src"
+  BINARY_DIR        "${PROJ_BINARY_DIR}/googletest-build"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  TEST_COMMAND      ""
+  # Disable install step
+  INSTALL_COMMAND   ""
+)
