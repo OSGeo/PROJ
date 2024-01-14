@@ -1360,7 +1360,7 @@ void GeodeticReferenceFrame::_exportToWKT(
                         l_name, "geodetic_datum", "ESRI");
                     size_t pos;
                     if (!l_alias.empty()) {
-                        l_name = l_alias;
+                        l_name = std::move(l_alias);
                         aliasFound = true;
                     } else if ((pos = l_name.find(" (")) != std::string::npos) {
                         l_alias = dbContext->getAliasFromOfficialName(

@@ -1628,7 +1628,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS) {
-        auto offsetLat =
+        const auto &offsetLat =
             parameterValueMeasure(EPSG_CODE_PARAMETER_LATITUDE_OFFSET);
         const common::Angle newOffsetLat(negate(offsetLat.value()),
                                          offsetLat.unit());

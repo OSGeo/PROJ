@@ -2208,7 +2208,7 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         frameReferenceEpoch =
             toString(dynamicDatum->frameReferenceEpoch().value());
     }
-    const std::string anchor = *(datum->anchorDefinition());
+    const std::string anchor(*(datum->anchorDefinition()));
     const util::optional<common::Measure> &anchorEpoch = datum->anchorEpoch();
     const auto sql = formatStatement(
         "INSERT INTO geodetic_datum VALUES("
@@ -2303,7 +2303,7 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         assert(!pmIds.empty());
         const std::string &pmAuthName = *(pmIds.front()->codeSpace());
         const std::string &pmCode = pmIds.front()->code();
-        const auto anchor = *(firstDatum->anchorDefinition());
+        const std::string anchor(*(firstDatum->anchorDefinition()));
         const util::optional<common::Measure> &anchorEpoch =
             firstDatum->anchorEpoch();
         const auto sql = formatStatement(
@@ -2324,7 +2324,7 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         const auto firstDatum =
             AuthorityFactory::create(self, membersId.front().first)
                 ->createVerticalDatum(membersId.front().second);
-        const auto anchor = *(firstDatum->anchorDefinition());
+        const std::string anchor(*(firstDatum->anchorDefinition()));
         const util::optional<common::Measure> &anchorEpoch =
             firstDatum->anchorEpoch();
         const auto sql = formatStatement(
@@ -2683,7 +2683,7 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         frameReferenceEpoch =
             toString(dynamicDatum->frameReferenceEpoch().value());
     }
-    const auto anchor = *(datum->anchorDefinition());
+    const std::string anchor(*(datum->anchorDefinition()));
     const util::optional<common::Measure> &anchorEpoch = datum->anchorEpoch();
     const auto sql = formatStatement(
         "INSERT INTO vertical_datum VALUES("
