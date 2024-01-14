@@ -16,11 +16,13 @@ message(STATUS "Using external GTest")
 
 # CMake < 3.20.0 uses GTest::GTest
 # CMake >= 3.20 uses GTest::gtest, and deprecates GTest::GTest
-# so for older CMake, create an alias from GTest::GTest to GTest::gtest
+add_library(gtest_for_proj INTERFACE IMPORTED)
 if(NOT TARGET GTest::gtest)
-    add_library(GTest::gtest INTERFACE IMPORTED)
-    set_target_properties(GTest::gtest PROPERTIES
+    set_target_properties(gtest_for_proj PROPERTIES
                           INTERFACE_LINK_LIBRARIES "GTest::GTest")
+else()
+    set_target_properties(gtest_for_proj PROPERTIES
+                          INTERFACE_LINK_LIBRARIES "GTest::gtest")
 endif()
 
 else()
@@ -67,7 +69,7 @@ add_subdirectory(
   EXCLUDE_FROM_ALL)
 
 # Provide the same target name as find_package(GTest)
-add_library(GTest::gtest ALIAS gtest)
+add_library(gtest_for_proj ALIAS gtest)
 
 endif()  # USE_EXTERNAL_GTEST
 
@@ -93,7 +95,7 @@ add_executable(proj_errno_string_test
   main.cpp
   proj_errno_string_test.cpp)
 target_link_libraries(proj_errno_string_test
-  PRIVATE GTest::gtest
+  PRIVATE gtest_for_proj
   PRIVATE ${PROJ_LIBRARIES})
 add_test(NAME proj_errno_string_test COMMAND proj_errno_string_test)
 set_property(TEST proj_errno_string_test
@@ -103,7 +105,7 @@ add_executable(proj_angular_io_test
   main.cpp
   proj_angular_io_test.cpp)
 target_link_libraries(proj_angular_io_test
-  PRIVATE GTest::gtest
+  PRIVATE gtest_for_proj
   PRIVATE ${PROJ_LIBRARIES})
 add_test(NAME proj_angular_io_test COMMAND proj_angular_io_test)
 set_property(TEST proj_angular_io_test
@@ -113,7 +115,7 @@ add_executable(proj_context_test
   main.cpp
   proj_context_test.cpp)
 target_link_libraries(proj_context_test
-  PRIVATE GTest::gtest
+  PRIVATE gtest_for_proj
   PRIVATE ${PROJ_LIBRARIES})
 add_test(NAME proj_context_test COMMAND proj_context_test)
 set_property(TEST proj_context_test
@@ -126,7 +128,7 @@ else()
     main.cpp
     pj_phi2_test.cpp)
   target_link_libraries(pj_phi2_test
-    PRIVATE GTest::gtest
+    PRIVATE gtest_for_proj
     PRIVATE ${PROJ_LIBRARIES})
   add_test(NAME pj_phi2_test COMMAND pj_phi2_test)
   set_property(TEST pj_phi2_test
@@ -151,7 +153,7 @@ add_executable(proj_test_cpp_api ${PROJ_TEST_CPP_API_SOURCES})
 set_property(SOURCE ${PROJ_TEST_CPP_API_SOURCES} PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
 
 target_link_libraries(proj_test_cpp_api
-  PRIVATE GTest::gtest
+  PRIVATE gtest_for_proj
   PRIVATE ${PROJ_LIBRARIES}
   PRIVATE ${SQLITE3_LIBRARY})
 add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)
@@ -165,7 +167,7 @@ add_executable(gie_self_tests
   main.cpp
   gie_self_tests.cpp)
 target_link_libraries(gie_self_tests
-  PRIVATE GTest::gtest
+  PRIVATE gtest_for_proj
   PRIVATE ${PROJ_LIBRARIES})
   
 add_test(NAME gie_self_tests COMMAND gie_self_tests)
@@ -183,7 +185,7 @@ if(CURL_ENABLED)
   target_link_libraries(test_network PRIVATE CURL::libcurl)
 endif()
 target_link_libraries(test_network
-  PRIVATE GTest::gtest
+  PRIVATE gtest_for_proj
   PRIVATE ${PROJ_LIBRARIES}
   PRIVATE ${SQLITE3_LIBRARY})
 if(TIFF_ENABLED)
@@ -196,7 +198,7 @@ add_executable(test_defmodel
   main.cpp
   test_defmodel.cpp)
 target_link_libraries(test_defmodel
-  PRIVATE GTest::gtest
+  PRIVATE gtest_for_proj
   PRIVATE ${PROJ_LIBRARIES})
 add_test(NAME test_defmodel COMMAND test_defmodel)
 set_property(TEST test_defmodel
@@ -206,7 +208,7 @@ add_executable(test_tinshift
   main.cpp
   test_tinshift.cpp)
 target_link_libraries(test_tinshift
-  PRIVATE GTest::gtest
+  PRIVATE gtest_for_proj
   PRIVATE ${PROJ_LIBRARIES})
 add_test(NAME test_tinshift COMMAND test_tinshift)
 set_property(TEST test_tinshift
@@ -216,7 +218,7 @@ add_executable(test_misc
   main.cpp
   test_misc.cpp)
 target_link_libraries(test_misc
-  PRIVATE GTest::gtest
+  PRIVATE gtest_for_proj
   PRIVATE ${PROJ_LIBRARIES})
 add_test(NAME test_misc COMMAND test_misc)
 set_property(TEST test_misc
