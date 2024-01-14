@@ -9,15 +9,12 @@
 ################################################################################
 # General settings
 ################################################################################
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.16...3.28)
 
 project(PROJ
   DESCRIPTION "PROJ coordinate transformation software library"
   LANGUAGES C CXX
 )
-
-# Only interpret if() arguments as variables or keywords when unquoted
-cmake_policy(SET CMP0054 NEW)
 
 # Set C++ version
 # Make CMAKE_CXX_STANDARD available as cache option overridable by user
@@ -126,7 +123,6 @@ set(PROJ_BUILD_VERSION "${PROJ_SOVERSION}.${PROJ_VERSION}")
 include(Ccache)
 include(ProjConfig)
 include(ProjMac)
-include(policies)
 
 ################################################################################
 # Check for nlohmann_json
