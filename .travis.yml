@@ -15,7 +15,7 @@ matrix:
   include:
 
     - os: linux
-      dist: bionic
+      dist: jammy
       compiler: gcc
       arch: s390x
       env:
@@ -23,7 +23,7 @@ matrix:
         - DETAILS="linux, s390x"
 
     - os: linux
-      dist: bionic
+      dist: jammy
       compiler: gcc
       arch: arm64
       env:
