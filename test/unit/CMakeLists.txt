@@ -148,9 +148,7 @@ set(PROJ_TEST_CPP_API_SOURCES
   test_c_api.cpp
   test_grids.cpp)
 add_executable(proj_test_cpp_api ${PROJ_TEST_CPP_API_SOURCES})
-if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
-  set_property(SOURCE ${PROJ_TEST_CPP_API_SOURCES} PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
-endif ()
+set_property(SOURCE ${PROJ_TEST_CPP_API_SOURCES} PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
 
 target_link_libraries(proj_test_cpp_api
   PRIVATE GTest::gtest
@@ -182,14 +180,7 @@ add_executable(test_network
   test_network.cpp)
 if(CURL_ENABLED)
   target_compile_definitions(test_network PRIVATE -DCURL_ENABLED)
-  if( CMAKE_VERSION VERSION_LESS 3.11 AND CMAKE_CROSSCOMPILING )
-      # Hack needed for ubuntu:18.04 mingw64 cross compiling to avoid
-      # -isystem to be emitted (similar to https://discourse.cmake.org/t/use-of-isystem/1574)
-      target_include_directories(test_network PRIVATE ${CURL_INCLUDE_DIRS})
-      target_link_libraries(test_network PRIVATE ${CURL_LIBRARIES})
-  else()
-      target_link_libraries(test_network PRIVATE CURL::libcurl)
-  endif()
+  target_link_libraries(test_network PRIVATE CURL::libcurl)
 endif()
 target_link_libraries(test_network
   PRIVATE GTest::gtest

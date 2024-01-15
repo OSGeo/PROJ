@@ -342,7 +342,7 @@ config_str = """
         - Longitude_Of_2nd_Point: "Longitude of 2nd point"
 
 - Azimuthal_Equidistant:
-    WKT2_name: EPSG_NAME_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT
+    WKT2_name: EPSG_NAME_METHOD_AZIMUTHAL_EQUIDISTANT
     Params:
         - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING

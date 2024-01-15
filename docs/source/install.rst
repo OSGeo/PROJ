@@ -144,7 +144,7 @@ Build requirements
 
 - C99 compiler
 - C++11 compiler
-- CMake >= 3.9
+- CMake >= 3.16
 - SQLite3 >= 3.11: headers and library for target architecture, and sqlite3 executable for build architecture.
 - libtiff >= 4.0 (optional but recommended)
 - curl >= 7.29.0 (optional but recommended)
@@ -263,7 +263,7 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
     Build PROJ library shared. Default is ON. See also the CMake
     documentation for `BUILD_SHARED_LIBS
-    <https://cmake.org/cmake/help/v3.9/variable/BUILD_SHARED_LIBS.html>`_.
+    <https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html>`_.
 
     .. versionchanged:: 7.0
         Renamed from ``BUILD_LIBPROJ_SHARED``
@@ -283,7 +283,7 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
     Choose the type of build, options are: None (default), Debug, Release,
     RelWithDebInfo, or MinSizeRel. See also the CMake documentation for
     `CMAKE_BUILD_TYPE
-    <https://cmake.org/cmake/help/v3.9/variable/CMAKE_BUILD_TYPE.html>`_.
+    <https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html>`_.
 
     .. note::
         A default build is not optimized without specifying
@@ -320,7 +320,9 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
     .. versionadded:: 9.4
 
     Default is OFF. This can be set to ON to build PROJ using the
-    https://cmake.org/cmake/help/latest/variable/CMAKE_UNITY_BUILD.html feature.
+    `CMAKE_UNITY_BUILD
+    <https://cmake.org/cmake/help/latest/variable/CMAKE_UNITY_BUILD.html>`_.
+    feature.
     This helps speeding PROJ build times. This feature is still considered
     experimental for now, and could hide subtle bugs (we are not aware of
     any at writing time though). We don't recommend it for mission critical

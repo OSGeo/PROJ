@@ -1105,3 +1105,9 @@ Reference implementation
 ------------------------
 
 PROJJSON is available as input and output of the `PROJ <https://proj.org>`_ software since PROJ 6.2.
+
+Online CRS definitions as PROJJSON
+----------------------------------
+
+The https://spatialreference.org/ website features CRS definitions for various authorities under a
+number of formats, including PROJJSON. For example: https://spatialreference.org/ref/epsg/4326/projjson.json

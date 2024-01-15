@@ -26,4 +26,8 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#include <stdio.h>
+
 bool validate_form_string_for_numbers(const char *formatString);
+
+void limited_fprintf_for_number(FILE *f, const char *formatString, double val);

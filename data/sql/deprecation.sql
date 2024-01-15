@@ -463,6 +463,5 @@ INSERT INTO "deprecation" VALUES('compound_crs','EPSG','5832','EPSG','9928','EPS
 INSERT INTO "deprecation" VALUES('compound_crs','EPSG','5833','EPSG','9929','EPSG');
 INSERT INTO "deprecation" VALUES('compound_crs','EPSG','5834','EPSG','9930','EPSG');
 INSERT INTO "deprecation" VALUES('compound_crs','EPSG','5835','EPSG','9931','EPSG');
-INSERT INTO "deprecation" VALUES('compound_crs','EPSG','9924','EPSG','10293','EPSG');
 INSERT INTO "deprecation" VALUES('projected_crs','EPSG','8395','EPSG','10285','EPSG');
 INSERT INTO "deprecation" VALUES('projected_crs','EPSG','10480','EPSG','10481','EPSG');

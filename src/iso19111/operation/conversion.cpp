@@ -744,11 +744,11 @@ ConversionNNPtr Conversion::createLambertConicConformal_2SP_Belgium(
 
 /** \brief Instantiate a conversion based on the
  * <a href="../../../operations/projections/aeqd.html">
- * Modified Azimuthal Equidistant</a> projection method.
+ * Azimuthal Equidistant</a> projection method.
  *
  * This method is defined as
- * <a href="https://epsg.org/coord-operation-method_9832/index.html">
- * EPSG:9832</a>.
+ * <a href="https://epsg.org/coord-operation-method_1125/index.html">
+ * EPSG:1125</a>.
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -762,7 +762,7 @@ ConversionNNPtr Conversion::createAzimuthalEquidistant(
     const util::PropertyMap &properties, const common::Angle &latitudeNatOrigin,
     const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    return create(properties, EPSG_CODE_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT,
+    return create(properties, EPSG_CODE_METHOD_AZIMUTHAL_EQUIDISTANT,
                   createParams(latitudeNatOrigin, longitudeNatOrigin,
                                falseEasting, falseNorthing));
 }
@@ -3447,7 +3447,7 @@ void Conversion::_exportToJSON(
         formatter->MakeObjectContext("Conversion", !identifiers().empty()));
 
     writer->AddObjKey("name");
-    auto l_name = nameStr();
+    const auto &l_name = nameStr();
     if (l_name.empty()) {
         writer->Add("unnamed");
     } else {
@@ -3539,7 +3539,7 @@ static bool createPROJ4WebMercator(const Conversion *conv,
                                   util::IComparable::Criterion::EQUIVALENT)) {
             auto projUnit = unit.exportToPROJString();
             if (!projUnit.empty()) {
-                units = projUnit;
+                units = std::move(projUnit);
             } else {
                 return false;
             }

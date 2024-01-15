@@ -268,6 +268,16 @@ void Datum::setProperties(
     if (!publicationDateResult.empty()) {
         d->publicationDate = common::DateTime::create(publicationDateResult);
     }
+    std::string anchorEpoch;
+    properties.getStringValue("ANCHOR_EPOCH", anchorEpoch);
+    if (!anchorEpoch.empty()) {
+        bool success = false;
+        const double anchorEpochYear = c_locale_stod(anchorEpoch, success);
+        if (success) {
+            setAnchorEpoch(util::optional<common::Measure>(
+                common::Measure(anchorEpochYear, common::UnitOfMeasure::YEAR)));
+        }
+    }
     ObjectUsage::setProperties(properties);
 }
 
@@ -405,8 +415,8 @@ void PrimeMeridian::_exportToWKT(
     io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    std::string l_name =
-        name()->description().has_value() ? nameStr() : "Greenwich";
+    std::string l_name(name()->description().has_value() ? nameStr()
+                                                         : "Greenwich");
     if (!(isWKT2 && formatter->primeMeridianOmittedIfGreenwich() &&
           l_name == "Greenwich")) {
         formatter->startNode(io::WKTConstants::PRIMEM, !identifiers().empty());
@@ -418,7 +428,7 @@ void PrimeMeridian::_exportToWKT(
                 auto l_alias = dbContext->getAliasFromOfficialName(
                     l_name, "prime_meridian", "ESRI");
                 if (!l_alias.empty()) {
-                    l_name = l_alias;
+                    l_name = std::move(l_alias);
                     aliasFound = true;
                 }
             }
@@ -873,7 +883,7 @@ void Ellipsoid::_exportToWKT(
                                 : io::WKTConstants::SPHEROID,
                          !identifiers().empty());
     {
-        auto l_name = nameStr();
+        std::string l_name(nameStr());
         if (l_name.empty()) {
             formatter->addQuotedString("unnamed");
         } else {
@@ -887,7 +897,7 @@ void Ellipsoid::_exportToWKT(
                         auto l_alias = dbContext->getAliasFromOfficialName(
                             l_name, "ellipsoid", "ESRI");
                         if (!l_alias.empty()) {
-                            l_name = l_alias;
+                            l_name = std::move(l_alias);
                             aliasFound = true;
                         }
                     }
@@ -941,7 +951,7 @@ void Ellipsoid::_exportToJSON(
         formatter->MakeObjectContext("Ellipsoid", !identifiers().empty()));
 
     writer->AddObjKey("name");
-    auto l_name = nameStr();
+    const auto &l_name = nameStr();
     if (l_name.empty()) {
         writer->Add("unnamed");
     } else {
@@ -1334,7 +1344,7 @@ void GeodeticReferenceFrame::_exportToWKT(
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     const auto &ids = identifiers();
     formatter->startNode(io::WKTConstants::DATUM, !ids.empty());
-    auto l_name = nameStr();
+    std::string l_name(nameStr());
     if (l_name.empty()) {
         l_name = "unnamed";
     }
@@ -1356,7 +1366,7 @@ void GeodeticReferenceFrame::_exportToWKT(
                         l_alias = dbContext->getAliasFromOfficialName(
                             l_name.substr(0, pos), "geodetic_datum", "ESRI");
                         if (!l_alias.empty()) {
-                            l_name = l_alias;
+                            l_name = std::move(l_alias);
                             aliasFound = true;
                         }
                     }
@@ -1469,7 +1479,7 @@ void GeodeticReferenceFrame::_exportToJSON(
     auto writer = formatter->writer();
 
     writer->AddObjKey("name");
-    auto l_name = nameStr();
+    const auto &l_name = nameStr();
     if (l_name.empty()) {
         writer->Add("unnamed");
     } else {
@@ -1935,7 +1945,7 @@ void DatumEnsemble::_exportToJSON(
     auto writer = formatter->writer();
 
     writer->AddObjKey("name");
-    auto l_name = nameStr();
+    const auto &l_name = nameStr();
     if (l_name.empty()) {
         writer->Add("unnamed");
     } else {
@@ -2148,7 +2158,7 @@ void VerticalReferenceFrame::_exportToWKT(
                              ? io::WKTConstants::VDATUM
                              : io::WKTConstants::VERT_DATUM,
                          !identifiers().empty());
-    auto l_name = nameStr();
+    std::string l_name(nameStr());
     if (!l_name.empty()) {
         if (!isWKT2 && formatter->useESRIDialect()) {
             bool aliasFound = false;
@@ -2157,7 +2167,7 @@ void VerticalReferenceFrame::_exportToWKT(
                 auto l_alias = dbContext->getAliasFromOfficialName(
                     l_name, "vertical_datum", "ESRI");
                 if (!l_alias.empty()) {
-                    l_name = l_alias;
+                    l_name = std::move(l_alias);
                     aliasFound = true;
                 }
             }
@@ -2217,7 +2227,7 @@ void VerticalReferenceFrame::_exportToJSON(
     auto writer = formatter->writer();
 
     writer->AddObjKey("name");
-    auto l_name = nameStr();
+    const auto &l_name = nameStr();
     if (l_name.empty()) {
         writer->Add("unnamed");
     } else {

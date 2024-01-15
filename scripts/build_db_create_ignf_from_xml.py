@@ -144,7 +144,7 @@ def ingest_datums(root, all_sql, mapEllpsId, mapPmId):
                 ellpsCode = extract_id_from_href(node.find('usesEllipsoid').attrib['href'])
                 assert ellpsCode in mapEllpsId
 
-                sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s',NULL,'%s','%s','%s','%s',NULL,NULL,NULL,NULL,0);""" % (id, names[0], mapEllpsId[ellpsCode][0], mapEllpsId[ellpsCode][1], mapPmId[pmCode][0], mapPmId[pmCode][1])
+                sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s',NULL,'%s','%s','%s','%s',NULL,NULL,NULL,NULL,NULL,0);""" % (id, names[0], mapEllpsId[ellpsCode][0], mapEllpsId[ellpsCode][1], mapPmId[pmCode][0], mapPmId[pmCode][1])
                 all_sql.append(sql)
 
                 mapDatumId[id] = ('IGNF', id)
@@ -154,7 +154,7 @@ def ingest_datums(root, all_sql, mapEllpsId, mapPmId):
                 id = node.attrib['id']
                 names = [_name.text for _name in node.iter('name')]
 
-                sql = """INSERT INTO "vertical_datum" VALUES('IGNF','%s','%s',NULL,NULL,NULL,NULL,NULL,0);"""% (id, names[0])
+                sql = """INSERT INTO "vertical_datum" VALUES('IGNF','%s','%s',NULL,NULL,NULL,NULL,NULL,NULL,0);"""% (id, names[0])
                 all_sql.append(sql)
 
                 mapVerticalDatumId[id] = ('IGNF', id)
@@ -401,7 +401,7 @@ mapGridURLs = {
 
     # Corse
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/RAC09.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/metropole/RAC09.mnt',
+        'https://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAC09.mnt',
 
 
 

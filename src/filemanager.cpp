@@ -1203,7 +1203,7 @@ const char *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
         }
 #endif
         path += "/proj";
-        ctx->user_writable_directory = path;
+        ctx->user_writable_directory = std::move(path);
     }
     if (create != FALSE) {
         CreateDirectoryRecursively(ctx, ctx->user_writable_directory);
@@ -1655,7 +1655,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
         auto dbContext = getDBcontext(ctx);
         if (dbContext) {
             try {
-                auto filename = dbContext->getProjGridName(name);
+                const auto filename = dbContext->getProjGridName(name);
                 if (!filename.empty()) {
                     file.reset(reinterpret_cast<NS_PROJ::File *>(
                         pj_open_lib_internal(ctx, filename.c_str(), "rb",
@@ -1686,7 +1686,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
         auto dbContext = getDBcontext(ctx);
         if (dbContext) {
             try {
-                auto filename = dbContext->getOldProjGridName(name);
+                const auto filename = dbContext->getOldProjGridName(name);
                 if (!filename.empty()) {
                     file.reset(reinterpret_cast<NS_PROJ::File *>(
                         pj_open_lib_internal(ctx, filename.c_str(), "rb",
