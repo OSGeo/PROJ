@@ -2562,7 +2562,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
 
-            auto filename = fileParameter->valueFile();
+            const auto &filename = fileParameter->valueFile();
             if (databaseContext->lookForGridAlternative(
                     filename, projFilename, projGridFormat, inverseDirection)) {
 

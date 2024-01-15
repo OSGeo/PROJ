@@ -2347,18 +2347,15 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
                     // PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID
                     // returned 0.
                     if (op_count == 1 &&
-                        (errorIfBestTransformationNotAvailable ||
-                         warnIfBestTransformationNotAvailable)) {
+                        errorIfBestTransformationNotAvailable) {
                         if (singleOpIsInstanciable < 0) {
                             singleOpIsInstanciable =
                                 proj_coordoperation_is_instantiable(ctx, P);
                         }
                         if (!singleOpIsInstanciable) {
-                            if (errorIfBestTransformationNotAvailable) {
-                                proj_destroy(P);
-                                proj_context_errno_set(ctx, backup_errno);
-                                return nullptr;
-                            }
+                            proj_destroy(P);
+                            proj_context_errno_set(ctx, backup_errno);
+                            return nullptr;
                         }
                     }
                 }

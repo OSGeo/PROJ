@@ -1356,7 +1356,8 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                     std::string(), dbContext, verticalAxisIfNotAlreadyPresent));
             return util::nn_static_pointer_cast<CRS>(
                 DerivedGeographicCRS::create(
-                    createProperties(), NN_CHECK_THROW(baseGeog3DCRS),
+                    createProperties(),
+                    NN_CHECK_THROW(std::move(baseGeog3DCRS)),
                     derivedGeogCRS->derivingConversion(), std::move(cs)));
         }
     }
@@ -1373,7 +1374,8 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                     std::string(), dbContext, verticalAxisIfNotAlreadyPresent));
             return util::nn_static_pointer_cast<CRS>(
                 DerivedProjectedCRS::create(
-                    createProperties(), NN_CHECK_THROW(baseProj3DCRS),
+                    createProperties(),
+                    NN_CHECK_THROW(std::move(baseProj3DCRS)),
                     derivedProjCRS->derivingConversion(), std::move(cs)));
         }
     }
@@ -2747,7 +2749,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                   &geodetic_crs_type, l_implicitCS,
                                   &dbContext]() {
             const auto &thisEllipsoid = thisDatum->ellipsoid();
-            const auto ellipsoids(
+            const std::list<datum::EllipsoidNNPtr> ellipsoids(
                 thisEllipsoid->identifiers().empty()
                     ? authorityFactory->createEllipsoidFromExisting(
                           thisEllipsoid)
@@ -6572,7 +6574,8 @@ DerivedGeographicCRSNNPtr DerivedGeographicCRS::demoteTo2D(
         return DerivedGeographicCRS::create(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
                                     !newName.empty() ? newName : nameStr()),
-            NN_CHECK_THROW(baseGeog2DCRS), derivingConversion(), std::move(cs));
+            NN_CHECK_THROW(std::move(baseGeog2DCRS)), derivingConversion(),
+            std::move(cs));
     }
 
     return NN_NO_CHECK(std::dynamic_pointer_cast<DerivedGeographicCRS>(
@@ -6687,7 +6690,8 @@ DerivedProjectedCRS::demoteTo2D(const std::string &newName,
         return DerivedProjectedCRS::create(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
                                     !newName.empty() ? newName : nameStr()),
-            NN_CHECK_THROW(baseProj2DCRS), derivingConversion(), std::move(cs));
+            NN_CHECK_THROW(std::move(baseProj2DCRS)), derivingConversion(),
+            std::move(cs));
     }
 
     return NN_NO_CHECK(std::dynamic_pointer_cast<DerivedProjectedCRS>(

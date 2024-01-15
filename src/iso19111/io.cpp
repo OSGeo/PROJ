@@ -4207,7 +4207,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
         }
     }
 
-    std::string projectionName(wkt1ProjectionName);
+    std::string projectionName(std::move(wkt1ProjectionName));
     const MethodMapping *mapping =
         tryToIdentifyWKT1Method ? getMappingFromWKT1(projectionName) : nullptr;
 
@@ -9770,11 +9770,11 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                 steps.back().name.empty()) {
                 assert(hasProj);
                 auto stepName = word.substr(strlen("proj="));
-                steps.back().name = stepName;
+                steps.back().name = std::move(stepName);
             } else if (starts_with(word, "init=")) {
                 assert(hasInit);
                 auto initName = word.substr(strlen("init="));
-                steps.back().name = initName;
+                steps.back().name = std::move(initName);
                 steps.back().isInit = true;
             } else if (word == "inv") {
                 if (!steps.empty()) {
@@ -9833,13 +9833,13 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
         } else {
             const auto pos = word.find('=');
             auto key = word.substr(0, pos);
-            auto pair = (pos != std::string::npos)
-                            ? Step::KeyValue(key, word.substr(pos + 1))
-                            : Step::KeyValue(key);
+            Step::KeyValue pair((pos != std::string::npos)
+                                    ? Step::KeyValue(key, word.substr(pos + 1))
+                                    : Step::KeyValue(key));
             if (steps.empty()) {
-                globalParamValues.push_back(pair);
+                globalParamValues.emplace_back(std::move(pair));
             } else {
-                steps.back().paramValues.push_back(pair);
+                steps.back().paramValues.emplace_back(std::move(pair));
             }
         }
     }
