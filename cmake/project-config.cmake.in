@@ -27,7 +27,7 @@ if("@CURL_ENABLED@")
 endif()
 cmake_policy(POP)
 
-find_package(Sqlite3 REQUIRED)
+find_package(SQLite3 REQUIRED)
 
 if(DEFINED PROJ_CONFIG_FIND_TIFF_DEP)
     find_dependency(TIFF)
