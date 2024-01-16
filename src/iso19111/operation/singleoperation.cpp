@@ -4179,7 +4179,7 @@ bool SingleOperation::exportToPROJStringGeneric(
 
         const auto vertDst =
             dynamic_cast<const crs::VerticalCRS *>(targetCRS().get());
-        if (!vertSrc) {
+        if (!vertDst) {
             throw io::FormattingException(concat(
                 "Can apply ", methodName, " only to a target VerticalCRS"));
         }
