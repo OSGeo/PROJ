@@ -2410,7 +2410,7 @@ struct MyPROJStringExportableHorizNullVertical final
     : public io::IPROJStringExportable {
     CoordinateOperationPtr horizTransform{};
 
-    MyPROJStringExportableHorizNullVertical(
+    explicit MyPROJStringExportableHorizNullVertical(
         const CoordinateOperationPtr &horizTransformIn)
         : horizTransform(horizTransformIn) {}
 
