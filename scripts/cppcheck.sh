@@ -58,6 +58,7 @@ grep -v "unmatchedSuppression" ${LOG_FILE} \
     | grep -v -e "helmert.*unreadVariable,Variable 'point.*' is assigned a value that is never used" \
     | grep -v -e "molodensky.*unreadVariable,Variable 'point.*' is assigned a value that is never used" \
     | grep -v -e "vgridshift.*unreadVariable,Variable 'point.*' is assigned a value that is never used" \
+    | grep -v -e "defines member function with name.*also defined in its parent" \
     > ${LOG_FILE}.tmp
 mv ${LOG_FILE}.tmp ${LOG_FILE}
 
