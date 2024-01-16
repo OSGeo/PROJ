@@ -2080,6 +2080,7 @@ bool Transformation::isGeographic3DToGravityRelatedHeight(
         "1118", // Geog3D to Geog2D+GravityRelatedHeight (ISG)
         "1122", // Geog3D to Geog2D+Depth (gtx)
         "1124", // Geog3D to Geog2D+GravityRelatedHeight (gtg)
+        "1126", // Vertical change by geoid grid difference (NRCan)
         "9661", // Geographic3D to GravityRelatedHeight (EGM)
         "9662", // Geographic3D to GravityRelatedHeight (Ausgeoid98)
         "9663", // Geographic3D to GravityRelatedHeight (OSGM-GB)
@@ -2218,7 +2219,9 @@ createSimilarPropertiesMethod(common::IdentifiedObjectNNPtr obj) {
 
 static bool isRegularVerticalGridMethod(int methodEPSGCode,
                                         bool &reverseOffsetSign) {
-    if (methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NRCAN_BYN) {
+    if (methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NRCAN_BYN ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_VERTICALCHANGE_BY_GEOID_GRID_DIFFERENCE_NRCAN) {
         // NRCAN vertical shift grids use a reverse convention from other
         // grids: the value in the grid is the value to subtract from the
         // source vertical CRS to get the target value.
@@ -2556,9 +2559,14 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
     bool reverseOffsetSign = false;
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTCON ||
         isRegularVerticalGridMethod(methodEPSGCode, reverseOffsetSign)) {
-        auto fileParameter =
-            parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
-                           EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
+        int parameterCode = EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE;
+        auto fileParameter = parameterValue(
+            EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE, parameterCode);
+        if (!fileParameter) {
+            parameterCode = EPSG_CODE_PARAMETER_GEOID_MODEL_DIFFERENCE_FILE;
+            fileParameter = parameterValue(
+                EPSG_NAME_PARAMETER_GEOID_MODEL_DIFFERENCE_FILE, parameterCode);
+        }
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
 
@@ -2588,8 +2596,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                 auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
                 auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
                 auto parameters = std::vector<OperationParameterNNPtr>{
-                    createOpParamNameEPSGCode(
-                        EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE)};
+                    createOpParamNameEPSGCode(parameterCode)};
                 if (inverseDirection) {
                     return Transformation::create(
                                createPropertiesForInverse(
@@ -4350,9 +4357,14 @@ bool SingleOperation::exportToPROJStringGeneric(
 
     bool reverseOffsetSign = false;
     if (isRegularVerticalGridMethod(methodEPSGCode, reverseOffsetSign)) {
-        auto fileParameter =
-            parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
-                           EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
+        int parameterCode = EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE;
+        auto fileParameter = parameterValue(
+            EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE, parameterCode);
+        if (!fileParameter) {
+            parameterCode = EPSG_CODE_PARAMETER_GEOID_MODEL_DIFFERENCE_FILE;
+            fileParameter = parameterValue(
+                EPSG_NAME_PARAMETER_GEOID_MODEL_DIFFERENCE_FILE, parameterCode);
+        }
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
             formatter->addStep("vgridshift");
