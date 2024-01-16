@@ -176,7 +176,6 @@ struct WKTFormatter::Private {
     std::string hDatumExtension_{};
     std::string vDatumExtension_{};
     crs::GeographicCRSPtr geogCRSOfCompoundCRS_{};
-    std::vector<bool> inversionStack_{false};
     std::string result_{};
 
     // cppcheck-suppress functionStatic
@@ -888,25 +887,6 @@ void WKTFormatter::ingestWKTNode(const WKTNodeNNPtr &node) {
     }
     endNode();
 }
-
-#ifdef unused
-// ---------------------------------------------------------------------------
-
-void WKTFormatter::startInversion() {
-    d->inversionStack_.push_back(!d->inversionStack_.back());
-}
-
-// ---------------------------------------------------------------------------
-
-void WKTFormatter::stopInversion() {
-    assert(!d->inversionStack_.empty());
-    d->inversionStack_.pop_back();
-}
-
-// ---------------------------------------------------------------------------
-
-bool WKTFormatter::isInverted() const { return d->inversionStack_.back(); }
-#endif
 
 //! @endcond
 
@@ -12464,8 +12444,6 @@ struct JSONFormatter::Private {
     bool abridgedTransformation_ = false;
     bool abridgedTransformationWriteSourceCRS_ = false;
     std::string schema_ = PROJJSON_DEFAULT_VERSION;
-
-    std::string result_{};
 
     // cppcheck-suppress functionStatic
     void pushOutputId(bool outputIdIn) { outputIdStack_.push_back(outputIdIn); }

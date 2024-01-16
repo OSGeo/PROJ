@@ -179,7 +179,6 @@ class DiskChunkCache {
     PJ_CONTEXT *ctx_ = nullptr;
     std::string path_{};
     sqlite3 *hDB_ = nullptr;
-    std::string thisNamePtr_{};
     std::unique_ptr<SQLite3VFS> vfs_{};
 
     explicit DiskChunkCache(PJ_CONTEXT *ctx, const std::string &path);
