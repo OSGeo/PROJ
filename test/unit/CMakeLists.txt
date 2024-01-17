@@ -1,4 +1,5 @@
 # CMake configuration for PROJ unit tests
+# External GTest provided by (e.g.) libgtest-dev
 
 find_package(GTest 1.8.1)
 if(GTest_FOUND)
@@ -9,65 +10,52 @@ endif()
 
 if(USE_EXTERNAL_GTEST)
 
-if(NOT GTest_FOUND)
+  if(NOT GTest_FOUND)
     message(FATAL_ERROR "External GTest >= 1.8.1 not found")
-endif()
-message(STATUS "Using external GTest")
+  endif()
+  message(STATUS "Using external GTest")
 
-# CMake < 3.20.0 uses GTest::GTest
-# CMake >= 3.20 uses GTest::gtest, and deprecates GTest::GTest
-# so for older CMake, create an alias from GTest::GTest to GTest::gtest
-if(NOT TARGET GTest::gtest)
+  # CMake < 3.20.0 uses GTest::GTest
+  # CMake >= 3.20 uses GTest::gtest, and deprecates GTest::GTest
+  # so for older CMake, create an alias from GTest::GTest to GTest::gtest
+  if(NOT TARGET GTest::gtest)
     add_library(GTest::gtest INTERFACE IMPORTED)
     set_target_properties(GTest::gtest PROPERTIES
                           INTERFACE_LINK_LIBRARIES "GTest::GTest")
-endif()
+  endif()
 
 else()
 
-message(STATUS "Using internal GTest")
+  message(STATUS "Fetching GTest")
 
-#
-# Build Google Test
-#
-# Source https://github.com/google/googletest/blob/master/googletest/README.md
-# Download and unpack googletest at configure time
-configure_file(
-  ${PROJ_SOURCE_DIR}/test/googletest/CMakeLists.txt.in
-  ${PROJ_BINARY_DIR}/googletest-download/CMakeLists.txt)
+  # Add Google Test
+  #
+  # See https://github.com/google/googletest/blob/main/googletest/README.md
 
-if(CYGWIN)
-# needed at least with gcc 11.3.0 Cygwin, otherwise build errors in
-# in googletest-src/googletest/include/gtest/internal/gtest-port.h related to
-# fileno() and other functions, when building gtest or including it
-add_definitions(-D_GNU_SOURCE)
-endif()
+  if(POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)  # for DOWNLOAD_EXTRACT_TIMESTAMP option
+  endif()
 
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${PROJ_BINARY_DIR}/googletest-download)
-if(result)
-  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${PROJ_BINARY_DIR}/googletest-download)
-if(result)
-  message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif()
-# Prevent overriding the parent project's compiler/linker
-# settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-# Add googletest directly to our build. This defines
-# the gtest and gtest_main targets.
-option(INSTALL_GTEST "Enable installation of googletest" OFF)
-add_subdirectory(
-  ${PROJ_BINARY_DIR}/googletest-src
-  ${PROJ_BINARY_DIR}/googletest-build
-  EXCLUDE_FROM_ALL)
+  include(FetchContent)
+  FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.zip
+    EXCLUDE_FROM_ALL  # ignored before CMake 3.28
+  )
 
-# Provide the same target name as find_package(GTest)
-add_library(GTest::gtest ALIAS gtest)
+  # For Windows: Prevent overriding the parent project's compiler/linker settings
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.28.0")
+    FetchContent_MakeAvailable(googletest)
+  else()
+    # Pre CMake 3.28 workaround to prevent installing files
+    FetchContent_GetProperties(googletest)
+    if(NOT googletest_POPULATED)
+      FetchContent_Populate(googletest)
+      add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
+  endif()
 
 endif()  # USE_EXTERNAL_GTEST
 
