@@ -176,15 +176,22 @@ if(NOT EXE_SQLITE3)
   message(SEND_ERROR "sqlite3 binary not found!")
 endif()
 
-find_package(Sqlite3 REQUIRED)
-if(NOT SQLITE3_FOUND)
-  message(SEND_ERROR "sqlite3 dependency not found!")
+# Deprecated variables since PROJ 9.4.0
+if(DEFINED SQLITE3_INCLUDE_DIR)
+  message(DEPRECATION "Use SQLite3_INCLUDE_DIR instead of SQLITE3_INCLUDE_DIR")
+  set(SQLite3_INCLUDE_DIR ${SQLITE3_INCLUDE_DIR})
 endif()
+if(DEFINED SQLITE3_LIBRARY)
+  message(DEPRECATION "Use SQLite3_LIBRARY instead of SQLITE3_LIBRARY")
+  set(SQLite3_LIBRARY ${SQLITE3_LIBRARY})
+endif()
+
+find_package(SQLite3 REQUIRED)
 
 # Would build and run with older versions, but with horrible performance
 # See https://github.com/OSGeo/PROJ/issues/1718
-if("${SQLITE3_VERSION}" VERSION_LESS "3.11")
-  message(SEND_ERROR "sqlite3 >= 3.11 required!")
+if(SQLite3_VERSION VERSION_LESS "3.11")
+  message(SEND_ERROR "SQLite3 >= 3.11 required!")
 endif()
 
 ################################################################################
