@@ -173,12 +173,8 @@ On Windows, one may need to specify generator::
 
     cmake -G "Visual Studio 15 2017" ..
 
-If the SQLite3 dependency is installed in a custom location, specify the
-paths to the include directory and the library::
-
-    cmake -DSQLITE3_INCLUDE_DIR=/opt/SQLite/include -DSQLITE3_LIBRARY=/opt/SQLite/lib/libsqlite3.so ..
-
-Alternatively, the custom prefix for SQLite3 can be specified::
+If the SQLite3 dependency is installed in a custom location, specify
+:option:`CMAKE_PREFIX_PATH`::
 
     cmake -DCMAKE_PREFIX_PATH=/opt/SQLite ..
 
@@ -315,6 +311,12 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
     :envvar:`OSGEO4W_ROOT` (if set), otherwise is ``c:/OSGeo4W``.
     Default for Unix-like is ``/usr/local/``.
 
+.. option:: CMAKE_PREFIX_PATH
+
+    `CMake variable
+    <https://cmake.org/cmake/help/latest/variable/CMAKE_PREFIX_PATH.html>`_
+    used to specify installation prefixes for SQLite3 and other dependencies.
+
 .. option:: CMAKE_UNITY_BUILD=OFF
 
     .. versionadded:: 9.4
@@ -341,14 +343,10 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
     Path to an ``sqlite3`` or ``sqlite3.exe`` executable.
 
-.. option:: SQLITE3_INCLUDE_DIR
-
-    Path to an include directory with the ``sqlite3.h`` header file.
-
-.. option:: SQLITE3_LIBRARY
-
-    Path to a shared or static library file, such as ``sqlite3.dll``,
-    ``libsqlite3.so``, ``sqlite3.lib`` or other name.
+.. deprecated:: 9.4.0
+    ``SQLITE3_INCLUDE_DIR`` and ``SQLITE3_LIBRARY`` should be replaced with
+    ``SQLite3_INCLUDE_DIR`` and ``SQLite3_LIBRARY``, respectively.
+    Users may also consider :option:`CMAKE_PREFIX_PATH` instead.
 
 .. option:: ENABLE_CURL=ON
 

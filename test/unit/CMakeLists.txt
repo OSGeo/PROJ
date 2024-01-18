@@ -64,7 +64,7 @@ endif()  # USE_EXTERNAL_GTEST
 #
 
 include_directories(${PROJ_SOURCE_DIR}/include)
-include_directories(${SQLITE3_INCLUDE_DIR})
+
 # Add the directory containing proj_config.h
 include_directories(${PROJ_BINARY_DIR}/src)
 
@@ -140,8 +140,8 @@ set_property(SOURCE ${PROJ_TEST_CPP_API_SOURCES} PROPERTY SKIP_UNITY_BUILD_INCLU
 
 target_link_libraries(proj_test_cpp_api
   PRIVATE GTest::gtest
-  PRIVATE ${PROJ_LIBRARIES}
-  PRIVATE ${SQLITE3_LIBRARY})
+  PRIVATE SQLite::SQLite3
+  PRIVATE ${PROJ_LIBRARIES})
 add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)
 set_property(TEST proj_test_cpp_api
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
@@ -172,8 +172,8 @@ if(CURL_ENABLED)
 endif()
 target_link_libraries(test_network
   PRIVATE GTest::gtest
-  PRIVATE ${PROJ_LIBRARIES}
-  PRIVATE ${SQLITE3_LIBRARY})
+  PRIVATE SQLite::SQLite3
+  PRIVATE ${PROJ_LIBRARIES})
 if(TIFF_ENABLED)
 add_test(NAME test_network COMMAND test_network)
 set_property(TEST test_network
