@@ -90,7 +90,15 @@ PJ *PJ_PROJECTION(tpeqd) {
     Q->cs = Q->cp1 * Q->sp2;
     Q->sc = Q->sp1 * Q->cp2;
     Q->ccs = Q->cp1 * Q->cp2 * sin(Q->dlam2);
-    Q->z02 = aacos(P->ctx, Q->sp1 * Q->sp2 + Q->cp1 * Q->cp2 * cos(Q->dlam2));
+
+    const auto SQ = [](double x) { return x * x; };
+    // Numerically stable formula for computing the central angle from
+    // (phi_1, lam_1) to (phi_2, lam_2).
+    // Special case of Vincenty formula on the sphere.
+    // https://en.wikipedia.org/wiki/Great-circle_distance#Computational_formulae
+    const double cs_minus_sc_cos_dlam = Q->cs - Q->sc * cos(Q->dlam2);
+    Q->z02 = atan2(sqrt(SQ(Q->cp2 * sin(Q->dlam2)) + SQ(cs_minus_sc_cos_dlam)),
+                   Q->sp1 * Q->sp2 + Q->cp1 * Q->cp2 * cos(Q->dlam2));
     if (Q->z02 == 0.0) {
         // Actually happens when both lat_1 = lat_2 and |lat_1| = 90
         proj_log_error(P, _("Invalid value for lat_1 and lat_2: their absolute "
@@ -98,8 +106,7 @@ PJ *PJ_PROJECTION(tpeqd) {
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     Q->hz0 = .5 * Q->z02;
-    A12 = atan2(Q->cp2 * sin(Q->dlam2),
-                Q->cp1 * Q->sp2 - Q->sp1 * Q->cp2 * cos(Q->dlam2));
+    A12 = atan2(Q->cp2 * sin(Q->dlam2), cs_minus_sc_cos_dlam);
     const double pp = aasin(P->ctx, Q->cp1 * sin(A12));
     Q->ca = cos(pp);
     Q->sa = sin(pp);
