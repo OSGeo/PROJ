@@ -17,9 +17,9 @@ documenting the individual :doc:`projections<../operations/projections/index>`.
     ==========   ================================================================
     Parameter    Description
     ==========   ================================================================
-    +a           Semimajor radius of the ellipsoid axis
+    +a           Semimajor radius of the ellipsoid axis (always in meters)
     +axis        Axis orientation
-    +b           Semiminor radius of the ellipsoid axis
+    +b           Semiminor radius of the ellipsoid axis (always in meters)
     +ellps       Ellipsoid name (see ``proj -le``)
     +k           Scaling factor (deprecated)
     +k_0         Scaling factor
@@ -51,8 +51,8 @@ specified with the ``+to_meter`` keyword (i.e. 0.304800609601219 for US feet).  
 symbolic unit names. The default unit for projected coordinates is the meter.
 A few special projections deviate from this behavior, most notably the
 latlong pseudo-projection that returns degrees.
-Note that this does *not* affect the units of linear parameters such as ``+x_0``
-or ``+y_0`` which should always be specified in meters.
+Note that this does *not* affect the units of linear parameters such as ``+x_0``,
+``+y_0``, ``+a`` or ``+b`` which should always be specified in meters.
 
 Vertical (Z) units can be specified using the ``+vunits`` keyword with a
 symbolic name for a unit (i.e. ``us-ft``).  Alternatively the translation to
