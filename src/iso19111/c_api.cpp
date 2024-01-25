@@ -1940,8 +1940,6 @@ int proj_get_area_of_use(PJ_CONTEXT *ctx, const PJ *obj,
 
 /** \brief Return the area of use of an object.
  *
- * In case of multiple usages, this will be the one of first usage.
- *
  * @param ctx PROJ context, or NULL for default context
  * @param obj Object (must not be NULL)
  * @param domainIdx Index of the domain/usage. In [0,proj_get_domain_count(obj)[
