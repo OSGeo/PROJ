@@ -920,10 +920,10 @@ expect      5.875      55.375      0
 # |                |       invertible step       |     non-invertible step     |
 # | flags          | forward path | inverse path | forward path | inverse path |
 # | -------------- | ------------ | ------------ | ------------ | ------------ |
-# | +omit_fwd      | omit         | inv          | omit         | undefined    |
+# | +omit_fwd      | omit         | inv          | omit         | runtime err  |
 # | +omit_fwd +inv | omit         | fwd          | omit         | fwd          |
 # | +omit_inv      | fwd          | omit         | fwd          | omit         |
-# | +omit_inv +inv | inv          | omit         | undefined    | omit         |
+# | +omit_inv +inv | inv          | omit         | pipeline creation error     |
 #
 # From the table we can see that invertible steps should work pretty much all
 # the time. Non-invertible steps on the other hand make either the forward path
@@ -1033,20 +1033,13 @@ direction inverse
 accept 1 2 3
 expect 1 2 3
 
-# Test that the forward path is not defined and inverse path does nothing.
+# Test that the forward path is not defined
 #
 # When going through the forward path, inv specifies that we should execute the
 # step in reverse. Because the affine transformation does not have an inverse,
 # this means that the forward path does not exist.
 
 operation proj=pipeline step proj=affine s11=1 s12=1 s13=1 s22=0 s33=0 omit_inv inv
-
-direction forward
-accept 1 2 3
 expect failure errno no_inverse_op
-
-direction inverse
-accept 1 2 3
-expect 1 2 3
 
 </gie-strict>

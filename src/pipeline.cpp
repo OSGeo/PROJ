@@ -533,12 +533,24 @@ PJ *OPERATION(pipeline, 0) {
     /* Require a forward path through the pipeline */
     for (auto &step : pipeline->steps) {
         PJ *Q = step.pj;
-        if ((Q->inverted && (Q->inv || Q->inv3d || Q->fwd4d)) ||
-            (!Q->inverted && (Q->fwd || Q->fwd3d || Q->fwd4d))) {
+        if (step.omit_fwd) {
             continue;
-        } else {
+        }
+        if (Q->inverted) {
+            if (Q->inv || Q->inv3d || Q->inv4d) {
+                continue;
+            }
             proj_log_error(
-                P, _("Pipeline: A forward operation couldn't be constructed"));
+                P, _("Pipeline: Inverse operation for %s is not available"),
+                Q->short_name);
+            return destructor(P, PROJ_ERR_OTHER_NO_INVERSE_OP);
+        } else {
+            if (Q->fwd || Q->fwd3d || Q->fwd4d) {
+                continue;
+            }
+            proj_log_error(
+                P, _("Pipeline: Forward operation for %s is not available"),
+                Q->short_name);
             return destructor(P, PROJ_ERR_INVALID_OP_WRONG_SYNTAX);
         }
     }
