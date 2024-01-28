@@ -129,6 +129,10 @@ Optional
 
     Invert a step in a pipeline.
 
+    ::
+
+        echo -88 42 0 0|cct +zone=16 +proj=pipeline +step +proj=utm +step +proj=utm +inv
+
 .. option:: +omit_fwd
 
     .. versionadded:: 6.3.0
