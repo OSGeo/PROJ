@@ -640,7 +640,7 @@ int main(int argc, char **argv) {
 
     if (!proj_angular_input(Proj, PJ_FWD)) {
         emess(3, "can't initialize operations that take non-angular input "
-                 "coordinates");
+                 "coordinates. Try cct.");
         exit(0);
     }
 
