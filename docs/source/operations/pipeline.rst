@@ -127,7 +127,12 @@ Optional
 
 .. option:: +inv
 
-    Invert a step in a pipeline.
+    Invert a step in a pipeline. Note, cct handles more situations:
+
+::
+
+    echo -88 42    |proj +zone=16 +proj=pipeline +step +proj=utm +step +proj=utm +inv #fails
+    echo -88 42 0 0|cct  +zone=16 +proj=pipeline +step +proj=utm +step +proj=utm +inv #succeeds
 
 .. option:: +omit_fwd
 
