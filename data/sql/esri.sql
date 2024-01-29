@@ -1995,7 +1995,6 @@ INSERT INTO "geodetic_datum" VALUES('ESRI','106228','D_Viti_Levu_1916','Viti Lev
 INSERT INTO "usage" VALUES('ESRI', '106228_USAGE','geodetic_datum','ESRI','106228','EPSG','3195','EPSG','1024');
 INSERT INTO "geodetic_crs" VALUES('ESRI','37228','GCS_Viti_Levu_1916',NULL,'geographic 2D','EPSG','6422','ESRI','106228',NULL,1);
 INSERT INTO "usage" VALUES('ESRI', '37228_USAGE','geodetic_crs','ESRI','37228','EPSG','3195','EPSG','1024');
-INSERT INTO "deprecation" VALUES('geodetic_crs','ESRI','37228','EPSG','4731','ESRI');
 INSERT INTO "geodetic_datum" VALUES('ESRI','106229','D_Wake_Eniwetok_1960','Wake-Eniwetok 1960 (Marshall Islands 1960)','EPSG','7053','EPSG','8901',NULL,NULL,NULL,NULL,NULL,1);
 INSERT INTO "usage" VALUES('ESRI', '106229_USAGE','geodetic_datum','ESRI','106229','EPSG','3191','EPSG','1024');
 INSERT INTO "geodetic_crs" VALUES('ESRI','37229','GCS_Wake_Eniwetok_1960',NULL,'geographic 2D','EPSG','6422','ESRI','106229',NULL,1);
@@ -2416,7 +2415,6 @@ INSERT INTO "geodetic_datum" VALUES('ESRI','106283','D_WGS_1984_Major_Auxiliary_
 INSERT INTO "usage" VALUES('ESRI', '106283_USAGE','geodetic_datum','ESRI','106283','EPSG','1262','EPSG','1024');
 INSERT INTO "geodetic_crs" VALUES('ESRI','104199','GCS_WGS_1984_Major_Auxiliary_Sphere',NULL,'geographic 2D','EPSG','6422','ESRI','106283',NULL,1);
 INSERT INTO "usage" VALUES('ESRI', '104199_USAGE','geodetic_crs','ESRI','104199','EPSG','1262','EPSG','1024');
-INSERT INTO "deprecation" VALUES('geodetic_crs','ESRI','104199','EPSG','4055','ESRI');
 INSERT INTO "geodetic_datum" VALUES('ESRI','106223','D_NAD_1983_CORS96','NAD 1983 (CORS96)','EPSG','7019','EPSG','8901',NULL,NULL,NULL,NULL,NULL,1);
 INSERT INTO "usage" VALUES('ESRI', '106223_USAGE','geodetic_datum','ESRI','106223','EPSG','1511','EPSG','1024');
 INSERT INTO "geodetic_crs" VALUES('ESRI','104223','GCS_NAD_1983_CORS96',NULL,'geographic 2D','EPSG','6422','ESRI','106223',NULL,1);
@@ -16311,7 +16309,6 @@ INSERT INTO "deprecation" VALUES('projected_crs','ESRI','102100','EPSG','3857','
 INSERT INTO "deprecation" VALUES('projected_crs','ESRI','102110','EPSG','2154','ESRI');
 INSERT INTO "deprecation" VALUES('projected_crs','ESRI','102111','EPSG','5519','ESRI');
 INSERT INTO "deprecation" VALUES('projected_crs','ESRI','102112','EPSG','3764','ESRI');
-INSERT INTO "deprecation" VALUES('projected_crs','ESRI','102113','EPSG','3785','ESRI');
 INSERT INTO "deprecation" VALUES('projected_crs','ESRI','102119','EPSG','3080','ESRI');
 INSERT INTO "deprecation" VALUES('projected_crs','ESRI','102123','EPSG','3078','ESRI');
 INSERT INTO "deprecation" VALUES('projected_crs','ESRI','102124','EPSG','26701','ESRI');

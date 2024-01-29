@@ -734,13 +734,14 @@ def import_geogcs():
 
                 if deprecated and code != latestWkid and code not in ('4305', '4812'):  # Voirol 1960 no longer in EPSG
                     cursor.execute(
-                        "SELECT name FROM geodetic_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
+                        "SELECT name, deprecated FROM geodetic_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
                     src_row = cursor.fetchone()
                     assert src_row, (code, latestWkid)
-
-                    sql = """INSERT INTO "deprecation" VALUES('geodetic_crs','ESRI','%s','EPSG','%s','ESRI');""" % (
-                        code, latestWkid)
-                    all_sql.append(sql)
+                    _, deprecated = src_row
+                    if not deprecated:
+                        sql = """INSERT INTO "deprecation" VALUES('geodetic_crs','ESRI','%s','EPSG','%s','ESRI');""" % (
+                            code, latestWkid)
+                        all_sql.append(sql)
                 elif deprecated and code != latestWkid:
                     mapDeprecatedToNonDeprecated[code] = latestWkid
 
@@ -1536,12 +1537,14 @@ def import_projcs():
                 all_sql.append(sql)
             else:
                 cursor.execute(
-                    "SELECT name FROM projected_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
+                    "SELECT name, deprecated FROM projected_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
                 src_row = cursor.fetchone()
                 assert src_row, row
-                sql = """INSERT INTO "deprecation" VALUES('projected_crs','ESRI','%s','EPSG','%s','ESRI');""" % (
-                    code, latestWkid)
-                all_sql.append(sql)
+                _, deprecated = src_row
+                if not deprecated:
+                    sql = """INSERT INTO "deprecation" VALUES('projected_crs','ESRI','%s','EPSG','%s','ESRI');""" % (
+                        code, latestWkid)
+                    all_sql.append(sql)
 
 
 ########################
@@ -1846,13 +1849,14 @@ def import_vertcs():
 
                 if deprecated and code != latestWkid:
                     cursor.execute(
-                        "SELECT name FROM vertical_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
+                        "SELECT name, deprecated FROM vertical_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
                     src_row = cursor.fetchone()
                     assert src_row
-
-                    sql = """INSERT INTO "deprecation" VALUES('vertical_crs','ESRI','%s','EPSG','%s','ESRI');""" % (
-                        code, latestWkid)
-                    all_sql.append(sql)
+                    _, deprecated = src_row
+                    if not deprecated:
+                        sql = """INSERT INTO "deprecation" VALUES('vertical_crs','ESRI','%s','EPSG','%s','ESRI');""" % (
+                            code, latestWkid)
+                        all_sql.append(sql)
                 elif deprecated and code != latestWkid:
                     mapDeprecatedToNonDeprecated[code] = latestWkid
 
