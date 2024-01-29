@@ -1384,8 +1384,6 @@ FOR EACH ROW BEGIN
         WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.table_name AND o.auth_name = NEW.auth_name AND o.code = NEW.code);
 END;
 
--- For ESRI stuff
--- typically deprecated is the 'wkid' column of deprecated = 'yes' entries in the .csv files, and non_deprecates is the 'latestWkid' column
 -- For EPSG, used to track superseded coordinate operations.
 CREATE TABLE supersession(
     superseded_table_name TEXT NOT NULL CHECK (superseded_table_name IN (
