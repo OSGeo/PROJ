@@ -1511,7 +1511,7 @@ double PROJ_DLL proj_coordinate_metadata_get_epoch(PJ_CONTEXT *ctx,
 /* ------------------------------------------------------------------------- */
 
 /**
- * \defgroup advanced_cpp_binding Binding in C of advanced methods from the C++
+ * \defgroup iso19111_advanced_types C types for advanced methods from the C++
  * API
  * @{
  */
@@ -1530,64 +1530,103 @@ typedef enum {
     PJ_UT_PARAMETRIC
 } PJ_UNIT_TYPE;
 
-/** Axis description. */
+/** \brief Axis description.
+ */
 typedef struct {
     /** Axis name. */
     char *name;
+
     /** Axis abbreviation. */
     char *abbreviation;
+
     /** Axis direction. */
     char *direction;
+
     /** Axis unit name. */
     char *unit_name;
+
     /** Conversion factor to SI of the unit. */
     double unit_conv_factor;
+
     /** Type of unit */
     PJ_UNIT_TYPE unit_type;
 } PJ_AXIS_DESCRIPTION;
 
-PJ PROJ_DLL *proj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
-                            int axis_count, const PJ_AXIS_DESCRIPTION *axis);
-
 /** Type of Cartesian 2D coordinate system. */
 typedef enum {
-    /* Easting-Norting */
+    /** Easting-Norting */
     PJ_CART2D_EASTING_NORTHING,
-    /* Northing-Easting */
+    /** Northing-Easting */
     PJ_CART2D_NORTHING_EASTING,
-    /* North Pole Easting/SOUTH-Norting/SOUTH */
+    /** North Pole Easting/SOUTH-Norting/SOUTH */
     PJ_CART2D_NORTH_POLE_EASTING_SOUTH_NORTHING_SOUTH,
-    /* South Pole Easting/NORTH-Norting/NORTH */
+    /** South Pole Easting/NORTH-Norting/NORTH */
     PJ_CART2D_SOUTH_POLE_EASTING_NORTH_NORTHING_NORTH,
-    /* Westing-southing */
+    /** Westing-southing */
     PJ_CART2D_WESTING_SOUTHING,
 } PJ_CARTESIAN_CS_2D_TYPE;
+
+/** Type of Ellipsoidal 2D coordinate system. */
+typedef enum {
+    /** Longitude-Latitude */
+    PJ_ELLPS2D_LONGITUDE_LATITUDE,
+    /** Latitude-Longitude */
+    PJ_ELLPS2D_LATITUDE_LONGITUDE,
+} PJ_ELLIPSOIDAL_CS_2D_TYPE;
+
+/** Type of Ellipsoidal 3D coordinate system. */
+typedef enum {
+    /** Longitude-Latitude-Height(up) */
+    PJ_ELLPS3D_LONGITUDE_LATITUDE_HEIGHT,
+    /** Latitude-Longitude-Height(up) */
+    PJ_ELLPS3D_LATITUDE_LONGITUDE_HEIGHT,
+} PJ_ELLIPSOIDAL_CS_3D_TYPE;
+
+/** \brief Description of a parameter value for a Conversion.
+ */
+typedef struct {
+    /** Parameter name. */
+    const char *name;
+
+    /** Parameter authority name. */
+    const char *auth_name;
+
+    /** Parameter code. */
+    const char *code;
+
+    /** Parameter value. */
+    double value;
+
+    /** Name of unit in which parameter value is expressed. */
+    const char *unit_name;
+
+    /** Conversion factor to SI of the unit. */
+    double unit_conv_factor;
+
+    /** Type of unit */
+    PJ_UNIT_TYPE unit_type;
+} PJ_PARAM_DESCRIPTION;
+
+/**@}*/
+
+/**
+ * \defgroup iso19111_advanced_functions Binding in C of advanced methods from
+ * the C++ API
+ * @{
+ */
+
+PJ PROJ_DLL *proj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
+                            int axis_count, const PJ_AXIS_DESCRIPTION *axis);
 
 PJ PROJ_DLL *proj_create_cartesian_2D_cs(PJ_CONTEXT *ctx,
                                          PJ_CARTESIAN_CS_2D_TYPE type,
                                          const char *unit_name,
                                          double unit_conv_factor);
 
-/** Type of Ellipsoidal 2D coordinate system. */
-typedef enum {
-    /* Longitude-Latitude */
-    PJ_ELLPS2D_LONGITUDE_LATITUDE,
-    /* Latitude-Longitude */
-    PJ_ELLPS2D_LATITUDE_LONGITUDE,
-} PJ_ELLIPSOIDAL_CS_2D_TYPE;
-
 PJ PROJ_DLL *proj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
                                            PJ_ELLIPSOIDAL_CS_2D_TYPE type,
                                            const char *unit_name,
                                            double unit_conv_factor);
-
-/** Type of Ellipsoidal 3D coordinate system. */
-typedef enum {
-    /* Longitude-Latitude-Height(up) */
-    PJ_ELLPS3D_LONGITUDE_LATITUDE_HEIGHT,
-    /* Latitude-Longitude-Height(up) */
-    PJ_ELLPS3D_LATITUDE_LONGITUDE_HEIGHT,
-} PJ_ELLIPSOIDAL_CS_3D_TYPE;
 
 PJ PROJ_DLL *
 proj_create_ellipsoidal_3D_cs(PJ_CONTEXT *ctx, PJ_ELLIPSOIDAL_CS_3D_TYPE type,
@@ -1683,24 +1722,6 @@ PJ PROJ_DLL *proj_create_vertical_crs_ex(
 
 PJ PROJ_DLL *proj_create_compound_crs(PJ_CONTEXT *ctx, const char *crs_name,
                                       PJ *horiz_crs, PJ *vert_crs);
-
-/** Description of a parameter value for a Conversion. */
-typedef struct {
-    /** Parameter name. */
-    const char *name;
-    /** Parameter authority name. */
-    const char *auth_name;
-    /** Parameter code. */
-    const char *code;
-    /** Parameter value. */
-    double value;
-    /** Name of unit in which parameter value is expressed. */
-    const char *unit_name;
-    /** Conversion factor to SI of the unit. */
-    double unit_conv_factor;
-    /** Type of unit */
-    PJ_UNIT_TYPE unit_type;
-} PJ_PARAM_DESCRIPTION;
 
 PJ PROJ_DLL *proj_create_conversion(PJ_CONTEXT *ctx, const char *name,
                                     const char *auth_name, const char *code,
