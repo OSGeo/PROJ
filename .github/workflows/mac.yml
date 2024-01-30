@@ -15,25 +15,35 @@ concurrency:
 jobs:
 
   macos_build:
-    runs-on: macos-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - platform: "macos-latest"
+            architecture: "x64"
+          # macOS-14 is a M1 ARM64 MacOS runner: https://github.blog/changelog/2024-01-30-github-actions-introducing-the-new-m1-macos-runner-available-to-open-source/
+          - platform: "macOS-14"
+            architecture: "arm64"
+
+    runs-on: ${{ matrix.platform }}
+
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
 
       - uses: actions/checkout@v3
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: mamba-org/setup-micromamba@v1
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          use-mamba: true
+          init-shell: bash
+          environment-file: .github/workflows/mac/environment.yml
 
       - name: Cache
         uses: actions/cache@v3
         id: cache
         with:
           path: ${{ github.workspace }}/.ccache
-          key: ${{ runner.os }}-cache-mac-${{ github.run_id }}
-          restore-keys: ${{ runner.os }}-cache-mac-
+          key: ${{ runner.os }}-cache-mac-${{ matrix.architecture }}-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-cache-mac-${{ matrix.architecture }}-
 
       - name: Install Requirements
         shell: bash -l {0}
