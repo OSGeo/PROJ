@@ -5208,7 +5208,7 @@ PJ *proj_create_conversion_two_point_equidistant(
  * linear_unit_conv_factor).
  * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  *
- * @deprecated. Replaced by proj_create_conversion_tunisia_mining_grid
+ * @since 9.2
  */
 PJ *proj_create_conversion_tunisia_mining_grid(
     PJ_CONTEXT *ctx, double center_lat, double center_long,
@@ -5242,7 +5242,7 @@ PJ *proj_create_conversion_tunisia_mining_grid(
  * linear_unit_conv_factor).
  * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  *
- * @since 9.2
+ * @deprecated Replaced by proj_create_conversion_tunisia_mining_grid
  */
 PJ *proj_create_conversion_tunisia_mapping_grid(
     PJ_CONTEXT *ctx, double center_lat, double center_long,
