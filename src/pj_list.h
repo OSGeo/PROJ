@@ -104,6 +104,7 @@ PROJ_HEAD(merc, "Mercator")
 PROJ_HEAD(mil_os, "Miller Oblated Stereographic")
 PROJ_HEAD(mill, "Miller Cylindrical")
 PROJ_HEAD(misrsom, "Space oblique for MISR")
+PROJ_HEAD(mod_krovak, "Modified Krovak")
 PROJ_HEAD(moll, "Mollweide")
 PROJ_HEAD(molobadekas,
           "Molodensky-Badekas transform") /* implemented in PJ_helmert.c */

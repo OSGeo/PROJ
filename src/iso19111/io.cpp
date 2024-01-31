@@ -10635,7 +10635,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
         !fStr.empty() || !esStr.empty() || !eStr.empty();
 
     if (!numericParamPresent && ellpsStr.empty() && datumStr.empty() &&
-        step.name == "krovak") {
+        (step.name == "krovak" || step.name == "mod_krovak")) {
         ellpsStr = "bessel";
     }
 
@@ -11059,7 +11059,8 @@ PROJStringParser::Private::processAxisSwap(Step &step,
                 throw ParsingException("Unhandled order=" + orderStr);
             }
         }
-    } else if (step.name == "krovak" && hasParamValue(step, "czech")) {
+    } else if ((step.name == "krovak" || step.name == "mod_krovak") &&
+               hasParamValue(step, "czech")) {
         axis[0] = west;
         axis[1] = south;
     }
@@ -11519,6 +11520,16 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
     } else if (step.name == "krovak" && iAxisSwap < 0 &&
                hasParamValue(step, "czech") && !hasParamValue(step, "axis")) {
         mapping = getMapping(EPSG_CODE_METHOD_KROVAK);
+    } else if (step.name == "mod_krovak" &&
+               ((iAxisSwap < 0 && getParamValue(step, "axis") == "swu" &&
+                 !hasParamValue(step, "czech")) ||
+                (iAxisSwap > 0 &&
+                 getParamValue(steps_[iAxisSwap], "order") == "-2,-1" &&
+                 !hasParamValue(step, "czech")))) {
+        mapping = getMapping(EPSG_CODE_METHOD_KROVAK_MODIFIED);
+    } else if (step.name == "mod_krovak" && iAxisSwap < 0 &&
+               hasParamValue(step, "czech") && !hasParamValue(step, "axis")) {
+        mapping = getMapping(EPSG_CODE_METHOD_KROVAK_MODIFIED);
     } else if (step.name == "merc") {
         if (hasParamValue(step, "a") && hasParamValue(step, "b") &&
             getParamValue(step, "a") == getParamValue(step, "b") &&
@@ -11692,7 +11703,7 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
                 if (!paramValue->empty()) {
                     value = getAngularValue(*paramValue);
                 }
-            } else if (step.name == "krovak") {
+            } else if (step.name == "krovak" || step.name == "mod_krovak") {
                 // Keep it in sync with defaults of krovak.cpp
                 if (param->epsg_code ==
                     EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE) {
@@ -12278,7 +12289,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 continue;
             }
             foundKeys.insert(kv.key);
-            if (step.name == "krovak" && kv.key == "alpha") {
+            if ((step.name == "krovak" || step.name == "mod_krovak") &&
+                kv.key == "alpha") {
                 // We recognize it in our CRS parsing code
                 recognizedByPROJ = true;
             } else {
