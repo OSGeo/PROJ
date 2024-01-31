@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.repository == 'OSGeo/PROJ'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Libraries
         run: |

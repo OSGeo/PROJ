@@ -33,7 +33,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: mamba-org/setup-micromamba@v1
         with:
@@ -41,7 +41,7 @@ jobs:
           environment-file: .github/workflows/mac/environment.yml
 
       - name: Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache
         with:
           path: ${{ github.workspace }}/.ccache

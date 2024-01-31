@@ -28,7 +28,7 @@ jobs:
       PLATFORM: ${{ matrix.platform }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - uses: conda-incubator/setup-miniconda@v2
       with:
@@ -47,7 +47,7 @@ jobs:
       working-directory: ./proj.4-feedstock
 
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.platform }}-conda-package
         path: ./proj.4-feedstock/packages/
