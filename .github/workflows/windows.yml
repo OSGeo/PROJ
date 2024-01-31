@@ -32,11 +32,12 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - uses: ilammy/msvc-dev-cmd@v1
 
       - name: Cache vcpkg packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache
         with:
             path: c:\vcpkg\installed
@@ -106,10 +107,10 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache
         with:
           path: ~/.ccache
