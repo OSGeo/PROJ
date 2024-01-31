@@ -25,6 +25,9 @@ else
     USE_CCACHE=OFF
 fi
 
+# Ensure directory exists for PROJ_DB_CACHE_DIR
+mkdir -p $HOME/.ccache
+
 if test "x${CMAKE_BUILD_TYPE}" = "x"; then
     CMAKE_BUILD_TYPE=Release
 fi

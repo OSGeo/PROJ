@@ -7238,7 +7238,8 @@ expect  failure errno coord_transfm_outside_projection_domain
 -------------------------------------------------------------------------------
 operation +proj=vandg +a=6400000 +over
 -------------------------------------------------------------------------------
-tolerance 0.25 mm
+# 0.25 is OK for Intel platforms, but on Mac M1 ARM64 we need 0.35
+tolerance 0.35 mm
 
 accept  2 1
 expect  223395.249543407 111704.596633675
