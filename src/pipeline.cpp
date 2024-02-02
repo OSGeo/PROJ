@@ -97,6 +97,8 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 *
 ********************************************************************************/
 
+#include <array>
+#include <map>
 #include <math.h>
 #include <stack>
 #include <stddef.h>
@@ -137,13 +139,17 @@ struct Pipeline {
     char **current_argv = nullptr;
     std::vector<Step> steps{};
     std::stack<double> stack[4];
+    std::map<std::string, int> bank_names_to_idx{};
+    std::vector<std::array<double, 4>> bank{};
 };
 
 struct PushPop {
-    bool v1;
-    bool v2;
-    bool v3;
-    bool v4;
+    std::string bank_name{};
+    int bank_index = -1;
+    bool v1 = false;
+    bool v2 = false;
+    bool v3 = false;
+    bool v4 = false;
 };
 } // anonymous namespace
 
@@ -642,55 +648,113 @@ static void push(PJ_COORD &point, PJ *P) {
     if (P->parent == nullptr)
         return;
 
-    struct Pipeline *pipeline =
-        static_cast<struct Pipeline *>(P->parent->opaque);
-    struct PushPop *pushpop = static_cast<struct PushPop *>(P->opaque);
+    Pipeline *pipeline = static_cast<struct Pipeline *>(P->parent->opaque);
+    PushPop *pushpop = static_cast<struct PushPop *>(P->opaque);
 
-    if (pushpop->v1)
-        pipeline->stack[0].push(point.v[0]);
-    if (pushpop->v2)
-        pipeline->stack[1].push(point.v[1]);
-    if (pushpop->v3)
-        pipeline->stack[2].push(point.v[2]);
-    if (pushpop->v4)
-        pipeline->stack[3].push(point.v[3]);
+    if (!pushpop->bank_name.empty() && pushpop->bank_index < 0) {
+        // Check if we already registered this bank name
+        const auto iter = pipeline->bank_names_to_idx.find(pushpop->bank_name);
+        if (iter != pipeline->bank_names_to_idx.end()) {
+            // Yes, then store its known index, so we don't have to fetch
+            // it anymore
+            pushpop->bank_index = iter->second;
+        } else {
+            // Unknown bank name. Add a new one, and register it in the
+            // pipeline.
+            const int bank_index = static_cast<int>(pipeline->bank.size());
+            pipeline->bank.resize(pipeline->bank.size() + 1);
+            pushpop->bank_index = bank_index;
+            pipeline->bank_names_to_idx[pushpop->bank_name] = bank_index;
+        }
+    }
+    if (pushpop->bank_index >= 0) {
+        if (pushpop->v1)
+            pipeline->bank[pushpop->bank_index][0] = point.v[0];
+        if (pushpop->v2)
+            pipeline->bank[pushpop->bank_index][1] = point.v[1];
+        if (pushpop->v3)
+            pipeline->bank[pushpop->bank_index][2] = point.v[2];
+        if (pushpop->v4)
+            pipeline->bank[pushpop->bank_index][3] = point.v[3];
+    } else {
+        if (pushpop->v1)
+            pipeline->stack[0].push(point.v[0]);
+        if (pushpop->v2)
+            pipeline->stack[1].push(point.v[1]);
+        if (pushpop->v3)
+            pipeline->stack[2].push(point.v[2]);
+        if (pushpop->v4)
+            pipeline->stack[3].push(point.v[3]);
+    }
 }
 
 static void pop(PJ_COORD &point, PJ *P) {
     if (P->parent == nullptr)
         return;
 
-    struct Pipeline *pipeline =
-        static_cast<struct Pipeline *>(P->parent->opaque);
-    struct PushPop *pushpop = static_cast<struct PushPop *>(P->opaque);
+    Pipeline *pipeline = static_cast<struct Pipeline *>(P->parent->opaque);
+    PushPop *pushpop = static_cast<struct PushPop *>(P->opaque);
 
-    if (pushpop->v1 && !pipeline->stack[0].empty()) {
-        point.v[0] = pipeline->stack[0].top();
-        pipeline->stack[0].pop();
+    if (!pushpop->bank_name.empty() && pushpop->bank_index < 0) {
+        const auto iter = pipeline->bank_names_to_idx.find(pushpop->bank_name);
+        if (iter != pipeline->bank_names_to_idx.end()) {
+            pushpop->bank_index = iter->second;
+        } else {
+            proj_context_errno_set(P->ctx,
+                                   PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            proj_log_error(P, _("Pipeline: pop: Bank %s is unknown"),
+                           pushpop->bank_name.c_str());
+            point = proj_coord_error();
+            return;
+        }
     }
 
-    if (pushpop->v2 && !pipeline->stack[1].empty()) {
-        point.v[1] = pipeline->stack[1].top();
-        pipeline->stack[1].pop();
-    }
+    if (pushpop->bank_index >= 0) {
+        if (pushpop->v1)
+            point.v[0] = pipeline->bank[pushpop->bank_index][0];
+        if (pushpop->v2)
+            point.v[1] = pipeline->bank[pushpop->bank_index][1];
+        if (pushpop->v3)
+            point.v[2] = pipeline->bank[pushpop->bank_index][2];
+        if (pushpop->v4)
+            point.v[3] = pipeline->bank[pushpop->bank_index][3];
+    } else {
+        if (pushpop->v1 && !pipeline->stack[0].empty()) {
+            point.v[0] = pipeline->stack[0].top();
+            pipeline->stack[0].pop();
+        }
 
-    if (pushpop->v3 && !pipeline->stack[2].empty()) {
-        point.v[2] = pipeline->stack[2].top();
-        pipeline->stack[2].pop();
-    }
+        if (pushpop->v2 && !pipeline->stack[1].empty()) {
+            point.v[1] = pipeline->stack[1].top();
+            pipeline->stack[1].pop();
+        }
 
-    if (pushpop->v4 && !pipeline->stack[3].empty()) {
-        point.v[3] = pipeline->stack[3].top();
-        pipeline->stack[3].pop();
+        if (pushpop->v3 && !pipeline->stack[2].empty()) {
+            point.v[2] = pipeline->stack[2].top();
+            pipeline->stack[2].pop();
+        }
+
+        if (pushpop->v4 && !pipeline->stack[3].empty()) {
+            point.v[3] = pipeline->stack[3].top();
+            pipeline->stack[3].pop();
+        }
     }
 }
 
+static PJ *pj_pushpop_destructor(PJ *P, int errlev) {
+    if (nullptr == P)
+        return nullptr;
+
+    delete static_cast<PushPop *>(P->opaque);
+    P->opaque = nullptr;
+
+    return pj_default_destructor(P, errlev);
+}
+
 static PJ *setup_pushpop(PJ *P) {
-    auto pushpop =
-        static_cast<struct PushPop *>(calloc(1, sizeof(struct PushPop)));
+    auto pushpop = new PushPop;
     P->opaque = pushpop;
-    if (nullptr == P->opaque)
-        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    P->destructor = pj_pushpop_destructor;
 
     if (pj_param_exists(P->params, "v_1"))
         pushpop->v1 = true;
@@ -703,6 +767,9 @@ static PJ *setup_pushpop(PJ *P) {
 
     if (pj_param_exists(P->params, "v_4"))
         pushpop->v4 = true;
+
+    if (pj_param_exists(P->params, "bank"))
+        pushpop->bank_name = pj_param(P->ctx, P->params, "sbank").s;
 
     P->left = PJ_IO_UNITS_WHATEVER;
     P->right = PJ_IO_UNITS_WHATEVER;

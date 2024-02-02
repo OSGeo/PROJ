@@ -86,6 +86,13 @@ Parameters
 
    Retrieves the fourth coordinate component from the pipeline stack
 
+.. option:: +bank=<bank_name>
+
+   .. versionadded:: 9.4.0
+
+   Restore the above components from a named "bank" instead of the pipeline
+   stack. This must be paired with a corresponding :ref:`push <push>` with the same bank name.
+
 
 Further reading
 ################################################################################

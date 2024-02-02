@@ -85,6 +85,32 @@ Parameters
 
    Stores the fourth coordinate component on the pipeline stack
 
+.. option:: +bank=<bank_name>
+
+   .. versionadded:: 9.4.0
+
+   Store the above saved components into a named "bank" instead of the pipeline
+   stack. They will be restored when using :ref:`pop <pop>` with the same bank name.
+   Push/pop operations with bank names can be interleaved with other push/pop
+   operations with or without bank names.
+
+   The following example shows a ETRS89 to S-JTSK/05 + Baltic 1957 height
+   transformation that chains a geoid model registered against ETRS89 with a
+   Helmert transformation.
+
+   ::
+
+       +proj=pipeline \
+            +step +proj=push +v_3 +omit_inv \                               # Save ETRS89 ellipsoidal height
+            +step +inv +proj=vgridshift +grids=CR2005.tif +multiplier=1 \   # Apply geoid
+            +step +proj=push +v_3 +bank=baltic_height \                     # Save Baltic 1957 height
+            +step +proj=pop +v_3 +omit_inv \                                # Restore ETRS89 ellipsoidal height
+            +step +proj=cart +ellps=GRS80 \                                 # Helmert transformation
+            +step +inv +proj=helmert +x=572.213 +y=85.334 +z=461.94 \
+                +rx=-4.9732 +ry=-1.529 +rz=-5.2484 +s=3.5378 +convention=coordinate_frame \
+            +step +inv +proj=cart +ellps=bessel \
+            +step +proj=pop +v_3 +bank=baltic_height                        # Restore Baltic 1957 height
+
 
 Further reading
 ################################################################################

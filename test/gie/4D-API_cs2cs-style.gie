@@ -394,6 +394,55 @@ accept      12 56 0 0
 expect      12 56 0 0
 
 -------------------------------------------------------------------------------
+# Test push/pop named banks
+-------------------------------------------------------------------------------
+
+# Simulate ETRS89 to S-JTSK/05 + Baltic 1957 height
+operation  +proj=pipeline \
+            +step +proj=push +v_3 +omit_inv \
+            +step +proj=affine +zoff=-50 \  # Simulate geoid grid
+            +step +proj=push +v_3 +bank=my_bank \
+            +step +proj=pop +v_3 +omit_inv \
+            +step +proj=cart +ellps=GRS80 \
+            +step +inv +proj=helmert +x=572.213 +y=85.334 +z=461.94 \
+                +rx=-4.9732 +ry=-1.529 +rz=-5.2484 +s=3.5378 +convention=coordinate_frame \
+            +step +inv +proj=cart +ellps=bessel \
+            +step +proj=pop +v_3 +bank=my_bank
+tolerance   1 mm
+
+accept      15              50                 1000
+expect      15.0011679017   50.0007533757      950.0000
+roundtrip   1
+
+# Show that all v_x work
+operation  +proj=pipeline \
+            +step +proj=push +v_1   +v_2   +v_3   +v_4    +bank=bank1 \
+            +step +proj=set  +v_1=0 +v_2=0 +v_3=0 +v_4=0              \
+            +step +proj=pop  +v_1   +v_2   +v_3   +v_4    +bank=bank1
+accept      1 2 3 4
+expect      1 2 3 4
+roundtrip   1
+
+# Several banks
+operation  +proj=pipeline \
+            +step +proj=push +v_1 +v_3 +bank=bank1 \
+            +step +proj=set +v_3=1000 \
+            +step +proj=push +v_1 +v_3 +bank=bank2 \
+            +step +proj=set +v_1=10 \
+            +step +proj=pop +v_1 +v_3 +bank=bank1 \
+            +step +proj=pop +v_3 +bank=bank2
+accept      1 2 3
+expect      1 2 1000
+
+
+# Error case: wrong bank name in pop
+operation  +proj=pipeline \
+            +step +proj=push +v_3 +bank=some_bank \
+            +step +proj=pop +v_3 +bank=unknown_bank
+accept      0 0 0
+expect      failure errno invalid_op_illegal_arg_value
+
+-------------------------------------------------------------------------------
 # Test Pipeline +omit_inv
 -------------------------------------------------------------------------------
 
