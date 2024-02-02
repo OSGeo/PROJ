@@ -93,6 +93,7 @@ Projections map the spherical 3D space to a flat 2D space.
    mil_os
    mill
    misrsom
+   mod_krovak
    moll
    murd1
    murd2

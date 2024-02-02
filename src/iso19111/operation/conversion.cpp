@@ -3925,7 +3925,9 @@ void Conversion::_exportToPROJString(
                 "y_0", parameterValueNumericAsSI(
                            EPSG_CODE_PARAMETER_NORTHING_PROJECTION_CENTRE));
         }
-    } else if (methodEPSGCode == EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED) {
+    } else if (methodEPSGCode == EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED ||
+               methodEPSGCode ==
+                   EPSG_CODE_METHOD_KROVAK_MODIFIED_NORTH_ORIENTED) {
         double colatitude =
             parameterValueNumeric(EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS,
                                   common::UnitOfMeasure::DEGREE);
@@ -4184,7 +4186,9 @@ void Conversion::_exportToPROJString(
             if (mapping->proj_name_aux) {
                 bool addAux = true;
                 if (internal::starts_with(mapping->proj_name_aux, "axis=")) {
-                    if (mapping->epsg_code == EPSG_CODE_METHOD_KROVAK) {
+                    if (mapping->epsg_code == EPSG_CODE_METHOD_KROVAK ||
+                        mapping->epsg_code ==
+                            EPSG_CODE_METHOD_KROVAK_MODIFIED) {
                         auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(
                             l_targetCRS.get());
                         if (projCRS) {

@@ -760,6 +760,13 @@ static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_KROVAK, EPSG_CODE_METHOD_KROVAK, "Krovak", "krovak",
      "axis=swu", krovakParameters},
 
+    {EPSG_NAME_METHOD_KROVAK_MODIFIED_NORTH_ORIENTED,
+     EPSG_CODE_METHOD_KROVAK_MODIFIED_NORTH_ORIENTED, nullptr, "mod_krovak",
+     nullptr, krovakParameters},
+
+    {EPSG_NAME_METHOD_KROVAK_MODIFIED, EPSG_CODE_METHOD_KROVAK_MODIFIED,
+     nullptr, "mod_krovak", "axis=swu", krovakParameters},
+
     {EPSG_NAME_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA,
      EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA,
      "Lambert_Azimuthal_Equal_Area", "laea", nullptr, paramsLaea},

@@ -78,10 +78,13 @@
 #include <errno.h>
 #include <math.h>
 
+#include <algorithm>
+
 #include "proj.h"
 #include "proj_internal.h"
 
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl, Ell";
+PROJ_HEAD(mod_krovak, "Modified Krovak") "\n\tPCyl, Ell";
 
 #define EPS 1e-15
 #define UQ 1.04216856380474 /* DU(2, 59, 42, 42.69689) */
@@ -97,41 +100,107 @@ struct pj_krovak_data {
     double n;
     double rho0;
     double ad;
-    int czech;
+    bool easting_northing; // true, in default mode. false when using +czech
+    bool modified;
 };
 } // anonymous namespace
+
+namespace pj_modified_krovak {
+constexpr double X0 = 1089000.0;
+constexpr double Y0 = 654000.0;
+constexpr double C1 = 2.946529277E-02;
+constexpr double C2 = 2.515965696E-02;
+constexpr double C3 = 1.193845912E-07;
+constexpr double C4 = -4.668270147E-07;
+constexpr double C5 = 9.233980362E-12;
+constexpr double C6 = 1.523735715E-12;
+constexpr double C7 = 1.696780024E-18;
+constexpr double C8 = 4.408314235E-18;
+constexpr double C9 = -8.331083518E-24;
+constexpr double C10 = -3.689471323E-24;
+
+// Correction terms to be applied to regular Krovak to obtain Modified Krovak.
+// Note that Xr is a Southing in metres and Yr a Westing in metres,
+// and output (dX, dY) is a corrective term in (Southing, Westing) in metres
+// Reference:
+// https://www.cuzk.cz/Zememerictvi/Geodeticke-zaklady-na-uzemi-CR/GNSS/Nova-realizace-systemu-ETRS89-v-CR/Metodika-prevodu-ETRF2000-vs-S-JTSK-var2(101208).aspx
+static void mod_krovak_compute_dx_dy(const double Xr, const double Yr,
+                                     double &dX, double &dY) {
+    const double Xr2 = Xr * Xr;
+    const double Yr2 = Yr * Yr;
+    const double Xr4 = Xr2 * Xr2;
+    const double Yr4 = Yr2 * Yr2;
+
+    dX = C1 + C3 * Xr - C4 * Yr - 2 * C6 * Xr * Yr + C5 * (Xr2 - Yr2) +
+         C7 * Xr * (Xr2 - 3 * Yr2) - C8 * Yr * (3 * Xr2 - Yr2) +
+         4 * C9 * Xr * Yr * (Xr2 - Yr2) + C10 * (Xr4 + Yr4 - 6 * Xr2 * Yr2);
+    dY = C2 + C3 * Yr + C4 * Xr + 2 * C5 * Xr * Yr + C6 * (Xr2 - Yr2) +
+         C8 * Xr * (Xr2 - 3 * Yr2) + C7 * Yr * (3 * Xr2 - Yr2) -
+         4 * C10 * Xr * Yr * (Xr2 - Yr2) + C9 * (Xr4 + Yr4 - 6 * Xr2 * Yr2);
+}
+
+} // namespace pj_modified_krovak
 
 static PJ_XY krovak_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     struct pj_krovak_data *Q = static_cast<struct pj_krovak_data *>(P->opaque);
     PJ_XY xy = {0.0, 0.0};
 
-    double gfi, u, deltav, s, d, eps, rho;
+    const double gfi =
+        pow((1. + P->e * sin(lp.phi)) / (1. - P->e * sin(lp.phi)),
+            Q->alpha * P->e / 2.);
 
-    gfi = pow((1. + P->e * sin(lp.phi)) / (1. - P->e * sin(lp.phi)),
-              Q->alpha * P->e / 2.);
-
-    u = 2. *
+    const double u =
+        2. *
         (atan(Q->k * pow(tan(lp.phi / 2. + M_PI_4), Q->alpha) / gfi) - M_PI_4);
-    deltav = -lp.lam * Q->alpha;
+    const double deltav = -lp.lam * Q->alpha;
 
-    s = asin(cos(Q->ad) * sin(u) + sin(Q->ad) * cos(u) * cos(deltav));
+    const double s =
+        asin(cos(Q->ad) * sin(u) + sin(Q->ad) * cos(u) * cos(deltav));
     const double cos_s = cos(s);
     if (cos_s < 1e-12) {
         xy.x = 0;
         xy.y = 0;
         return xy;
     }
-    d = asin(cos(u) * sin(deltav) / cos_s);
+    const double d = asin(cos(u) * sin(deltav) / cos_s);
 
-    eps = Q->n * d;
-    rho = Q->rho0 * pow(tan(S0 / 2. + M_PI_4), Q->n) /
-          pow(tan(s / 2. + M_PI_4), Q->n);
+    const double eps = Q->n * d;
+    const double rho = Q->rho0 * pow(tan(S0 / 2. + M_PI_4), Q->n) /
+                       pow(tan(s / 2. + M_PI_4), Q->n);
 
-    xy.y = rho * cos(eps);
-    xy.x = rho * sin(eps);
+    xy.x = rho * cos(eps);
+    xy.y = rho * sin(eps);
 
-    xy.y *= Q->czech;
-    xy.x *= Q->czech;
+    // At this point, xy.x is a southing and xy.y is a westing
+
+    if (Q->modified) {
+        using namespace pj_modified_krovak;
+
+        const double Xp = xy.x;
+        const double Yp = xy.y;
+
+        // Reduced X and Y
+        const double Xr = Xp * P->a - X0;
+        const double Yr = Yp * P->a - Y0;
+
+        double dX, dY;
+        mod_krovak_compute_dx_dy(Xr, Yr, dX, dY);
+
+        xy.x = Xp - dX / P->a;
+        xy.y = Yp - dY / P->a;
+    }
+
+    // PROJ always return values in (easting, northing) (default mode)
+    // or (westing, southing) (+czech mode), so swap X/Y
+    std::swap(xy.x, xy.y);
+
+    if (Q->easting_northing) {
+        // The default non-Czech convention uses easting, northing, so we have
+        // to reverse the sign of the coordinates. But to do so, we have to take
+        // into account the false easting/northing.
+        xy.x = -xy.x - 2 * P->x0 / P->a;
+        xy.y = -xy.y - 2 * P->y0 / P->a;
+    }
 
     return xy;
 }
@@ -140,20 +209,36 @@ static PJ_LP krovak_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     struct pj_krovak_data *Q = static_cast<struct pj_krovak_data *>(P->opaque);
     PJ_LP lp = {0.0, 0.0};
 
-    double u, deltav, s, d, eps, rho, fi1, xy0;
-    int i;
+    if (Q->easting_northing) {
+        // The default non-Czech convention uses easting, northing, so we have
+        // to reverse the sign of the coordinates. But to do so, we have to take
+        // into account the false easting/northing.
+        xy.y = -xy.y - 2 * P->x0 / P->a;
+        xy.x = -xy.x - 2 * P->y0 / P->a;
+    }
 
-    xy0 = xy.x;
-    xy.x = xy.y;
-    xy.y = xy0;
+    std::swap(xy.x, xy.y);
 
-    xy.x *= Q->czech;
-    xy.y *= Q->czech;
+    if (Q->modified) {
+        using namespace pj_modified_krovak;
 
-    rho = sqrt(xy.x * xy.x + xy.y * xy.y);
-    eps = atan2(xy.y, xy.x);
+        // Note: in EPSG guidance node 7-2, below Xr/Yr/dX/dY are actually
+        // Xr'/Yr'/dX'/dY'
+        const double Xr = xy.x * P->a - X0;
+        const double Yr = xy.y * P->a - Y0;
 
-    d = eps / sin(S0);
+        double dX, dY;
+        mod_krovak_compute_dx_dy(Xr, Yr, dX, dY);
+
+        xy.x = xy.x + dX / P->a;
+        xy.y = xy.y + dY / P->a;
+    }
+
+    const double rho = sqrt(xy.x * xy.x + xy.y * xy.y);
+    const double eps = atan2(xy.y, xy.x);
+
+    const double d = eps / sin(S0);
+    double s;
     if (rho == 0.0) {
         s = M_PI_2;
     } else {
@@ -161,14 +246,15 @@ static PJ_LP krovak_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
                   M_PI_4);
     }
 
-    u = asin(cos(Q->ad) * sin(s) - sin(Q->ad) * cos(s) * cos(d));
-    deltav = asin(cos(s) * sin(d) / cos(u));
+    const double u = asin(cos(Q->ad) * sin(s) - sin(Q->ad) * cos(s) * cos(d));
+    const double deltav = asin(cos(s) * sin(d) / cos(u));
 
     lp.lam = P->lam0 - deltav / Q->alpha;
 
     /* ITERATION FOR lp.phi */
-    fi1 = u;
+    double fi1 = u;
 
+    int i;
     for (i = MAX_ITER; i; --i) {
         lp.phi = 2. * (atan(pow(Q->k, -1. / Q->alpha) *
                             pow(tan(u / 2. + M_PI_4), 1. / Q->alpha) *
@@ -189,7 +275,7 @@ static PJ_LP krovak_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     return lp;
 }
 
-PJ *PJ_PROJECTION(krovak) {
+static PJ *krovak_setup(PJ *P, bool modified) {
     double u0, n0, g;
     struct pj_krovak_data *Q = static_cast<struct pj_krovak_data *>(
         calloc(1, sizeof(struct pj_krovak_data)));
@@ -217,9 +303,11 @@ PJ *PJ_PROJECTION(krovak) {
         !pj_param(P->ctx, P->params, "tk_0").i)
         P->k0 = 0.9999;
 
-    Q->czech = 1;
-    if (!pj_param(P->ctx, P->params, "tczech").i)
-        Q->czech = -1;
+    Q->modified = modified;
+
+    Q->easting_northing = true;
+    if (pj_param(P->ctx, P->params, "tczech").i)
+        Q->easting_northing = false;
 
     /* Set up shared parameters between forward and inverse */
     Q->alpha = sqrt(1. + (P->es * pow(cos(P->phi0), 4)) / (1. - P->es));
@@ -243,6 +331,10 @@ PJ *PJ_PROJECTION(krovak) {
 
     return P;
 }
+
+PJ *PJ_PROJECTION(krovak) { return krovak_setup(P, false); }
+
+PJ *PJ_PROJECTION(mod_krovak) { return krovak_setup(P, true); }
 
 #undef EPS
 #undef UQ

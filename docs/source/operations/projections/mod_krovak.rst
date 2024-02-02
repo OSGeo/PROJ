@@ -1,18 +1,19 @@
-.. _krovak:
+.. _mod_krovak:
 
 ********************************************************************************
-Krovak
+Modified Krovak
 ********************************************************************************
+
+.. versionadded:: 9.4.0
 
 +---------------------+----------------------------------------------------------+
-| **Classification**  | Conformal Conical                                        |
+| **Classification**  | Conical                                                  |
 +---------------------+----------------------------------------------------------+
 | **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
-| **Defined area**    | Global, but more accurate around Czech Republic and      |
-|                     | Slovakia                                                 |
+| **Defined area**    | Czech Republic                                           |
 +---------------------+----------------------------------------------------------+
-| **Alias**           | krovak                                                   |
+| **Alias**           | mod_krovak                                               |
 +---------------------+----------------------------------------------------------+
 | **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
@@ -25,24 +26,25 @@ Krovak
 .. figure:: ./images/krovak.png
    :width: 500 px
    :align: center
-   :alt:   Krovak
+   :alt:   Modified Krovak
 
-   proj-string: ``+proj=krovak``
+   proj-string: ``+proj=mod_krovak``
+
+Modified Krovak builts upon traditional :ref:`krovak`, with corrective terms that
+are better suited when using it with the S-JTSK/05 datum. This method is specific
+to the Czech Republic. Due to the corrective terms, this projection method is
+no longer strictly conformal.
 
 By default, coordinates in the forward direction are output in easting, northing,
-and negative in the Czech Republic and Slovakia, with absolute value of
-easting/westing being smaller than absolute value of northing/southing.
-
-See also :ref:`mod_krovak` for a variation of Krovak used with the S-JTSK/05 datum
-in the Czech Republic.
-
-.. note:: Before PROJ 9.4, using other values for x_0 or y_0 than the default 0
-          would lead to incorrect results when not using the ``+czech`` switch.
+and negative in the Czech Republic, with absolute value of easting/westing
+being smaller than absolute value of northing/southing.
+To distinguish it from regular Krovak, the usual value for ``+x_0`` and ``+y_0``
+in Modified Krovak is typically 5,000,000.
 
 Parameters
 ################################################################################
 
-.. note:: All parameters are optional for the Krovak projection.
+.. note:: All parameters are optional for the Modified Krovak projection.
 
           The latitude of pseudo standard parallel is hardcoded to 78.5° and
           the ellipsoid to Bessel.
@@ -50,8 +52,7 @@ Parameters
 .. option:: +czech
 
     Reverse the sign of the output coordinates, as is tradition in the
-    Czech Republic, to be westing, southing (positive values in Czech Republic
-    and Slovakia).
+    Czech Republic, to be westing, southing (positive values in Czech Republic)
 
 .. option:: +lon_0=<value>
 
