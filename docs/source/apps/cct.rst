@@ -169,7 +169,7 @@ Should give results comparable to the classic :program:`proj` command
 
 .. code-block:: console
 
-      cct +proj=pipeline +proj=utm +ellps=GRS80 +zone=32 +step +step +inv
+      cct +proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm +step +proj=utm +inv 
 
 4. As (2) but specify input columns for longitude, latitude, height and time:
 
