@@ -9136,7 +9136,7 @@ const std::string &PROJStringFormatter::toString() const {
                 }
             }
 
-            // hermert followed by its inverse is a no-op
+            // Helmert followed by its inverse is a no-op
             if (curStep.name == "helmert" && prevStep.name == "helmert" &&
                 !curStep.inverted && !prevStep.inverted &&
                 curStepParamCount == prevStepParamCount) {
