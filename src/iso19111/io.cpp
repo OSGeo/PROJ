@@ -9241,6 +9241,51 @@ const std::string &PROJStringFormatter::toString() const {
                 }
             }
 
+            // Optimize patterns like Krovak (South West) to Krovak East North
+            // (also applies to Modified Krovak)
+            //   +step +inv +proj=krovak +axis=swu +lat_0=49.5
+            //   +lon_0=24.8333333333333
+            //     +alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel
+            //   +step +proj=krovak +lat_0=49.5 +lon_0=24.8333333333333
+            //     +alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel
+            // as:
+            //   +step +proj=axisswap +order=-2,-1
+            // Also applies for the symmetrical case where +axis=swu is on the
+            // second step.
+            if (curStep.inverted != prevStep.inverted &&
+                curStep.name == prevStep.name &&
+                ((curStepParamCount + 1 == prevStepParamCount &&
+                  prevStep.paramValues[0].equals("axis", "swu")) ||
+                 (prevStepParamCount + 1 == curStepParamCount &&
+                  curStep.paramValues[0].equals("axis", "swu")))) {
+                const auto &swStep = (curStepParamCount < prevStepParamCount)
+                                         ? prevStep
+                                         : curStep;
+                const auto &enStep = (curStepParamCount < prevStepParamCount)
+                                         ? curStep
+                                         : prevStep;
+                // Check if all remaining parameters (except leading axis=swu
+                // in swStep) are identical.
+                bool allSame = true;
+                for (size_t j = 0;
+                     j < std::min(curStepParamCount, prevStepParamCount); j++) {
+                    if (enStep.paramValues[j] != swStep.paramValues[j + 1]) {
+                        allSame = false;
+                        break;
+                    }
+                }
+                if (allSame) {
+                    iterCur->inverted = false;
+                    iterCur->name = "axisswap";
+                    iterCur->paramValues.clear();
+                    iterCur->paramValues.emplace_back(
+                        Step::KeyValue("order", "-2,-1"));
+
+                    deletePrevIter();
+                    continue;
+                }
+            }
+
             // detect a step and its inverse
             if (curStep.inverted != prevStep.inverted &&
                 curStep.name == prevStep.name &&

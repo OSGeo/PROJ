@@ -10015,6 +10015,93 @@ TEST(io, projstringformatter_optim_as_uc_vgridshift_uc_as_push_as_uc) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projstringformatter_krovak_to_krovak_east_north) {
+    // Working case
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(
+            "+proj=pipeline "
+            "+step +inv +proj=krovak +axis=swu +lat_0=49.5 "
+            "+lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel "
+            "+step +proj=krovak +lat_0=49.5 +lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel");
+        EXPECT_EQ(fmt->toString(), "+proj=axisswap +order=-2,-1");
+    }
+
+    // Missing parameter
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(
+            "+proj=pipeline "
+            "+step +inv +proj=krovak +axis=swu +lat_0=49.5 "
+            "+lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel "
+            "+step +proj=krovak +lat_0=49.5 +lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 ");
+        // Not equal
+        EXPECT_NE(fmt->toString(), "+proj=axisswap +order=-2,-1");
+    }
+
+    // Different parameter values
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(
+            "+proj=pipeline "
+            "+step +inv +proj=krovak +axis=swu +lat_0=49.5 "
+            "+lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel "
+            "+step +proj=krovak +lat_0=FOO +lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel");
+        // Not equal
+        EXPECT_NE(fmt->toString(), "+proj=axisswap +order=-2,-1");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projstringformatter_krovak_east_north_to_krovak) {
+    // Working case
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(
+            "+proj=pipeline "
+            "+step +inv +proj=krovak +lat_0=49.5 +lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel "
+            "+step +proj=krovak +axis=swu +lat_0=49.5 +lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel");
+        EXPECT_EQ(fmt->toString(), "+proj=axisswap +order=-2,-1");
+    }
+
+    // Missing parameter
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(
+            "+proj=pipeline "
+            "+step +inv +proj=krovak +lat_0=49.5 +lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel "
+            "+step +proj=krovak +axis=swu +lat_0=FOO +lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0");
+        // Not equal
+        EXPECT_NE(fmt->toString(), "+proj=axisswap +order=-2,-1");
+    }
+
+    // Different parameter values
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(
+            "+proj=pipeline "
+            "+step +inv +proj=krovak +lat_0=49.5 +lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel "
+            "+step +proj=krovak +axis=swu +lat_0=FOO +lon_0=24.8333333333333 "
+            "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel");
+        // Not equal
+        EXPECT_NE(fmt->toString(), "+proj=axisswap +order=-2,-1");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_longlat) {
 
     auto expected = "GEODCRS[\"unknown\",\n"
