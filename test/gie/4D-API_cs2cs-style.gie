@@ -557,4 +557,140 @@ direction   inverse
 accept      1 2 3 4
 expect      10 20 30 40
 
+-------------------------------------------------------------------------------
+# Test proj=stack
+-------------------------------------------------------------------------------
+
+# push, set, pop with a single component
+operation   +proj=pipeline \
+                +step +proj=stack +push=1 \
+                +step +proj=set +v_1=10 \
+                +step +proj=stack +pop=1
+
+accept      10 20 30 40
+expect      10 20 30 40
+
+# push, set, pop with 2 components, and popping in different order than pushin
+operation   +proj=pipeline \
+                +step +proj=stack +push=2,1,3,4 \
+                +step +proj=stack +pop=1,2,4,3
+
+accept      10 20 30 40
+expect      20 10 40 30
+
+# Test swap
+operation   +proj=pipeline \
+                +step +proj=stack +push=1 \
+                +step +proj=set +v_1=10 \
+                +step +proj=stack +push=1 \
+                +step +proj=stack +swap \
+                +step +proj=stack +pop=1 \
+                +step +proj=set +v_1=-10 \
+                +step +proj=stack +pop=1
+
+accept      1 2 3 4
+expect      10 2 3 4
+
+# Test repeated execution of a pipeline with unbalanced push/pop to check
+# that it gets cleared at each execution
+operation   +proj=pipeline \
+                +step +proj=stack +push=1 +omit_inv \
+                +step +proj=set +v_1=10
+
+accept      10 20 30 40
+expect      10 20 30 40
+roundtrip   1000
+
+# Simulate ETRS89 to S-JTSK/05 + Baltic 1957 height
+operation  +proj=pipeline \
+            +step +proj=stack +push=3 +omit_inv \  # Save ETRS89 height (and on inverse, keep Baltic57 height)
+            +step +proj=affine +zoff=-50 \  # Simulate geoid grid
+            +step +proj=stack +push=3 \     # Save Baltic 57 height
+            +step +proj=stack +swap \       # Swap ETRS89 height and Baltic 57 height
+            +step +proj=stack +pop=3 \      # Restore ETRS89 height
+            +step +proj=cart +ellps=GRS80 \
+            +step +inv +proj=helmert +x=572.213 +y=85.334 +z=461.94 \
+                +rx=-4.9732 +ry=-1.529 +rz=-5.2484 +s=3.5378 +convention=coordinate_frame \
+            +step +inv +proj=cart +ellps=bessel \
+            +step +proj=stack +pop=3        # Restore Baltic57 height
+tolerance   1 mm
+
+accept      15              50                 1000
+expect      15.0011679017   50.0007533757      950.0000
+roundtrip   1
+
+
+###############
+# Error cases #
+###############
+
+# Missing operator for stack
+operation   +proj=pipeline \
+                +step +proj=set +v_1=10 \
+                +step +proj=stack
+expect failure errno invalid_op_wrong_syntax
+
+
+# More than 1 operator for stack
+operation   +proj=pipeline \
+                +step +proj=set +v_1=10 \
+                +step +proj=stack +push=1 +pop=1
+expect failure errno invalid_op_wrong_syntax
+
+
+# push without value
+operation   +proj=pipeline \
+                +step +proj=set +v_1=10 \
+                +step +proj=stack +push
+expect failure errno invalid_op_illegal_arg_value
+
+
+# Illegal component index
+operation   +proj=pipeline \
+                +step +proj=set +v_1=10 \
+                +step +proj=stack +push=0
+expect failure errno invalid_op_illegal_arg_value
+
+
+# Illegal component index
+operation   +proj=pipeline \
+                +step +proj=set +v_1=10 \
+                +step +proj=stack +push=5
+expect failure errno invalid_op_illegal_arg_value
+
+
+# Too many component indices
+operation   +proj=pipeline \
+                +step +proj=set +v_1=10 \
+                +step +proj=stack +push=1,2,3,4,5
+expect failure errno invalid_op_illegal_arg_value
+
+
+# More pop than push
+operation   +proj=pipeline \
+                +step +proj=set +v_1=10 \
+                +step +proj=stack +pop=1
+
+accept      1 2 3 4
+expect failure errno invalid_op_wrong_syntax
+
+
+# Different number of popped components than pushed
+operation   +proj=pipeline \
+                +step +proj=stack +push=1 \
+                +step +proj=stack +pop=1,2
+
+accept      1 2 3 4
+expect failure errno invalid_op_wrong_syntax
+
+
+# Swap with only one element on the stack
+operation   +proj=pipeline \
+                +step +proj=stack +push=1 \
+                +step +proj=stack +swap
+
+accept      1 2 3 4
+expect failure errno invalid_op_wrong_syntax
+
+
 </gie-strict>

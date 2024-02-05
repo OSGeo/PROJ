@@ -19,5 +19,6 @@ conversions.
    pop
    push
    set
+   stack
    topocentric
    unitconvert

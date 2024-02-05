@@ -32,6 +32,9 @@ the :ref:`pop operation<pop>`.
 If the push operation is used by itself, e.g. not in a pipeline, it will
 function as a no-operation that passes the coordinate through unchanged.
 
+As of PROJ 9.4.0, this operation is supersed by the :ref:`stack<stack>` operation.
+Note that the stacks of ``stack`` and ``push/pop`` are totally separated.
+
 Examples
 ################################################################################
 

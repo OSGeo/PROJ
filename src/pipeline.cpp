@@ -101,6 +101,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 #include <stack>
 #include <stddef.h>
 #include <string.h>
+#include <utility> // std::swap
 #include <vector>
 
 #include "geodesic.h"
@@ -110,6 +111,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 PROJ_HEAD(pipeline, "Transformation pipeline manager");
 PROJ_HEAD(pop, "Retrieve coordinate value from pipeline stack");
 PROJ_HEAD(push, "Save coordinate value on pipeline stack");
+PROJ_HEAD(stack, "Manipulate coordinate values on pipeline stack");
 
 /* Projection specific elements for the PJ object */
 namespace { // anonymous namespace
@@ -132,19 +134,31 @@ struct Step {
     ~Step() { proj_destroy(pj); }
 };
 
+//! Stack item of the +proj=stack operator
+struct StackData {
+    std::vector<double> values{}; // up to 4 values
+};
+
 struct Pipeline {
     char **argv = nullptr;
     char **current_argv = nullptr;
     std::vector<Step> steps{};
-    std::stack<double> stack[4];
+
+    // Superseded stack for +proj=push / +prop=pop operators
+    std::stack<double> supersededStack[4];
+
+    // "New-gen" stack of the +proj=stack operator
+    std::vector<StackData> newStack{};
 };
 
+/* Data for superseded +push / +pop operator */
 struct PushPop {
     bool v1;
     bool v2;
     bool v3;
     bool v4;
 };
+
 } // anonymous namespace
 
 static void pipeline_forward_4d(PJ_COORD &point, PJ *P);
@@ -160,8 +174,17 @@ static void pipeline_reassign_context(PJ *P, PJ_CONTEXT *ctx) {
         proj_assign_context(step.pj, ctx);
 }
 
+static void pipeline_reset(struct Pipeline *pipeline) {
+    // Clear stack for use cases with unbalanced push/pop
+    pipeline->newStack.clear();
+
+    for (int i = 0; i < 4; ++i)
+        pipeline->supersededStack[i] = std::stack<double>();
+}
+
 static void pipeline_forward_4d(PJ_COORD &point, PJ *P) {
     auto pipeline = static_cast<struct Pipeline *>(P->opaque);
+    pipeline_reset(pipeline);
     for (auto &step : pipeline->steps) {
         if (!step.omit_fwd) {
             if (!step.pj->inverted)
@@ -177,6 +200,7 @@ static void pipeline_forward_4d(PJ_COORD &point, PJ *P) {
 
 static void pipeline_reverse_4d(PJ_COORD &point, PJ *P) {
     auto pipeline = static_cast<struct Pipeline *>(P->opaque);
+    pipeline_reset(pipeline);
     for (auto iterStep = pipeline->steps.rbegin();
          iterStep != pipeline->steps.rend(); ++iterStep) {
         const auto &step = *iterStep;
@@ -196,6 +220,7 @@ static PJ_XYZ pipeline_forward_3d(PJ_LPZ lpz, PJ *P) {
     PJ_COORD point = {{0, 0, 0, 0}};
     point.lpz = lpz;
     auto pipeline = static_cast<struct Pipeline *>(P->opaque);
+    pipeline_reset(pipeline);
     for (auto &step : pipeline->steps) {
         if (!step.omit_fwd) {
             point = pj_approx_3D_trans(step.pj, PJ_FWD, point);
@@ -212,6 +237,7 @@ static PJ_LPZ pipeline_reverse_3d(PJ_XYZ xyz, PJ *P) {
     PJ_COORD point = {{0, 0, 0, 0}};
     point.xyz = xyz;
     auto pipeline = static_cast<struct Pipeline *>(P->opaque);
+    pipeline_reset(pipeline);
     for (auto iterStep = pipeline->steps.rbegin();
          iterStep != pipeline->steps.rend(); ++iterStep) {
         const auto &step = *iterStep;
@@ -230,6 +256,7 @@ static PJ_XY pipeline_forward(PJ_LP lp, PJ *P) {
     PJ_COORD point = {{0, 0, 0, 0}};
     point.lp = lp;
     auto pipeline = static_cast<struct Pipeline *>(P->opaque);
+    pipeline_reset(pipeline);
     for (auto &step : pipeline->steps) {
         if (!step.omit_fwd) {
             point = pj_approx_2D_trans(step.pj, PJ_FWD, point);
@@ -246,6 +273,7 @@ static PJ_LP pipeline_reverse(PJ_XY xy, PJ *P) {
     PJ_COORD point = {{0, 0, 0, 0}};
     point.xy = xy;
     auto pipeline = static_cast<struct Pipeline *>(P->opaque);
+    pipeline_reset(pipeline);
     for (auto iterStep = pipeline->steps.rbegin();
          iterStep != pipeline->steps.rend(); ++iterStep) {
         const auto &step = *iterStep;
@@ -638,6 +666,10 @@ PJ *OPERATION(pipeline, 0) {
     return P;
 }
 
+// ---------------------------------------------------------------------------
+// Superseded +proj=push / +proj=pop operators
+// ---------------------------------------------------------------------------
+
 static void push(PJ_COORD &point, PJ *P) {
     if (P->parent == nullptr)
         return;
@@ -647,13 +679,13 @@ static void push(PJ_COORD &point, PJ *P) {
     struct PushPop *pushpop = static_cast<struct PushPop *>(P->opaque);
 
     if (pushpop->v1)
-        pipeline->stack[0].push(point.v[0]);
+        pipeline->supersededStack[0].push(point.v[0]);
     if (pushpop->v2)
-        pipeline->stack[1].push(point.v[1]);
+        pipeline->supersededStack[1].push(point.v[1]);
     if (pushpop->v3)
-        pipeline->stack[2].push(point.v[2]);
+        pipeline->supersededStack[2].push(point.v[2]);
     if (pushpop->v4)
-        pipeline->stack[3].push(point.v[3]);
+        pipeline->supersededStack[3].push(point.v[3]);
 }
 
 static void pop(PJ_COORD &point, PJ *P) {
@@ -664,24 +696,24 @@ static void pop(PJ_COORD &point, PJ *P) {
         static_cast<struct Pipeline *>(P->parent->opaque);
     struct PushPop *pushpop = static_cast<struct PushPop *>(P->opaque);
 
-    if (pushpop->v1 && !pipeline->stack[0].empty()) {
-        point.v[0] = pipeline->stack[0].top();
-        pipeline->stack[0].pop();
+    if (pushpop->v1 && !pipeline->supersededStack[0].empty()) {
+        point.v[0] = pipeline->supersededStack[0].top();
+        pipeline->supersededStack[0].pop();
     }
 
-    if (pushpop->v2 && !pipeline->stack[1].empty()) {
-        point.v[1] = pipeline->stack[1].top();
-        pipeline->stack[1].pop();
+    if (pushpop->v2 && !pipeline->supersededStack[1].empty()) {
+        point.v[1] = pipeline->supersededStack[1].top();
+        pipeline->supersededStack[1].pop();
     }
 
-    if (pushpop->v3 && !pipeline->stack[2].empty()) {
-        point.v[2] = pipeline->stack[2].top();
-        pipeline->stack[2].pop();
+    if (pushpop->v3 && !pipeline->supersededStack[2].empty()) {
+        point.v[2] = pipeline->supersededStack[2].top();
+        pipeline->supersededStack[2].pop();
     }
 
-    if (pushpop->v4 && !pipeline->stack[3].empty()) {
-        point.v[3] = pipeline->stack[3].top();
-        pipeline->stack[3].pop();
+    if (pushpop->v4 && !pipeline->supersededStack[3].empty()) {
+        point.v[3] = pipeline->supersededStack[3].top();
+        pipeline->supersededStack[3].pop();
     }
 }
 
@@ -722,4 +754,153 @@ PJ *OPERATION(pop, 0) {
     P->fwd4d = pop;
 
     return setup_pushpop(P);
+}
+
+// ---------------------------------------------------------------------------
+// Implementation of +proj=stack operator
+// ---------------------------------------------------------------------------
+
+//! Configuration data for the +proj=stack operator
+struct StackConfig {
+    //! Up to 4 values, each between 0 and 3.
+    std::vector<int> components{};
+};
+
+static PJ *pj_stack_destructor(PJ *P, int errlev) {
+    if (nullptr == P)
+        return nullptr;
+
+    delete static_cast<StackConfig *>(P->opaque);
+    P->opaque = nullptr;
+
+    return pj_default_destructor(P, errlev);
+}
+
+static void stack_push(PJ_COORD &point, PJ *P) {
+    if (P->parent == nullptr)
+        return;
+
+    auto pipeline = static_cast<struct Pipeline *>(P->parent->opaque);
+    const auto *stackConfig = static_cast<struct StackConfig *>(P->opaque);
+
+    StackData stackData;
+    for (int component : stackConfig->components)
+        stackData.values.push_back(point.v[component]);
+    pipeline->newStack.emplace_back(std::move(stackData));
+}
+
+static void stack_pop(PJ_COORD &point, PJ *P) {
+    if (P->parent == nullptr)
+        return;
+
+    auto pipeline = static_cast<struct Pipeline *>(P->parent->opaque);
+    const auto *stackConfig = static_cast<struct StackConfig *>(P->opaque);
+
+    if (pipeline->newStack.empty()) {
+        proj_context_errno_set(P->ctx, PROJ_ERR_INVALID_OP_WRONG_SYNTAX);
+        proj_log_error(P, _("Stack: pop: Stack is empty"));
+        point = proj_coord_error();
+        return;
+    }
+
+    const auto &stackData = pipeline->newStack.back();
+    if (stackConfig->components.size() != stackData.values.size()) {
+        proj_context_errno_set(P->ctx, PROJ_ERR_INVALID_OP_WRONG_SYNTAX);
+        proj_log_error(P,
+                       _("Stack: pop: Trying to pop stack tuples which has %d "
+                         "elements into %d components"),
+                       static_cast<int>(stackData.values.size()),
+                       static_cast<int>(stackConfig->components.size()));
+        point = proj_coord_error();
+        return;
+    }
+    for (size_t i = 0; i < stackData.values.size(); ++i)
+        point.v[stackConfig->components[i]] = stackData.values[i];
+    pipeline->newStack.pop_back();
+}
+
+static void stack_swap(PJ_COORD &point, PJ *P) {
+    if (P->parent == nullptr)
+        return;
+
+    auto pipeline = static_cast<struct Pipeline *>(P->parent->opaque);
+
+    if (pipeline->newStack.size() < 2) {
+        proj_context_errno_set(P->ctx, PROJ_ERR_INVALID_OP_WRONG_SYNTAX);
+        proj_log_error(
+            P, _("Stack: swap: Stack should contain at least 2 elements"));
+        point = proj_coord_error();
+        return;
+    }
+
+    std::swap(pipeline->newStack[pipeline->newStack.size() - 1],
+              pipeline->newStack[pipeline->newStack.size() - 2]);
+}
+
+PJ *OPERATION(stack, 0) {
+
+    P->destructor = pj_stack_destructor;
+
+    const auto pushExists = pj_param_exists(P->params, "push");
+    const auto popExists = pj_param_exists(P->params, "pop");
+    const auto swapExists = pj_param_exists(P->params, "swap");
+    if (pushExists) {
+        P->fwd4d = stack_push;
+        P->inv4d = stack_pop;
+    } else if (popExists) {
+        P->fwd4d = stack_pop;
+        P->inv4d = stack_push;
+    } else if (swapExists) {
+        P->fwd4d = stack_swap;
+        P->inv4d = stack_swap;
+    } else {
+        proj_log_error(P,
+                       _("One of push, pop or swap argument should be used"));
+        return pj_stack_destructor(P, PROJ_ERR_INVALID_OP_WRONG_SYNTAX);
+    }
+
+    if ((pushExists ? 1 : 0) + (popExists ? 1 : 0) + (swapExists ? 1 : 0) > 1) {
+        proj_log_error(
+            P, _("At most one of push, pop or swap argument should be used"));
+        return pj_stack_destructor(P, PROJ_ERR_INVALID_OP_WRONG_SYNTAX);
+    }
+
+    if (pushExists || popExists) {
+        auto stackConfig = new StackConfig;
+        P->opaque = stackConfig;
+
+        const char *componentsStr =
+            pj_param(P->ctx, P->params, pushExists ? "spush" : "spop").s;
+        const char *s = componentsStr;
+        while (*s != '\0') {
+            if (stackConfig->components.size() == 4) {
+                proj_log_error(P, _("Too many axis"));
+                return pj_stack_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            }
+            const int nCurComponent = atoi(s);
+            if (nCurComponent <= 0 || nCurComponent > 4) {
+                proj_log_error(P, _("invalid axis '%d'"), nCurComponent);
+                return pj_stack_destructor(
+                    P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            }
+            // Go from 1-based convention to 0-based
+            stackConfig->components.push_back(nCurComponent - 1);
+            while (*s != '\0' && *s != ',')
+                s++;
+            if (*s == ',')
+                s++;
+        }
+
+        if (stackConfig->components.empty()) {
+            proj_log_error(P, _("No axis specified"));
+            return pj_stack_destructor(P,
+                                       PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
+    }
+
+    P->left = PJ_IO_UNITS_WHATEVER;
+    P->right = PJ_IO_UNITS_WHATEVER;
+
+    return P;
 }
