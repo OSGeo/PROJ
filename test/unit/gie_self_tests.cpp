@@ -644,7 +644,8 @@ TEST(gie, info_functions) {
     n = 0;
     for (pm_list = proj_list_prime_meridians(); pm_list->id; ++pm_list)
         n++;
-    ASSERT_NE(n, 0U);
+    /* hard-coded prime meridians are not updated; expect a fixed size */
+    EXPECT_EQ(n, 14U);
 }
 
 // ---------------------------------------------------------------------------
