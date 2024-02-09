@@ -322,7 +322,7 @@ osgeo::proj::GenericShiftGridSet::gridAt(std::string const&, double, double) con
 osgeo::proj::GenericShiftGridSet::open(pj_ctx*, std::string const&)
 osgeo::proj::GenericShiftGridSet::reassign_context(pj_ctx*)
 osgeo::proj::GenericShiftGridSet::reopen(pj_ctx*)
-osgeo::proj::GenericShiftGrid::valuesAt(int, int, int, int, int, int const*, float*) const
+osgeo::proj::GenericShiftGrid::valuesAt(int, int, int, int, int, int const*, float*, bool&) const
 osgeo::proj::Grid::~Grid()
 osgeo::proj::Grid::Grid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
 osgeo::proj::HorizontalShiftGrid::gridAt(double, double) const

@@ -13,18 +13,20 @@ Translation of geodetic coordinates using a grid shift.
 +-----------------+-------------------------------------------------------------------+
 | **Domain**      | 2D and 3D                                                         |
 +-----------------+-------------------------------------------------------------------+
-| **Input type**  | Geodetic coordinates (horizontal), meters (vertical)              |
+| **Input type**  | Geodetic or projected coordinates (horizontal), meters (vertical) |
 +-----------------+-------------------------------------------------------------------+
-| **Output type** | Geodetic coordinates (horizontal), meters (vertical)              |
+| **Output type** | Geodetic or projected coordinates (horizontal), meters (vertical) |
 +-----------------+-------------------------------------------------------------------+
 
-The transformation may apply horizontal geodetic offsetting and/or vertical
+The transformation may apply horizontal geodetic or projected offsetting and/or vertical
 (ellipsoidal or orthometric height) offsetting, depending on the type of the
 grid(s).
 
 This is a generalization of the :ref:`hgridshift` and :ref:`vgridshift` methods,
 that may be used in particular for US NADCON5 grids that contain both horizontal
 geodetic and ellipsoidal height offsets.
+
+.. note:: Support for grids referenced in a projected CRS has been added in PROJ 9.4.0
 
 
 Example

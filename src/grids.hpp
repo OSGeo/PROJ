@@ -215,8 +215,8 @@ class PROJ_GCC_DLL GenericShiftGrid : public Grid {
 
     PROJ_FOR_TEST virtual bool valuesAt(int x_start, int y_start, int x_count,
                                         int y_count, int sample_count,
-                                        const int *sample_idx,
-                                        float *out) const;
+                                        const int *sample_idx, float *out,
+                                        bool &nodataFound) const;
 
     PROJ_FOR_TEST virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
 };
