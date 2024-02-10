@@ -168,13 +168,13 @@ bool gridshiftData::checkGridTypes(PJ *P, bool &isProjectedCoord) {
             return false;
         }
         try {
-            m_offsetX = osgeo::proj::internal::c_locale_stod(offsetX);
+            m_offsetX = NS_PROJ::internal::c_locale_stod(offsetX);
         } catch (const std::exception &) {
             proj_log_error(P, _("Invalid offset value"));
             return false;
         }
         try {
-            m_offsetY = osgeo::proj::internal::c_locale_stod(offsetY);
+            m_offsetY = NS_PROJ::internal::c_locale_stod(offsetY);
         } catch (const std::exception &) {
             proj_log_error(P, _("Invalid offset value"));
             return false;
