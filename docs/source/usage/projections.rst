@@ -70,10 +70,10 @@ The returned coordinates are scaled by the value assigned with the ``+k_0``
 parameter. This parameter is only used by projections that mention using it,
 and its exact effect is projection dependent.
 
-Input units for angular parameters (``+lon_0``, ``+lat_0``, etc.) are
+Input units for angular parameters (``+lon_0``, ``+lat_0``, ``+pm``, etc.) are
 interpreted to be decimal degrees by convention.
 Explicit specification of input angular units can be accomplished by adding the
-appropriate ruffix to input values.
+appropriate suffix to input values.
 
 
     +----------------+---------------------+
@@ -90,9 +90,23 @@ appropriate ruffix to input values.
     | R              |                     |
     +----------------+---------------------+
 
+The sign of an angle is taken from either a ``-`` or ``+`` prefix,
+or the last character specifying a cardinal direction,
+where ``e``/``E`` (East) or ``n``/``N`` (North) are positive
+and ``w``/``W`` (West) or ``s``/``S`` (South) are negative.
+
 Example of use.  The longitude of the central meridian ``+lon_0=90``, can also be expressed more explicitly
 with units of decimal degrees as ``+lon_0=90d`` or in radian
 units as ``+lon_0=1.570796r`` (approximately).
+
+Angles can be expressed in DMS notation, using ``'`` after arcminutes
+and ``"`` after arcseconds, ending with optional cardinal direction.
+For example, ``+pm=3d41'14.55"W``, but
+character escapes ``+pm=3d41\'14.55\"W`` may be required.
+
+Degree-minute notation does not require any quotation symbols.
+All of these are equivalent values: ``+pm=-17d40``, ``+pm=17D40W``,
+``+pm=17°40w`` or ``+pm=17d40'W`` (escaped as ``+pm=17d40\'W``).
 
 
 False Easting/Northing
@@ -135,18 +149,19 @@ Note that ``+over`` does **not** disable ``+lon_wrap``.
 Prime Meridian
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-A prime meridian may be declared indicating the offset between the prime
-meridian of the declared coordinate system and that of greenwich.  A prime
-meridian is declared using the "pm" parameter, and may be assigned a symbolic
-name, or the longitude of the alternative prime meridian relative to greenwich.
+A prime meridian may be declared indicating the longitude offset between
+the prime meridian of the declared coordinate system and that of greenwich.
+A prime meridian is declared using the ``+pm`` parameter, and may be assigned
+an angle in DMS or decimal degrees format, or as a hard-coded name.
 
 Currently prime meridian declarations are not used by the ``pj_inv()`` and
 ``pj_fwd()`` calls.
 Consequently the user utility :program:`cs2cs` does honour prime meridians but
 the :program:`proj` user utility ignores them.
 
-The following predeclared prime meridian names are supported.  These can be
-listed using with ``cs2cs -lm``.
+Hard-coded prime meridians can be listed with ``cs2cs -lm``.
+Note that the following list is no longer updated, and some values
+may conflict with other sources.
 
  ===========     ================
  Meridian        Longitude
@@ -154,8 +169,8 @@ listed using with ``cs2cs -lm``.
    greenwich     0dE
       lisbon     9d07'54.862"W
        paris     2d20'14.025"E
-      bogota     74d04'51.3"E
-      madrid     3d41'16.48"W
+      bogota     74d04'51.3"W
+      madrid     3d41'16.58"W
         rome     12d27'8.4"E
         bern     7d26'22.5"E
      jakarta     106d48'27.79"E
@@ -164,17 +179,27 @@ listed using with ``cs2cs -lm``.
    stockholm     18d3'29.8"E
       athens     23d42'58.815"E
         oslo     10d43'22.5"E
+  copenhagen     12d34'40.35"E
  ===========     ================
 
 Example of use.  The location ``long=0``, ``lat=0`` in the greenwich based lat/long
-coordinates is translated to lat/long coordinates with Madrid as the prime
+coordinates is translated to lat/long coordinates with Lisbon as the prime
 meridian.
 
 ::
 
-    cs2cs +proj=latlong +datum=WGS84 +to +proj=latlong +datum=WGS84 +pm=madrid
+    cs2cs +proj=latlong +datum=WGS84 +to +proj=latlong +datum=WGS84 +pm=lisbon
     0 0
-    3d41'16.48"E    0dN 0.000
+    9d7'54.862"E	0dN 0.000
+
+Decimal degrees can also be simply specified for the prime meridian.
+
+::
+
+    echo 13d30E 45N | proj +proj=merc +pm=13.5
+    0.00    5591295.92
+
+See :ref:`projection_units` for other examples of angular inputs.
 
 
 Axis orientation

@@ -580,8 +580,10 @@ int main(int argc, char **argv) {
                         }
                         proj_unit_list_destroy(units);
                     } else if (arg[1] == 'm') { /* list prime meridians */
+                        (void)fprintf(stderr,
+                            "This list is no longer updated, and some values may "
+                            "conflict with other sources.\n");
                         const struct PJ_PRIME_MERIDIANS *lpm;
-
                         for (lpm = proj_list_prime_meridians(); lpm->id; ++lpm)
                             (void)printf("%12s %-30s\n", lpm->id, lpm->defn);
                     } else

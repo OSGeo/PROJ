@@ -667,7 +667,8 @@ Lists
 
 .. c:function:: const PJ_PRIME_MERIDIANS* proj_list_prime_meridians(void)
 
-    Get a pointer to an array of prime meridians defined in PROJ. The last
+    Get a pointer to an array of hard-coded prime meridians defined in PROJ.
+    Note that this list is no longer updated. The last
     entry of the returned array is a NULL-entry. The array is statically
     allocated and does not need to be freed after use.
 

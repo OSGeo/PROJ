@@ -104,6 +104,12 @@ The following control parameters can appear in any order:
 
     List of all ellipsoids that can be selected with the *+ellps* parameters.
 
+.. option:: -lm
+
+    List of hard-coded prime meridians that can be selected with the *+pm*
+    parameter.  Note that this list is no longer updated,
+    and some values may conflict with other sources.
+
 .. option:: -lu
 
     List of all distance units that can be selected with the *+units* parameter.

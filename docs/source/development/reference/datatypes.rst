@@ -608,7 +608,8 @@ List structures
 
 .. c:type:: PJ_PRIME_MERIDIANS
 
-    Prime meridians defined in PROJ.
+    Hard-coded prime meridians defined in PROJ. Note that the structure is
+    no longer updated, and some values may conflict with other sources.
 
     .. code-block:: C
 
