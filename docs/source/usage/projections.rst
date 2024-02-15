@@ -70,10 +70,10 @@ The returned coordinates are scaled by the value assigned with the ``+k_0``
 parameter. This parameter is only used by projections that mention using it,
 and its exact effect is projection dependent.
 
-Input units for angular parameters (``+lon_0``, ``+lat_0``, etc.) are
+Input units for angular parameters (``+lon_0``, ``+lat_0``, ``+pm``, etc.) are
 interpreted to be decimal degrees by convention.
 Explicit specification of input angular units can be accomplished by adding the
-appropriate ruffix to input values.
+appropriate suffix to input values.
 
 
     +----------------+---------------------+
@@ -90,9 +90,23 @@ appropriate ruffix to input values.
     | R              |                     |
     +----------------+---------------------+
 
+The sign of an angle is taken from either a ``-`` or ``+`` prefix,
+or the last character specifying a cardinal direction,
+where ``e``/``E`` (East) or ``n``/``N`` (North) are positive
+and ``w``/``W`` (West) or ``s``/``S`` (South) are negative.
+
 Example of use.  The longitude of the central meridian ``+lon_0=90``, can also be expressed more explicitly
 with units of decimal degrees as ``+lon_0=90d`` or in radian
 units as ``+lon_0=1.570796r`` (approximately).
+
+Angles can be expressed in DMS notation, using ``'`` after arcminutes
+and ``"`` after arcseconds, ending with optional cardinal direction.
+For example, ``+pm=3d41'14.55"W``, but
+character escapes ``+pm=3d41\'14.55\"W`` may be required.
+
+Degree-minute notation does not require any quotation symbols.
+All of these are equivalent values: ``+pm=-17d40``, ``+pm=17D40W``,
+``+pm=17°40w`` or ``+pm=17d40'W`` (escaped as ``+pm=17d40\'W``).
 
 
 False Easting/Northing
@@ -177,6 +191,15 @@ meridian.
     cs2cs +proj=latlong +datum=WGS84 +to +proj=latlong +datum=WGS84 +pm=lisbon
     0 0
     9d7'54.862"E	0dN 0.000
+
+Decimal degrees can also be simply specified for the prime meridian.
+
+::
+
+    echo 13d30E 45N | proj +proj=merc +pm=13.5
+    0.00    5591295.92
+
+See :ref:`projection_units` for other examples of angular inputs.
 
 
 Axis orientation
