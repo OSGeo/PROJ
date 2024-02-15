@@ -106,7 +106,9 @@ The following control parameters can appear in any order:
 
 .. option:: -lm
 
-    List of hard-coded prime meridians that can be selected with the *+pm* parameter.
+    List of hard-coded prime meridians that can be selected with the *+pm*
+    parameter.  Note that this list is no longer updated,
+    and some values may conflict with other sources.
 
 .. option:: -lu
 
