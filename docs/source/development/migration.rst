@@ -62,7 +62,7 @@ The same program implemented using PROJ 6:
         /* engine" used by PROJ to determine the best transformation(s) between */
         /* two CRS. */
         P = proj_create_crs_to_crs(PJ_DEFAULT_CTX,
-                                   "+proj=longlat +ellps=clrs66",
+                                   "+proj=longlat +ellps=clrk66",
                                    "+proj=merc +ellps=clrk66 +lat_ts=33",
                                    NULL);
         if (P==0)
