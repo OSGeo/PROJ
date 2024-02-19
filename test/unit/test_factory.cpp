@@ -2363,6 +2363,69 @@ TEST(factory, AuthorityFactory_getAvailableGeoidmodels) {
 // ---------------------------------------------------------------------------
 
 TEST_F(FactoryWithTmpDatabase,
+       AuthorityFactory_test_inversion_first_and_last_steps_of_concat_op) {
+    createStructure();
+    populateWithFakeEPSG();
+
+    // Completely dummy, to test proper inversion of first and last
+    // steps in ConcatenatedOperation, when it is needed
+    ASSERT_TRUE(execute("INSERT INTO geodetic_datum "
+                        "VALUES('EPSG','OTHER_DATUM','Other datum','',"
+                        "'EPSG','7030','EPSG','8901',NULL,NULL,NULL,"
+                        "'my anchor',NULL,0);"))
+        << last_error();
+    ASSERT_TRUE(
+        execute("INSERT INTO geodetic_crs VALUES('EPSG','OTHER_GEOG_CRS',"
+                "'OTHER_GEOG_CRS',NULL,'geographic 2D','EPSG','6422',"
+                "'EPSG','OTHER_DATUM',NULL,0);"))
+        << last_error();
+    ASSERT_TRUE(
+        execute("INSERT INTO other_transformation "
+                "VALUES('EPSG','4326_TO_OTHER_GEOG_CRS','name',NULL,"
+                "'EPSG','9601','Longitude rotation',"
+                "'EPSG','4326','EPSG','OTHER_GEOG_CRS',0.0,'EPSG'"
+                ",'8602','Longitude "
+                "offset',-17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+    ASSERT_TRUE(
+        execute("INSERT INTO other_transformation "
+                "VALUES('EPSG','OTHER_GEOG_CRS_TO_4326','name',NULL,"
+                "'EPSG','9601','Longitude rotation',"
+                "'EPSG','OTHER_GEOG_CRS','EPSG','4326',0.0,'EPSG'"
+                ",'8602','Longitude "
+                "offset',17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+    ASSERT_TRUE(execute("INSERT INTO concatenated_operation "
+                        "VALUES('EPSG','DUMMY_CONCATENATED_2','name',NULL,"
+                        "'EPSG','4326','EPSG'"
+                        ",'4326',NULL,NULL,0);"))
+        << last_error();
+    ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
+                        "VALUES('EPSG','DUMMY_CONCATENATED_2',1,"
+                        "'EPSG','OTHER_GEOG_CRS_TO_4326');"))
+        << last_error();
+
+    ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
+                        "VALUES('EPSG','DUMMY_CONCATENATED_2',2,"
+                        "'EPSG','4326_TO_OTHER_GEOG_CRS');"))
+        << last_error();
+
+    auto factoryEPSG = AuthorityFactory::create(DatabaseContext::create(m_ctxt),
+                                                std::string("EPSG"));
+    EXPECT_TRUE(nn_dynamic_pointer_cast<ConcatenatedOperation>(
+                    factoryEPSG->createObject("DUMMY_CONCATENATED_2")) !=
+                nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(FactoryWithTmpDatabase,
        AuthorityFactory_test_with_fake_EPSG_and_OTHER_database) {
     createStructure();
     populateWithFakeEPSG();

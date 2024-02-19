@@ -36,6 +36,9 @@ set(SQL_FILES
   "${SQL_DIR}/nkg.sql"
   "${SQL_DIR}/iau.sql"
   "${SQL_DIR}/nrcan.sql"
+  "${SQL_DIR}/transformations_czechia.sql"
+  # Below file not yet integrated to unclear licensing of referenced grid file
+  # "${SQL_DIR}/transformations_czechia_extra.sql"
   "${SQL_DIR}/grid_alternatives.sql"
   "${SQL_DIR}/grid_alternatives_generated_noaa.sql"
   "${SQL_DIR}/nadcon5_concatenated_operations.sql"

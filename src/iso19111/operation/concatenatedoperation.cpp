@@ -309,6 +309,36 @@ void ConcatenatedOperation::fixStepsDirection(
         }
     }
 
+    // If the first operation is a transformation whose target CRS matches the
+    // source CRS of the concatenated operation, then reverse it.
+    if (operationsInOut.size() >= 2) {
+        auto &op = operationsInOut.front();
+        auto l_sourceCRS = op->sourceCRS();
+        auto l_targetCRS = op->targetCRS();
+        if (l_sourceCRS && l_targetCRS &&
+            !areCRSMoreOrLessEquivalent(l_sourceCRS.get(),
+                                        concatOpSourceCRS.get()) &&
+            areCRSMoreOrLessEquivalent(l_targetCRS.get(),
+                                       concatOpSourceCRS.get())) {
+            op = op->inverse();
+        }
+    }
+
+    // If the last operation is a transformation whose source CRS matches the
+    // target CRS of the concatenated operation, then reverse it.
+    if (operationsInOut.size() >= 2) {
+        auto &op = operationsInOut.back();
+        auto l_sourceCRS = op->sourceCRS();
+        auto l_targetCRS = op->targetCRS();
+        if (l_sourceCRS && l_targetCRS &&
+            !areCRSMoreOrLessEquivalent(l_targetCRS.get(),
+                                        concatOpTargetCRS.get()) &&
+            areCRSMoreOrLessEquivalent(l_sourceCRS.get(),
+                                       concatOpTargetCRS.get())) {
+            op = op->inverse();
+        }
+    }
+
     const auto extractDerivedCRS =
         [](const crs::CRS *crs) -> const crs::DerivedCRS * {
         auto derivedCRS = dynamic_cast<const crs::DerivedCRS *>(crs);
