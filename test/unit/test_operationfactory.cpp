@@ -813,9 +813,19 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             authFactory->createCoordinateReferenceSystem("8357"),
             // ETRS89
             authFactory->createCoordinateReferenceSystem("4937"), ctxt);
-        ASSERT_EQ(list.size(), 2U);
+        ASSERT_EQ(list.size(), 3U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=vgridshift "
+            "+grids=cz_cuzk_CR-2005.tif "
+            "+multiplier=1 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1");
+        EXPECT_EQ(
+            list[1]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline "
             "+step +proj=axisswap +order=2,1 "
             "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
