@@ -97,7 +97,11 @@ Example: Second case - indirectly given azimuth
 ::
 
     $ echo 12 55 | proj +proj=omerc +lon_1=-1 +lat_1=1 +lon_2=0 +lat_2=0 +ellps=GRS80
-      349567.57   6839490.50
+    349567.57 6839490.50
+
+    # Same, with directly given azimuth, (via: echo 0 0 1 -1|geod -I -f %.7f +ellps=GRS80):
+    $ echo 12 55 | proj +proj=omerc +alpha=-45.1880402 +ellps=GRS80
+    349567.57 6839490.50
 
 
 Example: An approximation of the Danish "System 34" from :cite:`Rittri2012`
