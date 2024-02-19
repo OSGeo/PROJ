@@ -85,6 +85,10 @@ projections are limiting forms of the Oblique Mercator
     $ echo 12 55 | proj +proj=omerc +alpha=0 +R=6400000
     766869.97 6209742.96
 
+    # Same, with azimuth given indirectly via two points:
+    $ echo 12 55 | proj +proj=omerc +lon_1=0 +lat_1=-1 +lon_2=0 +lat_2=0 +R=6400000
+    766869.97 6209742.96
+
     $ echo 12 55 | proj +proj=tmerc +R=6400000
     766869.97 6209742.96
     
