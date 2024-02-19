@@ -190,3 +190,20 @@ Optional
 .. include:: ../options/x_0.rst
 
 .. include:: ../options/y_0.rst
+
+Caveats
+#######
+
+Note for the two-point method no rectification is done,
+
+::
+
+    echo 0 0|proj -I +proj=omerc +R=6400000 +lonc=-87 +lat_0=42 +alpha=0
+    87dW	42dN
+    echo 0 0|proj -I +proj=omerc +R=6400000 +lonc=-87 +lat_0=42 +alpha=0 +no_rot
+    87dW	0dS
+    echo 0 0|proj -I +proj=omerc +R=6400000 +lon_1=-87 +lat_1=42 +lon_2=-87 +lat_2=43
+    87dW	0dN
+
+Thus, just as was noted above regarding +no_rot, the two-point method
+itself is also probably only marginally useful.
