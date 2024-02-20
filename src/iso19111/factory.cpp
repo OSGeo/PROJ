@@ -4064,7 +4064,7 @@ bool AuthorityFactory::Private::rejectOpDueToMissingGrid(
 
     struct DisableNetwork {
         const DatabaseContextNNPtr &m_dbContext;
-        bool m_old_network_enabled;
+        bool m_old_network_enabled = false;
 
         explicit DisableNetwork(const DatabaseContextNNPtr &l_context)
             : m_dbContext(l_context) {
