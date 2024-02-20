@@ -69,7 +69,8 @@ include_directories(${PROJ_SOURCE_DIR}/include)
 include_directories(${PROJ_BINARY_DIR}/src)
 
 # Apply to targets in the current directory and below
-add_compile_options(${PROJ_CXX_WARN_FLAGS})
+add_compile_options("$<$<COMPILE_LANGUAGE:C>:${PROJ_C_WARN_FLAGS}>")
+add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>")
 
 set(PROJ_TEST_ENVIRONMENT
   "PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES"
