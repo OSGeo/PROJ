@@ -56,7 +56,9 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   set(PROJ_C_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Wmissing-prototypes
   )
-  set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS})
+  set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
+    -Weffc++
+  )
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   set(PROJ_C_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Wmissing-prototypes
@@ -65,6 +67,7 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   )
   set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Wfloat-conversion
+    -Weffc++
   )
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   add_definitions(/D_CRT_SECURE_NO_WARNINGS) # Eliminate deprecation warnings
