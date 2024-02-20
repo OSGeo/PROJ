@@ -200,7 +200,7 @@ class GTXVerticalShiftGrid : public VerticalShiftGrid {
     PJ_CONTEXT *m_ctx;
     std::unique_ptr<File> m_fp;
     std::unique_ptr<FloatLineCache> m_cache;
-    mutable std::vector<float> m_buffer;
+    mutable std::vector<float> m_buffer{};
 
     GTXVerticalShiftGrid(const GTXVerticalShiftGrid &) = delete;
     GTXVerticalShiftGrid &operator=(const GTXVerticalShiftGrid &) = delete;
@@ -2046,7 +2046,7 @@ bool CTable2Grid::valueAt(int x, int y, bool compensateNTConvention,
 
 class NTv2GridSet : public HorizontalShiftGridSet {
     std::unique_ptr<File> m_fp;
-    std::unique_ptr<FloatLineCache> m_cache;
+    std::unique_ptr<FloatLineCache> m_cache{};
 
     NTv2GridSet(const NTv2GridSet &) = delete;
     NTv2GridSet &operator=(const NTv2GridSet &) = delete;
@@ -2077,7 +2077,7 @@ class NTv2Grid : public HorizontalShiftGrid {
     uint32_t m_gridIdx;
     unsigned long long m_offset;
     bool m_mustSwap;
-    mutable std::vector<float> m_buffer;
+    mutable std::vector<float> m_buffer{};
 
     NTv2Grid(const NTv2Grid &) = delete;
     NTv2Grid &operator=(const NTv2Grid &) = delete;
@@ -2892,6 +2892,10 @@ class GTiffGenericGrid final : public GenericShiftGrid {
     }
 
     bool hasChanged() const override { return m_grid->hasChanged(); }
+
+  private:
+    GTiffGenericGrid(const GTiffGenericGrid &) = delete;
+    GTiffGenericGrid &operator=(const GTiffGenericGrid &) = delete;
 };
 
 // ---------------------------------------------------------------------------

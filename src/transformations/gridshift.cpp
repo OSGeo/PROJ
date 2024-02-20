@@ -69,7 +69,7 @@ struct GridInfo {
     int idxSampleZ = -1;
     bool eastingNorthingOffset = false;
     bool bilinearInterpolation = true;
-    std::vector<float> shifts;
+    std::vector<float> shifts{};
     bool swapXYInRes = false;
     std::vector<int> idxSampleXYZ{-1, -1, -1};
     IXY lastIdxXY = IXY{-1, -1};
