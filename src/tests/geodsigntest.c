@@ -256,14 +256,14 @@ int main() {
     /* azimuth of geodesic line with points on equator determined by signs of
      * latitude
      * lat1 lat2 azi1/2 */
+    int i = 0;
+    T azi1, azi2;
     T C[2][3] = {
       { +0.0, -0.0, 180 },
       { -0.0, +0.0,   0 }
     };
     struct geod_geodesic g;
     geod_init(&g, wgs84_a, wgs84_f);
-    T azi1, azi2;
-    int i = 0;
     for (int k = 0; k < 2; ++k) {
       geod_inverse(&g, C[k][0], 0.0, C[k][1], 0.0, nullptr, &azi1, &azi2);
       if ( equiv(azi1, C[k][2]) + equiv(azi2, C[k][2]) ) ++i;
@@ -277,14 +277,14 @@ int main() {
   {
     /* Does the nearly antipodal equatorial solution go north or south?
      * lat1 lat2 azi1 azi2 */
+    int i = 0;
+    T azi1, azi2;
     T C[2][4] = {
       { +0.0, +0.0,  56, 124},
       { -0.0, -0.0, 124,  56}
     };
     struct geod_geodesic g;
     geod_init(&g, wgs84_a, wgs84_f);
-    T azi1, azi2;
-    int i = 0;
     for (int k = 0; k < 2; ++k) {
       geod_inverse(&g, C[k][0], 0.0, C[k][1], 179.5, nullptr, &azi1, &azi2);
       i += checkEquals(azi1, C[k][2], 1) + checkEquals(azi2, C[k][3], 1);
@@ -299,6 +299,8 @@ int main() {
   {
     /* How does the exact antipodal equatorial path go N/S + E/W
      * lat1 lat2 lon2 azi1 azi2 */
+    int i = 0;
+    T azi1, azi2;
     T C[4][5] = {
       { +0.0, +0.0, +180,   +0.0, +180},
       { -0.0, -0.0, +180, +180,   +0.0},
@@ -307,8 +309,6 @@ int main() {
     };
     struct geod_geodesic g;
     geod_init(&g, wgs84_a, wgs84_f);
-    T azi1, azi2;
-    int i = 0;
     for (int k = 0; k < 4; ++k) {
       geod_inverse(&g, C[k][0], 0.0, C[k][1], C[k][2], nullptr, &azi1, &azi2);
       if ( equiv(azi1, C[k][3]) + equiv(azi2, C[k][4]) ) ++i;
@@ -323,14 +323,14 @@ int main() {
   {
     /* Antipodal points on the equator with prolate ellipsoid
      * lon2 azi1/2 */
+    int i = 0;
+    T azi1, azi2;
     T C[2][2] = {
       { +180, +90 },
       { -180, -90 }
     };
     struct geod_geodesic g;
     geod_init(&g, 6.4e6, -1/300.0);
-    T azi1, azi2;
-    int i = 0;
     for (int k = 0; k < 2; ++k) {
       geod_inverse(&g, 0.0, 0.0, 0.0, C[k][0], nullptr, &azi1, &azi2);
       if ( equiv(azi1, C[k][1]) + equiv(azi2, C[k][1]) ) ++i;
@@ -345,6 +345,8 @@ int main() {
   {
     /* azimuths = +/-0 and +/-180 for the direct problem
      * azi1, lon2, azi2 */
+    int i = 0;
+    T lon2, azi2;
     T C[4][3] = {
       { +0.0, +180, +180  },
       { -0.0, -180, -180  },
@@ -353,8 +355,6 @@ int main() {
     };
     struct geod_geodesic g;
     geod_init(&g, wgs84_a, wgs84_f);
-    T lon2, azi2;
-    int i = 0;
     for (int k = 0; k < 4; ++k) {
       geod_gendirect(&g, 0.0, 0.0, C[k][0], GEOD_LONG_UNROLL, 15e6,
                      nullptr, &lon2, &azi2,
