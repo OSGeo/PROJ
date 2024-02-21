@@ -61,7 +61,6 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     -Wlogical-op
   )
   set(PROJ_C_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
-    -Werror=declaration-after-statement
     -Wmissing-prototypes
   )
   set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
