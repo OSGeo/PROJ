@@ -4223,7 +4223,7 @@ TEST_F(CApi, proj_get_celestial_body_list_from_database) {
 
     {
         auto list =
-            proj_get_celestial_body_list_from_database(nullptr, nullptr, 0);
+            proj_get_celestial_body_list_from_database(nullptr, nullptr, nullptr);
         ASSERT_NE(list, nullptr);
         ASSERT_NE(list[0], nullptr);
         ASSERT_NE(list[0]->auth_name, nullptr);
@@ -4668,7 +4668,7 @@ TEST_F(CApi, proj_context_copy_from_default) {
 
 TEST_F(CApi, proj_context_clone) {
     int new_init_rules =
-        proj_context_get_use_proj4_init_rules(NULL, 0) > 0 ? 0 : 1;
+        proj_context_get_use_proj4_init_rules(nullptr, 0) > 0 ? 0 : 1;
     PJ_CONTEXT *new_ctx = proj_context_create();
     EXPECT_NE(new_ctx, nullptr);
     PjContextKeeper keeper_ctxt(new_ctx);

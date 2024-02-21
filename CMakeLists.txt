@@ -69,7 +69,7 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     -Wextra-semi
     # -Wold-style-cast
     -Woverloaded-virtual
-    # -Wzero-as-null-pointer-constant
+    -Wzero-as-null-pointer-constant
   )
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   set(PROJ_common_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
@@ -91,7 +91,7 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
     -Woverloaded-virtual
     -Wshorten-64-to-32
     -Wunused-private-field
-    # -Wzero-as-null-pointer-constant
+    -Wzero-as-null-pointer-constant
   )
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   add_definitions(/D_CRT_SECURE_NO_WARNINGS) # Eliminate deprecation warnings
