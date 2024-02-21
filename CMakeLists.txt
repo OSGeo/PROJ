@@ -75,7 +75,7 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   set(PROJ_common_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Wcomma
     -Wdeprecated
-    # -Wdocumentation -Wno-documentation-deprecated-sync
+    -Wdocumentation -Wno-documentation-deprecated-sync
     -Wfloat-conversion
     -Wlogical-op-parentheses
     # -Wweak-vtables
