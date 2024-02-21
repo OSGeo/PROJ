@@ -144,7 +144,7 @@ TEST(gie, cart_selftest) {
     b = proj_trans(P, PJ_FWD, b);
 
     /* Move it back to the default context */
-    proj_context_set(P, 0);
+    proj_context_set(P, nullptr);
     ASSERT_EQ(pj_get_default_ctx(), P->ctx);
 
     proj_context_destroy(ctx);
@@ -168,8 +168,8 @@ TEST(gie, cart_selftest) {
     b = proj_trans(P, PJ_FWD, obs[1]);
 
     n = proj_trans_generic(P, PJ_FWD, &(obs[0].lpz.lam), sz, 2,
-                           &(obs[0].lpz.phi), sz, 2, &(obs[0].lpz.z), sz, 2, 0,
-                           sz, 0);
+                           &(obs[0].lpz.phi), sz, 2, &(obs[0].lpz.z), sz, 2,
+                           nullptr, sz, 0);
     ASSERT_EQ(n, 2U);
 
     ASSERT_EQ(a.lpz.lam, obs[0].lpz.lam);
@@ -264,7 +264,7 @@ class gieTest : public ::testing::Test {
 TEST_F(gieTest, proj_create_crs_to_crs) {
     /* test proj_create_crs_to_crs() */
     auto P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "epsg:25832", "epsg:25833",
-                                    NULL);
+                                    nullptr);
     ASSERT_TRUE(P != nullptr);
     PJ_COORD a, b;
 
@@ -288,7 +288,7 @@ TEST_F(gieTest, proj_create_crs_to_crs) {
 
     /* we can also allow PROJ strings as a usable PJ */
     P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "proj=utm +zone=32 +datum=WGS84",
-                               "proj=utm +zone=33 +datum=WGS84", NULL);
+                               "proj=utm +zone=33 +datum=WGS84", nullptr);
     ASSERT_TRUE(P != nullptr);
     proj_destroy(P);
 
@@ -303,7 +303,7 @@ TEST_F(gieTest, proj_create_crs_to_crs) {
 TEST_F(gieTest, proj_create_crs_to_crs_EPSG_4326) {
 
     auto P =
-        proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4326", "EPSG:32631", NULL);
+        proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4326", "EPSG:32631", nullptr);
     ASSERT_TRUE(P != nullptr);
     PJ_COORD a, b;
 
@@ -327,7 +327,7 @@ TEST_F(gieTest, proj_create_crs_to_crs_EPSG_4326) {
 TEST_F(gieTest, proj_create_crs_to_crs_proj_longlat) {
 
     auto P = proj_create_crs_to_crs(
-        PJ_DEFAULT_CTX, "+proj=longlat +datum=WGS84", "EPSG:32631", NULL);
+        PJ_DEFAULT_CTX, "+proj=longlat +datum=WGS84", "EPSG:32631", nullptr);
     ASSERT_TRUE(P != nullptr);
     PJ_COORD a, b;
 
@@ -729,7 +729,7 @@ static void test_time(const char *args, double tol, double t_in, double t_exp) {
     PJ_COORD in, out;
     PJ *P = proj_create(PJ_DEFAULT_CTX, args);
 
-    ASSERT_TRUE(P != 0);
+    ASSERT_TRUE(P != nullptr);
 
     in = proj_coord(0.0, 0.0, 0.0, t_in);
 
@@ -741,7 +741,7 @@ static void test_time(const char *args, double tol, double t_in, double t_exp) {
 
     proj_destroy(P);
 
-    proj_log_level(NULL, PJ_LOG_NONE);
+    proj_log_level(nullptr, PJ_LOG_NONE);
 }
 
 // ---------------------------------------------------------------------------
@@ -773,7 +773,7 @@ static void test_date(const char *args, double tol, double t_in, double t_exp) {
     PJ_COORD in, out;
     PJ *P = proj_create(PJ_DEFAULT_CTX, args);
 
-    ASSERT_TRUE(P != 0);
+    ASSERT_TRUE(P != nullptr);
 
     in = proj_coord(0.0, 0.0, 0.0, t_in);
 
@@ -782,7 +782,7 @@ static void test_date(const char *args, double tol, double t_in, double t_exp) {
 
     proj_destroy(P);
 
-    proj_log_level(NULL, PJ_LOG_NONE);
+    proj_log_level(nullptr, PJ_LOG_NONE);
 }
 
 TEST(gie, unitconvert_selftest_date) {

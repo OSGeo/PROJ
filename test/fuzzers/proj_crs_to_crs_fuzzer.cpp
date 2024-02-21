@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
         return 0;
     } else {
         int nRet = 0;
-        void *buf = NULL;
+        void *buf = nullptr;
         int nLen = 0;
         FILE *f = fopen(argv[1], "rb");
         if (!f) {

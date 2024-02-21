@@ -44,30 +44,53 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 # Set warnings as variables, then store as cache options
 set(PROJ_common_WARN_FLAGS  # common only to GNU/Clang C/C++
   -Wall
+  -Wdate-time
+  -Werror=format-security
+  -Werror=vla
   -Wextra
-  -Wswitch
-  -Wshadow
-  -Wunused-parameter
-  -Wmissing-declarations
   -Wformat
-  -Wformat-security
+  -Wmissing-declarations
+  -Wshadow
+  -Wswitch
+  -Wunused-parameter
 )
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+  set(PROJ_common_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
+    -Wduplicated-cond
+    -Wduplicated-branches
+    -Wlogical-op
+  )
   set(PROJ_C_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Wmissing-prototypes
   )
   set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Weffc++
+    -Wextra-semi
+    # -Wold-style-cast
+    -Woverloaded-virtual
+    -Wzero-as-null-pointer-constant
   )
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
+  set(PROJ_common_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
+    -Wcomma
+    -Wdeprecated
+    -Wdocumentation -Wno-documentation-deprecated-sync
+    -Wfloat-conversion
+    -Wlogical-op-parentheses
+    # -Wweak-vtables
+  )
   set(PROJ_C_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Wmissing-prototypes
-    -Wfloat-conversion
     -Wc11-extensions
   )
   set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
-    -Wfloat-conversion
     -Weffc++
+    -Wextra-semi
+    # -Wold-style-cast
+    -Woverloaded-virtual
+    -Wshorten-64-to-32
+    -Wunused-private-field
+    -Wzero-as-null-pointer-constant
   )
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   add_definitions(/D_CRT_SECURE_NO_WARNINGS) # Eliminate deprecation warnings
