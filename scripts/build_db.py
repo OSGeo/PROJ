@@ -294,7 +294,7 @@ def create_datumensemble_transformations(proj_db_cursor):
                 # Insert a null transformation between the representative CRS of the datum ensemble
                 # and each representative CRS of its members.
                 crs_code, crs_name, crs_extent = find_crs_code_name_extent_from_geodetic_datum_code(proj_db_cursor, member_code)
-                assert crs_extent == ensemble_crs_extent or (crs_extent in (2830, 1262) and ensemble_crs_extent in (2830, 1262)), (ensemble_crs_code, ensemble_crs_name, ensemble_crs_extent, crs_code, crs_name, crs_extent)
+                assert crs_extent == ensemble_crs_extent or (crs_extent in (2830, 1262) and ensemble_crs_extent in (2830, 1262)) or (ensemble_crs_code == 4258 and ensemble_crs_extent == 4755 and crs_extent == 1298), (ensemble_crs_code, ensemble_crs_name, ensemble_crs_extent, crs_code, crs_name, crs_extent)
 
                 code = '%s_TO_%s' % (ensemble_crs_name, crs_name)
                 code = code.replace(' ', '')
