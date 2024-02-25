@@ -302,6 +302,7 @@ VALUES
 -- pt_dgt - DG Territorio
 ('DLx_ETRS89_geo.gsb','pt_dgt_DLx_ETRS89_geo.tif','DLx_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_DLx_ETRS89_geo.tif',1,1,NULL),
 ('D73_ETRS89_geo.gsb','pt_dgt_D73_ETRS89_geo.tif','D73_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_D73_ETRS89_geo.tif',1,1,NULL),
+('GeodPT08.dat','pt_dgt_GeodPT08.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/pt_dgt_GeodPT08.tif',1,1,NULL),
 
 -- se_lantmateriet - Sweden
 ('SWEN17_RH2000.gtx','se_lantmateriet_SWEN17_RH2000.tif','SWEN17_RH2000.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/se_lantmateriet_SWEN17_RH2000.tif',1,1,NULL),
