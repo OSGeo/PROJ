@@ -56,6 +56,7 @@ jobs:
                 id: cpp/non-https-url
     - name: Install dependencies
       run: |
+          sudo apt-get update
           sudo apt-get install -y ccache cmake g++ sqlite3 libsqlite3-dev libtiff-dev libcurl4-openssl-dev
     # cache the .ccache directory
     # key it on the runner os, build type, deps, and arch
