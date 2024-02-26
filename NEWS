@@ -1,3 +1,59 @@
+9.4.0 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Add support for transformations involving coordinate epoch changes
+   (PointMotionOperation), specifically for Canadian NAD83(CSRS)(#3884)
+
+ o SSL_OPTIONS: set SSL options on Curl library (#3936)
+
+ o Add support for unity builds (#3962)
+
+ o Added ability to install *.tif if present in data (#3970)
+
+ o createOperationsCompoundToGeog(): tune selection logic
+   when --grid-check known_available is specified (#3990)
+
+ o Increase CMake minimum version from 3.9 to 3.16 (#3997)
+
+ o CMake: use FetchContent to get googletest-1.12.1 (#4006)
+
+ o CMake: Replace custom FindSqlite3 with FindSQLite3 built-in (#4007)
+
+ o tpeqd: use numerically stable formula for computing the central angle
+   from (phi_1, lam_1) to (phi_2, lam_2) (#4009)
+
+ o Move content of proj_experimental.h to proj.h (#4019)
+
+ o Add +proj=mod_krovak projection method for Modified Krovak that
+   applies to S-JTSK/05 in the Czech Republic (#4021)
+
+ o PROJString formatter optimizer: simplify pipelines doing
+   [Modified]Krovak (South West) <--> [Modified]Krovak (East North)
+   by just doing an axis swap (#4034)
+
+ o +proj=gridshift: enhance to support grids referenced in projected CRS,
+   and with easting_offset/northing_offset corrections (#4038)
+
+ o Tune concatenated operation instanciation, reference CR2005 geoid for
+   Czechia and add (disabled by default) records for Czechia S-JTSK/05 based
+   transformations (#4044)
+
+ o Database: update to EPSG v11.004 (#4062)
+
+ Bug fixes
+ ---------
+
+ o Fix missing symbols at link time for Windows target in Visual Studio (#3984)
+
+ o Improve error message in axisswap (#3975)
+
+ o Avoid convergence errors in +proj=gridshift when using biquadratic
+    interpolation (#3985)
+
+
 9.3.1 Release Notes
 -------------------
 
