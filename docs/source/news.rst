@@ -3,6 +3,51 @@
 News
 ###############################################################################
 
+9.4.0 Release Notes
+++++++++++++++++++++
+*March 1st 2024*
+
+Updates
+-------
+
+* Add support for transformations involving coordinate epoch changes (PointMotionOperation), specifically for Canadian NAD83(CSRS)(`#3884 <https://github.com/OSGeo/PROJ/issues/3884>`_)
+
+* :envvar:`SSL_OPTIONS`: set SSL options on Curl library (`#3936 <https://github.com/OSGeo/PROJ/issues/3936>`_)
+
+* Add support for unity builds (`#3962 <https://github.com/OSGeo/PROJ/issues/3962>`_)
+
+* Added ability to install ``*.tif`` if present in data (`#3970 <https://github.com/OSGeo/PROJ/issues/3970>`_)
+
+* ``createOperationsCompoundToGeog()``: tune selection logic when ``--grid-check`` known_available is specified (`#3990 <https://github.com/OSGeo/PROJ/issues/3990>`_)
+
+* Increase CMake minimum version from 3.9 to 3.16 (`#3997 <https://github.com/OSGeo/PROJ/issues/3997>`_)
+
+* CMake: use FetchContent to get googletest-1.12.1 (`#4006 <https://github.com/OSGeo/PROJ/issues/4006>`_)
+
+* CMake: Replace custom FindSqlite3 with FindSQLite3 built-in (`#4007 <https://github.com/OSGeo/PROJ/issues/4007>`_)
+
+* tpeqd: use numerically stable formula for computing the central angle from (phi_1, lam_1) to (phi_2, lam_2) (`#4009 <https://github.com/OSGeo/PROJ/issues/4009>`_)
+
+* Move content of ``proj_experimental.h`` to ``proj.h`` (`#4019 <https://github.com/OSGeo/PROJ/issues/4019>`_)
+
+* Add ``+proj=mod_krovak`` projection method for Modified Krovak that applies to S-JTSK/05 in the Czech Republic (`#4021 <https://github.com/OSGeo/PROJ/issues/4021>`_)
+
+* PROJString formatter optimizer: simplify pipelines doing [Modified]Krovak (South West) <--> [Modified]Krovak (East North) by just doing an axis swap (`#4034 <https://github.com/OSGeo/PROJ/issues/4034>`_)
+
+* ``+proj=gridshift``: enhance to support grids referenced in projected CRS, and with easting_offset/northing_offset corrections (`#4038 <https://github.com/OSGeo/PROJ/issues/4038>`_)
+
+* Tune concatenated operation instanciation, reference CR2005 geoid for Czechia and add (disabled by default) records for Czechia S-JTSK/05 based transformations (`#4044 <https://github.com/OSGeo/PROJ/issues/4044>`_)
+
+* Database: update to EPSG v11.004 (`#4062 <https://github.com/OSGeo/PROJ/issues/4062>`_)
+
+Bug fixes
+---------
+
+* Fix missing symbols at link time for Windows target in Visual Studio (`#3984 <https://github.com/OSGeo/PROJ/issues/3984>`_)
+
+* Improve error message in axisswap (`#3975 <https://github.com/OSGeo/PROJ/issues/3975>`_)
+
+* Avoid convergence errors in ``+proj=gridshift`` when using biquadratic interpolation (`#3985 <https://github.com/OSGeo/PROJ/issues/3985>`_)
 
 9.3.1 Release Notes
 ++++++++++++++++++++
