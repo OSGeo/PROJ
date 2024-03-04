@@ -177,9 +177,9 @@ See step 1.6 above. Do not rename the archives with RC postfixes.
   - Add the release notes from `NEWS.md` to `docs/source/news.rst`
 
     These vim substitutions are helpfull when converting NEWS.md to rst:
-
-    :s!(\#\(\d\{4}\))!(`\#\1 <https://github.com/OSGeo/PROJ/issues/\1>`_)!
-
+```
+:s!(\#\(\d\{4}\))!(`\#\1 <https://github.com/OSGeo/PROJ/issues/\1>`_)!
+```
   - Update download links in `docs/source/download.rst`
 
 
