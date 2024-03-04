@@ -58,7 +58,7 @@ to master.
 1.3 Write release notes
 -------------------------------------------------------------------------------
 
-Update `NEWS` with descriptions of the changes since the last release.
+Update `NEWS.md` with descriptions of the changes since the last release.
 Hopefully issues and pull requests that go into the new release have been
 properly tagged with the milestone for the current release.
 
@@ -174,12 +174,11 @@ See step 1.6 above. Do not rename the archives with RC postfixes.
 2.2 Update website
 ------------------------------------------------------------------------------
 
-  - Add the release notes from `NEWS` to `docs/source/news.rst`
+  - Add the release notes from `NEWS.md` to `docs/source/news.rst`
 
-    These vim substitutions are helpfull when converting NEWS to rst:
+    These vim substitutions are helpfull when converting NEWS.md to rst:
 
     :s!(\#\(\d\{4}\))!(`\#\1 <https://github.com/OSGeo/PROJ/issues/\1>`_)!
-    :s/^o/*/
 
   - Update download links in `docs/source/download.rst`
 
@@ -204,7 +203,7 @@ git push --tags
 
 When the new tag is pushed upstream GitHub picks up that a new release has been
 issued. Update the new release on https://github.com/OSGeo/PROJ/releases with
-the release notes from `NEWS` and add the prepared source distribution archives
+the release notes from `NEWS.md` and add the prepared source distribution archives
 to the release (otherwise GitHub will just package the entire repository - we
 don't want that).
 

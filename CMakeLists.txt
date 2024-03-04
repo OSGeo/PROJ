@@ -364,7 +364,7 @@ if(BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
-set(docfiles COPYING NEWS AUTHORS)
+set(docfiles COPYING NEWS.md AUTHORS)
 install(FILES ${docfiles}
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
