@@ -403,7 +403,7 @@ set(CPACK_SOURCE_IGNORE_FILES
   /Dockerfile
   /docs/
   /Doxyfile
-  /HOWTO-RELEASE
+  /HOWTO-RELEASE.md
   /m4/lt*
   /m4/libtool*
   /media/
