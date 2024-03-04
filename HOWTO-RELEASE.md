@@ -47,9 +47,9 @@ https://community.kde.org/Policies/Binary_Compatibility_Issues_With_C%2B%2B
 Man pages are (mostly) automatically generated from the Sphinx docs. Follow
 these steps:
 
-    - Temporarily update `version` and `data_version` in `docs/source/conf.py`
-    - run `scripts/update_man.sh`
-    - Revert version number in `docs/source/conf.py`
+  - Temporarily update `version` and `data_version` in `docs/source/conf.py`
+  - run `scripts/update_man.sh`
+  - Revert version number in `docs/source/conf.py`
 
 The `update_man.sh` script builds the man pages and commits the update man pages
 to master.
@@ -243,11 +243,11 @@ of the release.*
 
 Edit the Sphinx configuration docs/source/conf.py with these changes:
 
-    - Set "version" to the major project version, e.g. "9.2"
-    - Set "release" to the full project version, e.g. "9.2.1"
-    - Set "data_version" to the PROJ-data version
-    - Set "today_date = date(Y, M, D)" using the release date
-    - set "github_version" to the maintenance branch label, e.g. "9.2"
+  - Set "version" to the major project version, e.g. "9.2"
+  - Set "release" to the full project version, e.g. "9.2.1"
+  - Set "data_version" to the PROJ-data version
+  - Set "today_date = date(Y, M, D)" using the release date
+  - set "github_version" to the maintenance branch label, e.g. "9.2"
 
 HTML and PDF documentation is built using ReadTheDocs, which supports multiple
 versions. Versions are based on branch labels, e.g. "9.2". To modify settings,
