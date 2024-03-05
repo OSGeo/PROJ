@@ -40,6 +40,8 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#define PJ_LIB_
+
 #include "proj_internal.h"
 #include <math.h>
 
@@ -105,12 +107,15 @@ PROJ_HEAD(cart, "Geodetic/cartesian conversions");
 /*********************************************************************/
 static double normal_radius_of_curvature(double a, double es, double sinphi) {
     /*********************************************************************/
-    if (es == 0)
-        return a;
+    /*Faster without this optimisation** if (es == 0)
+        return a;*/
     /* This is from WP.  HM formula 2-149 gives an a,b version */
     return a / sqrt(1 - es * sinphi * sinphi);
 }
 
+inline double invhypot(const double x, const double y) {
+  return 1.0 / sqrt(x*x + y*y);
+}
 /*********************************************************************/
 static double geocentric_radius(double a, double b, double cosphi,
                                 double sinphi) {
@@ -121,8 +126,8 @@ static double geocentric_radius(double a, double b, double cosphi,
         This is from WP2, but uses hypot() for potentially better
         numerical robustness
     ***********************************************************************/
-    return hypot(a * a * cosphi, b * b * sinphi) /
-           hypot(a * cosphi, b * sinphi);
+    return hypot(a * a * cosphi, b *  b * sinphi) *
+       invhypot(a * cosphi, b * sinphi);
 }
 
 /*********************************************************************/
@@ -160,16 +165,16 @@ static PJ_LPZ geodetic(PJ_XYZ cart, PJ *P) {
 #else
     const double y_theta = cart.z * P->a;
     const double x_theta = p * P->b;
-    const double norm = hypot(y_theta, x_theta);
-    const double c = norm == 0 ? 1 : x_theta / norm;
-    const double s = norm == 0 ? 0 : y_theta / norm;
+    const double invnorm = invhypot(y_theta, x_theta);
+    const double c = (y_theta==0 && x_theta==0)? 1 : x_theta * invnorm;
+    const double s = (y_theta==0 && x_theta==0)? 0 : y_theta * invnorm;
 #endif
 
     const double y_phi = cart.z + P->e2s * P->b * s * s * s;
     const double x_phi = p - P->es * P->a * c * c * c;
-    const double norm_phi = hypot(y_phi, x_phi);
-    double cosphi = norm_phi == 0 ? 1 : x_phi / norm_phi;
-    double sinphi = norm_phi == 0 ? 0 : y_phi / norm_phi;
+    const double invnorm_phi = invhypot(y_phi, x_phi);
+    double cosphi = (y_phi==0 && x_phi==0)? 1 : x_phi * invnorm_phi;
+    double sinphi = (y_phi==0 && x_phi==0)? 0 : y_phi * invnorm_phi;
     if (x_phi <= 0) {
         // this happen on non-sphere ellipsoid when x,y,z is very close to 0
         // there is no single solution to the cart->geodetic conversion in
@@ -222,7 +227,7 @@ static PJ_LP cart_reverse(PJ_XY xy, PJ *P) {
 }
 
 /*********************************************************************/
-PJ *PJ_CONVERSION(cart, 1) {
+PJ *CONVERSION(cart, 1) {
     /*********************************************************************/
     P->fwd3d = cartesian;
     P->inv3d = geodetic;
