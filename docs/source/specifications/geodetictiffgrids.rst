@@ -212,10 +212,16 @@ is an easy way to inspect such grid files:
     Values recognized by PROJ currently are:
 
     - ``HORIZONTAL_OFFSET``: implies the presence of at least two samples.
-      The first sample must contain the latitude offset and the second
-      sample must contain the longitude offset. The offset may also be expressed
-      as a speed per year for temporal gridshifting.
-      Corresponds to PROJ :ref:`hgridshift` method.
+      For grids referenced in geographic coordinates, the first sample must
+      contain the latitude offset and the second sample must contain the
+      longitude offset.
+      For grids referenced in projected coordinates (supported since PROJ 9.4),
+      the first sample must contain the easting offset and the second sample
+      must contain the northing offset.
+      The offset may also be expressed as a speed per year for temporal gridshifting.
+      Corresponds to PROJ :ref:`hgridshift` (only for grids referenced in
+      geographic coordinates) and :ref:`gridshift` methods (for grids referenced
+      both in geographic and projected coordinates)
 
     - ``GEOGRAPHIC_3D_OFFSET``: implies the presence of at least 3 samples.
       The first sample must contain the latitude offset, the second
@@ -277,6 +283,14 @@ is an easy way to inspect such grid files:
       GEOGRAPHIC_3D_OFFSET . Sample values should be
       the value to add a longitude expressed in the CRS encoded in the GeoKeys
       to obtain a longitude value expressed in the target CRS.
+
+    + ``easting_offset``: valid for TYPE=HORIZONTAL_OFFSET. Sample values should be
+      the value to add a easting expressed in the CRS encoded in the GeoKeys
+      to obtain a easting value expressed in the target CRS.
+
+    + ``northing_offset``: valid for TYPE=HORIZONTAL_OFFSET. Sample values should be
+      the value to add a northing expressed in the CRS encoded in the GeoKeys
+      to obtain a northing value expressed in the target CRS.
 
     + ``ellipsoidal_height_offset``: valid for TYPE=ELLIPSOIDAL_HEIGHT_OFFSET or
       GEOGRAPHIC_3D_OFFSET . Sample values should be the value to add to the
@@ -382,6 +396,19 @@ is an easy way to inspect such grid files:
 
         <Item name="UNITTYPE" sample="0" role="unittype">arc-second</Item>
         <Item name="UNITTYPE" sample="1" role="unittype">arc-second</Item>
+
+  * For grids with TYPE=HORIZONTAL_OFFSET and with a ``easting_offset`` and
+    ``northing_offset`` channel, an extra offset to apply after the grid correction
+    in the forward direction of the transformation can be specified with a
+    ``constant_offset`` metadata item, expressed in the same units as the grid
+    values (only metre supported at the moment).
+
+    Example:
+
+    .. code-block:: xml
+
+        <Item name="constant_offset" sample="0">-5000000</Item>
+        <Item name="constant_offset" sample="1">-5000000</Item>
 
   * For TYPE=DEFORMATION_MODEL, the type of the displacement must be specified
     with a `Item` whose ``name`` is set to ``DISPLACEMENT_TYPE``.
