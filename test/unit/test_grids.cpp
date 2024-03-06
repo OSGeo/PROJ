@@ -195,7 +195,8 @@ TEST_F(GridTest, GenericShiftGridSet_gtiff) {
     EXPECT_TRUE(grid->valueAt(0, 1, 0, out));
     EXPECT_EQ(out, 0.19718019664287567139f);
     int bandZero = 0;
-    EXPECT_TRUE(grid->valuesAt(0, 0, 1, 1, 1, &bandZero, &out));
+    bool nodataFound = false;
+    EXPECT_TRUE(grid->valuesAt(0, 0, 1, 1, 1, &bandZero, &out, nodataFound));
     EXPECT_EQ(out, 0.20783890783786773682f);
     constexpr int COUNT_X = 2;
     constexpr int COUNT_Y = 4;
@@ -205,7 +206,7 @@ TEST_F(GridTest, GenericShiftGridSet_gtiff) {
     constexpr int OFFSET_X = 2;
     constexpr int OFFSET_Y = 1;
     EXPECT_TRUE(grid->valuesAt(OFFSET_X, OFFSET_Y, COUNT_X, COUNT_Y,
-                               COUNT_BANDS, bands, values));
+                               COUNT_BANDS, bands, values, nodataFound));
     int valuesIdx = 0;
     for (int y = 0; y < COUNT_Y; ++y) {
         for (int x = 0; x < COUNT_X; ++x) {
@@ -251,7 +252,8 @@ TEST_F(GridTest, GenericShiftGridSet_gtiff_valuesAt_tiled_optim) {
     EXPECT_TRUE(grid->valueAt(0, 1, 0, out));
     EXPECT_EQ(out, 0.19718019664287567139f);
     int bandZero = 0;
-    EXPECT_TRUE(grid->valuesAt(0, 0, 1, 1, 1, &bandZero, &out));
+    bool nodataFound = false;
+    EXPECT_TRUE(grid->valuesAt(0, 0, 1, 1, 1, &bandZero, &out, nodataFound));
     EXPECT_EQ(out, 0.20783890783786773682f);
     constexpr int COUNT_X = 2;
     constexpr int COUNT_Y = 4;
@@ -261,7 +263,7 @@ TEST_F(GridTest, GenericShiftGridSet_gtiff_valuesAt_tiled_optim) {
     constexpr int OFFSET_X = 2;
     constexpr int OFFSET_Y = 1;
     EXPECT_TRUE(grid->valuesAt(OFFSET_X, OFFSET_Y, COUNT_X, COUNT_Y,
-                               COUNT_BANDS_THREE, bands, values));
+                               COUNT_BANDS_THREE, bands, values, nodataFound));
     for (int y = 0, valuesIdx = 0; y < COUNT_Y; ++y) {
         for (int x = 0; x < COUNT_X; ++x) {
             for (int band = 0; band < COUNT_BANDS_THREE; ++band) {
@@ -275,7 +277,7 @@ TEST_F(GridTest, GenericShiftGridSet_gtiff_valuesAt_tiled_optim) {
 
     constexpr int COUNT_BANDS_TWO = 2;
     EXPECT_TRUE(grid->valuesAt(OFFSET_X, OFFSET_Y, COUNT_X, COUNT_Y,
-                               COUNT_BANDS_TWO, bands, values));
+                               COUNT_BANDS_TWO, bands, values, nodataFound));
     for (int y = 0, valuesIdx = 0; y < COUNT_Y; ++y) {
         for (int x = 0; x < COUNT_X; ++x) {
             for (int band = 0; band < COUNT_BANDS_TWO; ++band) {

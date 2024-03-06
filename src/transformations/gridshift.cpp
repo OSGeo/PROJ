@@ -25,6 +25,10 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#ifndef FROM_PROJ_CPP
+#define FROM_PROJ_CPP
+#endif
+
 #include <errno.h>
 #include <mutex>
 #include <stddef.h>
@@ -32,30 +36,43 @@
 #include <time.h>
 
 #include "grids.hpp"
+#include "proj/internal/internal.hpp"
 #include "proj_internal.h"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <map>
+#include <utility>
 
 PROJ_HEAD(gridshift, "Generic grid shift");
 
 static std::mutex gMutex{};
-static std::set<std::string> gKnownGrids{};
+// Map of (name, isProjected)
+static std::map<std::string, bool> gKnownGrids{};
 
 using namespace NS_PROJ;
 
 namespace { // anonymous namespace
 
+struct IXY {
+    int32_t x, y;
+
+    inline bool operator!=(const IXY &other) const {
+        return x != other.x || y != other.y;
+    }
+};
+
 struct GridInfo {
-    int idxSampleLat = -1;
-    int idxSampleLong = -1;
+    int idxSampleX = -1;
+    int idxSampleY = -1;
     int idxSampleZ = -1;
+    bool eastingNorthingOffset = false;
     bool bilinearInterpolation = true;
     std::vector<float> shifts;
-    std::vector<int> idxSampleLatLongZ{-1, -1, -1};
-    int lastIdxLam = -1;
-    int lastIdxPhi = -1;
+    bool swapXYInRes = false;
+    std::vector<int> idxSampleXYZ{-1, -1, -1};
+    IXY lastIdxXY = IXY{-1, -1};
 };
 
 // ---------------------------------------------------------------------------
@@ -75,31 +92,54 @@ struct gridshiftData {
     std::string m_interpolation{};
     std::map<const GenericShiftGrid *, GridInfo> m_cacheGridInfo{};
 
-    bool checkGridTypes(PJ *P);
+    //! Offset in X to add in the forward direction, after the correction
+    // has been applied. (and reciprocally to subtract in the inverse direction
+    // before reading the grid). Used typically for the S-JTSK --> S-JTSK/05
+    // grid
+    double m_offsetX = 0;
+
+    //! Offset in Y to add in the forward direction, after the correction
+    // has been applied. (and reciprocally to subtract in the inverse direction
+    // before reading the grid). Used typically for the S-JTSK --> S-JTSK/05
+    // grid
+    double m_offsetY = 0;
+
+    bool checkGridTypes(PJ *P, bool &isProjectedCoord);
+    bool loadGridsIfNeeded(PJ *P);
     const GenericShiftGrid *findGrid(const std::string &type,
-                                     const PJ_LPZ &input,
+                                     const PJ_XYZ &input,
                                      GenericShiftGridSet *&gridSetOut) const;
-    PJ_LPZ grid_interpolate(PJ_CONTEXT *ctx, const std::string &type, PJ_LP lp,
+    PJ_XYZ grid_interpolate(PJ_CONTEXT *ctx, const std::string &type, PJ_XY xy,
                             const GenericShiftGrid *grid,
                             bool &biquadraticInterpolationOut);
-    PJ_LPZ grid_apply_internal(PJ_CONTEXT *ctx, const std::string &type,
-                               bool isVerticalOnly, const PJ_LPZ in,
+    PJ_XYZ grid_apply_internal(PJ_CONTEXT *ctx, const std::string &type,
+                               bool isVerticalOnly, const PJ_XYZ in,
                                PJ_DIRECTION direction,
                                const GenericShiftGrid *grid,
                                GenericShiftGridSet *gridset, bool &shouldRetry);
 
-    PJ_LPZ apply(PJ *P, PJ_DIRECTION dir, PJ_LPZ lpz);
+    PJ_XYZ apply(PJ *P, PJ_DIRECTION dir, PJ_XYZ xyz);
 };
 
 // ---------------------------------------------------------------------------
 
-bool gridshiftData::checkGridTypes(PJ *P) {
+bool gridshiftData::checkGridTypes(PJ *P, bool &isProjectedCoord) {
+    std::string offsetX, offsetY;
+    int gridCount = 0;
+    isProjectedCoord = false;
     for (const auto &gridset : m_grids) {
         for (const auto &grid : gridset->grids()) {
+            ++gridCount;
             const auto &type = grid->metadataItem("TYPE");
-            if (type == "HORIZONTAL_OFFSET")
+            if (type == "HORIZONTAL_OFFSET") {
                 m_bHasHorizontalOffset = true;
-            else if (type == "GEOGRAPHIC_3D_OFFSET")
+                if (offsetX.empty()) {
+                    offsetX = grid->metadataItem("constant_offset", 0);
+                }
+                if (offsetY.empty()) {
+                    offsetY = grid->metadataItem("constant_offset", 1);
+                }
+            } else if (type == "GEOGRAPHIC_3D_OFFSET")
                 m_bHasGeographic3DOffset = true;
             else if (type == "ELLIPSOIDAL_HEIGHT_OFFSET")
                 m_bHasEllipsoidalHeightOffset = true;
@@ -115,6 +155,29 @@ bool gridshiftData::checkGridTypes(PJ *P) {
                     P, _("Unhandled value for TYPE metadata item in grid(s)."));
                 return false;
             }
+
+            isProjectedCoord = !grid->extentAndRes().isGeographic;
+        }
+    }
+
+    if (!offsetX.empty() || !offsetY.empty()) {
+        if (gridCount > 1) {
+            // Makes life easier...
+            proj_log_error(P, _("Shift offset found in one grid. Only one grid "
+                                "with shift offset is supported at a time."));
+            return false;
+        }
+        try {
+            m_offsetX = osgeo::proj::internal::c_locale_stod(offsetX);
+        } catch (const std::exception &) {
+            proj_log_error(P, _("Invalid offset value"));
+            return false;
+        }
+        try {
+            m_offsetY = osgeo::proj::internal::c_locale_stod(offsetY);
+        } catch (const std::exception &) {
+            proj_log_error(P, _("Invalid offset value"));
+            return false;
         }
     }
 
@@ -158,10 +221,10 @@ bool gridshiftData::checkGridTypes(PJ *P) {
 // ---------------------------------------------------------------------------
 
 const GenericShiftGrid *
-gridshiftData::findGrid(const std::string &type, const PJ_LPZ &input,
+gridshiftData::findGrid(const std::string &type, const PJ_XYZ &input,
                         GenericShiftGridSet *&gridSetOut) const {
     for (const auto &gridset : m_grids) {
-        auto grid = gridset->gridAt(type, input.lam, input.phi);
+        auto grid = gridset->gridAt(type, input.x, input.y);
         if (grid) {
             gridSetOut = gridset.get();
             return grid;
@@ -172,42 +235,58 @@ gridshiftData::findGrid(const std::string &type, const PJ_LPZ &input,
 
 // ---------------------------------------------------------------------------
 
-typedef struct {
-    int32_t lam, phi;
-} ILP;
-
 #define REL_TOLERANCE_HGRIDSHIFT 1e-5
 
-PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
-                                       PJ_LP lp, const GenericShiftGrid *grid,
+PJ_XYZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
+                                       PJ_XY xy, const GenericShiftGrid *grid,
                                        bool &biquadraticInterpolationOut) {
-    PJ_LPZ val;
+    PJ_XYZ val;
 
-    val.lam = val.phi = HUGE_VAL;
+    val.x = val.y = HUGE_VAL;
     val.z = 0;
 
+    const bool isProjectedCoord = !grid->extentAndRes().isGeographic;
     auto iterCache = m_cacheGridInfo.find(grid);
     if (iterCache == m_cacheGridInfo.end()) {
+        bool eastingNorthingOffset = false;
         const auto samplesPerPixel = grid->samplesPerPixel();
-        int idxSampleLat = -1;
-        int idxSampleLong = -1;
+        int idxSampleY = -1;
+        int idxSampleX = -1;
         int idxSampleZ = -1;
         for (int i = 0; i < samplesPerPixel; i++) {
             const auto desc = grid->description(i);
-            if (desc == "latitude_offset") {
-                idxSampleLat = i;
-                const auto unit = grid->unit(idxSampleLat);
+            if (!isProjectedCoord && desc == "latitude_offset") {
+                idxSampleY = i;
+                const auto unit = grid->unit(idxSampleY);
                 if (!unit.empty() && unit != "arc-second") {
                     pj_log(ctx, PJ_LOG_ERROR,
                            "gridshift: Only unit=arc-second currently handled");
                     return val;
                 }
-            } else if (desc == "longitude_offset") {
-                idxSampleLong = i;
-                const auto unit = grid->unit(idxSampleLong);
+            } else if (!isProjectedCoord && desc == "longitude_offset") {
+                idxSampleX = i;
+                const auto unit = grid->unit(idxSampleX);
                 if (!unit.empty() && unit != "arc-second") {
                     pj_log(ctx, PJ_LOG_ERROR,
                            "gridshift: Only unit=arc-second currently handled");
+                    return val;
+                }
+            } else if (isProjectedCoord && desc == "easting_offset") {
+                eastingNorthingOffset = true;
+                idxSampleX = i;
+                const auto unit = grid->unit(idxSampleX);
+                if (!unit.empty() && unit != "metre") {
+                    pj_log(ctx, PJ_LOG_ERROR,
+                           "gridshift: Only unit=metre currently handled");
+                    return val;
+                }
+            } else if (isProjectedCoord && desc == "northing_offset") {
+                eastingNorthingOffset = true;
+                idxSampleY = i;
+                const auto unit = grid->unit(idxSampleY);
+                if (!unit.empty() && unit != "metre") {
+                    pj_log(ctx, PJ_LOG_ERROR,
+                           "gridshift: Only unit=metre currently handled");
                     return val;
                 }
             } else if (desc == "ellipsoidal_height_offset" ||
@@ -222,13 +301,23 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
                 }
             }
         }
-        if (samplesPerPixel >= 2 && idxSampleLat < 0 && idxSampleLong < 0 &&
+        if (samplesPerPixel >= 2 && idxSampleY < 0 && idxSampleX < 0 &&
             type == "HORIZONTAL_OFFSET") {
-            idxSampleLat = 0;
-            idxSampleLong = 1;
+            if (isProjectedCoord) {
+                eastingNorthingOffset = true;
+                idxSampleX = 0;
+                idxSampleY = 1;
+            } else {
+                // X=longitude assumed to be the second component if metadata
+                // lacking
+                idxSampleX = 1;
+                // Y=latitude assumed to be the first component if metadata
+                // lacking
+                idxSampleY = 0;
+            }
         }
         if (type == "HORIZONTAL_OFFSET" || type == "GEOGRAPHIC_3D_OFFSET") {
-            if (idxSampleLat < 0 || idxSampleLong < 0) {
+            if (idxSampleY < 0 || idxSampleX < 0) {
                 pj_log(ctx, PJ_LOG_ERROR,
                        "gridshift: grid has not expected samples");
                 return val;
@@ -258,121 +347,123 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
         }
 
         GridInfo gridInfo;
-        gridInfo.idxSampleLat = idxSampleLat;
-        gridInfo.idxSampleLong = idxSampleLong;
+        gridInfo.idxSampleX = idxSampleX;
+        gridInfo.idxSampleY = idxSampleY;
         gridInfo.idxSampleZ = m_skip_z_transform ? -1 : idxSampleZ;
+        gridInfo.eastingNorthingOffset = eastingNorthingOffset;
         gridInfo.bilinearInterpolation =
             (interpolation == "bilinear" || grid->width() < 3 ||
              grid->height() < 3);
         gridInfo.shifts.resize(3 * 3 * 3);
-        gridInfo.idxSampleLatLongZ[0] = idxSampleLat;
-        gridInfo.idxSampleLatLongZ[1] = idxSampleLong;
-        gridInfo.idxSampleLatLongZ[2] = idxSampleZ;
+        if (idxSampleX == 1 && idxSampleY == 0) {
+            // Little optimization for the common of grids storing shifts in
+            // latitude, longitude, in that order.
+            // We want to request data in the order it is stored in the grid,
+            // which triggers a read optimization.
+            // But we must compensate for that by switching the role of x and y
+            // after computation.
+            gridInfo.swapXYInRes = true;
+            gridInfo.idxSampleXYZ[0] = 0;
+            gridInfo.idxSampleXYZ[1] = 1;
+        } else {
+            gridInfo.idxSampleXYZ[0] = idxSampleX;
+            gridInfo.idxSampleXYZ[1] = idxSampleY;
+        }
+        gridInfo.idxSampleXYZ[2] = idxSampleZ;
         iterCache = m_cacheGridInfo.emplace(grid, std::move(gridInfo)).first;
     }
     GridInfo &gridInfo = iterCache->second;
-    const int idxSampleLat = gridInfo.idxSampleLat;
-    const int idxSampleLong = gridInfo.idxSampleLong;
+    const int idxSampleX = gridInfo.idxSampleX;
+    const int idxSampleY = gridInfo.idxSampleY;
     const int idxSampleZ = gridInfo.idxSampleZ;
     const bool bilinearInterpolation = gridInfo.bilinearInterpolation;
     biquadraticInterpolationOut = !bilinearInterpolation;
 
-    ILP indx;
+    IXY indxy;
     const auto &extent = grid->extentAndRes();
-    double lam = (lp.lam - extent.west) / extent.resX;
-    indx.lam = std::isnan(lam) ? 0 : (int32_t)lround(floor(lam));
-    double phi = (lp.phi - extent.south) / extent.resY;
-    indx.phi = std::isnan(phi) ? 0 : (int32_t)lround(floor(phi));
+    double x = (xy.x - extent.west) / extent.resX;
+    indxy.x = std::isnan(x) ? 0 : (int32_t)lround(floor(x));
+    double y = (xy.y - extent.south) / extent.resY;
+    indxy.y = std::isnan(y) ? 0 : (int32_t)lround(floor(y));
 
-    PJ_LP frct;
-    frct.lam = lam - indx.lam;
-    frct.phi = phi - indx.phi;
+    PJ_XY frct;
+    frct.x = x - indxy.x;
+    frct.y = y - indxy.y;
     int tmpInt;
-    if (indx.lam < 0) {
-        if (indx.lam == -1 && frct.lam > 1 - 10 * REL_TOLERANCE_HGRIDSHIFT) {
-            ++indx.lam;
-            frct.lam = 0.;
+    if (indxy.x < 0) {
+        if (indxy.x == -1 && frct.x > 1 - 10 * REL_TOLERANCE_HGRIDSHIFT) {
+            ++indxy.x;
+            frct.x = 0.;
         } else
             return val;
-    } else if ((tmpInt = indx.lam + 1) >= grid->width()) {
-        if (tmpInt == grid->width() &&
-            frct.lam < 10 * REL_TOLERANCE_HGRIDSHIFT) {
-            --indx.lam;
-            frct.lam = 1.;
+    } else if ((tmpInt = indxy.x + 1) >= grid->width()) {
+        if (tmpInt == grid->width() && frct.x < 10 * REL_TOLERANCE_HGRIDSHIFT) {
+            --indxy.x;
+            frct.x = 1.;
         } else
             return val;
     }
-    if (indx.phi < 0) {
-        if (indx.phi == -1 && frct.phi > 1 - 10 * REL_TOLERANCE_HGRIDSHIFT) {
-            ++indx.phi;
-            frct.phi = 0.;
+    if (indxy.y < 0) {
+        if (indxy.y == -1 && frct.y > 1 - 10 * REL_TOLERANCE_HGRIDSHIFT) {
+            ++indxy.y;
+            frct.y = 0.;
         } else
             return val;
-    } else if ((tmpInt = indx.phi + 1) >= grid->height()) {
+    } else if ((tmpInt = indxy.y + 1) >= grid->height()) {
         if (tmpInt == grid->height() &&
-            frct.phi < 10 * REL_TOLERANCE_HGRIDSHIFT) {
-            --indx.phi;
-            frct.phi = 1.;
+            frct.y < 10 * REL_TOLERANCE_HGRIDSHIFT) {
+            --indxy.y;
+            frct.y = 1.;
         } else
             return val;
     }
 
-    constexpr double convFactorLatLong = 1. / 3600 / 180 * M_PI;
+    bool nodataFound = false;
     if (bilinearInterpolation) {
-        double m10 = frct.lam;
+        double m10 = frct.x;
         double m11 = m10;
-        double m01 = 1. - frct.lam;
+        double m01 = 1. - frct.x;
         double m00 = m01;
-        m11 *= frct.phi;
-        m01 *= frct.phi;
-        frct.phi = 1. - frct.phi;
-        m00 *= frct.phi;
-        m10 *= frct.phi;
-        if (idxSampleLong >= 0 && idxSampleLat >= 0) {
-            if (gridInfo.lastIdxPhi != indx.phi ||
-                gridInfo.lastIdxLam != indx.lam) {
-                if (!grid->valuesAt(indx.lam, indx.phi, 2, 2,
+        m11 *= frct.y;
+        m01 *= frct.y;
+        frct.y = 1. - frct.y;
+        m00 *= frct.y;
+        m10 *= frct.y;
+        if (idxSampleX >= 0 && idxSampleY >= 0) {
+            if (gridInfo.lastIdxXY != indxy) {
+                if (!grid->valuesAt(indxy.x, indxy.y, 2, 2,
                                     idxSampleZ >= 0 ? 3 : 2,
-                                    gridInfo.idxSampleLatLongZ.data(),
-                                    gridInfo.shifts.data())) {
+                                    gridInfo.idxSampleXYZ.data(),
+                                    gridInfo.shifts.data(), nodataFound) ||
+                    nodataFound) {
                     return val;
                 }
-                gridInfo.lastIdxPhi = indx.phi;
-                gridInfo.lastIdxLam = indx.lam;
+                gridInfo.lastIdxXY = indxy;
             }
             if (idxSampleZ >= 0) {
-                val.phi =
-                    (m00 * gridInfo.shifts[0] + m10 * gridInfo.shifts[3] +
-                     m01 * gridInfo.shifts[6] + m11 * gridInfo.shifts[9]) *
-                    convFactorLatLong;
-                val.lam =
-                    (m00 * gridInfo.shifts[1] + m10 * gridInfo.shifts[4] +
-                     m01 * gridInfo.shifts[7] + m11 * gridInfo.shifts[10]) *
-                    convFactorLatLong;
+                val.x = (m00 * gridInfo.shifts[0] + m10 * gridInfo.shifts[3] +
+                         m01 * gridInfo.shifts[6] + m11 * gridInfo.shifts[9]);
+                val.y = (m00 * gridInfo.shifts[1] + m10 * gridInfo.shifts[4] +
+                         m01 * gridInfo.shifts[7] + m11 * gridInfo.shifts[10]);
                 val.z = m00 * gridInfo.shifts[2] + m10 * gridInfo.shifts[5] +
                         m01 * gridInfo.shifts[8] + m11 * gridInfo.shifts[11];
             } else {
-                val.phi =
-                    (m00 * gridInfo.shifts[0] + m10 * gridInfo.shifts[2] +
-                     m01 * gridInfo.shifts[4] + m11 * gridInfo.shifts[6]) *
-                    convFactorLatLong;
-                val.lam =
-                    (m00 * gridInfo.shifts[1] + m10 * gridInfo.shifts[3] +
-                     m01 * gridInfo.shifts[5] + m11 * gridInfo.shifts[7]) *
-                    convFactorLatLong;
+                val.x = (m00 * gridInfo.shifts[0] + m10 * gridInfo.shifts[2] +
+                         m01 * gridInfo.shifts[4] + m11 * gridInfo.shifts[6]);
+                val.y = (m00 * gridInfo.shifts[1] + m10 * gridInfo.shifts[3] +
+                         m01 * gridInfo.shifts[5] + m11 * gridInfo.shifts[7]);
             }
         } else {
-            val.lam = 0;
-            val.phi = 0;
+            val.x = 0;
+            val.y = 0;
             if (idxSampleZ >= 0) {
-                if (gridInfo.lastIdxPhi != indx.phi ||
-                    gridInfo.lastIdxLam != indx.lam) {
-                    if (!grid->valuesAt(indx.lam, indx.phi, 2, 2, 1,
-                                        &idxSampleZ, gridInfo.shifts.data())) {
+                if (gridInfo.lastIdxXY != indxy) {
+                    if (!grid->valuesAt(indxy.x, indxy.y, 2, 2, 1, &idxSampleZ,
+                                        gridInfo.shifts.data(), nodataFound) ||
+                        nodataFound) {
                         return val;
                     }
-                    gridInfo.lastIdxPhi = indx.phi;
-                    gridInfo.lastIdxLam = indx.lam;
+                    gridInfo.lastIdxXY = indxy;
                 }
                 val.z = m00 * gridInfo.shifts[0] + m10 * gridInfo.shifts[1] +
                         m01 * gridInfo.shifts[2] + m11 * gridInfo.shifts[3];
@@ -383,106 +474,104 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
         // Cf https://geodesy.noaa.gov/library/pdfs/NOAA_TM_NOS_NGS_0084.pdf
         // Depending if we are before or after half-pixel, shift the 3x3 window
         // of interpolation
-        if ((frct.lam <= 0.5 && indx.lam > 0) ||
-            (indx.lam + 2 == grid->width())) {
-            indx.lam -= 1;
-            frct.lam += 1;
+        if ((frct.x <= 0.5 && indxy.x > 0) || (indxy.x + 2 == grid->width())) {
+            indxy.x -= 1;
+            frct.x += 1;
         }
-        if ((frct.phi <= 0.5 && indx.phi > 0) ||
-            (indx.phi + 2 == grid->height())) {
-            indx.phi -= 1;
-            frct.phi += 1;
+        if ((frct.y <= 0.5 && indxy.y > 0) || (indxy.y + 2 == grid->height())) {
+            indxy.y -= 1;
+            frct.y += 1;
         }
 
         // Port of qterp() Fortran function from NOAA
-        // x must be in [0,2] range
+        // xToInterp must be in [0,2] range
         // f0 must be f(0), f1 must be f(1), f2 must be f(2)
-        // Returns f(x) interpolated value along the parabolic function
-        const auto quadraticInterpol = [](double x, double f0, double f1,
-                                          double f2) {
+        // Returns f(xToInterp) interpolated value along the parabolic function
+        const auto quadraticInterpol = [](double xToInterp, double f0,
+                                          double f1, double f2) {
             const double df0 = f1 - f0;
             const double df1 = f2 - f1;
             const double d2f0 = df1 - df0;
-            return f0 + x * df0 + 0.5 * x * (x - 1.0) * d2f0;
+            return f0 + xToInterp * df0 +
+                   0.5 * xToInterp * (xToInterp - 1.0) * d2f0;
         };
 
-        if (idxSampleLong >= 0 && idxSampleLat >= 0) {
-            if (gridInfo.lastIdxPhi != indx.phi ||
-                gridInfo.lastIdxLam != indx.lam) {
-                if (!grid->valuesAt(indx.lam, indx.phi, 3, 3,
+        if (idxSampleX >= 0 && idxSampleY >= 0) {
+            if (gridInfo.lastIdxXY != indxy) {
+                if (!grid->valuesAt(indxy.x, indxy.y, 3, 3,
                                     idxSampleZ >= 0 ? 3 : 2,
-                                    gridInfo.idxSampleLatLongZ.data(),
-                                    gridInfo.shifts.data())) {
+                                    gridInfo.idxSampleXYZ.data(),
+                                    gridInfo.shifts.data(), nodataFound) ||
+                    nodataFound) {
                     return val;
                 }
-                gridInfo.lastIdxPhi = indx.phi;
-                gridInfo.lastIdxLam = indx.lam;
+                gridInfo.lastIdxXY = indxy;
             }
-            const float *shifts_ptr = gridInfo.shifts.data();
+            const auto *shifts_ptr = gridInfo.shifts.data();
             if (idxSampleZ >= 0) {
-                double latlonz_shift[3][4];
+                double xyz_shift[3][4];
                 for (int j = 0; j <= 2; ++j) {
-                    latlonz_shift[j][0] = quadraticInterpol(
-                        frct.lam, shifts_ptr[0], shifts_ptr[3], shifts_ptr[6]);
-                    latlonz_shift[j][1] = quadraticInterpol(
-                        frct.lam, shifts_ptr[1], shifts_ptr[4], shifts_ptr[7]);
-                    latlonz_shift[j][2] = quadraticInterpol(
-                        frct.lam, shifts_ptr[2], shifts_ptr[5], shifts_ptr[8]);
+                    xyz_shift[j][0] = quadraticInterpol(
+                        frct.x, shifts_ptr[0], shifts_ptr[3], shifts_ptr[6]);
+                    xyz_shift[j][1] = quadraticInterpol(
+                        frct.x, shifts_ptr[1], shifts_ptr[4], shifts_ptr[7]);
+                    xyz_shift[j][2] = quadraticInterpol(
+                        frct.x, shifts_ptr[2], shifts_ptr[5], shifts_ptr[8]);
                     shifts_ptr += 9;
                 }
-                val.phi = quadraticInterpol(frct.phi, latlonz_shift[0][0],
-                                            latlonz_shift[1][0],
-                                            latlonz_shift[2][0]) *
-                          convFactorLatLong;
-                val.lam = quadraticInterpol(frct.phi, latlonz_shift[0][1],
-                                            latlonz_shift[1][1],
-                                            latlonz_shift[2][1]) *
-                          convFactorLatLong;
-                val.z =
-                    quadraticInterpol(frct.phi, latlonz_shift[0][2],
-                                      latlonz_shift[1][2], latlonz_shift[2][2]);
+                val.x = quadraticInterpol(frct.y, xyz_shift[0][0],
+                                          xyz_shift[1][0], xyz_shift[2][0]);
+                val.y = quadraticInterpol(frct.y, xyz_shift[0][1],
+                                          xyz_shift[1][1], xyz_shift[2][1]);
+                val.z = quadraticInterpol(frct.y, xyz_shift[0][2],
+                                          xyz_shift[1][2], xyz_shift[2][2]);
             } else {
-                double latlon_shift[3][2];
+                double xy_shift[3][2];
                 for (int j = 0; j <= 2; ++j) {
-                    latlon_shift[j][0] = quadraticInterpol(
-                        frct.lam, shifts_ptr[0], shifts_ptr[2], shifts_ptr[4]);
-                    latlon_shift[j][1] = quadraticInterpol(
-                        frct.lam, shifts_ptr[1], shifts_ptr[3], shifts_ptr[5]);
+                    xy_shift[j][0] = quadraticInterpol(
+                        frct.x, shifts_ptr[0], shifts_ptr[2], shifts_ptr[4]);
+                    xy_shift[j][1] = quadraticInterpol(
+                        frct.x, shifts_ptr[1], shifts_ptr[3], shifts_ptr[5]);
                     shifts_ptr += 6;
                 }
-                val.phi =
-                    quadraticInterpol(frct.phi, latlon_shift[0][0],
-                                      latlon_shift[1][0], latlon_shift[2][0]) *
-                    convFactorLatLong;
-                val.lam =
-                    quadraticInterpol(frct.phi, latlon_shift[0][1],
-                                      latlon_shift[1][1], latlon_shift[2][1]) *
-                    convFactorLatLong;
+                val.x = quadraticInterpol(frct.y, xy_shift[0][0],
+                                          xy_shift[1][0], xy_shift[2][0]);
+                val.y = quadraticInterpol(frct.y, xy_shift[0][1],
+                                          xy_shift[1][1], xy_shift[2][1]);
             }
         } else {
-            val.lam = 0;
-            val.phi = 0;
+            val.x = 0;
+            val.y = 0;
             if (idxSampleZ >= 0) {
-                if (gridInfo.lastIdxPhi != indx.phi ||
-                    gridInfo.lastIdxLam != indx.lam) {
-                    if (!grid->valuesAt(indx.lam, indx.phi, 3, 3, 1,
-                                        &idxSampleZ, gridInfo.shifts.data())) {
+                if (gridInfo.lastIdxXY != indxy) {
+                    if (!grid->valuesAt(indxy.x, indxy.y, 3, 3, 1, &idxSampleZ,
+                                        gridInfo.shifts.data(), nodataFound) ||
+                        nodataFound) {
                         return val;
                     }
-                    gridInfo.lastIdxPhi = indx.phi;
-                    gridInfo.lastIdxLam = indx.lam;
+                    gridInfo.lastIdxXY = indxy;
                 }
                 double z_shift[3];
-                const float *shifts_ptr = gridInfo.shifts.data();
+                const auto *shifts_ptr = gridInfo.shifts.data();
                 for (int j = 0; j <= 2; ++j) {
                     z_shift[j] = quadraticInterpol(
-                        frct.lam, shifts_ptr[0], shifts_ptr[1], shifts_ptr[2]);
+                        frct.x, shifts_ptr[0], shifts_ptr[1], shifts_ptr[2]);
                     shifts_ptr += 3;
                 }
-                val.z = quadraticInterpol(frct.phi, z_shift[0], z_shift[1],
+                val.z = quadraticInterpol(frct.y, z_shift[0], z_shift[1],
                                           z_shift[2]);
             }
         }
+    }
+
+    if (idxSampleX >= 0 && idxSampleY >= 0 && !gridInfo.eastingNorthingOffset) {
+        constexpr double convFactorXY = 1. / 3600 / 180 * M_PI;
+        val.x *= convFactorXY;
+        val.y *= convFactorXY;
+    }
+
+    if (gridInfo.swapXYInRes) {
+        std::swap(val.x, val.y);
     }
 
     return val;
@@ -490,18 +579,20 @@ PJ_LPZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
 
 // ---------------------------------------------------------------------------
 
-static PJ_LP normalizeLongitude(const GenericShiftGrid *grid, const PJ_LPZ in,
-                                const NS_PROJ::ExtentAndRes *&extentOut) {
-    PJ_LP normalized;
-    normalized.lam = in.lam;
-    normalized.phi = in.phi;
+static PJ_XY normalizeX(const GenericShiftGrid *grid, const PJ_XYZ in,
+                        const NS_PROJ::ExtentAndRes *&extentOut) {
+    PJ_XY normalized;
+    normalized.x = in.x;
+    normalized.y = in.y;
     extentOut = &(grid->extentAndRes());
-    const double epsilon =
-        (extentOut->resX + extentOut->resY) * REL_TOLERANCE_HGRIDSHIFT;
-    if (normalized.lam < extentOut->west - epsilon)
-        normalized.lam += 2 * M_PI;
-    else if (normalized.lam > extentOut->east + epsilon)
-        normalized.lam -= 2 * M_PI;
+    if (extentOut->isGeographic) {
+        const double epsilon =
+            (extentOut->resX + extentOut->resY) * REL_TOLERANCE_HGRIDSHIFT;
+        if (normalized.x < extentOut->west - epsilon)
+            normalized.x += 2 * M_PI;
+        else if (normalized.x > extentOut->east + epsilon)
+            normalized.x -= 2 * M_PI;
+    }
     return normalized;
 }
 
@@ -510,48 +601,48 @@ static PJ_LP normalizeLongitude(const GenericShiftGrid *grid, const PJ_LPZ in,
 #define MAX_ITERATIONS 10
 #define TOL 1e-12
 
-PJ_LPZ gridshiftData::grid_apply_internal(
+PJ_XYZ gridshiftData::grid_apply_internal(
     PJ_CONTEXT *ctx, const std::string &type, bool isVerticalOnly,
-    const PJ_LPZ in, PJ_DIRECTION direction, const GenericShiftGrid *grid,
+    const PJ_XYZ in, PJ_DIRECTION direction, const GenericShiftGrid *grid,
     GenericShiftGridSet *gridset, bool &shouldRetry) {
 
     shouldRetry = false;
-    if (in.lam == HUGE_VAL)
+    if (in.x == HUGE_VAL)
         return in;
 
     /* normalized longitude of input */
     const NS_PROJ::ExtentAndRes *extent;
-    PJ_LP normalized_in = normalizeLongitude(grid, in, extent);
+    PJ_XY normalized_in = normalizeX(grid, in, extent);
 
     bool biquadraticInterpolationOut = false;
-    PJ_LPZ shift = grid_interpolate(ctx, type, normalized_in, grid,
+    PJ_XYZ shift = grid_interpolate(ctx, type, normalized_in, grid,
                                     biquadraticInterpolationOut);
     if (grid->hasChanged()) {
         shouldRetry = gridset->reopen(ctx);
-        PJ_LPZ out;
-        out.lam = out.phi = out.z = HUGE_VAL;
+        PJ_XYZ out;
+        out.x = out.y = out.z = HUGE_VAL;
         return out;
     }
-    if (shift.lam == HUGE_VAL)
+    if (shift.x == HUGE_VAL)
         return shift;
 
     if (direction == PJ_FWD) {
-        PJ_LPZ out = in;
-        out.lam += shift.lam;
-        out.phi += shift.phi;
+        PJ_XYZ out = in;
+        out.x += shift.x;
+        out.y += shift.y;
         out.z += shift.z;
         return out;
     }
 
     if (isVerticalOnly) {
-        PJ_LPZ out = in;
+        PJ_XYZ out = in;
         out.z -= shift.z;
         return out;
     }
 
-    PJ_LP guess;
-    guess.lam = normalized_in.lam - shift.lam;
-    guess.phi = normalized_in.phi - shift.phi;
+    PJ_XY guess;
+    guess.x = normalized_in.x - shift.x;
+    guess.y = normalized_in.y - shift.y;
 
     // NOAA NCAT transformer tool doesn't do iteration in the reverse path.
     // Do the same (only for biquadratic, although NCAT applies this logic to
@@ -567,23 +658,23 @@ PJ_LPZ gridshiftData::grid_apply_internal(
     if (!biquadraticInterpolationOut) {
         int i = MAX_ITERATIONS;
         const double toltol = TOL * TOL;
-        PJ_LP diff;
+        PJ_XY diff;
         do {
             shift = grid_interpolate(ctx, type, guess, grid,
                                      biquadraticInterpolationOut);
             if (grid->hasChanged()) {
                 shouldRetry = gridset->reopen(ctx);
-                PJ_LPZ out;
-                out.lam = out.phi = out.z = HUGE_VAL;
+                PJ_XYZ out;
+                out.x = out.y = out.z = HUGE_VAL;
                 return out;
             }
 
             /* We can possibly go outside of the initial guessed grid, so try */
             /* to fetch a new grid into which iterate... */
-            if (shift.lam == HUGE_VAL) {
-                PJ_LPZ lp;
-                lp.lam = guess.lam;
-                lp.phi = guess.phi;
+            if (shift.x == HUGE_VAL) {
+                PJ_XYZ lp;
+                lp.x = guess.x;
+                lp.y = guess.y;
                 auto newGrid = findGrid(type, lp, gridset);
                 if (newGrid == nullptr || newGrid == grid ||
                     newGrid->isNullGrid())
@@ -591,30 +682,30 @@ PJ_LPZ gridshiftData::grid_apply_internal(
                 pj_log(ctx, PJ_LOG_TRACE, "Switching from grid %s to grid %s",
                        grid->name().c_str(), newGrid->name().c_str());
                 grid = newGrid;
-                normalized_in = normalizeLongitude(grid, in, extent);
-                diff.lam = std::numeric_limits<double>::max();
-                diff.phi = std::numeric_limits<double>::max();
+                normalized_in = normalizeX(grid, in, extent);
+                diff.x = std::numeric_limits<double>::max();
+                diff.y = std::numeric_limits<double>::max();
                 continue;
             }
 
-            diff.lam = guess.lam + shift.lam - normalized_in.lam;
-            diff.phi = guess.phi + shift.phi - normalized_in.phi;
-            guess.lam -= diff.lam;
-            guess.phi -= diff.phi;
+            diff.x = guess.x + shift.x - normalized_in.x;
+            diff.y = guess.y + shift.y - normalized_in.y;
+            guess.x -= diff.x;
+            guess.y -= diff.y;
 
-        } while (--i && (diff.lam * diff.lam + diff.phi * diff.phi >
+        } while (--i && (diff.x * diff.x + diff.y * diff.y >
                          toltol)); /* prob. slightly faster than hypot() */
 
         if (i == 0) {
             pj_log(ctx, PJ_LOG_TRACE,
                    "Inverse grid shift iterator failed to converge.");
             proj_context_errno_set(ctx, PROJ_ERR_COORD_TRANSFM_NO_CONVERGENCE);
-            PJ_LPZ out;
-            out.lam = out.phi = out.z = HUGE_VAL;
+            PJ_XYZ out;
+            out.x = out.y = out.z = HUGE_VAL;
             return out;
         }
 
-        if (shift.lam == HUGE_VAL) {
+        if (shift.x == HUGE_VAL) {
             pj_log(
                 ctx, PJ_LOG_TRACE,
                 "Inverse grid shift iteration failed, presumably at grid edge. "
@@ -622,46 +713,54 @@ PJ_LPZ gridshiftData::grid_apply_internal(
         }
     }
 
-    PJ_LPZ out;
-    out.lam = adjlon(guess.lam);
-    out.phi = guess.phi;
+    PJ_XYZ out;
+    out.x = extent->isGeographic ? adjlon(guess.x) : guess.x;
+    out.y = guess.y;
     out.z = in.z - shift.z;
     return out;
 }
 
 // ---------------------------------------------------------------------------
 
-static const std::string sHORIZONTAL_OFFSET("HORIZONTAL_OFFSET");
-
-PJ_LPZ gridshiftData::apply(PJ *P, PJ_DIRECTION direction, PJ_LPZ lpz) {
+bool gridshiftData::loadGridsIfNeeded(PJ *P) {
     if (m_defer_grid_opening) {
         m_defer_grid_opening = false;
         m_grids = pj_generic_grid_init(P, "grids");
         if (proj_errno(P)) {
-            return proj_coord_error().lpz;
+            return false;
         }
-        if (!checkGridTypes(P)) {
-            return proj_coord_error().lpz;
+        bool isProjectedCoord;
+        if (!checkGridTypes(P, isProjectedCoord)) {
+            return false;
         }
     }
+    return true;
+}
 
-    PJ_LPZ out;
+// ---------------------------------------------------------------------------
 
-    out.lam = HUGE_VAL;
-    out.phi = HUGE_VAL;
+// ---------------------------------------------------------------------------
+
+static const std::string sHORIZONTAL_OFFSET("HORIZONTAL_OFFSET");
+
+PJ_XYZ gridshiftData::apply(PJ *P, PJ_DIRECTION direction, PJ_XYZ xyz) {
+    PJ_XYZ out;
+
+    out.x = HUGE_VAL;
+    out.y = HUGE_VAL;
     out.z = HUGE_VAL;
 
     std::string &type = m_mainGridType;
     bool bFoundGeog3DOffset = false;
     while (true) {
         GenericShiftGridSet *gridset = nullptr;
-        const GenericShiftGrid *grid = findGrid(type, lpz, gridset);
+        const GenericShiftGrid *grid = findGrid(type, xyz, gridset);
         if (!grid) {
             if (m_mainGridTypeIsGeographic3DOffset && m_bHasHorizontalOffset) {
                 // If we have a mix of grids with GEOGRAPHIC_3D_OFFSET
                 // and HORIZONTAL_OFFSET+ELLIPSOIDAL_HEIGHT_OFFSET
                 type = sHORIZONTAL_OFFSET;
-                grid = findGrid(type, lpz, gridset);
+                grid = findGrid(type, xyz, gridset);
             }
             if (!grid) {
                 proj_context_errno_set(P->ctx,
@@ -674,19 +773,19 @@ PJ_LPZ gridshiftData::apply(PJ *P, PJ_DIRECTION direction, PJ_LPZ lpz) {
         }
 
         if (grid->isNullGrid()) {
-            out = lpz;
+            out = xyz;
             break;
         }
         bool shouldRetry = false;
         out = grid_apply_internal(
             P->ctx, type, !(m_bHasGeographic3DOffset || m_bHasHorizontalOffset),
-            lpz, direction, grid, gridset, shouldRetry);
+            xyz, direction, grid, gridset, shouldRetry);
         if (!shouldRetry) {
             break;
         }
     }
 
-    if (out.lam == HUGE_VAL || out.phi == HUGE_VAL) {
+    if (out.x == HUGE_VAL || out.y == HUGE_VAL) {
         if (proj_context_errno(P->ctx) == 0) {
             proj_context_errno_set(P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_GRID);
         }
@@ -696,10 +795,10 @@ PJ_LPZ gridshiftData::apply(PJ *P, PJ_DIRECTION direction, PJ_LPZ lpz) {
     // Second pass to apply vertical transformation, if it is in a
     // separate grid than lat-lon offsets.
     if (!bFoundGeog3DOffset && !m_auxGridType.empty()) {
-        lpz = out;
+        xyz = out;
         while (true) {
             GenericShiftGridSet *gridset = nullptr;
-            const auto grid = findGrid(m_auxGridType, lpz, gridset);
+            const auto grid = findGrid(m_auxGridType, xyz, gridset);
             if (!grid) {
                 proj_context_errno_set(P->ctx,
                                        PROJ_ERR_COORD_TRANSFM_OUTSIDE_GRID);
@@ -710,14 +809,14 @@ PJ_LPZ gridshiftData::apply(PJ *P, PJ_DIRECTION direction, PJ_LPZ lpz) {
             }
 
             bool shouldRetry = false;
-            out = grid_apply_internal(P->ctx, m_auxGridType, true, lpz,
+            out = grid_apply_internal(P->ctx, m_auxGridType, true, xyz,
                                       direction, grid, gridset, shouldRetry);
             if (!shouldRetry) {
                 break;
             }
         }
 
-        if (out.lam == HUGE_VAL || out.phi == HUGE_VAL) {
+        if (out.x == HUGE_VAL || out.y == HUGE_VAL) {
             proj_context_errno_set(P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_GRID);
             return out;
         }
@@ -732,23 +831,43 @@ PJ_LPZ gridshiftData::apply(PJ *P, PJ_DIRECTION direction, PJ_LPZ lpz) {
 
 static PJ_XYZ pj_gridshift_forward_3d(PJ_LPZ lpz, PJ *P) {
     auto Q = static_cast<gridshiftData *>(P->opaque);
-    PJ_COORD point = {{0, 0, 0, 0}};
 
-    point.lpz = Q->apply(P, PJ_FWD, lpz);
+    if (!Q->loadGridsIfNeeded(P)) {
+        return proj_coord_error().xyz;
+    }
 
-    return point.xyz;
+    PJ_XYZ xyz;
+    xyz.x = lpz.lam;
+    xyz.y = lpz.phi;
+    xyz.z = lpz.z;
+
+    xyz = Q->apply(P, PJ_FWD, xyz);
+
+    xyz.x += Q->m_offsetX;
+    xyz.y += Q->m_offsetY;
+
+    return xyz;
 }
 
 // ---------------------------------------------------------------------------
 
 static PJ_LPZ pj_gridshift_reverse_3d(PJ_XYZ xyz, PJ *P) {
     auto Q = static_cast<gridshiftData *>(P->opaque);
-    PJ_COORD point = {{0, 0, 0, 0}};
-    point.xyz = xyz;
 
-    point.lpz = Q->apply(P, PJ_INV, point.lpz);
+    // Must be done before using m_offsetX !
+    if (!Q->loadGridsIfNeeded(P)) {
+        return proj_coord_error().lpz;
+    }
 
-    return point.lpz;
+    xyz.x -= Q->m_offsetX;
+    xyz.y -= Q->m_offsetY;
+
+    PJ_XYZ xyz_out = Q->apply(P, PJ_INV, xyz);
+    PJ_LPZ lpz;
+    lpz.lam = xyz_out.x;
+    lpz.phi = xyz_out.y;
+    lpz.z = xyz_out.z;
+    return lpz;
 }
 
 // ---------------------------------------------------------------------------
@@ -785,21 +904,22 @@ PJ *PJ_TRANSFORMATION(gridshift, 0) {
     P->fwd = nullptr;
     P->inv = nullptr;
 
-    P->left = PJ_IO_UNITS_RADIANS;
-    P->right = PJ_IO_UNITS_RADIANS;
-
     if (0 == pj_param(P->ctx, P->params, "tgrids").i) {
         proj_log_error(P, _("+grids parameter missing."));
         return pj_gridshift_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
+    bool isProjectedCoord = false;
     if (P->ctx->defer_grid_opening) {
         Q->m_defer_grid_opening = true;
     } else {
         const char *gridnames = pj_param(P->ctx, P->params, "sgrids").s;
         gMutex.lock();
-        const bool isKnownGrid =
-            gKnownGrids.find(gridnames) != gKnownGrids.end();
+        const auto iter = gKnownGrids.find(gridnames);
+        const bool isKnownGrid = iter != gKnownGrids.end();
+        if (isKnownGrid) {
+            isProjectedCoord = iter->second;
+        }
         gMutex.unlock();
         if (isKnownGrid) {
             Q->m_defer_grid_opening = true;
@@ -811,13 +931,13 @@ PJ *PJ_TRANSFORMATION(gridshift, 0) {
                 return pj_gridshift_destructor(
                     P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
             }
-            if (!Q->checkGridTypes(P)) {
+            if (!Q->checkGridTypes(P, isProjectedCoord)) {
                 return pj_gridshift_destructor(
                     P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
             }
 
             gMutex.lock();
-            gKnownGrids.insert(gridnames);
+            gKnownGrids[gridnames] = isProjectedCoord;
             gMutex.unlock();
         }
     }
@@ -837,6 +957,49 @@ PJ *PJ_TRANSFORMATION(gridshift, 0) {
 
     if (pj_param(P->ctx, P->params, "tno_z_transform").i) {
         Q->m_skip_z_transform = true;
+    }
+
+    // +coord_type not advertized in documentation on purpose for now.
+    // It is probably useless to do it, as the only potential use case of it
+    // would be for PROJ itself when generating pipelines with defered grid
+    // opening.
+    if (pj_param(P->ctx, P->params, "tcoord_type").i) {
+        // Check the coordinate type (projected/geographic) from the explicit
+        // +coord_type switch. This is mostly only useful in defered grid
+        // opening, otherwise we have figured it out above in checkGridTypes()
+        const char *coord_type = pj_param(P->ctx, P->params, "scoord_type").s;
+        if (coord_type) {
+            if (strcmp(coord_type, "projected") == 0) {
+                if (!P->ctx->defer_grid_opening && !isProjectedCoord) {
+                    proj_log_error(P,
+                                   _("+coord_type=projected specified, but the "
+                                     "grid is known to not be projected"));
+                    return pj_gridshift_destructor(
+                        P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+                }
+                isProjectedCoord = true;
+            } else if (strcmp(coord_type, "geographic") == 0) {
+                if (!P->ctx->defer_grid_opening && isProjectedCoord) {
+                    proj_log_error(P, _("+coord_type=geographic specified, but "
+                                        "the grid is known to be projected"));
+                    return pj_gridshift_destructor(
+                        P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+                }
+            } else {
+                proj_log_error(P, _("Unsupported value for +coord_type: valid "
+                                    "values are 'geographic' or 'projected'"));
+                return pj_gridshift_destructor(P,
+                                               PROJ_ERR_INVALID_OP_MISSING_ARG);
+            }
+        }
+    }
+
+    if (isProjectedCoord) {
+        P->left = PJ_IO_UNITS_PROJECTED;
+        P->right = PJ_IO_UNITS_PROJECTED;
+    } else {
+        P->left = PJ_IO_UNITS_RADIANS;
+        P->right = PJ_IO_UNITS_RADIANS;
     }
 
     return P;
