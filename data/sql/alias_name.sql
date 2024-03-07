@@ -734,6 +734,7 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1371','DVR90 ensemble',
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1368','DVR90(2002)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1369','DVR90(2013)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1370','DVR90(2023)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1383','WGS 84 (G2296)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
