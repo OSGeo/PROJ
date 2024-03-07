@@ -256,5 +256,8 @@ registered users must first log in. To add a version, go to
 https://readthedocs.org/projects/osgeo-proj/versions/ and click "Activate"
 next to the maintenance branch label.
 
+Also update the redirect for ``/* -> /en/X.Y/:splat`` at
+https://readthedocs.org/dashboard/osgeo-proj/redirects/
+
 The latest maintenance branch should be set as the "Default version" found at
 https://readthedocs.org/dashboard/osgeo-proj/advanced/
