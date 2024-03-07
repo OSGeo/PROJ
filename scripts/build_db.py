@@ -784,7 +784,7 @@ def fill_grid_transformation(proj_db_cursor):
         # 1126: Vertical change by geoid grid difference (NRCan)
         # WARNING: update Transformation::isGeographic3DToGravityRelatedHeight()
         # in src/iso19111/operation/singleoperation.cpp if adding new methods
-        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1100, 1101, 1103, 1105, 1110, 1112, 1113, 1114, 1115, 1118, 1122, 1124, 1126) and n_params == 2:
+        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1100, 1101, 1103, 1105, 1110, 1112, 1113, 1114, 1115, 1118, 1122, 1124, 1126, 1128, 1129) and n_params == 2:
             assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
@@ -889,7 +889,7 @@ def fill_other_transformation(proj_db_cursor):
 
 
         arg = (EPSG_AUTHORITY, code, name,
-               remarks, 
+               remarks,
                EPSG_AUTHORITY, method_code, method_name,
                EPSG_AUTHORITY, source_crs_code,
                EPSG_AUTHORITY, target_crs_code,

@@ -734,6 +734,15 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1371','DVR90 ensemble',
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1368','DVR90(2002)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1369','DVR90(2013)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1370','DVR90(2023)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1378','GLLMSL(2022)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1372','DKMSL(2022)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1373','DKLAT(2022)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1375','DKLAT(2023)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1377','DKLAT','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1376','DKMSL','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1382','ETRF2020','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1383','WGS 84 (G2296)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1374','DKMSL(2023)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -7963,3 +7972,6 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10731','ETRS89/DREF91/R1
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10733','ETRS89/DREF91/R16 / UTM 33','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10516','NAD83(2011) / WISCRS Adjusted Jackson (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10732','ETRS89/DREF91/R16 / UTM 32','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','10551','DKMSL ensemble depth','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','10552','DKLAT ensemble depth','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','7400','NTF (Paris) + NGF IGN69 height','EPSG');

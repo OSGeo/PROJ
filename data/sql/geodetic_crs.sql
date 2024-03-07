@@ -1749,7 +1749,7 @@ INSERT INTO "usage" VALUES('EPSG','5819','geodetic_crs','EPSG','8397','EPSG','12
 INSERT INTO "geodetic_crs" VALUES('EPSG','8399','ETRF2005',NULL,'geographic 3D','EPSG','6423','EPSG','1204',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5820','geodetic_crs','EPSG','8399','EPSG','1298','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','8401','ETRF2014',NULL,'geocentric','EPSG','6500','EPSG','1206',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','5821','geodetic_crs','EPSG','8401','EPSG','4755','EPSG','1027');
+INSERT INTO "usage" VALUES('EPSG','5821','geodetic_crs','EPSG','8401','EPSG','1298','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','8403','ETRF2014',NULL,'geographic 3D','EPSG','6423','EPSG','1206',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5822','geodetic_crs','EPSG','8403','EPSG','1298','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','8425','Hong Kong Geodetic CS',NULL,'geocentric','EPSG','6500','EPSG','1209',NULL,0);
@@ -2131,7 +2131,7 @@ INSERT INTO "usage" VALUES('EPSG','15341','geodetic_crs','EPSG','9739','EPSG','4
 INSERT INTO "geodetic_crs" VALUES('EPSG','9753','WGS 84 (G2139)',NULL,'geocentric','EPSG','6500','EPSG','1309',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','16657','geodetic_crs','EPSG','9753','EPSG','1262','EPSG','1176');
 INSERT INTO "geodetic_crs" VALUES('EPSG','9754','WGS 84 (G2139)',NULL,'geographic 3D','EPSG','6423','EPSG','1309',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','16853','geodetic_crs','EPSG','9754','EPSG','2830','EPSG','1176');
+INSERT INTO "usage" VALUES('EPSG','16853','geodetic_crs','EPSG','9754','EPSG','1262','EPSG','1176');
 INSERT INTO "geodetic_crs" VALUES('EPSG','9755','WGS 84 (G2139)',NULL,'geographic 2D','EPSG','6422','EPSG','1309',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','16852','geodetic_crs','EPSG','9755','EPSG','1262','EPSG','1176');
 INSERT INTO "geodetic_crs" VALUES('EPSG','9758','ECML14_NB-IRF',NULL,'geographic 2D','EPSG','6422','EPSG','1310',NULL,0);
@@ -2282,6 +2282,18 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','10474','BBT2000',NULL,'geographic 3D',
 INSERT INTO "usage" VALUES('EPSG','20339','geodetic_crs','EPSG','10474','EPSG','4744','EPSG','1285');
 INSERT INTO "geodetic_crs" VALUES('EPSG','10475','BBT2000',NULL,'geographic 2D','EPSG','6422','EPSG','1367',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','20331','geodetic_crs','EPSG','10475','EPSG','4744','EPSG','1183');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10569','ETRF2020',NULL,'geocentric','EPSG','6500','EPSG','1382',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21226','geodetic_crs','EPSG','10569','EPSG','4755','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10570','ETRF2020',NULL,'geographic 3D','EPSG','6423','EPSG','1382',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21227','geodetic_crs','EPSG','10570','EPSG','1298','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10571','ETRF2020',NULL,'geographic 2D','EPSG','6422','EPSG','1382',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21228','geodetic_crs','EPSG','10571','EPSG','1298','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10604','WGS 84 (G2296)',NULL,'geocentric','EPSG','6500','EPSG','1383',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21200','geodetic_crs','EPSG','10604','EPSG','1262','EPSG','1176');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10605','WGS 84 (G2296)',NULL,'geographic 3D','EPSG','6423','EPSG','1383',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21195','geodetic_crs','EPSG','10605','EPSG','2830','EPSG','1176');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10606','WGS 84 (G2296)',NULL,'geographic 2D','EPSG','6422','EPSG','1383',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21196','geodetic_crs','EPSG','10606','EPSG','1262','EPSG','1176');
 INSERT INTO "geodetic_crs" VALUES('EPSG','20033','MWC18-IRF',NULL,'geographic 2D','EPSG','6422','EPSG','1324',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18335','geodetic_crs','EPSG','20033','EPSG','4666','EPSG','1141');
 INSERT INTO "geodetic_crs" VALUES('EPSG','20039','SIRGAS-Chile 2021',NULL,'geocentric','EPSG','6500','EPSG','1327',NULL,0);
