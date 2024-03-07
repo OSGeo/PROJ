@@ -258,7 +258,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','6917','SVY21 + SHD height',NULL,'EPSG'
 INSERT INTO "usage" VALUES('EPSG','5040','compound_crs','EPSG','6917','EPSG','1210','EPSG','1144');
 INSERT INTO "compound_crs" VALUES('EPSG','6927','SVY21 / Singapore TM + SHD height',NULL,'EPSG','3414','EPSG','6916',0);
 INSERT INTO "usage" VALUES('EPSG','5045','compound_crs','EPSG','6927','EPSG','1210','EPSG','1144');
-INSERT INTO "compound_crs" VALUES('EPSG','7400','NTF (Paris) + NGF IGN69 height',NULL,'EPSG','4807','EPSG','5720',0);
+INSERT INTO "compound_crs" VALUES('EPSG','7400','NTF (Paris) + NGF-IGN69 height',NULL,'EPSG','4807','EPSG','5720',0);
 INSERT INTO "usage" VALUES('EPSG','5265','compound_crs','EPSG','7400','EPSG','1326','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','7401','NTF (Paris) / France II + NGF Lallemand',NULL,'EPSG','27582','EPSG','5719',1);
 INSERT INTO "usage" VALUES('EPSG','5266','compound_crs','EPSG','7401','EPSG','1326','EPSG','1142');
@@ -862,6 +862,14 @@ INSERT INTO "compound_crs" VALUES('EPSG','10507','RGF93 v2b + NGF-IGN78 height',
 INSERT INTO "usage" VALUES('EPSG','20491','compound_crs','EPSG','10507','EPSG','1327','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','10545','ETRS89 + Cascais height',NULL,'EPSG','4258','EPSG','5780',0);
 INSERT INTO "usage" VALUES('EPSG','20908','compound_crs','EPSG','10545','EPSG','1294','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','10553','ETRS89 + DKMSL(2022) depth',NULL,'EPSG','4258','EPSG','10547',0);
+INSERT INTO "usage" VALUES('EPSG','21026','compound_crs','EPSG','10553','EPSG','4756','EPSG','1272');
+INSERT INTO "compound_crs" VALUES('EPSG','10554','ETRS89 + DKLAT(2022) depth',NULL,'EPSG','4258','EPSG','10548',0);
+INSERT INTO "usage" VALUES('EPSG','21027','compound_crs','EPSG','10554','EPSG','4756','EPSG','1272');
+INSERT INTO "compound_crs" VALUES('EPSG','10555','ETRS89 + DKMSL(2023) depth',NULL,'EPSG','4258','EPSG','10549',0);
+INSERT INTO "usage" VALUES('EPSG','21028','compound_crs','EPSG','10555','EPSG','4756','EPSG','1272');
+INSERT INTO "compound_crs" VALUES('EPSG','10556','ETRS89 + DKLAT(2023) depth',NULL,'EPSG','4258','EPSG','10550',0);
+INSERT INTO "usage" VALUES('EPSG','21029','compound_crs','EPSG','10556','EPSG','4756','EPSG','1272');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);

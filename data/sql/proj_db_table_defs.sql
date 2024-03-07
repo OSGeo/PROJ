@@ -1137,7 +1137,6 @@ FOR EACH ROW BEGIN
         WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.name = NEW.name AND covwv.deprecated = 0 AND NEW.deprecated = 0
         AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
         AND NEW.name != 'NAD83(CSRS)v2 to NAD83(CSRS)v3 (1)' -- duplicate entry in EPSG
-        AND NEW.name != 'ETRS89 to ETRS89 + Baltic 1957 height (1)' -- duplicate entry in EPSG
         AND NOT (NEW.description LIKE 'Reversible alternative to%' AND covwv.description NOT LIKE 'Reversible alternative to%')
         AND NEW.code NOT LIKE '%_WITH_NAD83CSRSV7_INTERPOLATION'
     );

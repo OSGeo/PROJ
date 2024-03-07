@@ -12,6 +12,7 @@ GEOGCRS["WGS 84",
         MEMBER["World Geodetic System 1984 (G1674)"],
         MEMBER["World Geodetic System 1984 (G1762)"],
         MEMBER["World Geodetic System 1984 (G2139)"],
+        MEMBER["World Geodetic System 1984 (G2296)"],
         ELLIPSOID["WGS 84",6378137,298.257223563,
             LENGTHUNIT["metre",1]],
         ENSEMBLEACCURACY[2.0]],
@@ -75,6 +76,7 @@ GEOGCRS["WGS 84",
         MEMBER["World Geodetic System 1984 (G1674)"],
         MEMBER["World Geodetic System 1984 (G1762)"],
         MEMBER["World Geodetic System 1984 (G2139)"],
+        MEMBER["World Geodetic System 1984 (G2296)"],
         ELLIPSOID["WGS 84",6378137,298.257223563,
             LENGTHUNIT["metre",1]],
         ENSEMBLEACCURACY[2.0]],
@@ -126,6 +128,7 @@ GEOGCRS["WGS 84",
         MEMBER["World Geodetic System 1984 (G1674)"],
         MEMBER["World Geodetic System 1984 (G1762)"],
         MEMBER["World Geodetic System 1984 (G2139)"],
+        MEMBER["World Geodetic System 1984 (G2296)"],
         ELLIPSOID["WGS 84",6378137,298.257223563,
             LENGTHUNIT["metre",1]],
         ENSEMBLEACCURACY[2.0]],
@@ -216,6 +219,13 @@ PROJJSON:
         "id": {
           "authority": "EPSG",
           "code": 1309
+        }
+      },
+      {
+        "name": "World Geodetic System 1984 (G2296)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1383
         }
       }
     ],
@@ -946,6 +956,7 @@ Several candidates area of use matching provided name :
   EPSG:4575 : Denmark - onshore Jutland, Funen, Zealand and Lolland.
   EPSG:4693 : Denmark - onshore - Copenhagen and surrounding area.
   EPSG:4694 : Denmark - onshore northern Schleswig and surrounding islands (i.e. Jutland south of the pre-1920 border near the Kongea river).
+  EPSG:4756 : 4756 - Denmark - offshore
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area no_match --summary
 No area of use matching provided name
@@ -1204,6 +1215,7 @@ PROJCRS["WGS 84 / UTM zone 31N",
             MEMBER["World Geodetic System 1984 (G1674)"],
             MEMBER["World Geodetic System 1984 (G1762)"],
             MEMBER["World Geodetic System 1984 (G2139)"],
+            MEMBER["World Geodetic System 1984 (G2296)"],
             ELLIPSOID["WGS 84",6378137,298.257223563,
                 LENGTHUNIT["metre",1]],
             ENSEMBLEACCURACY[2.0]],
@@ -1390,6 +1402,8 @@ ENSEMBLE["World Geodetic System 1984 ensemble",
         ID["EPSG",1156]],
     MEMBER["World Geodetic System 1984 (G2139)",
         ID["EPSG",1309]],
+    MEMBER["World Geodetic System 1984 (G2296)",
+        ID["EPSG",1383]],
     ELLIPSOID["WGS 84",6378137,298.257223563,
         LENGTHUNIT["metre",1],
         ID["EPSG",7030]],
@@ -1425,6 +1439,8 @@ ENSEMBLE["World Geodetic System 1984 ensemble",
         ID["EPSG",1156]],
     MEMBER["World Geodetic System 1984 (G2139)",
         ID["EPSG",1309]],
+    MEMBER["World Geodetic System 1984 (G2296)",
+        ID["EPSG",1383]],
     ELLIPSOID["WGS 84",6378137,298.257223563,
         LENGTHUNIT["metre",1],
         ID["EPSG",7030]],
@@ -1611,6 +1627,7 @@ GEOGCRS["WGS 84",
         MEMBER["World Geodetic System 1984 (G1674)"],
         MEMBER["World Geodetic System 1984 (G1762)"],
         MEMBER["World Geodetic System 1984 (G2139)"],
+        MEMBER["World Geodetic System 1984 (G2296)"],
         ELLIPSOID["WGS 84",6378137,298.257223563,
             LENGTHUNIT["metre",1]],
         ENSEMBLEACCURACY[2.0]],

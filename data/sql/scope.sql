@@ -264,3 +264,4 @@ INSERT INTO "scope" VALUES('EPSG','1284','Geodesy. Defines NAD83(CSRS)v8.',0);
 INSERT INTO "scope" VALUES('EPSG','1285','Engineering survey and mapping for the Brenner base tunnel (BBT) railway project.',0);
 INSERT INTO "scope" VALUES('EPSG','1286','Mapping and data analysis for Texas Water Development Board groundwater modeling.',0);
 INSERT INTO "scope" VALUES('EPSG','1287','Continental mapping of raster data.',0);
+INSERT INTO "scope" VALUES('EPSG','1289','Geodesy. Defines ETRF2020.',0);

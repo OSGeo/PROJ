@@ -852,9 +852,21 @@ TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_context) {
             authFactory->createCoordinateReferenceSystem("4937"),
             // ETRS89 + Baltic 1957 height
             authFactory->createCoordinateReferenceSystem("8360"), ctxt);
-        ASSERT_GE(list.size(), 1U);
+        ASSERT_GE(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +inv +proj=vgridshift "
+            "+grids=cz_cuzk_CR-2005.tif +multiplier=1 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1");
+        EXPECT_EQ(list[0]->inverse()->nameStr(),
+                  "Inverse of ETRS89 to Baltic 1957 height (2)");
+
+        EXPECT_EQ(
+            list[1]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline "
             "+step +proj=axisswap +order=2,1 "
             "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
@@ -862,8 +874,7 @@ TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_context) {
             "+grids=sk_gku_Slovakia_ETRS89h_to_Baltic1957.tif +multiplier=1 "
             "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
             "+step +proj=axisswap +order=2,1");
-
-        EXPECT_EQ(list[0]->inverse()->nameStr(),
+        EXPECT_EQ(list[1]->inverse()->nameStr(),
                   "Inverse of 'ETRS89 to ETRS89 + Baltic 1957 height (1)'");
     }
 }
@@ -5867,8 +5878,15 @@ TEST(
     {
         auto list = CoordinateOperationFactory::create()->createOperations(
             NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
-        ASSERT_GE(list.size(), 1U);
+        ASSERT_GE(list.size(), 2U);
         EXPECT_EQ(list[0]->nameStr(),
+                  "Inverse of NAD83(CSRS)v6 to CGVD28 height (1) + "
+                  "NAD83(CSRS)v6 to CGVD2013(CGG2013) height (1) "
+                  "using Null geographic offset "
+                  "from NAD83(CSRS)v6 (geog3D) to NAD83(CSRS)v6 (geog2D) + "
+                  "Inverse of NAD83 to NAD83(CSRS)v6 (10) + "
+                  "NAD83 to NAD83(CSRS) (4)");
+        EXPECT_EQ(list[1]->nameStr(),
                   "Inverse of NAD83(CSRS)v6 to CGVD28 height (1) + "
                   "NAD83(CSRS)v6 to CGVD2013(CGG2013) height (1) "
                   "using Ballpark geographic offset "
