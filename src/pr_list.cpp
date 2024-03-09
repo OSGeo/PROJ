@@ -56,7 +56,7 @@ pj_pr_list(PJ *P) {
 /*      +init= calls and +datum= definitions would be expanded.         */
 /************************************************************************/
 
-char *pj_get_def(PJ *P, int options)
+char *pj_get_def(const PJ *P, int options)
 
 {
     paralist *t;
