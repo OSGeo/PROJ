@@ -1898,7 +1898,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
 
         ASSERT_TRUE(execute(
             "INSERT INTO helmert_transformation "
-            "VALUES('EPSG','DUMMY_HELMERT','name',NULL,'EPSG','9603','"
+            "VALUES('EPSG','DUMMY_HELMERT','dummy_helmert',NULL,'EPSG','9603','"
             "Geocentric translations (geog2D domain)','EPSG','4326',"
             "'EPSG','4326',44.0,-143."
             "0,-90.0,-294.0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,"
@@ -1914,7 +1914,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
 
         ASSERT_TRUE(execute(
             "INSERT INTO grid_transformation "
-            "VALUES('EPSG','DUMMY_GRID_TRANSFORMATION','name',NULL,"
+            "VALUES('EPSG','DUMMY_GRID_TRANSFORMATION',"
+            "'dummy_grid_transformation',NULL,"
             "'EPSG','9615'"
             ",'NTv2','EPSG','4326','EPSG','4326',1.0,'EPSG','"
             "8656','Latitude and longitude difference "
@@ -1936,7 +1937,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
 
         ASSERT_TRUE(execute(
             "INSERT INTO other_transformation "
-            "VALUES('EPSG','DUMMY_OTHER_TRANSFORMATION','name',NULL,"
+            "VALUES('EPSG','DUMMY_OTHER_TRANSFORMATION',"
+            "'dummy_other_transformation',NULL,"
             "'EPSG','9601','Longitude rotation',"
             "'EPSG','4326','EPSG','4326',0.0,'EPSG'"
             ",'8602','Longitude "
@@ -1954,7 +1956,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             << last_error();
 
         ASSERT_TRUE(execute("INSERT INTO concatenated_operation "
-                            "VALUES('EPSG','DUMMY_CONCATENATED','name',NULL,"
+                            "VALUES('EPSG','DUMMY_CONCATENATED',"
+                            "'dummy_concatenated',NULL,"
                             "'EPSG','4326','EPSG'"
                             ",'4326',NULL,NULL,0);"))
             << last_error();
@@ -2381,7 +2384,8 @@ TEST_F(FactoryWithTmpDatabase,
         << last_error();
     ASSERT_TRUE(
         execute("INSERT INTO other_transformation "
-                "VALUES('EPSG','4326_TO_OTHER_GEOG_CRS','name',NULL,"
+                "VALUES('EPSG','4326_TO_OTHER_GEOG_CRS',"
+                "'4326_to_other_geog_crs',NULL,"
                 "'EPSG','9601','Longitude rotation',"
                 "'EPSG','4326','EPSG','OTHER_GEOG_CRS',0.0,'EPSG'"
                 ",'8602','Longitude "
@@ -2392,7 +2396,8 @@ TEST_F(FactoryWithTmpDatabase,
         << last_error();
     ASSERT_TRUE(
         execute("INSERT INTO other_transformation "
-                "VALUES('EPSG','OTHER_GEOG_CRS_TO_4326','name',NULL,"
+                "VALUES('EPSG','OTHER_GEOG_CRS_TO_4326',"
+                "'other_geog_crs_to_4326',NULL,"
                 "'EPSG','9601','Longitude rotation',"
                 "'EPSG','OTHER_GEOG_CRS','EPSG','4326',0.0,'EPSG'"
                 ",'8602','Longitude "
@@ -2402,7 +2407,8 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO concatenated_operation "
-                        "VALUES('EPSG','DUMMY_CONCATENATED_2','name',NULL,"
+                        "VALUES('EPSG','DUMMY_CONCATENATED_2',"
+                        "'dummy_concatenated_2',NULL,"
                         "'EPSG','4326','EPSG'"
                         ",'4326',NULL,NULL,0);"))
         << last_error();
@@ -2441,7 +2447,7 @@ TEST_F(FactoryWithTmpDatabase,
         << last_error();
 
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
-                        "VALUES('OTHER','OTHER_32631','WGS 84 / UTM zone "
+                        "VALUES('OTHER','OTHER_32631','my WGS 84 / UTM zone "
                         "31N',NULL,'EPSG','4400','OTHER','OTHER_4326',"
                         "'EPSG','16031',NULL,0);"))
         << last_error();
@@ -2478,7 +2484,8 @@ TEST_F(FactoryWithTmpDatabase,
 
     ASSERT_TRUE(execute(
         "INSERT INTO grid_transformation "
-        "VALUES('OTHER','OTHER_GRID_TRANSFORMATION','name',NULL,"
+        "VALUES('OTHER','OTHER_GRID_TRANSFORMATION',"
+        "'other_grid_transformation_2',NULL,"
         "'EPSG','9615'"
         ",'NTv2','EPSG','4326','OTHER','OTHER_4326',1.0,'EPSG','"
         "8656','Latitude and longitude difference "
@@ -3035,19 +3042,22 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
     populateWithFakeEPSG();
 
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
-                        "VALUES('TEST_NS','TEST','my name',NULL,NULL,"
+                        "VALUES('TEST_NS','TEST',"
+                        "'custom_projected_crs',NULL,NULL,"
                         "NULL,NULL,NULL,NULL,NULL,"
                         "'+proj=mbt_s +unused_flag',0);"))
         << last_error();
 
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
-                        "VALUES('TEST_NS','TEST_BOUND','my name',NULL,"
+                        "VALUES('TEST_NS','TEST_BOUND',"
+                        "'custom_projected_crs2',NULL,"
                         "NULL,NULL,NULL,NULL,NULL,NULL,"
                         "'+proj=mbt_s +unused_flag +towgs84=1,2,3',0);"))
         << last_error();
 
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
-                        "VALUES('TEST_NS','TEST_WRONG','my name',NULL,"
+                        "VALUES('TEST_NS','TEST_WRONG',"
+                        "'custom_projected_crs3',NULL,"
                         "NULL,NULL,NULL,NULL,NULL,NULL,"
                         "'+proj=longlat',0);"))
         << last_error();
@@ -3097,7 +3107,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "TEST_NS");
     {
         auto crs = factory->createProjectedCRS("TEST");
-        EXPECT_EQ(*(crs->name()->description()), "my name");
+        EXPECT_EQ(*(crs->name()->description()), "custom_projected_crs");
         EXPECT_EQ(crs->identifiers().size(), 1U);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
         EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
@@ -3106,7 +3116,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
     }
     {
         auto crs = factory->createProjectedCRS("TEST_BOUND");
-        EXPECT_EQ(*(crs->name()->description()), "my name");
+        EXPECT_EQ(*(crs->name()->description()), "custom_projected_crs2");
         EXPECT_EQ(crs->identifiers().size(), 1U);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
         EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
@@ -3487,7 +3497,8 @@ TEST_F(FactoryWithTmpDatabase,
 
     ASSERT_TRUE(execute(
         "INSERT INTO other_transformation "
-        "VALUES('EPSG','NOOP_TRANSFORMATION_32631','name',NULL,"
+        "VALUES('EPSG','NOOP_TRANSFORMATION_32631',"
+        "'NOOP_TRANSFORMATION_32631',NULL,"
         "'PROJ','PROJString','+proj=noop',"
         "'EPSG','32631','EPSG','32631',0.0,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
@@ -3506,7 +3517,8 @@ TEST_F(FactoryWithTmpDatabase,
 
     ASSERT_TRUE(execute(
         "INSERT INTO other_transformation "
-        "VALUES('EPSG','NOOP_TRANSFORMATION_4326','name',NULL,"
+        "VALUES('EPSG','NOOP_TRANSFORMATION_4326',"
+        "'NOOP_TRANSFORMATION_4326',NULL,"
         "'PROJ','PROJString','+proj=noop',"
         "'EPSG','4326','EPSG','4326',0.0,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"

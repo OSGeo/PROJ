@@ -126,7 +126,7 @@ constexpr const char *CS_TYPE_ORDINAL = cs::OrdinalCS::WKT2_TYPE;
 constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 // If the code depends on the new additions, then DATABASE_LAYOUT_VERSION_MINOR
 // must be incremented.
-constexpr int DATABASE_LAYOUT_VERSION_MINOR = 3;
+constexpr int DATABASE_LAYOUT_VERSION_MINOR = 4;
 
 constexpr size_t N_MAX_PARAMS = 7;
 

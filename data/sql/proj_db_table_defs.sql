@@ -306,12 +306,32 @@ CREATE TABLE vertical_crs(
     CONSTRAINT fk_vertical_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES vertical_datum(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
+-- Authorities provided by the upstream PROJ
+-- This is used to check unicity of object names
+CREATE TABLE builtin_authorities(auth_name TEXT NOT NULL PRIMARY KEY) WITHOUT ROWID;
+INSERT INTO builtin_authorities VALUES
+    ('EPSG'),
+    ('ESRI'),
+    ('IAU_2015'),
+    ('IGNF'),
+    ('NKG'),
+    ('NRCAN'),
+    ('OGC'),
+    ('PROJ')
+;
+
 CREATE TRIGGER vertical_crs_insert_trigger
 BEFORE INSERT ON vertical_crs
 FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: (auth_name, code) must not already exist in crs_view')
         WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
+
+    SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) crs_view')
+        WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.name = NEW.name AND crs_view.deprecated = 0 AND NEW.deprecated = 0
+        AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
+        AND NOT(NEW.auth_name = 'ESRI' and crs_view.table_name = 'geodetic_crs') -- some ESRI vertical CRS are an ellipsoidal height CRS derived from a geodetic CRS
+    );
 
     SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: datum must not be deprecated when vertical_crs is not deprecated')
         WHERE EXISTS(SELECT 1 FROM vertical_crs datum WHERE datum.auth_name = NEW.datum_auth_name AND datum.code = NEW.datum_code AND datum.deprecated != 0) AND NEW.deprecated = 0;
@@ -723,6 +743,11 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: (auth_name, code) must not already exist in crs_view')
         WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
 
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) crs_view')
+        WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.name = NEW.name AND crs_view.deprecated = 0 AND NEW.deprecated = 0
+        AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
+    );
+
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must not be deprecated when projected_crs is not deprecated')
         WHERE EXISTS(SELECT 1 FROM geodetic_crs WHERE geodetic_crs.auth_name = NEW.geodetic_crs_auth_name AND geodetic_crs.code = NEW.geodetic_crs_code AND geodetic_crs.deprecated != 0 AND geodetic_crs.name NOT LIKE 'Unknown datum%' AND geodetic_crs.name NOT LIKE 'Unspecified datum%') AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI' AND NEW.geodetic_crs_auth_name != 'ESRI');
 
@@ -763,6 +788,11 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: (auth_name, code) must not already exist in crs_view')
         WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
+
+    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) crs_view')
+        WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.name = NEW.name AND crs_view.deprecated = 0 AND NEW.deprecated = 0
+        AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
+    );
 
     SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: horiz_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.horiz_crs_auth_name AND crs_view.code = NEW.horiz_crs_code);
@@ -1026,6 +1056,13 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
         WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
 
+    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) coordinate_operation_with_conversion_view')
+        WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.name = NEW.name AND covwv.deprecated = 0 AND NEW.deprecated = 0
+        AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
+        AND NEW.name != 'NKG_ETRF00 to ETRF96@2000.0' -- NKG:P1_2008_EE and NKG:P1_2008_FI have the same name
+        AND NEW.name != 'NKG_ETRF14 to ETRF96@2000.0' -- NKG:PAR_2020_EE and NKG:PAR_2020_FI have the same name
+    );
+
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: translation_uom.type must be ''length''')
         WHERE (SELECT type FROM unit_of_measure WHERE unit_of_measure.auth_name = NEW.translation_uom_auth_name AND unit_of_measure.code = NEW.translation_uom_code) != 'length';
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: rotation_uom.type must be ''angle''')
@@ -1095,6 +1132,15 @@ BEFORE INSERT ON grid_transformation
 FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
         WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
+
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) coordinate_operation_with_conversion_view')
+        WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.name = NEW.name AND covwv.deprecated = 0 AND NEW.deprecated = 0
+        AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
+        AND NEW.name != 'NAD83(CSRS)v2 to NAD83(CSRS)v3 (1)' -- duplicate entry in EPSG
+        AND NEW.name != 'ETRS89 to ETRS89 + Baltic 1957 height (1)' -- duplicate entry in EPSG
+        AND NOT (NEW.description LIKE 'Reversible alternative to%' AND covwv.description NOT LIKE 'Reversible alternative to%')
+        AND NEW.code NOT LIKE '%_WITH_NAD83CSRSV7_INTERPOLATION'
+    );
 
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: source_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.source_crs_auth_name AND crs_view.code = NEW.source_crs_code);
@@ -1266,6 +1312,17 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
         WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
 
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) coordinate_operation_with_conversion_view')
+        WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.name = NEW.name AND covwv.deprecated = 0 AND NEW.deprecated = 0
+        AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
+        AND NEW.name != 'NKG_ETRF14 to ETRF93@2000.0' -- NKG:PAR_2020_NO and NKG:NKG_ETRF14_ETRF93_2000 have the same name
+        AND NEW.name != 'ETRF96@2000.0 to ETRF96@1997.56' -- NKG:ETRF96_2000_TO_ETRF96_1997_56 and NKG:EE_2020_INTRAPLATE have the same name
+        AND NEW.name != 'ETRF93@2000.0 to ETRF93@1995.0' -- NKG:ETRF93_2000_TO_ETRF93_1995 and NKG:NO_2020_INTRAPLATE have the same name
+        AND NEW.name != 'ETRF92@2000.0 to ETRF92@1994.704' -- NKG:ETRF92_2000_TO_ETRF92_1994 and NKG:DK_2020_INTRAPLATE have the same name
+        AND NEW.name != 'ETRF96@2000.0 to ETRF96@1997.0' -- NKG:ETRF96_2000_TO_ETRF96_1997 AND NKG:FI_2020_INTRAPLATE have the same name
+        AND NEW.name != 'ETRF97@2000.0 to ETRF97@1999.5' -- NKG:ETRF97_2000_TO_ETRF97_1999 and NKG:SE_2020_INTRAPLATE have the same name
+    );
+
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: source_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.source_crs_auth_name AND crs_view.code = NEW.source_crs_code);
 
@@ -1310,6 +1367,11 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
         WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
+
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) coordinate_operation_with_conversion_view')
+        WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.name = NEW.name AND covwv.deprecated = 0 AND NEW.deprecated = 0
+        AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
+    );
 
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: source_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.source_crs_auth_name AND crs_view.code = NEW.source_crs_code);
@@ -1469,8 +1531,8 @@ CREATE VIEW coordinate_operation_view AS
 ;
 
 CREATE VIEW coordinate_operation_with_conversion_view AS
-    SELECT auth_name, code, table_name AS type FROM coordinate_operation_view UNION ALL
-    SELECT auth_name, code, CAST('conversion' AS TEXT) FROM conversion_table;
+    SELECT auth_name, code, name, description, table_name AS type, deprecated FROM coordinate_operation_view UNION ALL
+    SELECT auth_name, code, name, description, CAST('conversion' AS TEXT) AS type, deprecated FROM conversion_table;
 
 CREATE VIEW crs_view AS
     SELECT CAST('geodetic_crs' AS TEXT) AS table_name, auth_name, code, name, type,
