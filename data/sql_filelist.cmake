@@ -2,6 +2,7 @@ set(SQL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/sql")
 set(SQL_FILES
   "${SQL_DIR}/begin.sql"
   "${SQL_DIR}/proj_db_table_defs.sql"
+  "${SQL_DIR}/consistency_checks_triggers.sql"
   "${SQL_DIR}/conversion_triggers.sql"
   "${SQL_DIR}/customizations_early.sql"
   "${SQL_DIR}/metadata.sql"
