@@ -514,6 +514,82 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on concatenated_operation_step violates constraint: step should not be a concatenated_operation')
         WHERE EXISTS(SELECT 1 FROM concatenated_operation WHERE auth_name = NEW.step_auth_name AND code = NEW.step_code);
 
+    -- NOTE: it would be good to be able to do the same for the last step, but
+    -- we don't know at INSERT time which one is going to be the last one...
+    SELECT RAISE(ABORT, 'insert on concatenated_operation_step violates constraint: step 1 must be a conversion or its source_crs or target_crs must be the source_crs of the concatenated_operation')
+        WHERE
+        NEW.step_number = 1
+        -- skip deprecated concatenated operations, or some blocklisted EPSG operations
+        AND NOT EXISTS (
+            SELECT 1 FROM concatenated_operation concat_op WHERE
+            concat_op.auth_name = NEW.operation_auth_name AND concat_op.code = NEW.operation_code
+            AND concat_op.deprecated = 1)
+
+        -- check if source_crs of step 1 is the source_crs of the concatenated_operation (by CRS code)
+        AND NOT EXISTS (
+            SELECT 1 FROM coordinate_operation_view step_op
+            LEFT JOIN concatenated_operation concat_op ON
+            concat_op.auth_name = NEW.operation_auth_name AND concat_op.code = NEW.operation_code
+            WHERE concat_op.deprecated = 0
+            AND step_op.auth_name = NEW.step_auth_name AND step_op.code = NEW.step_code
+            AND concat_op.source_crs_auth_name = step_op.source_crs_auth_name
+            AND concat_op.source_crs_code = step_op.source_crs_code)
+
+        -- same as above, but check by CRS name, and only for geodetic CRS.
+        -- For example the concatenated operation EPSG:9683 ("ITRF2014 to GDA94 (2)")
+        -- has EPSG:9000 "ITRF2014" (geographic 2D) as source CRS
+        -- but its first step is EPSG:8049 ("ITRF2014 to GDA2020 (1)") which has
+        -- EPSG:7789 "ITRF2014" (geocentric) as source CRS !
+        AND NOT EXISTS (
+            SELECT 1 FROM coordinate_operation_view step_op
+            LEFT JOIN concatenated_operation concat_op ON
+            concat_op.auth_name = NEW.operation_auth_name AND concat_op.code = NEW.operation_code
+            LEFT JOIN geodetic_crs concat_op_source_crs ON
+            concat_op_source_crs.auth_name = concat_op.source_crs_auth_name
+            AND concat_op_source_crs.code = concat_op.source_crs_code
+            LEFT JOIN geodetic_crs step_op_source_crs ON
+            step_op_source_crs.auth_name = step_op.source_crs_auth_name
+            AND step_op_source_crs.code = step_op.source_crs_code
+            WHERE concat_op.deprecated = 0
+            AND step_op.auth_name = NEW.step_auth_name AND step_op.code = NEW.step_code
+            AND concat_op_source_crs.name = step_op_source_crs.name)
+
+        -- case for EPSG:10146 "INAGeoid2020 v1 height to INAGeoid v2 height (1)"
+        -- that has EPSG:9471 "INAGeoid2020 v1 height" as source CRS
+        -- but its first step is EPSG:9629 "SRGI2013 to SRGI2013 + INAGeoid2020 v1 height (1)"
+        -- that has EPSG:9529 "SRGI2013 + INAGeoid2020 v1 height" as target CRS
+        AND NOT EXISTS (
+            SELECT 1 FROM coordinate_operation_view step_op
+            LEFT JOIN concatenated_operation concat_op ON
+            concat_op.auth_name = NEW.operation_auth_name AND concat_op.code = NEW.operation_code
+            LEFT JOIN vertical_crs concat_op_source_crs ON
+            concat_op_source_crs.auth_name = concat_op.source_crs_auth_name
+            AND concat_op_source_crs.code = concat_op.source_crs_code
+            LEFT JOIN compound_crs step_op_target_crs ON
+            step_op_target_crs.auth_name = step_op.target_crs_auth_name
+            AND step_op_target_crs.code = step_op.target_crs_code
+            WHERE concat_op.deprecated = 0
+            AND step_op.auth_name = NEW.step_auth_name AND step_op.code = NEW.step_code
+            AND step_op_target_crs.name LIKE '% + '|| concat_op_source_crs.name)
+
+        -- or if source_crs of step 1 is the target_crs of the concatenated_operation
+        AND NOT EXISTS (
+            SELECT 1 FROM coordinate_operation_view step_op
+            LEFT JOIN concatenated_operation concat_op ON
+            concat_op.auth_name = NEW.operation_auth_name AND concat_op.code = NEW.operation_code
+            WHERE concat_op.deprecated = 0
+            AND step_op.auth_name = NEW.step_auth_name AND step_op.code = NEW.step_code
+            AND concat_op.source_crs_auth_name = step_op.target_crs_auth_name
+            AND concat_op.source_crs_code = step_op.target_crs_code)
+
+        -- or if source_crs of step 1 is a conversion
+        AND NOT EXISTS (
+            SELECT 1 FROM conversion_table step_op
+            LEFT JOIN concatenated_operation concat_op ON
+            concat_op.auth_name = NEW.operation_auth_name AND concat_op.code = NEW.operation_code
+            WHERE concat_op.deprecated = 0
+            AND step_op.auth_name = NEW.step_auth_name AND step_op.code = NEW.step_code)
+    ;
 END;
 
 CREATE TRIGGER geoid_model_insert_trigger
