@@ -285,6 +285,47 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM geodetic_crs crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: target_crs must not be deprecated when helmert_transformation is not deprecated')
         WHERE EXISTS(SELECT 1 FROM geodetic_crs crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+
+    -- check that source and target of the same nature
+    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: source CRS and target CRS must have same geodetic_crs.type')
+        WHERE EXISTS (SELECT 1 FROM geodetic_crs crs1, geodetic_crs crs2 WHERE
+                          crs1.auth_name = NEW.source_crs_auth_name AND crs1.code = NEW.source_crs_code
+                          AND crs2.auth_name = NEW.target_crs_auth_name AND crs2.code = NEW.target_crs_code
+                          AND NEW.deprecated = 0 AND crs1.type != crs2.type);
+
+    -- check that the method used by a Helmert transformation is consistent with the dimensionality of the CRS
+    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: the domain of the method of helmert_transformation should be consistent with the dimensionality of the CRS')
+        WHERE NEW.deprecated = 0 AND
+              EXISTS (SELECT 1 FROM geodetic_crs crs
+                      LEFT JOIN coordinate_operation_method m ON
+                          NEW.method_auth_name = m.auth_name AND NEW.method_code = m.code
+                      WHERE
+                          crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND
+                          ((m.name LIKE '%geog2D domain%' AND crs.type != 'geographic 2D') OR
+                           (m.name LIKE '%geog3D domain%' AND crs.type != 'geographic 3D') OR
+                           (m.name LIKE '%geocentric domain%' AND crs.type != 'geocentric')));
+
+    -- check that a time-dependent Helmert transformation has its source or target CRS being dyanmic
+    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: a time-dependent Helmert transformations should have at least one of its source or target CRS dynamic')
+        WHERE NEW.deprecated = 0
+              AND EXISTS (SELECT 1 FROM coordinate_operation_method m
+                      WHERE NEW.method_auth_name = m.auth_name AND NEW.method_code = m.code AND
+                            m.name LIKE 'Time-dependent%')
+              AND EXISTS (
+                  SELECT 1 FROM geodetic_crs crs
+                  JOIN geodetic_datum gd ON
+                          gd.auth_name = crs.datum_auth_name AND gd.code = crs.datum_code
+                  WHERE crs.auth_name = NEW.source_crs_auth_name AND
+                        crs.code = NEW.source_crs_code AND
+                        gd.frame_reference_epoch IS NULL)
+              AND EXISTS (
+                  SELECT 1 FROM geodetic_crs crs
+                  JOIN geodetic_datum gd ON
+                          gd.auth_name = crs.datum_auth_name AND gd.code = crs.datum_code
+                  WHERE crs.auth_name = NEW.target_crs_auth_name AND
+                        crs.code = NEW.target_crs_code AND
+                        gd.frame_reference_epoch IS NULL);
+
 END;
 
 CREATE TRIGGER grid_transformation_insert_trigger
@@ -310,6 +351,51 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: target_crs must not be deprecated when grid_transformation is not deprecated')
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+
+    -- check that grids with NTv2 method are properly registered
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: grid_transformation with NTv2 must have its source_crs in geodetic_crs table with type = ''geographic 2D''')
+        WHERE NEW.method_name = 'NTv2' AND
+                      NOT EXISTS (SELECT 1 FROM geodetic_crs crs WHERE
+                          NEW.source_crs_auth_name = crs.auth_name AND
+                          NEW.source_crs_code = crs.code AND
+                          crs.type = 'geographic 2D');
+
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: grid_transformation with NTv2 has have its target_crs in geodetic_crs table with type = ''geographic 2D''')
+        WHERE NEW.method_name = 'NTv2' AND
+                      NOT EXISTS (SELECT 1 FROM geodetic_crs crs WHERE
+                          NEW.target_crs_auth_name = crs.auth_name AND
+                          NEW.target_crs_code = crs.code AND
+                          crs.type = 'geographic 2D');
+
+    -- check that grids with Geographic3D to GravityRelatedHeight method are properly registered
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: grid_transformation with Geographic3D to GravityRelatedHeight must have its target_crs in vertical_crs table')
+        WHERE NEW.deprecated = 0 AND
+              NEW.method_name LIKE 'Geographic3D to GravityRelatedHeight%' AND
+              NOT EXISTS (SELECT 1 FROM vertical_crs crs WHERE
+                          NEW.target_crs_auth_name = crs.auth_name AND
+                          NEW.target_crs_code = crs.code);
+
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: grid_transformation with Geographic3D to GravityRelatedHeight or Geog3D to Geog2D+XXX must have its source_crs in geodetic_crs table with type = ''geographic 3D''')
+        WHERE NEW.deprecated = 0 AND
+              (NEW.method_name LIKE 'Geographic3D to %' OR NEW.method_name LIKE 'Geog3D to %') AND
+              NOT EXISTS (SELECT 1 FROM geodetic_crs crs WHERE
+                          NEW.source_crs_auth_name = crs.auth_name AND
+                          NEW.source_crs_code = crs.code AND
+                          crs.type = 'geographic 3D');
+
+    -- check that grids with 'Vertical Offset by Grid Interpolation' methods are properly registered
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: grid_transformation with Vertical Offset by Grid Interpolation must have its source_crs in vertical_crs table')
+        WHERE NEW.method_name LIKE 'Vertical Offset by Grid Interpolation%' AND
+              NOT EXISTS (SELECT 1 FROM vertical_crs crs WHERE
+                          NEW.source_crs_auth_name = crs.auth_name AND
+                          NEW.source_crs_code = crs.code);
+
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: grid_transformation with Vertical Offset by Grid Interpolation must have its target_crs in vertical_crs table')
+        WHERE NEW.method_name LIKE 'Vertical Offset by Grid Interpolation%' AND
+              NOT EXISTS (SELECT 1 FROM vertical_crs crs WHERE
+                          NEW.target_crs_auth_name = crs.auth_name AND
+                          NEW.target_crs_code = crs.code);
+
 END;
 
 CREATE TRIGGER grid_packages_insert_trigger
@@ -361,6 +447,37 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: target_crs must not be deprecated when other_transformation is not deprecated')
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+
+    -- check that transformations operations between vertical CRS are from/into a vertical CRS
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: transformation operating on vertical CRS must have a source CRS being a vertical CRS')
+        WHERE NEW.deprecated = 0 AND
+              NEW.method_name IN ('Vertical Offset', 'Height Depth Reversal', 'Change of Vertical Unit') AND
+              NOT EXISTS (SELECT 1 FROM vertical_crs crs WHERE
+                          crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code);
+
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: transformation operating on vertical CRS must have a target CRS being a vertical CRS')
+        WHERE NEW.deprecated = 0 AND
+              NEW.method_name IN ('Vertical Offset', 'Height Depth Reversal', 'Change of Vertical Unit') AND
+              NOT EXISTS (SELECT 1 FROM vertical_crs crs WHERE
+                          crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code);
+
+    -- check that 'Geographic2D with Height Offsets' transformations have a compound CRS with a geog2D as source
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: a transformation Geographic2D with Height Offsets must have a compound CRS with a geog2D as source')
+        WHERE NEW.deprecated = 0 AND
+              NEW.method_name = 'Geographic2D with Height Offsets' AND
+              NOT EXISTS (SELECT 1 FROM compound_crs ccrs
+                      LEFT JOIN geodetic_crs gcrs ON
+                          gcrs.auth_name = horiz_crs_auth_name AND gcrs.code = horiz_crs_code
+                      WHERE
+                          ccrs.auth_name = NEW.source_crs_auth_name AND ccrs.code = NEW.source_crs_code
+                          AND gcrs.type = 'geographic 2D');
+
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: a transformation Geographic2D with Height Offsets must have a geographic 3D CRS as target')
+        WHERE NEW.deprecated = 0 AND
+              NEW.method_name = 'Geographic2D with Height Offsets' AND
+              NOT EXISTS (SELECT 1 FROM geodetic_crs gcrs WHERE
+                          gcrs.auth_name = NEW.target_crs_auth_name AND gcrs.code = NEW.target_crs_code
+                          AND gcrs.type = 'geographic 3D');
 END;
 
 CREATE TRIGGER concatenated_operation_insert_trigger
