@@ -383,6 +383,36 @@ FOR EACH ROW BEGIN
                           NEW.source_crs_code = crs.code AND
                           crs.type = 'geographic 3D');
 
+    -- check that transformations with Geog3D to Geog2D+GravityRelatedHeight/Depth family of methods are properly registered
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: a transformation Geog3D to Geog2D+GravityRelatedHeight/Depth must have a geog3D CRS as source')
+        WHERE NEW.deprecated = 0 AND
+              NEW.method_name LIKE 'Geog3D to Geog2D+%' AND
+              NOT EXISTS (SELECT 1 FROM geodetic_crs gcrs WHERE
+                          gcrs.auth_name = NEW.source_crs_auth_name AND gcrs.code = NEW.source_crs_code
+                          AND gcrs.type = 'geographic 3D');
+
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: a transformation Geog3D to Geog2D+GravityRelatedHeight/Depth must have a compound CRS with a geog2D CRS as target')
+        WHERE NEW.deprecated = 0 AND
+              NEW.method_name LIKE 'Geog3D to Geog2D+%' AND
+              NOT EXISTS (SELECT 1 FROM compound_crs ccrs
+                      LEFT JOIN geodetic_crs gcrs ON
+                          gcrs.auth_name = horiz_crs_auth_name AND gcrs.code = horiz_crs_code
+                      WHERE
+                          ccrs.auth_name = NEW.target_crs_auth_name AND ccrs.code = NEW.target_crs_code
+                          AND gcrs.type = 'geographic 2D');
+
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: a transformation Geog3D to Geog2D+GravityRelatedHeight/Depth must use the same geodetic datum for the source and target CRS')
+        WHERE NEW.deprecated = 0 AND
+              NEW.method_name LIKE 'Geog3D to Geog2D+%' AND
+              NOT EXISTS (SELECT 1 FROM compound_crs ccrs
+                      LEFT JOIN geodetic_crs target_gcrs ON
+                          target_gcrs.auth_name = horiz_crs_auth_name AND target_gcrs.code = horiz_crs_code
+                      LEFT JOIN geodetic_crs source_gcrs ON
+                          source_gcrs.auth_name = NEW.source_crs_auth_name AND source_gcrs.code = NEW.source_crs_code
+                      WHERE
+                          ccrs.auth_name = NEW.target_crs_auth_name AND ccrs.code = NEW.target_crs_code
+                          AND source_gcrs.name = target_gcrs.name);
+
     -- check that grids with 'Vertical Offset by Grid Interpolation' methods are properly registered
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: grid_transformation with Vertical Offset by Grid Interpolation must have its source_crs in vertical_crs table')
         WHERE NEW.method_name LIKE 'Vertical Offset by Grid Interpolation%' AND
