@@ -185,6 +185,9 @@ which gives:
 
     45d31'0.003"N 123d40'59.985"W 75d39'13.094"
 
+i.e., the latitude and longitude of Portland, and the
+back azimuth from Portland to Boston.
+
 .. note::
     Lack of precision in the distance value compromises the
     precision of the Portland location.
