@@ -1256,6 +1256,8 @@ fill_deprecation(proj_db_cursor)
 fill_usage(proj_db_cursor)
 non_imported_operations = report_non_imported_operations(proj_db_cursor)
 
+proj_db_cursor.execute("""DROP TABLE builtin_authorities;""")
+
 proj_db_cursor.close()
 proj_db_conn.commit()
 
