@@ -3457,7 +3457,7 @@ PJ *proj_create_geographic_crs(PJ_CONTEXT *ctx, const char *crs_name,
                                double prime_meridian_offset,
                                const char *pm_angular_units,
                                double pm_angular_units_conv,
-                               PJ *ellipsoidal_cs) {
+                               const PJ *ellipsoidal_cs) {
 
     SANITIZE_CTX(ctx);
     auto cs = std::dynamic_pointer_cast<EllipsoidalCS>(ellipsoidal_cs->iso_obj);
@@ -3496,8 +3496,8 @@ PJ *proj_create_geographic_crs(PJ_CONTEXT *ctx, const char *crs_name,
  * proj_destroy(), or NULL in case of error.
  */
 PJ *proj_create_geographic_crs_from_datum(PJ_CONTEXT *ctx, const char *crs_name,
-                                          PJ *datum_or_datum_ensemble,
-                                          PJ *ellipsoidal_cs) {
+                                          const PJ *datum_or_datum_ensemble,
+                                          const PJ *ellipsoidal_cs) {
 
     SANITIZE_CTX(ctx);
     if (datum_or_datum_ensemble == nullptr) {
@@ -3811,7 +3811,7 @@ PJ *proj_create_vertical_crs_ex(
  * proj_destroy(), or NULL in case of error.
  */
 PJ *proj_create_compound_crs(PJ_CONTEXT *ctx, const char *crs_name,
-                             PJ *horiz_crs, PJ *vert_crs) {
+                             const PJ *horiz_crs, const PJ *vert_crs) {
 
     SANITIZE_CTX(ctx);
     if (!horiz_crs || !vert_crs) {
@@ -4517,14 +4517,12 @@ PJ *proj_create_conversion(PJ_CONTEXT *ctx, const char *name,
  * proj_destroy(), or NULL in case of error.
  */
 
-PJ *proj_create_transformation(PJ_CONTEXT *ctx, const char *name,
-                               const char *auth_name, const char *code,
-                               PJ *source_crs, PJ *target_crs,
-                               PJ *interpolation_crs, const char *method_name,
-                               const char *method_auth_name,
-                               const char *method_code, int param_count,
-                               const PJ_PARAM_DESCRIPTION *params,
-                               double accuracy) {
+PJ *proj_create_transformation(
+    PJ_CONTEXT *ctx, const char *name, const char *auth_name, const char *code,
+    const PJ *source_crs, const PJ *target_crs, const PJ *interpolation_crs,
+    const char *method_name, const char *method_auth_name,
+    const char *method_code, int param_count,
+    const PJ_PARAM_DESCRIPTION *params, double accuracy) {
     SANITIZE_CTX(ctx);
     if (!source_crs || !target_crs) {
         proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);

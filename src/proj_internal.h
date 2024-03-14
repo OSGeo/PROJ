@@ -1007,7 +1007,7 @@ PJ_LPZ pj_inv3d(PJ_XYZ, PJ *);
 
 void pj_clear_initcache(void);
 void PROJ_DLL pj_pr_list(PJ *); /* used by proj.cpp */
-char *pj_get_def(PJ *, int);
+char *pj_get_def(const PJ *, int);
 int pj_has_inverse(PJ *);
 
 char *pj_strdup(const char *str);

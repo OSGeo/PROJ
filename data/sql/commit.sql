@@ -28,6 +28,13 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'corrupt definition of authority_list')
         WHERE (SELECT 1 FROM authority_list LIMIT 1) = 0;
 
+    -- check that the auth_name of all objects in object_view is recorded in builtin_authorities
+    SELECT RAISE(ABORT, 'One or several authorities referenced in object_view are missing in builtin_authorities')
+        WHERE EXISTS (
+            SELECT DISTINCT o.auth_name FROM object_view o WHERE NOT EXISTS (
+                SELECT 1 FROM builtin_authorities b WHERE o.auth_name = b.auth_name)
+        );
+
     -- check that a usage is registered for most objects where this is needed
     SELECT RAISE(ABORT, 'One or several objects lack a corresponding record in the usage table')
         WHERE EXISTS (

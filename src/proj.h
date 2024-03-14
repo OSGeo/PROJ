@@ -1643,12 +1643,13 @@ PJ PROJ_DLL *proj_create_geographic_crs(
     PJ_CONTEXT *ctx, const char *crs_name, const char *datum_name,
     const char *ellps_name, double semi_major_metre, double inv_flattening,
     const char *prime_meridian_name, double prime_meridian_offset,
-    const char *pm_angular_units, double pm_units_conv, PJ *ellipsoidal_cs);
+    const char *pm_angular_units, double pm_units_conv,
+    const PJ *ellipsoidal_cs);
 
-PJ PROJ_DLL *proj_create_geographic_crs_from_datum(PJ_CONTEXT *ctx,
-                                                   const char *crs_name,
-                                                   PJ *datum_or_datum_ensemble,
-                                                   PJ *ellipsoidal_cs);
+PJ PROJ_DLL *
+proj_create_geographic_crs_from_datum(PJ_CONTEXT *ctx, const char *crs_name,
+                                      const PJ *datum_or_datum_ensemble,
+                                      const PJ *ellipsoidal_cs);
 
 PJ PROJ_DLL *proj_create_geocentric_crs(
     PJ_CONTEXT *ctx, const char *crs_name, const char *datum_name,
@@ -1721,7 +1722,7 @@ PJ PROJ_DLL *proj_create_vertical_crs_ex(
     const char *const *options);
 
 PJ PROJ_DLL *proj_create_compound_crs(PJ_CONTEXT *ctx, const char *crs_name,
-                                      PJ *horiz_crs, PJ *vert_crs);
+                                      const PJ *horiz_crs, const PJ *vert_crs);
 
 PJ PROJ_DLL *proj_create_conversion(PJ_CONTEXT *ctx, const char *name,
                                     const char *auth_name, const char *code,
@@ -1732,7 +1733,7 @@ PJ PROJ_DLL *proj_create_conversion(PJ_CONTEXT *ctx, const char *name,
 
 PJ PROJ_DLL *proj_create_transformation(
     PJ_CONTEXT *ctx, const char *name, const char *auth_name, const char *code,
-    PJ *source_crs, PJ *target_crs, PJ *interpolation_crs,
+    const PJ *source_crs, const PJ *target_crs, const PJ *interpolation_crs,
     const char *method_name, const char *method_auth_name,
     const char *method_code, int param_count,
     const PJ_PARAM_DESCRIPTION *params, double accuracy);
