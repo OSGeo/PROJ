@@ -260,6 +260,16 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1369','Dansk Vertikal Reference 1990
 INSERT INTO "usage" VALUES('EPSG','20432','vertical_datum','EPSG','1369','EPSG','3237','EPSG','1142');
 INSERT INTO "vertical_datum" VALUES('EPSG','1370','Dansk Vertikal Reference 1990 (2023)',NULL,'2023-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','20433','vertical_datum','EPSG','1370','EPSG','3237','EPSG','1142');
+INSERT INTO "vertical_datum" VALUES('EPSG','1372','Denmark Mean Sea Level (2022)',NULL,'2022-01-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21004','vertical_datum','EPSG','1372','EPSG','4756','EPSG','1198');
+INSERT INTO "vertical_datum" VALUES('EPSG','1373','Denmark Lowest Astronomical Tide (2022)',NULL,'2022-01-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21005','vertical_datum','EPSG','1373','EPSG','4756','EPSG','1198');
+INSERT INTO "vertical_datum" VALUES('EPSG','1374','Denmark Mean Sea Level (2023)',NULL,'2024-01-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21267','vertical_datum','EPSG','1374','EPSG','4756','EPSG','1198');
+INSERT INTO "vertical_datum" VALUES('EPSG','1375','Denmark Lowest Astronomic Tide (2023)',NULL,'2024-01-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21041','vertical_datum','EPSG','1375','EPSG','4756','EPSG','1198');
+INSERT INTO "vertical_datum" VALUES('EPSG','1378','Greenland Local Mean Sea Level (2022)',NULL,'2022-01-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','20999','vertical_datum','EPSG','1378','EPSG','3119','EPSG','1142');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,NULL,NULL,0);
@@ -494,3 +504,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1288','British Isles height ensemble
 INSERT INTO "usage" VALUES('EPSG','14086','vertical_datum','EPSG','1288','EPSG','4606','EPSG','1026');
 INSERT INTO "vertical_datum" VALUES('EPSG','1371','Dansk Vertikal Reference 1990 ensemble',NULL,NULL,NULL,0.05,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','20365','vertical_datum','EPSG','1371','EPSG','3237','EPSG','1142');
+INSERT INTO "vertical_datum" VALUES('EPSG','1376','Denmark Mean Sea Level ',NULL,NULL,NULL,0.5,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21052','vertical_datum','EPSG','1376','EPSG','4756','EPSG','1198');
+INSERT INTO "vertical_datum" VALUES('EPSG','1377','Denmark Lowest Astronomical Tide ',NULL,NULL,NULL,0.5,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21051','vertical_datum','EPSG','1377','EPSG','4756','EPSG','1198');
