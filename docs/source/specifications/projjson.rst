@@ -40,7 +40,7 @@ Schema
 ------
 
 A JSON schema of PROJJSON grammar is available at
-https://proj.org/schemas/v0.6/projjson.schema.json
+https://proj.org/schemas/v0.7/projjson.schema.json
 
 This schema defines a minimum set of constraints that apply to well-formed PROJJSON.
 Number of specific CRS and coordinate operation domain constraints are not expressed
