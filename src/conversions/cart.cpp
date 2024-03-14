@@ -155,9 +155,19 @@ static PJ_LPZ geodetic(PJ_XYZ cart, PJ *P) {
     PJ_LPZ lpz;
 
     // Normalize (x,y,z) to the unit sphere/ellipsoid.
+#if (defined(__i386__) && !defined(__SSE__)) || defined(_M_IX86)
+    // i386 (actually non-SSE) code path to make following test case of
+    // testvarious happy
+    // "echo 6378137.00 -0.00 0.00 | bin/cs2cs +proj=geocent +datum=WGS84 +to
+    // +proj=latlong +datum=WGS84"
     const double x_div_a = cart.x / P->a;
     const double y_div_a = cart.y / P->a;
     const double z_div_a = cart.z / P->a;
+#else
+    const double x_div_a = cart.x * P->ra;
+    const double y_div_a = cart.y * P->ra;
+    const double z_div_a = cart.z * P->ra;
+#endif
 
     /* Perpendicular distance from point to Z-axis (HM eq. 5-28) */
     const double p_div_a = sqrt(x_div_a * x_div_a + y_div_a * y_div_a);
