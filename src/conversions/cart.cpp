@@ -39,6 +39,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
+#if __SIZEOF_POINTER__ == 4
+#define mode_32bits
+#endif /*detect use of -m32*/
 
 #include "proj_internal.h"
 #include <math.h>
@@ -111,9 +114,11 @@ static double normal_radius_of_curvature(double a, double es, double sinphi) {
     return a / sqrt(1 - es * sinphi * sinphi);
 }
 
+#ifndef mode_32bits
 inline double invhypot(const double x, const double y) {
   return 1.0 / sqrt(x*x + y*y);
 }
+#endif /*not 32bit*/
 /*********************************************************************/
 static double geocentric_radius(double a, double b, double cosphi,
                                 double sinphi) {
@@ -124,8 +129,13 @@ static double geocentric_radius(double a, double b, double cosphi,
         This is from WP2, but uses hypot() for potentially better
         numerical robustness
     ***********************************************************************/
+#ifdef mode_32bits
+    return hypot(a * a * cosphi, b * b * sinphi) /
+           hypot(a * cosphi, b * sinphi);
+#else
     return hypot(a * a * cosphi, b *  b * sinphi) *
        invhypot(a * cosphi, b * sinphi);
+#endif /*32bit*/
 }
 
 /*********************************************************************/
@@ -163,16 +173,28 @@ static PJ_LPZ geodetic(PJ_XYZ cart, PJ *P) {
 #else
     const double y_theta = cart.z * P->a;
     const double x_theta = p * P->b;
+#ifdef mode_32bits
+    const double norm = hypot(y_theta, x_theta);
+    const double c = norm == 0 ? 1 : x_theta / norm;
+    const double s = norm == 0 ? 0 : y_theta / norm;
+#else
     const double invnorm = invhypot(y_theta, x_theta);
     const double c = (y_theta==0 && x_theta==0)? 1 : x_theta * invnorm;
     const double s = (y_theta==0 && x_theta==0)? 0 : y_theta * invnorm;
+#endif /*32bit*/
 #endif
 
     const double y_phi = cart.z + P->e2s * P->b * s * s * s;
     const double x_phi = p - P->es * P->a * c * c * c;
+#ifdef mode_32bits
+    const double norm_phi = hypot(y_phi, x_phi);
+    double cosphi = norm_phi == 0 ? 1 : x_phi / norm_phi;
+    double sinphi = norm_phi == 0 ? 0 : y_phi / norm_phi;
+#else
     const double invnorm_phi = invhypot(y_phi, x_phi);
     double cosphi = (y_phi==0 && x_phi==0)? 1 : x_phi * invnorm_phi;
     double sinphi = (y_phi==0 && x_phi==0)? 0 : y_phi * invnorm_phi;
+#endif /*32bit*/
     if (x_phi <= 0) {
         // this happen on non-sphere ellipsoid when x,y,z is very close to 0
         // there is no single solution to the cart->geodetic conversion in
