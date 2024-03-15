@@ -28,6 +28,12 @@ Stereographic
 
    proj-string: ``+proj=stere +lat_0=90 +lat_ts=75``
 
+.. note::
+
+    This projection method gives different results than the :ref:`sterea`
+    method in the non-polar cases (i.e. the oblique and equatorial case). The later
+    projection method is the one referenced by EPSG as "Oblique Stereographic".
+
 Parameters
 ################################################################################
 
