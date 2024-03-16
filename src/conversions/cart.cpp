@@ -130,10 +130,9 @@ static double geocentric_radius(double a, double b_div_a, double cosphi,
     const double b_div_a_squared = b_div_a * b_div_a;
     const double b_div_a_squared_mul_sinphi_squared =
         b_div_a_squared * sinphi_squared;
-    return a *
-           sqrt(cosphi_squared +
-                b_div_a_squared * b_div_a_squared_mul_sinphi_squared) /
-           sqrt(cosphi_squared + b_div_a_squared_mul_sinphi_squared);
+    return a * sqrt((cosphi_squared +
+                     b_div_a_squared * b_div_a_squared_mul_sinphi_squared) /
+                    (cosphi_squared + b_div_a_squared_mul_sinphi_squared));
 }
 
 /*********************************************************************/
