@@ -296,7 +296,7 @@
 
   * C API: add proj_get_domain_count(), proj_get_area_of_use_ex() and proj_get_scope_ex() (#3588)
 
-  DEPRECATIONS
+## Deprecations
 
   The following functions have been deprecated and will be removed in a future version.
 
@@ -788,7 +788,7 @@ Details about the build system unification can be found in PROJ RFC 7.
   project (#2913)
 
 
-## THANKS TO
+## Thanks to
 
 Thomas Knudsen
 Alan D. Snow
@@ -813,7 +813,7 @@ Even Rouault
 
 * EPSG Database updated to version 10.028 (#2773)
 
-## Bug Fixes
+## Bug fixes
 
 * Include algorithm header file to avoid build errors on Alpine Linux (#2769)
 
@@ -850,7 +850,7 @@ Even Rouault
   inverse map projection is involved in non-final step (#2819)
 
 
-## THANKS TO
+## Thanks to
 
 Brendan Jurd
 Kristian Evers
@@ -1001,7 +1001,7 @@ Even Rouault
 * createOperations(): fix incorrect height transformation between 3D promoted RGF93 and CH1903+ (#2555)
 
 
-## THANKS TO
+## Thanks to
 
 Dan Jacobson
 Sveinung Himle
@@ -1081,7 +1081,7 @@ tweaks in the underlying API.
 
 * Close database connection when autoclose set to True (#2532)
 
-## THANKS TO
+## Thanks to
 
 
 Zac Miller
@@ -1157,7 +1157,7 @@ Even Rouault
 
 * createOperations(): fix inconsistent chaining exception when transforming from BoundCRS of projected CRS based on NTF Paris to BoundCRS of geog CRS NTF Paris (#2486)
 
-## THANKS TO
+## Thanks to
 
 Zac Miller
 Nomit Rawat
@@ -1242,7 +1242,7 @@ Even Rouault
 * WKT1_ESRI: fix import and export of CompoundCRS (#2389)
 
 
-## THANKS TO
+## Thanks to
 
 Alexander Saprykin
 Jeff McKenna
@@ -1291,7 +1291,7 @@ Even Rouault
 
  * Revert compiler generated Fused Multiply Addition optimized routines #2328
 
-## THANKS TO
+## Thanks to
 
 Jeff McKenna
 Kai Pastor
@@ -1437,7 +1437,7 @@ Even Rouault
 
 * Fix access violation in proj_context_get_database_metadata (#2260)
 
-## THANKS TO
+## Thanks to
 
 Martin Raspaud
 Jeroen Ooms
@@ -1563,7 +1563,7 @@ Even Rouault
 * Fix support of WKT1_GDAL with netCDF rotated pole formulation (#2186)
 
 
-## THANKS TO
+## Thanks to
 
 Mike Taves
 Chris Mayo
@@ -1671,7 +1671,7 @@ for more info on how to migrate from the old to the new API.
 
 * Increase CMake minimum version from 3.5 to 3.9 (#1907)
 
-## THANKS TO
+## Thanks to
 
 Jeff McKenna
 Calum Robinson
@@ -1731,7 +1731,7 @@ Even Rouault
 
 * Various updates to make regression test suite pass with gcc on i386 (#1906)
 
-## THANKS TO
+## Thanks to
 
 Alan D. Snow
 GitHub user @russkel
@@ -1810,7 +1810,7 @@ Even Rouault
 
 * Fix errors running gie-based tests in Debug mode on Windows (#1688)
 
-## THANKS TO
+## Thanks to
 
 Pedro Venancio
 Owen Rudge
@@ -1906,7 +1906,7 @@ Even Rouault
 * importFromWkt(): fix axis orientation for non-standard ESRI WKT (#1690)
 
 
-## THANKS TO
+## Thanks to
 
 R. Schmunk
 Jakob Egger
@@ -1939,11 +1939,11 @@ Even Rouault
 
 * Added C API function proj_cleanup() (#1569)
 
-## Bug Fixes
+## Bug fixes
 
 * Fixed build failure on Solaris systems (#1554)
 
-## THANKS TO
+## Thanks to
 
 Version 6.2.0 is made possible by the following contributors:
 
@@ -1960,7 +1960,7 @@ Even Rouault
 * Update EPSG registry to version 9.6.3 (1485)
 
 
-## Bug Fixes
+## Bug fixes
 
 * Take the passed authority into account when identifying
   objects (#1466)
@@ -1988,7 +1988,7 @@ Even Rouault
   created (#1526)
 
 
-## THANKS TO
+## Thanks to
 
 Version 6.1.1 is made possible by the following contributors:
 
@@ -2066,7 +2066,7 @@ Even Rouault
 
 * Many division by zero and similar bug fixes found by OSS Fuzz.
 
-## THANKS TO
+## Thanks to
 
 Version 6.1.0 is made possible by the following contributors:
 
@@ -2126,7 +2126,7 @@ a geodetic object of the database, import and export geodetic objects from/into
 WKT and PROJ strings, and display coordinate operations available between two
 CRSs.
 
-## UPDATES
+## Updates
 
 * Removed projects.h as a public interface (#835)
 
@@ -2184,7 +2184,7 @@ CRSs.
 * Added +dt parameter to deformation as replacement for
   removed +t_obs (#1264)
 
-## BUG FIXES
+## Bug fixes
 
 * Read +towgs84 values correctly on locales not using dot as comma separator (#1136)
 
@@ -2205,7 +2205,7 @@ CRSs.
 * Robinson: fix wrong values for forward path for latitudes >= 87.5 (#1172),
   and fix inaccurate inverse method.
 
-## THANKS TO
+## Thanks to
 
 Version 6.0.0 is made possible by the following contributors:
 
@@ -2232,7 +2232,7 @@ Even Rouault
 
 # 5.2.0 Release Notes
 
-## UPDATES
+## Updates
 
 * Added support for deg, rad and grad in unitconvert (#1054)
 
@@ -2257,7 +2257,7 @@ Even Rouault
   stream (#1111)
 
 
-## BUG FIXES
+## Bug fixes
 
 * Do not pivot over WGS84 when doing cs2cs-emulation with geocent (#1026)
 
@@ -2282,7 +2282,7 @@ Even Rouault
 All bug fix numbers refer to issues or pull requests indexed at
 https://github.com/OSGeo/proj.4/
 
-## THANKS TO
+## Thanks to
 
 Version 5.2.0 is made possible by the following contributors:
 
@@ -2303,7 +2303,7 @@ Kristian Evers
 
 # 5.1.0 Release Notes
 
-## UPDATES
+## Updates
 
 * Function proj_errno_string() added to proj.h API (#847)
 
@@ -2331,7 +2331,7 @@ Kristian Evers
   the temporal domain (#1015)
 
 
-## BUG FIXES
+## Bug fixes
 
 * Handle nan float cast overflow in PJ_robin.c and nad_intr.c (#887)
 
@@ -2368,7 +2368,7 @@ Kristian Evers
 All bug fix numbers refer to issues or pull requests indexed at
 https://github.com/OSGeo/proj.4/
 
-## THANKS TO
+## Thanks to
 
 Version 5.1.0 is made possible by the following contributors:
 
@@ -2386,7 +2386,7 @@ Version 5.1.0 is made possible by the following contributors:
 
 # 5.0.1 Release Notes
 
-## BUG FIXES
+## Bug fixes
 
 All bug fix numbers refer to issues or pull requests indexed at
 https://github.com/OSGeo/proj.4/
@@ -2420,7 +2420,7 @@ https://github.com/OSGeo/proj.4/
 
 * Fix incorrect Web Mercator transformations #834
 
-## THANKS TO
+## Thanks to
 
 Version 5.0.1 is made possible by the following contributors:
 
@@ -2476,7 +2476,7 @@ software package with a clean and concise code base appealing to
 both users and developers.
 
 
-## VERSIONING AND NAMING
+## Versioning and naming
 
 For the first time in more than 25 years the major version number of
 the software is changed. The decision to do this is based on the many
@@ -2511,7 +2511,7 @@ In summary:
  which at the time of writing is at version 1.6.0.
 
 
-## UPDATES
+## Updates
 
 * Introduced new API in proj.h.
   - The new API is orthogonal to the existing proj_api.h API and the
@@ -2609,7 +2609,7 @@ In summary:
 
 * Removed the VB6 COM interface.
 
-## BUG FIXES
+## Bug fixes
 
 All bug fix numbers refer to issues indexed at
 https://github.com/OSGeo/proj.4/issues/
@@ -2669,7 +2669,7 @@ https://github.com/OSGeo/proj.4/issues/
   https://bugs.chromium.org/p/oss-fuzz/issues/list?can=1&q=proj4
 
 
-## DEPRECATIONS
+## Deprecations
 
 * The projects.h header and the functions related to it is
   considered deprecated from version 5.0.0 and onwards.
@@ -2691,7 +2691,7 @@ https://github.com/OSGeo/proj.4/issues/
    !!!                 WITH VERSION 7.0.0                  !!!
 
 
-## THANKS TO
+## Thanks to
 
 Version 5.0.0 is made possible by the following contributors:
 
