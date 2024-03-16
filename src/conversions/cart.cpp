@@ -125,11 +125,15 @@ static double geocentric_radius(double a, double b_div_a, double cosphi,
     // const double b = a * b_div_a;
     // return hypot(a * a * cosphi, b * b * sinphi) /
     //        hypot(a * cosphi, b * sinphi);
-
+    const double cosphi_squared = cosphi * cosphi;
+    const double sinphi_squared = sinphi * sinphi;
+    const double b_div_a_squared = b_div_a * b_div_a;
+    const double b_div_a_squared_mul_sinphi_squared =
+        b_div_a_squared * sinphi_squared;
     return a *
-           sqrt(cosphi * cosphi +
-                (b_div_a * b_div_a) * (b_div_a * b_div_a) * (sinphi * sinphi)) /
-           sqrt(cosphi * cosphi + (b_div_a * b_div_a) * (sinphi * sinphi));
+           sqrt(cosphi_squared +
+                b_div_a_squared * b_div_a_squared_mul_sinphi_squared) /
+           sqrt(cosphi_squared + b_div_a_squared_mul_sinphi_squared);
 }
 
 /*********************************************************************/
