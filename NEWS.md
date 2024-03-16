@@ -790,21 +790,21 @@ Details about the build system unification can be found in PROJ RFC 7.
 
 ## Thanks to
 
-Thomas Knudsen
-Alan D. Snow
-Johannes Schauer Marin Rodrigues
-Howard Butler
-Geoff Evans
-Joris Van den Bossche
-marcus-elia
-Waheed Barghouthi
-snowman2
-Ben Boeckel
-Mike Taves
-Javier Jimenez Shaw
-Brendan Jurd
-Kristian Evers
-Even Rouault
+- Thomas Knudsen
+- Alan D. Snow
+- Johannes Schauer Marin Rodrigues
+- Howard Butler
+- Geoff Evans
+- Joris Van den Bossche
+- marcus-elia
+- Waheed Barghouthi
+- snowman2
+- Ben Boeckel
+- Mike Taves
+- Javier Jimenez Shaw
+- Brendan Jurd
+- Kristian Evers
+- Even Rouault
 
 
 # 8.1.1 Release Notes
@@ -852,9 +852,9 @@ Even Rouault
 
 ## Thanks to
 
-Brendan Jurd
-Kristian Evers
-Even Rouault
+- Brendan Jurd
+- Kristian Evers
+- Even Rouault
 
 # 8.1.0 Release Notes
 
@@ -932,18 +932,18 @@ Even Rouault
 
 ## Thanks to
 
-Howard Butler
-Alan D. Snow
-Roel van den Berg
-Heidi Vanparys
-Sveinung Himle
-積丹尼 Dan Jacobson
-Nyall Dawson
-Javier Jimenez Shaw
-Charles Karney
-Mike Taves
-Kristian Evers
-Even Rouault
+- Howard Butler
+- Alan D. Snow
+- Roel van den Berg
+- Heidi Vanparys
+- Sveinung Himle
+- 積丹尼 Dan Jacobson
+- Nyall Dawson
+- Javier Jimenez Shaw
+- Charles Karney
+- Mike Taves
+- Kristian Evers
+- Even Rouault
 
 
 # 8.0.1 Release Notes
@@ -1003,12 +1003,12 @@ Even Rouault
 
 ## Thanks to
 
-Dan Jacobson
-Sveinung Himle
-Mike Taves
-Javier Jimenez Shaw
-Kristian Evers
-Even Rouault
+- Dan Jacobson
+- Sveinung Himle
+- Mike Taves
+- Javier Jimenez Shaw
+- Kristian Evers
+- Even Rouault
 
 
 # 8.0.0 Release Notes
@@ -1083,26 +1083,25 @@ tweaks in the underlying API.
 
 ## Thanks to
 
-
-Zac Miller
-Juan Hernando
-Thomas Knudsen
-Sveinung Himle
-Olli Raisa
-Nomit Rawat
-Modern Slave
-J.H. van de Water
-Guillaume Lostis
-Martin Steinisch
-Javier Jimenez Shaw
-Mateusz Łoskot
-Martijn Visser
-Alan D. Snow
-Mike Taves
-Nyall Dawson
-Charles Karney
-Kristian Evers
-Even Rouault
+- Zac Miller
+- Juan Hernando
+- Thomas Knudsen
+- Sveinung Himle
+- Olli Raisa
+- Nomit Rawat
+- Modern Slave
+- J.H. van de Water
+- Guillaume Lostis
+- Martin Steinisch
+- Javier Jimenez Shaw
+- Mateusz Łoskot
+- Martijn Visser
+- Alan D. Snow
+- Mike Taves
+- Nyall Dawson
+- Charles Karney
+- Kristian Evers
+- Even Rouault
 
 
 # 7.2.1 Release Notes
@@ -1159,12 +1158,12 @@ Even Rouault
 
 ## Thanks to
 
-Zac Miller
-Nomit Rawat
-Guillaume Lostis
-J.H. van de Water
-Kristian Evers
-Even Rouault
+- Zac Miller
+- Nomit Rawat
+- Guillaume Lostis
+- J.H. van de Water
+- Kristian Evers
+- Even Rouault
 
 
 # 7.2.0 Release Notes
@@ -1244,17 +1243,17 @@ Even Rouault
 
 ## Thanks to
 
-Alexander Saprykin
-Jeff McKenna
-Nyall Dawson
-Kai Pastor
-Juan Hernando
-Javier Jimenez Shaw
-Howard Butler
-Alan D. Snow
-Charles Karney
-Kristian Evers
-Even Rouault
+- Alexander Saprykin
+- Jeff McKenna
+- Nyall Dawson
+- Kai Pastor
+- Juan Hernando
+- Javier Jimenez Shaw
+- Howard Butler
+- Alan D. Snow
+- Charles Karney
+- Kristian Evers
+- Even Rouault
 
 
 # 7.1.1 Release Notes
@@ -1293,14 +1292,11 @@ Even Rouault
 
 ## Thanks to
 
-Jeff McKenna
-Kai Pastor
-Javier Jimenez Shaw
-Kristian Evers
-Even Rouault
-
-
-
+- Jeff McKenna
+- Kai Pastor
+- Javier Jimenez Shaw
+- Kristian Evers
+- Even Rouault
 
 
 # 7.1.0 Release Notes
@@ -1439,28 +1435,28 @@ Even Rouault
 
 ## Thanks to
 
-Martin Raspaud
-Jeroen Ooms
-Jeff McKenna
-Colin Doig
-Chris Mayo
-Chatziargyriou Eleftheria
-Bas Couwenberg
-B R S Recht
-積丹尼 Dan Jacobson
-Alan D. Snow
-GitHub user @chrodger
-Pedro Venancio
-Olli Räisä
-John Krasting
-Andrei Marshalov
-Javier Jimenez Shaw
-Martin Dobias
-Howard Butler
-Nyall Dawson
-Mike Taves
-Kristian Evers
-Even Rouault
+- Martin Raspaud
+- Jeroen Ooms
+- Jeff McKenna
+- Colin Doig
+- Chris Mayo
+- Chatziargyriou Eleftheria
+- Bas Couwenberg
+- B R S Recht
+- 積丹尼 Dan Jacobson
+- Alan D. Snow
+- GitHub user @chrodger
+- Pedro Venancio
+- Olli Räisä
+- John Krasting
+- Andrei Marshalov
+- Javier Jimenez Shaw
+- Martin Dobias
+- Howard Butler
+- Nyall Dawson
+- Mike Taves
+- Kristian Evers
+- Even Rouault
 
 # 7.0.1 Release Notes
 
@@ -1565,10 +1561,10 @@ Even Rouault
 
 ## Thanks to
 
-Mike Taves
-Chris Mayo
-Kristian Evers
-Even Rouault
+- Mike Taves
+- Chris Mayo
+- Kristian Evers
+- Even Rouault
 
 
 # 7.0.0 Release Notes
@@ -1673,15 +1669,15 @@ for more info on how to migrate from the old to the new API.
 
 ## Thanks to
 
-Jeff McKenna
-Calum Robinson
-Anshul Singhvi
-Bas Couwenberg
-Mike Taves
-Alan D. Snow
-Charles Karney
-Kristian Evers
-Even Rouault
+- Jeff McKenna
+- Calum Robinson
+- Anshul Singhvi
+- Bas Couwenberg
+- Mike Taves
+- Alan D. Snow
+- Charles Karney
+- Kristian Evers
+- Even Rouault
 
 # 6.3.1 Release Notes
 
@@ -1733,13 +1729,13 @@ Even Rouault
 
 ## Thanks to
 
-Alan D. Snow
-GitHub user @russkel
-Gerrit Holl
-Anshul Singhvi
-Raven Kopelman
-Kristian Evers
-Even Rouault
+- Alan D. Snow
+- GitHub user @russkel
+- Gerrit Holl
+- Anshul Singhvi
+- Raven Kopelman
+- Kristian Evers
+- Even Rouault
 
 # 6.3.0 Release Notes
 
@@ -1812,33 +1808,33 @@ Even Rouault
 
 ## Thanks to
 
-Pedro Venancio
-Owen Rudge
-Nyall Dawson
-Mateusz Łoskot
-Markus Neteler
-Juergen E. Fischer
-Joaquim Luis
-Jeff McKenna
-Jakob Egger
-Guillaume Lostis
-GitHub user @yonarw
-Asa Packer
-Joe Mann
-Stephan Hügel
-Simon Schneegans
-R. Schmunk
-Alan D. Snow
-Chris Crook
-Howard Butler
-Fabrice Fontaine
-Kai Pastor
-Martin Desruisseaux
-Dalia Prizginiene
-Mike Taves
-Charles Karney
-Kristian Evers
-Even Rouault
+- Pedro Venancio
+- Owen Rudge
+- Nyall Dawson
+- Mateusz Łoskot
+- Markus Neteler
+- Juergen E. Fischer
+- Joaquim Luis
+- Jeff McKenna
+- Jakob Egger
+- Guillaume Lostis
+- GitHub user @yonarw
+- Asa Packer
+- Joe Mann
+- Stephan Hügel
+- Simon Schneegans
+- R. Schmunk
+- Alan D. Snow
+- Chris Crook
+- Howard Butler
+- Fabrice Fontaine
+- Kai Pastor
+- Martin Desruisseaux
+- Dalia Prizginiene
+- Mike Taves
+- Charles Karney
+- Kristian Evers
+- Even Rouault
 
 # 6.2.1 Release Notes
 
@@ -1908,13 +1904,13 @@ Even Rouault
 
 ## Thanks to
 
-R. Schmunk
-Jakob Egger
-Alan D. Snow
-Stephan Hügel
-Kai Pastor
-Kristian Evers
-Even Rouault
+- R. Schmunk
+- Jakob Egger
+- Alan D. Snow
+- Stephan Hügel
+- Kai Pastor
+- Kristian Evers
+- Even Rouault
 
 # 6.2.0 Release Notes
 
@@ -1947,11 +1943,11 @@ Even Rouault
 
 Version 6.2.0 is made possible by the following contributors:
 
-GitHub user @edechaux
-Michael D. Smith
-Matt Littlemore
-Kristian Evers
-Even Rouault
+- GitHub user @edechaux
+- Michael D. Smith
+- Matt Littlemore
+- Kristian Evers
+- Even Rouault
 
 # 6.1.1 Release Notes
 
@@ -1993,17 +1989,17 @@ Even Rouault
 Version 6.1.1 is made possible by the following contributors:
 
 
-Alan D. Snow
-Paul Menzel
-Mateusz Łoskot
-Bas Couwenberg
-Peter Limkilde Svendsen
-Mike Taves
-Howard Butler
-Nyall Dawson
-Andrew Bell
-Kristian Evers
-Even Rouault
+- Alan D. Snow
+- Paul Menzel
+- Mateusz Łoskot
+- Bas Couwenberg
+- Peter Limkilde Svendsen
+- Mike Taves
+- Howard Butler
+- Nyall Dawson
+- Andrew Bell
+- Kristian Evers
+- Even Rouault
 
 # 6.1.0 Release Notes
 
@@ -2070,18 +2066,18 @@ Even Rouault
 
 Version 6.1.0 is made possible by the following contributors:
 
-Andrew Hardin
-Sean Warren
-Dan Baston
-Howard Butler
-Joris Van den Bossche
-Elliott Sales de Andrade
-Alan D. Snow
-Nyall Dawson
-Chris Mayo
-Mike Taves
-Kristian Evers
-Even Rouault
+- Andrew Hardin
+- Sean Warren
+- Dan Baston
+- Howard Butler
+- Joris Van den Bossche
+- Elliott Sales de Andrade
+- Alan D. Snow
+- Nyall Dawson
+- Chris Mayo
+- Mike Taves
+- Kristian Evers
+- Even Rouault
 
 
 # 6.0.0 Release Notes
@@ -2209,26 +2205,26 @@ CRSs.
 
 Version 6.0.0 is made possible by the following contributors:
 
-Aaron Puchert
-Thomas Knudsen
-Phil Elson
-Mateusz Łoskot
-Markus Neteler
-Jürgen Fischer
-Charles Karney
-Bas Couwenberg
-Karoline Skaar
-Alan D. Snow
-Howard Butler
-Marco Bernasocchi
-Ben Boeckel
-Ivan Veselov
-Philippe Rivière
-Mike Taves
-Elliott Sales de Andrade
-Kai Pastor
-Kristian Evers
-Even Rouault
+- Aaron Puchert
+- Thomas Knudsen
+- Phil Elson
+- Mateusz Łoskot
+- Markus Neteler
+- Jürgen Fischer
+- Charles Karney
+- Bas Couwenberg
+- Karoline Skaar
+- Alan D. Snow
+- Howard Butler
+- Marco Bernasocchi
+- Ben Boeckel
+- Ivan Veselov
+- Philippe Rivière
+- Mike Taves
+- Elliott Sales de Andrade
+- Kai Pastor
+- Kristian Evers
+- Even Rouault
 
 # 5.2.0 Release Notes
 
@@ -2286,20 +2282,20 @@ https://github.com/OSGeo/proj.4/
 
 Version 5.2.0 is made possible by the following contributors:
 
-Søren Holm
-Mateusz Łoskot
-Jürnjakob Dugge
-Greg Minshall
-Aaron Puchert
-Vedran Stojnović
-Bojan Šavrič
-Charles Karney
-Mateusz Loskot
-Howard Butler
-Mike Toews
-Kurt Schwehr
-Even Rouault
-Kristian Evers
+- Søren Holm
+- Mateusz Łoskot
+- Jürnjakob Dugge
+- Greg Minshall
+- Aaron Puchert
+- Vedran Stojnović
+- Bojan Šavrič
+- Charles Karney
+- Mateusz Loskot
+- Howard Butler
+- Mike Toews
+- Kurt Schwehr
+- Even Rouault
+- Kristian Evers
 
 # 5.1.0 Release Notes
 
@@ -2372,17 +2368,17 @@ https://github.com/OSGeo/proj.4/
 
 Version 5.1.0 is made possible by the following contributors:
 
-  Kristian Evers
-  Even Rouault
-  Kurt Schwehr
-  Mike Toews
-  Martin Desruisseaux
-  Charles Karney
-  Thomas Knudsen
-  Javier Goizueta
-  Bas Couwenberg
-  Adam Wulkiewicz
-  Aaron Puchert
+- Kristian Evers
+- Even Rouault
+- Kurt Schwehr
+- Mike Toews
+- Martin Desruisseaux
+- Charles Karney
+- Thomas Knudsen
+- Javier Goizueta
+- Bas Couwenberg
+- Adam Wulkiewicz
+- Aaron Puchert
 
 # 5.0.1 Release Notes
 
@@ -2424,12 +2420,12 @@ https://github.com/OSGeo/proj.4/
 
 Version 5.0.1 is made possible by the following contributors:
 
-  Mike Toews
-  Kurt Schwehr
-  Even Rouault
-  Charles Karney
-  Thomas Knudsen
-  Kristian Evers
+- Mike Toews
+- Kurt Schwehr
+- Even Rouault
+- Charles Karney
+- Thomas Knudsen
+- Kristian Evers
 
 
 # 5.0.0 Release Notes
@@ -2701,31 +2697,31 @@ https://github.com/OSGeo/proj.4/issues/
 
 Version 5.0.0 is made possible by the following contributors:
 
-   Lukasz Komsta
-   Maxim Churilin
-   edechaux
-   dusanjovic
-   Zoltan Siki
-   Tom Fili
-   Nicolas David
-   Mike Toews
-   Micah Cochran
-   Luke Campbell
-   Ilya Oshchepkov
-   Adam Wulkiewicz
-   Jonas Tittmann
-   Mateusz Loskot
-   Etienne Jacques
-   Bas Couwenberg
-   Elliott Sales de Andrade
-   Charles Karney
-   Aaron Puchert
-   Julien Moquet
-   Charles Karney
-   Howard Butler
-   Even Rouault
-   Thomas Knudsen
-   Kristian Evers
+  - Lukasz Komsta
+  - Maxim Churilin
+  - edechaux
+  - dusanjovic
+  - Zoltan Siki
+  - Tom Fili
+  - Nicolas David
+  - Mike Toews
+  - Micah Cochran
+  - Luke Campbell
+  - Ilya Oshchepkov
+  - Adam Wulkiewicz
+  - Jonas Tittmann
+  - Mateusz Loskot
+  - Etienne Jacques
+  - Bas Couwenberg
+  - Elliott Sales de Andrade
+  - Charles Karney
+  - Aaron Puchert
+  - Julien Moquet
+  - Charles Karney
+  - Howard Butler
+  - Even Rouault
+  - Thomas Knudsen
+  - Kristian Evers
 
 
 # 4.9.3 Release Notes
