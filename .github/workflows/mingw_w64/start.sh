@@ -123,4 +123,4 @@ ccache -s
 
 echo "Saving ccache..."
 rm -f "$WORK_DIR/ccache.tar.gz"
-(cd $HOME && tar czf "$WORK_DIR/ccache.tar.gz" .ccache)
+(cd $HOME && test ! -e .ccache || tar czf "$WORK_DIR/ccache.tar.gz" .ccache)
