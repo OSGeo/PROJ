@@ -4222,8 +4222,8 @@ TEST_F(CApi, proj_get_celestial_body_list_from_database) {
     { proj_celestial_body_list_destroy(nullptr); }
 
     {
-        auto list =
-            proj_get_celestial_body_list_from_database(nullptr, nullptr, nullptr);
+        auto list = proj_get_celestial_body_list_from_database(nullptr, nullptr,
+                                                               nullptr);
         ASSERT_NE(list, nullptr);
         ASSERT_NE(list[0], nullptr);
         ASSERT_NE(list[0]->auth_name, nullptr);
@@ -5544,6 +5544,7 @@ TEST_F(CApi, proj_create_derived_geographic_crs) {
         "            MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
         "            MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
         "            MEMBER[\"World Geodetic System 1984 (G2139)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G2296)\"],\n"
         "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
         "                LENGTHUNIT[\"metre\",1]],\n"
         "            ENSEMBLEACCURACY[2.0]],\n"

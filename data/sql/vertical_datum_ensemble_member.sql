@@ -13,3 +13,7 @@ INSERT INTO "vertical_datum_ensemble_member" VALUES('EPSG','1371','EPSG','5206',
 INSERT INTO "vertical_datum_ensemble_member" VALUES('EPSG','1371','EPSG','1368',2);
 INSERT INTO "vertical_datum_ensemble_member" VALUES('EPSG','1371','EPSG','1369',3);
 INSERT INTO "vertical_datum_ensemble_member" VALUES('EPSG','1371','EPSG','1370',4);
+INSERT INTO "vertical_datum_ensemble_member" VALUES('EPSG','1376','EPSG','1372',1);
+INSERT INTO "vertical_datum_ensemble_member" VALUES('EPSG','1376','EPSG','1374',2);
+INSERT INTO "vertical_datum_ensemble_member" VALUES('EPSG','1377','EPSG','1373',1);
+INSERT INTO "vertical_datum_ensemble_member" VALUES('EPSG','1377','EPSG','1375',2);

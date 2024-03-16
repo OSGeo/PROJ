@@ -265,7 +265,7 @@ INSERT INTO "extent" VALUES('EPSG','1285','Indonesia - Bali, Java and western Su
 INSERT INTO "extent" VALUES('EPSG','1286','Europe - Liechtenstein and Switzerland','Liechtenstein; Switzerland.',45.82,47.81,5.96,10.49,0);
 INSERT INTO "extent" VALUES('EPSG','1287','Indonesia - Banga & Belitung Islands','Indonesia - Banga and Belitung Islands.',-3.3,-1.44,105.07,108.35,0);
 INSERT INTO "extent" VALUES('EPSG','1288','Angola - Angola proper','Angola - Angola proper - onshore and offshore.',-18.02,-5.82,8.2,24.09,0);
-INSERT INTO "extent" VALUES('EPSG','1289','Canada - CGVD28','Canada - onshore - Alberta; British Columbia; Manitoba south of 57°N; New Brunswick; Northwest Territories south west of a line between 60°N, 110°W and the coast at 132°W; Nova Scotia; Ontario south of 52°N; Prince Edward Island; Quebec - mainland west of 66°W and south of 55°N; Saskatchewan south of 55°N; Yukon.',41.67,69.8,-141.01,-59.73,0);
+INSERT INTO "extent" VALUES('EPSG','1289','Canada - CGVD28','Canada - onshore - Alberta; British Columbia; Manitoba south of 59°N; New Brunswick; Newfoundland, Labrador between 52°50’N and 54°30’N; Northwest Territories south west of a line between 60°40’N, 110°W and the coast at 132°W; Nova Scotia; Ontario south of 52°20''N; Prince Edward Island; Quebec - mainland south of 55°N and west of 64°W, north of 55°N between 70°W and 66°W, coastal area between 66°W and 64°W, and Anticosta island; Saskatchewan south of 58°30’N; Yukon.',41.67,69.81,-141.01,-52.54,0);
 INSERT INTO "extent" VALUES('EPSG','1290','Africa - Botswana, Eswatini, Lesotho and South Africa','Botswana; Eswatini (Swaziland); Lesotho; South Africa - mainland.',-34.88,-17.78,16.45,32.95,0);
 INSERT INTO "extent" VALUES('EPSG','1291','Asia - FSU - Caspian Sea','Azerbaijan - offshore; Kazakhstan - offshore; Russian Federation - Caspian Sea; Turkmenistan - offshore.',37.35,46.97,46.95,53.93,0);
 INSERT INTO "extent" VALUES('EPSG','1292','Argentina - Neuquen province','Argentina - Neuquen province.',-40.17,-34.26,-71.19,-66.52,0);
@@ -2213,7 +2213,7 @@ INSERT INTO "extent" VALUES('EPSG','3233','Cote d''Ivoire (Ivory Coast) - onshor
 INSERT INTO "extent" VALUES('EPSG','3234','Croatia - onshore','Croatia - onshore.',42.34,46.54,13.43,19.43,0);
 INSERT INTO "extent" VALUES('EPSG','3235','Cuba - onshore','Cuba - onshore.',19.77,23.25,-85.01,-74.07,0);
 INSERT INTO "extent" VALUES('EPSG','3236','Cyprus - onshore','Cyprus - onshore.',34.59,35.74,32.2,34.65,0);
-INSERT INTO "extent" VALUES('EPSG','3237','Denmark - onshore','Denmark - onshore.',54.51,57.8,8.0,15.25,0);
+INSERT INTO "extent" VALUES('EPSG','3237','Denmark - onshore','Denmark - onshore.',54.5,57.81,7.98,15.28,0);
 INSERT INTO "extent" VALUES('EPSG','3238','Djibouti - onshore','Djibouti - onshore.',10.94,12.72,41.75,43.48,0);
 INSERT INTO "extent" VALUES('EPSG','3239','Dominica - onshore','Dominica - onshore.',15.14,15.69,-61.55,-61.2,0);
 INSERT INTO "extent" VALUES('EPSG','3240','Dominican Republic - onshore','Dominican Republic - onshore.',17.55,19.99,-72.01,-68.27,0);
@@ -3728,3 +3728,4 @@ INSERT INTO "extent" VALUES('EPSG','4749','North America - Equi7','North America
 INSERT INTO "extent" VALUES('EPSG','4750','South America - Equi7','South America including Panama.',-59.87,30.31,-124.82,-14.58,0);
 INSERT INTO "extent" VALUES('EPSG','4751','Oceania - Equi7','Australasia and the western Pacific Ocean.',-60.56,21.57,72.37,-121.05,0);
 INSERT INTO "extent" VALUES('EPSG','4755','Europe - ETRF by country','Europe - onshore and offshore: Albania; Andorra; Austria; Belgium; Bosnia and Herzegovina; Bulgaria; Croatia; Cyprus; Czechia; Denmark; Estonia; Faroe Islands; Finland; France; Germany; Gibraltar; Greece; Hungary; Ireland; Italy; Kosovo; Latvia; Liechtenstein; Lithuania; Luxembourg; Malta; Moldova; Monaco; Montenegro; Netherlands; North Macedonia; Norway including Svalbard and Jan Mayen; Poland; Portugal; Romania; San Marino; Serbia; Slovakia; Slovenia; Spain; Sweden; Switzerland; United Kingdom (UK) including Channel Islands and Isle of Man; Vatican City State.',32.88,84.73,-16.1,40.18,0);
+INSERT INTO "extent" VALUES('EPSG','4756','Denmark - offshore','4756 - Denmark - offshore',54.36,58.27,3.25,16.51,0);
