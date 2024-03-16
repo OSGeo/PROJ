@@ -2457,6 +2457,7 @@ programming interface. But the process has revealed a need to simplify
 and reduce the code base, in order to support sustained active
 development.
 
+```text
 !!!
 !!! Therefore we have scheduled regular releases over the coming years
 !!! which will gradually remove the old programming interface.
@@ -2465,6 +2466,7 @@ development.
 !!! releases, which will affect all projects that depend on PROJ
 !!! (cf. section "deprecations" below).
 !!!
+```
 
 The decision to break the existing API has not been easy, but has
 ultimately been deemed necessary to ensure the long term survival of
@@ -2674,22 +2676,26 @@ https://github.com/OSGeo/proj.4/issues/
 * The projects.h header and the functions related to it is
   considered deprecated from version 5.0.0 and onwards.
 
-
-   !!!     PROJECTS.H WILL BE REMOVED FROM THE LIBRARY     !!!
-   !!!                 WITH VERSION 6.0.0                  !!!
+  ```
+  !!!     PROJECTS.H WILL BE REMOVED FROM THE LIBRARY     !!!
+  !!!                 WITH VERSION 6.0.0                  !!!
+  ```
 
 * The nmake build system on Windows will not be supported from
   version 6.0.0 on onwards. Use CMake instead.
 
-   !!! NMAKE BUILD SYSTEM WILL BE REMOVED FROM THE LIBRARY !!!
-   !!!                 WITH VERSION 6.0.0                  !!!
+  ```
+  !!! NMAKE BUILD SYSTEM WILL BE REMOVED FROM THE LIBRARY !!!
+  !!!                 WITH VERSION 6.0.0                  !!!
+  ```
 
 * The proj_api.h header and the functions related to it is
   consided deprecated from version 5.0.0 and onwards.
 
-   !!!     PROJ_API.H WILL BE REMOVED FROM THE LIBRARY     !!!
-   !!!                 WITH VERSION 7.0.0                  !!!
-
+  ```
+  !!!     PROJ_API.H WILL BE REMOVED FROM THE LIBRARY     !!!
+  !!!                 WITH VERSION 7.0.0                  !!!
+  ```
 
 ## Thanks to
 
