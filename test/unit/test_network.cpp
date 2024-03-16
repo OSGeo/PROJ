@@ -1264,26 +1264,28 @@ TEST(networking, network_endpoint_api) {
 
 static PROJ_NETWORK_HANDLE *dummy_open_cbk(PJ_CONTEXT *, const char *,
                                            unsigned long long, size_t, void *,
-                                           size_t *, size_t, char *, void *) {
-    assert(false);
+                                           size_t *, size_t, char *,
+                                           void *pUserData) {
+    *static_cast<bool *>(pUserData) = true;
     return nullptr;
 }
 
-static void dummy_close_cbk(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *, void *) {
-    assert(false);
+static void dummy_close_cbk(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *,
+                            void *pUserData) {
+    *static_cast<bool *>(pUserData) = true;
 }
 
 static const char *dummy_get_header_value_cbk(PJ_CONTEXT *,
                                               PROJ_NETWORK_HANDLE *,
-                                              const char *, void *) {
-    assert(false);
+                                              const char *, void *pUserData) {
+    *static_cast<bool *>(pUserData) = true;
     return nullptr;
 }
 
 static size_t dummy_read_range_cbk(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *,
                                    unsigned long long, size_t, void *, size_t,
-                                   char *, void *) {
-    assert(false);
+                                   char *, void *pUserData) {
+    *static_cast<bool *>(pUserData) = true;
     return 0;
 }
 
@@ -1332,12 +1334,14 @@ TEST(networking, cache_basic) {
     proj_cleanup();
 
     // Check that a second access doesn't trigger any network activity
+    bool networkActivity = false;
     ASSERT_TRUE(proj_context_set_network_callbacks(
         ctx, dummy_open_cbk, dummy_close_cbk, dummy_get_header_value_cbk,
-        dummy_read_range_cbk, nullptr));
+        dummy_read_range_cbk, &networkActivity));
     P = proj_create(ctx, pipeline);
     ASSERT_NE(P, nullptr);
     proj_destroy(P);
+    EXPECT_FALSE(networkActivity);
 
     proj_context_destroy(ctx);
 }
@@ -2014,6 +2018,52 @@ TEST(networking, pyproj_issue_1192) {
     doTest(ctx);
     proj_context_set_enable_network(ctx, false);
     doTest(ctx);
+
+    proj_context_destroy(ctx);
+}
+
+#endif
+
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+TEST(networking, do_not_attempt_network_access_known_available_network_on) {
+
+    // Check that proj_create_operations() itself does not trigger network
+    // activity in enable_network == true and
+    // PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE mode when all grids are known.
+
+    const auto doTest = [](PJ_CONTEXT *ctxt) {
+        auto factory_context =
+            proj_create_operation_factory_context(ctxt, nullptr);
+        proj_operation_factory_context_set_grid_availability_use(
+            ctxt, factory_context, PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE);
+        proj_operation_factory_context_set_spatial_criterion(
+            ctxt, factory_context, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+        auto from = proj_create(ctxt, "EPSG:4326");
+        auto to = proj_create(ctxt, "EPSG:4267");
+        auto pj_operations =
+            proj_create_operations(ctxt, from, to, factory_context);
+        proj_destroy(from);
+        proj_destroy(to);
+        auto num_operations = proj_list_get_count(pj_operations);
+        EXPECT_GE(num_operations, 10);
+        proj_operation_factory_context_destroy(factory_context);
+        proj_list_destroy(pj_operations);
+    };
+
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+
+    // Check that we don't trigger any network activity
+    bool networkActivity = false;
+    ASSERT_TRUE(proj_context_set_network_callbacks(
+        ctx, dummy_open_cbk, dummy_close_cbk, dummy_get_header_value_cbk,
+        dummy_read_range_cbk, &networkActivity));
+
+    doTest(ctx);
+    EXPECT_FALSE(networkActivity);
 
     proj_context_destroy(ctx);
 }
