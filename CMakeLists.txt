@@ -418,18 +418,10 @@ set(CPACK_SOURCE_IGNORE_FILES
 
 include(CPack)
 
-# Simplify README.md to README
-add_custom_target(README
-  COMMAND ${CMAKE_COMMAND}
-    -D PROJ_SOURCE_DIR=${PROJ_SOURCE_DIR}
-    -P ${PROJ_SOURCE_DIR}/cmake/ProjReadme.cmake
-)
-
 get_property(_is_multi_config_generator GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(NOT _is_multi_config_generator)
   add_custom_target(dist
     COMMAND ${CMAKE_MAKE_PROGRAM} package_source
-    DEPENDS README
   )
   message(STATUS "PROJ: Configured 'dist' target")
 endif()
