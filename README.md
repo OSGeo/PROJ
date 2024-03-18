@@ -23,7 +23,7 @@ The PROJ mailing list can be found at:
 
 https://lists.osgeo.org/mailman/listinfo/proj/
 
-See the NEWS file for changes between versions.
+See the NEWS.md file for changes between versions.
 
 The following command line utilities are included in the PROJ package:
 

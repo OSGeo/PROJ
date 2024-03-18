@@ -47,9 +47,9 @@ https://community.kde.org/Policies/Binary_Compatibility_Issues_With_C%2B%2B
 Man pages are (mostly) automatically generated from the Sphinx docs. Follow
 these steps:
 
-    - Temporarily update `version` and `data_version` in `docs/source/conf.py`
-    - run `scripts/update_man.sh`
-    - Revert version number in `docs/source/conf.py`
+  - Temporarily update `version` and `data_version` in `docs/source/conf.py`
+  - run `scripts/update_man.sh`
+  - Revert version number in `docs/source/conf.py`
 
 The `update_man.sh` script builds the man pages and commits the update man pages
 to master.
@@ -58,7 +58,7 @@ to master.
 1.3 Write release notes
 -------------------------------------------------------------------------------
 
-Update `NEWS` with descriptions of the changes since the last release.
+Update `NEWS.md` with descriptions of the changes since the last release.
 Hopefully issues and pull requests that go into the new release have been
 properly tagged with the milestone for the current release.
 
@@ -174,13 +174,12 @@ See step 1.6 above. Do not rename the archives with RC postfixes.
 2.2 Update website
 ------------------------------------------------------------------------------
 
-  - Add the release notes from `NEWS` to `docs/source/news.rst`
+  - Add the release notes from `NEWS.md` to `docs/source/news.rst`
 
-    These vim substitutions are helpfull when converting NEWS to rst:
-
-    :s!(\#\(\d\{4}\))!(`\#\1 <https://github.com/OSGeo/PROJ/issues/\1>`_)!
-    :s/^o/*/
-
+    These vim substitutions are helpfull when converting NEWS.md to rst:
+```
+:s!(\#\(\d\{4}\))!(`\#\1 <https://github.com/OSGeo/PROJ/issues/\1>`_)!
+```
   - Update download links in `docs/source/download.rst`
 
 
@@ -204,7 +203,7 @@ git push --tags
 
 When the new tag is pushed upstream GitHub picks up that a new release has been
 issued. Update the new release on https://github.com/OSGeo/PROJ/releases with
-the release notes from `NEWS` and add the prepared source distribution archives
+the release notes from `NEWS.md` and add the prepared source distribution archives
 to the release (otherwise GitHub will just package the entire repository - we
 don't want that).
 
@@ -244,11 +243,11 @@ of the release.*
 
 Edit the Sphinx configuration docs/source/conf.py with these changes:
 
-    - Set "version" to the major project version, e.g. "9.2"
-    - Set "release" to the full project version, e.g. "9.2.1"
-    - Set "data_version" to the PROJ-data version
-    - Set "today_date = date(Y, M, D)" using the release date
-    - set "github_version" to the maintenance branch label, e.g. "9.2"
+  - Set "version" to the major project version, e.g. "9.2"
+  - Set "release" to the full project version, e.g. "9.2.1"
+  - Set "data_version" to the PROJ-data version
+  - Set "today_date = date(Y, M, D)" using the release date
+  - set "github_version" to the maintenance branch label, e.g. "9.2"
 
 HTML and PDF documentation is built using ReadTheDocs, which supports multiple
 versions. Versions are based on branch labels, e.g. "9.2". To modify settings,
