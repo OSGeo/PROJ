@@ -3324,14 +3324,18 @@ bool DatabaseContext::lookForGridInfo(
     url.clear();
     openLicense = false;
     directDownload = false;
+    gridAvailable = false;
 
-    fullFilename.resize(2048);
-    int errno_before = proj_context_errno(ctxt);
-    gridAvailable = NS_PROJ::FileManager::open_resource_file(
-                        ctxt, projFilename.c_str(), &fullFilename[0],
-                        fullFilename.size() - 1) != nullptr;
-    proj_context_errno_set(ctxt, errno_before);
-    fullFilename.resize(strlen(fullFilename.c_str()));
+    const auto resolveFullFilename = [ctxt, &fullFilename, &projFilename]() {
+        fullFilename.resize(2048);
+        const int errno_before = proj_context_errno(ctxt);
+        bool lGridAvailable = NS_PROJ::FileManager::open_resource_file(
+                                  ctxt, projFilename.c_str(), &fullFilename[0],
+                                  fullFilename.size() - 1) != nullptr;
+        proj_context_errno_set(ctxt, errno_before);
+        fullFilename.resize(strlen(fullFilename.c_str()));
+        return lGridAvailable;
+    };
 
     auto res =
         d->run("SELECT "
@@ -3363,7 +3367,7 @@ bool DatabaseContext::lookForGridInfo(
             old_proj_grid_name == projFilename) {
             std::string fullFilenameNewName;
             fullFilenameNewName.resize(2048);
-            errno_before = proj_context_errno(ctxt);
+            const int errno_before = proj_context_errno(ctxt);
             bool gridAvailableWithNewName =
                 pj_find_file(ctxt, proj_grid_name.c_str(),
                              &fullFilenameNewName[0],
@@ -3376,8 +3380,17 @@ bool DatabaseContext::lookForGridInfo(
             }
         }
 
-        if (considerKnownGridsAsAvailable &&
+        if (!gridAvailable && considerKnownGridsAsAvailable &&
             (!packageName.empty() || (!url.empty() && openLicense))) {
+
+            // In considerKnownGridsAsAvailable mode, try to fetch the local
+            // file name if it exists, but do not attempt network access.
+            const auto network_was_enabled =
+                proj_context_is_network_enabled(ctxt);
+            proj_context_set_enable_network(ctxt, false);
+            (void)resolveFullFilename();
+            proj_context_set_enable_network(ctxt, network_was_enabled);
+
             gridAvailable = true;
         }
 
@@ -3391,7 +3404,13 @@ bool DatabaseContext::lookForGridInfo(
         }
         info.directDownload = directDownload;
         info.openLicense = openLicense;
+
+        if (!gridAvailable) {
+            gridAvailable = resolveFullFilename();
+        }
     } else {
+        gridAvailable = resolveFullFilename();
+
         if (starts_with(fullFilename, "http://") ||
             starts_with(fullFilename, "https://")) {
             url = fullFilename;
