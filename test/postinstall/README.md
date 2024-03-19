@@ -9,6 +9,7 @@ The two trivial applications `c_app` and `cpp_app` use C and C++ compilers, resp
 ## Configure method
 
 Each configure method is driven using a script with two arguments:
+
 1. Path to a PROJ install prefix (containing `bin`, `lib`, etc.)
 2. An optional build mode `shared` (default) or `static`
 
@@ -27,6 +28,7 @@ Use `test_cmake.sh` for Unix-like or `test_cmake.bat` for Windows. This checks t
 ## Build mode
 
 Two build modes are tested with each configure method:
+
 1. `shared` for dynamic linking with libproj (or proj.dll for MSVC)
 2. `static` for static linking with libproj (or proj.lib for MSVC); note that static linking of dependants is out-of-scope with these tests, so only libproj is assumed to be static
 
@@ -38,4 +40,3 @@ All configure methods share the same suite of tests for `c_app` and `cpp_app`:
 - `test_transform` - example coordinate transform to ensure basic functions work as expected.
 - `test_searchpath` - compares `searchpath` (from `proj_info()`) to either `datadir` via pkg-config or relative path `PROJ_DIR/../../../share/proj` via CMake.
 - `test_version` - compares PROJ version components from `proj_info()` to the version from pkg-config or CMake.
-

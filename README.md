@@ -17,11 +17,11 @@ This includes cartographic projections as well as geodetic transformations.
 
 For more information on the PROJ project please see the web page at:
 
-https://proj.org/
+<https://proj.org/>
 
 The PROJ mailing list can be found at:
 
-https://lists.osgeo.org/mailman/listinfo/proj/
+<https://lists.osgeo.org/mailman/listinfo/proj/>
 
 See the NEWS.md file for changes between versions.
 
@@ -73,7 +73,6 @@ the resource files can be retrieved on-the-fly from the
 [PROJ CDN](https://cdn.proj.org/). A [network-enabled](https://proj.org/usage/network.html) PROJ build, will
 automatically fetch resource files that are not present locally from the
 CDN.
-
 
 ## Citing PROJ in publications
 

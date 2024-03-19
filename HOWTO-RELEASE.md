@@ -27,19 +27,18 @@ When a release candidate has not prompted any request for changes in 48 hours,
 a motion for promotion to final release should be issued on the PROJ mailing
 list. The PROJ PSC guidelines describes the rules for passing a motion.
 
-1.1 Update ABI version numbers:
+1.1 Update ABI version numbers
 -------------------------------------------------------------------------------
 
 In case of a un-planned maintenance release, make sure that version numbers are
 properly updated: see 3.1
 
-For each release version, increment PROJ_SOVERSION in CMakeLists.txt if the 
-ABI is not backwards compatible, i.e. any interfaces have been removed, or 
+For each release version, increment PROJ_SOVERSION in CMakeLists.txt if the
+ABI is not backwards compatible, i.e. any interfaces have been removed, or
 changed since the last release. See also:
-https://community.kde.org/Policies/Binary_Compatibility_Issues_With_C%2B%2B
+<https://community.kde.org/Policies/Binary_Compatibility_Issues_With_C%2B%2B>
 
 *Commit the changes to master.*
-
 
 1.2 Update man pages
 -------------------------------------------------------------------------------
@@ -47,13 +46,12 @@ https://community.kde.org/Policies/Binary_Compatibility_Issues_With_C%2B%2B
 Man pages are (mostly) automatically generated from the Sphinx docs. Follow
 these steps:
 
-  - Temporarily update `version` and `data_version` in `docs/source/conf.py`
-  - run `scripts/update_man.sh`
-  - Revert version number in `docs/source/conf.py`
+- Temporarily update `version` and `data_version` in `docs/source/conf.py`
+- run `scripts/update_man.sh`
+- Revert version number in `docs/source/conf.py`
 
 The `update_man.sh` script builds the man pages and commits the update man pages
 to master.
-
 
 1.3 Write release notes
 -------------------------------------------------------------------------------
@@ -74,7 +72,6 @@ slightly since not all authors has properly configured their names in git.
 
 *Commit the changes to master.*
 
-
 1.4 Update `CITATION.cff` and `CITATION`
 -------------------------------------------------------------------------------
 
@@ -85,7 +82,6 @@ If needed, update the two instances of year in `CITATION`.
 
 *Commit the changes to master.*
 
-
 1.5 Update `PROJ_DATA.VERSION`
 -------------------------------------------------------------------------------
 
@@ -93,7 +89,6 @@ If the database references data from an updated PROJ-data package, update
 `PROJ_DATA.VERSION` in `data/sql/metadata.sql`.
 
 *Commit the changes to master.*
-
 
 1.6 Create maintenance branch
 -------------------------------------------------------------------------------
@@ -111,7 +106,6 @@ fixes found in the release candidates should be pushed to master and
 subsequently cherry-picked to the maintenance branch.
 
 *Push branch upstream.*
-
 
 1.7 Prepare and upload archives
 -------------------------------------------------------------------------------
@@ -146,12 +140,10 @@ scp proj-x.y.zRCn.* warmerdam@upload.osgeo.org:/osgeo/download/proj
 
 Adjust version numbers and usernames accordingly.
 
-
 1.8 Announce the release candidate
 -------------------------------------------------------------------------------
 
 Announce the release candidate on the PROJ mailing list.
-
 
 1.9 Promotion to final release
 -------------------------------------------------------------------------------
@@ -159,7 +151,6 @@ Announce the release candidate on the PROJ mailing list.
 When you are confident that the latest release candidate is ready for promotion
 to final release a motion for promotion should be issued on the PROJ mailing
 list. Allow for a minimum of 48 hours for voting time.
-
 
 2 Final release
 ===============================================================================
@@ -174,15 +165,15 @@ See step 1.6 above. Do not rename the archives with RC postfixes.
 2.2 Update website
 ------------------------------------------------------------------------------
 
-  - Add the release notes from `NEWS.md` to `docs/source/news.rst`
+- Add the release notes from `NEWS.md` to `docs/source/news.rst`
 
     These vim substitutions are helpfull when converting NEWS.md to rst:
+
 ```
 :s!(\#\(\d\{4}\))!(`\#\1 <https://github.com/OSGeo/PROJ/issues/\1>`_)!
 ```
-  - Update download links in `docs/source/download.rst`
 
-
+- Update download links in `docs/source/download.rst`
 
 *Commit the changes to master and cherry-pick into maintenance branch.*
 
@@ -202,21 +193,19 @@ git push --tags
 -------------------------------------------------------------------------------
 
 When the new tag is pushed upstream GitHub picks up that a new release has been
-issued. Update the new release on https://github.com/OSGeo/PROJ/releases with
+issued. Update the new release on <https://github.com/OSGeo/PROJ/releases> with
 the release notes from `NEWS.md` and add the prepared source distribution archives
 to the release (otherwise GitHub will just package the entire repository - we
 don't want that).
-
 
 2.5 Announce the new release
 -------------------------------------------------------------------------------
 
 The release should be announced on PROJ and MetaCRS mailing lists. Additionally
-the release announcement should be sent to news_item@osgeo.org which will add
+the release announcement should be sent to <news_item@osgeo.org> which will add
 the announcement to osgeo.org and other OSGeo communication channels.
 
 Make some noise on Twitter and other relevant social media.
-
 
 3 Post final release
 ===============================================================================
@@ -228,12 +217,11 @@ PROJ uses [semantic versioning](http://semver.org/). Depending on the changes
 in the release will be either a major, minor or patch release. Update the
 version numbers in the files.
 
-  - src/proj.h:           Update PROJ_VERSION_MAJOR, PROJ_VERSION_MINOR and
+- src/proj.h:           Update PROJ_VERSION_MAJOR, PROJ_VERSION_MINOR and
                           PROJ_VERSION_PATCH.
-  - src/release.cpp:      Update date to the scheduled release date.
-  - CMakeLists.txt:       Update proj_version()
-  - docs/source/conf.py:  Update version number
-
+- src/release.cpp:      Update date to the scheduled release date.
+- CMakeLists.txt:       Update proj_version()
+- docs/source/conf.py:  Update version number
 
 *Commit changes. Either to master or maintenance branch depending on the nature
 of the release.*
@@ -243,20 +231,20 @@ of the release.*
 
 Edit the Sphinx configuration docs/source/conf.py with these changes:
 
-  - Set "version" to the major project version, e.g. "9.2"
-  - Set "release" to the full project version, e.g. "9.2.1"
-  - Set "data_version" to the PROJ-data version
-  - Set "today_date = date(Y, M, D)" using the release date
-  - set "github_version" to the maintenance branch label, e.g. "9.2"
+- Set "version" to the major project version, e.g. "9.2"
+- Set "release" to the full project version, e.g. "9.2.1"
+- Set "data_version" to the PROJ-data version
+- Set "today_date = date(Y, M, D)" using the release date
+- set "github_version" to the maintenance branch label, e.g. "9.2"
 
 HTML and PDF documentation is built using ReadTheDocs, which supports multiple
 versions. Versions are based on branch labels, e.g. "9.2". To modify settings,
 registered users must first log in. To add a version, go to
-https://readthedocs.org/projects/osgeo-proj/versions/ and click "Activate"
+<https://readthedocs.org/projects/osgeo-proj/versions/> and click "Activate"
 next to the maintenance branch label.
 
 Also update the redirect for ``/* -> /en/X.Y/:splat`` at
-https://readthedocs.org/dashboard/osgeo-proj/redirects/
+<https://readthedocs.org/dashboard/osgeo-proj/redirects/>
 
 The latest maintenance branch should be set as the "Default version" found at
-https://readthedocs.org/dashboard/osgeo-proj/advanced/
+<https://readthedocs.org/dashboard/osgeo-proj/advanced/>

@@ -1,0 +1,26 @@
+# https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# Heading style
+MD003:
+  style: "atx"
+
+# Unordered list indentation
+MD007:
+  indent: 2
+
+# Line length
+MD013: false
+# line_length: 100
+
+# Multiple headings with the same content
+MD024:
+  siblings_only: true
+
+# Multiple top-level headings in the same document
+MD025: false
+
+# First line in a file should be a top-level heading
+MD041: false
+
+# Required heading structure
+MD043: true

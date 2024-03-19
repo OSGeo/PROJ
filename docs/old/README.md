@@ -11,7 +11,6 @@ The following resources are unpublished.
 * [proj_4_3_12.pdf](proj_4_3_12.pdf) – Evenden, G. I. 1995. *Cartographic Projection Procedures, Release 4*. Second Interim Report.
 * [SWISS.pdf](SWISS.pdf) – Evenden, G. I. 1995. *Supplementary PROJ.4 Notes, Swiss Oblique Mercator Projection*.
 
-
 ## External resources
 
 The following resources were previously located in this directory, however are published externally.
