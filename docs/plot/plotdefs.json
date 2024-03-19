@@ -1346,13 +1346,13 @@
     },
     {
         "filename": "sterea.png",
-        "latmax": 90,
-        "latmin": 50,
-        "lonmax": 180,
-        "lonmin": -180,
+        "latmax": 70,
+        "latmin": 30,
+        "lonmax": 50,
+        "lonmin": -50,
         "name": "sterea",
-        "projstring": "+proj=sterea +lat_0=90",
-        "res": "low",
+        "projstring": "+proj=sterea +lat_0=52.1561605555556 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel",
+        "res": "med",
         "type": "poly"
     },
     {
