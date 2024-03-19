@@ -1457,19 +1457,19 @@ DATUM["World Geodetic System 1984",
 Testing --accuracy 0.05 -s EPSG:4326 -t EPSG:4258
 Candidate operations found: 0
 
-Testing -s NZGD2000 -t ITRF96 -o PROJ -q
+Testing -s NZGD2000 -t ITRF96 -o PROJ -q --spatial-test intersects --hide-ballpark
 +proj=pipeline
+  +step +proj=axisswap +order=2,1
   +step +proj=unitconvert +xy_in=deg +xy_out=rad
-  +step +proj=axisswap +order=2,1
   +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
-  +step +proj=axisswap +order=2,1
   +step +proj=unitconvert +xy_in=rad +xy_out=deg
-
-Testing -s NZGD2000 -t ITRF97 -o PROJ -q
-+proj=pipeline
-  +step +proj=unitconvert +xy_in=deg +xy_out=rad
   +step +proj=axisswap +order=2,1
-  +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
+
+Testing -s NZGD2000 -t ITRF97 -o PROJ -q --spatial-test intersects --hide-ballpark
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=defmodel +model=nz_linz_nzgd2000-20000101.json
   +step +proj=cart +ellps=GRS80
   +step +inv +proj=helmert +x=0 +y=-0.00051 +z=0.01553 +rx=-0.00016508
         +ry=0.00026897 +rz=5.984e-05 +s=-0.00151099 +dx=0.00069 +dy=-0.0001
@@ -1479,11 +1479,11 @@ Testing -s NZGD2000 -t ITRF97 -o PROJ -q
   +step +proj=unitconvert +xy_in=rad +xy_out=deg
   +step +proj=axisswap +order=2,1
 
-Testing -s NZGD2000 -t ITRF2000 -o PROJ -q
+Testing -s NZGD2000 -t ITRF2000 -o PROJ -q --spatial-test intersects --hide-ballpark
 +proj=pipeline
-  +step +proj=unitconvert +xy_in=deg +xy_out=rad
   +step +proj=axisswap +order=2,1
-  +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=defmodel +model=nz_linz_nzgd2000-20000101.json
   +step +proj=cart +ellps=GRS80
   +step +inv +proj=helmert +x=0.0067 +y=0.00379 +z=-0.00717 +rx=-0.00016508
         +ry=0.00026897 +rz=0.00011984 +s=6.901e-05 +dx=0.00069 +dy=-0.0007
@@ -1493,11 +1493,11 @@ Testing -s NZGD2000 -t ITRF2000 -o PROJ -q
   +step +proj=unitconvert +xy_in=rad +xy_out=deg
   +step +proj=axisswap +order=2,1
 
-Testing -s NZGD2000 -t ITRF2005 -o PROJ -q
+Testing -s NZGD2000 -t ITRF2005 -o PROJ -q --spatial-test intersects --hide-ballpark
 +proj=pipeline
-  +step +proj=unitconvert +xy_in=deg +xy_out=rad
   +step +proj=axisswap +order=2,1
-  +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=defmodel +model=nz_linz_nzgd2000-20000101.json
   +step +proj=cart +ellps=GRS80
   +step +inv +proj=helmert +x=0.0068 +y=0.00299 +z=-0.01297 +rx=-0.00016508
         +ry=0.00026897 +rz=0.00011984 +s=0.00046901 +dx=0.00049 +dy=-0.0006
@@ -1507,11 +1507,11 @@ Testing -s NZGD2000 -t ITRF2005 -o PROJ -q
   +step +proj=unitconvert +xy_in=rad +xy_out=deg
   +step +proj=axisswap +order=2,1
 
-Testing -s NZGD2000 -t ITRF2008 -o PROJ -q
+Testing -s NZGD2000 -t ITRF2008 -o PROJ -q --spatial-test intersects --hide-ballpark
 +proj=pipeline
-  +step +proj=unitconvert +xy_in=deg +xy_out=rad
   +step +proj=axisswap +order=2,1
-  +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=defmodel +model=nz_linz_nzgd2000-20171201.json
   +step +proj=cart +ellps=GRS80
   +step +inv +proj=helmert +x=0.0048 +y=0.00209 +z=-0.01767 +rx=-0.00016508
         +ry=0.00026897 +rz=0.00011984 +s=0.00140901 +dx=0.00079 +dy=-0.0006
@@ -1521,10 +1521,10 @@ Testing -s NZGD2000 -t ITRF2008 -o PROJ -q
   +step +proj=unitconvert +xy_in=rad +xy_out=deg
   +step +proj=axisswap +order=2,1
 
-Testing -s NZGD2000 -t ITRF2014 -o PROJ -q
+Testing -s NZGD2000 -t ITRF2014 -o PROJ -q --spatial-test intersects --hide-ballpark
 +proj=pipeline
-  +step +proj=unitconvert +xy_in=deg +xy_out=rad
   +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
   +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
   +step +proj=cart +ellps=GRS80
   +step +inv +proj=helmert +x=0.0064 +y=0.00399 +z=-0.01427 +rx=-0.00016508

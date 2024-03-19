@@ -2622,6 +2622,63 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
         }
     }
 
+    if (methodEPSGCode == EPSG_CODE_METHOD_NEW_ZEALAND_DEFORMATION_MODEL) {
+        auto fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
+                           EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+
+            const auto &filename = fileParameter->valueFile();
+            if (databaseContext->lookForGridAlternative(
+                    filename, projFilename, projGridFormat, inverseDirection)) {
+
+                if (filename == projFilename) {
+                    if (inverseDirection) {
+                        throw util::UnsupportedOperationException(
+                            "Inverse direction for " + projFilename +
+                            " not supported");
+                    }
+                    return self;
+                }
+
+                const auto l_sourceCRSNull = sourceCRS();
+                const auto l_targetCRSNull = targetCRS();
+                if (l_sourceCRSNull == nullptr) {
+                    throw util::UnsupportedOperationException(
+                        "Missing sourceCRS");
+                }
+                if (l_targetCRSNull == nullptr) {
+                    throw util::UnsupportedOperationException(
+                        "Missing targetCRS");
+                }
+                auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
+                auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
+                auto parameters = std::vector<OperationParameterNNPtr>{
+                    createOpParamNameEPSGCode(
+                        EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+                if (inverseDirection) {
+                    return Transformation::create(
+                               createPropertiesForInverse(
+                                   self.as_nullable().get(), true, false),
+                               l_targetCRS, l_sourceCRS, l_interpolationCRS,
+                               createSimilarPropertiesMethod(method()),
+                               parameters,
+                               {ParameterValue::createFilename(projFilename)},
+                               coordinateOperationAccuracies())
+                        ->inverseAsTransformation();
+                } else {
+                    return Transformation::create(
+                        createSimilarPropertiesOperation(self), l_sourceCRS,
+                        l_targetCRS, l_interpolationCRS,
+                        createSimilarPropertiesMethod(method()), parameters,
+                        {ParameterValue::createFilename(projFilename)},
+                        coordinateOperationAccuracies());
+                }
+            }
+        }
+    }
+
     return self;
 }
 
@@ -4438,6 +4495,52 @@ bool SingleOperation::exportToPROJStringGeneric(
         targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
 
         return true;
+    }
+
+    if (methodEPSGCode == EPSG_CODE_METHOD_NEW_ZEALAND_DEFORMATION_MODEL) {
+        auto sourceCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
+        if (!sourceCRSGeog) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName, " only to GeographicCRS"));
+        }
+
+        auto targetCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
+        if (!targetCRSGeog) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName, " only to GeographicCRS"));
+        }
+
+        auto fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
+                           EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+
+            formatter->startInversion();
+            sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+            formatter->stopInversion();
+
+            if (isMethodInverseOf) {
+                formatter->startInversion();
+            }
+
+            // Operations are registered in EPSG with inverse order as
+            // the +proj=defmodel implementation
+            formatter->startInversion();
+            formatter->addStep("defmodel");
+            formatter->addParam("model", fileParameter->valueFile());
+            formatter->stopInversion();
+
+            if (isMethodInverseOf) {
+                formatter->stopInversion();
+            }
+
+            targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+
+            return true;
+        }
     }
 
     const char *prefix = "PROJ-based operation method: ";
