@@ -1971,12 +1971,12 @@ _getGeographic3DOffsetByVelocityGridFilename(const SingleOperation *op,
     const auto &l_method = op->method();
     const auto &methodName = l_method->nameStr();
     if (l_method->getEPSGCode() ==
-            EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN ||
+            EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NTV2_VEL ||
         (allowInverse &&
          ci_equal(
              methodName,
              INVERSE_OF +
-                 EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN))) {
+                 EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NTV2_VEL))) {
         const auto &fileParameter = op->parameterValue(
             EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
             EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
@@ -2004,7 +2004,7 @@ _getVerticalOffsetByVelocityGridFilename(const SingleOperation *op,
          ci_equal(
              methodName,
              INVERSE_OF +
-                 EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN))) {
+                 EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NTV2_VEL))) {
         const auto &fileParameter = op->parameterValue(
             EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
             EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
@@ -4050,7 +4050,7 @@ bool SingleOperation::exportToPROJStringGeneric(
             throw io::FormattingException(
                 "InterpolationCRS required "
                 "for"
-                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN);
+                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NTV2_VEL);
         }
         const bool interpIsSrc = interpCRS->_isEquivalentTo(
             sourceCRS()->demoteTo2D(std::string(), nullptr).get(),
@@ -4061,7 +4061,7 @@ bool SingleOperation::exportToPROJStringGeneric(
         if (!interpIsSrc && !interpIsTarget) {
             throw io::FormattingException(
                 "For"
-                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN
+                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NTV2_VEL
                 ", interpolation CRS should be the source or target CRS");
         }
 
@@ -4110,13 +4110,13 @@ bool SingleOperation::exportToPROJStringGeneric(
         if (sourceYear == 0.0) {
             throw io::FormattingException(
                 "For"
-                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN
+                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NTV2_VEL
                 ", missing epoch for source CRS");
         }
         if (targetYear == 0.0) {
             throw io::FormattingException(
                 "For"
-                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN
+                " " EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NTV2_VEL
                 ", missing epoch for target CRS");
         }
         formatter->addParam("dt", targetYear - sourceYear);
