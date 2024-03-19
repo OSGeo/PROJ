@@ -5843,3 +5843,77 @@ TEST(operation, PointMotionOperation_with_epochs) {
         "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
         "+step +proj=axisswap +order=2,1");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, export_of_Cartesian_Grid_Offsets_with_EngineeringCRS) {
+
+    auto wkt =
+        "COORDINATEOPERATION[\"CIG85 to GDA94 / MGA zone 48\",\n"
+        "    VERSION[\"GA-Cxr\"],\n"
+        "    SOURCECRS[\n"
+        "        ENGCRS[\"Christmas Island Grid 1985\",\n"
+        "            EDATUM[\"Christmas Island Datum 1985\"],\n"
+        "            CS[Cartesian,2],\n"
+        "                AXIS[\"(E)\",east,\n"
+        "                    ORDER[1],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                AXIS[\"(N)\",north,\n"
+        "                    ORDER[2],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",6715]]],\n"
+        "    TARGETCRS[\n"
+        "        PROJCRS[\"GDA94 / MGA zone 48\",\n"
+        "            BASEGEOGCRS[\"GDA94\",\n"
+        "                DATUM[\"Geocentric Datum of Australia 1994\",\n"
+        "                    ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                        LENGTHUNIT[\"metre\",1]]],\n"
+        "                PRIMEM[\"Greenwich\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                ID[\"EPSG\",4283]],\n"
+        "            CONVERSION[\"Map Grid of Australia zone 48\",\n"
+        "                METHOD[\"Transverse Mercator\",\n"
+        "                    ID[\"EPSG\",9807]],\n"
+        "                PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8801]],\n"
+        "                PARAMETER[\"Longitude of natural origin\",105,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8802]],\n"
+        "                PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "                    SCALEUNIT[\"unity\",1],\n"
+        "                    ID[\"EPSG\",8805]],\n"
+        "                PARAMETER[\"False easting\",500000,\n"
+        "                    LENGTHUNIT[\"metre\",1],\n"
+        "                    ID[\"EPSG\",8806]],\n"
+        "                PARAMETER[\"False northing\",10000000,\n"
+        "                    LENGTHUNIT[\"metre\",1],\n"
+        "                    ID[\"EPSG\",8807]]],\n"
+        "            CS[Cartesian,2],\n"
+        "                AXIS[\"(E)\",east,\n"
+        "                    ORDER[1],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                AXIS[\"(N)\",north,\n"
+        "                    ORDER[2],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",28348]]],\n"
+        "    METHOD[\"Cartesian Grid Offsets\",\n"
+        "        ID[\"EPSG\",9656]],\n"
+        "    PARAMETER[\"Easting offset\",550015,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8728]],\n"
+        "    PARAMETER[\"Northing offset\",8780001,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8729]],\n"
+        "    OPERATIONACCURACY[5],\n"
+        "    ID[\"EPSG\",6724]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=affine +xoff=550015 +yoff=8780001");
+    EXPECT_EQ(transf->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=affine +xoff=-550015 +yoff=-8780001");
+}

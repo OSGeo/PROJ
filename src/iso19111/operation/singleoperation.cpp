@@ -3829,6 +3829,72 @@ bool SingleOperation::exportToPROJStringGeneric(
         return true;
     }
 
+    if (methodEPSGCode == EPSG_CODE_METHOD_CARTESIAN_GRID_OFFSETS) {
+        double eastingOffset = parameterValueNumeric(
+            EPSG_CODE_PARAMETER_EASTING_OFFSET, common::UnitOfMeasure::METRE);
+        double northingOffset = parameterValueNumeric(
+            EPSG_CODE_PARAMETER_NORTHING_OFFSET, common::UnitOfMeasure::METRE);
+
+        const auto checkIfCompatEngineeringCRS = [](const crs::CRSPtr &crs) {
+            auto engineeringCRS =
+                dynamic_cast<const crs::EngineeringCRS *>(crs.get());
+            if (engineeringCRS) {
+                auto cs = dynamic_cast<cs::CartesianCS *>(
+                    engineeringCRS->coordinateSystem().get());
+                if (!cs) {
+                    throw io::FormattingException(
+                        "Can apply Cartesian grid offsets only to "
+                        "EngineeringCRS with CartesianCS");
+                }
+                const auto &unit = cs->axisList()[0]->unit();
+                if (!unit._isEquivalentTo(
+                        common::UnitOfMeasure::METRE,
+                        util::IComparable::Criterion::EQUIVALENT)) {
+                    // Could be enhanced to support other units...
+                    throw io::FormattingException(
+                        "Can apply Cartesian grid offsets only to "
+                        "EngineeringCRS with CartesianCS with metre unit");
+                }
+            } else {
+                throw io::FormattingException(
+                    "Can apply Cartesian grid offsets only to ProjectedCRS or "
+                    "EngineeringCRS");
+            }
+        };
+
+        auto l_sourceCRS = sourceCRS();
+        auto sourceCRSProj =
+            dynamic_cast<const crs::ProjectedCRS *>(l_sourceCRS.get());
+        if (!sourceCRSProj) {
+            checkIfCompatEngineeringCRS(l_sourceCRS);
+        }
+
+        auto l_targetCRS = targetCRS();
+        auto targetCRSProj =
+            dynamic_cast<const crs::ProjectedCRS *>(l_targetCRS.get());
+        if (!targetCRSProj) {
+            checkIfCompatEngineeringCRS(l_targetCRS);
+        }
+
+        if (sourceCRSProj) {
+            formatter->startInversion();
+            sourceCRSProj->addUnitConvertAndAxisSwap(formatter, false);
+            formatter->stopInversion();
+        }
+
+        if (eastingOffset != 0.0 || northingOffset != 0.0) {
+            formatter->addStep("affine");
+            formatter->addParam("xoff", eastingOffset);
+            formatter->addParam("yoff", northingOffset);
+        }
+
+        if (targetCRSProj) {
+            targetCRSProj->addUnitConvertAndAxisSwap(formatter, false);
+        }
+
+        return true;
+    }
+
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTICAL_OFFSET) {
 
         const crs::CRS *srcCRS = sourceCRS().get();

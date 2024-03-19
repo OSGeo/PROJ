@@ -1011,6 +1011,7 @@ const struct MethodNameCode methodNameCodesList[] = {
     METHOD_NAME_CODE(GEOGRAPHIC2D_OFFSETS),
     METHOD_NAME_CODE(GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS),
     METHOD_NAME_CODE(GEOGRAPHIC3D_OFFSETS),
+    METHOD_NAME_CODE(CARTESIAN_GRID_OFFSETS),
     METHOD_NAME_CODE(VERTICAL_OFFSET),
     METHOD_NAME_CODE(VERTICAL_OFFSET_AND_SLOPE),
     METHOD_NAME_CODE(NTV2),
@@ -1075,6 +1076,8 @@ const struct ParamNameCode paramNameCodes[] = {
     PARAM_NAME_CODE(LATITUDE_OFFSET),
     PARAM_NAME_CODE(LONGITUDE_OFFSET),
     PARAM_NAME_CODE(VERTICAL_OFFSET),
+    PARAM_NAME_CODE(EASTING_OFFSET),
+    PARAM_NAME_CODE(NORTHING_OFFSET),
     PARAM_NAME_CODE(GEOID_UNDULATION),
     PARAM_NAME_CODE(A0),
     PARAM_NAME_CODE(A1),
@@ -1336,6 +1339,17 @@ static const ParamMapping paramVerticalOffset = {
 static const ParamMapping *const paramsGeographic3DOffsets[] = {
     &paramLatitudeOffset, &paramLongitudeOffset, &paramVerticalOffset, nullptr};
 
+static const ParamMapping paramEastingOffset = {
+    EPSG_NAME_PARAMETER_EASTING_OFFSET, EPSG_CODE_PARAMETER_EASTING_OFFSET,
+    nullptr, common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramNorthingOffset = {
+    EPSG_NAME_PARAMETER_NORTHING_OFFSET, EPSG_CODE_PARAMETER_NORTHING_OFFSET,
+    nullptr, common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping *const paramsCartesianGridOffsets[] = {
+    &paramEastingOffset, &paramNorthingOffset, nullptr};
+
 static const ParamMapping *const paramsVerticalOffsets[] = {
     &paramVerticalOffset, nullptr};
 
@@ -1568,6 +1582,10 @@ static const MethodMapping otherMethodMappings[] = {
     {EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSETS,
      EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSETS, nullptr, nullptr, nullptr,
      paramsGeographic3DOffsets},
+
+    {EPSG_NAME_METHOD_CARTESIAN_GRID_OFFSETS,
+     EPSG_CODE_METHOD_CARTESIAN_GRID_OFFSETS, nullptr, nullptr, nullptr,
+     paramsCartesianGridOffsets},
 
     {EPSG_NAME_METHOD_VERTICAL_OFFSET, EPSG_CODE_METHOD_VERTICAL_OFFSET,
      nullptr, nullptr, nullptr, paramsVerticalOffsets},

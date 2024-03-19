@@ -829,8 +829,9 @@ def fill_other_transformation(proj_db_cursor):
     # 1068: Height Depth Reversal
     # 1069: Change of Vertical Unit
     # 1046: Vertical Offset and Slope
-    # 9621 : Similarity transformation
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_method_code IN (9601, 9616, 9618, 9619, 9624, 9660, 1068, 1069, 1046, 9621)")
+    # 9621: Similarity transformation
+    # 9656: Cartesian Grid Offsets
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_method_code IN (9601, 9616, 9618, 9619, 9624, 9660, 1068, 1069, 1046, 9621, 9656)")
     for (code, name, method_code, method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, deprecated, remarks) in proj_db_cursor.fetchall():
 
         # 1068 and 1069 are Height Depth Reversal and Change of Vertical Unit
@@ -854,7 +855,7 @@ def fill_other_transformation(proj_db_cursor):
             target_crs_code = target_codes[0][0]
 
         # Engineering CRS
-        if source_crs_code in (5800, 5817):
+        if source_crs_code in (5800, 5817, 6715):
             print("Skipping transformation %s as source CRS (%d) is not handled" % (name, source_crs_code))
             continue
 
