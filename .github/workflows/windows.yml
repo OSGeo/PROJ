@@ -74,6 +74,18 @@ jobs:
             dir %PROJ_DIR%\bin
 
       - name: Run tests
+        shell: bash -l {0}
+        run: |
+            export VCPKG_ROOT=c:/vcpkg
+            export platform=${{ env.ARCH }}
+            export VCPKG_INSTALLED=${VCPKG_ROOT}/installed/${platform}-windows
+            export PATH=${VCPKG_INSTALLED}/bin:${PATH}
+            export PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
+            export PROJ_BUILD=${GITHUB_WORKSPACE}/build
+            cd ${PROJ_BUILD}
+            ctest --output-on-failure -C "${{ env.BUILD_TYPE }}"
+
+      - name: Post install checks
         shell: cmd
         run: |
             set VCPKG_ROOT=c:\vcpkg
@@ -83,7 +95,6 @@ jobs:
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
             set PROJ_BUILD=%GITHUB_WORKSPACE%\build
             cd %PROJ_BUILD%
-            ctest --output-on-failure -C "${{ env.BUILD_TYPE }}"
             set PATH=%PROJ_DIR%\bin;%PATH%
             set BUILD_MODE=shared
             if "${{ env.BUILD_SHARED_LIBS }}"=="OFF" (set BUILD_MODE=static)
