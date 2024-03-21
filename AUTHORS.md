@@ -6,7 +6,7 @@
 
 ## Maintainers
 
-- Kristian Evers <kreve@sdfe.dk>
+- Kristian Evers <kreve@sdfi.dk>
 - Even Rouault <even.rouault@spatialys.com>
 
 ## Project Steering Committee
@@ -16,14 +16,14 @@ Process and membership can be found at:
 
 Chair:
 
-- Kristian Evers <kreve@sdfe.dk>
+- Kristian Evers <kreve@sdfi.dk>
 
 Members:
 
 - Frank Warmerdam <warmerdam@pobox.com>
 - Howard Butler <howard@hobu.co>
 - Charles Karney <charles.karney@sri.com>
-- Thomas Knudsen <thokn@sdfe.dk>
+- Thomas Knudsen <thokn@sdfi.dk>
 - Even Rouault <even.rouault@spatialys.com>
 - Kurt Schwehr <schwehr@gmail.com>
 
