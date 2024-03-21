@@ -6,9 +6,6 @@
 [![Gitter](https://badges.gitter.im/OSGeo/proj.4.svg)](https://gitter.im/OSGeo/proj.4)
 [![Mailing List](https://img.shields.io/badge/PROJ-mailing%20list-4eb899.svg)](http://lists.osgeo.org/mailman/listinfo/proj)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
-
-<!-- [![Cirrus Status](https://img.shields.io/cirrus/github/OSGeo/PROJ)](https://cirrus-ci.com/github/OSGeo/PROJ/master) -->
-
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5884394.svg)](https://doi.org/10.5281/zenodo.5884394)
 
 PROJ is a generic coordinate transformation software, that transforms
@@ -17,11 +14,11 @@ This includes cartographic projections as well as geodetic transformations.
 
 For more information on the PROJ project please see the web page at:
 
-https://proj.org/
+<https://proj.org/>
 
 The PROJ mailing list can be found at:
 
-https://lists.osgeo.org/mailman/listinfo/proj/
+<https://lists.osgeo.org/mailman/listinfo/proj/>
 
 See the NEWS.md file for changes between versions.
 
@@ -70,10 +67,9 @@ be changed to a different directory. On Windows you have to define
 
 As an alternative to installing the data package on the local system,
 the resource files can be retrieved on-the-fly from the
-[PROJ CDN](https://cdn.proj.org/). A [network-enabled](https://proj.org/usage/network.html) PROJ build, will
-automatically fetch resource files that are not present locally from the
-CDN.
-
+[PROJ CDN](https://cdn.proj.org/).
+A [network-enabled](https://proj.org/usage/network.html) PROJ build, will
+automatically fetch resource files that are not present locally from the CDN.
 
 ## Citing PROJ in publications
 
