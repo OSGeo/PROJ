@@ -1,6 +1,8 @@
-# 9.4.0 Release Notes
+# PROJ Release Notes
 
-## Updates
+## 9.4.0
+
+### Updates
 
 * Add support for transformations involving coordinate epoch changes
   (PointMotionOperation), specifically for Canadian NAD83(CSRS)(#3884)
@@ -41,7 +43,7 @@
 
 * Database: update to EPSG v11.004 (#4062)
 
-## Bug fixes
+### Bug fixes
 
 * Fix missing symbols at link time for Windows target in Visual Studio (#3984)
 
@@ -50,15 +52,15 @@
 * Avoid convergence errors in +proj=gridshift when using biquadratic
    interpolation (#3985)
 
-# 9.3.1 Release Notes
+## 9.3.1
 
-## Updates
+### Updates
 
 * Update to EPSG 10.098 (#3968)
 
 * Update ESRI objects to v3.2.0 (#3944)
 
-## Bug fixes
+### Bug fixes
 
 * ITRF2008: fix wrong sign for 'dry' parameter of EURA and EURA_T  (#3870)
 
@@ -113,9 +115,9 @@
 
 * horner: allow arbitrary input type of coordinate (#3961)
 
-# 9.3.0 Release Notes
+## 9.3.0
 
-## Updates
+### Updates
 
 * Add C++ API to transform coordinate (#3705)
 
@@ -138,7 +140,7 @@
 
 * Database: update to EPSG 10.094 (#3847)
 
-## Bug fixes
+### Bug fixes
 
 * GeographicBoundingBox::intersection(): avoid infinite recursion and stack
   overflow on invalid bounding boxes (#3748)
@@ -158,11 +160,12 @@
 
 * bonne: fix inverse map projection computations when lat_1 < 0 (#3849)
 
-* WKT1 ESRI import/export: fix GCS name for EPSG:8353 S-JTSK_[JTSK03]_Krovak_East_North (#3851)
+* WKT1 ESRI import/export: fix GCS name for EPSG:8353
+  S-JTSK_[JTSK03]_Krovak_East_North (#3851)
 
-# 9.2.1 Release Notes
+## 9.2.1
 
-## Database updates
+### Database updates
 
 * Add alias for old ESRI datum/CRS names of EPSG:8353
   S_JTSK_JTSK03_Krovak_East_North (#3678)
@@ -171,7 +174,7 @@
 
 * Updated to EPSG 10.088 (#3731)
 
-## Bug fixes
+### Bug fixes
 
 * Fixed build errors with Cygwin (#3642)
 
@@ -211,9 +214,9 @@
 
 * tinshift: raise maximum size of JSON file to 100 MB (#3736)
 
-# 9.2.0 Release Notes
+## 9.2.0
 
-## Updates
+### Updates
 
 * Database
 
@@ -292,9 +295,9 @@
 
   * C API: add proj_get_domain_count(), proj_get_area_of_use_ex() and proj_get_scope_ex() (#3588)
 
-## Deprecations
+### Deprecations
 
-  The following functions have been deprecated and will be removed in a future version.
+The following functions have been deprecated and will be removed in a future version.
 
 * C API function proj_rtodms. Use proj_rtodms2 instead (#3431)
 
@@ -328,7 +331,7 @@
 * Added PROJ_IGNORE_CELESTIAL_BODY=YES environment variable that allows better matching of
    non-earth shaped ellipsoids to other celestial bodies (#3569)
 
-## Bug fixes
+### Bug fixes
 
 * rtodms(): fix potential buffer overflow not dealt with (#3441)
 
@@ -342,7 +345,7 @@
 
 * ProjectedCRS::identify(): Relax trust in id/authority in definition to identify (#3532)
 
-* Fix instantion of <http://www.opengis.net/def/crs/IAU/2015/xxx> URNs (#3569)
+* Fix instantion of `http://www.opengis.net/def/crs/IAU/2015/xxx` URNs (#3569)
 
 * Fix proj_normalize_for_visualization() on a transformation with FORCE_OVER=YES (#3570)
 
@@ -356,20 +359,20 @@
 
 * projinfo: fix long option name --source-crs (#3601)
 
-# 9.1.1 Release Notes
+## 9.1.1
 
-## Updates
+### Updates
 
 * Database: register at_bev_AT_GIS_GRID_2021_09_28 grid (#3442)
 
-## Bug fixes
+### Bug fixes
 
 * Implement alterGeodeticCRS and stripVerticalComponent for DerivedProjected (#3482)
 
 * Various improvements to handling of DerivedProjectedCRS
   (#3482, #3477, #3342, #3319, #3317)
 
-* Add missing <cstdint> includes (#3459)
+* Add missing `<cstdint>` includes (#3459)
 
 * cs2cs: better validate value of -W option (#3453)
 
@@ -415,83 +418,83 @@
 
 * Link geodtest against libm when available (#3341)
 
-# 9.1.0 Release Notes
+## 9.1.0
 
-## Updates
+### Updates
 
 * Database
 
-* Database: update to EPSG v10.074 (#3273)
+  * Database: update to EPSG v10.074 (#3273)
 
-* Update ESRI objects to version 3.0.0 (#3257)
+  * Update ESRI objects to version 3.0.0 (#3257)
 
-* Generate null transformation between geodetic/vertical datum ensemble and
-   its members (#3266)
+  * Generate null transformation between geodetic/vertical datum ensemble and
+    its members (#3266)
 
-* Add fk delete cascade to database tables for improved customizability
-   of the database (#3237)
+  * Add fk delete cascade to database tables for improved customizability
+    of the database (#3237)
 
-* Add Svalbard geoid grid no_kv_arcgp-2006-sk to grid alternatives (#3292)
+  * Add Svalbard geoid grid no_kv_arcgp-2006-sk to grid alternatives (#3292)
 
-* Added French grid fr_ign_RAF20 to grid alternatives (#3228)
+  * Added French grid fr_ign_RAF20 to grid alternatives (#3228)
 
 * WKT & PROJJSON
 
-* WKT2 parser: allow unit-less PARAMETER for coordinate operations (#3271)
+  * WKT2 parser: allow unit-less PARAMETER for coordinate operations (#3271)
 
-* WKT and PROJJSON adjustments (#3234)
+  * WKT and PROJJSON adjustments (#3234)
 
-* Bump PROJJSON to v0.5 (#3216)
+  * Bump PROJJSON to v0.5 (#3216)
 
-* Change order of horizontal and vertical operations when dealing with
-   WKT1 / PROJ4 compound CRS (#3127)
+  * Change order of horizontal and vertical operations when dealing with
+    WKT1 / PROJ4 compound CRS (#3127)
 
 * Coordinate Operations
 
-* Implement Vertical Offset and slope transformation method (#3200)
+  * Implement Vertical Offset and slope transformation method (#3200)
 
-* Add Interrupted Mollweide (land and ocean view) projections (#3139)
+  * Add Interrupted Mollweide (land and ocean view) projections (#3139)
 
-* Add invertible Horner polynomials (#3133)
+  * Add invertible Horner polynomials (#3133)
 
 * Optimizations
 
-* NTv2 and GTX grid readers: add a cache of lines to speed-up (#3241)
+  * NTv2 and GTX grid readers: add a cache of lines to speed-up (#3241)
 
-* IComparable::isEquivalentTo() optimizations (#3233)
+  * IComparable::isEquivalentTo() optimizations (#3233)
 
 * Various Updates
 
-* createOperations() / proj_trans(): better take into account area of
-   interest name / do not only keep first returned coordinate operation (#3282)
+  * createOperations() / proj_trans(): better take into account area of
+    interest name / do not only keep first returned coordinate operation (#3282)
 
-* createOperations(): take into account axis unit and inversion of target
-   DerivedProjectedCRS (#3281)
+  * createOperations(): take into account axis unit and inversion of target
+    DerivedProjectedCRS (#3281)
 
-* Allow a Compound CRS with derived projected (#3283)
+  * Allow a Compound CRS with derived projected (#3283)
 
-* Make "Vertical Offset and Slope" method usable as a deriving conversion of
-   a DerivedVerticalCRS (#3270)
+  * Make "Vertical Offset and Slope" method usable as a deriving conversion of
+    a DerivedVerticalCRS (#3270)
 
-* PROJ pipeline generator: recognize opposite Helmert transformations using
-   a different convention (#3265)
+  * PROJ pipeline generator: recognize opposite Helmert transformations using
+    a different convention (#3265)
 
-* createOperations(): prefer simpler pipelines / affects WGS 84 to
-   GDA94/GDA2020 (#3248)
+  * createOperations(): prefer simpler pipelines / affects WGS 84 to
+    GDA94/GDA2020 (#3248)
 
-* Make it possible to determine which grid files were actually used during a
-   transformation (#3180)
+  * Make it possible to determine which grid files were actually used during a
+    transformation (#3180)
 
-* Transformation: no longer do vertical trasnformation when doing compound CRS
-   to 2D CRS / add --3d to cs2cs (#3119)
+  * Transformation: no longer do vertical trasnformation when doing compound CRS
+    to 2D CRS / add --3d to cs2cs (#3119)
 
-* Deprecate PROJ4 CMake name (#3094)
+  * Deprecate PROJ4 CMake name (#3094)
 
-* Use GNUInstallDirs for CMake install locations (#3100)
+  * Use GNUInstallDirs for CMake install locations (#3100)
 
-* Introduce PROJ_DATA environment variable to deprecate PROJ_LIB (#3253)
+  * Introduce PROJ_DATA environment variable to deprecate PROJ_LIB (#3253)
 
-## Bug fixes
+### Bug fixes
 
 * projinfo: fix crash on --list-crs when proj.db cannot be opened (#3290)
 
@@ -516,15 +519,15 @@
 
 * createOperations(): fix infinite recursion in a complex case (#3226)
 
-# 9.0.1 Release Notes
+## 9.0.1
 
-## Database updates
+### Database updates
 
 * Update to EPSG 10.064 (#3208)
 
 * Add OGC:CRS84h (WGS 84 longitude-latitude-height) (#3155)
 
-## Bug fixes
+### Bug fixes
 
 * Use CMAKE_INSTALL_MANDIR to override default (#3081)
 
@@ -578,24 +581,24 @@
 
 * PROJJSON parser: do not error out if a datum ensemble member is unknown in the database (#3223)
 
-# 9.0.0 Release Notes
+## 9.0.0
 
-## Breaking Changes
+### Breaking changes
 
 * Support for the autotools build system has been removed (#3027)
   See RFC7 for details: <https://proj.org/community/rfc/rfc-7.html>
 
-## Updates
+### Updates
 
 * Database updates:
 
-* ESRI projection engine db to version 12.9 (#2943)
+  * ESRI projection engine db to version 12.9 (#2943)
 
-* EPSG v10.054 (#3051)
+  * EPSG v10.054 (#3051)
 
-* Vertical grid files for PL-geoid-2011, Polish geoid model (#2960)
+  * Vertical grid files for PL-geoid-2011, Polish geoid model (#2960)
 
-* Belgian geoid model hBG18 to grid alternatives (#3044)
+  * Belgian geoid model hBG18 to grid alternatives (#3044)
 
 * Add new option to proj_create_crs_to_crs_from_pj method to force +over on
   transformation operations (#2914)
@@ -613,7 +616,7 @@
 
 * proj.ini: add a 'ca_bundle_path' variable (#3049)
 
-## Bug fixes
+### Bug fixes
 
 * Fix extremely long parsing time on hostile PROJ strings (#2968)
 
@@ -634,13 +637,13 @@
 * Fix importing CRS definition with +proj=peirce_q and +shape different from
   square or diamond (#3057)
 
-# 8.2.1 Release Notes
+## 8.2.1
 
-## Updates
+### Updates
 
 * Database updated with EPSG v. 10.041 (#2974)
 
-## Bug fixes
+### Bug fixes
 
 * BoundCRS WKT import: fix setting of name (#2917)
 
@@ -669,9 +672,9 @@
 
 * Fix build with Intel C++ compiler (#2995)
 
-# 8.2.0 Release Notes
+## 8.2.0
 
-## Announcements
+### Announcements
 
 From PROJ 9.0.0 and onwards CMake will be the only build system bundled
 with the PROJ package. As a consequence support for Autotools builds will
@@ -681,7 +684,7 @@ any discrepancies discovered between Autotools and CMake builds.
 
 Details about the build system unification can be found in PROJ RFC 7.
 
-## Updates
+### Updates
 
 * Added the S2 projection (#2749)
 
@@ -730,7 +733,7 @@ Details about the build system unification can be found in PROJ RFC 7.
 
 * CMake: revise handling of symbol export and static builds (#2912)
 
-## Bug fixes
+### Bug fixes
 
 * Fix O(n^2) performance patterns where n is the number of steps of
   a pipeline (#2820)
@@ -743,7 +746,7 @@ Details about the build system unification can be found in PROJ RFC 7.
 * Make sure to re-order projection parameters according to their canonical
   order if needed (#2842)
 
-* Fix database access across fork() when SQLite3 doesn't use pread[64]() (#2845)
+* Fix database access across fork() when SQLite3 doesn't use `pread[64]()` (#2845)
 
 * Fix error in implementation of Inverse ellipsoidal orthographic projection
   that cause convergence to sometimes fail (#2853)
@@ -774,7 +777,7 @@ Details about the build system unification can be found in PROJ RFC 7.
   directories, so that proj can be used as a subdirectory of a larger
   project (#2913)
 
-## Thanks to
+### Thanks to
 
 * Thomas Knudsen
 * Alan D. Snow
@@ -792,13 +795,13 @@ Details about the build system unification can be found in PROJ RFC 7.
 * Kristian Evers
 * Even Rouault
 
-# 8.1.1 Release Notes
+## 8.1.1
 
-## Updates
+### Updates
 
 * EPSG Database updated to version 10.028 (#2773)
 
-## Bug fixes
+### Bug fixes
 
 * Include algorithm header file to avoid build errors on Alpine Linux (#2769)
 
@@ -834,15 +837,15 @@ Details about the build system unification can be found in PROJ RFC 7.
 * ConcatenatedOperation::fixStepsDirection(): fix bad chaining of steps when
   inverse map projection is involved in non-final step (#2819)
 
-## Thanks to
+### Thanks to
 
 * Brendan Jurd
 * Kristian Evers
 * Even Rouault
 
-# 8.1.0 Release Notes
+## 8.1.0
 
-## Updates
+### Updates
 
 * Database
 
@@ -889,7 +892,8 @@ Details about the build system unification can be found in PROJ RFC 7.
   * Update internal nlohmann/json to 3.9.1, and add a CMake option to
     be able to use external nlohmann/json (#2686)
 
-  * createFromUserInput(): change name of CRS built from URN combined references to match the convention of EPSG projected CRS (#2677)
+  * createFromUserInput(): change name of CRS built from URN combined references
+    to match the convention of EPSG projected CRS (#2677)
 
   * Parse compound id with two authorities, like ESRI:103668+EPSG:5703 (#2669)
 
@@ -899,7 +903,7 @@ Details about the build system unification can be found in PROJ RFC 7.
 
   * Added capability to get SQL statements to add custom CRS in the database (#2577)
 
-## Bug fixes
+### Bug fixes
 
 * Fix 'Please include winsock2.h before windows.h' warning with msys (#2692)
 
@@ -914,7 +918,7 @@ Details about the build system unification can be found in PROJ RFC 7.
 * Fix export of transformation to PROJ string in a particular situation
   where CompoundCRS are involved (#2721)
 
-## Thanks to
+### Thanks to
 
 * Howard Butler
 * Alan D. Snow
@@ -929,9 +933,9 @@ Details about the build system unification can be found in PROJ RFC 7.
 * Kristian Evers
 * Even Rouault
 
-# 8.0.1 Release Notes
+## 8.0.1
 
-## Updates
+### Updates
 
 * Database: update to EPSG v10.018 (#2636)
 
@@ -939,11 +943,12 @@ Details about the build system unification can be found in PROJ RFC 7.
 
 * Additions to the norwegian NKG2020 transformation (#2600)
 
-## Bug fixes
+### Bug fixes
 
 * pj_vlog(): fix buffer overflow in case of super lengthy error message (#2693)
 
-* Revert "proj_create_crs_to_crs_from_pj(): do not use PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION if area is specified" (#2679)
+* Revert "proj_create_crs_to_crs_from_pj(): do not use PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION
+  if area is specified" (#2679)
 
 * UTM: error out when value of +zone= is not an integer (#2672)
 
@@ -983,7 +988,7 @@ Details about the build system unification can be found in PROJ RFC 7.
 
 * createOperations(): fix incorrect height transformation between 3D promoted RGF93 and CH1903+ (#2555)
 
-## Thanks to
+### Thanks to
 
 * Dan Jacobson
 * Sveinung Himle
@@ -992,7 +997,7 @@ Details about the build system unification can be found in PROJ RFC 7.
 * Kristian Evers
 * Even Rouault
 
-# 8.0.0 Release Notes
+## 8.0.0
 
 With the release of PROJ 8 the proj_api.h API is finally removed. See
 <https://proj.org/development/migration.html> for more info on how to migrate
@@ -1004,7 +1009,7 @@ and messages given by the software. The error codes are exposed in the API.
 Several improvements has been made to the command line utilities as well as
 tweaks in the underlying API.
 
-## Updates
+### Updates
 
 * Public header file proj_api.h removed (#837)
 
@@ -1051,7 +1056,7 @@ tweaks in the underlying API.
 
 * CMake installs a pkg-config file proj.pc, where supported (#2547)
 
-## Bug fixes
+### Bug fixes
 
 * Do not restrict longitude to [-90;90] range in spherical transverse Mercator
   forward projection (#2471)
@@ -1062,7 +1067,7 @@ tweaks in the underlying API.
 
 * Close database connection when autoclose set to True (#2532)
 
-## Thanks to
+### Thanks to
 
 * Zac Miller
 * Juan Hernando
@@ -1084,9 +1089,9 @@ tweaks in the underlying API.
 * Kristian Evers
 * Even Rouault
 
-# 7.2.1 Release Notes
+## 7.2.1
 
-## Updates
+### Updates
 
 * Add metadata with the version number of the database layout (#2474)
 
@@ -1096,7 +1101,7 @@ tweaks in the underlying API.
 
 * Added the NKG 2008 and 2020 transformations in proj.db (#2495)
 
-## Bug fixes
+### Bug fixes
 
 * Set CURL_ENABLED definition on projinfo build (#2405)
 
@@ -1134,9 +1139,10 @@ tweaks in the underlying API.
 
 * Include JSON Schema files in CMake builds (#2485)
 
-* createOperations(): fix inconsistent chaining exception when transforming from BoundCRS of projected CRS based on NTF Paris to BoundCRS of geog CRS NTF Paris (#2486)
+* createOperations(): fix inconsistent chaining exception when transforming from
+  BoundCRS of projected CRS based on NTF Paris to BoundCRS of geog CRS NTF Paris (#2486)
 
-## Thanks to
+### Thanks to
 
 * Zac Miller
 * Nomit Rawat
@@ -1145,9 +1151,9 @@ tweaks in the underlying API.
 * Kristian Evers
 * Even Rouault
 
-# 7.2.0 Release Notes
+## 7.2.0
 
-## Updates
+### Updates
 
 * Command line tools:
 
@@ -1181,24 +1187,24 @@ tweaks in the underlying API.
 
 * API
 
-* Added temporal, engineering, and parametric datum
-  PJ_TYPE enumerations (#2274)
+  * Added temporal, engineering, and parametric datum
+    PJ_TYPE enumerations (#2274)
 
-* Various improvements to context handling (#2329, #2331)
+  * Various improvements to context handling (#2329, #2331)
 
-* proj_create_vertical_crs_ex(): add a ACCURACY option to provide
+  * proj_create_vertical_crs_ex(): add a ACCURACY option to provide
     an explicit accuracy, or derive it from the grid name if it is
     known (#2342)
 
-* proj_crs_create_bound_crs_to_WGS84(): make it work on
+  * proj_crs_create_bound_crs_to_WGS84(): make it work on
     verticalCRS/compoundCRS such as EPSG:4326+5773 and
     EPSG:4326+3855 (#2365)
 
-* promoteTo3D(): add a remark with the original CRS identifier (#2369)
+  * promoteTo3D(): add a remark with the original CRS identifier (#2369)
 
-* Added proj_context_clone (#2383)
+  * Added proj_context_clone (#2383)
 
-## Bug fixes
+### Bug fixes
 
 * Avoid core dumps when copying contexts in certain scenarios (#2324)
 
@@ -1217,7 +1223,7 @@ tweaks in the underlying API.
 
 * WKT1_ESRI: fix import and export of CompoundCRS (#2389)
 
-## Thanks to
+### Thanks to
 
 * Alexander Saprykin
 * Jeff McKenna
@@ -1231,9 +1237,9 @@ tweaks in the underlying API.
 * Kristian Evers
 * Even Rouault
 
-# 7.1.1 Release Notes
+## 7.1.1
 
-## Updates
+### Updates
 
 * Added various Brazillian grids to the database #2277
 
@@ -1241,7 +1247,7 @@ tweaks in the underlying API.
 
 * Updated EPSG database to version 9.8.15 #2310
 
-## Bug fixes
+### Bug fixes
 
 * WKT parser: do not raise warning when parsing a WKT2:2015 TIMECRS
    whose TIMEUNIT is at the CS level, and not inside #2281
@@ -1265,7 +1271,7 @@ tweaks in the underlying API.
 
 * Revert compiler generated Fused Multiply Addition optimized routines #2328
 
-## Thanks to
+### Thanks to
 
 * Jeff McKenna
 * Kai Pastor
@@ -1273,9 +1279,9 @@ tweaks in the underlying API.
 * Kristian Evers
 * Even Rouault
 
-# 7.1.0 Release Notes
+## 7.1.0
 
-## Updates
+### Updates
 
 * New transformations:
 
@@ -1283,13 +1289,12 @@ tweaks in the underlying API.
 
 * New projections:
 
-  * Add square conformal projections from libproject:
+  * Add square conformal projections from libproject (#2148):
     * Adams Hemisphere in a Square
     * Adams World in a Square I
     * Adams World in a Square II
     * Guyou
     * Pierce Quincuncial
-     (#2148)
 
   * Adams Square II: map ESRI WKT to PROJ string, and implement iterative
      inverse method (#2157)
@@ -1320,7 +1325,7 @@ tweaks in the underlying API.
   * Register NZGD2000 -> ITRF96 transformation for NZGD2000 database (#2248)
 
   * Register geoid file for UK added
-     (see <https://github.com/OSGeo//PROJ-data/pull/25()> (#2250)
+     (see <https://github.com/OSGeo//PROJ-data/pull/25>) (#2250)
 
   * Register Slovakian geoid transformations with needed code changes (#2259)
 
@@ -1370,13 +1375,13 @@ tweaks in the underlying API.
 
   * projinfo: add a --hide-ballpark option (#2127)
 
-  * gie: implement a strict mode with <gie-strict> </gie-strict> (#2168)
+  * gie: implement a strict mode with `<gie-strict> </gie-strict>` (#2168)
 
   * Allow importing WKT1 COMPD_CS with a VERT_DATUM[Ellipsoid,2002] (#2229)
 
   * Add runtime checking that sqlite3 is >= 3.11 (#2235)
 
-## Bug fixes
+### Bug fixes
 
 * createOperations(): do not remove ballpark transformation if there are only grid
   based operations, even if they cover the whole area of use (#2155)
@@ -1406,7 +1411,7 @@ tweaks in the underlying API.
 
 * Fix access violation in proj_context_get_database_metadata (#2260)
 
-## Thanks to
+### Thanks to
 
 * Martin Raspaud
 * Jeroen Ooms
@@ -1431,13 +1436,13 @@ tweaks in the underlying API.
 * Kristian Evers
 * Even Rouault
 
-# 7.0.1 Release Notes
+## 7.0.1
 
-## Updates
+### Updates
 
 * Database: update to EPSG v9.8.9 #2141
 
-## Bug fixes
+### Bug fixes
 
 * Make tests independent of proj-datumgrid (#1995)
 
@@ -1531,14 +1536,14 @@ tweaks in the underlying API.
 
 * Fix support of WKT1_GDAL with netCDF rotated pole formulation (#2186)
 
-## Thanks to
+### Thanks to
 
 * Mike Taves
 * Chris Mayo
 * Kristian Evers
 * Even Rouault
 
-# 7.0.0 Release Notes
+## 7.0.0
 
 The major feature in PROJ 7 is significantly improved handling of gridded
 models. This was implemented in RFC4 (<https://proj.org/community/rfc/rfc-4.html>).
@@ -1550,8 +1555,8 @@ store in the cloud.
 The grids that was previously available via the proj-datumgrid packages are now
 available in two places:
 
- 1. As a single combined data archive including all available resource files
- 2. From the cloud via <https://cdn.proj.org>
+1. As a single combined data archive including all available resource files
+2. From the cloud via <https://cdn.proj.org>
 
 In Addition, provided with PROJ is a utility called projsync that can be used
 download grids from the data store in the cloud.
@@ -1567,7 +1572,7 @@ in the proj.h header and all projects still relying on proj_api.h are encouraged
 to migrate to the new API in proj.h. See <https://proj.org/development/migration.html>
 for more info on how to migrate from the old to the new API.
 
-## Updates
+### Updates
 
 * Added new file access API to proj.h #866
 
@@ -1612,7 +1617,7 @@ for more info on how to migrate from the old to the new API.
 
 * Use relative directory to locate PROJ resource files (#1921)
 
-## Bug fixes
+### Bug fixes
 
 * Horizontal grid shift: fix failures on points slightly outside a
   subgrid (#209)
@@ -1621,7 +1626,7 @@ for more info on how to migrate from the old to the new API.
 
 * tests: force use of bash for proj_add_test_script_sh (#1905)
 
-## Breaking changes
+### Breaking changes
 
 * Reject NTV2 files where GS_TYPE != SECONDS #1294
 
@@ -1636,7 +1641,7 @@ for more info on how to migrate from the old to the new API.
 
 * Increase CMake minimum version from 3.5 to 3.9 (#1907)
 
-## Thanks to
+### Thanks to
 
 * Jeff McKenna
 * Calum Robinson
@@ -1648,9 +1653,9 @@ for more info on how to migrate from the old to the new API.
 * Kristian Evers
 * Even Rouault
 
-# 6.3.1 Release Notes
+## 6.3.1
 
-## Updates
+### Updates
 
 * Update the EPSG database to version 9.8.6
 
@@ -1658,7 +1663,7 @@ for more info on how to migrate from the old to the new API.
 
 * Database: add mapping for TOR27CSv1.GSB
 
-## Bug fixes
+### Bug fixes
 
 * Fix wrong use of derivingConversionRef() that caused issues with use of
   +init=epsg:XXXX by GDAL (affecting R spatial libraries) or in MapServer
@@ -1696,7 +1701,7 @@ for more info on how to migrate from the old to the new API.
 
 * Various updates to make regression test suite pass with gcc on i386 (#1906)
 
-## Thanks to
+### Thanks to
 
 * Alan D. Snow
 * GitHub user @russkel
@@ -1706,9 +1711,9 @@ for more info on how to migrate from the old to the new API.
 * Kristian Evers
 * Even Rouault
 
-# 6.3.0 Release Notes
+## 6.3.0
 
-## Updates
+### Updates
 
 * Database: tune accuracy of Canadian NTv1 file w.r.t NTv2 (#1812)
 
@@ -1744,7 +1749,7 @@ for more info on how to migrate from the old to the new API.
 
 * Better filtering based on extent and performance improvements (#1709)
 
-## Bug fixes
+### Bug fixes
 
 * Horizontal grid shift: fix issue on iterative inverse computation when
   switching between (sub)grids (#1797)
@@ -1774,7 +1779,7 @@ for more info on how to migrate from the old to the new API.
 
 * Fix errors running gie-based tests in Debug mode on Windows (#1688)
 
-## Thanks to
+### Thanks to
 
 * Pedro Venancio
 * Owen Rudge
@@ -1804,13 +1809,13 @@ for more info on how to migrate from the old to the new API.
 * Kristian Evers
 * Even Rouault
 
-# 6.2.1 Release Notes
+## 6.2.1
 
-## Updates
+### Updates
 
 * Update the EPSG database to version 9.8.2
 
-## Bug fixes
+### Bug fixes
 
 * Fixed erroneous spelling of "Potsdam" (#1573)
 
@@ -1869,7 +1874,7 @@ for more info on how to migrate from the old to the new API.
 
 * importFromWkt(): fix axis orientation for non-standard ESRI WKT (#1690)
 
-## Thanks to
+### Thanks to
 
 * R. Schmunk
 * Jakob Egger
@@ -1879,9 +1884,9 @@ for more info on how to migrate from the old to the new API.
 * Kristian Evers
 * Even Rouault
 
-# 6.2.0 Release Notes
+## 6.2.0
 
-## Updates
+### Updates
 
 * Introduced PROJJSON, a JSON encoding of WKT2 (#1547)
 
@@ -1902,11 +1907,11 @@ for more info on how to migrate from the old to the new API.
 
 * Added C API function proj_cleanup() (#1569)
 
-## Bug fixes
+### Bug fixes
 
 * Fixed build failure on Solaris systems (#1554)
 
-## Thanks to
+### Thanks to
 
 Version 6.2.0 is made possible by the following contributors:
 
@@ -1916,13 +1921,13 @@ Version 6.2.0 is made possible by the following contributors:
 * Kristian Evers
 * Even Rouault
 
-# 6.1.1 Release Notes
+## 6.1.1
 
-## Updates
+### Updates
 
 * Update EPSG registry to version 9.6.3 (1485)
 
-## Bug fixes
+### Bug fixes
 
 * Take the passed authority into account when identifying
   objects (#1466)
@@ -1949,7 +1954,7 @@ Version 6.2.0 is made possible by the following contributors:
 * Make sure that pipelines including +proj=ob_tran can be
   created (#1526)
 
-## Thanks to
+### Thanks to
 
 Version 6.1.1 is made possible by the following contributors:
 
@@ -1965,9 +1970,9 @@ Version 6.1.1 is made possible by the following contributors:
 * Kristian Evers
 * Even Rouault
 
-# 6.1.0 Release Notes
+## 6.1.0
 
-## Updates
+### Updates
 
 * Include custom ellipsoid definitions from QGIS (#1337)
 
@@ -1994,7 +1999,7 @@ Version 6.1.1 is made possible by the following contributors:
 * add support for compoundCRS and concatenatedOperation named from
   their components (#1441)
 
-## Bug fixes
+### Bug fixes
 
 * Have gie return non-zero code when file can't be opened (#1312)
 
@@ -2026,7 +2031,7 @@ Version 6.1.1 is made possible by the following contributors:
 
 * Many division by zero and similar bug fixes found by OSS Fuzz.
 
-## Thanks to
+### Thanks to
 
 Version 6.1.0 is made possible by the following contributors:
 
@@ -2043,7 +2048,7 @@ Version 6.1.0 is made possible by the following contributors:
 * Kristian Evers
 * Even Rouault
 
-# 6.0.0 Release Notes
+## 6.0.0
 
 PROJ 6 has undergone extensive changes to increase its functional scope from a
 cartographic projection engine with so-called "early-binding" geodetic datum
@@ -2085,7 +2090,7 @@ a geodetic object of the database, import and export geodetic objects from/into
 WKT and PROJ strings, and display coordinate operations available between two
 CRSs.
 
-## Updates
+### Updates
 
 * Removed projects.h as a public interface (#835)
 
@@ -2143,7 +2148,7 @@ CRSs.
 * Added +dt parameter to deformation as replacement for
   removed +t_obs (#1264)
 
-## Bug fixes
+### Bug fixes
 
 * Read +towgs84 values correctly on locales not using dot as comma separator (#1136)
 
@@ -2164,7 +2169,7 @@ CRSs.
 * Robinson: fix wrong values for forward path for latitudes >= 87.5 (#1172),
   and fix inaccurate inverse method.
 
-## Thanks to
+### Thanks to
 
 Version 6.0.0 is made possible by the following contributors:
 
@@ -2189,9 +2194,9 @@ Version 6.0.0 is made possible by the following contributors:
 * Kristian Evers
 * Even Rouault
 
-# 5.2.0 Release Notes
+## 5.2.0
 
-## Updates
+### Updates
 
 * Added support for deg, rad and grad in unitconvert (#1054)
 
@@ -2215,7 +2220,7 @@ Version 6.0.0 is made possible by the following contributors:
 * cct will now forward text after coordinate input to output
   stream (#1111)
 
-## Bug fixes
+### Bug fixes
 
 * Do not pivot over WGS84 when doing cs2cs-emulation with geocent (#1026)
 
@@ -2239,7 +2244,7 @@ Version 6.0.0 is made possible by the following contributors:
 All bug fix numbers refer to issues or pull requests indexed at
 <https://github.com/OSGeo/proj.4/>
 
-## Thanks to
+### Thanks to
 
 Version 5.2.0 is made possible by the following contributors:
 
@@ -2258,9 +2263,9 @@ Version 5.2.0 is made possible by the following contributors:
 * Even Rouault
 * Kristian Evers
 
-# 5.1.0 Release Notes
+## 5.1.0
 
-## Updates
+### Updates
 
 * Function proj_errno_string() added to proj.h API (#847)
 
@@ -2287,7 +2292,7 @@ Version 5.2.0 is made possible by the following contributors:
 * Horizontal and vertical gridshift operations extended to
   the temporal domain (#1015)
 
-## Bug fixes
+### Bug fixes
 
 * Handle nan float cast overflow in PJ_robin.c and nad_intr.c (#887)
 
@@ -2324,7 +2329,7 @@ Version 5.2.0 is made possible by the following contributors:
 All bug fix numbers refer to issues or pull requests indexed at
 <https://github.com/OSGeo/proj.4/>
 
-## Thanks to
+### Thanks to
 
 Version 5.1.0 is made possible by the following contributors:
 
@@ -2340,9 +2345,9 @@ Version 5.1.0 is made possible by the following contributors:
 * Adam Wulkiewicz
 * Aaron Puchert
 
-# 5.0.1 Release Notes
+## 5.0.1
 
-## Bug fixes
+### Bug fixes
 
 All bug fix numbers refer to issues or pull requests indexed at
 <https://github.com/OSGeo/proj.4/>
@@ -2376,7 +2381,7 @@ All bug fix numbers refer to issues or pull requests indexed at
 
 * Fix incorrect Web Mercator transformations #834
 
-## Thanks to
+### Thanks to
 
 Version 5.0.1 is made possible by the following contributors:
 
@@ -2387,7 +2392,7 @@ Version 5.0.1 is made possible by the following contributors:
 * Thomas Knudsen
 * Kristian Evers
 
-# 5.0.0 Release Notes
+## 5.0.0
 
 This version of PROJ introduces some significant extensions and
 improvements to (primarily) the geodetic functionality of the system.
@@ -2432,7 +2437,7 @@ The end goal is to deliver a generic coordinate transformation
 software package with a clean and concise code base appealing to
 both users and developers.
 
-## Versioning and naming
+### Versioning and naming
 
 For the first time in more than 25 years the major version number of
 the software is changed. The decision to do this is based on the many
@@ -2466,7 +2471,7 @@ In summary:
 * The PROJ.4 project also distributes the datum-grid package,
  which at the time of writing is at version 1.6.0.
 
-## Updates
+### Updates
 
 * Introduced new API in proj.h.
   * The new API is orthogonal to the existing proj_api.h API and the
@@ -2564,7 +2569,7 @@ In summary:
 
 * Removed the VB6 COM interface.
 
-## Bug fixes
+### Bug fixes
 
 All bug fix numbers refer to issues indexed at
 <https://github.com/OSGeo/proj.4/issues/>
@@ -2623,12 +2628,12 @@ All bug fix numbers refer to issues indexed at
 * Additional bug fixes courtesy of Google's OSS-Fuzz program:
   <https://bugs.chromium.org/p/oss-fuzz/issues/list?can=1&q=proj4>
 
-## Deprecations
+### Deprecations
 
 * The projects.h header and the functions related to it is
   considered deprecated from version 5.0.0 and onwards.
 
-  ```
+  ```text
   !!!     PROJECTS.H WILL BE REMOVED FROM THE LIBRARY     !!!
   !!!                 WITH VERSION 6.0.0                  !!!
   ```
@@ -2636,7 +2641,7 @@ All bug fix numbers refer to issues indexed at
 * The nmake build system on Windows will not be supported from
   version 6.0.0 on onwards. Use CMake instead.
 
-  ```
+  ```text
   !!! NMAKE BUILD SYSTEM WILL BE REMOVED FROM THE LIBRARY !!!
   !!!                 WITH VERSION 6.0.0                  !!!
   ```
@@ -2644,12 +2649,12 @@ All bug fix numbers refer to issues indexed at
 * The proj_api.h header and the functions related to it is
   consided deprecated from version 5.0.0 and onwards.
 
-  ```
+  ```text
   !!!     PROJ_API.H WILL BE REMOVED FROM THE LIBRARY     !!!
   !!!                 WITH VERSION 7.0.0                  !!!
   ```
 
-## Thanks to
+### Thanks to
 
 Version 5.0.0 is made possible by the following contributors:
 
@@ -2679,7 +2684,7 @@ Version 5.0.0 is made possible by the following contributors:
 * Thomas Knudsen
 * Kristian Evers
 
-# 4.9.3 Release Notes
+## 4.9.3
 
 * UTM now uses etmerc, following NGA recommendations.  Tests adjusted
   for tiny changes in values.
@@ -2695,7 +2700,7 @@ Version 5.0.0 is made possible by the following contributors:
 
 * New (optional) runtime self tests added to proj
 
-# 4.9.2 Release Notes
+## 4.9.2
 
 * proj_def.dat was missing from source distribution
   see <https://github.com/OSGeo/proj.4/issues/274> for more detail
@@ -2706,7 +2711,7 @@ Version 5.0.0 is made possible by the following contributors:
 
 * Renamed PVALUE in pj_param.c to prevent clash with Windows
 
-# 4.9.1 Release Notes
+## 4.9.1
 
 * 4.9.0RC2 release was abandoned because it was not promoted in a
   timely fashion. Subsequent maintenance of tickets has continued,
@@ -2742,7 +2747,7 @@ Version 5.0.0 is made possible by the following contributors:
 
 * Dial back test sensitivity #255
 
-# 4.9.0 Release Notes
+## 4.9.0
 
 * Implement CMake as an option for building PROJ.4
 
@@ -2766,7 +2771,7 @@ Version 5.0.0 is made possible by the following contributors:
 
 * Added the CalCOFI pseudo-projection, #135
 
-# 4.8.0 Release Notes
+## 4.8.0
 
 * Added the Natural Earth projection.
 
@@ -2803,7 +2808,7 @@ Version 5.0.0 is made possible by the following contributors:
   flag no longer works, and some coordinate systems (ie. Malaysian) will
   need to use +gamma instead.  "epsg" init file updated accordingly.
 
-# 4.7.0 Release Notes
+## 4.7.0
 
 * Added in memory caching of init file search results for substantial
   acceleration in some application environments (like MapServer).
@@ -2814,7 +2819,7 @@ Version 5.0.0 is made possible by the following contributors:
 * Various thread safety improvements, including preliminary support for
   a mutex lock around some operations, like grid loading.
 
-# 4.6.1 Release Notes
+## 4.6.1
 
 * Upgraded to EPSG 6.17 version for nad/epsg.  Also corrected the precision
   problem introduced in the last version.
@@ -2840,7 +2845,7 @@ Version 5.0.0 is made possible by the following contributors:
 
 * Fix testvarious test script so it works properly when grid files available
 
-# 4.6.0 Release Notes
+## 4.6.0
 
 * MAJOR: Rework pj_transform() to avoid applying ellipsoid to ellipsoid
   transformations as a datum shift when no datum info is available.
@@ -2864,7 +2869,7 @@ Version 5.0.0 is made possible by the following contributors:
 
 * add lonlat, and latlon as aliases for longlat.
 
-# 4.5.0 Release Notes
+## 4.5.0
 
 * Microsoft Visual Studio 8 compatibility changes.
 
@@ -2879,7 +2884,7 @@ Version 5.0.0 is made possible by the following contributors:
 * Added experimental +lon_wrap flag for alternate pj_transform() longitude
   wrapping behavior on output.
 
-# 4.4.9 Release Notes
+## 4.4.9
 
 * Win32 build uses proj.dll by default now.
 
@@ -2896,7 +2901,7 @@ Version 5.0.0 is made possible by the following contributors:
 
 * A few other bug fixes.
 
-# 4.4.8 Release Notes
+## 4.4.8
 
 * Updated epsg file to EPSG 6.5, added other.extra pseudo-EPSG WMS definitions
 
@@ -2916,7 +2921,7 @@ Version 5.0.0 is made possible by the following contributors:
 
 * Various other bug fixes.
 
-# 4.4.7 Release Notes
+## 4.4.7
 
 * Added NTv2 (.gsb) grid shift file support.
 
@@ -2931,7 +2936,7 @@ Version 5.0.0 is made possible by the following contributors:
 
 * Various bug fixes.
 
-# 4.4.6 Release Notes
+## 4.4.6
 
 * Incorporated new lcca (Lambert Conformal Conic Alternate) projection from
   Gerald.

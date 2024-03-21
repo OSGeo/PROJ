@@ -81,7 +81,7 @@ If you intend to document one of PROJ's supported projections please use the
 
 See [Code Contributions](https://proj.org/community/code_contributions.html)
 
-#### Legalese
+### Legalese
 
 Committers are the front line gatekeepers to keep the code base clear of improperly contributed code.
 It is important to the PROJ users, developers and the OSGeo foundation to avoid contributing any
@@ -130,6 +130,6 @@ improperly contributing code to the source repository:
 
 ## Acknowledgements
 
-The *code contribution* section of this CONTRIBUTING file is inspired by
-[PDAL's](https://github.com/PDAL/PDAL/blob/master/CONTRIBUTING.md) and the *legalese* section is
-modified from [GDAL committer guidelines](https://trac.osgeo.org/gdal/wiki/rfc3_commiters)
+The [code contribution](#Code Contributions) section of this CONTRIBUTING file is inspired by
+[PDAL's](https://github.com/PDAL/PDAL/blob/master/CONTRIBUTING.md) and the [legalese](#legalese)
+section is modified from [GDAL committer guidelines](https://trac.osgeo.org/gdal/wiki/rfc3_commiters)
