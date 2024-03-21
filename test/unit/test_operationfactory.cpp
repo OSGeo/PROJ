@@ -1971,7 +1971,7 @@ TEST(operation, geogCRS_to_geogCRS_with_intermediate_no_ids) {
             "ITRF2014 to ETRF2014 (1) + "
             "Inverse of NKG_ETRF14 to ETRF2014 + "
             "NKG_ETRF14 to ETRF96@2000.0 + "
-            "ETRF96@2000.0 to ETRF96@1997.56 + "
+            "ETRF96@2000.0 to ETRF96@1997.56 using nkgrf17vel + "
             "Conversion from ETRS89 (geocentric) to ETRS89 (geog2D) + "
             "Inverse of EST97 to ETRS89 (1) + "
             "Null geographic offset from EST97 (geog2D) to EST97 (geog3D) + "
