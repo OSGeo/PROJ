@@ -112,7 +112,7 @@ static double normal_radius_of_curvature(double a, double es, double sinphi) {
 }
 
 /*********************************************************************/
-static double geocentric_radius(double a, double b, double cosphi,
+static double geocentric_radius(double a, double b_div_a, double cosphi,
                                 double sinphi) {
     /*********************************************************************
         Return the geocentric radius at latitude phi, of an ellipsoid
@@ -121,8 +121,18 @@ static double geocentric_radius(double a, double b, double cosphi,
         This is from WP2, but uses hypot() for potentially better
         numerical robustness
     ***********************************************************************/
-    return hypot(a * a * cosphi, b * b * sinphi) /
-           hypot(a * cosphi, b * sinphi);
+    // Non-optimized version:
+    // const double b = a * b_div_a;
+    // return hypot(a * a * cosphi, b * b * sinphi) /
+    //        hypot(a * cosphi, b * sinphi);
+    const double cosphi_squared = cosphi * cosphi;
+    const double sinphi_squared = sinphi * sinphi;
+    const double b_div_a_squared = b_div_a * b_div_a;
+    const double b_div_a_squared_mul_sinphi_squared =
+        b_div_a_squared * sinphi_squared;
+    return a * sqrt((cosphi_squared +
+                     b_div_a_squared * b_div_a_squared_mul_sinphi_squared) /
+                    (cosphi_squared + b_div_a_squared_mul_sinphi_squared));
 }
 
 /*********************************************************************/
@@ -147,8 +157,23 @@ static PJ_LPZ geodetic(PJ_XYZ cart, PJ *P) {
     /*********************************************************************/
     PJ_LPZ lpz;
 
+    // Normalize (x,y,z) to the unit sphere/ellipsoid.
+#if (defined(__i386__) && !defined(__SSE__)) || defined(_M_IX86)
+    // i386 (actually non-SSE) code path to make following test case of
+    // testvarious happy
+    // "echo 6378137.00 -0.00 0.00 | bin/cs2cs +proj=geocent +datum=WGS84 +to
+    // +proj=latlong +datum=WGS84"
+    const double x_div_a = cart.x / P->a;
+    const double y_div_a = cart.y / P->a;
+    const double z_div_a = cart.z / P->a;
+#else
+    const double x_div_a = cart.x * P->ra;
+    const double y_div_a = cart.y * P->ra;
+    const double z_div_a = cart.z * P->ra;
+#endif
+
     /* Perpendicular distance from point to Z-axis (HM eq. 5-28) */
-    const double p = hypot(cart.x, cart.y);
+    const double p_div_a = sqrt(x_div_a * x_div_a + y_div_a * y_div_a);
 
 #if 0
     /* HM eq. (5-37) */
@@ -158,18 +183,33 @@ static PJ_LPZ geodetic(PJ_XYZ cart, PJ *P) {
     const double c  =  cos(theta);
     const double s  =  sin(theta);
 #else
-    const double y_theta = cart.z * P->a;
-    const double x_theta = p * P->b;
-    const double norm = hypot(y_theta, x_theta);
-    const double c = norm == 0 ? 1 : x_theta / norm;
-    const double s = norm == 0 ? 0 : y_theta / norm;
+    const double b_div_a = 1 - P->f; // = P->b / P->a
+    const double p_div_a_b_div_a = p_div_a * b_div_a;
+    const double norm =
+        sqrt(z_div_a * z_div_a + p_div_a_b_div_a * p_div_a_b_div_a);
+    double c, s;
+    if (norm != 0) {
+        const double inv_norm = 1.0 / norm;
+        c = p_div_a_b_div_a * inv_norm;
+        s = z_div_a * inv_norm;
+    } else {
+        c = 1;
+        s = 0;
+    }
 #endif
 
-    const double y_phi = cart.z + P->e2s * P->b * s * s * s;
-    const double x_phi = p - P->es * P->a * c * c * c;
-    const double norm_phi = hypot(y_phi, x_phi);
-    double cosphi = norm_phi == 0 ? 1 : x_phi / norm_phi;
-    double sinphi = norm_phi == 0 ? 0 : y_phi / norm_phi;
+    const double y_phi = z_div_a + P->e2s * b_div_a * s * s * s;
+    const double x_phi = p_div_a - P->es * c * c * c;
+    const double norm_phi = sqrt(y_phi * y_phi + x_phi * x_phi);
+    double cosphi, sinphi;
+    if (norm_phi != 0) {
+        const double inv_norm_phi = 1.0 / norm_phi;
+        cosphi = x_phi * inv_norm_phi;
+        sinphi = y_phi * inv_norm_phi;
+    } else {
+        cosphi = 1;
+        sinphi = 0;
+    }
     if (x_phi <= 0) {
         // this happen on non-sphere ellipsoid when x,y,z is very close to 0
         // there is no single solution to the cart->geodetic conversion in
@@ -181,18 +221,18 @@ static PJ_LPZ geodetic(PJ_XYZ cart, PJ *P) {
     } else {
         lpz.phi = atan(y_phi / x_phi);
     }
-    lpz.lam = atan2(cart.y, cart.x);
+    lpz.lam = atan2(y_div_a, x_div_a);
 
     if (cosphi < 1e-6) {
         /* poleward of 89.99994 deg, we avoid division by zero   */
         /* by computing the height as the cartesian z value      */
         /* minus the geocentric radius of the Earth at the given */
         /* latitude                                              */
-        const double r = geocentric_radius(P->a, P->b, cosphi, sinphi);
+        const double r = geocentric_radius(P->a, b_div_a, cosphi, sinphi);
         lpz.z = fabs(cart.z) - r;
     } else {
         const double N = normal_radius_of_curvature(P->a, P->es, sinphi);
-        lpz.z = p / cosphi - N;
+        lpz.z = P->a * p_div_a / cosphi - N;
     }
 
     return lpz;
