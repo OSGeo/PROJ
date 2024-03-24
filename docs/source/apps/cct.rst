@@ -62,17 +62,17 @@ The following control parameters can appear in any order:
 
 .. program:: cct
 
-.. option:: -c <x,y,z,t>
+.. option:: -c <x,y,z,t>, --columns=<x,y,z,t>
 
     Specify input columns for (up to) 4 input parameters. Defaults to 1,2,3,4.
 
-.. option:: -d <n>
+.. option:: -d <n>, --decimals=<n>
 
     .. versionadded:: 5.2.0
 
     Specify the number of decimals to round to in the output.
 
-.. option:: -I
+.. option:: -I, --inverse
 
     Do the inverse transformation.
 
