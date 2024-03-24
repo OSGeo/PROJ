@@ -52,8 +52,10 @@ file referenced by the {object_reference} must contain a valid
 Description
 ***********
 
-:program:`cct` is a 4D equivalent to the :program:`proj` projection program,
-performs transformation coordinate systems on a set of input points. The
+:program:`cct` is an enhancement to the :program:`proj` projection program, with
+additional features including 4D.
+
+:program:`cct` performs transformations of coordinate systems on a set of input points. The
 coordinate system transformation can include translation between projected
 and geographic coordinates as well as the application of datum shifts.
 
