@@ -1407,7 +1407,8 @@ TEST(factory,
         "        GEOGCRS[\"NAD83(CSRS)v7\",\n"
         "            DATUM[\"North American Datum of 1983 (CSRS) version 7\",\n"
         "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
-        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                ANCHOREPOCH[2010]],\n"
         "            PRIMEM[\"Greenwich\",0,\n"
         "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
         "            CS[ellipsoidal,3],\n"
@@ -1421,7 +1422,7 @@ TEST(factory,
         "                    ORDER[3],\n"
         "                    LENGTHUNIT[\"metre\",1]],\n"
         "            ID[\"EPSG\",8254]]],\n"
-        "    METHOD[\"Point motion by grid (Canada NTv2_Vel)\",\n"
+        "    METHOD[\"Point motion by grid (NTv2_Vel)\",\n"
         "        ID[\"EPSG\",1070]],\n"
         "    PARAMETERFILE[\"Point motion velocity grid "
         "file\",\"NAD83v70VG.gvb\"],\n"
@@ -1429,14 +1430,15 @@ TEST(factory,
         "    USAGE[\n"
         "        SCOPE[\"Change of coordinate epoch for points referenced to "
         "NAD83(CSRS)v7.\"],\n"
-        "        AREA[\"Canada - onshore and offshore - Alberta; British "
-        "Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; "
-        "Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward "
-        "Island; Quebec; Saskatchewan; Yukon.\"],\n"
-        "        BBOX[38.21,-141.01,86.46,-40.73]],\n"
+        "        AREA[\"Canada - onshore - Alberta; British Columbia (BC); "
+        "Manitoba; New Brunswick (NB); Newfoundland and Labrador; Northwest "
+        "Territories (NWT); Nova Scotia (NS); Nunavut; Ontario; Prince Edward "
+        "Island (PEI); Quebec; Saskatchewan; Yukon.\"],\n"
+        "        BBOX[41.67,-141.01,83.17,-52.54]],\n"
         "    ID[\"EPSG\",9483],\n"
         "    REMARK[\"File initially published with name cvg70.cvb, later "
-        "renamed to NAD83v70VG.gvb with no change of content.\"]]";
+        "renamed to NAD83v70VG.gvb with no change of content. Replaces v6 "
+        "velocity grid.\"]]";
 
     EXPECT_EQ(
         pmo->exportToWKT(

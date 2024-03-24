@@ -260,6 +260,13 @@ VALUES
 -- nz_linz - New Zealand
 ('nzgd2kgrid0005.gsb','nz_linz_nzgd2kgrid0005.tif','nzgd2kgrid0005.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/nz_linz_nzgd2kgrid0005.tif',1,1,NULL),
 ('nzgeoid2016.gtx','nz_linz_nzgeoid2016.tif','nzgeoid2016.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nz_linz_nzgeoid2016.tif',1,1,NULL),
+('nzgd2000_deformation_20000101_full.zip','nz_linz_nzgd2000-20000101.json',NULL,'GTiff','defmodel',0,NULL,'https://cdn.proj.org/nz_linz_nzgd2000-20000101.json',1,1,NULL),
+('nzgd2000_deformation_20130801_full.zip','nz_linz_nzgd2000-20130801.json',NULL,'GTiff','defmodel',0,NULL,'https://cdn.proj.org/nz_linz_nzgd2000-20130801.json',1,1,NULL),
+('nzgd2000_deformation_20140201_full.zip','nz_linz_nzgd2000-20140201.json',NULL,'GTiff','defmodel',0,NULL,'https://cdn.proj.org/nz_linz_nzgd2000-20140201.json',1,1,NULL),
+('nzgd2000_deformation_20150101_full.zip','nz_linz_nzgd2000-20150101.json',NULL,'GTiff','defmodel',0,NULL,'https://cdn.proj.org/nz_linz_nzgd2000-20150101.json',1,1,NULL),
+('nzgd2000_deformation_20160701_full.zip','nz_linz_nzgd2000-20160701.json',NULL,'GTiff','defmodel',0,NULL,'https://cdn.proj.org/nz_linz_nzgd2000-20160701.json',1,1,NULL),
+('nzgd2000_deformation_20171201_full.zip','nz_linz_nzgd2000-20171201.json',NULL,'GTiff','defmodel',0,NULL,'https://cdn.proj.org/nz_linz_nzgd2000-20171201.json',1,1,NULL),
+('nzgd2000_deformation_20180701_full.zip','nz_linz_nzgd2000-20180701.json',NULL,'GTiff','defmodel',0,NULL,'https://cdn.proj.org/nz_linz_nzgd2000-20180701.json',1,1,NULL),
 -- Superseded
 ('New_Zealand_Quasigeoid_2016.csv','nz_linz_nzgeoid2016.tif','nzgeoid2016.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nz_linz_nzgeoid2016.tif',1,1,NULL),
 ('nzgeoid2009.gtx','nz_linz_nzgeoid2009.tif','nzgeoid2009.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nz_linz_nzgeoid2009.tif',1,1,NULL),

@@ -1136,7 +1136,6 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) coordinate_operation_with_conversion_view')
         WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.name = NEW.name AND covwv.deprecated = 0 AND NEW.deprecated = 0
         AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
-        AND NEW.name != 'NAD83(CSRS)v2 to NAD83(CSRS)v3 (1)' -- duplicate entry in EPSG
         AND NOT (NEW.description LIKE 'Reversible alternative to%' AND covwv.description NOT LIKE 'Reversible alternative to%')
         AND NEW.code NOT LIKE '%_WITH_NAD83CSRSV7_INTERPOLATION'
     );
@@ -1187,7 +1186,7 @@ CREATE TABLE grid_alternatives(
 
     CONSTRAINT fk_grid_alternatives_grid_packages FOREIGN KEY (package_name) REFERENCES grid_packages(package_name) ON DELETE CASCADE,
     CONSTRAINT check_grid_alternatives_grid_fromat CHECK (proj_grid_format IN ('GTiff', 'GTX', 'NTv2', 'JSON')),
-    CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('gridshift', 'hgridshift', 'vgridshift', 'geoid_like', 'geocentricoffset', 'tinshift', 'velocity_grid')),
+    CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('gridshift', 'hgridshift', 'vgridshift', 'geoid_like', 'geocentricoffset', 'tinshift', 'velocity_grid', 'defmodel')),
     CONSTRAINT check_grid_alternatives_inverse_direction CHECK (NOT(proj_method = 'geoid_like' AND inverse_direction = 1)),
     CONSTRAINT check_grid_alternatives_package_name CHECK (package_name IS NULL),
     CONSTRAINT check_grid_alternatives_direct_download_url CHECK (NOT(direct_download IS NULL AND url IS NOT NULL)),

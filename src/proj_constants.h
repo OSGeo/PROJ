@@ -600,9 +600,22 @@
     "Point motion velocity grid file"
 
 /* ------------------------------------------------------------------------ */
+
+#define EPSG_NAME_METHOD_NEW_ZEALAND_DEFORMATION_MODEL                         \
+    "New Zealand Deformation Model"
+#define EPSG_CODE_METHOD_NEW_ZEALAND_DEFORMATION_MODEL 1079
+
+/* ------------------------------------------------------------------------ */
+
+/* Has been renamed to
+ * EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NTV2_VEL */
 #define EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN            \
     "Geographic3D Offset by velocity grid (NRCan byn)"
 #define EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NRCAN 1114
+
+#define EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NTV2_VEL         \
+    "Geographic3D Offset by velocity grid (NTv2_Vel)"
+#define EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSET_BY_VELOCITY_GRID_NTV2_VEL 1114
 
 /* ------------------------------------------------------------------------ */
 

@@ -10392,7 +10392,7 @@ TEST(
               "+x_0=304800 +y_0=0 +ellps=GRS80 "
               "+step +proj=vgridshift +grids=ca_nrc_HT2_1997.tif +multiplier=1 "
               "+step +proj=cart +ellps=GRS80 "
-              "+step +inv +proj=deformation +dt=-13 "
+              "+step +proj=deformation +dt=13 "
               "+grids=ca_nrc_NAD83v70VG.tif "
               "+ellps=GRS80 "
               "+step +inv +proj=cart +ellps=GRS80 "
@@ -10466,8 +10466,8 @@ TEST(operation, createOperation_Geographic3D_Offset_by_velocity_grid) {
               "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
               "+step +proj=cart +ellps=GRS80 "
-              "+step +proj=deformation +dt=-13 +grids=ca_nrc_NAD83v70VG.tif "
-              "+ellps=GRS80 "
+              "+step +inv +proj=deformation +dt=13 "
+              "+grids=ca_nrc_NAD83v70VG.tif +ellps=GRS80 "
               "+step +inv +proj=cart +ellps=GRS80 "
               "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
               "+step +proj=axisswap +order=2,1");
@@ -10499,7 +10499,7 @@ TEST(operation, createOperation_test_createOperationsWithDatumPivot_iter_1) {
     EXPECT_STREQ(list[0]->nameStr().c_str(),
                  "Conversion from NAD83(CSRS)v2 (geog2D) to "
                  "NAD83(CSRS)v2 (geocentric) + "
-                 "NAD83(CSRS)v2 to NAD83(CSRS)v3 (1) + "
+                 "NAD83(CSRS)v2 to NAD83(CSRS)v3 (3) + "
                  "Conversion from NAD83(CSRS)v3 (geocentric) to "
                  "NAD83(CSRS)v3 (geog2D)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),

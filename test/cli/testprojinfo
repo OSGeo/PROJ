@@ -241,28 +241,28 @@ echo "" >>${OUT}
 ######################
 # NZGD2000 -> ITRFxx #
 ######################
-echo 'Testing -s NZGD2000 -t ITRF96 -o PROJ -q' >> ${OUT}
-$EXE -s NZGD2000 -t ITRF96 -o PROJ -q >>${OUT} 2>&1
+echo 'Testing -s NZGD2000 -t ITRF96 -o PROJ -q --spatial-test intersects --hide-ballpark' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF96 -o PROJ -q --spatial-test intersects --hide-ballpark >>${OUT} 2>&1
 echo "" >>${OUT}
 
-echo 'Testing -s NZGD2000 -t ITRF97 -o PROJ -q' >> ${OUT}
-$EXE -s NZGD2000 -t ITRF97 -o PROJ -q >>${OUT} 2>&1
+echo 'Testing -s NZGD2000 -t ITRF97 -o PROJ -q --spatial-test intersects --hide-ballpark' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF97 -o PROJ -q --spatial-test intersects --hide-ballpark >>${OUT} 2>&1
 echo "" >>${OUT}
 
-echo 'Testing -s NZGD2000 -t ITRF2000 -o PROJ -q' >> ${OUT}
-$EXE -s NZGD2000 -t ITRF2000 -o PROJ -q >>${OUT} 2>&1
+echo 'Testing -s NZGD2000 -t ITRF2000 -o PROJ -q --spatial-test intersects --hide-ballpark' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF2000 -o PROJ -q --spatial-test intersects --hide-ballpark >>${OUT} 2>&1
 echo "" >>${OUT}
 
-echo 'Testing -s NZGD2000 -t ITRF2005 -o PROJ -q' >> ${OUT}
-$EXE -s NZGD2000 -t ITRF2005 -o PROJ -q >>${OUT} 2>&1
+echo 'Testing -s NZGD2000 -t ITRF2005 -o PROJ -q --spatial-test intersects --hide-ballpark' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF2005 -o PROJ -q --spatial-test intersects --hide-ballpark >>${OUT} 2>&1
 echo "" >>${OUT}
 
-echo 'Testing -s NZGD2000 -t ITRF2008 -o PROJ -q' >> ${OUT}
-$EXE -s NZGD2000 -t ITRF2008 -o PROJ -q >>${OUT} 2>&1
+echo 'Testing -s NZGD2000 -t ITRF2008 -o PROJ -q --spatial-test intersects --hide-ballpark' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF2008 -o PROJ -q --spatial-test intersects --hide-ballpark >>${OUT} 2>&1
 echo "" >>${OUT}
 
-echo 'Testing -s NZGD2000 -t ITRF2014 -o PROJ -q' >> ${OUT}
-$EXE -s NZGD2000 -t ITRF2014 -o PROJ -q >>${OUT} 2>&1
+echo 'Testing -s NZGD2000 -t ITRF2014 -o PROJ -q --spatial-test intersects --hide-ballpark' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF2014 -o PROJ -q --spatial-test intersects --hide-ballpark >>${OUT} 2>&1
 echo "" >>${OUT}
 
 ######################
@@ -390,8 +390,8 @@ echo 'Testing EPSG:9945 -o PROJ -q' >> ${OUT}
 $EXE EPSG:9945 -o PROJ -q >> ${OUT}
 echo "" >>${OUT}
 
-echo 'Testing -s "NAD83(CSRS)v7" --s_epoch 1997 -t "NAD83(CSRS)v7" --t_epoch 2010 --summary --hide-ballpark' >> ${OUT}
-$EXE -s "NAD83(CSRS)v7" --s_epoch 1997 -t "NAD83(CSRS)v7" --t_epoch 2010 --summary --hide-ballpark >> ${OUT}
+echo 'Testing -s "NAD83(CSRS)v7" --s_epoch 1997 -t "NAD83(CSRS)v7" --t_epoch 2010 --summary --hide-ballpark --spatial-test intersects' >> ${OUT}
+$EXE -s "NAD83(CSRS)v7" --s_epoch 1997 -t "NAD83(CSRS)v7" --t_epoch 2010 --summary --hide-ballpark --spatial-test intersects >> ${OUT}
 echo "" >>${OUT}
 
 # do 'diff' with distribution results
