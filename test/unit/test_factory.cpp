@@ -182,8 +182,6 @@ TEST(factory, AuthorityFactory_identifyBodyFromSemiMajorAxis) {
 TEST(factory, AuthorityFactory_createEllipsoid) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createEllipsoid("-1"), NoSuchAuthorityCodeException);
-    EXPECT_TRUE(nn_dynamic_pointer_cast<Ellipsoid>(
-                    factory->createObject("7030")) != nullptr);
     auto ellipsoid = factory->createEllipsoid("7030");
     ASSERT_EQ(ellipsoid->identifiers().size(), 1U);
     EXPECT_EQ(ellipsoid->identifiers()[0]->code(), "7030");

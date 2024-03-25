@@ -819,6 +819,17 @@
 
 /* ------------------------------------------------------------------------ */
 
+#define EPSG_CODE_METHOD_CARTESIAN_GRID_OFFSETS 9656
+#define EPSG_NAME_METHOD_CARTESIAN_GRID_OFFSETS "Cartesian Grid Offsets"
+
+#define EPSG_CODE_PARAMETER_EASTING_OFFSET 8728
+#define EPSG_NAME_PARAMETER_EASTING_OFFSET "Easting offset"
+
+#define EPSG_CODE_PARAMETER_NORTHING_OFFSET 8729
+#define EPSG_NAME_PARAMETER_NORTHING_OFFSET "Northing offset"
+
+/* ------------------------------------------------------------------------ */
+
 #define EPSG_NAME_METHOD_GEOCENTRIC_TOPOCENTRIC                                \
     "Geocentric/topocentric conversions"
 #define EPSG_CODE_METHOD_GEOCENTRIC_TOPOCENTRIC 9836

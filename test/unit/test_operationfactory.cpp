@@ -2578,6 +2578,68 @@ TEST(operation, projCRS_to_projCRS_context_incompatible_areas_ballpark) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, projCRS_to_projCRS_context_grid_offsets) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem(
+                "3392"), // Karbala 1979 / UTM zone 38N
+            authFactory->createCoordinateReferenceSystem(
+                "3891"), // IGRS / UTM zone 38N
+            ctxt);
+        ASSERT_EQ(list.size(), 2U);
+        EXPECT_EQ(list[1]->nameStr(),
+                  "Karbala 1979 / UTM zone 38N to IGRS / UTM zone 38N (1)");
+        EXPECT_EQ(
+            list[1]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=affine +xoff=-287.54 +yoff=278.25");
+    }
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem(
+                "3891"), // IGRS / UTM zone 38N
+            authFactory->createCoordinateReferenceSystem(
+                "3392"), // Karbala 1979 / UTM zone 38N
+            ctxt);
+        ASSERT_EQ(list.size(), 2U);
+        EXPECT_EQ(list[1]->nameStr(), "Inverse of Karbala 1979 / UTM zone 38N "
+                                      "to IGRS / UTM zone 38N (1)");
+        EXPECT_EQ(
+            list[1]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=affine +xoff=287.54 +yoff=-278.25");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, projCRS_to_projCRS_context_grid_offsets_non_metre_unit_noop) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem(
+            "10516"), // NAD83(2011) / Adjusted Jackson (ftUS)
+        authFactory->createCoordinateReferenceSystem(
+            "8162"), // NAD83(HARN) / WISCRS Jackson (ftUS)
+        ctxt);
+    ASSERT_GE(list.size(), 2U);
+    EXPECT_EQ(list[0]->nameStr(), "NAD83(2011) / Adjusted Jackson (ftUS) to "
+                                  "NAD83(HARN) / WISCRS Jackson (ftUS) (1)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(
     operation,
     projCRS_to_projCRS_context_incompatible_areas_crs_extent_use_intersection) {
