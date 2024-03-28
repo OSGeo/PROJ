@@ -484,6 +484,7 @@ osgeo::proj::io::WKTNode::~WKTNode()
 osgeo::proj::io::WKTNode::WKTNode(std::string const&)
 osgeo::proj::io::WKTParser::attachDatabaseContext(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&)
 osgeo::proj::io::WKTParser::createFromWKT(std::string const&)
+osgeo::proj::io::WKTParser::grammarErrorList() const
 osgeo::proj::io::WKTParser::guessDialect(std::string const&)
 osgeo::proj::io::WKTParser::setStrict(bool)
 osgeo::proj::io::WKTParser::setUnsetIdentifiersIfIncompatibleDef(bool)
