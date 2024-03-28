@@ -319,10 +319,16 @@ static BaseObjectNNPtr buildObject(
                 wktParser.attachDatabaseContext(dbContext);
                 obj = wktParser.createFromWKT(l_user_string).as_nullable();
                 if (!quiet) {
-                    auto warnings = wktParser.warningList();
+                    const auto warnings = wktParser.warningList();
                     if (!warnings.empty()) {
                         for (const auto &str : warnings) {
                             std::cerr << "Warning: " << str << std::endl;
+                        }
+                    }
+                    const auto grammarErrorList = wktParser.grammarErrorList();
+                    if (!grammarErrorList.empty()) {
+                        for (const auto &str : grammarErrorList) {
+                            std::cerr << "Grammar error: " << str << std::endl;
                         }
                     }
                 }

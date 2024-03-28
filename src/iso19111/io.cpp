@@ -1266,6 +1266,7 @@ struct WKTParser::Private {
     bool strict_ = true;
     bool unsetIdentifiersIfIncompatibleDef_ = true;
     std::list<std::string> warningList_{};
+    std::list<std::string> grammarErrorList_{};
     std::vector<double> toWGS84Parameters_{};
     std::string datumPROJ4Grids_{};
     bool esriStyle_ = false;
@@ -1288,7 +1289,8 @@ struct WKTParser::Private {
     Private(const Private &) = delete;
     Private &operator=(const Private &) = delete;
 
-    void emitRecoverableWarning(const std::string &errorMsg);
+    void emitRecoverableWarning(const std::string &warningMsg);
+    void emitGrammarError(const std::string &errorMsg);
     void emitRecoverableMissingUNIT(const std::string &parentNodeName,
                                     const UnitOfMeasure &fallbackUnit);
 
@@ -1517,12 +1519,37 @@ std::list<std::string> WKTParser::warningList() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the list of grammar errors found during parsing.
+ *
+ * Grammar errors are non-compliance issues with respect to the WKT grammar.
+ *
+ * \note The list might be non-empty only is setStrict(false) has been called.
+ *
+ * @since PROJ 9.5
+ */
+std::list<std::string> WKTParser::grammarErrorList() const {
+    return d->grammarErrorList_;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 void WKTParser::Private::emitRecoverableWarning(const std::string &errorMsg) {
     if (strict_) {
         throw ParsingException(errorMsg);
     } else {
         warningList_.push_back(errorMsg);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void WKTParser::Private::emitGrammarError(const std::string &errorMsg) {
+    if (strict_) {
+        throw ParsingException(errorMsg);
+    } else {
+        grammarErrorList_.push_back(errorMsg);
     }
 }
 
@@ -8136,13 +8163,13 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
         dialect == WKTGuessedDialect::WKT1_ESRI) {
         auto errorMsg = pj_wkt1_parse(wkt);
         if (!errorMsg.empty()) {
-            d->emitRecoverableWarning(errorMsg);
+            d->emitGrammarError(errorMsg);
         }
     } else if (dialect == WKTGuessedDialect::WKT2_2015 ||
                dialect == WKTGuessedDialect::WKT2_2019) {
         auto errorMsg = pj_wkt2_parse(wkt);
         if (!errorMsg.empty()) {
-            d->emitRecoverableWarning(errorMsg);
+            d->emitGrammarError(errorMsg);
         }
     }
 

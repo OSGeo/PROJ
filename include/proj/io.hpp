@@ -792,6 +792,7 @@ class PROJ_GCC_DLL WKTParser {
 
     PROJ_DLL WKTParser &setStrict(bool strict);
     PROJ_DLL std::list<std::string> warningList() const;
+    PROJ_DLL std::list<std::string> grammarErrorList() const;
 
     PROJ_DLL WKTParser &setUnsetIdentifiersIfIncompatibleDef(bool unset);
 
