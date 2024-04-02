@@ -311,7 +311,7 @@ INSERT INTO "usage" VALUES (
 -- EE
 INSERT INTO "helmert_transformation" VALUES (
     'NKG','P1_2008_EE', -- operation auth+code
-    'NKG_ETRF00 to ETRF96@2000.0', -- name
+    'NKG_ETRF00 to ETRF96@2000.0 (Estonia)', -- name
     'Transformation from NKG_ETRF00 to ETRF96, at transformation reference epoch 2000.0', -- description / remark
     'EPSG','1033',  -- method auth+code
     'Position Vector transformation (geocentric domain)',
@@ -345,7 +345,7 @@ INSERT INTO "usage" VALUES (
 -- FI
 INSERT INTO "helmert_transformation" VALUES (
     'NKG','P1_2008_FI', -- operation auth+code
-    'NKG_ETRF00 to ETRF96@2000.0', -- name
+    'NKG_ETRF00 to ETRF96@2000.0 (Finland)', -- name
     'Transformation from NKG_ETRF00 to ETRF96, at transformation reference epoch 2000.0', -- description / remark
     'EPSG','1033',  -- method auth+code
     'Position Vector transformation (geocentric domain)',
@@ -553,7 +553,7 @@ INSERT INTO "usage" VALUES (
 -- EE
 INSERT INTO "helmert_transformation" VALUES (
     'NKG','PAR_2020_EE', -- operation auth+code
-    'NKG_ETRF14 to ETRF96@2000.0', -- name
+    'NKG_ETRF14 to ETRF96@2000.0 (Estonia)', -- name
     'Transformation from NKG_ETRF14 to ETRF96, at transformation reference epoch 2000.0', -- description / remark
     'EPSG','1033',  -- method auth+code
     'Position Vector transformation (geocentric domain)',
@@ -587,7 +587,7 @@ INSERT INTO "usage" VALUES (
 -- FI
 INSERT INTO "helmert_transformation" VALUES (
     'NKG','PAR_2020_FI', -- operation auth+code
-    'NKG_ETRF14 to ETRF96@2000.0', -- name
+    'NKG_ETRF14 to ETRF96@2000.0 (Finland)', -- name
     'Transformation from NKG_ETRF14 to ETRF96, at transformation reference epoch 2000.0', -- description / remark
     'EPSG','1033',  -- method auth+code
     'Position Vector transformation (geocentric domain)',
