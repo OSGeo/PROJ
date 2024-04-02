@@ -618,6 +618,12 @@ PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
  * The returned object must be unreferenced with proj_destroy() after use.
  * It should be used by at most one thread at a time.
  *
+ * The distinction between warnings and grammar errors is somewhat artificial
+ * and does not tell much about the real criticity of the non-compliance.
+ * Some warnings may be more concerning than some grammar errors. Human
+ * expertise (or, by the time this comment will be read, specialized AI) is
+ * generally needed to perform that assessment.
+ *
  * @param ctx PROJ context, or NULL for default context
  * @param wkt WKT string (must not be NULL)
  * @param options null-terminated list of options, or NULL. Currently
@@ -632,8 +638,8 @@ PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
  * </ul>
  * @param out_warnings Pointer to a PROJ_STRING_LIST object, or NULL.
  * If provided, *out_warnings will contain a list of warnings, typically for
- * non recognized projection method or parameters. It must be freed with
- * proj_string_list_destroy().
+ * non recognized projection method or parameters, or other issues found during
+ * WKT analys. It must be freed with proj_string_list_destroy().
  * @param out_grammar_errors Pointer to a PROJ_STRING_LIST object, or NULL.
  * If provided, *out_grammar_errors will contain a list of errors regarding the
  * WKT grammar. It must be freed with proj_string_list_destroy().
@@ -682,41 +688,32 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
         }
         auto obj = parser.createFromWKT(wkt);
 
-        std::vector<std::string> warningsFromParsing;
         if (out_grammar_errors) {
-            auto rawWarnings = parser.warningList();
-            std::vector<std::string> grammarWarnings;
-            for (const auto &msg : rawWarnings) {
-                if (msg.find("Default it to") != std::string::npos) {
-                    warningsFromParsing.push_back(msg);
-                } else {
-                    grammarWarnings.push_back(msg);
-                }
-            }
-            if (!grammarWarnings.empty()) {
-                *out_grammar_errors = to_string_list(grammarWarnings);
+            auto grammarErrors = parser.grammarErrorList();
+            if (!grammarErrors.empty()) {
+                *out_grammar_errors = to_string_list(grammarErrors);
             }
         }
 
         if (out_warnings) {
+            auto warnings = parser.warningList();
             auto derivedCRS = dynamic_cast<const crs::DerivedCRS *>(obj.get());
             if (derivedCRS) {
-                auto warnings =
+                auto extraWarnings =
                     derivedCRS->derivingConversionRef()->validateParameters();
-                warnings.insert(warnings.end(), warningsFromParsing.begin(),
-                                warningsFromParsing.end());
-                if (!warnings.empty()) {
-                    *out_warnings = to_string_list(warnings);
-                }
+                warnings.insert(warnings.end(), extraWarnings.begin(),
+                                extraWarnings.end());
             } else {
                 auto singleOp =
                     dynamic_cast<const operation::SingleOperation *>(obj.get());
                 if (singleOp) {
-                    auto warnings = singleOp->validateParameters();
-                    if (!warnings.empty()) {
-                        *out_warnings = to_string_list(warnings);
-                    }
+                    auto extraWarnings = singleOp->validateParameters();
+                    warnings.insert(warnings.end(), extraWarnings.begin(),
+                                    extraWarnings.end());
                 }
+            }
+            if (!warnings.empty()) {
+                *out_warnings = to_string_list(warnings);
             }
         }
 
