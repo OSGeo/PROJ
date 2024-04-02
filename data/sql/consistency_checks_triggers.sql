@@ -261,8 +261,6 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) coordinate_operation_with_conversion_view')
         WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.name = NEW.name AND covwv.deprecated = 0 AND NEW.deprecated = 0
         AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
-        AND NEW.name != 'NKG_ETRF00 to ETRF96@2000.0' -- NKG:P1_2008_EE and NKG:P1_2008_FI have the same name
-        AND NEW.name != 'NKG_ETRF14 to ETRF96@2000.0' -- NKG:PAR_2020_EE and NKG:PAR_2020_FI have the same name
     );
 
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: translation_uom.type must be ''length''')
@@ -459,12 +457,6 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) coordinate_operation_with_conversion_view')
         WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.name = NEW.name AND covwv.deprecated = 0 AND NEW.deprecated = 0
         AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
-        AND NEW.name != 'NKG_ETRF14 to ETRF93@2000.0' -- NKG:PAR_2020_NO and NKG:NKG_ETRF14_ETRF93_2000 have the same name
-        AND NEW.name != 'ETRF96@2000.0 to ETRF96@1997.56' -- NKG:ETRF96_2000_TO_ETRF96_1997_56 and NKG:EE_2020_INTRAPLATE have the same name
-        AND NEW.name != 'ETRF93@2000.0 to ETRF93@1995.0' -- NKG:ETRF93_2000_TO_ETRF93_1995 and NKG:NO_2020_INTRAPLATE have the same name
-        AND NEW.name != 'ETRF92@2000.0 to ETRF92@1994.704' -- NKG:ETRF92_2000_TO_ETRF92_1994 and NKG:DK_2020_INTRAPLATE have the same name
-        AND NEW.name != 'ETRF96@2000.0 to ETRF96@1997.0' -- NKG:ETRF96_2000_TO_ETRF96_1997 AND NKG:FI_2020_INTRAPLATE have the same name
-        AND NEW.name != 'ETRF97@2000.0 to ETRF97@1999.5' -- NKG:ETRF97_2000_TO_ETRF97_1999 and NKG:SE_2020_INTRAPLATE have the same name
     );
 
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: source_crs(auth_name, code) not found')
