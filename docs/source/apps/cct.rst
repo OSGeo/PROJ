@@ -28,7 +28,9 @@ by :c:func:`proj_create`, provided it expresses a coordinate operation
     - an object name. e.g. "ITRF2014 to ETRF2014 (1)". In that case as
       uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
     - a OGC URN combining references for concatenated operations
-      (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
+      (e.g. "urn:ogc:def:coordinateOperation,
+      coordinateOperation:EPSG::3895,
+      coordinateOperation:EPSG::1618")
     - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.4/projjson.schema.json
 
     .. versionadded:: 8.0.0
