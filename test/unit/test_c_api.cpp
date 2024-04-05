@@ -232,6 +232,20 @@ TEST_F(CApi, proj_create) {
         ObjectKeeper keeper(obj);
         EXPECT_NE(obj, nullptr);
     }
+
+    {
+        PJ_CONTEXT *ctxt = proj_context_create();
+        std::string s;
+        proj_log_func(ctxt, &s, [](void *user_data, int, const char *msg) {
+            *static_cast<std::string *>(user_data) = msg;
+        });
+        auto crs = proj_create(ctxt, "EPSG:i_do_not_exist");
+        proj_destroy(crs);
+        proj_context_destroy(ctxt);
+        EXPECT_EQ(crs, nullptr);
+        EXPECT_STREQ(s.c_str(),
+                     "proj_create: crs not found: EPSG:i_do_not_exist");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1093,6 +1107,22 @@ TEST_F(CApi, proj_create_from_database) {
                         "step proj=unitconvert xy_in=rad xy_out=deg "
                         "step proj=axisswap order=2,1"));
         EXPECT_EQ(info.accuracy, 1);
+    }
+
+    {
+        PJ_CONTEXT *ctxt = proj_context_create();
+        std::string s;
+        proj_log_func(ctxt, &s, [](void *user_data, int, const char *msg) {
+            *static_cast<std::string *>(user_data) = msg;
+        });
+        auto crs = proj_create_from_database(ctxt, "EPSG", "i_do_not_exist",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        proj_destroy(crs);
+        proj_context_destroy(ctxt);
+        EXPECT_EQ(crs, nullptr);
+        EXPECT_STREQ(
+            s.c_str(),
+            "proj_create_from_database: crs not found: EPSG:i_do_not_exist");
     }
 }
 
