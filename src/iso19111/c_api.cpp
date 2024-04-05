@@ -603,6 +603,14 @@ PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
             proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP_WRONG_SYNTAX);
         }
         proj_log_error(ctx, __FUNCTION__, e.what());
+    } catch (const NoSuchAuthorityCodeException &e) {
+        proj_log_error(ctx, __FUNCTION__,
+                       std::string(e.what())
+                           .append(": ")
+                           .append(e.getAuthority())
+                           .append(":")
+                           .append(e.getAuthorityCode())
+                           .c_str());
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -794,6 +802,14 @@ PJ *proj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
             break;
         }
         return pj_obj_create(ctx, NN_NO_CHECK(obj));
+    } catch (const NoSuchAuthorityCodeException &e) {
+        proj_log_error(ctx, __FUNCTION__,
+                       std::string(e.what())
+                           .append(": ")
+                           .append(e.getAuthority())
+                           .append(":")
+                           .append(e.getAuthorityCode())
+                           .c_str());
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
