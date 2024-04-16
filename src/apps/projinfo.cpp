@@ -388,8 +388,8 @@ static BaseObjectNNPtr buildObject(
             }
         }
     } catch (const std::exception &e) {
-        std::cerr << context << ": parsing of user string failed: " << e.what()
-                  << std::endl;
+        std::cerr << context << ": parsing of '" << l_user_string
+                  << "' failed: " << e.what() << std::endl;
         std::exit(1);
     }
 
