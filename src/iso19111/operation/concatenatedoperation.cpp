@@ -461,6 +461,38 @@ void ConcatenatedOperation::fixStepsDirection(
                 } else {
                     op->setCRSs(NN_NO_CHECK(l_sourceCRS),
                                 NN_NO_CHECK(l_targetCRS), nullptr);
+
+                    // Deal with special case of
+                    // https://github.com/OSGeo/PROJ/issues/4116 where EPSG:7989
+                    // -- NAVD88 height to NAVD88 depth conversion is chained
+                    // with "NAD83(FBN)+LMSL to NAD83(FBN)+NAVD88 depth" The
+                    // latter must thus be inversed
+                    const auto nPosTo = conv->nameStr().find(" to ");
+                    const auto nPosToNextOp =
+                        operationsInOut[i + 1]->nameStr().find(" to ");
+                    if (nPosTo != std::string::npos &&
+                        nPosToNextOp != std::string::npos) {
+                        const std::string convTo =
+                            conv->nameStr().substr(nPosTo + strlen(" to "));
+                        const std::string nextOpFrom =
+                            operationsInOut[i + 1]->nameStr().substr(
+                                0, nPosToNextOp);
+                        const std::string nextOpTo =
+                            operationsInOut[i + 1]->nameStr().substr(
+                                nPosToNextOp + strlen(" to "));
+                        if (nextOpTo.find(convTo) != std::string::npos &&
+                            nextOpFrom.find(convTo) == std::string::npos &&
+                            operationsInOut[i + 1]->sourceCRS()) {
+                            operationsInOut[i + 1] =
+                                operationsInOut[i + 1]->inverse();
+
+                            op->setCRSs(
+                                NN_NO_CHECK(l_sourceCRS),
+                                NN_NO_CHECK(
+                                    operationsInOut[i + 1]->sourceCRS()),
+                                nullptr);
+                        }
+                    }
                 }
             } else if (l_sourceCRS && l_targetCRS == nullptr &&
                        conv->method()->getEPSGCode() ==
