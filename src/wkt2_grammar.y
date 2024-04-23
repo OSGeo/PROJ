@@ -1393,8 +1393,17 @@ derived_crs_name: quoted_latin_text
 base_projected_crs: base_projected_crs_keyword left_delimiter base_crs_name
                     wkt_separator base_geodetic_geographic_crs
                     wkt_separator map_projection
-                    opt_separator_identifier_list
+                    // Current WKT grammar (as of WKT2 18-010r11) does not allow a
+                    // BASEPROJCRS.CS node, but there are situations where this is
+                    // ambiguous and we want to allow one.
+                    // Cf WKTParser::Private::buildProjectedCRS() for more details
+                    // Otherwise this should only be a opt_separator_identifier_list
+                    base_projected_crs_opt_separator_cs_identifier
                     right_delimiter
+
+base_projected_crs_opt_separator_cs_identifier:
+    | wkt_separator spatial_cs_scope_extent_identifier_remark
+    | wkt_separator no_opt_separator_scope_extent_identifier_remark
 
 base_projected_crs_keyword: T_BASEPROJCRS
 
