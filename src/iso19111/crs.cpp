@@ -6740,6 +6740,37 @@ void DerivedProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         formatter->endNode();
 
         l_baseProjCRS->derivingConversionRef()->_exportToWKT(formatter);
+
+        const auto &baseCSAxisList =
+            l_baseProjCRS->coordinateSystem()->axisList();
+        // Current WKT grammar (as of WKT2 18-010r11) does not allow a
+        // BASEPROJCRS.CS node, but in situations where this is ambiguous, emit
+        // one. Cf WKTParser::Private::buildProjectedCRS() for more details
+        if (!baseCSAxisList.empty() &&
+            baseCSAxisList[0]->unit() != common::UnitOfMeasure::METRE &&
+            l_baseProjCRS->identifiers().empty()) {
+            bool knownBaseCRS = false;
+            auto &dbContext = formatter->databaseContext();
+            if (dbContext) {
+                auto authFactory = io::AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), std::string());
+                auto res = authFactory->createObjectsFromName(
+                    l_baseProjCRS->nameStr(),
+                    {io::AuthorityFactory::ObjectType::PROJECTED_CRS}, false,
+                    2);
+                if (res.size() == 1) {
+                    knownBaseCRS = true;
+                }
+            }
+            if (!knownBaseCRS) {
+                l_baseProjCRS->coordinateSystem()->_exportToWKT(formatter);
+            }
+        }
+
+        if (identifiers().empty() && !l_baseProjCRS->identifiers().empty()) {
+            l_baseProjCRS->formatID(formatter);
+        }
+
         formatter->endNode();
     }
 
