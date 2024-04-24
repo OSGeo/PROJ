@@ -1111,3 +1111,9 @@ Online CRS definitions as PROJJSON
 
 The https://spatialreference.org/ website features CRS definitions for various authorities under a
 number of formats, including PROJJSON. For example: https://spatialreference.org/ref/epsg/4326/projjson.json
+
+Copyright and License information
+---------------------------------
+
+This document is copyright Even Rouault and PROJ contributors, 2019-2024, and
+subject to the MIT license.
