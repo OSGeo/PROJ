@@ -2,7 +2,7 @@
   "$id": "https://proj.org/schemas/v0.7/projjson.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "description": "Schema for PROJJSON (v0.7)",
-  "$comment": "This file exists both in data/ and in schemas/vXXX/. Keep both in sync. And if changing the value of $id, change PROJJSON_DEFAULT_VERSION accordingly in io.cpp",
+  "$comment": "This document is copyright Even Rouault and PROJ contributors, 2019-2023, and subject to the MIT license. This file exists both in data/ and in schemas/vXXX/. Keep both in sync. And if changing the value of $id, change PROJJSON_DEFAULT_VERSION accordingly in io.cpp",
 
   "oneOf": [
     { "$ref": "#/definitions/crs" },
