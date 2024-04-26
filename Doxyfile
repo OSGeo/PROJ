@@ -2010,7 +2010,8 @@ PREDEFINED             =    DOXYGEN_ENABLED \
                             PROJ_OPAQUE_PRIVATE_DATA= \
                             PROJ_PRIVATE=private \
                             PROJ_PURE_DECL= \
-                            noexceptoverride="noexcept override"
+                            noexceptoverride="noexcept override" \
+                            PROJ_NO_RETURN=
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
