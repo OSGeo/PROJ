@@ -29,9 +29,9 @@ jobs:
         dockerfile: ["./Dockerfile", "./docs/docbuild/Dockerfile"]
         exclude:
           - container: "proj"
-            dockerfile: "./docs/docbuild/Dockerfile"
-          - container: "proj-docs-2404"
             dockerfile: "./Dockerfile"
+          - container: "proj-docs-2404"
+            dockerfile: "./docs/docbuild/Dockerfile"
     env:
       PUSH_PACKAGES: ${{ github.repository_owner == 'OSGeo' && github.event_name != 'pull_request' }}
       CONTAINER: ${{ matrix.container }}
