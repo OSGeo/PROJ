@@ -25,12 +25,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        container: ["proj","proj-docs-2404"]
+        container: ["proj","proj-docs"]
         dockerfile: ["./Dockerfile", "./docs/docbuild/Dockerfile"]
         exclude:
           - container: "proj"
             dockerfile: "./docs/docbuild/Dockerfile"
-          - container: "proj-docs-2404"
+          - container: "proj-docs"
             dockerfile: "./Dockerfile"
     env:
       PUSH_PACKAGES: ${{ github.repository_owner == 'OSGeo' && github.event_name != 'pull_request' }}
