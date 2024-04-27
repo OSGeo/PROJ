@@ -1541,6 +1541,7 @@ void WKTParser::Private::emitRecoverableWarning(const std::string &errorMsg) {
         warningList_.push_back(errorMsg);
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1552,6 +1553,7 @@ void WKTParser::Private::emitGrammarError(const std::string &errorMsg) {
         grammarErrorList_.push_back(errorMsg);
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1597,6 +1599,7 @@ static ParsingException buildRethrow(const char *funcName,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 std::string WKTParser::Private::stripQuotes(const WKTNodeNNPtr &node) {
     return ::stripQuotes(node->GP()->value());
 }
@@ -5705,9 +5708,11 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 
     throw ParsingException(concat("unhandled keyword: ", name));
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 class JSONParser {
     DatabaseContextPtr dbContext_{};
     std::string deformationModelName_{};
@@ -7103,7 +7108,11 @@ EllipsoidNNPtr JSONParser::buildEllipsoid(const json &j) {
     throw ParsingException("Missing semi_major_axis or radius");
 }
 
+//! @endcond
+
 // ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 
 // import a CRS encoded as OGC Best Practice document 11-135.
 
