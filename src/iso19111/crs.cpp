@@ -741,53 +741,19 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
 // ---------------------------------------------------------------------------
 
 /** \brief Returns a CRS whose coordinate system does not contain a vertical
- * component
+ * component.
+ *
+ * As of PROJ 9.5, this method is an alias of demoteTo2D(std::string(),
+ * nullptr), which deals with all potential CRS types.
+ *
+ * demoteTo2D() is a preferred alternative, especially when invoked with a
+ * non-null database context, to perform a look-up in the database for
+ * already registered 2D CRS.
  *
  * @return a CRS.
  */
 CRSNNPtr CRS::stripVerticalComponent() const {
-    auto self = NN_NO_CHECK(
-        std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
-
-    if (auto geogCRS = dynamic_cast<const GeographicCRS *>(this)) {
-        const auto &axisList = geogCRS->coordinateSystem()->axisList();
-        if (axisList.size() == 3) {
-            auto cs = cs::EllipsoidalCS::create(util::PropertyMap(),
-                                                axisList[0], axisList[1]);
-            return util::nn_static_pointer_cast<CRS>(GeographicCRS::create(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        nameStr()),
-                geogCRS->datum(), geogCRS->datumEnsemble(), cs));
-        }
-    }
-
-    if (auto projCRS = dynamic_cast<const ProjectedCRS *>(this)) {
-        const auto &axisList = projCRS->coordinateSystem()->axisList();
-        if (axisList.size() == 3) {
-            auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
-                                              axisList[1]);
-            return util::nn_static_pointer_cast<CRS>(ProjectedCRS::create(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        nameStr()),
-                projCRS->baseCRS(), projCRS->derivingConversion(), cs));
-        }
-    }
-
-    if (auto derivedProjCRS = dynamic_cast<const DerivedProjectedCRS *>(this)) {
-        const auto &axisList = derivedProjCRS->coordinateSystem()->axisList();
-        if (axisList.size() == 3) {
-            auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
-                                              axisList[1]);
-            return util::nn_static_pointer_cast<CRS>(
-                DerivedProjectedCRS::create(
-                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                            nameStr()),
-                    derivedProjCRS->baseCRS(),
-                    derivedProjCRS->derivingConversion(), cs));
-        }
-    }
-
-    return self;
+    return demoteTo2D(std::string(), nullptr);
 }
 
 // ---------------------------------------------------------------------------
