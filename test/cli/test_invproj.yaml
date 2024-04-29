@@ -1,0 +1,6 @@
+comment: Test basic capabilities of the invproj command
+exe: invproj
+tests:
+- args: +proj=tmerc +ellps=GRS80 -E -f %.3f
+  in: 146339.48 5431555.61
+  out: "146339.48 5431555.61\t2.000\t49.000"

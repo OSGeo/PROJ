@@ -37,6 +37,11 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: pip install pyyaml
+
       - uses: ilammy/msvc-dev-cmd@v1
 
       - name: Cache vcpkg packages
@@ -65,10 +70,17 @@ jobs:
             mkdir %PROJ_BUILD%
             cd %PROJ_BUILD%
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
-            # Not directly linked to BUILD_SHARED_LIBS, but a way to test different C++ standard versions
+            :: Not directly linked to BUILD_SHARED_LIBS, but a way to test different C++ standard versions
             if "${{ env.BUILD_SHARED_LIBS }}"=="ON" (set EXTRA_CXX_FLAGS="/std:c++20")
             if "${{ env.BUILD_TYPE }}"=="Release" (set CMAKE_UNITY_BUILD_OPT="-DCMAKE_UNITY_BUILD=ON")
-            cmake -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DBUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX %EXTRA_CXX_FLAGS%" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%" -DPROJ_DB_CACHE_DIR=%PROJ_DB_CACHE_DIR% %CMAKE_UNITY_BUILD_OPT% ..
+            cmake -D CMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" ^
+              -D BUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" ^
+              -D CMAKE_C_FLAGS="/WX" ^
+              -D CMAKE_CXX_FLAGS="/WX %EXTRA_CXX_FLAGS%" ^
+              -D CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
+              -D CMAKE_INSTALL_PREFIX="%PROJ_DIR%" ^
+              -D PROJ_DB_CACHE_DIR=%PROJ_DB_CACHE_DIR% ^
+              %CMAKE_UNITY_BUILD_OPT% ..
             ninja -v
             ninja install
             dir %PROJ_DIR%\bin
@@ -142,17 +154,28 @@ jobs:
             mingw-w64-x86_64-curl
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-libtiff
+            mingw-w64-x86_64-python-yaml
             mingw-w64-x86_64-sqlite3
 
       - name: Build
         run: |
+            mkdir -p $HOME/.ccache
             ccache -M 500M
             ccache -s
             PROJ_BUILD=${GITHUB_WORKSPACE}/build
             PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
             mkdir ${PROJ_BUILD}
             cd ${PROJ_BUILD}
-            cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_CXX_FLAGS="-Werror" -DUSE_CCACHE=ON -DCMAKE_UNITY_BUILD=ON -DPROJ_DB_CACHE_DIR=$HOME/.ccache ..
+            cmake -D CMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+              -D BUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} \
+              -D CMAKE_INSTALL_PREFIX="${PROJ_DIR}" \
+              -D CMAKE_C_FLAGS="-Werror" \
+              -D CMAKE_CXX_FLAGS="-Werror" \
+              -D USE_CCACHE=ON \
+              -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
+              -D CMAKE_UNITY_BUILD=ON \
+              -D Python3_ROOT_DIR=/mingw64 \
+              ..
             make -j 2
             make install
             ls ${PROJ_DIR}/bin

@@ -318,10 +318,10 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
 
         if (spatialCriterionOK) {
             // The offshore test is for the "Test bug 245 (use +datum=carthage)"
-            // of testvarious. The long=10 lat=34 point belongs both to the
-            // onshore and offshore Tunisia area of uses, but is slightly
-            // onshore. So in a general way, prefer a onshore area to a
-            // offshore one.
+            // of test_cs2cs_various.yaml. The long=10 lat=34 point belongs
+            // both to the onshore and offshore Tunisia area of uses, but is
+            // slightly onshore. So in a general way, prefer a onshore area
+            // to a offshore one.
             if (iBest < 0 ||
                 (((alt.accuracy >= 0 && alt.accuracy < bestAccuracy) ||
                   // If two operations have the same accuracy, use

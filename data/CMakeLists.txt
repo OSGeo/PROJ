@@ -100,6 +100,10 @@ endforeach()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/egm96_15_downsampled.gtx ${CMAKE_CURRENT_BINARY_DIR}/for_tests/egm96_15.gtx COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/ntv2_0_downsampled.gsb ${CMAKE_CURRENT_BINARY_DIR}/for_tests/ntv2_0.gsb COPYONLY)
 
+# test_cs2cs_datumfile has a special case
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/for_tests/dir with space")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/conus "${CMAKE_CURRENT_BINARY_DIR}/for_tests/dir with space/myconus" COPYONLY)
+
 #
 #install
 #

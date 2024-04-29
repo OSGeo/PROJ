@@ -1,5 +1,5 @@
 #
-# add test with sh script
+# Add command-line interface tests
 #
 
 function(proj_test_set_properties TESTNAME)
@@ -14,20 +14,28 @@ function(proj_test_set_properties TESTNAME)
     PROPERTY ENVIRONMENT ${_env})
 endfunction()
 
-function(proj_add_test_script_sh SH_NAME BIN_USE)
-  if(UNIX)
-    get_filename_component(testname ${SH_NAME} NAME_WE)
+function(proj_add_test_script_sh SH_NAME EXE_PATH)
+  set(testname ${SH_NAME})
 
-    add_test(NAME "${testname}"
-      WORKING_DIRECTORY ${PROJ_BINARY_DIR}/test/cli
-      COMMAND bash ${PROJ_SOURCE_DIR}/test/cli/${SH_NAME}
-      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${${BIN_USE}}
-    )
-    proj_test_set_properties(${testname})
-
-  endif()
+  add_test(NAME ${testname}
+    WORKING_DIRECTORY ${PROJ_BINARY_DIR}/test/cli
+    COMMAND bash ${PROJ_SOURCE_DIR}/test/cli/${SH_NAME} "${${EXE_PATH}}"
+  )
+  proj_test_set_properties(${testname})
 endfunction()
 
+function(proj_run_cli_test TESTFILE EXE_PATH)
+  set(testname ${TESTFILE})
+
+  add_test(NAME ${testname}
+    WORKING_DIRECTORY ${PROJ_BINARY_DIR}/test/cli
+    COMMAND ${Python3_EXECUTABLE}
+      ${PROJ_SOURCE_DIR}/test/cli/run_cli_test.py
+      --exe "${${EXE_PATH}}"
+      ${PROJ_SOURCE_DIR}/test/cli/${TESTFILE}
+  )
+  proj_test_set_properties(${testname})
+endfunction()
 
 function(proj_add_gie_test TESTNAME TESTCASE)
 

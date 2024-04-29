@@ -12,15 +12,16 @@ dpkg --add-architecture i386
 apt-get update -y
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends  -o APT::Immediate-Configure=0  \
-    autoconf automake libtool make cmake ccache pkg-config python3-pip sqlite3 tar zip \
+    autoconf automake libtool make cmake ccache pkg-config python3-pip sqlite3 tar zip curl \
     gcc-multilib g++-multilib g++ jq dpkg-dev \
     libsqlite3-dev:$ARCH \
     libtiff-dev:$ARCH libwebp-dev:$ARCH libzstd-dev:$ARCH \
     libcurl4-openssl-dev:$ARCH libnghttp2-dev:$ARCH libidn2-dev:$ARCH librtmp-dev:$ARCH libssh-dev:$ARCH \
-      libpsl-dev:$ARCH libssl-dev:$ARCH libkrb5-dev:$ARCH comerr-dev:$ARCH libldap2-dev:$ARCH libbrotli-dev:$ARCH
+    libpsl-dev:$ARCH libssl-dev:$ARCH libkrb5-dev:$ARCH comerr-dev:$ARCH libldap2-dev:$ARCH libbrotli-dev:$ARCH
 
-python3 -m pip install --user jsonschema
 export PATH=$HOME/.local/bin:$PATH
+python3 -m pip config --user set global.progress_bar off
+python3 -m pip install --user jsonschema ruamel.yaml
 
 export CXXFLAGS='-m32 -D_GLIBCXX_ASSERTIONS'
 export CFLAGS='-m32'
@@ -36,6 +37,8 @@ cd "$WORK_DIR"
 if test -f "$WORK_DIR/ccache.tar.gz"; then
     echo "Restoring ccache..."
     (cd $HOME && tar xzf "$WORK_DIR/ccache.tar.gz")
+else
+    mkdir -p $HOME/.ccache
 fi
 
 ccache -M 500M
