@@ -29,8 +29,10 @@ X64_PACKAGES="zlib1g-dev libssl-dev libsqlite3-dev"
 
 if [ "$ARCHITECTURE" = "i386" ]; then
     apt-get install -y $I386_PACKAGES
+    PROJ_CMAKE_EXTRA_ARGS=" -DSQLite3_LIBRARY=/lib/i386-linux-gnu/libsqlite3.a"
 else
     apt-get install -y $X64_PACKAGES
+    PROJ_CMAKE_EXTRA_ARGS=""
 fi
 
 # build libcurl.a (builing against Ubuntu libcurl.a doesn't work easily)
@@ -59,7 +61,8 @@ cmake .. -DBUILD_SHARED_LIBS:BOOL=OFF \
         -DTIFF_LIBRARY_RELEASE:FILEPATH="$SRC/install/lib/libtiff.a" \
         -DCMAKE_INSTALL_PREFIX=$SRC/install \
         -DBUILD_APPS:BOOL=OFF \
-        -DBUILD_TESTING:BOOL=OFF
+        -DBUILD_TESTING:BOOL=OFF \
+        ${PROJ_CMAKE_EXTRA_ARGS}
 make clean -s
 make -j$(nproc) -s
 make install
