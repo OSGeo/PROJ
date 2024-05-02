@@ -3633,7 +3633,7 @@ INSERT INTO "usage" VALUES('EPSG','2845','projected_crs','EPSG','3842','EPSG','3
 INSERT INTO "projected_crs" VALUES('EPSG','3843','Pulkovo 1942(83) / 3-degree Gauss-Kruger zone 8',NULL,'EPSG','4530','EPSG','4178','EPSG','16266',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','2846','projected_crs','EPSG','3843','EPSG','3586','EPSG','1160');
 INSERT INTO "projected_crs" VALUES('EPSG','3844','Pulkovo 1942(58) / Stereo70',NULL,'EPSG','4530','EPSG','4179','EPSG','19926',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','2847','projected_crs','EPSG','3844','EPSG','1197','EPSG','1142');
+INSERT INTO "usage" VALUES('EPSG','2847','projected_crs','EPSG','3844','EPSG','1197','EPSG','1056');
 INSERT INTO "projected_crs" VALUES('EPSG','3845','SWEREF99 / RT90 7.5 gon V emulation',NULL,'EPSG','4530','EPSG','4619','EPSG','17339',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2848','projected_crs','EPSG','3845','EPSG','2845','EPSG','1230');
 INSERT INTO "projected_crs" VALUES('EPSG','3846','SWEREF99 / RT90 5 gon V emulation',NULL,'EPSG','4530','EPSG','4619','EPSG','17340',NULL,0);
@@ -7053,7 +7053,7 @@ INSERT INTO "projected_crs" VALUES('EPSG','8387','NAD83(2011) / NCRS Las Vegas h
 INSERT INTO "usage" VALUES('EPSG','5816','projected_crs','EPSG','8387','EPSG','4487','EPSG','1029');
 INSERT INTO "projected_crs" VALUES('EPSG','8391','GDA94 / WEIPA94',NULL,'EPSG','4400','EPSG','4283','EPSG','8389',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5817','projected_crs','EPSG','8391','EPSG','4491','EPSG','1249');
-INSERT INTO "projected_crs" VALUES('EPSG','8395','ETRS89 / Gauss-Kruger CM 9E',NULL,'EPSG','4400','EPSG','4258','EPSG','16302',NULL,1);
+INSERT INTO "projected_crs" VALUES('EPSG','8395','ETRS89 / Gauss-Kruger CM 9E',NULL,'EPSG','4400','EPSG','4258','EPSG','16302',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5818','projected_crs','EPSG','8395','EPSG','4490','EPSG','1143');
 INSERT INTO "projected_crs" VALUES('EPSG','8433','Macao 1920 / Macao Grid',NULL,'EPSG','4500','EPSG','8428','EPSG','8432',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5830','projected_crs','EPSG','8433','EPSG','1147','EPSG','1055');
