@@ -35,7 +35,7 @@ Synopsis
     |    --list-crs [list-crs-filter] |
     |    --dump-db-structure [{object_definition} | {object_reference}] |
     |    {object_definition} | {object_reference} |
-    |    [--s_epoch {epoch}] -t {srs_def} [--t_epoch {epoch}])
+    |    (-s {srs_def} [--s_epoch {epoch}] -t {srs_def} [--t_epoch {epoch}])
     |
 
     where {object_definition} or {srs_def} is one of the possibilities accepted
