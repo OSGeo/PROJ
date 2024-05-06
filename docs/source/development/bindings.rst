@@ -40,6 +40,11 @@ MySQL
 `fProj4 <https://sourceforge.net/projects/mysqlscientific/files/fPROJ4/>`_:
 Bindings for PROJ in MySQL
 
+Perl
+====
+`Geo::LibProj::FFI <https://metacpan.org/pod/Geo::LibProj::FFI>`_:
+Foreign function interface for PROJ (version 6 and newer) in Perl
+
 Python
 ======
 `pyproj <https://pypi.python.org/pypi/pyproj>`_:
