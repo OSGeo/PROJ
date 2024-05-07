@@ -5643,6 +5643,266 @@ TEST(wkt_parse, DerivedProjectedCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, DerivedProjectedCRS_base_crs_cs_non_metre_from_conversion) {
+    auto wkt =
+        "DERIVEDPROJCRS[\"Ground for NAD83(2011) / Idaho West (ftUS)\",\n"
+        "    BASEPROJCRS[\"foo\",\n"
+        "        BASEGEOGCRS[\"NAD83(2011)\",\n"
+        "            DATUM[\"NAD83 (National Spatial Reference System "
+        "2011)\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        CONVERSION[\"SPCS83 Idaho West zone (US Survey feet)\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural "
+        "origin\",41.6666666666667,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",-115.75,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural "
+        "origin\",0.999933333,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",2624666.667,\n"
+        "                LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "                ID[\"EPSG\",8807]]]],\n"
+        "    DERIVINGCONVERSION[\"Grid to ground\",\n"
+        "        METHOD[\"Similarity transformation\",\n"
+        "            ID[\"EPSG\",9621]],\n"
+        "        PARAMETER[\"Ordinate 1 of evaluation point in target "
+        "CRS\",1000,\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "            ID[\"EPSG\",8621]],\n"
+        "        PARAMETER[\"Ordinate 2 of evaluation point in target "
+        "CRS\",0,\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "            ID[\"EPSG\",8622]],\n"
+        "        PARAMETER[\"Scale factor for source CRS axes\",1,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",1061]],\n"
+        "        PARAMETER[\"Rotation angle of source CRS axes\",0,\n"
+        "            ANGLEUNIT[\"degree\",0],\n"
+        "            ID[\"EPSG\",8614]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"easting (X)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]],\n"
+        "        AXIS[\"northing (Y)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    const auto &axisList = crs->baseCRS()->coordinateSystem()->axisList();
+    ASSERT_EQ(axisList.size(), 2U);
+    EXPECT_EQ(axisList[0]->unit(), UnitOfMeasure::US_FOOT);
+
+    // Check that we emit a BASEPROJCRS.CS node
+    const char *expected =
+        "DERIVEDPROJCRS[\"Ground for NAD83(2011) / Idaho West (ftUS)\",\n"
+        "    BASEPROJCRS[\"foo\",\n"
+        "        BASEGEOGCRS[\"NAD83(2011)\",\n"
+        "            DATUM[\"NAD83 (National Spatial Reference System "
+        "2011)\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        CONVERSION[\"SPCS83 Idaho West zone (US Survey feet)\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural "
+        "origin\",41.6666666666667,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",-115.75,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural "
+        "origin\",0.999933333,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",2624666.667,\n"
+        "                LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "                ID[\"EPSG\",8807]]],\n"
+        "        CS[Cartesian,2],\n"
+        "            AXIS[\"(E)\",east,\n"
+        "                ORDER[1],\n"
+        "                LENGTHUNIT[\"US survey foot\",0.304800609601219]],\n"
+        "            AXIS[\"(N)\",north,\n"
+        "                ORDER[2],\n"
+        "                LENGTHUNIT[\"US survey foot\",0.304800609601219]]],\n"
+        "    DERIVINGCONVERSION[\"Grid to ground\",\n"
+        "        METHOD[\"Similarity transformation\",\n"
+        "            ID[\"EPSG\",9621]],\n"
+        "        PARAMETER[\"Ordinate 1 of evaluation point in target "
+        "CRS\",1000,\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "            ID[\"EPSG\",8621]],\n"
+        "        PARAMETER[\"Ordinate 2 of evaluation point in target "
+        "CRS\",0,\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "            ID[\"EPSG\",8622]],\n"
+        "        PARAMETER[\"Scale factor for source CRS axes\",1,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",1061]],\n"
+        "        PARAMETER[\"Rotation angle of source CRS axes\",0,\n"
+        "            ANGLEUNIT[\"degree\",0],\n"
+        "            ID[\"EPSG\",8614]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"easting (X)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]],\n"
+        "        AXIS[\"northing (Y)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]]]";
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        expected);
+
+    auto dbContext = DatabaseContext::create();
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019, dbContext)
+                .get()),
+        expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    wkt_parse,
+    DerivedProjectedCRS_base_crs_cs_non_metre_from_conversion_context_from_baseprojcrs_name) {
+    auto wkt =
+        "DERIVEDPROJCRS[\"Ground for NAD83(2011) / Idaho West (ftUS)\",\n"
+        "    BASEPROJCRS[\"NAD83(2011) / Idaho West (ftUS)\",\n"
+        "        BASEGEOGCRS[\"NAD83(2011)\",\n"
+        "            DATUM[\"NAD83 (National Spatial Reference System "
+        "2011)\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        CONVERSION[\"incomplete conversion\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]]]],\n"
+        "    DERIVINGCONVERSION[\"Grid to ground\",\n"
+        "        METHOD[\"Similarity transformation\",\n"
+        "            ID[\"EPSG\",9621]],\n"
+        "        PARAMETER[\"Ordinate 1 of evaluation point in target "
+        "CRS\",1000,\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "            ID[\"EPSG\",8621]],\n"
+        "        PARAMETER[\"Ordinate 2 of evaluation point in target "
+        "CRS\",0,\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "            ID[\"EPSG\",8622]],\n"
+        "        PARAMETER[\"Scale factor for source CRS axes\",1,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",1061]],\n"
+        "        PARAMETER[\"Rotation angle of source CRS axes\",0,\n"
+        "            ANGLEUNIT[\"degree\",0],\n"
+        "            ID[\"EPSG\",8614]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"easting (X)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]],\n"
+        "        AXIS[\"northing (Y)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    const auto &axisList = crs->baseCRS()->coordinateSystem()->axisList();
+    ASSERT_EQ(axisList.size(), 2U);
+    EXPECT_EQ(axisList[0]->unit(), UnitOfMeasure::US_FOOT);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019, dbContext)
+                .get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    wkt_parse,
+    DerivedProjectedCRS_base_crs_cs_non_metre_from_conversion_context_from_baseprojcrs_id) {
+    auto wkt =
+        "DERIVEDPROJCRS[\"Ground for NAD83(2011) / Idaho West (ftUS)\",\n"
+        "    BASEPROJCRS[\"foo\",\n"
+        "        BASEGEOGCRS[\"NAD83(2011)\",\n"
+        "            DATUM[\"NAD83 (National Spatial Reference System "
+        "2011)\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        CONVERSION[\"incomplete conversion\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]]],\n"
+        "        ID[\"EPSG\",6453]],\n"
+        "    DERIVINGCONVERSION[\"Grid to ground\",\n"
+        "        METHOD[\"Similarity transformation\",\n"
+        "            ID[\"EPSG\",9621]],\n"
+        "        PARAMETER[\"Ordinate 1 of evaluation point in target "
+        "CRS\",1000,\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "            ID[\"EPSG\",8621]],\n"
+        "        PARAMETER[\"Ordinate 2 of evaluation point in target "
+        "CRS\",0,\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "            ID[\"EPSG\",8622]],\n"
+        "        PARAMETER[\"Scale factor for source CRS axes\",1,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",1061]],\n"
+        "        PARAMETER[\"Rotation angle of source CRS axes\",0,\n"
+        "            ANGLEUNIT[\"degree\",0],\n"
+        "            ID[\"EPSG\",8614]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"easting (X)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]],\n"
+        "        AXIS[\"northing (Y)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    const auto &axisList = crs->baseCRS()->coordinateSystem()->axisList();
+    ASSERT_EQ(axisList.size(), 2U);
+    EXPECT_EQ(axisList[0]->unit(), UnitOfMeasure::US_FOOT);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019, dbContext)
+                .get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, DerivedProjectedCRS_ordinal) {
     auto wkt = "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
                "    BASEPROJCRS[\"BASEPROJCRS\",\n"
