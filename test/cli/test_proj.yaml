@@ -1,0 +1,21 @@
+comment: Test basic capabilities of the proj command
+exe: proj
+tests:
+- args: +ellps=WGS84 +proj=ob_tran +o_proj=latlon +o_lon_p=0.0 +o_lat_p=90.0 +lon_0=360.0 +to_meter=0.0174532925199433 +no_defs -E -f %.3f
+  in: 2 49
+  out: "2 49\t2.000\t49.000"
+- comment: Test CRS option
+  args: EPSG:32620 -S
+  in: -63 0
+  out: "500000.00\t0.00\t<0.9996 0.9996 0.9992 0 0.9996 0.9996>"
+- comment: Test projection factors on projected CRS with non-Greenwhich prime meridian
+  args: EPSG:27571 -S
+  in: 2.33722917 49.5
+  # On some architectures the angular distortion (omega) of EPSG:27571 is
+  # not exactly 0, but 8.53878e-07
+  sub: ["8.53878e-07", "0"]
+  out: "600000.00\t1200000.00\t<0.999877 0.999877 0.999755 0 0.999877 0.999877>"
+- comment: Test projection factors on compound CRS with a projected CRS
+  args: EPSG:5972 -S
+  in: 9 0
+  out: "500000.00\t0.00\t<0.9996 0.9996 0.9992 0 0.9996 0.9996>"

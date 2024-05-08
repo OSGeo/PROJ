@@ -4,22 +4,25 @@ set -e
 
 apt-get update -y
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    autoconf automake libtool make cmake ccache pkg-config python3-pip sqlite3 tar zip \
+    autoconf automake libtool make cmake ccache pkg-config python3-pip sqlite3 tar zip curl \
     clang++-10 jq python3-clang-10 \
     libsqlite3-dev \
     libtiff-dev libwebp-dev libzstd-dev \
     libcurl4-openssl-dev libnghttp2-dev libidn2-dev librtmp-dev libssh-dev \
-      libpsl-dev libssl-dev libkrb5-dev comerr-dev libldap2-dev libbrotli-dev \
+    libpsl-dev libssl-dev libkrb5-dev comerr-dev libldap2-dev libbrotli-dev \
     nlohmann-json3-dev libgtest-dev
 
-python3 -m pip install --user jsonschema
 export PATH=$HOME/.local/bin:$PATH
+python3 -m pip config --user set global.progress_bar off
+python3 -m pip install --user jsonschema pyyaml pytest
 
 cd "$WORK_DIR"
 
 if test -f "$WORK_DIR/ccache.tar.gz"; then
     echo "Restoring ccache..."
     (cd $HOME && tar xzf "$WORK_DIR/ccache.tar.gz")
+else
+    mkdir -p $HOME/.ccache
 fi
 
 ccache -M 500M

@@ -1,20 +1,15 @@
-:
+#!/bin/bash
+
 # Test projsync
 
-TEST_CLI_DIR=`dirname $0`
+set -e
+
+TEST_CLI_DIR=$(dirname $0)
 EXE=$1
-
-usage()
-{
-    echo "Usage: ${0} <path to 'projsync' program>" 
-    echo
-    exit 1
-}
-
 if test -z "${EXE}"; then
-    EXE=../../src/projsync
+    echo "Usage: ${0} <path to 'projsync' program>"
+    exit 1
 fi
-
 if test ! -x ${EXE}; then
     echo "*** ERROR: Can not find '${EXE}' program!"
     exit 1
@@ -210,6 +205,7 @@ cat ${TMP_OUT} | grep "Skipping removed_in_1.7 as it is no longer useful startin
 cat ${TMP_OUT} | grep "Skipping added_in_99_99.tif as it is only useful starting with PROJ-data 99.99" >/dev/null || (cat ${TMP_OUT}; exit 100)
 cat ${TMP_OUT} | grep "Would download https://cdn.proj.org/without_version.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
 
+# Cleanup
 rm -rf ${PROJ_USER_WRITABLE_DIRECTORY}
 rm ${TMP_OUT}
 

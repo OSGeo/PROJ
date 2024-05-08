@@ -3276,7 +3276,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     // ... but when transforming between 2 IGNF CRS, we do just one single pass
     // by allowing directly all transformation. There is no strong reason for
     // that particular case, except that otherwise we'd get different results
-    // for thest test/cli/testIGNF script when transforming a point outside
+    // for test/cli/test_cs2cs_ignf.yaml when transforming a point outside
     // the area of validity... Not totally sure the behaviour we try to preserve
     // here with the particular case is fundamentally better than the general
     // case. The general case is needed typically for the RGNC91-93 -> RGNC15

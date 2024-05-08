@@ -388,7 +388,7 @@ int main(int argc, char **argv) {
     }
 
     /* This is just to check that pj_init() is locale-safe */
-    /* Used by nad/testvarious */
+    /* Used by test/cli/test_cs2cs_locale.sh */
     if (getenv("PROJ_USE_ENV_LOCALE") != nullptr)
         use_env_locale = 1;
 

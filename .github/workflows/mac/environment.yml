@@ -13,4 +13,6 @@ dependencies:
   - autoconf
   - automake
   - jsonschema
+  - ruamel.yaml
+  - pytest
 

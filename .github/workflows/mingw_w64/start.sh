@@ -26,6 +26,8 @@ cd "$WORK_DIR"
 if test -f "$WORK_DIR/ccache.tar.gz"; then
     echo "Restoring ccache..."
     (cd $HOME && tar xzf "$WORK_DIR/ccache.tar.gz")
+else
+    mkdir -p $HOME/.ccache
 fi
 
 sudo apt-get install -y --no-install-recommends \
@@ -68,7 +70,7 @@ ln -s $MINGW_PREFIX/libgcc_s_seh-1.dll $WINE_SYSDIR
 ln -s /usr/$MINGW_ARCH/lib/libwinpthread-1.dll $WINE_SYSDIR
 
 # build zlib
-wget https://github.com/madler/zlib/archive/v1.2.11.tar.gz
+wget -q https://github.com/madler/zlib/archive/v1.2.11.tar.gz
 tar xzf v1.2.11.tar.gz
 (cd zlib-1.2.11 && \
   sudo make install -f win32/Makefile.gcc SHARED_MODE=1 \
@@ -79,13 +81,13 @@ tar xzf v1.2.11.tar.gz
 ln -s /usr/$MINGW_ARCH/bin/zlib1.dll $WINE_SYSDIR
 
 # build libtiff
-wget http://download.osgeo.org/libtiff/tiff-4.1.0.tar.gz
+wget -q http://download.osgeo.org/libtiff/tiff-4.1.0.tar.gz
 tar xzf tiff-4.1.0.tar.gz
 (cd tiff-4.1.0 && ./configure --host=$MINGW_ARCH --prefix=/usr/$MINGW_ARCH && make && sudo make install)
 ln -s /usr/$MINGW_ARCH/bin/libtiff-5.dll $WINE_SYSDIR
 
 # build sqlite3
-wget https://sqlite.org/2020/sqlite-autoconf-3330000.tar.gz
+wget -q https://sqlite.org/2020/sqlite-autoconf-3330000.tar.gz
 tar xzf sqlite-autoconf-3330000.tar.gz
 # Build with SQLITE_DQS=0 to ensure we properly use single quotes and double quotes (cf issue #2480)
 (cd sqlite-autoconf-3330000 &&
