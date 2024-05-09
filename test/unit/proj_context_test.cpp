@@ -151,6 +151,30 @@ TEST(proj_context, proj_context_set_search_paths) {
 
 // ---------------------------------------------------------------------------
 
+TEST(proj_context, proj_context_set_user_writable_directory) {
+
+    auto ctx = proj_context_create();
+    auto default_path =
+        std::string(proj_context_get_user_writable_directory(ctx, false));
+    EXPECT_TRUE(!default_path.empty());
+
+    auto new_path = default_path + DIR_CHAR + "temp_proj_dic4";
+    proj_context_set_user_writable_directory(ctx, new_path.c_str(), true);
+
+    EXPECT_STREQ(proj_context_get_user_writable_directory(ctx, false),
+                 new_path.c_str());
+
+    proj_context_set_user_writable_directory(ctx, nullptr, false);
+
+    EXPECT_STREQ(proj_context_get_user_writable_directory(ctx, false),
+                 default_path.c_str());
+
+    proj_context_destroy(ctx);
+    MyUnlink(new_path);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(proj_context, read_grid_from_user_writable_directory) {
 
     auto ctx = proj_context_create();

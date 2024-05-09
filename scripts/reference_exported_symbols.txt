@@ -817,7 +817,6 @@ pj_approx_3D_trans(PJconsts*, PJ_DIRECTION, PJ_COORD)
 pj_atof(char const*)
 pj_chomp(char*)
 pj_context_get_grid_cache_filename(pj_ctx*)
-pj_context_set_user_writable_directory(pj_ctx*, std::string const&)
 pj_ell_set(pj_ctx*, ARG_list*, double*, double*)
 pj_fwd(PJ_LP, PJconsts*)
 pj_get_datums_ref()
@@ -875,6 +874,7 @@ proj_context_set(PJconsts*, pj_ctx*)
 proj_context_set_search_paths
 proj_context_set_sqlite3_vfs_name
 proj_context_set_url_endpoint
+proj_context_set_user_writable_directory
 proj_context_use_proj4_init_rules
 proj_convert_conversion_to_other_method
 proj_coord
