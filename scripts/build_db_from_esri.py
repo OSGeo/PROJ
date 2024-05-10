@@ -1804,16 +1804,17 @@ def import_vertcs():
                     datum_auth_name = 'ESRI'
 
                 elif datum_auth_name == 'ESRI':
-                    assert datum_code not in vdatum_written
 
-                    vdatum_written.add(datum_code)
+                    # e.g Mean_Sea_Level_Hawaii datum is used both by ESRI:105795 'MSL_Hawaii_height_(m)' and SL_Hawaii_height_(ftUS)'
+                    if datum_code not in vdatum_written:
+                        vdatum_written.add(datum_code)
 
-                    p = map_vdatum_esri_to_parameters[datum_code]
-                    sql = """INSERT INTO "vertical_datum" VALUES('ESRI','%s','%s',NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                        datum_code, p['esri_name'], p['deprecated'])
-                    all_sql.append(sql)
-                    sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','vertical_datum','ESRI','%s','%s','%s','%s','%s');""" % (datum_code, datum_code, extent_auth_name, extent_code, 'EPSG', '1024')
-                    all_sql.append(sql)
+                        p = map_vdatum_esri_to_parameters[datum_code]
+                        sql = """INSERT INTO "vertical_datum" VALUES('ESRI','%s','%s',NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                            datum_code, p['esri_name'], p['deprecated'])
+                        all_sql.append(sql)
+                        sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','vertical_datum','ESRI','%s','%s','%s','%s','%s');""" % (datum_code, datum_code, extent_auth_name, extent_code, 'EPSG', '1024')
+                        all_sql.append(sql)
 
                 #map_vertcs_esri_name_to_auth_code[esri_name] = ['ESRI', code]
 
