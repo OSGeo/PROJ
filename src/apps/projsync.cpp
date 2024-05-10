@@ -242,7 +242,7 @@ int main(int argc, char *argv[]) {
         }
 
         // This is used by projsync() to determine where to write files.
-        pj_context_set_user_writable_directory(ctx, targetDir);
+        proj_context_set_user_writable_directory(ctx, targetDir.c_str(), true);
     }
 
     if (!endpoint.empty() && endpoint.back() == '/') {
