@@ -1274,18 +1274,11 @@ struct WKTParser::Private {
     DatabaseContextPtr dbContext_{};
     crs::GeographicCRSPtr geogCRSOfCompoundCRS_{};
 
-    static constexpr int MAX_PROPERTY_SIZE = 1024;
-    PropertyMap **properties_{};
-    int propertyCount_ = 0;
+    static constexpr unsigned int MAX_PROPERTY_SIZE = 1024;
+    std::vector<std::unique_ptr<PropertyMap>> properties_{};
 
-    Private() { properties_ = new PropertyMap *[MAX_PROPERTY_SIZE]; }
-
-    ~Private() {
-        for (int i = 0; i < propertyCount_; i++) {
-            delete properties_[i];
-        }
-        delete[] properties_;
-    }
+    Private() = default;
+    ~Private() = default;
     Private(const Private &) = delete;
     Private &operator=(const Private &) = delete;
 
@@ -1686,12 +1679,11 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
                                                  bool removeInverseOf,
                                                  bool hasName) {
 
-    if (propertyCount_ == MAX_PROPERTY_SIZE) {
+    if (properties_.size() >= MAX_PROPERTY_SIZE) {
         throw ParsingException("MAX_PROPERTY_SIZE reached");
     }
-    properties_[propertyCount_] = new PropertyMap();
-    auto &&properties = properties_[propertyCount_];
-    propertyCount_++;
+    properties_.push_back(internal::make_unique<PropertyMap>());
+    auto properties = properties_.back().get();
 
     std::string authNameFromAlias;
     std::string codeFromAlias;
