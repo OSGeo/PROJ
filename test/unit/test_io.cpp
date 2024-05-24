@@ -266,6 +266,32 @@ TEST(wkt_parse, datum_no_pm_not_earth) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, guess_celestial_body_from_ellipsoid_name) {
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT("DATUM[\"unnamed\",\n"
+                                  "    ELLIPSOID[\"Ananke\",10000,0,\n"
+                                  "        LENGTHUNIT[\"metre\",1]]]");
+    auto datum = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(datum != nullptr);
+    EXPECT_EQ(datum->ellipsoid()->celestialBody(), "Ananke");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, guess_celestial_body_from_ellipsoid_name_false_positive) {
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT("DATUM[\"unnamed\",\n"
+                                  "    ELLIPSOID[\"Ananke\",999999,0,\n"
+                                  "        LENGTHUNIT[\"metre\",1]]]");
+    auto datum = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(datum != nullptr);
+    EXPECT_EQ(datum->ellipsoid()->celestialBody(), "Non-Earth body");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, dynamic_geodetic_reference_frame) {
     auto obj = WKTParser().createFromWKT(
         "GEOGCRS[\"WGS 84 (G1762)\","

@@ -338,7 +338,8 @@ class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
                         //! @endcond
 
     PROJ_INTERNAL static std::string
-    guessBodyName(const io::DatabaseContextPtr &dbContext, double a);
+    guessBodyName(const io::DatabaseContextPtr &dbContext, double a,
+                  const std::string &ellpsName = std::string());
 
     PROJ_INTERNAL bool lookForProjWellKnownEllps(std::string &projEllpsName,
                                                  std::string &ellpsName) const;

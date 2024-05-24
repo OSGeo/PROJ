@@ -637,6 +637,115 @@ TEST(operation, geogCRS_to_geogCRS_context_datum_ensemble) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_incompatible_celestial_body) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto authFactoryEPSG =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto authFactoryIAU_2015 =
+        AuthorityFactory::create(DatabaseContext::create(), "IAU_2015");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    EXPECT_THROW(
+        CoordinateOperationFactory::create()->createOperations(
+            authFactoryEPSG->createCoordinateReferenceSystem("4326"), // WGS 84
+            authFactoryIAU_2015->createCoordinateReferenceSystem(
+                "51200"), // Ananke
+            ctxt),
+        UnsupportedOperationException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     geogCRS_to_geogCRS_context_incompatible_celestial_body_but_same_radius) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto authFactoryESRI =
+        AuthorityFactory::create(DatabaseContext::create(), "ESRI");
+    auto authFactoryIAU_2015 =
+        AuthorityFactory::create(DatabaseContext::create(), "IAU_2015");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    EXPECT_THROW(CoordinateOperationFactory::create()->createOperations(
+                     authFactoryESRI->createCoordinateReferenceSystem(
+                         "104936"), // GCS_Pan_2000
+                     authFactoryIAU_2015->createCoordinateReferenceSystem(
+                         "51200"), // Ananke
+                     ctxt),
+                 UnsupportedOperationException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geogCRS_compatible_unknown_celestial_body) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto objSrc =
+        createFromUserInput("+proj=longlat +R=10000 +type=crs", dbContext);
+    auto srcCRS = nn_dynamic_pointer_cast<CRS>(objSrc);
+    auto objDst =
+        createFromUserInput("+proj=longlat +R=10001 +type=crs", dbContext);
+    auto dstCRS = nn_dynamic_pointer_cast<CRS>(objDst);
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(srcCRS), NN_NO_CHECK(dstCRS), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geogCRS_incompatible_unknown_celestial_body) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto objSrc =
+        createFromUserInput("+proj=longlat +R=10000 +type=crs", dbContext);
+    auto srcCRS = nn_dynamic_pointer_cast<CRS>(objSrc);
+    auto objDst =
+        createFromUserInput("+proj=longlat +R=99999 +type=crs", dbContext);
+    auto dstCRS = nn_dynamic_pointer_cast<CRS>(objDst);
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    EXPECT_THROW(CoordinateOperationFactory::create()->createOperations(
+                     NN_NO_CHECK(srcCRS), NN_NO_CHECK(dstCRS), ctxt),
+                 UnsupportedOperationException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     geogCRS_to_geogCRS_compatible_celestial_body_through_semi_major_axis) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto authFactoryIAU_2015 =
+        AuthorityFactory::create(DatabaseContext::create(), "IAU_2015");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+
+    auto dst_wkt = "GEOGCRS[\"unknown\",\n"
+                   "    DATUM[\"unknown\",\n"
+                   "        ELLIPSOID[\"unknown\",9999,0,\n" // Ananke is 10000
+                   "            LENGTHUNIT[\"metre\",1]]],\n"
+                   "    PRIMEM[\"Reference_Meridian\",0,\n"
+                   "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                   "    CS[ellipsoidal,2],\n"
+                   "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+                   "            ORDER[1],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                   "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+                   "            ORDER[2],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
+    auto dstObj = WKTParser().createFromWKT(dst_wkt);
+    auto dstCRS = nn_dynamic_pointer_cast<CRS>(dstObj);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactoryIAU_2015->createCoordinateReferenceSystem("51200"), // Ananke
+        NN_NO_CHECK(dstCRS), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_derived_geogCRS_3D) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");

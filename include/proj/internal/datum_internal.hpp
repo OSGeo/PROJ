@@ -35,4 +35,11 @@
 
 #define UNKNOWN_ENGINEERING_DATUM "Unknown engineering datum"
 
+constexpr const char *NON_EARTH_BODY = "Non-Earth body";
+
+// Mars (2015) - Sphere uses R=3396190
+// and Mars polar radius (as used by HIRISE JPEG2000) is 3376200m
+// which is a 0.59% relative difference.
+constexpr double REL_ERROR_FOR_SAME_CELESTIAL_BODY = 0.007;
+
 #endif // DATUM_INTERNAL_HH_INCLUDED
