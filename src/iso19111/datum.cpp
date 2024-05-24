@@ -1179,24 +1179,35 @@ bool Ellipsoid::_isEquivalentTo(const util::IComparable *other,
 // ---------------------------------------------------------------------------
 
 std::string Ellipsoid::guessBodyName(const io::DatabaseContextPtr &dbContext,
-                                     double a) {
-    // Mars (2015) - Sphere uses R=3396190
-    // and Mars polar radius (as used by HIRISE JPEG2000) is 3376200m
-    // which is a 0.59% relative difference.
-    constexpr double relError = 0.007;
+                                     double a, const std::string &ellpsName) {
     constexpr double earthMeanRadius = 6375000.0;
-    if (std::fabs(a - earthMeanRadius) < relError * earthMeanRadius) {
+    if (std::fabs(a - earthMeanRadius) <
+        REL_ERROR_FOR_SAME_CELESTIAL_BODY * earthMeanRadius) {
         return Ellipsoid::EARTH;
     }
     if (dbContext) {
         try {
             auto factory = io::AuthorityFactory::create(NN_NO_CHECK(dbContext),
                                                         std::string());
-            return factory->identifyBodyFromSemiMajorAxis(a, relError);
+            if (!ellpsName.empty()) {
+                auto matches = factory->createObjectsFromName(
+                    ellpsName, {io::AuthorityFactory::ObjectType::ELLIPSOID},
+                    true, 1);
+                if (!matches.empty()) {
+                    auto ellps =
+                        static_cast<const Ellipsoid *>(matches.front().get());
+                    if (std::fabs(a - ellps->semiMajorAxis().getSIValue()) <
+                        REL_ERROR_FOR_SAME_CELESTIAL_BODY * a) {
+                        return ellps->celestialBody();
+                    }
+                }
+            }
+            return factory->identifyBodyFromSemiMajorAxis(
+                a, REL_ERROR_FOR_SAME_CELESTIAL_BODY);
         } catch (const std::exception &) {
         }
     }
-    return "Non-Earth body";
+    return NON_EARTH_BODY;
 }
 
 // ---------------------------------------------------------------------------
