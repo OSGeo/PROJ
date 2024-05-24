@@ -38,6 +38,7 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include "proj/internal/datum_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 #include "proj/internal/tracing.hpp"
@@ -4442,28 +4443,34 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
 
     ENTER_FUNCTION();
 
-    if (geodSrc->ellipsoid()->celestialBody() !=
-        geodDst->ellipsoid()->celestialBody()) {
+    const auto &srcEllps = geodSrc->ellipsoid();
+    const auto &dstEllps = geodDst->ellipsoid();
+    if (srcEllps->celestialBody() == dstEllps->celestialBody() &&
+        srcEllps->celestialBody() != NON_EARTH_BODY) {
+        // Same celestial body, with a known name (that is not the generic
+        // NON_EARTH_BODY used when we can't guess it) ==> compatible
+    } else if ((srcEllps->celestialBody() != dstEllps->celestialBody() &&
+                srcEllps->celestialBody() != NON_EARTH_BODY &&
+                dstEllps->celestialBody() != NON_EARTH_BODY) ||
+               std::fabs(srcEllps->semiMajorAxis().getSIValue() -
+                         dstEllps->semiMajorAxis().getSIValue()) >
+                   REL_ERROR_FOR_SAME_CELESTIAL_BODY *
+                       dstEllps->semiMajorAxis().getSIValue()) {
         const char *envVarVal = getenv("PROJ_IGNORE_CELESTIAL_BODY");
-        if (envVarVal == nullptr) {
+        if (envVarVal == nullptr || ci_equal(envVarVal, "NO") ||
+            ci_equal(envVarVal, "FALSE") || ci_equal(envVarVal, "OFF")) {
             std::string osMsg(
                 "Source and target ellipsoid do not belong to the same "
                 "celestial body (");
-            osMsg += geodSrc->ellipsoid()->celestialBody();
+            osMsg += srcEllps->celestialBody();
             osMsg += " vs ";
-            osMsg += geodDst->ellipsoid()->celestialBody();
-            osMsg += "). You may override this check by setting the "
-                     "PROJ_IGNORE_CELESTIAL_BODY environment variable to YES.";
-            throw util::UnsupportedOperationException(osMsg.c_str());
-        } else if (ci_equal(envVarVal, "NO") || ci_equal(envVarVal, "FALSE") ||
-                   ci_equal(envVarVal, "OFF")) {
-            std::string osMsg(
-                "Source and target ellipsoid do not belong to the same "
-                "celestial body (");
-            osMsg += geodSrc->ellipsoid()->celestialBody();
-            osMsg += " vs ";
-            osMsg += geodDst->ellipsoid()->celestialBody();
+            osMsg += dstEllps->celestialBody();
             osMsg += ").";
+            if (envVarVal == nullptr) {
+                osMsg += " You may override this check by setting the "
+                         "PROJ_IGNORE_CELESTIAL_BODY environment variable "
+                         "to YES.";
+            }
             throw util::UnsupportedOperationException(osMsg.c_str());
         }
     }
