@@ -4524,20 +4524,30 @@ std::string
 AuthorityFactory::identifyBodyFromSemiMajorAxis(double semi_major_axis,
                                                 double tolerance) const {
     auto res =
-        d->run("SELECT name, (ABS(semi_major_axis - ?) / semi_major_axis ) "
-               "AS rel_error FROM celestial_body WHERE rel_error <= ?",
+        d->run("SELECT DISTINCT name, "
+               "(ABS(semi_major_axis - ?) / semi_major_axis ) AS rel_error "
+               "FROM celestial_body WHERE rel_error <= ? "
+               "ORDER BY rel_error, name",
                {semi_major_axis, tolerance});
     if (res.empty()) {
         throw FactoryException("no match found");
     }
+    constexpr int IDX_NAME = 0;
     if (res.size() > 1) {
+        constexpr int IDX_REL_ERROR = 1;
+        // If the first object has a relative error of 0 and the next one
+        // a non-zero error, then use the first one.
+        if (res.front()[IDX_REL_ERROR] == "0" &&
+            (*std::next(res.begin()))[IDX_REL_ERROR] != "0") {
+            return res.front()[IDX_NAME];
+        }
         for (const auto &row : res) {
-            if (row[0] != res.front()[0]) {
+            if (row[IDX_NAME] != res.front()[IDX_NAME]) {
                 throw FactoryException("more than one match found");
             }
         }
     }
-    return res.front()[0];
+    return res.front()[IDX_NAME];
 }
 
 // ---------------------------------------------------------------------------
