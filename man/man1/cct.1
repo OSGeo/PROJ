@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "CCT" "1" "01 Mar 2024" "9.4" "PROJ"
+.TH "CCT" "1" "01 Jun 2024" "9.4.1" "PROJ"
 .SH NAME
 cct \- Coordinate Conversion and Transformation
 .SH SYNOPSIS
@@ -100,6 +100,9 @@ New in version 8.0.0.
 performs transformation coordinate systems on a set of input points. The
 coordinate system transformation can include translation between projected
 and geographic coordinates as well as the application of datum shifts.
+.sp
+Note however that unlike the \fI\%proj\fP, angular input must be in decimal degrees.
+Any minutes and seconds given will be silently dropped.
 .sp
 The following control parameters can appear in any order:
 .INDENT 0.0
