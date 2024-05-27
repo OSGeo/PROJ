@@ -1,3 +1,32 @@
+9.4.1 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Database: update to EPSG v11.006 (#4086)
+
+ o Database: update ESRI dataset to ArcGIS Pro 3.3 (#4143)
+
+ Bug fixes
+ -------
+
+ o DatabaseContext::lookForGridInfo(): do not trigger network activity in
+   PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE mode when all grids are known (#4090)
+
+ o Retry "Connection reset by peer" (#4107)
+
+ o Use unique names for NKG transformations (#4111)
+
+ o proj_create()/proj_create_from_database(): recall CRS AUTH:CODE in error message (#4114)
+
+ o DerivedProjectedCRS: deal with lack of explicit CS in BASEPROJCRS in WKT (#4139)
+
+ o proj_symbol_rename.h: update with current symbols (#4145)
+
+ o Improve detection of compatible/incompatible celestial bodies (#4150)
+
+
 9.4.0 Release Notes
 -------------------
 
