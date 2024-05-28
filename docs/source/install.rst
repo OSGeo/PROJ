@@ -139,15 +139,27 @@ The following guides show how to compile and install the software using CMake.
     PROJ 9.0 and later releases only support builds using CMake.
 
 
-Build requirements
+Requirements
 --------------------------------------------------------------------------------
+
+Build requirements
+++++++++++++++++++
 
 - C99 compiler
 - C++11 compiler
 - CMake >= 3.16
-- SQLite3 >= 3.11: headers and library for target architecture, and sqlite3 executable for build architecture.
+- SQLite3 >= 3.11: headers and library for target architecture, and sqlite3 executable for build architecture
 - libtiff >= 4.0 (optional but recommended)
 - curl >= 7.29.0 (optional but recommended)
+- JSON for Modern C++ (nlohmann/json) >= 3.7.0; if not found as an external dependency then vendored version 3.9.1 from PROJ source tree is used
+
+Test requirements
++++++++++++++++++
+
+This is only required if testing is built (see :option:`BUILD_TESTING`, default ON)
+
+- GoogleTest (GTest) >= 1.8.1; if not found then version 1.12.1 is fetched from GitHub and installed internally
+
 
 Build steps
 --------------------------------------------------------------------------------
