@@ -3,6 +3,36 @@
 News
 ###############################################################################
 
+9.4.1 Release Notes
+++++++++++++++++++++
+*June 1st 2024*
+
+Updates
+-------
+
+* Database: update to EPSG v11.006 (`#4086 <https://github.com/OSGeo/PROJ/issues/4086>`_)
+
+* Database: update ESRI dataset to ArcGIS Pro 3.3 (`#4143 <https://github.com/OSGeo/PROJ/issues/4143>`_)
+
+Bug fixes
+---------
+
+ * ``DatabaseContext::lookForGridInfo()``: do not trigger network activity in
+   PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE mode when all grids are known (`#4090 <https://github.com/OSGeo/PROJ/issues/4090>`_)
+
+ * Retry "Connection reset by peer" (`#4107 <https://github.com/OSGeo/PROJ/issues/4107>`_)
+
+ * Use unique names for NKG transformations (`#4111 <https://github.com/OSGeo/PROJ/issues/4111>`_)
+
+ * ``proj_create()``/``proj_create_from_database()``: recall CRS AUTH:CODE in error message (`#4114 <https://github.com/OSGeo/PROJ/issues/4114>`_)
+
+ * ``DerivedProjectedCRS``: deal with lack of explicit CS in BASEPROJCRS in WKT (`#4139 <https://github.com/OSGeo/PROJ/issues/4139>`_)
+
+ * ``proj_symbol_rename.h``: update with current symbols (`#4145 <https://github.com/OSGeo/PROJ/issues/4145>`_)
+
+ * Improve detection of compatible/incompatible celestial bodies (`#4150 <https://github.com/OSGeo/PROJ/issues/4150>`_)
+
+
 9.4.0 Release Notes
 ++++++++++++++++++++
 *March 1st 2024*
