@@ -32,6 +32,11 @@ C_NAMESPACE PJ *pj_moll(PJ *);
 namespace pj_imoll_o_ns {
 struct pj_imoll_o_data {
     struct PJconsts *pj[6];
+    // We need to know the inverse boundary locations of the "seams".
+    double boundary12;
+    double boundary23;
+    double boundary45;
+    double boundary56;
 };
 
 /* SIMPLIFY THIS */
@@ -100,16 +105,16 @@ static PJ_LP imoll_o_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     if (xy.y > y90 + EPSLN || xy.y < -y90 + EPSLN) /* 0 */
         z = 0;
     else if (xy.y >= 0) {
-        if (xy.x <= -d90)
+        if (xy.x <= Q->boundary12)
             z = 1;
-        else if (xy.x >= d60)
+        else if (xy.x >= Q->boundary23)
             z = 3;
         else
             z = 2;
     } else {
-        if (xy.x <= -d60)
+        if (xy.x <= Q->boundary45)
             z = 4;
-        else if (xy.x >= d90)
+        else if (xy.x >= Q->boundary56)
             z = 6;
         else
             z = 5;
@@ -232,6 +237,20 @@ pj_imoll_o_compute_zone_offset(struct pj_imoll_o_ns::pj_imoll_o_data *Q,
     return (xy2.x + Q->pj[zone2 - 1]->x0) - (xy1.x + Q->pj[zone1 - 1]->x0);
 }
 
+static double
+pj_imoll_o_compute_zone_x_boundary(PJ *P, double lam, double phi) {
+    PJ_LP lp1, lp2;
+    PJ_XY xy1, xy2;
+
+    lp1.lam = lam - pj_imoll_o_ns::EPSLN;
+    lp1.phi = phi;
+    lp2.lam = lam + pj_imoll_o_ns::EPSLN;
+    lp2.phi = phi;
+    xy1 = imoll_o_s_forward(lp1, P);
+    xy2 = imoll_o_s_forward(lp2, P);
+    return (xy1.x + xy2.x)/2.;
+}
+
 PJ *PJ_PROJECTION(imoll_o) {
     using namespace pj_imoll_o_ns;
 
@@ -272,6 +291,16 @@ PJ *PJ_PROJECTION(imoll_o) {
     /* Match 6 (south) to 3 (north) */
     Q->pj[5]->x0 +=
         pj_imoll_o_compute_zone_offset(Q, 6, 3, d90, 0.0 - EPSLN, 0.0 + EPSLN);
+
+    /*
+      The most straightforward way of computing the x locations of the "seams"
+      in the interrupted projection is to compute the forward transform at the
+      seams and record these values.
+    */
+    Q->boundary12 = pj_imoll_o_compute_zone_x_boundary(P, -d90, 0.0 + EPSLN);
+    Q->boundary23 = pj_imoll_o_compute_zone_x_boundary(P, d60, 0.0 + EPSLN);
+    Q->boundary45 = pj_imoll_o_compute_zone_x_boundary(P, -d60, 0.0 - EPSLN);
+    Q->boundary56 = pj_imoll_o_compute_zone_x_boundary(P, d90, 0.0 - EPSLN);
 
     P->inv = imoll_o_s_inverse;
     P->fwd = imoll_o_s_forward;
