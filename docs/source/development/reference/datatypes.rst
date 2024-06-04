@@ -737,7 +737,7 @@ Info structures
 
         Name of grid, e.g. "*BETA2007.gsb*".
 
-    .. c:member:: char PJ_GRID_INFO
+    .. c:member:: char PJ_GRID_INFO.filename[260]
 
         Full path of grid file, e.g. *"C:\\OSGeo4W64\\share\\proj\\BETA2007.gsb"*
 
