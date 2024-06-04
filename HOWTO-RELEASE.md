@@ -174,7 +174,13 @@ git tag -a -m "Create tag x.y.z" x.y.z
 git push --tags
 ```
 
-### 2.4 Prepare the release on GitHub
+### 2.4 Check the GitHub Zeonodo integration
+
+Go to https://zenodo.org/account/settings/github/ and check that the OSGeo/PROJ
+repository is ON so that the creation of the GitHub release triggers the
+creation of a corresponding Zenodo record.
+
+### 2.5 Prepare the release on GitHub
 
 When the new tag is pushed upstream GitHub picks up that a new release has been
 issued. Update the new release on <https://github.com/OSGeo/PROJ/releases> with
@@ -182,7 +188,7 @@ the release notes from `NEWS.md` and add the prepared source distribution archiv
 to the release (otherwise GitHub will just package the entire repository - we
 don't want that).
 
-### 2.5 Announce the new release
+### 2.6 Announce the new release
 
 The release should be announced on PROJ and MetaCRS mailing lists. Additionally
 the release announcement should be sent to <news_item@osgeo.org> which will add
