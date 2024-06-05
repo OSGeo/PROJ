@@ -4244,6 +4244,36 @@ TEST(wkt_parse, conversion_proj_based) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, conversion_utm_zone_south_wrong_id) {
+
+    auto wkt = "CONVERSION[\"UTM zone 55S\","
+               "    METHOD[\"Transverse Mercator\","
+               "        ID[\"EPSG\",9807]],"
+               "    PARAMETER[\"Latitude of natural origin\",0,"
+               "        ANGLEUNIT[\"Degree\",0.0174532925199433],"
+               "        ID[\"EPSG\",8801]],"
+               "    PARAMETER[\"Longitude of natural origin\",147,"
+               "        ANGLEUNIT[\"Degree\",0.0174532925199433],"
+               "        ID[\"EPSG\",8802]],"
+               "    PARAMETER[\"Scale factor at natural origin\",0.9996,"
+               "        SCALEUNIT[\"unity\",1],"
+               "        ID[\"EPSG\",8805]],"
+               "    PARAMETER[\"False easting\",500000,"
+               "        LENGTHUNIT[\"metre\",1],"
+               "        ID[\"EPSG\",8806]],"
+               "    PARAMETER[\"False northing\",10000000,"
+               "        LENGTHUNIT[\"metre\",1],"
+               "        ID[\"EPSG\",8807]],"
+               "    ID[\"EPSG\",17055]]"; // wrong code
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto conv = nn_dynamic_pointer_cast<Conversion>(obj);
+    ASSERT_TRUE(conv != nullptr);
+    EXPECT_EQ(conv->getEPSGCode(), 16155); // code fixed on import
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, CONCATENATEDOPERATION) {
 
     auto transf_1 = Transformation::create(
@@ -14900,6 +14930,87 @@ TEST(json_import, projected_crs) {
     ASSERT_TRUE(pcrs != nullptr);
     EXPECT_EQ(pcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, conversion_utm_zone_south_wrong_id) {
+
+    auto json = "{\n"
+                "  \"type\": \"Conversion\",\n"
+                "  \"name\": \"UTM zone 55S\",\n"
+                "  \"method\": {\n"
+                "    \"name\": \"Transverse Mercator\",\n"
+                "    \"id\": {\n"
+                "      \"authority\": \"EPSG\",\n"
+                "      \"code\": 9807\n"
+                "    }\n"
+                "  },\n"
+                "  \"parameters\": [\n"
+                "    {\n"
+                "      \"name\": \"Latitude of natural origin\",\n"
+                "      \"value\": 0,\n"
+                "      \"unit\": {\n"
+                "        \"type\": \"AngularUnit\",\n"
+                "        \"name\": \"Degree\",\n"
+                "        \"conversion_factor\": 0.0174532925199433\n"
+                "      },\n"
+                "      \"id\": {\n"
+                "        \"authority\": \"EPSG\",\n"
+                "        \"code\": 8801\n"
+                "      }\n"
+                "    },\n"
+                "    {\n"
+                "      \"name\": \"Longitude of natural origin\",\n"
+                "      \"value\": 147,\n"
+                "      \"unit\": {\n"
+                "        \"type\": \"AngularUnit\",\n"
+                "        \"name\": \"Degree\",\n"
+                "        \"conversion_factor\": 0.0174532925199433\n"
+                "      },\n"
+                "      \"id\": {\n"
+                "        \"authority\": \"EPSG\",\n"
+                "        \"code\": 8802\n"
+                "      }\n"
+                "    },\n"
+                "    {\n"
+                "      \"name\": \"Scale factor at natural origin\",\n"
+                "      \"value\": 0.9996,\n"
+                "      \"unit\": \"unity\",\n"
+                "      \"id\": {\n"
+                "        \"authority\": \"EPSG\",\n"
+                "        \"code\": 8805\n"
+                "      }\n"
+                "    },\n"
+                "    {\n"
+                "      \"name\": \"False easting\",\n"
+                "      \"value\": 500000,\n"
+                "      \"unit\": \"metre\",\n"
+                "      \"id\": {\n"
+                "        \"authority\": \"EPSG\",\n"
+                "        \"code\": 8806\n"
+                "      }\n"
+                "    },\n"
+                "    {\n"
+                "      \"name\": \"False northing\",\n"
+                "      \"value\": 10000000,\n"
+                "      \"unit\": \"metre\",\n"
+                "      \"id\": {\n"
+                "        \"authority\": \"EPSG\",\n"
+                "        \"code\": 8807\n"
+                "      }\n"
+                "    }\n"
+                "  ],\n"
+                "  \"id\": {\n"
+                "    \"authority\": \"EPSG\",\n"
+                "    \"code\": 17055\n" // wrong code
+                "  }\n"
+                "}";
+
+    auto obj = createFromUserInput(json, nullptr);
+    auto conv = nn_dynamic_pointer_cast<Conversion>(obj);
+    ASSERT_TRUE(conv != nullptr);
+    EXPECT_EQ(conv->getEPSGCode(), 16155); // code fixed on import
 }
 
 // ---------------------------------------------------------------------------
