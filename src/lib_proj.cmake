@@ -372,7 +372,6 @@ set(ALL_LIBPROJ_SOURCES
 set(ALL_LIBPROJ_HEADERS ${HEADERS_LIBPROJ})
 
 # Configuration for the core target "proj"
-proj_target_output_name(proj PROJ_CORE_TARGET_OUTPUT_NAME)
 
 add_library(proj
   ${ALL_LIBPROJ_SOURCES}
@@ -411,12 +410,36 @@ target_include_directories(proj INTERFACE
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 if(WIN32)
+    if (MINGW AND BUILD_SHARED_LIBS)
+        option(APPEND_SOVERSION "Whether to include shared object version as a suffix in the name of the PROJ shared library name." OFF)
+    endif()
+    if(MINGW AND BUILD_SHARED_LIBS AND APPEND_SOVERSION)
+        set(PROJ_OUTPUT_NAME "proj" CACHE STRING "Name of the PROJ library")
+    else()
+        # Detect major version update if re-using a CMake build directory where the
+        # PROJ version major number has been updated in the meantime.
+        math(EXPR PROJ_VERSION_MAJOR_MINUS_ONE "${PROJ_VERSION_MAJOR} - 1")
+        if(DEFINED PROJ_OUTPUT_NAME AND PROJ_OUTPUT_NAME STREQUAL "proj_${PROJ_VERSION_MAJOR_MINUS_ONE}")
+            message(WARNING "PROJ_OUTPUT_NAME was set to ${PROJ_OUTPUT_NAME}. Updating it to proj_${PROJ_VERSION_MAJOR}")
+            unset(PROJ_OUTPUT_NAME CACHE)
+        endif()
+        set(PROJ_OUTPUT_NAME "proj_${PROJ_VERSION_MAJOR}" CACHE STRING "Name of the PROJ library")
+    endif()
+else()
+    set(PROJ_OUTPUT_NAME "proj" CACHE STRING "Name of the PROJ library")
+endif()
+
+set_target_properties(proj PROPERTIES OUTPUT_NAME ${PROJ_OUTPUT_NAME})
+
+if(WIN32)
   set_target_properties(proj
     PROPERTIES
     VERSION "${PROJ_VERSION}"
-    OUTPUT_NAME "${PROJ_CORE_TARGET_OUTPUT_NAME}"
     ARCHIVE_OUTPUT_NAME proj
     CLEAN_DIRECT_OUTPUT 1)
+    if (MINGW AND BUILD_SHARED_LIBS AND APPEND_SOVERSION)
+        set_target_properties(proj PROPERTIES SUFFIX "-${PROJ_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    endif()
 elseif(BUILD_FRAMEWORKS_AND_BUNDLE)
   set_target_properties(proj
     PROPERTIES
