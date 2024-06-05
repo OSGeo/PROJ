@@ -251,7 +251,7 @@ getUTMConversionProperty(const util::PropertyMap &properties, int zone,
         conversionName += (north ? 'N' : 'S');
 
         return createMapNameEPSGCode(conversionName,
-                                     (north ? 16000 : 17000) + zone);
+                                     (north ? 16000 : 16100) + zone);
     } else {
         return properties;
     }
@@ -1760,7 +1760,8 @@ ConversionNNPtr Conversion::createPopularVisualisationPseudoMercator(
  * sphere at centerLat.
  *
  * This method is defined as
- * <a href="https://epsg.org/coord-operation-method_1026/Mercator-Spherical.html">
+ * <a
+ * href="https://epsg.org/coord-operation-method_1026/Mercator-Spherical.html">
  * EPSG:1026</a>.
  *
  * @param properties See \ref general_properties of the conversion. If the name

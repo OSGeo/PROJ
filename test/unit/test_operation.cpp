@@ -1241,7 +1241,7 @@ TEST(operation, utm_export) {
               "    PARAMETER[\"False northing\",10000000,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]],\n"
-              "    ID[\"EPSG\",17001]]");
+              "    ID[\"EPSG\",16101]]");
 
     EXPECT_EQ(
         conv->exportToWKT(
