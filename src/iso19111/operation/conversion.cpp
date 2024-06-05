@@ -1752,6 +1752,8 @@ ConversionNNPtr Conversion::createPopularVisualisationPseudoMercator(
 
 // ---------------------------------------------------------------------------
 
+// clang-format off
+
 /** \brief Instantiate a conversion based on the
  * <a href="../../../operations/projections/merc.html">
  * Mercator</a> projection method, using its spherical formulation
@@ -1760,8 +1762,7 @@ ConversionNNPtr Conversion::createPopularVisualisationPseudoMercator(
  * sphere at centerLat.
  *
  * This method is defined as
- * <a
- * href="https://epsg.org/coord-operation-method_1026/Mercator-Spherical.html">
+ * <a href="https://epsg.org/coord-operation-method_1026/Mercator-Spherical.html">
  * EPSG:1026</a>.
  *
  * @param properties See \ref general_properties of the conversion. If the name
@@ -1781,6 +1782,8 @@ ConversionNNPtr Conversion::createMercatorSpherical(
         properties, EPSG_CODE_METHOD_MERCATOR_SPHERICAL,
         createParams(centerLat, centerLong, falseEasting, falseNorthing));
 }
+
+// clang-format on
 
 // ---------------------------------------------------------------------------
 
