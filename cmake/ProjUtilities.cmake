@@ -35,34 +35,6 @@ function(print_variable NAME)
 endfunction()
 
 #
-# Generates output name for given target depending on platform and version.
-# For instance, on Windows, dynamic link libraries get ABI version suffix
-# proj_X_Y.dll.
-#
-
-function(proj_target_output_name TARGET_NAME OUTPUT_NAME)
-  if(NOT DEFINED TARGET_NAME)
-    message(SEND_ERROR "Error, the variable TARGET_NAME is not defined!")
-  endif()
-
-  if(NOT DEFINED ${PROJECT_NAME}_VERSION)
-    message(SEND_ERROR
-      "Error, the variable ${${PROJECT_NAME}_VERSION} is not defined!")
-  endif()
-
-  # On Windows, ABI version is specified using binary file name suffix.
-  # On Unix, suffix is empty and SOVERSION is used instead.
-  if(WIN32)
-    string(LENGTH "${${PROJECT_NAME}_ABI_VERSION}" abilen)
-    if(abilen GREATER 0)
-      set(SUFFIX "_${${PROJECT_NAME}_ABI_VERSION}")
-    endif()
-  endif()
-
-  set(${OUTPUT_NAME} ${TARGET_NAME}${SUFFIX} PARENT_SCOPE)
-endfunction()
-
-#
 # Configure a pkg-config file proj.pc
 # See also ProjInstallPath.cmake
 #

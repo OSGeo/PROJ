@@ -372,7 +372,6 @@ set(ALL_LIBPROJ_SOURCES
 set(ALL_LIBPROJ_HEADERS ${HEADERS_LIBPROJ})
 
 # Configuration for the core target "proj"
-proj_target_output_name(proj PROJ_CORE_TARGET_OUTPUT_NAME)
 
 add_library(proj
   ${ALL_LIBPROJ_SOURCES}
@@ -414,9 +413,12 @@ if(WIN32)
   set_target_properties(proj
     PROPERTIES
     VERSION "${PROJ_VERSION}"
-    OUTPUT_NAME "${PROJ_CORE_TARGET_OUTPUT_NAME}"
+    OUTPUT_NAME proj
     ARCHIVE_OUTPUT_NAME proj
     CLEAN_DIRECT_OUTPUT 1)
+    if (MINGW AND BUILD_SHARED_LIBS)
+        set_target_properties(proj PROPERTIES SUFFIX "-${PROJ_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    endif()
 elseif(BUILD_FRAMEWORKS_AND_BUNDLE)
   set_target_properties(proj
     PROPERTIES
