@@ -5886,9 +5886,16 @@ bool BoundCRS::isTOWGS84Compatible() const {
 
 // ---------------------------------------------------------------------------
 
-std::string BoundCRS::getHDatumPROJ4GRIDS() const {
+std::string BoundCRS::getHDatumPROJ4GRIDS(
+    const io::DatabaseContextPtr &databaseContext) const {
     if (ci_equal(d->hubCRS()->nameStr(), "WGS 84")) {
-        return d->transformation()->getNTv2Filename();
+        if (databaseContext) {
+            return d->transformation()
+                ->substitutePROJAlternativeGridNames(
+                    NN_NO_CHECK(databaseContext))
+                ->getPROJ4NadgridsCompatibleFilename();
+        }
+        return d->transformation()->getPROJ4NadgridsCompatibleFilename();
     }
     return std::string();
 }
@@ -5945,7 +5952,8 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             return;
         }
 
-        auto hdatumProj4GridName = getHDatumPROJ4GRIDS();
+        auto hdatumProj4GridName =
+            getHDatumPROJ4GRIDS(formatter->databaseContext());
         if (!hdatumProj4GridName.empty()) {
             formatter->setHDatumExtension(hdatumProj4GridName);
             d->baseCRS()->_exportToWKT(formatter);
@@ -6039,7 +6047,8 @@ void BoundCRS::_exportToPROJString(
         crs_exportable->_exportToPROJString(formatter);
         formatter->setVDatumExtension(std::string(), std::string());
     } else {
-        auto hdatumProj4GridName = getHDatumPROJ4GRIDS();
+        auto hdatumProj4GridName =
+            getHDatumPROJ4GRIDS(formatter->databaseContext());
         if (!hdatumProj4GridName.empty()) {
             formatter->setHDatumExtension(hdatumProj4GridName);
             crs_exportable->_exportToPROJString(formatter);

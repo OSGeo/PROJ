@@ -1702,7 +1702,7 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL const std::string &
-        getNTv2Filename() const;
+        getPROJ4NadgridsCompatibleFilename() const;
 
     PROJ_FOR_TEST std::vector<double>
     getTOWGS84Parameters() const; // throw(io::FormattingException)
