@@ -251,7 +251,7 @@ getUTMConversionProperty(const util::PropertyMap &properties, int zone,
         conversionName += (north ? 'N' : 'S');
 
         return createMapNameEPSGCode(conversionName,
-                                     (north ? 16000 : 17000) + zone);
+                                     (north ? 16000 : 16100) + zone);
     } else {
         return properties;
     }
@@ -1752,6 +1752,8 @@ ConversionNNPtr Conversion::createPopularVisualisationPseudoMercator(
 
 // ---------------------------------------------------------------------------
 
+// clang-format off
+
 /** \brief Instantiate a conversion based on the
  * <a href="../../../operations/projections/merc.html">
  * Mercator</a> projection method, using its spherical formulation
@@ -1780,6 +1782,8 @@ ConversionNNPtr Conversion::createMercatorSpherical(
         properties, EPSG_CODE_METHOD_MERCATOR_SPHERICAL,
         createParams(centerLat, centerLong, falseEasting, falseNorthing));
 }
+
+// clang-format on
 
 // ---------------------------------------------------------------------------
 
