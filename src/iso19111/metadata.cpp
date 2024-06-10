@@ -322,14 +322,21 @@ bool GeographicBoundingBox::Private::intersects(const Private &other) const {
     const double oN = other.north_;
     const double oS = other.south_;
 
+    // Check intersection along the latitude axis
     if (N < oS || S > oN) {
         return false;
     }
 
+    // Check world coverage of this bbox, and other bbox overlapping
+    // antimeridian (e.g. oW=175 and oE=-175)
+    // Check oW > oE written for symmetry with the intersection() method.
     if (W == -180.0 && E == 180.0 && oW > oE) {
         return true;
     }
 
+    // Check world coverage of othre bbox, and this bbox overlapping
+    // antimeridian (e.g. W=175 and E=-175)
+    // Check W > E written for symmetry with the intersection() method.
     if (oW == -180.0 && oE == 180.0 && W > E) {
         return true;
     }
@@ -353,7 +360,7 @@ bool GeographicBoundingBox::Private::intersects(const Private &other) const {
         return intersects(Private(oW, oS, 180.0, oN)) ||
                intersects(Private(-180.0, oS, oE, oN));
 
-        // No: crossing antimerian
+        // No: crossing antimeridian
     } else {
         if (oW <= oE) {
             return other.intersects(*this);
@@ -402,15 +409,20 @@ GeographicBoundingBox::Private::intersection(const Private &otherExtent) const {
     const double oN = otherExtent.north_;
     const double oS = otherExtent.south_;
 
+    // Check intersection along the latitude axis
     if (N < oS || S > oN) {
         return nullptr;
     }
 
+    // Check world coverage of this bbox, and other bbox overlapping
+    // antimeridian (e.g. oW=175 and oE=-175)
     if (W == -180.0 && E == 180.0 && oW > oE) {
         return internal::make_unique<Private>(oW, std::max(S, oS), oE,
                                               std::min(N, oN));
     }
 
+    // Check world coverage of othre bbox, and this bbox overlapping
+    // antimeridian (e.g. W=175 and E=-175)
     if (oW == -180.0 && oE == 180.0 && W > E) {
         return internal::make_unique<Private>(W, std::max(S, oS), E,
                                               std::min(N, oN));
@@ -448,7 +460,7 @@ GeographicBoundingBox::Private::intersection(const Private &otherExtent) const {
             return inter1;
         }
         return inter2;
-        // No: crossing antimerian
+        // No: crossing antimeridian
     } else {
         if (oW <= oE) {
             return otherExtent.intersection(*this);
