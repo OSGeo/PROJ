@@ -400,6 +400,7 @@ osgeo::proj::io::DatabaseContext::lookForGridInfo(std::string const&, bool, std:
 osgeo::proj::io::DatabaseContext::startInsertStatementsSession()
 osgeo::proj::io::DatabaseContext::stopInsertStatementsSession()
 osgeo::proj::io::DatabaseContext::suggestsCodeFor(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::common::IdentifiedObject> > const&, std::string const&, bool)
+osgeo::proj::io::DatabaseContext::toWGS84AutocorrectWrongValues(double&, double&, double&, double&, double&, double&, double&) const
 osgeo::proj::io::FactoryException::~FactoryException()
 osgeo::proj::io::FactoryException::FactoryException(char const*)
 osgeo::proj::io::FactoryException::FactoryException(osgeo::proj::io::FactoryException const&)
