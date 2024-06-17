@@ -60,6 +60,8 @@ proj_add_gie_test("Deformation" "gie/deformation.gie")
 proj_add_gie_test("geotiff_grids" "gie/geotiff_grids.gie")
 proj_add_gie_test("defmodel" "gie/defmodel.gie")
 proj_add_gie_test("gridshift" "gie/gridshift.gie")
+# Does not really require the network, but test running with PROJ_NETWORK=ON
+proj_add_gie_network_dependent_test("gridshift_network_enabled" "gie/gridshift.gie")
 endif()
 
 if(TIFF_ENABLED AND CURL_ENABLED AND RUN_NETWORK_DEPENDENT_TESTS)
