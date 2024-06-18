@@ -251,6 +251,19 @@ accept      -598000.000  -1160020.000 0.000
 expect      -5597999.885 -6160019.978 0.000
 roundtrip   1
 
+-------------------------------------------------------------------------------
+operation   +proj=pipeline \
+                +step +proj=krovak +lat_0=49.5 +lon_0=24.8333333333333 +alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel \
+                +step +proj=gridshift +grids=tests/test_gridshift_projected.tif \
+                +step +inv +proj=mod_krovak +lat_0=49.5 +lon_0=24.8333333333333 +alpha=30.2881397222222 +k=0.9999 +x_0=5000000 +y_0=5000000 +ellps=bessel
+-------------------------------------------------------------------------------
+
+tolerance   0.5 mm
+
+accept      16.610452439 49.202425040 0.000
+expect      16.610455233 49.202425034 0.000
+roundtrip   1
+
 -------------
 # Error cases
 -------------

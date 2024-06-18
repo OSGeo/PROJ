@@ -909,37 +909,41 @@ PJ *PJ_TRANSFORMATION(gridshift, 0) {
         return pj_gridshift_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
+    bool isKnownGrid = false;
     bool isProjectedCoord = false;
-    if (P->ctx->defer_grid_opening) {
-        Q->m_defer_grid_opening = true;
-    } else {
+
+    if (!P->ctx->defer_grid_opening ||
+        !pj_param(P->ctx, P->params, "tcoord_type").i) {
         const char *gridnames = pj_param(P->ctx, P->params, "sgrids").s;
         gMutex.lock();
         const auto iter = gKnownGrids.find(gridnames);
-        const bool isKnownGrid = iter != gKnownGrids.end();
+        isKnownGrid = iter != gKnownGrids.end();
         if (isKnownGrid) {
+            Q->m_defer_grid_opening = true;
             isProjectedCoord = iter->second;
         }
         gMutex.unlock();
-        if (isKnownGrid) {
-            Q->m_defer_grid_opening = true;
-        } else {
-            Q->m_grids = pj_generic_grid_init(P, "grids");
-            /* Was gridlist compiled properly? */
-            if (proj_errno(P)) {
-                proj_log_error(P, _("could not find required grid(s)."));
-                return pj_gridshift_destructor(
-                    P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
-            }
-            if (!Q->checkGridTypes(P, isProjectedCoord)) {
-                return pj_gridshift_destructor(
-                    P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
-            }
+    }
 
-            gMutex.lock();
-            gKnownGrids[gridnames] = isProjectedCoord;
-            gMutex.unlock();
+    if (P->ctx->defer_grid_opening || isKnownGrid) {
+        Q->m_defer_grid_opening = true;
+    } else {
+        const char *gridnames = pj_param(P->ctx, P->params, "sgrids").s;
+        Q->m_grids = pj_generic_grid_init(P, "grids");
+        /* Was gridlist compiled properly? */
+        if (proj_errno(P)) {
+            proj_log_error(P, _("could not find required grid(s)."));
+            return pj_gridshift_destructor(
+                P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
         }
+        if (!Q->checkGridTypes(P, isProjectedCoord)) {
+            return pj_gridshift_destructor(
+                P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+        }
+
+        gMutex.lock();
+        gKnownGrids[gridnames] = isProjectedCoord;
+        gMutex.unlock();
     }
 
     if (pj_param(P->ctx, P->params, "tinterpolation").i) {
@@ -994,12 +998,17 @@ PJ *PJ_TRANSFORMATION(gridshift, 0) {
         }
     }
 
-    if (isProjectedCoord) {
-        P->left = PJ_IO_UNITS_PROJECTED;
-        P->right = PJ_IO_UNITS_PROJECTED;
+    if (isKnownGrid || pj_param(P->ctx, P->params, "tcoord_type").i) {
+        if (isProjectedCoord) {
+            P->left = PJ_IO_UNITS_PROJECTED;
+            P->right = PJ_IO_UNITS_PROJECTED;
+        } else {
+            P->left = PJ_IO_UNITS_RADIANS;
+            P->right = PJ_IO_UNITS_RADIANS;
+        }
     } else {
-        P->left = PJ_IO_UNITS_RADIANS;
-        P->right = PJ_IO_UNITS_RADIANS;
+        P->left = PJ_IO_UNITS_WHATEVER;
+        P->right = PJ_IO_UNITS_WHATEVER;
     }
 
     return P;
