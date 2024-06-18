@@ -256,24 +256,20 @@ static void process(FILE *fid)
 /*                          instantiate_crs()                           */
 /************************************************************************/
 
-static PJ *instantiate_crs(const std::string &definition, bool &isLongLatCS,
+static PJ *instantiate_crs(const PJ *crs_in, bool &isLongLatCS,
                            double &toRadians, bool &isLatFirst) {
-    PJ *crs =
-        proj_create(nullptr, pj_add_type_crs_if_needed(definition).c_str());
-    if (!crs) {
-        return nullptr;
-    }
 
+    PJ *crs = nullptr;
     isLongLatCS = false;
     toRadians = 0.0;
     isLatFirst = false;
 
-    auto type = proj_get_type(crs);
+    auto type = proj_get_type(crs_in);
     if (type == PJ_TYPE_BOUND_CRS) {
-        auto base = proj_get_source_crs(nullptr, crs);
-        proj_destroy(crs);
-        crs = base;
+        crs = proj_get_source_crs(nullptr, crs_in);
         type = proj_get_type(crs);
+    } else {
+        crs = proj_clone(nullptr, crs_in);
     }
     if (type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
         type == PJ_TYPE_GEOGRAPHIC_3D_CRS || type == PJ_TYPE_GEODETIC_CRS) {
@@ -307,12 +303,12 @@ static PJ *instantiate_crs(const std::string &definition, bool &isLongLatCS,
 /*               get_geog_crs_proj_string_from_proj_crs()               */
 /************************************************************************/
 
-static std::string get_geog_crs_proj_string_from_proj_crs(PJ *src,
-                                                          double &toRadians,
-                                                          bool &isLatFirst) {
+static PJ *get_geog_crs_proj_string_from_proj_crs(const PJ *src,
+                                                  double &toRadians,
+                                                  bool &isLatFirst) {
     auto srcType = proj_get_type(src);
     if (srcType != PJ_TYPE_PROJECTED_CRS) {
-        return std::string();
+        return nullptr;
     }
 
     auto base = proj_get_source_crs(nullptr, src);
@@ -321,7 +317,7 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ *src,
     if (baseType != PJ_TYPE_GEOGRAPHIC_2D_CRS &&
         baseType != PJ_TYPE_GEOGRAPHIC_3D_CRS) {
         proj_destroy(base);
-        return std::string();
+        return nullptr;
     }
 
     auto cs = proj_crs_get_coordinate_system(nullptr, base);
@@ -342,10 +338,7 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ *src,
 
     proj_destroy(cs);
 
-    auto retCStr = proj_as_proj_string(nullptr, base, PJ_PROJ_5, nullptr);
-    std::string ret(retCStr ? retCStr : "");
-    proj_destroy(base);
-    return ret;
+    return base;
 }
 
 // ---------------------------------------------------------------------------
@@ -580,9 +573,9 @@ int main(int argc, char **argv) {
                         }
                         proj_unit_list_destroy(units);
                     } else if (arg[1] == 'm') { /* list prime meridians */
-                        (void)fprintf(stderr,
-                            "This list is no longer updated, and some values may "
-                            "conflict with other sources.\n");
+                        (void)fprintf(stderr, "This list is no longer updated, "
+                                              "and some values may "
+                                              "conflict with other sources.\n");
                         const struct PJ_PRIME_MERIDIANS *lpm;
                         for (lpm = proj_list_prime_meridians(); lpm->id; ++lpm)
                             (void)printf("%12s %-30s\n", lpm->id, lpm->defn);
@@ -806,49 +799,55 @@ int main(int argc, char **argv) {
     proj_context_use_proj4_init_rules(
         nullptr, proj_context_get_use_proj4_init_rules(nullptr, TRUE));
 
-    PJ *src = nullptr;
-    if (!fromStr.empty()) {
+    PJ *src =
+        !fromStr.empty()
+            ? proj_create(nullptr, pj_add_type_crs_if_needed(fromStr).c_str())
+            : nullptr;
+    PJ *dst =
+        !toStr.empty()
+            ? proj_create(nullptr, pj_add_type_crs_if_needed(toStr).c_str())
+            : nullptr;
+
+    PJ *src_unbound = nullptr;
+    if (src) {
         bool ignored;
-        src = instantiate_crs(fromStr, srcIsLongLat, srcToRadians, ignored);
-        if (!src) {
+        src_unbound = instantiate_crs(src, srcIsLongLat, srcToRadians, ignored);
+        if (!src_unbound) {
             emess(3, "cannot instantiate source coordinate system");
         }
     }
 
-    PJ *dst = nullptr;
-    if (!toStr.empty()) {
-        dst =
-            instantiate_crs(toStr, destIsLongLat, destToRadians, destIsLatLong);
-        if (!dst) {
+    PJ *dst_unbound = nullptr;
+    if (dst) {
+        dst_unbound =
+            instantiate_crs(dst, destIsLongLat, destToRadians, destIsLatLong);
+        if (!dst_unbound) {
             emess(3, "cannot instantiate target coordinate system");
         }
     }
 
-    if (toStr.empty()) {
-        assert(src);
-        toStr = get_geog_crs_proj_string_from_proj_crs(src, destToRadians,
-                                                       destIsLatLong);
-        if (toStr.empty()) {
+    if (!dst) {
+        assert(src_unbound);
+        dst = get_geog_crs_proj_string_from_proj_crs(src_unbound, destToRadians,
+                                                     destIsLatLong);
+        if (!dst) {
             emess(3,
                   "missing target CRS and source CRS is not a projected CRS");
         }
         destIsLongLat = true;
-    } else if (fromStr.empty()) {
-        assert(dst);
+    } else if (!src) {
+        assert(dst_unbound);
         bool ignored;
-        fromStr =
-            get_geog_crs_proj_string_from_proj_crs(dst, srcToRadians, ignored);
-        if (fromStr.empty()) {
+        src = get_geog_crs_proj_string_from_proj_crs(dst_unbound, srcToRadians,
+                                                     ignored);
+        if (!src) {
             emess(3,
                   "missing source CRS and target CRS is not a projected CRS");
         }
         srcIsLongLat = true;
     }
-    proj_destroy(src);
-    proj_destroy(dst);
-
-    src = proj_create(nullptr, pj_add_type_crs_if_needed(fromStr).c_str());
-    dst = proj_create(nullptr, pj_add_type_crs_if_needed(toStr).c_str());
+    proj_destroy(src_unbound);
+    proj_destroy(dst_unbound);
 
     if (promoteTo3D) {
         auto src3D = proj_crs_promote_to_3D(nullptr, nullptr, src);
