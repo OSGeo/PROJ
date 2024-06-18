@@ -960,6 +960,11 @@ class PROJ_GCC_DLL DatabaseContext {
     PROJ_DLL std::vector<std::string>
     getVersionedAuthoritiesFromName(const std::string &authName);
 
+    PROJ_FOR_TEST bool
+    toWGS84AutocorrectWrongValues(double &tx, double &ty, double &tz,
+                                  double &rx, double &ry, double &rz,
+                                  double &scale_difference) const;
+
     //! @endcond
 
   protected:

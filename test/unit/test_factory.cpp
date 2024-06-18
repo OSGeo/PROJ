@@ -4935,4 +4935,106 @@ TEST(factory, getPointMotionOperationsFor) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, toWGS84AutocorrectWrongValues) {
+    auto ctxt = DatabaseContext::create();
+    {
+        double tx = 1;
+        double ty = 2;
+        double tz = 3;
+        double rx = 0;
+        double ry = 0;
+        double rz = 0;
+        double scale_difference = 0;
+        EXPECT_FALSE(ctxt->toWGS84AutocorrectWrongValues(tx, ty, tz, rx, ry, rz,
+                                                         scale_difference));
+        EXPECT_EQ(tx, 1);
+        EXPECT_EQ(ty, 2);
+        EXPECT_EQ(tz, 3);
+        EXPECT_EQ(rx, 0);
+        EXPECT_EQ(ry, 0);
+        EXPECT_EQ(rz, 0);
+        EXPECT_EQ(scale_difference, 0);
+    }
+    {
+        // Incorrect parameters for EPSG:15929: WGS84 -> Belgian Lambert 72
+        // Cf https://github.com/OSGeo/PROJ/issues/4170
+        double tx = -106.8686;
+        double ty = 52.2978;
+        double tz = -103.7239;
+        double rx = -0.3366;
+        double ry = 0.457;
+        double rz = -1.8422;
+        double scale_difference = -1.2747;
+        EXPECT_TRUE(ctxt->toWGS84AutocorrectWrongValues(tx, ty, tz, rx, ry, rz,
+                                                        scale_difference));
+        EXPECT_EQ(tx, -106.8686);
+        EXPECT_EQ(ty, 52.2978);
+        EXPECT_EQ(tz, -103.7239);
+        EXPECT_EQ(rx, 0.3366);
+        EXPECT_EQ(ry, -0.457);
+        EXPECT_EQ(rz, 1.8422);
+        EXPECT_EQ(scale_difference, -1.2747);
+    }
+    {
+        // Almost incorrect parameters EPSG:15929: WGS84 -> Belgian Lambert 72
+        double tx = -106;
+        double ty = 52.2978;
+        double tz = -103.7239;
+        double rx = -0.3366;
+        double ry = 0.457;
+        double rz = -1.8422;
+        double scale_difference = -1.2747;
+        EXPECT_FALSE(ctxt->toWGS84AutocorrectWrongValues(tx, ty, tz, rx, ry, rz,
+                                                         scale_difference));
+        EXPECT_EQ(tx, -106);
+        EXPECT_EQ(ty, 52.2978);
+        EXPECT_EQ(tz, -103.7239);
+        EXPECT_EQ(rx, -0.3366);
+        EXPECT_EQ(ry, 0.457);
+        EXPECT_EQ(rz, -1.8422);
+        EXPECT_EQ(scale_difference, -1.2747);
+    }
+    {
+        // Correct Position Vector transformation ('EPSG','15869','DHDN to WGS
+        // 84 (3))
+        double tx = 612.4;
+        double ty = 77.0;
+        double tz = 440.2;
+        double rx = -0.054;
+        double ry = 0.057;
+        double rz = -2.797;
+        double scale_difference = 2.55;
+        EXPECT_FALSE(ctxt->toWGS84AutocorrectWrongValues(tx, ty, tz, rx, ry, rz,
+                                                         scale_difference));
+        EXPECT_EQ(tx, 612.4);
+        EXPECT_EQ(ty, 77.0);
+        EXPECT_EQ(tz, 440.2);
+        EXPECT_EQ(rx, -0.054);
+        EXPECT_EQ(ry, 0.057);
+        EXPECT_EQ(rz, -2.797);
+        EXPECT_EQ(scale_difference, 2.55);
+    }
+    {
+        // Correct parameters for EPSG:15929: WGS84 -> Belgian Lambert 72
+        // (Coordinate Frame rotation) Cf
+        // https://github.com/OSGeo/PROJ/issues/4170
+        double tx = -106.8686;
+        double ty = 52.2978;
+        double tz = -103.7239;
+        double rx = 0.3366;
+        double ry = -0.457;
+        double rz = 1.8422;
+        double scale_difference = -1.2747;
+        EXPECT_FALSE(ctxt->toWGS84AutocorrectWrongValues(tx, ty, tz, rx, ry, rz,
+                                                         scale_difference));
+        EXPECT_EQ(tx, -106.8686);
+        EXPECT_EQ(ty, 52.2978);
+        EXPECT_EQ(tz, -103.7239);
+        EXPECT_EQ(rx, 0.3366);
+        EXPECT_EQ(ry, -0.457);
+        EXPECT_EQ(rz, 1.8422);
+        EXPECT_EQ(scale_difference, -1.2747);
+    }
+}
+
 } // namespace

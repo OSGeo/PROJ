@@ -5280,6 +5280,50 @@ TEST(wkt_parse, projcs_TOWGS84_7terms) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projcs_TOWGS84_7terms_autocorrect) {
+    // Auto-correct wrong sign for rotation terms
+    // Cf https://github.com/OSGeo/PROJ/issues/4170
+    auto wkt =
+        "PROJCS[\"BD72 / Belgian Lambert 72\",\n"
+        "    GEOGCS[\"BD72\",\n"
+        "        DATUM[\"Reseau_National_Belge_1972\",\n"
+        "            SPHEROID[\"International 1924\",6378388,297],\n"
+        "            "
+        "TOWGS84[-106.8686,52.2978,-103.7239,-0.3366,0.457,-1.8422,-1.2747]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "        UNIT[\"degree\",0.0174532925199433,\n"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "        AUTHORITY[\"EPSG\",\"4313\"]],\n"
+        "    PROJECTION[\"Lambert_Conformal_Conic_2SP\"],\n"
+        "    PARAMETER[\"latitude_of_origin\",90],\n"
+        "    PARAMETER[\"central_meridian\",4.36748666666667],\n"
+        "    PARAMETER[\"standard_parallel_1\",51.1666672333333],\n"
+        "    PARAMETER[\"standard_parallel_2\",49.8333339],\n"
+        "    PARAMETER[\"false_easting\",150000.013],\n"
+        "    PARAMETER[\"false_northing\",5400088.438],\n"
+        "    UNIT[\"metre\",1,\n"
+        "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "    AXIS[\"Easting\",EAST],\n"
+        "    AXIS[\"Northing\",NORTH],\n"
+        "    AUTHORITY[\"EPSG\",\"31370\"]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto params = crs->transformation()->getTOWGS84Parameters();
+    auto expected = std::vector<double>{-106.8686, 52.2978, -103.7239, 0.3366,
+                                        -0.457,    1.8422,  -1.2747};
+    ASSERT_EQ(params.size(), expected.size());
+    for (int i = 0; i < 7; i++) {
+        EXPECT_NEAR(params[i], expected[i], 1e-10);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, WKT1_VERT_DATUM_EXTENSION) {
     auto wkt = "VERT_CS[\"EGM2008 geoid height\",\n"
                "    VERT_DATUM[\"EGM2008 geoid\",2005,\n"
@@ -10959,6 +11003,31 @@ TEST(io, projparse_longlat_towgs84_7_terms) {
                 .get()),
         "+proj=longlat +ellps=GRS80 +towgs84=1.2,2,3,4,5,6,7 +no_defs "
         "+type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_towgs84_7_terms_autocorrect) {
+    // Auto-correct wrong sign for rotation terms
+    // Cf https://github.com/OSGeo/PROJ/issues/4170
+    auto dbContext = DatabaseContext::create();
+    auto obj = createFromUserInput(
+        "+proj=lcc +lat_0=90 +lon_0=4.36748666666667 +lat_1=51.1666672333333 "
+        "+lat_2=49.8333339 +x_0=150000.013 +y_0=5400088.438 +ellps=intl "
+        "+towgs84=-106.8686,52.2978,-103.7239,-0.3366,0.457,-1.8422,-1.2747 "
+        "+units=m +no_defs +type=crs",
+        dbContext, true);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        "+proj=lcc +lat_0=90 +lon_0=4.36748666666667 +lat_1=51.1666672333333 "
+        "+lat_2=49.8333339 +x_0=150000.013 +y_0=5400088.438 +ellps=intl "
+        "+towgs84=-106.8686,52.2978,-103.7239,0.3366,-0.457,1.8422,-1.2747 "
+        "+units=m +no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
