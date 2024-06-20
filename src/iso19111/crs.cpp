@@ -550,14 +550,34 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
     const auto &l_domains = domains();
     metadata::ExtentPtr extent;
     if (!l_domains.empty()) {
-        if (l_domains.size() > 1) {
-            // If there are several domains of validity, then it is extremely
-            // unlikely, we could get a single transformation valid for all.
-            // At least, in the current state of the code of createOperations()
-            // which returns a single extent, this can't happen.
-            return thisAsCRS;
+        if (l_domains.size() == 2) {
+            // Special case for the UTM ETRS89 CRS that have 2 domains since
+            // EPSG v11.009. The "Pan-European conformal mapping at scales
+            // larger than 1:500,000" one includes a slightly smaller one
+            // "Engineering survey, topographic mapping" valid for some
+            // countries. Let's take the larger one to get a transformation
+            // valid for all domains.
+            auto extent0 = l_domains[0]->domainOfValidity();
+            auto extent1 = l_domains[1]->domainOfValidity();
+            if (extent0 && extent1) {
+                if (extent0->contains(NN_NO_CHECK(extent1))) {
+                    extent = extent0;
+                } else if (extent1->contains(NN_NO_CHECK(extent0))) {
+                    extent = extent1;
+                }
+            }
         }
-        extent = l_domains[0]->domainOfValidity();
+        if (!extent) {
+            if (l_domains.size() > 1) {
+                // If there are several domains of validity, then it is
+                // extremely unlikely, we could get a single transformation
+                // valid for all. At least, in the current state of the code of
+                // createOperations() which returns a single extent, this can't
+                // happen.
+                return thisAsCRS;
+            }
+            extent = l_domains[0]->domainOfValidity();
+        }
     }
 
     std::string crs_authority;
