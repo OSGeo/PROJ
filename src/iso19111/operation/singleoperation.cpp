@@ -385,7 +385,7 @@ CoordinateOperation::normalizeForVisualization() const {
  * It should not be used after the context has been destroyed.
  *
  * @param ctx Execution context to which the transformer will be tied to.
- *            If null, the default context will be used (only sfe for
+ *            If null, the default context will be used (only safe for
  *            single-threaded applications).
  * @return a new CoordinateTransformer instance.
  * @since 9.3
@@ -438,6 +438,9 @@ CoordinateTransformer::create(const CoordinateOperationNNPtr &op,
                               PJ_CONTEXT *ctx) {
     auto transformer = NN_NO_CHECK(
         CoordinateTransformer::make_unique<CoordinateTransformer>());
+    // pj_obj_create does not sanitize the context
+    if (ctx == nullptr)
+        ctx = pj_get_default_ctx();
     transformer->d->pj_ = pj_obj_create(ctx, op);
     if (transformer->d->pj_ == nullptr)
         throw util::UnsupportedOperationException(
