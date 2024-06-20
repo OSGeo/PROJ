@@ -203,7 +203,7 @@ INSERT INTO "scope" VALUES('EPSG','1223','Very small scale equal-area mapping - 
 INSERT INTO "scope" VALUES('EPSG','1224','Very small scale equal-area mapping - Asia-Pacific-centred.',0);
 INSERT INTO "scope" VALUES('EPSG','1225','Very small scale equal-area mapping - Europe-Africa-centred.',0);
 INSERT INTO "scope" VALUES('EPSG','1226','Wellbore survey.',0);
-INSERT INTO "scope" VALUES('EPSG','1227','Pan-European medium scale conformal mapping.',0);
+INSERT INTO "scope" VALUES('EPSG','1227','Pan-European conformal mapping at scales larger than 1:500,000.',0);
 INSERT INTO "scope" VALUES('EPSG','1228','Very small scale conformal mapping.',0);
 INSERT INTO "scope" VALUES('EPSG','1229','Engineering design concept visualisation.',0);
 INSERT INTO "scope" VALUES('EPSG','1230','User-defined CRS in GPS receiver.',0);
@@ -266,3 +266,4 @@ INSERT INTO "scope" VALUES('EPSG','1286','Mapping and data analysis for Texas Wa
 INSERT INTO "scope" VALUES('EPSG','1287','Continental mapping of raster data.',0);
 INSERT INTO "scope" VALUES('EPSG','1288','Change of coordinate epoch in 2-dimensions (φλ horizontal only).',0);
 INSERT INTO "scope" VALUES('EPSG','1289','Geodesy. Defines ETRF2020.',0);
+INSERT INTO "scope" VALUES('EPSG','1290','Pan-European conformal mapping at scales larger than 1:500,000, engineering survey and topographic mapping at all scales.',0);
