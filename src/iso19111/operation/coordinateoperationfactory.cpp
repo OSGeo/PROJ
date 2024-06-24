@@ -5360,8 +5360,10 @@ void CoordinateOperationFactory::Private::createOperationsVertToGeogSynthetized(
     const auto dbContext =
         authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
 
-    const auto vertDatumName = vertSrc->datumNonNull(dbContext)->nameStr();
-    const auto geogDstDatumName = geogDst->datumNonNull(dbContext)->nameStr();
+    const auto vertDatum = vertSrc->datumNonNull(dbContext);
+    const auto &vertDatumName = vertDatum->nameStr();
+    const auto geogDstDatum = geogDst->datumNonNull(dbContext);
+    const auto &geogDstDatumName = geogDstDatum->nameStr();
     // We accept a vertical CRS whose datum name is the same datum name as the
     // source geographic CRS, or whose datum name is "Ellipsoid" if it is part
     // of a CompoundCRS whose horizontal CRS has a geodetic datum of the same

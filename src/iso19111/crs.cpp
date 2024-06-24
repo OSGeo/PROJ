@@ -561,9 +561,9 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
             auto extent1 = l_domains[1]->domainOfValidity();
             if (extent0 && extent1) {
                 if (extent0->contains(NN_NO_CHECK(extent1))) {
-                    extent = extent0;
+                    extent = std::move(extent0);
                 } else if (extent1->contains(NN_NO_CHECK(extent0))) {
-                    extent = extent1;
+                    extent = std::move(extent1);
                 }
             }
         }
