@@ -610,6 +610,11 @@ static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_ALBERS_EQUAL_AREA, EPSG_CODE_METHOD_ALBERS_EQUAL_AREA,
      "Albers_Conic_Equal_Area", "aea", nullptr, paramsAEA_EQDC},
 
+    // Variant used by Oracle WKT:
+    // https://lists.osgeo.org/pipermail/qgis-user/2024-June/054599.html
+    {EPSG_NAME_METHOD_ALBERS_EQUAL_AREA, EPSG_CODE_METHOD_ALBERS_EQUAL_AREA,
+     "Albers_Conical_Equal_Area", "aea", nullptr, paramsAEA_EQDC},
+
     {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
      EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
      "Lambert_Conformal_Conic_1SP", "lcc", nullptr, paramsLCC1SP},
