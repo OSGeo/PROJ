@@ -555,7 +555,7 @@ TEST(operation, transformation_createGeocentricTranslations) {
         2.0, 3.0, std::vector<PositionalAccuracyNNPtr>());
     EXPECT_TRUE(transf->validateParameters().empty());
 
-    auto params = transf->getTOWGS84Parameters();
+    auto params = transf->getTOWGS84Parameters(true);
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.0};
     EXPECT_EQ(params, expected);
 
@@ -570,7 +570,7 @@ TEST(operation, transformation_createGeocentricTranslations) {
               inv_transf_as_transf->sourceCRS()->nameStr());
     auto expected_inv =
         std::vector<double>{-1.0, -2.0, -3.0, 0.0, 0.0, 0.0, 0.0};
-    EXPECT_EQ(inv_transf_as_transf->getTOWGS84Parameters(), expected_inv);
+    EXPECT_EQ(inv_transf_as_transf->getTOWGS84Parameters(true), expected_inv);
 
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -677,7 +677,7 @@ TEST(operation, transformation_createPositionVector) {
     ASSERT_EQ(transf->coordinateOperationAccuracies().size(), 1U);
 
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
-    EXPECT_EQ(transf->getTOWGS84Parameters(), expected);
+    EXPECT_EQ(transf->getTOWGS84Parameters(true), expected);
 
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -744,7 +744,7 @@ TEST(operation, transformation_createCoordinateFrameRotation) {
         std::vector<PositionalAccuracyNNPtr>());
     EXPECT_TRUE(transf->validateParameters().empty());
 
-    auto params = transf->getTOWGS84Parameters();
+    auto params = transf->getTOWGS84Parameters(true);
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
     EXPECT_EQ(params, expected);
 

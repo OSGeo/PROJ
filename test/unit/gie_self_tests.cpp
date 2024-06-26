@@ -302,8 +302,8 @@ TEST_F(gieTest, proj_create_crs_to_crs) {
 
 TEST_F(gieTest, proj_create_crs_to_crs_EPSG_4326) {
 
-    auto P =
-        proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4326", "EPSG:32631", nullptr);
+    auto P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4326", "EPSG:32631",
+                                    nullptr);
     ASSERT_TRUE(P != nullptr);
     PJ_COORD a, b;
 

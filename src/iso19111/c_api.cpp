@@ -7761,16 +7761,19 @@ int proj_coordoperation_get_towgs84_values(PJ_CONTEXT *ctx,
         }
         return FALSE;
     }
-    try {
-        auto values = transf->getTOWGS84Parameters();
+
+    const auto values = transf->getTOWGS84Parameters(false);
+    if (!values.empty()) {
         for (int i = 0;
              i < value_count && static_cast<size_t>(i) < values.size(); i++) {
             out_values[i] = values[i];
         }
         return TRUE;
-    } catch (const std::exception &e) {
+    } else {
         if (emit_error_if_incompatible) {
-            proj_log_error(ctx, __FUNCTION__, e.what());
+            proj_log_error(ctx, __FUNCTION__,
+                           "Transformation cannot be formatted as WKT1 TOWGS84 "
+                           "parameters");
         }
         return FALSE;
     }

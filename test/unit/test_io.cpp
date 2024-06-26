@@ -5033,7 +5033,7 @@ TEST(wkt_parse, BOUNDCRS_transformation_from_names) {
     EXPECT_EQ(crs->transformation()->sourceCRS()->nameStr(),
               projcrs->baseCRS()->nameStr());
 
-    auto params = crs->transformation()->getTOWGS84Parameters();
+    auto params = crs->transformation()->getTOWGS84Parameters(true);
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
     ASSERT_EQ(params.size(), expected.size());
     for (int i = 0; i < 7; i++) {
@@ -5082,7 +5082,7 @@ TEST(wkt_parse, BOUNDCRS_transformation_from_codes) {
     EXPECT_EQ(crs->transformation()->sourceCRS()->nameStr(),
               projcrs->baseCRS()->nameStr());
 
-    auto params = crs->transformation()->getTOWGS84Parameters();
+    auto params = crs->transformation()->getTOWGS84Parameters(true);
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
     ASSERT_EQ(params.size(), expected.size());
     for (int i = 0; i < 7; i++) {
@@ -5224,7 +5224,7 @@ TEST(wkt_parse, geogcs_TOWGS84_3terms) {
     ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
     EXPECT_EQ(crs->transformation()->sourceCRS()->nameStr(), "my GEOGCRS");
 
-    auto params = crs->transformation()->getTOWGS84Parameters();
+    auto params = crs->transformation()->getTOWGS84Parameters(true);
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.0};
     ASSERT_EQ(params.size(), expected.size());
     for (int i = 0; i < 7; i++) {
@@ -5270,7 +5270,7 @@ TEST(wkt_parse, projcs_TOWGS84_7terms) {
     ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
     EXPECT_EQ(crs->transformation()->sourceCRS()->nameStr(), "my GEOGCRS");
 
-    auto params = crs->transformation()->getTOWGS84Parameters();
+    auto params = crs->transformation()->getTOWGS84Parameters(true);
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
     ASSERT_EQ(params.size(), expected.size());
     for (int i = 0; i < 7; i++) {
@@ -5313,7 +5313,7 @@ TEST(io, projcs_TOWGS84_7terms_autocorrect) {
     auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
-    auto params = crs->transformation()->getTOWGS84Parameters();
+    auto params = crs->transformation()->getTOWGS84Parameters(true);
     auto expected = std::vector<double>{-106.8686, 52.2978, -103.7239, 0.3366,
                                         -0.457,    1.8422,  -1.2747};
     ASSERT_EQ(params.size(), expected.size());
