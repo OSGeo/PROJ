@@ -8319,6 +8319,43 @@ TEST(wkt_parse, wkt1_oracle) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_oracle_albers_conical_equal_area) {
+    // WKT from mdsys.cs_srs Oracle table:
+    // https://lists.osgeo.org/pipermail/qgis-user/2024-June/054599.html
+    auto wkt = "PROJCS[\"NAD83 / BC Albers\",GEOGCS[\"NAD83\","
+               "DATUM[\"North_American_Datum_1983\","
+               "SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+               "AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],"
+               "PRIMEM[\"Greenwich\",0],"
+               "UNIT[\"Decimal Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Albers_Conical_Equal_Area\"],"
+               "PARAMETER[\"Latitude_Of_Origin\",45],"
+               "PARAMETER[\"Central_Meridian\",-126],"
+               "PARAMETER[\"Standard_Parallel_1\",50],"
+               "PARAMETER[\"Standard_Parallel_2\",58.5],"
+               "PARAMETER[\"False_Easting\",1000000],"
+               "PARAMETER[\"False_Northing\",0],"
+               "UNIT[\"Meter\",1],"
+               "AXIS[\"Easting\",EAST],"
+               "AXIS[\"Northing\",NORTH]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->derivingConversion()->method()->nameStr(),
+              "Albers Equal Area");
+
+    auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+    auto res = crs->identify(factoryAll);
+    ASSERT_GE(res.size(), 1U);
+    EXPECT_EQ(res.front().first->getEPSGCode(), 3005);
+    EXPECT_EQ(res.front().second, 100);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt1_lcc_1sp_without_1sp_suffix) {
     // WKT from Trimble
     auto wkt = "PROJCS[\"TWM-Madison Co LDP\","
