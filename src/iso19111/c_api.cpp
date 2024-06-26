@@ -194,41 +194,53 @@ getDBcontextNoException(PJ_CONTEXT *ctx, const char *function) {
 PJ *pj_obj_create(PJ_CONTEXT *ctx, const BaseObjectNNPtr &objIn) {
     auto coordop = dynamic_cast<const CoordinateOperation *>(objIn.get());
     if (coordop) {
-        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
-        try {
-            auto formatter = PROJStringFormatter::create(
-                PROJStringFormatter::Convention::PROJ_5, std::move(dbContext));
-            auto projString = coordop->exportToPROJString(formatter.get());
-            if (proj_context_is_network_enabled(ctx)) {
-                ctx->defer_grid_opening = true;
-            }
-            auto pj = pj_create_internal(ctx, projString.c_str());
-            ctx->defer_grid_opening = false;
-            if (pj) {
-                pj->iso_obj = objIn;
-                pj->iso_obj_is_coordinate_operation = true;
-                auto sourceEpoch = coordop->sourceCoordinateEpoch();
-                auto targetEpoch = coordop->targetCoordinateEpoch();
-                if (sourceEpoch.has_value()) {
-                    if (!targetEpoch.has_value()) {
-                        pj->hasCoordinateEpoch = true;
-                        pj->coordinateEpoch =
-                            sourceEpoch->coordinateEpoch().convertToUnit(
-                                common::UnitOfMeasure::YEAR);
-                    }
-                } else {
-                    if (targetEpoch.has_value()) {
-                        pj->hasCoordinateEpoch = true;
-                        pj->coordinateEpoch =
-                            targetEpoch->coordinateEpoch().convertToUnit(
-                                common::UnitOfMeasure::YEAR);
-                    }
+        auto singleOp = dynamic_cast<const SingleOperation *>(coordop);
+        bool bTryToExportToProj = true;
+        if (singleOp && singleOp->method()->nameStr() == "unnamed") {
+            // Can happen for example when the GDAL GeoTIFF SRS builder
+            // creates a dummy conversion when building the SRS, before setting
+            // the final map projection. This avoids exportToPROJString() from
+            // throwing an exception.
+            bTryToExportToProj = false;
+        }
+        if (bTryToExportToProj) {
+            auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+            try {
+                auto formatter = PROJStringFormatter::create(
+                    PROJStringFormatter::Convention::PROJ_5,
+                    std::move(dbContext));
+                auto projString = coordop->exportToPROJString(formatter.get());
+                if (proj_context_is_network_enabled(ctx)) {
+                    ctx->defer_grid_opening = true;
                 }
-                return pj;
+                auto pj = pj_create_internal(ctx, projString.c_str());
+                ctx->defer_grid_opening = false;
+                if (pj) {
+                    pj->iso_obj = objIn;
+                    pj->iso_obj_is_coordinate_operation = true;
+                    auto sourceEpoch = coordop->sourceCoordinateEpoch();
+                    auto targetEpoch = coordop->targetCoordinateEpoch();
+                    if (sourceEpoch.has_value()) {
+                        if (!targetEpoch.has_value()) {
+                            pj->hasCoordinateEpoch = true;
+                            pj->coordinateEpoch =
+                                sourceEpoch->coordinateEpoch().convertToUnit(
+                                    common::UnitOfMeasure::YEAR);
+                        }
+                    } else {
+                        if (targetEpoch.has_value()) {
+                            pj->hasCoordinateEpoch = true;
+                            pj->coordinateEpoch =
+                                targetEpoch->coordinateEpoch().convertToUnit(
+                                    common::UnitOfMeasure::YEAR);
+                        }
+                    }
+                    return pj;
+                }
+            } catch (const std::exception &) {
+                // Silence, since we may not always be able to export as a
+                // PROJ string.
             }
-        } catch (const std::exception &) {
-            // Silence, since we may not always be able to export as a
-            // PROJ string.
         }
     }
     auto pj = pj_new();
