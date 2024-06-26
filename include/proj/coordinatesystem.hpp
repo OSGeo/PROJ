@@ -60,10 +60,10 @@ class AxisDirection : public util::CodeList {
     valueOf(const std::string &nameIn) noexcept;
     //! @endcond
 
-    AxisDirection(const AxisDirection&) = delete;
-    AxisDirection& operator=(const AxisDirection&) = delete;
-    AxisDirection(AxisDirection&&) = delete;
-    AxisDirection& operator=(AxisDirection&&) = delete;
+    AxisDirection(const AxisDirection &) = delete;
+    AxisDirection &operator=(const AxisDirection &) = delete;
+    AxisDirection(AxisDirection &&) = delete;
+    AxisDirection &operator=(AxisDirection &&) = delete;
 
     PROJ_DLL static const AxisDirection NORTH;
     PROJ_DLL static const AxisDirection NORTH_NORTH_EAST;

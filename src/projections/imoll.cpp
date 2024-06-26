@@ -233,7 +233,7 @@ static double compute_zone_x_boundary(PJ *P, double lam, double phi) {
     lp2.phi = phi;
     xy1 = imoll_s_forward(lp1, P);
     xy2 = imoll_s_forward(lp2, P);
-    return (xy1.x + xy2.x)/2.;
+    return (xy1.x + xy2.x) / 2.;
 }
 
 PJ *PJ_PROJECTION(imoll) {
