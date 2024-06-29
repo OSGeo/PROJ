@@ -64,9 +64,7 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     -Wmissing-prototypes
   )
   if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 8)
-	  set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
-		-Wextra-semi
-	  )
+        set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS} -Wextra-semi)
   endif()
   set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Weffc++
