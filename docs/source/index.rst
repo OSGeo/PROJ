@@ -31,3 +31,6 @@ PROJ
     You can download the source code for PROJ on the :ref:`download section<download>`
     and find links to prepackaged executables in the
     :ref:`installation section<install>`.
+
+.. meta::
+   :google-site-verification: MhCjgTBKAzLd1y46INE_vmHIiJ_TLHrDc98XC_jYB14
