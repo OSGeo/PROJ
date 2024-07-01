@@ -37,16 +37,5 @@ macro(proj_version)
 ${${PROJECT_NAME}_VERSION_MINOR}.\
 ${${PROJECT_NAME}_VERSION_PATCH}")
 
-  # Set ABI version string used to name binary output
-  # On Windows, ABI version is specified using binary file name suffix.
-  if(WIN32)
-    set(${PROJECT_NAME}_ABI_VERSION
-      "${${PROJECT_NAME}_VERSION_MAJOR}_\
-${${PROJECT_NAME}_VERSION_MINOR}")
-  endif()
-
   print_variable(${PROJECT_NAME}_VERSION)
-  if(WIN32)
-    print_variable(${PROJECT_NAME}_ABI_VERSION)
-  endif()
 endmacro()
