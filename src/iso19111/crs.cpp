@@ -696,11 +696,10 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
 
             const auto takeIntoAccountCandidate =
                 [&](const operation::TransformationNNPtr &transf) {
-                    try {
-                        transf->getTOWGS84Parameters();
-                    } catch (const std::exception &) {
+                    if (transf->getTOWGS84Parameters(false).empty()) {
                         return;
                     }
+
                     candidateCount++;
                     if (candidateBoundCRS == nullptr) {
                         candidateCount = 1;
@@ -1426,13 +1425,12 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
         auto base3DCRS = boundCRS->baseCRS()->promoteTo3D(
             newName, dbContext, verticalAxisIfNotAlreadyPresent);
         auto transf = boundCRS->transformation();
-        try {
-            transf->getTOWGS84Parameters();
+        if (!transf->getTOWGS84Parameters(false).empty()) {
             return BoundCRS::create(
                 createProperties(), base3DCRS,
                 boundCRS->hubCRS()->promoteTo3D(std::string(), dbContext),
                 transf->promoteTo3D(std::string(), dbContext));
-        } catch (const io::FormattingException &) {
+        } else {
             return BoundCRS::create(base3DCRS, boundCRS->hubCRS(),
                                     std::move(transf));
         }
@@ -1481,13 +1479,12 @@ CRSNNPtr CRS::demoteTo2D(const std::string &newName,
     else if (auto boundCRS = dynamic_cast<const BoundCRS *>(this)) {
         auto base2DCRS = boundCRS->baseCRS()->demoteTo2D(newName, dbContext);
         auto transf = boundCRS->transformation();
-        try {
-            transf->getTOWGS84Parameters();
+        if (!transf->getTOWGS84Parameters(false).empty()) {
             return BoundCRS::create(
                 base2DCRS,
                 boundCRS->hubCRS()->demoteTo2D(std::string(), dbContext),
                 transf->demoteTo2D(std::string(), dbContext));
-        } catch (const io::FormattingException &) {
+        } else {
             return BoundCRS::create(base2DCRS, boundCRS->hubCRS(), transf);
         }
     }
@@ -5985,7 +5982,7 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             io::FormattingException::Throw(
                 "Cannot export BoundCRS with non-WGS 84 hub CRS in WKT1");
         }
-        auto params = d->transformation()->getTOWGS84Parameters();
+        auto params = d->transformation()->getTOWGS84Parameters(true);
         if (!formatter->useESRIDialect()) {
             formatter->setTOWGS84Parameters(params);
         }
@@ -6075,7 +6072,7 @@ void BoundCRS::_exportToPROJString(
             formatter->setHDatumExtension(std::string());
         } else {
             if (isTOWGS84Compatible()) {
-                auto params = transformation()->getTOWGS84Parameters();
+                auto params = transformation()->getTOWGS84Parameters(true);
                 formatter->setTOWGS84Parameters(params);
             }
             crs_exportable->_exportToPROJString(formatter);
@@ -6137,7 +6134,7 @@ BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         }
         bool refIsNullTransform = false;
         if (isTOWGS84Compatible()) {
-            auto params = transformation()->getTOWGS84Parameters();
+            auto params = transformation()->getTOWGS84Parameters(true);
             if (params == std::vector<double>{0, 0, 0, 0, 0, 0, 0}) {
                 refIsNullTransform = true;
             }

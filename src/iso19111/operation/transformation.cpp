@@ -184,12 +184,14 @@ Transformation::demoteTo2D(const std::string &,
  * can be used as the value of the WKT1 TOWGS84 parameter or
  * PROJ +towgs84 parameter.
  *
+ * @param canThrowException if true, an exception is thrown if the method fails,
+ * otherwise an empty vector is returned in case of failure.
  * @return a vector of 7 values if valid, otherwise a io::FormattingException
  * is thrown.
  * @throws io::FormattingException
  */
-std::vector<double>
-Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
+std::vector<double> Transformation::getTOWGS84Parameters(
+    bool canThrowException) const // throw(io::FormattingException)
 {
     // GDAL WKT1 assumes EPSG:9606 / Position Vector convention
 
@@ -297,6 +299,8 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
              (foundRotX && foundRotY && foundRotZ && foundScale))) {
             return params;
         } else {
+            if (!canThrowException)
+                return {};
             throw io::FormattingException(
                 "Missing required parameter values in transformation");
         }
@@ -321,6 +325,8 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
     }
 #endif
 
+    if (!canThrowException)
+        return {};
     throw io::FormattingException(
         "Transformation cannot be formatted as WKT1 TOWGS84 parameters");
 }

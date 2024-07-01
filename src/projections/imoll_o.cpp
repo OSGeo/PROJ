@@ -237,8 +237,8 @@ pj_imoll_o_compute_zone_offset(struct pj_imoll_o_ns::pj_imoll_o_data *Q,
     return (xy2.x + Q->pj[zone2 - 1]->x0) - (xy1.x + Q->pj[zone1 - 1]->x0);
 }
 
-static double
-pj_imoll_o_compute_zone_x_boundary(PJ *P, double lam, double phi) {
+static double pj_imoll_o_compute_zone_x_boundary(PJ *P, double lam,
+                                                 double phi) {
     PJ_LP lp1, lp2;
     PJ_XY xy1, xy2;
 
@@ -248,7 +248,7 @@ pj_imoll_o_compute_zone_x_boundary(PJ *P, double lam, double phi) {
     lp2.phi = phi;
     xy1 = imoll_o_s_forward(lp1, P);
     xy2 = imoll_o_s_forward(lp2, P);
-    return (xy1.x + xy2.x)/2.;
+    return (xy1.x + xy2.x) / 2.;
 }
 
 PJ *PJ_PROJECTION(imoll_o) {
