@@ -1998,6 +1998,23 @@ TEST(crs, geodeticcrs_identify_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
         EXPECT_EQ(res.front().second, 70.0);
     }
+    {
+        // Test that IDNK authority doesn't popup in results
+        auto obj = PROJStringParser()
+                       .attachDatabaseContext(dbContext)
+                       .createFromPROJString(
+                           "+proj=longlat +ellps=GRS80 +no_defs +type=crs");
+        auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        EXPECT_GE(res.size(), 1U);
+        for (const auto &match : res) {
+            const auto &ids = match.first->identifiers();
+            ASSERT_TRUE(!ids.empty());
+            EXPECT_TRUE(*(ids[0]->codeSpace()) != "IDNK");
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -3467,6 +3484,23 @@ TEST(crs, projectedCRS_identify_db) {
         EXPECT_EQ(*(res.front().first->identifiers()[0]->codeSpace()),
                   "IAU_2015");
         EXPECT_EQ(res.front().second, 90);
+    }
+    {
+        // Test that IDNK authority doesn't popup in results
+        auto obj = PROJStringParser()
+                       .attachDatabaseContext(dbContext)
+                       .createFromPROJString("+proj=utm +zone=31 +ellps=GRS80 "
+                                             "+units=m +no_defs +type=crs");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        EXPECT_GE(res.size(), 1U);
+        for (const auto &match : res) {
+            const auto &ids = match.first->identifiers();
+            ASSERT_TRUE(!ids.empty());
+            EXPECT_TRUE(*(ids[0]->codeSpace()) != "IDNK");
+        }
     }
 }
 

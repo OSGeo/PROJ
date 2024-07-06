@@ -31,7 +31,7 @@ FOR EACH ROW BEGIN
     -- check that the auth_name of all objects in object_view is recorded in builtin_authorities
     SELECT RAISE(ABORT, 'One or several authorities referenced in object_view are missing in builtin_authorities')
         WHERE EXISTS (
-            SELECT DISTINCT o.auth_name FROM object_view o WHERE NOT EXISTS (
+            SELECT DISTINCT o.auth_name FROM object_view o WHERE o.auth_name != 'IDNK' AND NOT EXISTS (
                 SELECT 1 FROM builtin_authorities b WHERE o.auth_name = b.auth_name)
         );
 

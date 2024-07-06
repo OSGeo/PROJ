@@ -4008,6 +4008,9 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
         EXPECT_NE(list[0]->auth_name, nullptr);
         EXPECT_NE(list[0]->code, nullptr);
         EXPECT_NE(list[0]->name, nullptr);
+        for (int i = 0; list[i] != nullptr; i++) {
+            EXPECT_TRUE(std::string(list[i]->auth_name) != "IDNK");
+        }
         proj_crs_info_list_destroy(list);
     }
 

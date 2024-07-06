@@ -2927,7 +2927,8 @@ DatabaseContext::create(const std::string &databasePath,
 /** \brief Return the list of authorities used in the database.
  */
 std::set<std::string> DatabaseContext::getAuthorities() const {
-    auto res = d->run("SELECT auth_name FROM authority_list");
+    auto res = d->run("SELECT auth_name FROM authority_list "
+                      "WHERE auth_name != 'IDNK'");
     std::set<std::string> list;
     for (const auto &row : res) {
         list.insert(row[0]);
@@ -8399,10 +8400,17 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
     sql += getSqlArea("geodetic_crs");
     sql += getJoinCelestialBody("c");
     ListOfParams params;
-    if (d->hasAuthorityRestriction()) {
-        sql += "WHERE c.auth_name = ? ";
-        params.emplace_back(d->authority());
-    }
+
+    const auto addAuthorityRestriction = [this, &params, &sql]() {
+        if (d->hasAuthorityRestriction()) {
+            sql += "WHERE c.auth_name = ? ";
+            params.emplace_back(d->authority());
+        } else {
+            sql += "WHERE c.auth_name != 'IDNK' ";
+        }
+    };
+    addAuthorityRestriction();
+
     sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'projected', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
@@ -8419,30 +8427,21 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
            "AND gcrs.code = c.geodetic_crs_code ";
     sql += getSqlArea("projected_crs");
     sql += getJoinCelestialBody("gcrs");
-    if (d->hasAuthorityRestriction()) {
-        sql += "WHERE c.auth_name = ? ";
-        params.emplace_back(d->authority());
-    }
+    addAuthorityRestriction();
     // FIXME: we can't handle non-EARTH vertical CRS for now
     sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'vertical', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
            "a.description, NULL, 'Earth' FROM vertical_crs c ";
     sql += getSqlArea("vertical_crs");
-    if (d->hasAuthorityRestriction()) {
-        sql += "WHERE c.auth_name = ? ";
-        params.emplace_back(d->authority());
-    }
+    addAuthorityRestriction();
     // FIXME: we can't handle non-EARTH compound CRS for now
     sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'compound', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
            "a.description, NULL, 'Earth' FROM compound_crs c ";
     sql += getSqlArea("compound_crs");
-    if (d->hasAuthorityRestriction()) {
-        sql += "WHERE c.auth_name = ? ";
-        params.emplace_back(d->authority());
-    }
+    addAuthorityRestriction();
     sql += ") r ORDER BY auth_name, code";
     auto sqlRes = d->run(sql, params);
     std::list<AuthorityFactory::CRSInfo> res;
@@ -9412,6 +9411,8 @@ AuthorityFactory::createGeodeticCRSFromEllipsoid(
     if (d->hasAuthorityRestriction()) {
         sql += " AND geodetic_crs.auth_name = ?";
         params.emplace_back(d->authority());
+    } else {
+        sql += " AND geodetic_crs.auth_name != 'IDNK'";
     }
     if (!geodetic_crs_type.empty()) {
         sql += " AND geodetic_crs.type = ?";
@@ -9537,6 +9538,8 @@ AuthorityFactory::createProjectedCRSFromExisting(
     if (d->hasAuthorityRestriction()) {
         sql += " AND projected_crs.auth_name = ?";
         params.emplace_back(d->authority());
+    } else {
+        sql += " AND projected_crs.auth_name!= 'IDNK'";
     }
 
     int iParam = 0;
@@ -9768,6 +9771,8 @@ AuthorityFactory::createProjectedCRSFromExisting(
     if (d->hasAuthorityRestriction()) {
         sql += " AND auth_name = ?";
         params.emplace_back(d->authority());
+    } else {
+        sql += " AND auth_name != 'IDNK'";
     }
 
     auto sqlRes2 = d->run(sql, params);
