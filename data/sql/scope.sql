@@ -27,7 +27,7 @@ INSERT INTO "scope" VALUES('EPSG','1047','Remote sensing.',0);
 INSERT INTO "scope" VALUES('EPSG','1048','Transformation of coordinates at 0.25m level of accuracy.',0);
 INSERT INTO "scope" VALUES('EPSG','1049','Transformation of coordinates at 9m level of accuracy.',0);
 INSERT INTO "scope" VALUES('EPSG','1050','Transformation of coordinates at 10m level of accuracy.',0);
-INSERT INTO "scope" VALUES('EPSG','1051','Approximation of horizontal component of official 3D RDNAPTRANS(TM) transformation, which since 1st October 2000 has defined Amersfoort geodetic datum.',0);
+INSERT INTO "scope" VALUES('EPSG','1051','Horizontal component of official 3D RDNAPTRANS(TM)2018 transformation. Accuracy by definition exact.',0);
 INSERT INTO "scope" VALUES('EPSG','1052','Basin-wide mapping and analysis.',0);
 INSERT INTO "scope" VALUES('EPSG','1053','Boundary demarcation.',0);
 INSERT INTO "scope" VALUES('EPSG','1054','Cadastre, engineering survey.',0);
@@ -62,7 +62,7 @@ INSERT INTO "scope" VALUES('EPSG','1082','Approximate transformation of seismic 
 INSERT INTO "scope" VALUES('EPSG','1083','Approximation (to better than 2cm) using NTv2 method of results of FINELTRA programme concatenated with LV-95 parameters.',0);
 INSERT INTO "scope" VALUES('EPSG','1084','Parameter values from CH1903+ to ETRS89 (tfm code 1647) and are used as an approximation from CH1903 with a lesser accuracy of 1.5m which equates to the magnitude of distortions in the CH1903 network.',0);
 INSERT INTO "scope" VALUES('EPSG','1085','Approximation using NTv2 method of results of FINELTRA programme to an accuracy of 0.01m except at boundary of the Geneva and Vaud cantons, in city of Geneva and in the main valleys of Valais canton where differences are up to 20 cm.',0);
-INSERT INTO "scope" VALUES('EPSG','1086','Approximation of horizontal component of official 3D RDNAPTRANS(TM) transformation, which since 1st October 2000 has defined Amersfoort geodetic datum.',0);
+INSERT INTO "scope" VALUES('EPSG','1086','Approximation of horizontal component of official 3D RDNAPTRANS(TM)2008 transformation.',0);
 INSERT INTO "scope" VALUES('EPSG','1087','Approximation for pan-European small-scale mapping in extended ETRS89.',0);
 INSERT INTO "scope" VALUES('EPSG','1088','Approximation for pan-European statistical analysis in extended ETRS89.',0);
 INSERT INTO "scope" VALUES('EPSG','1089','Basis for topographic mapping in Republic of Ireland between 1965 and 1975; for scientific purposes only in Northern Ireland.',0);
