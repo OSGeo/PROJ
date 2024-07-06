@@ -33,6 +33,7 @@ set(SQL_FILES
   "${SQL_DIR}/supersession.sql"
   "${SQL_DIR}/deprecation.sql"
   "${SQL_DIR}/esri.sql"
+  "${SQL_DIR}/idnk.sql"
   "${SQL_DIR}/ignf.sql"
   "${SQL_DIR}/nkg.sql"
   "${SQL_DIR}/iau.sql"
