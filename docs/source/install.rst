@@ -343,6 +343,13 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
     Path to an ``sqlite3`` or ``sqlite3.exe`` executable.
 
+    .. note::
+
+        When cross-compiling, the executable pointed by EXE_SQLITE3 must be
+        of the same architecture as the host, *not* of the architecture you
+        build for. That sqlite3 binary is used to build the :file:`proj.db`
+        SQLite3 database from source .sql files.
+
 .. deprecated:: 9.4.0
     ``SQLITE3_INCLUDE_DIR`` and ``SQLITE3_LIBRARY`` should be replaced with
     ``SQLite3_INCLUDE_DIR`` and ``SQLite3_LIBRARY``, respectively.
