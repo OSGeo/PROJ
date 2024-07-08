@@ -600,18 +600,18 @@ INSERT INTO "extent" VALUES('EPSG','1620','Tunisia - south of 34°39''N','Tunisi
 INSERT INTO "extent" VALUES('EPSG','1621','Brazil - Corrego Alegre - west of 42°W','Brazil - NE coastal area between 45°W and 42°W.',-3.9,-1.5,-45.0,-42.0,1);
 INSERT INTO "extent" VALUES('EPSG','1622','Brazil - Corrego Alegre - east of 42°W','Brazil - NE coastal area between 42°W and 40°W.',-4.0,-2.7,-42.0,-40.0,1);
 INSERT INTO "extent" VALUES('EPSG','1623','Asia - Middle East - Lebanon and Syria onshore','Lebanon - onshore. Syrian Arab Republic - onshore.',32.31,37.3,35.04,42.38,0);
-INSERT INTO "extent" VALUES('EPSG','1624','Germany - West Germany - west of 7.5°E','Germany - former West Germany onshore west of 7°30''E - states of Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland.',49.11,53.81,5.86,7.5,0);
+INSERT INTO "extent" VALUES('EPSG','1624','Germany - West Germany - west of 7.5°E','Germany - former West Germany onshore west of 7°30''E - states of Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland.',49.11,53.81,5.86,7.51,0);
 INSERT INTO "extent" VALUES('EPSG','1625','Germany - West-Germany - 7.5°E to 10.5°E','Germany - former West Germany onshore between 7°30''E and 10°30''E - states of Baden-Wurtemberg, Bayern, Bremen, Hamberg, Hessen, Niedersachsen, Nordrhein-Westfalen, Rhineland-Pfalz, Schleswig-Holstein.',47.27,55.09,7.5,10.51,0);
 INSERT INTO "extent" VALUES('EPSG','1626','Germany - West Germany - 10.5°E to 13.5°E','Germany - former West Germany onshore between 10°30''E and 13°30''E - states of Bayern, Berlin, Niedersachsen, Schleswig-Holstein.',47.39,54.59,10.5,13.51,0);
 INSERT INTO "extent" VALUES('EPSG','1627','Germany - West Germany - east of 13.5°E','Germany - former West Germany onshore east of 13°30''E - state of Bayern.',48.51,48.98,13.5,13.84,0);
 INSERT INTO "extent" VALUES('EPSG','1628','Germany - west of 4.5°E','Germany - onshore - west of 4°30''E.',NULL,NULL,NULL,NULL,1);
 INSERT INTO "extent" VALUES('EPSG','1629','UK - offshore - North Sea','United Kingdom (UK) - offshore - North Sea.',51.03,62.03,-5.05,3.4,0);
-INSERT INTO "extent" VALUES('EPSG','1630','Netherlands - offshore','Netherlands - offshore North Sea.',51.45,55.77,2.53,6.41,0);
+INSERT INTO "extent" VALUES('EPSG','1630','Netherlands - offshore','Netherlands - offshore North Sea.',51.44,55.77,2.53,6.37,0);
 INSERT INTO "extent" VALUES('EPSG','1631','Europe - 18°W to 12°W and ED50 by country','Europe - between 18°W and 12°W - Ireland offshore.',48.43,56.57,-16.1,-12.0,0);
 INSERT INTO "extent" VALUES('EPSG','1632','Europe - 12°W to 6°W and ED50 by country','Europe - between 12°W and 6°W - Faroe Islands - onshore; Spain - mainland onshore; Ireland offshore.',36.13,62.41,-12.0,-6.0,0);
 INSERT INTO "extent" VALUES('EPSG','1633','Europe - 6°W to 0°W and ED50 by country','Europe - between 6°W and 0°W - Channel Islands (Jersey, Guernsey); France offshore; Gibraltar; Ireland offshore; Norway including Svalbard - offshore; Spain - onshore; United Kingdom - UKCS offshore.',35.26,80.49,-6.0,0.01,0);
-INSERT INTO "extent" VALUES('EPSG','1634','Europe - 0°E to 6°E and ED50 by country','Europe - between 0°E and 6°E - Andorra; Denmark (North Sea); France - offshore; Germany - offshore; Netherlands - offshore; Norway including Svalbard - onshore and offshore; Spain - onshore (mainland and Balearic Islands); United Kingdom - offshore UKCS.',38.56,82.45,0.0,6.01,0);
-INSERT INTO "extent" VALUES('EPSG','1635','Europe - 6°E to 12°E and ED50 by country','Europe - between 6°E and 12°E - Denmark - onshore and offshore; France - offshore; Germany offshore; Italy - onshore and offshore; Netherlands offshore; Norway including Svalbard - onshore and offshore.',36.53,84.33,5.99,12.01,0);
+INSERT INTO "extent" VALUES('EPSG','1634','Europe - 0°E to 6°E and ED50 by country','Europe - between 0°E and 6°E - Andorra; Denmark (North Sea); France - offshore; Germany - offshore; Netherlands - offshore; Norway including Svalbard - onshore and offshore; Spain - onshore (mainland and Balearic Islands); United Kingdom - offshore UKCS.',38.56,82.45,0.0,6.0,0);
+INSERT INTO "extent" VALUES('EPSG','1635','Europe - 6°E to 12°E and ED50 by country','Europe - between 6°E and 12°E - Denmark - onshore and offshore; France - offshore; Germany offshore; Italy - onshore and offshore; Netherlands offshore; Norway including Svalbard - onshore and offshore.',36.53,84.33,6.0,12.0,0);
 INSERT INTO "extent" VALUES('EPSG','1636','Europe - 12°E to 18°E and ED50 by country','Europe - between 12°E and 18°E onshore and offshore - Denmark (including Bornholm); Italy including San Marino and Vatican City State; Malta; Norway including Svalbard.',34.49,84.42,12.0,18.01,0);
 INSERT INTO "extent" VALUES('EPSG','1637','Europe - 18°E to 24°E and ED50 by country','Europe - between 18°E and 24°E - Greece - offshore; Italy - onshore and offshore; Norway including Svalbard - onshore and offshore.',33.59,84.54,17.99,24.01,0);
 INSERT INTO "extent" VALUES('EPSG','1638','Europe - 24°E to 30°E and ED50 by country','Europe - between 24°E and 30°E - Greece - offshore; Norway including Svalbard - onshore and offshore; Türkiye (Turkey) - onshore and offshore. Egypt - Western Desert.',25.71,84.73,24.0,30.01,0);
@@ -1306,7 +1306,7 @@ INSERT INTO "extent" VALUES('EPSG','2326','Germany - West Germany all states','G
 INSERT INTO "extent" VALUES('EPSG','2327','Syria - Al Whaleed area','Syria - Al Whaleed area',35.33,35.9,39.15,40.41,0);
 INSERT INTO "extent" VALUES('EPSG','2328','Syria - Shaddadeh area','Syria - Shaddadeh area (36°N, 41°E)',35.79,36.5,40.5,41.39,0);
 INSERT INTO "extent" VALUES('EPSG','2329','Syria - Deir area','Syria - Deir area (35°22''N, 40°06''E)',34.49,35.9,39.3,40.81,0);
-INSERT INTO "extent" VALUES('EPSG','2330','Europe - North Sea','Denmark - North Sea; Germany - North Sea; Netherlands - offshore; Norway - North Sea south of 62°N; United Kingdom (UKCS) - North Sea south of 62°N.',51.03,62.01,-5.05,10.86,0);
+INSERT INTO "extent" VALUES('EPSG','2330','Europe - North Sea','Denmark - North Sea; Germany - North Sea; Netherlands - offshore; Norway - North Sea south of 62°N; United Kingdom (UKCS) - North Sea south of 62°N.',51.03,62.0,-5.05,10.86,0);
 INSERT INTO "extent" VALUES('EPSG','2331','Norway - offshore north of 65°N','Norway - offshore north of 65°N.',65.0,72.0,-0.5,32.02,1);
 INSERT INTO "extent" VALUES('EPSG','2332','Norway - offshore north of 65°N; Svalbard','Norway - offshore north of 65°N. Also Svalbard.',65.0,84.73,-3.35,38.01,0);
 INSERT INTO "extent" VALUES('EPSG','2333','Norway - offshore 62°N to 65°N and west of 5°E','Norway - offshore between 62°N and 65°N and west of 5°E.',62.0,65.01,-0.49,5.01,0);
@@ -1517,7 +1517,7 @@ INSERT INTO "extent" VALUES('EPSG','2537','World - N hemisphere - 3-degree CM 03
 INSERT INTO "extent" VALUES('EPSG','2538','World - N hemisphere - 3-degree CM 039°E','Between 37°30''E and 40°30''E, northern hemisphere.',0.0,84.0,37.5,40.5,0);
 INSERT INTO "extent" VALUES('EPSG','2539','World - N hemisphere - 3-degree CM 042°E','Between 40°30''E and 43°30''E, northern hemisphere.',0.0,84.0,40.5,43.5,0);
 INSERT INTO "extent" VALUES('EPSG','2540','World - N hemisphere - 3-degree CM 045°E','Between 43°30''E and 46°30''E, northern hemisphere.',0.0,84.0,43.5,46.5,0);
-INSERT INTO "extent" VALUES('EPSG','2541','Germany - West Germany N','Germany - states of former West Germany - onshore north of 52°20''N.',52.33,55.09,6.58,11.59,0);
+INSERT INTO "extent" VALUES('EPSG','2541','Germany - West Germany N','Germany - states of former West Germany - onshore north of 52°20''N.',52.33,55.09,6.56,11.59,0);
 INSERT INTO "extent" VALUES('EPSG','2542','Germany - West Germany C','Germany - states of former West Germany - between 50°20''N and 52°20''N.',50.33,52.34,5.86,12.03,0);
 INSERT INTO "extent" VALUES('EPSG','2543','Germany - West Germany S','Germany - states of former West Germany - south of 50°20''N.',47.27,50.34,6.11,13.84,0);
 INSERT INTO "extent" VALUES('EPSG','2544','Germany - Thuringen','Germany - Thuringen.',50.2,51.64,9.92,12.56,0);
@@ -1836,7 +1836,7 @@ INSERT INTO "extent" VALUES('EPSG','2856','Europe - 24°W to 18°W','Europe - be
 INSERT INTO "extent" VALUES('EPSG','2857','Europe - 18°W to 12°W','Europe - between 18°W and 12°W.',27.6,66.55,-18.0,-12.0,1);
 INSERT INTO "extent" VALUES('EPSG','2858','Europe - 12°W to 6°W','Europe - between 12°W and 6°W.',36.0,62.33,-12.0,-6.0,1);
 INSERT INTO "extent" VALUES('EPSG','2859','Europe - 6°W to 0°W','Europe - between 6°W and 0°W.',34.75,62.33,-6.0,0.0,1);
-INSERT INTO "extent" VALUES('EPSG','2860','Germany - west of 6°E','Germany - onshore and offshore west of 6°E.',50.97,55.92,3.34,6.0,0);
+INSERT INTO "extent" VALUES('EPSG','2860','Germany - west of 6°E','Germany - onshore and offshore west of 6°E.',50.97,55.92,3.34,6.01,0);
 INSERT INTO "extent" VALUES('EPSG','2861','Germany - 6°E to 12°E','Germany - onshore and offshore between 6°E and 12°E - Baden-Wurtemberg, Bayern, Bremen, Hamburg, Hessen, Mecklenburg-Vorpommern, Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland, Sachsen, Sachsen-Anhalt, Schleswig-Holstein, Thuringen.',47.27,55.47,6.0,12.01,0);
 INSERT INTO "extent" VALUES('EPSG','2862','Germany - east of 12°E','Germany - onshore and offshore east of 12°E, together with that part of Brandenburg state west of 12°E - Bayern, Berlin, Brandenburg (all state), Mecklenburg-Vorpommern, Sachsen, Sachsen-Anhalt, Thuringen.',47.46,55.03,11.57,15.04,0);
 INSERT INTO "extent" VALUES('EPSG','2863','Europe - 18°E to 24°E','Europe - between 18°E and 24°E.',34.8,75.0,18.0,24.0,1);
@@ -1855,7 +1855,7 @@ INSERT INTO "extent" VALUES('EPSG','2875','Portugal - Azores C - S Jorge onshore
 INSERT INTO "extent" VALUES('EPSG','2876','Asia - Middle East - Iraq-Kuwait boundary','Iraq - Kuwait boundary.',29.06,30.32,46.36,48.61,0);
 INSERT INTO "extent" VALUES('EPSG','2877','Slovenia - Slovenska Bistrica','Slovenia - Slovenska Bistrica with the Dravinja River Basin, area of Boc and parts of the Haloze and the Kozjansko region.',46.14,46.46,15.31,16.0,0);
 INSERT INTO "extent" VALUES('EPSG','2878','Slovenia - Slovenske Gorice','Slovenia - Slovenske Gorice (the Slovene Humpback) with the broad region of Ormoz.',46.29,46.76,15.9,16.3,0);
-INSERT INTO "extent" VALUES('EPSG','2879','Germany - offshore North Sea','Germany - offshore North Sea.',53.6,55.92,3.34,8.88,0);
+INSERT INTO "extent" VALUES('EPSG','2879','Germany - offshore North Sea','Germany - offshore North Sea.',53.58,55.92,3.34,8.88,0);
 INSERT INTO "extent" VALUES('EPSG','2880','Antarctica - Australian sector north of 80°S','Antarctica - north of 80°S and between 45°E and 136°E and between 142°E and 160°E - Australian sector north of 80°S.',-80.0,-60.0,45.0,160.0,0);
 INSERT INTO "extent" VALUES('EPSG','2881','Europe - LCC & LAEA','Europe - European Union (EU) countries and candidates. Europe - onshore and offshore: Albania; Andorra; Austria; Belgium; Bosnia and Herzegovina; Bulgaria; Croatia; Cyprus; Czechia; Denmark; Estonia; Faroe Islands; Finland; France; Germany; Gibraltar; Greece; Hungary; Iceland; Ireland; Italy; Kosovo; Latvia; Liechtenstein; Lithuania; Luxembourg; Malta; Monaco; Montenegro; Netherlands; North Macedonia; Norway including Svalbard and Jan Mayen; Poland; Portugal including Madeira and Azores; Romania; San Marino; Serbia; Slovakia; Slovenia; Spain including Canary Islands; Sweden; Switzerland; Türkiye (Turkey); United Kingdom (UK) including Channel Islands and Isle of Man; Vatican City State.',24.6,84.73,-35.58,44.83,0);
 INSERT INTO "extent" VALUES('EPSG','2882','Italy - Adriatic - North Ancona','Italy - offshore - Adriatic Sea - North Ancona.',43.62,45.73,12.22,13.96,0);
@@ -2679,7 +2679,7 @@ INSERT INTO "extent" VALUES('EPSG','3699','Brazil - Cumuruxatiba, Jequitinhonha 
 INSERT INTO "extent" VALUES('EPSG','3700','Brazil - Santos and Pelotas','Brazil - offshore - Santos and Pelotas basins.',-35.71,-22.66,-53.38,-40.2,0);
 INSERT INTO "extent" VALUES('EPSG','3701','Iraq - 34.6°N to 36.2°N, west of 42.8°E (map 5)','Iraq - between UTM 3830000mN and 4010000mN (approximately 34°35''N and 36°13''N) and west of UTM 300000mE (approximately 42°48''E).',34.57,36.22,41.09,42.82,0);
 INSERT INTO "extent" VALUES('EPSG','3702','Iraq - SE','Iraq - onshore southeast.',29.06,32.51,43.98,48.61,0);
-INSERT INTO "extent" VALUES('EPSG','3703','Germany - Lower Saxony west of 7.5°E','Germany - Niedersachsen onshore west of 7°30''E.',52.23,53.81,6.58,7.5,0);
+INSERT INTO "extent" VALUES('EPSG','3703','Germany - Lower Saxony west of 7.5°E','Germany - Niedersachsen onshore west of 7°30''E.',52.23,53.81,6.56,7.51,0);
 INSERT INTO "extent" VALUES('EPSG','3704','Iraq - 31.4°N to 33°N, east of 46.1°E (map 17)','Iraq - between UTM 3470000mN and 3650000mN (approximately 31°21''N and 32°58''N) and east of UTM 600000mE (approximately 46°04''E).',31.33,32.99,46.05,47.87,0);
 INSERT INTO "extent" VALUES('EPSG','3705','Germany - Lower Saxony east of 10.5°E','Germany - Niedersachsen east of 10°30''E.',51.55,53.38,10.5,11.59,0);
 INSERT INTO "extent" VALUES('EPSG','3706','Iraq - 29.7 to 31.4°N, 42°E to 43.9°E (map 19)','Iraq - between UTM 3290000mN and 3470000mN (approximately 29°47''N and 31°21''N) and between 42°E and UTM 400000mE (approximately 43°56''E).',29.75,31.37,42.0,43.97,0);
@@ -2868,7 +2868,7 @@ INSERT INTO "extent" VALUES('EPSG','3888','Papua New Guinea - 150°E to 156°E',
 INSERT INTO "extent" VALUES('EPSG','3889','Europe - Fehmarnbelt outer','Fehmarnbelt area of Denmark and Germany.',54.33,54.83,10.66,12.01,0);
 INSERT INTO "extent" VALUES('EPSG','3890','Europe - Fehmarnbelt inner','Fehmarnbelt area of Denmark and Germany.',54.42,54.76,11.17,11.51,0);
 INSERT INTO "extent" VALUES('EPSG','3891','Canada - 60°W to 54°W and NAD27','Canada between 60°W and 54°W, onshore and offshore - Newfoundland and Labrador; Quebec.',40.57,68.93,-60.0,-54.0,0);
-INSERT INTO "extent" VALUES('EPSG','3892','Germany - offshore North Sea west of 4.5°E','Germany - offshore North Sea west of 4°30''E.',55.24,55.92,3.34,4.5,0);
+INSERT INTO "extent" VALUES('EPSG','3892','Germany - offshore North Sea west of 4.5°E','Germany - offshore North Sea west of 4°30''E.',55.24,55.92,3.34,4.51,0);
 INSERT INTO "extent" VALUES('EPSG','3893','UK - Wytch Farm','United Kingdom (UK) - Wytch Farm area - onshore and offshore.',50.53,50.8,-2.2,-1.68,0);
 INSERT INTO "extent" VALUES('EPSG','3894','New Zealand - Chatham Island onshore','New Zealand - Chatham Island - onshore.',-44.18,-43.67,-176.92,-176.2,0);
 INSERT INTO "extent" VALUES('EPSG','3895','Ukraine - west of 24°E','Ukraine - west of 24°E.',47.95,51.66,22.15,24.0,0);
