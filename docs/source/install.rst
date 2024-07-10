@@ -287,6 +287,26 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
         or by specifying ``--config Release`` with CMake
         multi-configuration build tools (see example below).
 
+.. option:: PROJ_OUTPUT_NAME
+
+    .. versionadded:: 9.5
+
+    Sets the name of the PROJ library (excluding extension).
+    This generally defaults to "proj", except on Windows, where this defaults to
+    "proj_${PROJ_MAJOR_VERSION}" if APPEND_SOVERSION is OFF.
+
+    .. note::
+        For PROJ >= 6.0 and up to 9.4.1, on Windows, this was hardcoded to
+        "proj_${PROJ_MAJOR_VERSION}_${PROJ_MINOR_VERSION}".
+
+.. option:: APPEND_SOVERSION=OFF
+
+    .. versionadded:: 9.5
+
+    This variable can be set to ON for MinGW builds where BUILD_SHARED_LIBS=ON,
+    to add a "-${PROJ_SOVERSION}" suffix to the PROJ shared library name.
+    When this variable is set, PROJ_OUTPUT_NAME defaults to "proj"
+
 .. option:: CMAKE_C_COMPILER
 
     C compiler. Ignored for some generators, such as Visual Studio.
