@@ -536,6 +536,6 @@ endif()
 ##############################################
 # Core configuration summary
 ##############################################
-print_variable(PROJ_CORE_TARGET_OUTPUT_NAME)
+print_variable(PROJ_OUTPUT_NAME)
 print_variable(BUILD_SHARED_LIBS)
 print_variable(PROJ_LIBRARIES)
