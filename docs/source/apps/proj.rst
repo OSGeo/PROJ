@@ -127,7 +127,8 @@ The following control parameters can appear in any order
     in a forward projection mode the cartesian output values are multiplied by
     *mult* otherwise the input cartesian values are divided by *mult* before inverse
     projection. If the first two characters of *mult* are 1/ or 1: then the
-    reciprocal value of *mult* is employed.
+    reciprocal value of *mult* is employed. ``-m 1/mult`` is the same as
+    ``+to_meter=mult``.
 
 .. option:: -f <format>
 
