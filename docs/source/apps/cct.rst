@@ -76,7 +76,7 @@ The following control parameters can appear in any order:
 
 .. option:: -I
 
-    Do the inverse transformation.
+    Do the inverse transformation. (``+`` style option: ``+inv``).
 
 .. option:: -o <output file name>, --output=<output file name>
 
