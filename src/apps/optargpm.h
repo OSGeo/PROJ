@@ -75,7 +75,7 @@ handle open/close of a sequence of input files:
 
 enum OPTARGS_FILE_MODE:
         indicates whether to read operands in text (0) or binary (1) mode
-opt_input_loop (o, mode):
+opt_input_loop (o, mode, &gotError):
         When used as condition in a while loop, traverses all operands,
         giving the impression of reading just a single input file.
 
@@ -129,7 +129,8 @@ to "o" internally
     P = proj_create_argv (0, o->pargc, o->pargv);
 
     // Loop over all lines of all input files
-    while (opt_input_loop (o, optargs_file_format_text)) {
+    bool gotError = false;
+    while (opt_input_loop (o, optargs_file_format_text, &gotError)) {
         char buf[1000];
         int ret = fgets (buf, 1000, o->input);
         if (opt_eof (o)) {
@@ -186,6 +187,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-09-10
 #include <ctype.h>
 #include <errno.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -201,7 +203,7 @@ enum OPTARGS_FILE_FORMAT {
 char *opt_filename(OPTARGS *opt);
 static int opt_eof(OPTARGS *opt);
 int opt_record(OPTARGS *opt);
-int opt_input_loop(OPTARGS *opt, int binary);
+int opt_input_loop(OPTARGS *opt, int binary, bool *gotError);
 static int opt_is_flag(OPTARGS *opt, int ordinal);
 static int opt_raise_flag(OPTARGS *opt, int ordinal);
 static int opt_ordinal(OPTARGS *opt, const char *option);
@@ -261,7 +263,9 @@ int opt_record(OPTARGS *opt) {
 }
 
 /* handle closing/opening of a "stream-of-streams" */
-int opt_input_loop(OPTARGS *opt, int binary) {
+int opt_input_loop(OPTARGS *opt, int binary, bool *gotError) {
+    if (gotError)
+        *gotError = false;
     if (nullptr == opt)
         return 0;
 
@@ -291,12 +295,16 @@ int opt_input_loop(OPTARGS *opt, int binary) {
         return 0;
 
     /* otherwise, open next input file */
-    opt->input = fopen(opt->fargv[opt->input_index++], binary ? "rb" : "rt");
-    if (nullptr != opt->input)
-        return 1;
+    const char *filename = opt->fargv[opt->input_index++];
+    opt->input = fopen(filename, binary ? "rb" : "rt");
+    if (nullptr == opt->input) {
+        fprintf(stderr, "Cannot open file %s\n", filename);
+        if (gotError)
+            *gotError = true;
+        return 0;
+    }
 
-    /* ignore non-existing files - go on! */
-    return opt_input_loop(opt, binary);
+    return 1;
 }
 
 /* return true if option with given ordinal is a flag, false if undefined or

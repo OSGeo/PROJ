@@ -151,3 +151,7 @@ tests:
   args: +proj=noop input_file1_with_utf8_bom.txt
   # no BOM with output
   out: "       0.0000         3.0000        0.0000           inf"
+- comment: Test cct with non existing input file
+  args: +proj=noop i_do_not_exist.txt
+  stderr: "Cannot open file i_do_not_exist.txt"
+  exitcode: 1
