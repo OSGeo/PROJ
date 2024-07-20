@@ -12250,7 +12250,13 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     if (kv.key == "over") {
                         hasOver = true;
                     } else if (!((kv.key == "type" && kv.value == "crs") ||
-                                 kv.key == "wktext" || kv.key == "no_defs")) {
+                                 kv.key == "wktext" || kv.key == "no_defs" ||
+                                 kv.key == "title" ||
+                                 // epsgaxis is a MapServer specific trick,
+                                 // ignored by PROJ. MapServer shouldn't pass it
+                                 // to PROJ, but it does at least until
+                                 // MapServer 8.2.0. Removed in later versions.
+                                 kv.key == "epsgaxis")) {
                         hasSignificantParamValues = true;
                         break;
                     }
