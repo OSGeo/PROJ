@@ -60,10 +60,6 @@ struct ObjectKeeper {
     PJ *m_obj = nullptr;
     explicit ObjectKeeper(PJ *obj) : m_obj(obj) {}
     ~ObjectKeeper() { proj_destroy(m_obj); }
-    void clear() {
-        proj_destroy(m_obj);
-        m_obj = nullptr;
-    }
 
     ObjectKeeper(const ObjectKeeper &) = delete;
     ObjectKeeper &operator=(const ObjectKeeper &) = delete;

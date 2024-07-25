@@ -2153,15 +2153,6 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         }
     }
 
-    bool get_table(const char *sql, sqlite3 *db = nullptr) {
-        sqlite3_free_table(m_papszResult);
-        m_papszResult = nullptr;
-        m_nRows = 0;
-        m_nCols = 0;
-        return sqlite3_get_table(db ? db : m_ctxt, sql, &m_papszResult,
-                                 &m_nRows, &m_nCols, nullptr) == SQLITE_OK;
-    }
-
     bool execute(const std::string &sql) {
         return sqlite3_exec(m_ctxt, sql.c_str(), nullptr, nullptr, nullptr) ==
                SQLITE_OK;
