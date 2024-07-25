@@ -32,7 +32,7 @@
 // proj_config.h must be included before testing HAVE_LIBDL
 #include "proj_config.h"
 
-#if defined(HAVE_LIBDL) && !defined(_GNU_SOURCE)
+#if defined(__CYGWIN__) && defined(HAVE_LIBDL) && !defined(_GNU_SOURCE)
 // Required for dladdr() on Cygwin
 #define _GNU_SOURCE
 #endif
