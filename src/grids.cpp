@@ -44,6 +44,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 
 NS_PROJ_START
 
@@ -1857,7 +1858,9 @@ NTv1Grid *NTv1Grid::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
         swap_words(header + 104, sizeof(double), 1);
     }
 
-    if (*((int *)(header + 8)) != 12) {
+    int recordCount;
+    memcpy(&recordCount, header + 8, sizeof(recordCount));
+    if (recordCount != 12) {
         pj_log(ctx, PJ_LOG_ERROR,
                _("NTv1 grid shift file has wrong record count, corrupt?"));
         proj_context_errno_set(ctx,
