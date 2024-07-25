@@ -1364,8 +1364,6 @@ class GTiffVGridShiftSet : public VerticalShiftGridSet {
     }
 };
 
-#endif // TIFF_ENABLED
-
 // ---------------------------------------------------------------------------
 
 template <class GridType, class GenericGridType>
@@ -1430,7 +1428,6 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
     topGrids.emplace_back(std::move(grid));
 }
 
-#ifdef TIFF_ENABLED
 // ---------------------------------------------------------------------------
 
 class GTiffVGrid : public VerticalShiftGrid {
