@@ -416,9 +416,11 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
 .. option:: EMBED_PROJ_DATA_PATH
 
-    .. versionadded:: 9.4
+    .. versionadded:: 9.5
 
-    Embed ``PROJ_DATA_PATH`` data files location, default ON.
+    Embed ``PROJ_DATA_PATH`` data files location as an alternative paths for
+    external libraries. Disable to avoid setting this non-relocatable hardcoded
+    paths. Default ON.
 
 
 Building on Windows with vcpkg and Visual Studio 2017 or 2019
