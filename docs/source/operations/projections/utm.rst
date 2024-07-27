@@ -54,8 +54,7 @@ Convert geodetic coordinate to UTM Zone 59 on the southern hemisphere::
 
 Show the relationship of UTM to TM::
 
-    $ echo 121 24 | proj +proj=utm +lon_0=123 |
-    proj -I +proj=tmerc +lon_0=123 +x_0=500000 +k=0.9996
+    $ echo 121 24 | proj +proj=utm +lon_0=123 | proj -I +proj=tmerc +lon_0=123 +x_0=500000 +k=0.9996
     121dE 24dN
 
 Parameters
