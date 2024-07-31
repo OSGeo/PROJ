@@ -29,7 +29,6 @@
 
 #include "proj.h"
 
-#define PJ_DATUMS_
 #include "proj_internal.h"
 
 /*
