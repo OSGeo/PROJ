@@ -1011,6 +1011,8 @@ static PJ_XY isea_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
+static PJ_LP isea_s_inverse(PJ_XY xy, PJ *P);
+
 PJ *PJ_PROJECTION(isea) {
     char *opt;
     struct pj_isea_data *Q = static_cast<struct pj_isea_data *>(
@@ -1022,6 +1024,7 @@ PJ *PJ_PROJECTION(isea) {
     // NOTE: if a inverse was needed, there is some material at
     // https://brsr.github.io/2021/08/31/snyder-equal-area.html
     P->fwd = isea_s_forward;
+    P->inv = isea_s_inverse;
     isea_grid_init(&Q->dgg);
 
     Q->dgg.output = ISEA_PLANE;
@@ -1105,5 +1108,335 @@ PJ *PJ_PROJECTION(isea) {
 #undef F_RAD
 #undef TABLE_G
 #undef TABLE_H
-#undef ISEA_STD_LAT
-#undef ISEA_STD_LONG
+// #undef ISEA_STD_LAT
+// #undef ISEA_STD_LONG
+
+/*
+   Icosahedron Snyder equal-area (ISEA) Inverse Projection
+   --------------------------------------------------------------------------
+   This inverse projection was adapted from Java and eC by Jérôme Jacovella-St-Louis,
+   originally from the Franz-Benjamin Mocnik's ISEA implementation found at
+   https://github.com/mocnik-science/geogrid/blob/master/
+    src/main/java/org/giscience/utils/geogrid/projections/ISEAProjection.java
+   with the following license:
+
+   MIT License
+
+   Copyright (c) 2017-2019 Heidelberg University
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+*/
+
+/* The ISEA projection a projects a sphere on the icosahedron. Thereby the size of areas mapped to the icosahedron
+ * are preserved. Angles and distances are however slightly distorted. The angular distortion is below 17.27 degree, and
+ * the scale variation is less than 16.3 per cent.
+ *
+ * The projection has been proposed and has been described in detail by:
+ *
+ * John P. Snyder: An equal-area map projection for polyhedral globes. Cartographica, 29(1), 10–21, 1992.
+ * doi:10.3138/27H7-8K88-4882-1752
+ *
+ * Another description and improvements can be found in:
+ *
+ * Erika Harrison, Ali Mahdavi-Amiri, and Faramarz Samavati: Optimization of inverse Snyder polyhedral projection.
+ * International Conference on Cyberworlds 2011. doi:10.1109/CW.2011.36
+ *
+ * Erika Harrison, Ali Mahdavi-Amiri, and Faramarz Samavati: Analysis of inverse Snyder optimizations.
+ * In: Marina L. Gavrilova, and C. J. Kenneth Tan (Eds): Transactions on Computational Science XVI. Heidelberg,
+ * Springer, 2012. pp. 134–148. doi:10.1007/978-3-642-32663-9_8
+ */
+
+struct GeoPoint { double lat, lon; };        // In radians
+
+#define Pi                 3.1415926535897932384626433832795028841971
+
+#define Degrees(x)         ((x) * Pi / 180)
+
+#define wgs84InvFlattening 298.257223563
+#define wgs84Major         6378137.0  // Meters
+#define wgs84Minor         (wgs84Major - (wgs84Major / wgs84InvFlattening)) // 6356752.3142451792955399
+
+// #define phi                ((1 + sqrt(5)) / 2)
+// radius
+// #define a2                 (wgs84Major * wgs84Major)
+// #define c2                 (wgs84Minor * wgs84Minor)
+
+// #define eccentricity       0.0818191908426 // sqrt(1.0 - (c2/a2));
+// #define log1pe_1me         0.1640050079196   // log((1+e)/(1-e)))
+// #define S                  (Pi * (2 * a2 + c2/eccentricity * log1pe_1me))
+#define earthAuthalicRadius 6371007.18091875 //sqrt(S / (4 * Pi)); // R -- authalic sphere radius for WGS84 [6371007.1809184747 m]
+#define R2                 (earthAuthalicRadius * earthAuthalicRadius) // R^2
+#define RprimeOverR        0.9103832815095032 // (1 / (2 * sqrt(5)) + 1 / 6.0) * sqrt(Pi * sqrt(3)); // R' / R
+#define Rprime             (RprimeOverR * earthAuthalicRadius) // R'
+
+#include <algorithm>
+
+#define Min std::min
+#define Max std::max
+
+#define inf std::numeric_limits<double>::infinity()
+
+// distortion
+// static double maximumAngularDistortion = 17.27;
+// static double maximumScaleVariation = 1.163;
+// static double minimumScaleVariation = .860;
+
+// Vertices of dodecahedron centered in icosahedron faces
+#define E Degrees(52.6226318593487) //(Degrees)atan((3 + sqrt(5)) / 4); // Latitude of center of top icosahedron faces
+#define F Degrees(10.8123169635739) //(Degrees)atan((3 - sqrt(5)) / 4); // Latitude of center of faces mirroring top icosahedron face
+#define numIcosahedronFaces   20
+static const GeoPoint facesCenterDodecahedronVertices[numIcosahedronFaces] =
+{
+   {  E, Degrees(-144) }, {  E, Degrees(-72) }, {  E, Degrees( 0) }, {  E, Degrees( 72) }, {  E, Degrees(144) },
+   {  F, Degrees(-144) }, {  F, Degrees(-72) }, {  F, Degrees( 0) }, {  F, Degrees( 72) }, {  F, Degrees(144) },
+   { -F, Degrees(-108) }, { -F, Degrees(-36) }, { -F, Degrees(36) }, { -F, Degrees(108) }, { -F, Degrees(180) },
+   { -E, Degrees(-108) }, { -E, Degrees(-36) }, { -E, Degrees(36) }, { -E, Degrees(108) }, { -E, Degrees(180) }
+};
+// static define precision = Degrees(1e-9);
+#define precision                Degrees(1e-11)
+#define precisionPerDefinition   Degrees(1e-5)
+
+#define Rprime2X        (2 * Rprime)
+#define AzMax           Degrees(120)
+#define sdc2vos         (F + 2 * Degrees(58.2825255885418) /*(Degrees)atan(phi)*/ - Degrees(90)) // g -- sphericalDistanceFromCenterToVerticesOnSphere
+#define tang            0.763932022500419 //tan(sdc2vos)
+#define cotTheta        (1.0 / tan(Degrees(30)))
+#define RprimeTang      (Rprime * tang) // twice the center-to-base distance
+#define centerToBase    (RprimeTang / 2)
+#define triWidth        (RprimeTang * 1.73205080756887729352744634150587236694280525381038) //sqrt(3)
+#define Rprime2Tan2g    (RprimeTang * RprimeTang)
+#define cosG            cos(Degrees(36))
+#define sinGcosSDC2VoS  sin(Degrees(36)) * cos(sdc2vos) // sin G cos g
+#define westVertexLon   Degrees(-144)
+
+static const double yOffsets[4] = { -2*centerToBase, -4*centerToBase, -5*centerToBase, -7*centerToBase };
+
+static inline double latGeocentricToGeodetic(double theta)
+{
+   static const double a2ob2 = (wgs84Major * wgs84Major) / (wgs84Minor * wgs84Minor);
+   return atan(tan(theta) * a2ob2);
+}
+
+struct ISEAFacePoint
+{
+   int face;
+   double x, y;
+};
+
+class ISEAPlanarProjection
+{
+public:
+   ISEAPlanarProjection(const GeoPoint & value) :
+      orientation(value),
+      cosOrientationLat(cos(value.lat)),
+      sinOrientationLat(sin(value.lat))
+   {
+   }
+
+   bool cartesianToGeo(const PJ_XY & position, GeoPoint & result)
+   {
+      bool r = false;
+      static const double epsilon = 2E-8; // NOTE: 1E-11 seems too small for forward projection precision at boundaries
+      int face = 0;
+      // Rotate and shear to determine face if not stored in position.z
+      static const double sr = -0.86602540378443864676372317075293618347140262690519, cr = 0.5;    // sin(-60), cos(-60)
+      static const double shearX = 1.0 / 1.73205080756887729352744634150587236694280525381038; //sqrt(3); // 0.5773502691896257 -- 2*centerToBase / triWidth
+      static const double sx = 1.0 / triWidth, sy = 1.0 / (3*centerToBase);
+      double yp = -(position.x * sr + position.y * cr);
+      double x = (position.x * cr - position.y * sr + yp * shearX) * sx;
+      double y = yp * sy;
+
+           if(x < 0 || (y > x && x < 5 - epsilon)) x += epsilon;
+      else if(x > 5 || (y < x && x > 0 + epsilon)) x -= epsilon;
+
+      if(y < 0 || (x > y && y < 6 - epsilon)) y += epsilon;
+      else if(y > 6 || (x < y && y > 0 + epsilon)) y -= epsilon;
+
+      if(x >= 0 && x <= 5 && y >= 0 && y <= 6)
+      {
+         int ix = Max(0, Min(4, (int)x));
+         int iy = Max(0, Min(5, (int)y));
+         if(iy == ix || iy == ix + 1)
+         {
+            int rhombus = ix + iy;
+            bool top = x - ix > y - iy;
+            face = -1;
+
+            switch(rhombus)
+            {
+               case 0: face = top ? 0 : 5; break;
+               case 2: face = top ? 1 : 6; break;
+               case 4: face = top ? 2 : 7; break;
+               case 6: face = top ? 3 : 8; break;
+               case 8: face = top ? 4 : 9; break;
+
+               case 1: face = top ? 10 : 15; break;
+               case 3: face = top ? 11 : 16; break;
+               case 5: face = top ? 12 : 17; break;
+               case 7: face = top ? 13 : 18; break;
+               case 9: face = top ? 14 : 19; break;
+            }
+            face++;
+         }
+      }
+
+      if(face)
+      {
+         // Degrees faceLon = facesCenterDodecahedronVertices[face].lon;
+         int fy = (face-1) / 5, fx = (face-1) - 5*fy;
+         double rx = position.x - (2*fx + fy/2 + 1) * triWidth/2;
+         double ry = position.y - (yOffsets[fy] + 3 * centerToBase);
+         GeoPoint dst;
+
+         r = icosahedronToSphere({ face - 1, rx, ry }, dst);
+
+         // REVIEW: It seems like the forward transformation +proj=isea +R=6371007.18091875 does not apply this geodetic to geocentric conversion
+         //         In FMSDI phase 3, this conversion was necessary to align data from PYXIS server properly. Should this be applied or not?
+         // dst.lat = latGeocentricToGeodetic(dst.lat);
+
+              if(dst.lon < -Pi - epsilon) dst.lon += 2*Pi;
+         else if(dst.lon >  Pi + epsilon) dst.lon -= 2*Pi;
+
+         result = { dst.lat, dst.lon };
+      }
+      return r;
+   }
+
+   // Converts coordinates on the icosahedron to geographic coordinates (inverse projection)
+   bool icosahedronToSphere(const ISEAFacePoint & c, GeoPoint & r)
+   {
+      if(c.face >= 0 && c.face < numIcosahedronFaces)
+      {
+         double Az = atan2(c.x, c.y); // Az'
+         double rho = sqrt(c.x * c.x + c.y * c.y);
+         double AzAdjustment = faceOrientation(c.face);
+
+         Az += AzAdjustment;
+         while(Az <     0) AzAdjustment += AzMax, Az += AzMax;
+         while(Az > AzMax) AzAdjustment -= AzMax, Az -= AzMax;
+         {
+            double sinAz = sin(Az), cosAz = cos(Az);
+            double cotAz = cosAz / sinAz;
+            double area = Rprime2Tan2g / (2 * (cotAz + cotTheta)); // A_G or A_{ABD}
+            double deltaAz = 10 * precision;
+            double degAreaOverR2Plus180Minus36 = area / R2 - westVertexLon;
+            double Az_earth = Az;
+
+            while(fabs(deltaAz) > precision)
+            {
+               double sinAzEarth = sin(Az_earth), cosAzEarth = cos(Az_earth);
+               double H = acos(sinAzEarth * sinGcosSDC2VoS - cosAzEarth * cosG);
+               double FAz_earth = degAreaOverR2Plus180Minus36 - H - Az_earth; // F(Az) or g(Az)
+               double F2Az_earth = (cosAzEarth * sinGcosSDC2VoS + sinAzEarth * cosG) / sin(H) - 1; // F'(Az) or g'(Az)
+               deltaAz = -FAz_earth / F2Az_earth; // Delta Az^0 or Delta Az
+               Az_earth += deltaAz;
+            }
+            {
+               double sinAz_earth = sin(Az_earth), cosAz_earth = cos(Az_earth);
+               double q = atan2(tang, (cosAz_earth + sinAz_earth * cotTheta));
+               double d = RprimeTang / (cosAz + sinAz * cotTheta); // d'
+               double f = d / (Rprime2X * sin(q / 2)); // f
+               double z = 2 * asin(rho / (Rprime2X * f));
+
+               Az_earth -= AzAdjustment;
+               {
+                  double lat0 = facesCenterDodecahedronVertices[c.face].lat;
+                  double sinLat0 = sin(lat0), cosLat0 = cos(lat0);
+                  double sinZ = sin(z), cosZ = cos(z);
+                  double cosLat0SinZ = cosLat0 * sinZ;
+                  double lat = asin(sinLat0 * cosZ + cosLat0SinZ * cos(Az_earth));
+                  double lon = facesCenterDodecahedronVertices[c.face].lon + atan2(sin(Az_earth) * cosLat0SinZ, cosZ - sinLat0 * sin(lat));
+
+                  revertOrientation({ lat, lon }, r);
+               }
+            }
+         }
+         return true;
+      }
+      r = { inf, inf };
+      return false;
+   }
+
+private:
+   GeoPoint orientation;
+   double cosOrientationLat, sinOrientationLat;
+
+   inline void revertOrientation(const GeoPoint & c, GeoPoint & r)
+   {
+      double lon = (c.lat < Degrees(-90) + precisionPerDefinition || c.lat > Degrees(90) - precisionPerDefinition) ? 0 : c.lon;
+      if(orientation.lat || orientation.lon)
+      {
+         double sinLat = sin(c.lat), cosLat = cos(c.lat);
+         double sinLon = sin(lon),   cosLon = cos(lon);
+         double cosLonCosLat = cosLon * cosLat;
+         r = {
+            asin(sinLat * cosOrientationLat - cosLonCosLat * sinOrientationLat),
+            atan2(sinLon * cosLat, cosLonCosLat * cosOrientationLat + sinLat * sinOrientationLat) - orientation.lon
+         };
+      }
+      else
+         r = { c.lat, lon };
+   }
+
+   static inline double faceOrientation(int face)
+   {
+      return (face <= 4 || (10 <= face && face <= 14)) ? 0 : Degrees(180);
+   }
+};
+
+// Orientation symmetric to equator (+proj=isea)
+/* Sets the orientation of the icosahedron such that the north and the south poles are mapped to the edge midpoints
+ * of the icosahedron. The equator is thus mapped symmetrically.
+ */
+static ISEAPlanarProjection standardISEA({ (E + F) / 2 /* Degrees(90 - 58.282525590) = 31.7174744114613 */, Degrees(-11.25) });
+
+// Polar orientation (+proj=isea +orient=pole)
+/*
+ * One corner of the icosahedron is, by default, facing to the north pole, and one to the south pole. The provided
+ * orientation is relative to the default orientation.
+ *
+ * The orientation shifts every location by the angle orientation.lon in direction of positive
+ * longitude, and thereafter by the angle orientation.lat in direction of positive latitude.
+ */
+static ISEAPlanarProjection polarISEA({ 0, 0 });
+
+// NOTE: This currently assumes +proj=isea +R=6371007.18091875 (authalic sphere with surface area of WGS84)
+static PJ_LP isea_s_inverse(PJ_XY xy, PJ *P)
+{
+   struct pj_isea_data *Q = static_cast<struct pj_isea_data *>(P->opaque);
+   // Default origin of +proj=isea is different (OGC:1534 is +x_0=19186144.8709401525557041 +y_0=-3323137.7717845365405083)
+   static const double xo =  2.5 * triWidth;
+   static const double yo = -1.5 * centerToBase;
+   PJ_XY input { xy.x * P->a + xo, xy.y * P->a + yo };
+   GeoPoint result;
+   ISEAPlanarProjection * p =
+      // Only supporting default planar options for now
+      Q->dgg.output != ISEA_PLANE ||
+      Q->dgg.o_az ||
+      Q->dgg.aperture != 3.0 ||
+      Q->dgg.resolution != 4.0 ? 0 :
+      // Only supporting +orient=isea and +orient=pole for now
+      (Q->dgg.o_lat == ISEA_STD_LAT && Q->dgg.o_lon == ISEA_STD_LONG) ? &standardISEA :
+      (Q->dgg.o_lat == M_PI / 2.0 && Q->dgg.o_lon == 0) ? &polarISEA : 0;
+
+   if(p && p->cartesianToGeo(input, result))
+      return { result.lon, result.lat };
+   else
+      return { inf, inf };
+}
