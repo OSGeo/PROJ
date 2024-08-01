@@ -1208,6 +1208,15 @@ TEST(factory, AuthorityFactory_affine_parametric_transform) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_10566_issue_4212) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("10566", true);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=vgridshift +grids=dk_sdfi_gllmsl_2022.tif +multiplier=1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory,
      AuthorityFactory_createCoordinateOperation_concatenated_operation) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
