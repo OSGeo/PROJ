@@ -656,6 +656,10 @@
 #define EPSG_NAME_METHOD_VERTICALGRID_GTX                                      \
     "Vertical Offset by Grid Interpolation (gtx)"
 
+#define EPSG_CODE_METHOD_VERTICALGRID_GTG 1129
+#define EPSG_NAME_METHOD_VERTICALGRID_GTG                                      \
+    "Vertical Offset by Grid Interpolation (gtg)"
+
 #define EPSG_CODE_METHOD_VERTICALGRID_PL_TXT 1101
 #define EPSG_NAME_METHOD_VERTICALGRID_PL_TXT                                   \
     "Vertical Offset by Grid Interpolation (PL txt)"

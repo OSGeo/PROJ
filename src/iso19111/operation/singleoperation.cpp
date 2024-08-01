@@ -2269,6 +2269,7 @@ static bool isRegularVerticalGridMethod(int methodEPSGCode,
     return methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ||
            methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_BEV_AT ||
            methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX ||
+           methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTG ||
            methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_PL_TXT;
 }
 
