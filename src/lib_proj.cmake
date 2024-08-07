@@ -303,7 +303,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 source_group("CMake Files" FILES CMakeLists.txt)
 
 # Embed PROJ_DATA data files location
-add_definitions(-DPROJ_DATA="${PROJ_DATA_PATH}")
+if(EMBED_PROJ_DATA_PATH)
+  add_definitions(-DPROJ_DATA="${PROJ_DATA_PATH}")
+endif()
 
 
 ###########################################################
