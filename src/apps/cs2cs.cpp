@@ -36,6 +36,7 @@
 #include <string.h>
 
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>

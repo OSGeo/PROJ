@@ -79,6 +79,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 #include <string.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <fstream> // std::ifstream
 #include <iostream>
 
