@@ -122,8 +122,9 @@ struct OutputOptions {
         << "                {object_definition} | {object_reference} |"
         << std::endl
         << "                (-s {srs_def} [--s_epoch {epoch}] "
-           "-t {srs_def} [--t_epoch {epoch}])"
-        << std::endl;
+           "-t {srs_def} [--t_epoch {epoch}]) |"
+        << std::endl
+        << "                ({srs_def} {srs_def})" << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
                  "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
@@ -1042,8 +1043,7 @@ int main(int argc, char **argv) {
         usage();
     }
 
-    std::string user_string;
-    bool user_string_specified = false;
+    std::vector<std::string> positional_args;
     std::string sourceCRSStr;
     std::string sourceEpoch;
     std::string targetCRSStr;
@@ -1405,13 +1405,7 @@ int main(int argc, char **argv) {
             std::cerr << "Unrecognized option: " << arg << std::endl;
             usage();
         } else {
-            if (!user_string_specified) {
-                user_string_specified = true;
-                user_string = arg;
-            } else {
-                std::cerr << "Too many parameters: " << arg << std::endl;
-                usage();
-            }
+            positional_args.push_back(arg);
         }
     }
 
@@ -1420,7 +1414,8 @@ int main(int argc, char **argv) {
         std::exit(1);
     }
 
-    if (dumpDbStructure && user_string_specified && !outputSwitchSpecified) {
+    if (dumpDbStructure && positional_args.size() == 1 &&
+        !outputSwitchSpecified) {
         // Implicit settings in --output-db-structure mode + object
         outputSwitchSpecified = true;
         outputOpt.SQL = true;
@@ -1569,6 +1564,19 @@ int main(int argc, char **argv) {
         }
     }
 
+    std::string user_string;
+    if (sourceCRSStr.empty() && targetCRSStr.empty() &&
+        positional_args.size() == 2) {
+        sourceCRSStr = positional_args[0];
+        targetCRSStr = positional_args[1];
+        positional_args.resize(0);
+    } else if (positional_args.size() == 1) {
+        user_string = positional_args.front();
+    } else if (positional_args.size() > 1) {
+        std::cerr << "Too many parameters: " << positional_args[1] << std::endl;
+        usage();
+    }
+
     if (!sourceCRSStr.empty() && targetCRSStr.empty()) {
         std::cerr << "Source CRS specified, but missing target CRS"
                   << std::endl;
@@ -1578,11 +1586,11 @@ int main(int argc, char **argv) {
                   << std::endl;
         usage();
     } else if (!sourceCRSStr.empty() && !targetCRSStr.empty()) {
-        if (user_string_specified) {
+        if (!positional_args.empty()) {
             std::cerr << "Unused extra value" << std::endl;
             usage();
         }
-    } else if (!user_string_specified) {
+    } else if (positional_args.empty()) {
         if (dumpDbStructure || listCRSSpecified) {
             std::exit(0);
         }
