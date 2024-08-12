@@ -267,6 +267,8 @@ endif()
 
 ################################################################################
 
+option(EMBED_PROJ_DATA_PATH "Whether the PROJ_DATA_PATH should be embedded" ON)
+
 if(DEFINED PROJ_LIB_ENV_VAR_TRIED_LAST)
   set(PROJ_DATA_ENV_VAR_TRIED_LAST ${PROJ_LIB_ENV_VAR_TRIED_LAST})
   message(WARNING "PROJ_LIB_ENV_VAR_TRIED_LAST option has been renamed to PROJ_DATA_ENV_VAR_TRIED_LAST. PROJ_LIB_ENV_VAR_TRIED_LAST is still working for now, but may be completely replaced by PROJ_DATA_ENV_VAR_TRIED_LAST in a future release")

@@ -414,6 +414,12 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
     Path to an existing directory used to cache :file:`proj.db` to speed-up
     subsequent builds without modifications to source SQL files.
 
+.. option:: EMBED_PROJ_DATA_PATH
+
+    .. versionadded:: 9.5
+
+    Embed ``PROJ_DATA`` hard-coded alternative path for data files location. Disable to avoid setting this non-relocatable hard-coded path. Default ON.
+
 
 Building on Windows with vcpkg and Visual Studio 2017 or 2019
 --------------------------------------------------------------------------------
