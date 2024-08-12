@@ -665,7 +665,8 @@ OPTARGS *opt_parse(int argc, char **argv, const char *flags, const char *keys,
     for (/* empty */; i < argc; i++) {
         if ('-' == argv[i][0]) {
             free(o);
-            fprintf(stderr, "Minus options must come first, then the plus options\n");
+            fprintf(stderr,
+                    "Minus options must come first, then the plus options\n");
             return nullptr;
         }
 
