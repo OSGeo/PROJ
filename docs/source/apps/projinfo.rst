@@ -67,7 +67,7 @@ Synopsis
     file referenced by the {object_reference} must contain a valid
     {object_definition}.
 
-    The usage of "{srs_def} {srs_def}" is equivalent to "-s {srs_def} -t {srs_def}".
+    The usage of "{srs_def} {srs_def}" is equivalent to "-s {srs_def} -t {srs_def}" (*added in 9.5*).
 
 Description
 ***********
