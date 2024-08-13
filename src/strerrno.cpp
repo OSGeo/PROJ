@@ -36,6 +36,8 @@ static const struct {
        "nodata")},
     {PROJ_ERR_COORD_TRANSFM_NO_CONVERGENCE,
      _("Iterative method fails to converge on coordinate to transform")},
+    {PROJ_ERR_COORD_TRANSFM_MISSING_TIME,
+     _("Coordinate to transform lacks time")},
     {PROJ_ERR_OTHER_API_MISUSE, _("API misuse")},
     {PROJ_ERR_OTHER_NO_INVERSE_OP, _("No inverse operation")},
     {PROJ_ERR_OTHER_NETWORK_ERROR,

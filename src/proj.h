@@ -712,6 +712,9 @@ PJ_COORD PROJ_DLL proj_geod(const PJ *P, PJ_COORD a, PJ_COORD b);
      5) /* point to transform falls in a grid cell that evaluates to nodata */
 #define PROJ_ERR_COORD_TRANSFM_NO_CONVERGENCE                                  \
     (PROJ_ERR_COORD_TRANSFM + 6) /* iterative convergence method fail */
+#define PROJ_ERR_COORD_TRANSFM_MISSING_TIME                                    \
+    (PROJ_ERR_COORD_TRANSFM + 7) /* operation requires time, but not provided  \
+                                  */
 
 /** Other type of errors */
 #define PROJ_ERR_OTHER 4096
