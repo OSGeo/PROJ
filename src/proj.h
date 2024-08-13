@@ -1464,6 +1464,9 @@ int PROJ_DLL proj_coordoperation_is_instantiable(PJ_CONTEXT *ctx,
 int PROJ_DLL proj_coordoperation_has_ballpark_transformation(
     PJ_CONTEXT *ctx, const PJ *coordoperation);
 
+int PROJ_DLL proj_coordoperation_requires_per_coordinate_input_time(
+    PJ_CONTEXT *ctx, const PJ *coordoperation);
+
 int PROJ_DLL proj_coordoperation_get_param_count(PJ_CONTEXT *ctx,
                                                  const PJ *coordoperation);
 

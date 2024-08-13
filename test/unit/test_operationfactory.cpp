@@ -1770,6 +1770,8 @@ TEST(operation,
         "+t_epoch=2000 +convention=position_vector +step +inv "
         "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
         "+z_in=m +xy_out=deg +z_out=m +step +proj=axisswap +order=2,1");
+
+    EXPECT_TRUE(list[0]->requiresPerCoordinateInputTime());
 }
 
 // ---------------------------------------------------------------------------

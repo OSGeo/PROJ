@@ -456,6 +456,8 @@ class PROJ_GCC_DLL PROJStringFormatter {
 
     PROJ_INTERNAL std::set<std::string> getUsedGridNames() const;
 
+    PROJ_INTERNAL bool requiresPerCoordinateInputTime() const;
+
     PROJ_INTERNAL void setTOWGS84Parameters(const std::vector<double> &params);
     PROJ_INTERNAL const std::vector<double> &getTOWGS84Parameters() const;
 
