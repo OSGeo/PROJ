@@ -36,7 +36,7 @@ matrix:
 
 before_install: ./travis/${BUILD_NAME}/before_install.sh
 
-install: ./travis/${BUILD_NAME}/install.sh
+install: travis_wait 20 ./travis/${BUILD_NAME}/install.sh
 
 script:
   - echo "done"
