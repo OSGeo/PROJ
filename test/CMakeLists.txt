@@ -1,43 +1,67 @@
-set(GIE_BIN "gie")
+option(TESTING_USE_NETWORK
+  "Permit use of network to fetch test requirements (if needed) \
+  and run network-dependent tests. Default ON." ON
+)
 
-if(CURL_ENABLED AND NOT DEFINED RUN_NETWORK_DEPENDENT_TESTS)
-    message(STATUS "Checking if network is available...")
+set(HAS_NETWORK OFF)  # evaluate if ON below
+
+if(TESTING_USE_NETWORK)
+  if(NOT CMAKE_REQUIRED_QUIET)
+    # CMake 3.17+ use CHECK_START/CHECK_PASS/CHECK_FAIL
+    message(STATUS "Checking if network is available")
+  endif()
+  set(NO_CONNECTION 1)
+  find_program(HAS_CURL curl)
+  if(HAS_CURL)
     # First try with curl as we can get an 'instant' answer if it is there
     execute_process(
-            COMMAND curl -I https://www.google.com
-            OUTPUT_QUIET
-            ERROR_QUIET
-            RESULT_VARIABLE NO_CONNECTION
+      COMMAND ${HAS_CURL} -I https://www.google.com
+      OUTPUT_QUIET
+      ERROR_QUIET
+      RESULT_VARIABLE NO_CONNECTION
     )
-    if(NOT NO_CONNECTION EQUAL 0)
-        # Then fallback to ping
-        # From https://stackoverflow.com/questions/62214621/how-to-check-for-internet-connection-with-cmake-automatically-prevent-fails-if/68376537#68376537
-        if(WIN32)
-            execute_process(
-                COMMAND ping www.google.com -n 2
-                OUTPUT_QUIET
-                ERROR_QUIET
-                RESULT_VARIABLE NO_CONNECTION
-            )
-        else()
-            execute_process(
-                COMMAND ping www.google.com -c 2
-                OUTPUT_QUIET
-                ERROR_QUIET
-                RESULT_VARIABLE NO_CONNECTION
-            )
-        endif()
-    endif()
-
-    if(NOT NO_CONNECTION EQUAL 0)
-        message(WARNING "... no. Skipping network dependent tests.")
-        set(RUN_NETWORK_DEPENDENT_TESTS_DEFAULT_VAL OFF)
+  else()
+    find_program(HAS_PING ping)
+    if(HAS_PING)
+      # Then fallback to ping -- https://stackoverflow.com/a/68376537/
+      if(WIN32)
+        set(PING_COUNT "-n")
+      else()
+        set(PING_COUNT "-c")
+      endif()
+      execute_process(
+        COMMAND ${HAS_PING} www.google.com ${PING_COUNT} 2
+        OUTPUT_QUIET
+        ERROR_QUIET
+        RESULT_VARIABLE NO_CONNECTION
+      )
     else()
-        message(STATUS "... yes")
-        set(RUN_NETWORK_DEPENDENT_TESTS_DEFAULT_VAL ON)
+      message(WARNING
+        "Cannot establish if network is avalable - "
+        "'curl' or 'ping' not found"
+      )
     endif()
-    option(RUN_NETWORK_DEPENDENT_TESTS "Whether to run tests dependent on network availability" ${RUN_NETWORK_DEPENDENT_TESTS_DEFAULT_VAL})
+  endif()
+  if(NO_CONNECTION EQUAL 0)
+    set(HAS_NETWORK ON)
+    if(NOT CMAKE_REQUIRED_QUIET)
+      message(STATUS "Checking if network is available - yes")
+    endif()
+  else()
+    if(NOT CMAKE_REQUIRED_QUIET)
+      message(STATUS
+        "Checking if network is available - no; skipping network-dependent tests."
+      )
+    endif()
+  endif()
+else()
+  message(STATUS "Network access not premitted (TESTING_USE_NETWORK=OFF)")
 endif()
+
+option(RUN_NETWORK_DEPENDENT_TESTS
+  "Whether to run tests dependent on network availability"
+  ${HAS_NETWORK}
+)
 
 # Regression tests
 proj_add_gie_test("Builtins" "gie/builtins.gie")

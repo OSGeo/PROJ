@@ -153,12 +153,17 @@ Build requirements
 - curl >= 7.29.0 (optional but recommended)
 - JSON for Modern C++ (nlohmann/json) >= 3.7.0; if not found as an external dependency then vendored version 3.9.1 from PROJ source tree is used
 
+.. _test_requirements:
+
 Test requirements
 +++++++++++++++++
 
-This is only required if testing is built (see :option:`BUILD_TESTING`, default ON)
+These are only required if testing is built (see :option:`BUILD_TESTING`, default ON)
 
-- GoogleTest (GTest) >= 1.8.1; if not found then version 1.12.1 is fetched from GitHub and installed internally
+- GoogleTest (GTest) >= 1.8.1; if not found and :option:`TESTING_USE_NETWORK` is ON, then version 1.12.1 is fetched from GitHub and locally installed
+- Python >= 3.7
+- `importlib_metadata <https://pypi.org/project/importlib-metadata/>`_ only needed for Python 3.7
+- One of either `PyYAML <https://pypi.org/project/PyYAML/>`_ or `ruamel.yaml <https://pypi.org/project/ruamel.yaml/>`_
 
 
 Build steps
@@ -280,8 +285,9 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
 .. option:: BUILD_TESTING=ON
 
-    CTest option to build the testing tree, which also downloads and installs
-    Googletest. Default is ON, but can be turned OFF if tests are not required.
+    CTest option to build the testing tree. Default is ON, but can be turned
+    OFF if tests are not required.
+    See :ref:`test requirements <test_requirements>` for other details.
 
     .. versionchanged:: 7.0
         Renamed from ``PROJ_TESTS``
@@ -425,6 +431,14 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
     Path to an existing directory used to cache :file:`proj.db` to speed-up
     subsequent builds without modifications to source SQL files.
+
+.. option:: TESTING_USE_NETWORK=ON
+
+    .. versionadded:: 9.5
+
+    Permit use of network to fetch :ref:`test requirements
+    <test_requirements>` (if needed)
+    and run network-dependent tests. Default ON.
 
 .. option:: EMBED_PROJ_DATA_PATH
 

@@ -1,17 +1,41 @@
 # CMake configuration for PROJ unit tests
 # External GTest provided by (e.g.) libgtest-dev
 
-find_package(GTest 1.8.1)
-if(GTest_FOUND)
-  option(USE_EXTERNAL_GTEST "Compile against external GTest" ON)
-else()
-  option(USE_EXTERNAL_GTEST "Compile against external GTest" OFF)
+set(MIN_GTest_VERSION "1.8.1")
+
+if(NOT CMAKE_REQUIRED_QUIET)
+  # CMake 3.17+ use CHECK_START/CHECK_PASS/CHECK_FAIL
+  message(STATUS "Looking for GTest")
 endif()
+find_package(GTest QUIET)
+set(USE_EXTERNAL_GTEST_DEFAULT OFF)
+if(GTest_FOUND)
+  if(NOT CMAKE_REQUIRED_QUIET)
+    message(STATUS "Looking for GTest - found (${GTest_VERSION})")
+  endif()
+  if(GTest_VERSION VERSION_LESS MIN_GTest_VERSION)
+    message(WARNING "External GTest version is too old")
+  else()
+    set(USE_EXTERNAL_GTEST_DEFAULT ON)
+  endif()
+else()
+  if(NOT CMAKE_REQUIRED_QUIET)
+    message(STATUS "Looking for GTest - not found")
+  endif()
+endif()
+
+option(USE_EXTERNAL_GTEST
+  "Compile against external GTest"
+  ${USE_EXTERNAL_GTEST_DEFAULT}
+)
 
 if(USE_EXTERNAL_GTEST)
 
   if(NOT GTest_FOUND)
-    message(FATAL_ERROR "External GTest >= 1.8.1 not found")
+    message(SEND_ERROR "External GTest >= ${MIN_GTest_VERSION} not found, \
+      skipping some tests")
+    # exit the remainder of this file
+    return()
   endif()
   message(STATUS "Using external GTest")
 
@@ -24,9 +48,9 @@ if(USE_EXTERNAL_GTEST)
                           INTERFACE_LINK_LIBRARIES "GTest::GTest")
   endif()
 
-else()
+elseif(HAS_NETWORK)
 
-  message(STATUS "Fetching GTest")
+  message(STATUS "Fetching GTest from GitHub ...")
 
   # Add Google Test
   #
@@ -56,8 +80,19 @@ else()
       add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
     endif()
   endif()
-
-endif()  # USE_EXTERNAL_GTEST
+else()
+  if(TESTING_USE_NETWORK)
+    set(_msg_detail "install GTest dependency")
+  else()
+    set(_msg_detail
+      "either install GTest dependency, or if possible, \
+      set TESTING_USE_NETWORK=ON to fetch content from GitHub"
+    )
+  endif()
+  message(WARNING "Tests that require GTest will be skipped; ${_msg_detail}")
+  # exit the remainder of this file
+  return()
+endif()
 
 #
 # Build PROJ unit tests
