@@ -315,7 +315,81 @@ tests:
 
     WKT2:2019 string:
     CONVERSION["UTM zone 31N",METHOD["Transverse Mercator",ID["EPSG",9807]],PARAMETER["Latitude of natural origin",0,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8801]],PARAMETER["Longitude of natural origin",3,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8802]],PARAMETER["Scale factor at natural origin",0.9996,SCALEUNIT["unity",1],ID["EPSG",8805]],PARAMETER["False easting",500000,LENGTHUNIT["metre",1],ID["EPSG",8806]],PARAMETER["False northing",0,LENGTHUNIT["metre",1],ID["EPSG",8807]],ID["EPSG",16031]]
+- args: EPSG:4326 EPSG:32631 --single-line
+  out: |
+    Candidate operations found: 1
+    -------------------------------------
+    Operation No. 1:
+
+    EPSG:16031, UTM zone 31N, 0 m, Between 0°E and 6°E, northern hemisphere between equator and 84°N, onshore and offshore.
+
+    PROJ string:
+    +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=31 +ellps=WGS84
+
+    WKT2:2019 string:
+    CONVERSION["UTM zone 31N",METHOD["Transverse Mercator",ID["EPSG",9807]],PARAMETER["Latitude of natural origin",0,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8801]],PARAMETER["Longitude of natural origin",3,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8802]],PARAMETER["Scale factor at natural origin",0.9996,SCALEUNIT["unity",1],ID["EPSG",8805]],PARAMETER["False easting",500000,LENGTHUNIT["metre",1],ID["EPSG",8806]],PARAMETER["False northing",0,LENGTHUNIT["metre",1],ID["EPSG",8807]],ID["EPSG",16031]]
+- args: EPSG:4326 EPSG:32631 EPSG:4327
+  grep: Too many parameters
+  stderr: |
+    Too many parameters: EPSG:32631
+  exitcode: 1
 - args: --source-crs NAD27 --target-crs NAD83
+  out: |
+    Candidate operations found: 1
+    Note: using '--spatial-test intersects' would bring more results (10)
+    -------------------------------------
+    Operation No. 1:
+
+    unknown id, Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, World, has ballpark transformation
+
+    PROJ string:
+    +proj=noop
+
+    WKT2:2019 string:
+    COORDINATEOPERATION["Ballpark geographic offset from NAD27 to NAD83",
+        SOURCECRS[
+            GEOGCRS["NAD27",
+                DATUM["North American Datum 1927",
+                    ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
+                        LENGTHUNIT["metre",1]]],
+                PRIMEM["Greenwich",0,
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                CS[ellipsoidal,2],
+                    AXIS["geodetic latitude (Lat)",north,
+                        ORDER[1],
+                        ANGLEUNIT["degree",0.0174532925199433]],
+                    AXIS["geodetic longitude (Lon)",east,
+                        ORDER[2],
+                        ANGLEUNIT["degree",0.0174532925199433]],
+                ID["EPSG",4267]]],
+        TARGETCRS[
+            GEOGCRS["NAD83",
+                DATUM["North American Datum 1983",
+                    ELLIPSOID["GRS 1980",6378137,298.257222101,
+                        LENGTHUNIT["metre",1]]],
+                PRIMEM["Greenwich",0,
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                CS[ellipsoidal,2],
+                    AXIS["geodetic latitude (Lat)",north,
+                        ORDER[1],
+                        ANGLEUNIT["degree",0.0174532925199433]],
+                    AXIS["geodetic longitude (Lon)",east,
+                        ORDER[2],
+                        ANGLEUNIT["degree",0.0174532925199433]],
+                ID["EPSG",4269]]],
+        METHOD["Geographic2D offsets",
+            ID["EPSG",9619]],
+        PARAMETER["Latitude offset",0,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8601]],
+        PARAMETER["Longitude offset",0,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8602]],
+        USAGE[
+            SCOPE["unknown"],
+            AREA["World"],
+            BBOX[-90,-180,90,180]]]
+- args: NAD27 NAD83
   out: |
     Candidate operations found: 1
     Note: using '--spatial-test intersects' would bring more results (10)

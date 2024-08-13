@@ -35,7 +35,8 @@ Synopsis
     |    --list-crs [list-crs-filter] |
     |    --dump-db-structure [{object_definition} | {object_reference}] |
     |    {object_definition} | {object_reference} |
-    |    (-s {srs_def} [--s_epoch {epoch}] -t {srs_def} [--t_epoch {epoch}])
+    |    (-s {srs_def} [--s_epoch {epoch}] -t {srs_def} [--t_epoch {epoch}]) |
+    |    ({srs_def} {srs_def})
     |
 
     where {object_definition} or {srs_def} is one of the possibilities accepted
@@ -65,6 +66,8 @@ Synopsis
     {object_reference} is a filename preceded by the '@' character.  The
     file referenced by the {object_reference} must contain a valid
     {object_definition}.
+
+    The usage of "{srs_def} {srs_def}" is equivalent to "-s {srs_def} -t {srs_def}" (*added in 9.5*).
 
 Description
 ***********
