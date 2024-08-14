@@ -342,6 +342,24 @@ struct pj_isea_data {
 #pragma warning(disable : 4702)
 #endif
 
+#define SAFE_ARC_EPSILON 1E-15
+
+static inline double safeArcSin(double t) {
+    return fabs(t) < SAFE_ARC_EPSILON         ? 0
+           : fabs(t - 1.0) < SAFE_ARC_EPSILON ? M_PI / 2
+           : fabs(t + 1.0) < SAFE_ARC_EPSILON ? -M_PI / 2
+                                              : asin(t);
+}
+
+static inline double safeArcCos(double t) {
+    return fabs(t) < SAFE_ARC_EPSILON       ? M_PI / 2
+           : fabs(t + 1) < SAFE_ARC_EPSILON ? M_PI
+           : fabs(t - 1) < SAFE_ARC_EPSILON ? 0
+                                            : acos(t);
+}
+
+#undef SAFE_ARC_EPSILON
+
 /* coord needs to be in radians */
 static int isea_snyder_forward(const struct pj_isea_data *data,
                                const struct GeoPoint *ll, struct isea_pt *out) {
@@ -371,7 +389,8 @@ static int isea_snyder_forward(const struct pj_isea_data *data,
         double sinAz, cosAz;
 
         /* step 1 */
-        double z = fabs(cosZ) < 1E-15 ? 0 : acos(cosZ);
+        double z = safeArcCos(cosZ);
+
         /* not on this triangle */
         if (z > sdc2vos /*g*/ + 0.000005) { /* TODO DBL_EPSILON */
             continue;
@@ -533,9 +552,7 @@ static struct GeoPoint snyder_ctran(const struct GeoPoint &np,
     while (lambdap < -M_PI)
         lambdap += 2 * M_PI;
 
-    result.lat = fabs(sin_phip - 1.0) < 1E-15   ? M_PI / 2
-                 : fabs(sin_phip + 1.0) < 1E-15 ? -M_PI / 2
-                                                : asin(sin_phip);
+    result.lat = safeArcSin(sin_phip);
     result.lon = lambdap;
     return result;
 }
@@ -1242,10 +1259,7 @@ class ISEAPlanarProjection {
                         double cosLat0SinZ = cosLat0 * sinZ;
                         double latSin =
                             sinLat0 * cosZ + cosLat0SinZ * cos(Az_earth);
-                        double lat = fabs(latSin - 1.0) < 1E-15 ? M_PI / 2
-                                     : fabs(latSin + 1.0) < 1E-15
-                                         ? -M_PI / 2
-                                         : asin(latSin);
+                        double lat = safeArcSin(latSin);
                         double lon =
                             facesCenterDodecahedronVertices[c.face].lon +
                             atan2(sin(Az_earth) * cosLat0SinZ,
