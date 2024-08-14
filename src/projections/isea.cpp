@@ -280,6 +280,9 @@ static struct isea_pt isea_triangle_xy(int triangle) {
     if (triangle > 9) {
         c.x += TABLE_G;
     }
+
+    // REVIEW: This is likely related to
+    //         pj_isea_data::yOffsets
     switch (triangle / 5) {
     case 0:
         c.y = 5.0 * TABLE_H;
@@ -633,17 +636,16 @@ static void isea_rotate(struct isea_pt *pt, double degrees) {
     pt->y = y;
 }
 
-static int isea_tri_plane(int tri, struct isea_pt *pt) {
+static void isea_tri_plane(int tri, struct isea_pt *pt) {
     struct isea_pt tc; /* center of triangle */
 
     if (DOWNTRI(tri)) {
-        isea_rotate(pt, 180.0);
+        pt->x *= -1;
+        pt->y *= -1;
     }
     tc = isea_triangle_xy(tri);
     pt->x += tc.x;
     pt->y += tc.y;
-
-    return tri;
 }
 
 /* convert projected triangle coords to quad xy coords, return quad number */
@@ -653,6 +655,8 @@ static int isea_ptdd(int tri, struct isea_pt *pt) {
     downtri = ((tri / 5) % 2 == 1);
     quadz = (tri % 5) + (tri / 10) * 5 + 1;
 
+    // NOTE: This would always be a 60 degrees rotation if the flip were
+    //       already done as in isea_tri_plane()
     isea_rotate(pt, downtri ? 240.0 : 60.0);
     if (downtri) {
         pt->x += 0.5;
