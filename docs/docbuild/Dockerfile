@@ -2,7 +2,7 @@ FROM ubuntu:24.04
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        python3-dev python3-pip python3-venv g++ doxygen dvipng latexmk \
+        python3-dev python3-pip python3-venv make g++ doxygen dvipng latexmk \
         cmake libjpeg8-dev zlib1g-dev texlive-latex-base \
         texlive-latex-extra git latex-cjk-all texlive-lang-all \
         graphviz python3-matplotlib wget unzip enchant-2 locales \
