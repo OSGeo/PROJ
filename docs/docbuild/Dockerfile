@@ -5,6 +5,7 @@ RUN apt-get update \
         python3-dev python3-pip python3-venv make g++ doxygen dvipng latexmk \
         cmake libjpeg8-dev zlib1g-dev texlive-latex-base \
         texlive-latex-extra git latex-cjk-all texlive-lang-all \
+        tex-gyre \
         graphviz python3-matplotlib wget unzip enchant-2 locales \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
