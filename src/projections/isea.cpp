@@ -231,17 +231,7 @@ static void hexbin2(double width, double x, double y, long *i, long *j) {
 #define numIcosahedronFaces 20
 
 namespace { // anonymous namespace
-enum isea_address_form {
-    ISEA_GEO,
-    ISEA_Q2DI,
-    ISEA_SEQNUM,
-    ISEA_INTERLEAVE,
-    ISEA_PLANE,
-    ISEA_Q2DD,
-    ISEA_PROJTRI,
-    ISEA_VERTEX2DD,
-    ISEA_HEX
-};
+enum isea_address_form { ISEA_PLANE, ISEA_Q2DI, ISEA_Q2DD, ISEA_HEX };
 
 struct isea_sincos {
     double s, c;
@@ -318,17 +308,13 @@ namespace { // anonymous namespace
 class ISEAPlanarProjection;
 
 struct pj_isea_data {
-    int polyhedron;            /* ignored, icosahedron */
     double o_lat, o_lon, o_az; /* orientation, radians */
-    int topology;              /* ignored, hexagon */
     int aperture;              /* valid values depend on partitioning method */
     int resolution;
-    double radius; /* radius of the earth in meters, ignored 1.0 */
-    int output;    /* an isea_address_form */
-    int triangle;  /* triangle of last transformed point */
-    int quad;      /* quad of last transformed point */
+    isea_address_form output; /* an isea_address_form */
+    int triangle;             /* triangle of last transformed point */
+    int quad;                 /* quad of last transformed point */
     isea_sincos vertexLatSinCos[numIcosahedronFaces];
-    unsigned long serial;
 
     double R2;
     double Rprime;
@@ -581,14 +567,11 @@ static int isea_grid_init(struct pj_isea_data *g) {
     if (!g)
         return 0;
 
-    g->polyhedron = numIcosahedronFaces;
     g->o_lat = ISEA_STD_LAT;
     g->o_lon = ISEA_STD_LONG;
     g->o_az = 0.0;
     g->aperture = 4;
     g->resolution = 6;
-    g->radius = 1.0;
-    g->topology = 6;
 
     for (i = 0; i < numIcosahedronFaces; i++) {
         const GeoPoint *c = &facesCenterDodecahedronVertices[i];
@@ -625,8 +608,6 @@ static int isea_transform(struct pj_isea_data *g, struct GeoPoint *in,
     i = isea_ctran(&pole, in, g->o_az);
 
     tri = isea_snyder_forward(g, &i, out);
-    out->x *= g->radius;
-    out->y *= g->radius;
     g->triangle = tri;
 
     return tri;
@@ -652,15 +633,13 @@ static void isea_rotate(struct isea_pt *pt, double degrees) {
     pt->y = y;
 }
 
-static int isea_tri_plane(int tri, struct isea_pt *pt, double radius) {
+static int isea_tri_plane(int tri, struct isea_pt *pt) {
     struct isea_pt tc; /* center of triangle */
 
     if (DOWNTRI(tri)) {
         isea_rotate(pt, 180.0);
     }
     tc = isea_triangle_xy(tri);
-    tc.x *= radius;
-    tc.y *= radius;
     pt->x += tc.x;
     pt->y += tc.y;
 
@@ -850,40 +829,6 @@ static int isea_ptdi(struct pj_isea_data *g, int tri, struct isea_pt *pt,
     return quadz;
 }
 
-/* q2di to seqnum */
-
-static long isea_disn(struct pj_isea_data *g, int quadz, struct isea_pt *di) {
-    long sidelength;
-    long sn, height;
-    long hexes;
-
-    if (quadz == 0) {
-        g->serial = 1;
-        return g->serial;
-    }
-    /* hexes in a quad */
-    hexes = lround(pow(static_cast<double>(g->aperture),
-                       static_cast<double>(g->resolution)));
-    if (quadz == 11) {
-        g->serial = 1 + 10 * hexes + 1;
-        return g->serial;
-    }
-    if (g->aperture == 3 && g->resolution % 2 == 1) {
-        height = lround(floor((pow(g->aperture, (g->resolution - 1) / 2.0))));
-        sn = ((long)di->x) * height;
-        sn += ((long)di->y) / height;
-        sn += (quadz - 1) * hexes;
-        sn += 2;
-    } else {
-        sidelength = lround((pow(g->aperture, g->resolution / 2.0)));
-        sn = lround(
-            floor(((quadz - 1) * hexes + sidelength * di->x + di->y + 2)));
-    }
-
-    g->serial = sn;
-    return sn;
-}
-
 /* TODO just encode the quad in the d or i coordinate
  * quad is 0-11, which can be four bits.
  * d' = d << 4 + q, d = d' >> 4, q = d' & 0xf
@@ -957,49 +902,35 @@ static int isea_hex(struct pj_isea_data *g, int tri, struct isea_pt *pt,
 
 static struct isea_pt isea_forward(struct pj_isea_data *g,
                                    struct GeoPoint *in) {
-    int tri;
-    struct isea_pt out, coord;
+    isea_pt out;
+    int tri = isea_transform(g, in, &out);
 
-    tri = isea_transform(g, in, &out);
+    if (g->output == ISEA_PLANE)
+        isea_tri_plane(tri, &out);
+    else {
+        isea_pt coord;
 
-    if (g->output == ISEA_PLANE) {
-        isea_tri_plane(tri, &out, g->radius);
-        return out;
+        /* convert to isea standard triangle size */
+        out.x *= ISEA_SCALE; // / g->radius;
+        out.y *= ISEA_SCALE; // / g->radius;
+        out.x += 0.5;
+        out.y += 2.0 * .14433756729740644112;
+
+        switch (g->output) {
+        case ISEA_PLANE:
+            /* already handled above -- GCC should not be complaining */
+        case ISEA_Q2DD:
+            /* Same as above, we just don't print as much */
+            g->quad = isea_ptdd(tri, &out);
+            break;
+        case ISEA_Q2DI:
+            g->quad = isea_ptdi(g, tri, &out, &coord);
+            return coord;
+        case ISEA_HEX:
+            isea_hex(g, tri, &out, &coord);
+            return coord;
+        }
     }
-
-    /* convert to isea standard triangle size */
-    out.x = out.x / g->radius * ISEA_SCALE;
-    out.y = out.y / g->radius * ISEA_SCALE;
-    out.x += 0.5;
-    out.y += 2.0 * .14433756729740644112;
-
-    switch (g->output) {
-    case ISEA_PROJTRI:
-        /* nothing to do, already in projected triangle */
-        break;
-    case ISEA_VERTEX2DD:
-        g->quad = isea_ptdd(tri, &out);
-        break;
-    case ISEA_Q2DD:
-        /* Same as above, we just don't print as much */
-        g->quad = isea_ptdd(tri, &out);
-        break;
-    case ISEA_Q2DI:
-        g->quad = isea_ptdi(g, tri, &out, &coord);
-        return coord;
-        break;
-    case ISEA_SEQNUM:
-        isea_ptdi(g, tri, &out, &coord);
-        /* disn will set g->serial */
-        isea_disn(g, g->quad, &coord);
-        return coord;
-        break;
-    case ISEA_HEX:
-        isea_hex(g, tri, &out, &coord);
-        return coord;
-        break;
-    }
-
     return out;
 }
 
@@ -1098,9 +1029,11 @@ PJ *PJ_PROJECTION(isea) {
         }
     }
 
+    /* REVIEW: Was this an undocumented +rescale= parameter?
     if (pj_param(P->ctx, P->params, "trescale").i) {
         Q->radius = ISEA_SCALE;
     }
+    */
 
     if (pj_param(P->ctx, P->params, "tresolution").i) {
         Q->resolution = pj_param(P->ctx, P->params, "iresolution").i;
