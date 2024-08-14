@@ -36,32 +36,32 @@ if(UNIX)
   endif()
 endif()
 
-macro(find_Python3_package PACKAGE VARIABLE)
+macro(find_Python_package PACKAGE VARIABLE)
   if(NOT DEFINED "${VARIABLE}")
     if(NOT CMAKE_REQUIRED_QUIET)
       # CMake 3.17+ use CHECK_START/CHECK_PASS/CHECK_FAIL
       message(STATUS "Looking for ${PACKAGE}")
     endif()
-    if(Python3_VERSION VERSION_GREATER_EQUAL "3.8.0")
+    if(Python_VERSION VERSION_GREATER_EQUAL "3.8.0")
       # importlib.metadata was added in version 3.8
       set(CMD "from importlib.metadata import version; print(version('${PACKAGE}'), end='')")
       execute_process(
-        COMMAND ${Python3_EXECUTABLE} -c "${CMD}"
+        COMMAND ${Python_EXECUTABLE} -c "${CMD}"
         RESULT_VARIABLE EXIT_CODE
         OUTPUT_VARIABLE ${PACKAGE}_VERSION
         ERROR_QUIET
       )
     else()
-      # importlib_metadata backport needed for older Python3 versions
+      # importlib_metadata backport needed for older Python versions
       execute_process(
-        COMMAND ${Python3_EXECUTABLE} -c "import importlib_metadata"
+        COMMAND ${Python_EXECUTABLE} -c "import importlib_metadata"
         RESULT_VARIABLE EXIT_CODE
         OUTPUT_QUIET ERROR_QUIET
       )
       if(EXIT_CODE EQUAL 0)
         set(CMD "from importlib_metadata import version; print(version('${PACKAGE}'), end='')")
         execute_process(
-            COMMAND ${Python3_EXECUTABLE} -c "${CMD}"
+            COMMAND ${Python_EXECUTABLE} -c "${CMD}"
             RESULT_VARIABLE EXIT_CODE
             OUTPUT_VARIABLE ${PACKAGE}_VERSION
             ERROR_QUIET
@@ -85,23 +85,25 @@ macro(find_Python3_package PACKAGE VARIABLE)
 endmacro()
 
 # Evaluate if Python can be used for CLI testing
-find_package(Python3 COMPONENTS Interpreter)
-set(Python3_for_cli_tests OFF)
-if(Python3_FOUND)
-  if(Python3_VERSION VERSION_GREATER_EQUAL "3.7.0")
-    find_Python3_package("ruamel.yaml" HAS_RUAMEL_YAML)
+find_package(Python COMPONENTS Interpreter)
+set(Python_for_cli_tests OFF)
+if(Python_FOUND)
+  if(Python_VERSION VERSION_GREATER_EQUAL "3.7.0")
+    find_Python_package("ruamel.yaml" HAS_RUAMEL_YAML)
     if(HAS_RUAMEL_YAML)
-      set(Python3_for_cli_tests ON)
+      set(Python_for_cli_tests ON)
     else()
-      find_Python3_package("pyyaml" HAS_PYYAML)
+      find_Python_package("pyyaml" HAS_PYYAML)
       if(HAS_PYYAML)
-        set(Python3_for_cli_tests ON)
+        set(Python_for_cli_tests ON)
       endif()
     endif()
+  else()
+    message(WARNING "Python Interpreter version is too old")
   endif()
 endif()
 
-if(Python3_for_cli_tests)
+if(Python_for_cli_tests)
   if(BUILD_CCT)
     proj_run_cli_test(test_cct.yaml CCT_EXE)
   endif()
@@ -123,10 +125,10 @@ if(Python3_for_cli_tests)
   endif()
 
   # auto-test run_cli_test.py if pytest available
-  find_Python3_package("pytest" HAS_PYTEST)
+  find_Python_package("pytest" HAS_PYTEST)
   if(HAS_PYTEST)
     add_test(NAME pytest_run_cli_test
-      COMMAND ${Python3_EXECUTABLE} -m pytest -vv
+      COMMAND ${Python_EXECUTABLE} -m pytest -vv
         ${PROJ_SOURCE_DIR}/test/cli/run_cli_test.py
     )
   endif()
