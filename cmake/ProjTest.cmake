@@ -29,7 +29,7 @@ function(proj_run_cli_test TESTFILE EXE_PATH)
 
   add_test(NAME ${testname}
     WORKING_DIRECTORY ${PROJ_BINARY_DIR}/test/cli
-    COMMAND ${Python3_EXECUTABLE}
+    COMMAND ${Python_EXECUTABLE}
       ${PROJ_SOURCE_DIR}/test/cli/run_cli_test.py
       --exe "${${EXE_PATH}}"
       ${PROJ_SOURCE_DIR}/test/cli/${TESTFILE}

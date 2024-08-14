@@ -174,7 +174,7 @@ jobs:
               -D USE_CCACHE=ON \
               -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
               -D CMAKE_UNITY_BUILD=ON \
-              -D Python3_ROOT_DIR=/mingw64 \
+              -D Python_ROOT_DIR=/mingw64 \
               ..
             make -j 2
             make install
