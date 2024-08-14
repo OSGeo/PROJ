@@ -3128,7 +3128,7 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
                    EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A) {
             if (std::abs(
                     conv->parameterValueNumericAsSI(
-                        EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) -
+                        EPSG_CODE_PARAMETER_AZIMUTH_PROJECTION_CENTRE) -
                     conv->parameterValueNumericAsSI(
                         EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) <
                 1e-15) {
@@ -3145,7 +3145,7 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
                    EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B) {
             if (std::abs(
                     conv->parameterValueNumericAsSI(
-                        EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) -
+                        EPSG_CODE_PARAMETER_AZIMUTH_PROJECTION_CENTRE) -
                     conv->parameterValueNumericAsSI(
                         EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) <
                 1e-15) {
@@ -3871,7 +3871,7 @@ void Conversion::_exportToPROJString(
     } else if (methodEPSGCode ==
                EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A) {
         const double azimuth =
-            parameterValueNumeric(EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE,
+            parameterValueNumeric(EPSG_CODE_PARAMETER_AZIMUTH_PROJECTION_CENTRE,
                                   common::UnitOfMeasure::DEGREE);
         const double angleRectifiedToSkewGrid = parameterValueNumeric(
             EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID,
@@ -3891,7 +3891,7 @@ void Conversion::_exportToPROJString(
                              common::UnitOfMeasure::DEGREE));
             formatter->addParam(
                 "k_0", parameterValueNumericAsSI(
-                           EPSG_CODE_PARAMETER_SCALE_FACTOR_INITIAL_LINE));
+                           EPSG_CODE_PARAMETER_SCALE_FACTOR_PROJECTION_CENTRE));
             formatter->addParam("x_0", parameterValueNumericAsSI(
                                            EPSG_CODE_PARAMETER_FALSE_EASTING));
             formatter->addParam("y_0", parameterValueNumericAsSI(
@@ -3900,7 +3900,7 @@ void Conversion::_exportToPROJString(
     } else if (methodEPSGCode ==
                EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B) {
         const double azimuth =
-            parameterValueNumeric(EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE,
+            parameterValueNumeric(EPSG_CODE_PARAMETER_AZIMUTH_PROJECTION_CENTRE,
                                   common::UnitOfMeasure::DEGREE);
         const double angleRectifiedToSkewGrid = parameterValueNumeric(
             EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID,
@@ -3920,7 +3920,7 @@ void Conversion::_exportToPROJString(
                              common::UnitOfMeasure::DEGREE));
             formatter->addParam(
                 "k_0", parameterValueNumericAsSI(
-                           EPSG_CODE_PARAMETER_SCALE_FACTOR_INITIAL_LINE));
+                           EPSG_CODE_PARAMETER_SCALE_FACTOR_PROJECTION_CENTRE));
             formatter->addParam(
                 "x_0", parameterValueNumericAsSI(
                            EPSG_CODE_PARAMETER_EASTING_PROJECTION_CENTRE));

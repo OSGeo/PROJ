@@ -311,16 +311,28 @@
     "Longitude of projection centre"
 #define EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE 8812
 
+// Before EPSG 11.015
 #define EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE "Azimuth of initial line"
 #define EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE 8813
+
+// Since EPSG 11.015
+#define EPSG_NAME_PARAMETER_AZIMUTH_PROJECTION_CENTRE                          \
+    "Azimuth at projection centre"
+#define EPSG_CODE_PARAMETER_AZIMUTH_PROJECTION_CENTRE 8813
 
 #define EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID                       \
     "Angle from Rectified to Skew Grid"
 #define EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID 8814
 
+// Before EPSG 11.015
 #define EPSG_NAME_PARAMETER_SCALE_FACTOR_INITIAL_LINE                          \
     "Scale factor on initial line"
 #define EPSG_CODE_PARAMETER_SCALE_FACTOR_INITIAL_LINE 8815
+
+// Since EPSG 11.015
+#define EPSG_NAME_PARAMETER_SCALE_FACTOR_PROJECTION_CENTRE                     \
+    "Scale factor at projection centre"
+#define EPSG_CODE_PARAMETER_SCALE_FACTOR_PROJECTION_CENTRE 8815
 
 #define EPSG_NAME_PARAMETER_EASTING_PROJECTION_CENTRE                          \
     "Easting at projection centre"

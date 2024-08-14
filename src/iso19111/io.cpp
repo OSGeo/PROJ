@@ -4444,14 +4444,14 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                 foundAngleRecifiedToSkewGrid = true;
             } else if (foundParameters[idx] &&
                        mapping->params[idx]->epsg_code ==
-                           EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) {
+                           EPSG_CODE_PARAMETER_AZIMUTH_PROJECTION_CENTRE) {
                 foundAzimuth = true;
             }
         }
         if (!foundAngleRecifiedToSkewGrid && foundAzimuth) {
             for (size_t idx = 0; idx < parameters.size(); ++idx) {
                 if (parameters[idx]->getEPSGCode() ==
-                    EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) {
+                    EPSG_CODE_PARAMETER_AZIMUTH_PROJECTION_CENTRE) {
                     PropertyMap propertiesParameter;
                     propertiesParameter.set(
                         Identifier::CODE_KEY,

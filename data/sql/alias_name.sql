@@ -745,6 +745,8 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1383','WGS 84 (G2296)',
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1374','DKMSL(2023)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1386','WC05-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1385','ECML14-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1388','GLLAT(2023)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1387','GLMSL(2023)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -7978,6 +7980,7 @@ INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','10551','DKMSL ensemble de
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','10552','DKLAT ensemble depth','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','7400','NTF (Paris) + NGF IGN69 height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3844','Stereografic 1970','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10622','NAD83(2011) / SFO B18 grid (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10627','ETRS89 / ECML14 SnakeGrid + Newlyn height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10626','ETRS89 / ECML14 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10632','ETRS89 / WC05 SnakeGrid','EPSG');

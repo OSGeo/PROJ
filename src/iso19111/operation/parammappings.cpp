@@ -297,17 +297,17 @@ static const ParamMapping paramLonCentreLonCenterLonc = {
     common::UnitOfMeasure::Type::ANGULAR, lonc};
 
 static const ParamMapping paramAzimuth = {
-    EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
-    EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE, WKT1_AZIMUTH,
+    EPSG_NAME_PARAMETER_AZIMUTH_PROJECTION_CENTRE,
+    EPSG_CODE_PARAMETER_AZIMUTH_PROJECTION_CENTRE, WKT1_AZIMUTH,
     common::UnitOfMeasure::Type::ANGULAR, alpha};
 
 static const ParamMapping paramAngleToSkewGrid = {
     EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID,
     EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID, WKT1_RECTIFIED_GRID_ANGLE,
     common::UnitOfMeasure::Type::ANGULAR, gamma};
-static const ParamMapping paramScaleFactorInitialLine = {
-    EPSG_NAME_PARAMETER_SCALE_FACTOR_INITIAL_LINE,
-    EPSG_CODE_PARAMETER_SCALE_FACTOR_INITIAL_LINE, WKT1_SCALE_FACTOR,
+static const ParamMapping paramScaleFactorProjectionCentre = {
+    EPSG_NAME_PARAMETER_SCALE_FACTOR_PROJECTION_CENTRE,
+    EPSG_CODE_PARAMETER_SCALE_FACTOR_PROJECTION_CENTRE, WKT1_SCALE_FACTOR,
     common::UnitOfMeasure::Type::SCALE, k};
 
 static const ParamMapping *const paramsHomVariantA[] = {
@@ -315,7 +315,7 @@ static const ParamMapping *const paramsHomVariantA[] = {
     &paramLonCentreLonCenterLonc,
     &paramAzimuth,
     &paramAngleToSkewGrid,
-    &paramScaleFactorInitialLine,
+    &paramScaleFactorProjectionCentre,
     &paramFalseEasting,
     &paramFalseNorthing,
     nullptr};
@@ -335,7 +335,7 @@ static const ParamMapping *const paramsHomVariantB[] = {
     &paramLonCentreLonCenterLonc,
     &paramAzimuth,
     &paramAngleToSkewGrid,
-    &paramScaleFactorInitialLine,
+    &paramScaleFactorProjectionCentre,
     &paramFalseEastingProjectionCentre,
     &paramFalseNorthingProjectionCentre,
     nullptr};
@@ -362,7 +362,7 @@ static const ParamMapping *const paramsHomTwoPoint[] = {
     &paramLongPoint1,
     &paramLatPoint2,
     &paramLongPoint2,
-    &paramScaleFactorInitialLine,
+    &paramScaleFactorProjectionCentre,
     &paramFalseEastingProjectionCentre,
     &paramFalseNorthingProjectionCentre,
     nullptr};
@@ -497,15 +497,15 @@ static const ParamMapping paramLongCentre = {
     common::UnitOfMeasure::Type::ANGULAR, lon_0};
 
 static const ParamMapping paramLabordeObliqueMercatorAzimuth = {
-    EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
-    EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE, WKT1_AZIMUTH,
+    EPSG_NAME_PARAMETER_AZIMUTH_PROJECTION_CENTRE,
+    EPSG_CODE_PARAMETER_AZIMUTH_PROJECTION_CENTRE, WKT1_AZIMUTH,
     common::UnitOfMeasure::Type::ANGULAR, "azi"};
 
 static const ParamMapping *const paramsLabordeObliqueMercator[] = {
     &paramLatCentreLatCenter,
     &paramLongCentre,
     &paramLabordeObliqueMercatorAzimuth,
-    &paramScaleFactorInitialLine,
+    &paramScaleFactorProjectionCentre,
     &paramFalseEasting,
     &paramFalseNorthing,
     nullptr};
@@ -1048,9 +1048,9 @@ const struct ParamNameCode paramNameCodes[] = {
     PARAM_NAME_CODE(FALSE_NORTHING),
     PARAM_NAME_CODE(LATITUDE_PROJECTION_CENTRE),
     PARAM_NAME_CODE(LONGITUDE_PROJECTION_CENTRE),
-    PARAM_NAME_CODE(AZIMUTH_INITIAL_LINE),
+    PARAM_NAME_CODE(AZIMUTH_PROJECTION_CENTRE),
     PARAM_NAME_CODE(ANGLE_RECTIFIED_TO_SKEW_GRID),
-    PARAM_NAME_CODE(SCALE_FACTOR_INITIAL_LINE),
+    PARAM_NAME_CODE(SCALE_FACTOR_PROJECTION_CENTRE),
     PARAM_NAME_CODE(EASTING_PROJECTION_CENTRE),
     PARAM_NAME_CODE(NORTHING_PROJECTION_CENTRE),
     PARAM_NAME_CODE(LATITUDE_PSEUDO_STANDARD_PARALLEL),
