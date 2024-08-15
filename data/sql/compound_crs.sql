@@ -874,6 +874,10 @@ INSERT INTO "compound_crs" VALUES('EPSG','10627','ECML14 Grid + ODN height',NULL
 INSERT INTO "usage" VALUES('EPSG','21376','compound_crs','EPSG','10627','EPSG','4774','EPSG','1141');
 INSERT INTO "compound_crs" VALUES('EPSG','10633','RGAF09 / UTM zone 20N + Martinique 1987 height',NULL,'EPSG','5490','EPSG','5756',0);
 INSERT INTO "usage" VALUES('EPSG','21399','compound_crs','EPSG','10633','EPSG','3276','EPSG','1178');
+INSERT INTO "compound_crs" VALUES('EPSG','10651','GR96 + GLMSL(2023) depth',NULL,'EPSG','4747','EPSG','10649',0);
+INSERT INTO "usage" VALUES('EPSG','21455','compound_crs','EPSG','10651','EPSG','4776','EPSG','1272');
+INSERT INTO "compound_crs" VALUES('EPSG','10652','GR96 + GLLAT(2023) depth',NULL,'EPSG','4747','EPSG','10650',0);
+INSERT INTO "usage" VALUES('EPSG','21452','compound_crs','EPSG','10652','EPSG','4776','EPSG','1272');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);

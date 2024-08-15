@@ -974,7 +974,7 @@ bool OperationParameterValue::_isEquivalentTo(
         return true;
     }
     if (d->parameter->getEPSGCode() ==
-            EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE ||
+            EPSG_CODE_PARAMETER_AZIMUTH_PROJECTION_CENTRE ||
         d->parameter->getEPSGCode() ==
             EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID) {
         if (parameterValue()->type() == ParameterValue::Type::MEASURE &&

@@ -3505,6 +3505,7 @@ INSERT INTO "extent" VALUES('EPSG','4525','Pacific - Guam and NMI - onshore','Gu
 INSERT INTO "extent" VALUES('EPSG','4526','Saudi Arabia - 36°E to 42°E','Saudi Arabia - onshore and offshore - between 36°E and 42°E.',16.29,32.16,36.0,42.0,0);
 INSERT INTO "extent" VALUES('EPSG','4527','Saudi Arabia - 42°E to 48°E','Saudi Arabia - onshore and offshore - between of 42°E and 48°E.',16.35,31.15,41.99,48.0,0);
 INSERT INTO "extent" VALUES('EPSG','4528','Saudi Arabia - 48°E to 54°E','Saudi Arabia - onshore and offshore - between 48°E and 54°E.',17.94,28.94,47.99,54.01,0);
+INSERT INTO "extent" VALUES('EPSG','4529','USA - California - San Francisco international airport','USA - California - San Francisco international airport.',37.58,37.66,-122.43,-122.33,0);
 INSERT INTO "extent" VALUES('EPSG','4530','Latin America - Central America and South America','Latin America - Central America and South America, onshore and offshore.',-59.87,32.72,-122.19,-25.28,0);
 INSERT INTO "extent" VALUES('EPSG','4531','Costa Rica - offshore Caribbean','Costa Rica - offshore - Caribbean sea.',9.6,11.77,-83.6,-81.43,0);
 INSERT INTO "extent" VALUES('EPSG','4532','Costa Rica - offshore Pacific','Costa Rica - offshore Pacific ocean and onshore Coco Island.',2.15,11.11,-90.45,-82.92,0);
@@ -3750,3 +3751,4 @@ INSERT INTO "extent" VALUES('EPSG','4772','Europe - 24°E to 30°E and ETRF by c
 INSERT INTO "extent" VALUES('EPSG','4773','Europe - 30°E to 36°E and ETRF by country','Europe between 30°E and 36°E and approximately 33°55''N to 84°N: Bulgaria - offshore; Norway including Svalbard - onshore and offshore.',33.91,84.01,30.0,36.01,0);
 INSERT INTO "extent" VALUES('EPSG','4774','UK - London to Edinburgh','United Kingdom (UK) - on or related to the east coast mainline rail route from London (Kings Cross) via Newcastle to Edinburgh.',51.45,56.1,-3.45,0.05,0);
 INSERT INTO "extent" VALUES('EPSG','4775','UK - London to Glasgow','United Kingdom (UK) - on or related to the west coast mainline rail route from London (Euston) via Carlisle to Glasgow.',51.4,55.92,-4.33,-0.04,0);
+INSERT INTO "extent" VALUES('EPSG','4776','Greenland - offshore','Greenland - offshore.',56.38,87.03,-75.0,7.99,0);

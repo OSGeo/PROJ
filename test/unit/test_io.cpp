@@ -7111,7 +7111,7 @@ static const struct {
          {"Longitude of 1st point", 6},
          {"Latitude of 2nd point", 4},
          {"Longitude of 2nd point", 7},
-         {"Scale factor on initial line", 5},
+         {"Scale factor at projection centre", 5},
          {"Easting at projection centre", 1},
          {"Northing at projection centre", 2},
      }},
@@ -7296,9 +7296,9 @@ static const struct {
      {
          {"Latitude of projection centre", 6},
          {"Longitude of projection centre", 5},
-         {"Azimuth of initial line", 4},
+         {"Azimuth at projection centre", 4},
          {"Angle from Rectified to Skew Grid", 4},
-         {"Scale factor on initial line", 3},
+         {"Scale factor at projection centre", 3},
          {"False easting", 1},
          {"False northing", 2},
      }},
@@ -7314,9 +7314,9 @@ static const struct {
      {
          {"Latitude of projection centre", 6},
          {"Longitude of projection centre", 5},
-         {"Azimuth of initial line", 4},
+         {"Azimuth at projection centre", 4},
          {"Angle from Rectified to Skew Grid", 4},
-         {"Scale factor on initial line", 3},
+         {"Scale factor at projection centre", 3},
          {"Easting at projection centre", 1},
          {"Northing at projection centre", 2},
      }},
@@ -7523,9 +7523,9 @@ static const struct {
      {
          {"Latitude of projection centre", 6},
          {"Longitude of projection centre", 5},
-         {"Azimuth of initial line", 4},
+         {"Azimuth at projection centre", 4},
          {"Angle from Rectified to Skew Grid", 7},
-         {"Scale factor on initial line", 3},
+         {"Scale factor at projection centre", 3},
          {"False easting", 1},
          {"False northing", 2},
      }},
@@ -7545,9 +7545,9 @@ static const struct {
      {
          {"Latitude of projection centre", 6},
          {"Longitude of projection centre", 5},
-         {"Azimuth of initial line", 4},
+         {"Azimuth at projection centre", 4},
          {"Angle from Rectified to Skew Grid", 7},
-         {"Scale factor on initial line", 3},
+         {"Scale factor at projection centre", 3},
          {"Easting at projection centre", 1},
          {"Northing at projection centre", 2},
      }},
@@ -7614,8 +7614,8 @@ static const struct {
      {
          {"Latitude of projection centre", 6},
          {"Longitude of projection centre", 5},
-         {"Azimuth of initial line", 4},
-         {"Scale factor on initial line", 3},
+         {"Azimuth at projection centre", 4},
+         {"Scale factor at projection centre", 3},
          {"False easting", 1},
          {"False northing", 2},
      }},
@@ -11688,7 +11688,7 @@ TEST(io, projparse_omerc_nouoff) {
     EXPECT_TRUE(wkt.find("METHOD[\"Hotine Oblique Mercator (variant "
                          "A)\",ID[\"EPSG\",9812]]") != std::string::npos)
         << wkt;
-    EXPECT_TRUE(wkt.find("PARAMETER[\"Azimuth of initial line\",2") !=
+    EXPECT_TRUE(wkt.find("PARAMETER[\"Azimuth at projection centre\",2") !=
                 std::string::npos)
         << wkt;
     EXPECT_TRUE(wkt.find("PARAMETER[\"Angle from Rectified to Skew Grid\",3") !=
@@ -11756,10 +11756,11 @@ TEST(io, projparse_somerc) {
     EXPECT_TRUE(wkt.find("\"Longitude of projection centre\",2") !=
                 std::string::npos)
         << wkt;
-    EXPECT_TRUE(wkt.find("\"Scale factor on initial line\",3") !=
+    EXPECT_TRUE(wkt.find("\"Scale factor at projection centre\",3") !=
                 std::string::npos)
         << wkt;
-    EXPECT_TRUE(wkt.find("\"Azimuth of initial line\",90") != std::string::npos)
+    EXPECT_TRUE(wkt.find("\"Azimuth at projection centre\",90") !=
+                std::string::npos)
         << wkt;
     EXPECT_TRUE(wkt.find("\"Angle from Rectified to Skew Grid\",90") !=
                 std::string::npos)
