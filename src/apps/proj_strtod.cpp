@@ -271,18 +271,17 @@ double proj_strtod(const char *str, char **endptr) {
             p++;
         /* Does it have a sign? */
         sign = 0;
-        if ('-' == *p)
+        if ('-' == *p) {
             sign = -1;
-        if ('+' == *p)
-            sign = +1;
-        if (0 == sign) {
-            if (!(isdigit(*p) || *p == '_')) {
-                if (endptr)
-                    *endptr = const_cast<char *>(p);
-                return HUGE_VAL;
-            }
-        } else
             p++;
+        } else if ('+' == *p) {
+            sign = +1;
+            p++;
+        } else if (!(isdigit(*p))) {
+            if (endptr)
+                *endptr = const_cast<char *>(p);
+            return HUGE_VAL;
+        }
 
         /* Go on and read the exponent */
         n = 0;

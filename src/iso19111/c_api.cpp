@@ -9529,11 +9529,13 @@ PROJ_STRING_LIST proj_get_insert_statements(
     (void)options;
 
     struct TempSessionHolder {
+      private:
         PJ_CONTEXT *m_ctx;
-        PJ_INSERT_SESSION *m_tempSession = nullptr;
+        PJ_INSERT_SESSION *m_tempSession;
         TempSessionHolder(const TempSessionHolder &) = delete;
         TempSessionHolder &operator=(const TempSessionHolder &) = delete;
 
+      public:
         TempSessionHolder(PJ_CONTEXT *ctx, PJ_INSERT_SESSION *session)
             : m_ctx(ctx),
               m_tempSession(session ? nullptr
@@ -9544,12 +9546,16 @@ PROJ_STRING_LIST proj_get_insert_statements(
                 proj_insert_object_session_destroy(m_ctx, m_tempSession);
             }
         }
+
+        inline PJ_INSERT_SESSION *GetTempSession() const {
+            return m_tempSession;
+        }
     };
 
     try {
         TempSessionHolder oHolder(ctx, session);
         if (!session) {
-            session = oHolder.m_tempSession;
+            session = oHolder.GetTempSession();
             if (!session) {
                 return nullptr;
             }

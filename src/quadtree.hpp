@@ -227,8 +227,8 @@ template <class Feature> class QuadTree {
     }
 #endif
 
-    void search(const Node &node, double x, double y,
-                std::vector<Feature> &features) const {
+    static void search(const Node &node, double x, double y,
+                       std::vector<Feature> &features) {
         // Does this node overlap the area of interest at all?  If not,
         // return without adding to the list at all.
         if (!node.rect.contains(x, y))

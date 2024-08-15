@@ -50,6 +50,7 @@ static PJ_XY vandg_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
             // https://github.com/OSGeo/PROJ/issues/1906#issuecomment-583168348
             // The choice of p2 is completely arbitrary.
             volatile double p2_tmp = p2;
+            // cppcheck-suppress redundantAssignment
             p2 = p2_tmp;
         }
         xy.x = g - p2; // G - P^2

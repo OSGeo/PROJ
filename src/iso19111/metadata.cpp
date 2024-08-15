@@ -928,8 +928,8 @@ void Identifier::Private::setProperties(
                                                     AUTHORITY_KEY);
                 }
             } else {
-                if (auto citation =
-                        dynamic_cast<const Citation *>(pVal->get())) {
+                auto citation = dynamic_cast<const Citation *>(pVal->get());
+                if (citation) {
                     authority_ = *citation;
                 } else {
                     throw InvalidValueTypeException("Invalid value type for " +

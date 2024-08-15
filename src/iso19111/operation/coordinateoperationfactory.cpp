@@ -1655,10 +1655,9 @@ filterAndSort(const std::vector<CoordinateOperationNNPtr> &sourceList,
     logTrace("number of results before filter and sort: " +
              toString(static_cast<int>(sourceList.size())));
 #endif
-    auto resFiltered =
-        FilterResults(sourceList, context, extent1, extent2, false)
-            .andSort()
-            .getRes();
+    FilterResults filterResults(sourceList, context, extent1, extent2, false);
+    filterResults.andSort();
+    const auto &resFiltered = filterResults.getRes();
 #ifdef TRACE_CREATE_OPERATIONS
     logTrace("number of results after filter and sort: " +
              toString(static_cast<int>(resFiltered.size())));
