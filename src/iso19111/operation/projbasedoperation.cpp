@@ -97,6 +97,17 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     op->setProperties(
         addDefaultNameIfNeeded(properties, "PROJ-based coordinate operation"));
     op->setAccuracies(accuracies);
+
+    auto formatter = io::PROJStringFormatter::create();
+    try {
+        formatter->ingestPROJString(PROJString);
+        op->setRequiresPerCoordinateInputTime(
+            formatter->requiresPerCoordinateInputTime());
+    } catch (const io::ParsingException &e) {
+        throw util::UnsupportedOperationException(
+            std::string("PROJBasedOperation::create() failed: ") + e.what());
+    }
+
     return op;
 }
 
@@ -114,6 +125,8 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     if (inverse) {
         formatter->startInversion();
     }
+    const bool bRequiresPerCoordinateInputTime =
+        formatter->requiresPerCoordinateInputTime();
     projExportable->_exportToPROJString(formatter.get());
     if (inverse) {
         formatter->stopInversion();
@@ -135,6 +148,8 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     op->projStringExportable_ = projExportable.as_nullable();
     op->inverse_ = inverse;
     op->setHasBallparkTransformation(hasBallparkTransformation);
+    op->setRequiresPerCoordinateInputTime(bRequiresPerCoordinateInputTime);
+
     return op;
 }
 
@@ -170,6 +185,8 @@ CoordinateOperationNNPtr PROJBasedOperation::inverse() const {
                     interpolationCRS());
     }
     op->setHasBallparkTransformation(hasBallparkTransformation());
+    op->setRequiresPerCoordinateInputTime(
+        formatter->requiresPerCoordinateInputTime());
     return util::nn_static_pointer_cast<CoordinateOperation>(op);
 }
 

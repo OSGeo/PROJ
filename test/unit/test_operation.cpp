@@ -813,12 +813,16 @@ TEST(operation, transformation_createTimeDependentPositionVector) {
         std::vector<PositionalAccuracyNNPtr>());
     EXPECT_TRUE(transf->validateParameters().empty());
 
+    EXPECT_TRUE(transf->requiresPerCoordinateInputTime());
+
     auto inv_transf = transf->inverse();
 
     EXPECT_EQ(transf->sourceCRS()->nameStr(),
               inv_transf->targetCRS()->nameStr());
     EXPECT_EQ(transf->targetCRS()->nameStr(),
               inv_transf->sourceCRS()->nameStr());
+
+    EXPECT_TRUE(inv_transf->requiresPerCoordinateInputTime());
 
     auto projString =
         inv_transf->exportToPROJString(PROJStringFormatter::create().get());
@@ -4366,7 +4370,7 @@ TEST(operation, PROJ_based) {
                      PropertyMap(), "+proj=pipeline +step +proj=pipeline",
                      nullptr, nullptr)
                      ->exportToPROJString(PROJStringFormatter::create().get()),
-                 FormattingException);
+                 UnsupportedOperationException);
 }
 
 // ---------------------------------------------------------------------------
@@ -5712,6 +5716,8 @@ TEST(operation,
               "+step +inv +proj=vgridshift +grids=foo.gtx +multiplier=1 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
+
+    EXPECT_FALSE(transf->requiresPerCoordinateInputTime());
 }
 
 // ---------------------------------------------------------------------------

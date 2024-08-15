@@ -71,6 +71,15 @@ accept      -3004295.5882503074 -1093474.1690603832 5500477.1338251457 2000.0
 expect      -3004295.7000       -1093474.2097       5500477.3397       2000.0
 roundtrip   5
 
+# Missing time
+direction  forward
+accept -3004295.5882503074 -1093474.1690603832 5500477.1338251457 HUGE_VAL
+expect failure errno coord_transfm_missing_time
+
+direction  inverse
+accept -3004295.5882503074 -1093474.1690603832 5500477.1338251457 HUGE_VAL
+expect failure errno coord_transfm_missing_time
+
 -------------------------------------------------------------------------------
 operation   proj=deformation xy_grids=alaska +dt=1.0 ellps=GRS80
 expect      failure errno invalid_op_missing_arg

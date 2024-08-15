@@ -345,6 +345,12 @@ static PJ *destructor(PJ *P, int errlev) {
 static void forward_4d(PJ_COORD &coo, PJ *P) {
     auto *Q = (struct defmodelData *)P->opaque;
 
+    if (coo.xyzt.t == HUGE_VAL) {
+        coo = proj_coord_error();
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_MISSING_TIME);
+        return;
+    }
+
     if (!Q->evaluator->forward(Q->evaluatorIface, coo.xyzt.x, coo.xyzt.y,
                                coo.xyzt.z, coo.xyzt.t, coo.xyzt.x, coo.xyzt.y,
                                coo.xyzt.z)) {
@@ -354,6 +360,12 @@ static void forward_4d(PJ_COORD &coo, PJ *P) {
 
 static void reverse_4d(PJ_COORD &coo, PJ *P) {
     auto *Q = (struct defmodelData *)P->opaque;
+
+    if (coo.xyzt.t == HUGE_VAL) {
+        coo = proj_coord_error();
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_MISSING_TIME);
+        return;
+    }
 
     if (!Q->evaluator->inverse(Q->evaluatorIface, coo.xyzt.x, coo.xyzt.y,
                                coo.xyzt.z, coo.xyzt.t, coo.xyzt.x, coo.xyzt.y,

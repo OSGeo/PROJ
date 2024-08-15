@@ -7517,6 +7517,42 @@ int proj_coordoperation_has_ballpark_transformation(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether a coordinate operation requires coordinate tuples
+ * to have a valid input time for the coordinate transformation to succeed.
+ * (this applies for the forward direction)
+ *
+ * Note: in the case of a time-dependent Helmert transformation, this function
+ * will return true, but when executing proj_trans(), execution will still
+ * succeed if the time information is missing, due to the transformation central
+ * epoch being used as a fallback.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param coordoperation Object of type CoordinateOperation or derived classes
+ * (must not be NULL)
+ * @return TRUE or FALSE.
+ * @since 9.5
+ */
+
+int proj_coordoperation_requires_per_coordinate_input_time(
+    PJ_CONTEXT *ctx, const PJ *coordoperation) {
+    SANITIZE_CTX(ctx);
+    if (!coordoperation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return false;
+    }
+    auto op = dynamic_cast<const CoordinateOperation *>(
+        coordoperation->iso_obj.get());
+    if (!op) {
+        proj_log_error(ctx, __FUNCTION__,
+                       "Object is not a CoordinateOperation");
+        return false;
+    }
+    return op->requiresPerCoordinateInputTime();
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the number of parameters of a SingleOperation
  *
  * @param ctx PROJ context, or NULL for default context

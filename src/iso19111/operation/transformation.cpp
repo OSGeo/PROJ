@@ -1527,6 +1527,8 @@ Transformation::Private::registerInv(const Transformation *thisIn,
     invTransform->d->forwardOperation_ = thisIn->shallowClone().as_nullable();
     invTransform->setHasBallparkTransformation(
         thisIn->hasBallparkTransformation());
+    invTransform->setRequiresPerCoordinateInputTime(
+        thisIn->requiresPerCoordinateInputTime());
     return invTransform;
 }
 //! @endcond

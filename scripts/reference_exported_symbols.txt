@@ -677,6 +677,7 @@ osgeo::proj::operation::CoordinateOperation::interpolationCRS() const
 osgeo::proj::operation::CoordinateOperation::isPROJInstantiable(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, bool) const
 osgeo::proj::operation::CoordinateOperation::normalizeForVisualization() const
 osgeo::proj::operation::CoordinateOperation::operationVersion() const
+osgeo::proj::operation::CoordinateOperation::requiresPerCoordinateInputTime() const
 osgeo::proj::operation::CoordinateOperation::shallowClone() const
 osgeo::proj::operation::CoordinateOperation::sourceCoordinateEpoch() const
 osgeo::proj::operation::CoordinateOperation::sourceCRS() const
@@ -893,6 +894,7 @@ proj_coordoperation_get_param_index
 proj_coordoperation_get_towgs84_values
 proj_coordoperation_has_ballpark_transformation
 proj_coordoperation_is_instantiable
+proj_coordoperation_requires_per_coordinate_input_time
 proj_create
 proj_create_argv
 proj_create_cartesian_2D_cs

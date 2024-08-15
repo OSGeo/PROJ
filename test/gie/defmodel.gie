@@ -18,6 +18,16 @@ expect failure errno invalid_op_file_not_found_or_invalid
 operation   +proj=defmodel +model=proj.ini
 expect failure errno invalid_op_file_not_found_or_invalid
 
+# Missing time
+operation   +proj=defmodel +model=tests/simple_model_degree_horizontal.json
+accept 2 49 30 HUGE_VAL
+expect failure errno coord_transfm_missing_time
+
+operation   +proj=defmodel +model=tests/simple_model_degree_horizontal.json
+direction inverse
+accept 2 49 30 HUGE_VAL
+expect failure errno coord_transfm_missing_time
+
 # Horizontal deformation with horizontal unit = degree
 operation   +proj=defmodel +model=tests/simple_model_degree_horizontal.json
 tolerance 0.1 mm

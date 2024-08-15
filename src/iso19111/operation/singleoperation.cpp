@@ -329,6 +329,30 @@ void CoordinateOperation::setHasBallparkTransformation(bool b) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether a coordinate operation requires coordinate tuples
+ * to have a valid input time for the coordinate transformation to succeed.
+ * (this applies for the forward direction)
+ *
+ * Note: in the case of a time-dependent Helmert transformation, this function
+ * will return true, but when executing proj_trans(), execution will still
+ * succeed if the time information is missing, due to the transformation central
+ * epoch being used as a fallback.
+ *
+ * @since 9.5
+ */
+bool CoordinateOperation::requiresPerCoordinateInputTime() const {
+    return d->requiresPerCoordinateInputTime_ &&
+           !d->sourceCoordinateEpoch_->has_value();
+}
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperation::setRequiresPerCoordinateInputTime(bool b) {
+    d->requiresPerCoordinateInputTime_ = b;
+}
+
+// ---------------------------------------------------------------------------
+
 void CoordinateOperation::setProperties(
     const util::PropertyMap &properties) // throw(InvalidValueTypeException)
 {
@@ -1143,7 +1167,22 @@ struct SingleOperation::Private {
 // ---------------------------------------------------------------------------
 
 SingleOperation::SingleOperation(const OperationMethodNNPtr &methodIn)
-    : d(internal::make_unique<Private>(methodIn)) {}
+    : d(internal::make_unique<Private>(methodIn)) {
+
+    const int methodEPSGCode = d->method_->getEPSGCode();
+    const auto &methodName = d->method_->nameStr();
+    setRequiresPerCoordinateInputTime(
+        isTimeDependent(methodName) ||
+        methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
+        methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+        methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D);
+}
 
 // ---------------------------------------------------------------------------
 
@@ -4684,6 +4723,8 @@ void InverseCoordinateOperation::setPropertiesFromForward() {
     }
     setHasBallparkTransformation(
         forwardOperation_->hasBallparkTransformation());
+    setRequiresPerCoordinateInputTime(
+        forwardOperation_->requiresPerCoordinateInputTime());
 }
 
 // ---------------------------------------------------------------------------

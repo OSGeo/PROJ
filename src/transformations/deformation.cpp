@@ -279,6 +279,11 @@ static void pj_deformation_forward_4d(PJ_COORD &coo, PJ *P) {
     if (Q->dt != HUGE_VAL) {
         dt = Q->dt;
     } else {
+        if (coo.xyzt.t == HUGE_VAL) {
+            coo = proj_coord_error();
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_MISSING_TIME);
+            return;
+        }
         dt = coo.xyzt.t - Q->t_epoch;
     }
 
@@ -312,6 +317,11 @@ static void pj_deformation_reverse_4d(PJ_COORD &coo, PJ *P) {
     if (Q->dt != HUGE_VAL) {
         dt = Q->dt;
     } else {
+        if (coo.xyzt.t == HUGE_VAL) {
+            coo = proj_coord_error();
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_MISSING_TIME);
+            return;
+        }
         dt = coo.xyzt.t - Q->t_epoch;
     }
 

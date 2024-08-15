@@ -10255,6 +10255,35 @@ std::set<std::string> PROJStringFormatter::getUsedGridNames() const {
 
 // ---------------------------------------------------------------------------
 
+bool PROJStringFormatter::requiresPerCoordinateInputTime() const {
+    for (const auto &step : d->steps_) {
+        if (step.name == "set" && !step.inverted) {
+            for (const auto &param : step.paramValues) {
+                if (param.keyEquals("v_4")) {
+                    return false;
+                }
+            }
+        } else if (step.name == "helmert") {
+            for (const auto &param : step.paramValues) {
+                if (param.keyEquals("t_epoch")) {
+                    return true;
+                }
+            }
+        } else if (step.name == "deformation") {
+            for (const auto &param : step.paramValues) {
+                if (param.keyEquals("t_epoch")) {
+                    return true;
+                }
+            }
+        } else if (step.name == "defmodel") {
+            return true;
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
 void PROJStringFormatter::setVDatumExtension(const std::string &filename,
                                              const std::string &geoidCRSValue) {
     d->vDatumExtension_ = filename;

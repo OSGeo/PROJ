@@ -6538,6 +6538,74 @@ TEST_F(CApi, proj_crs_has_point_motion_operation) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_coordoperation_requires_per_coordinate_input_time) {
+    {
+        PJ *P = proj_create(m_ctxt, "+proj=helmert +t_epoch=2010");
+        ObjectKeeper keeper(P);
+        EXPECT_EQ(
+            proj_coordoperation_requires_per_coordinate_input_time(m_ctxt, P),
+            true);
+    }
+    {
+        PJ *P = proj_create(m_ctxt, "+proj=helmert");
+        ObjectKeeper keeper(P);
+        EXPECT_EQ(
+            proj_coordoperation_requires_per_coordinate_input_time(m_ctxt, P),
+            false);
+    }
+#ifdef TIFF_ENABLED
+    {
+        PJ *P = proj_create(m_ctxt,
+                            "+proj=deformation +t_epoch=2010 "
+                            "+grids=tests/nkgrf03vel_realigned_extract.tif");
+        ObjectKeeper keeper(P);
+        EXPECT_EQ(
+            proj_coordoperation_requires_per_coordinate_input_time(m_ctxt, P),
+            true);
+    }
+    {
+        PJ *P = proj_create(m_ctxt,
+                            "+proj=deformation +dt=1 "
+                            "+grids=tests/nkgrf03vel_realigned_extract.tif");
+        ObjectKeeper keeper(P);
+        EXPECT_EQ(
+            proj_coordoperation_requires_per_coordinate_input_time(m_ctxt, P),
+            false);
+    }
+#endif
+    {
+        PJ *P = proj_create(
+            m_ctxt, "+proj=defmodel +model=tests/simple_model_degree_3d.json");
+        ObjectKeeper keeper(P);
+        EXPECT_EQ(
+            proj_coordoperation_requires_per_coordinate_input_time(m_ctxt, P),
+            true);
+    }
+    {
+        PJ *P = proj_create(m_ctxt, "+proj=pipeline +step +proj=set +v_4=2020 "
+                                    "+proj=helmert +t_epoch=2010");
+        ObjectKeeper keeper(P);
+        EXPECT_EQ(
+            proj_coordoperation_requires_per_coordinate_input_time(m_ctxt, P),
+            false);
+    }
+    // Error cases
+    {
+        EXPECT_EQ(proj_coordoperation_requires_per_coordinate_input_time(
+                      m_ctxt, nullptr),
+                  false);
+    }
+    {
+        PJ *P = proj_create(m_ctxt, "+proj=merc +type=crs");
+        ObjectKeeper keeper(P);
+        EXPECT_EQ(
+            proj_coordoperation_requires_per_coordinate_input_time(m_ctxt, P),
+            false);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 #if !defined(_WIN32)
 TEST_F(CApi, open_plenty_of_contexts) {
     // Test that we only consume 1 file handle for the connection to the

@@ -753,7 +753,15 @@ static PJ_COORD parse_coord(const char *args) {
         // big projected coordinates cause inaccuracies, that can cause
         // test failures when testing points at edge of grids.
         // For example 1501000.0 becomes 1501000.000000000233
-        double d = proj_strtod(prev, &endp);
+        double d;
+        while (*prev && isspace(*prev))
+            ++prev;
+        if (strncmp(prev, "HUGE_VAL", strlen("HUGE_VAL")) == 0) {
+            d = HUGE_VAL;
+            endp = const_cast<char *>(prev) + strlen("HUGE_VAL");
+        } else {
+            d = proj_strtod(prev, &endp);
+        }
         if (!std::isnan(d) && *endp != '\0' && !isspace(*endp)) {
             double dms = PJ_TODEG(proj_dmstor(prev, &dmsendp));
             /* TODO: When projects.h is removed, call proj_dmstor() in all cases
@@ -1174,6 +1182,7 @@ static const struct {
     {"coord_transfm_no_operation", PROJ_ERR_COORD_TRANSFM_NO_OPERATION},
     {"coord_transfm_outside_grid", PROJ_ERR_COORD_TRANSFM_OUTSIDE_GRID},
     {"coord_transfm_grid_at_nodata", PROJ_ERR_COORD_TRANSFM_GRID_AT_NODATA},
+    {"coord_transfm_missing_time", PROJ_ERR_COORD_TRANSFM_MISSING_TIME},
     {"other", PROJ_ERR_OTHER},
     {"api_misuse", PROJ_ERR_OTHER_API_MISUSE},
     {"no_inverse_op", PROJ_ERR_OTHER_NO_INVERSE_OP},

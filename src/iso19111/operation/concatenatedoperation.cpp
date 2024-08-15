@@ -100,7 +100,14 @@ ConcatenatedOperation::ConcatenatedOperation(const ConcatenatedOperation &other)
 
 ConcatenatedOperation::ConcatenatedOperation(
     const std::vector<CoordinateOperationNNPtr> &operationsIn)
-    : CoordinateOperation(), d(internal::make_unique<Private>(operationsIn)) {}
+    : CoordinateOperation(), d(internal::make_unique<Private>(operationsIn)) {
+    for (const auto &op : operationsIn) {
+        if (op->requiresPerCoordinateInputTime()) {
+            setRequiresPerCoordinateInputTime(true);
+            break;
+        }
+    }
+}
 
 // ---------------------------------------------------------------------------
 

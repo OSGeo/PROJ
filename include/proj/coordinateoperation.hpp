@@ -211,6 +211,8 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
 
     PROJ_DLL bool hasBallparkTransformation() const;
 
+    PROJ_DLL bool requiresPerCoordinateInputTime() const;
+
     PROJ_DLL static const std::string OPERATION_VERSION_KEY;
 
     PROJ_DLL CoordinateOperationNNPtr normalizeForVisualization() const;
@@ -245,6 +247,8 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     void setAccuracies(
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
     PROJ_INTERNAL void setHasBallparkTransformation(bool b);
+
+    PROJ_INTERNAL void setRequiresPerCoordinateInputTime(bool b);
 
     PROJ_INTERNAL void
     setSourceCoordinateEpoch(const util::optional<common::DataEpoch> &epoch);
