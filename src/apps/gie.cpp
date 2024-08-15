@@ -460,7 +460,7 @@ static int process_file(const char *fname) {
     }
     if (F->level == 0)
         return errmsg(-3, "File '%s':Missing '<gie>' cmnd - bye!\n", fname);
-    if (F->level && F->level % 2) {
+    if (F->level % 2) {
         if (F->strict_mode)
             return errmsg(-4, "File '%s':Missing '</gie-strict>' cmnd - bye!\n",
                           fname);

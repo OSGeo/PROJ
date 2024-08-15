@@ -2056,7 +2056,7 @@ static bool exportAsESRIWktCompoundCRSWithEllipsoidalHeight(
 
 // Try to format a Geographic/ProjectedCRS 3D CRS as a
 // GEOGCS[]/PROJCS[],VERTCS["Ellipsoid (metre)",DATUM["Ellipsoid",2002],...]
-static bool exportAsWKT1CompoundCRSWithEllipsoidalHeight(
+static void exportAsWKT1CompoundCRSWithEllipsoidalHeight(
     const CRSNNPtr &base2DCRS,
     const cs::CoordinateSystemAxisNNPtr &verticalAxis,
     io::WKTFormatter *formatter) {
@@ -2077,7 +2077,6 @@ static bool exportAsWKT1CompoundCRSWithEllipsoidalHeight(
     base2DCRS->_exportToWKT(formatter);
     vertCRS->_exportToWKT(formatter);
     formatter->endNode();
-    return true;
 }
 //! @endcond
 
@@ -2154,10 +2153,9 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         }
 
         if (formatter->isAllowedEllipsoidalHeightAsVerticalCRS()) {
-            if (exportAsWKT1CompoundCRSWithEllipsoidalHeight(
-                    geogCRS2D, axisList[2], formatter)) {
-                return;
-            }
+            exportAsWKT1CompoundCRSWithEllipsoidalHeight(geogCRS2D, axisList[2],
+                                                         formatter);
+            return;
         }
 
         io::FormattingException::Throw(
@@ -4248,10 +4246,9 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
         if (!formatter->useESRIDialect() &&
             formatter->isAllowedEllipsoidalHeightAsVerticalCRS()) {
-            if (exportAsWKT1CompoundCRSWithEllipsoidalHeight(
-                    projCRS2D, axisList[2], formatter)) {
-                return;
-            }
+            exportAsWKT1CompoundCRSWithEllipsoidalHeight(projCRS2D, axisList[2],
+                                                         formatter);
+            return;
         }
 
         io::FormattingException::Throw(

@@ -372,6 +372,7 @@ PJ_XYZ gridshiftData::grid_interpolate(PJ_CONTEXT *ctx, const std::string &type,
         gridInfo.idxSampleXYZ[2] = idxSampleZ;
         iterCache = m_cacheGridInfo.emplace(grid, std::move(gridInfo)).first;
     }
+    // cppcheck-suppress derefInvalidIteratorRedundantCheck
     GridInfo &gridInfo = iterCache->second;
     const int idxSampleX = gridInfo.idxSampleX;
     const int idxSampleY = gridInfo.idxSampleY;
