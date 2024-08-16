@@ -1894,6 +1894,36 @@ ConversionNNPtr Conversion::createOrthographic(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the
+ * <a href="../../../operations/projections/ortho.html">
+ * Orthographic</a> projection method.
+ *
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_1130/index.html">
+ * EPSG:1130</a>.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param azimuthInitialLine See \ref azimuth_initial_line
+ * @param scale See \ref scale_factor_initial_line
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createLocalOrthographic(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Angle &azimuthInitialLine,
+    const common::Scale &scale, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    return create(properties, EPSG_CODE_METHOD_LOCAL_ORTHOGRAPHIC,
+                  createParams(centerLat, centerLong, azimuthInitialLine, scale,
+                               falseEasting, falseNorthing));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a conversion based on the
  * <a href="../../../operations/projections/poly.html">
  * American Polyconic</a> projection method.
  *

@@ -18,6 +18,8 @@ struct pj_ortho_data {
     double y_shift;
     double y_scale;
     enum pj_ortho_ns::Mode mode;
+    double sinalpha;
+    double cosalpha;
 };
 } // anonymous namespace
 
@@ -72,6 +74,11 @@ static PJ_XY ortho_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
         break;
     }
     xy.x = cosphi * sin(lp.lam);
+
+    const double xp = xy.x;
+    const double yp = xy.y;
+    xy.x = (xp * Q->cosalpha - yp * Q->sinalpha) * P->k0;
+    xy.y = (xp * Q->sinalpha + yp * Q->cosalpha) * P->k0;
     return xy;
 }
 
@@ -82,6 +89,11 @@ static PJ_LP ortho_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
 
     lp.lam = HUGE_VAL;
     lp.phi = HUGE_VAL;
+
+    const double xf = xy.x;
+    const double yf = xy.y;
+    xy.x = (Q->cosalpha * xf + Q->sinalpha * yf) / P->k0;
+    xy.y = (-Q->sinalpha * xf + Q->cosalpha * yf) / P->k0;
 
     const double rh = hypot(xy.x, xy.y);
     sinc = rh;
@@ -150,9 +162,11 @@ static PJ_XY ortho_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     }
 
     const double nu = 1.0 / sqrt(1.0 - P->es * sinphi * sinphi);
-    xy.x = nu * cosphi * sinlam;
-    xy.y = nu * (sinphi * Q->cosph0 - cosphi * Q->sinph0 * coslam) +
-           P->es * (Q->nu0 * Q->sinph0 - nu * sinphi) * Q->cosph0;
+    const double xp = nu * cosphi * sinlam;
+    const double yp = nu * (sinphi * Q->cosph0 - cosphi * Q->sinph0 * coslam) +
+                      P->es * (Q->nu0 * Q->sinph0 - nu * sinphi) * Q->cosph0;
+    xy.x = (Q->cosalpha * xp - Q->sinalpha * yp) * P->k0;
+    xy.y = (Q->sinalpha * xp + Q->cosalpha * yp) * P->k0;
 
     return xy;
 }
@@ -162,6 +176,11 @@ static PJ_LP ortho_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     struct pj_ortho_data *Q = static_cast<struct pj_ortho_data *>(P->opaque);
 
     const auto SQ = [](double x) { return x * x; };
+
+    const double xf = xy.x;
+    const double yf = xy.y;
+    xy.x = (Q->cosalpha * xf + Q->sinalpha * yf) / P->k0;
+    xy.y = (-Q->sinalpha * xf + Q->cosalpha * yf) / P->k0;
 
     if (Q->mode == pj_ortho_ns::N_POLE || Q->mode == pj_ortho_ns::S_POLE) {
         // Polar case. Forward case equations can be simplified as:
@@ -308,6 +327,10 @@ PJ *PJ_PROJECTION(ortho) {
         P->inv = ortho_e_inverse;
         P->fwd = ortho_e_forward;
     }
+
+    const double alpha = pj_param(P->ctx, P->params, "ralpha").f;
+    Q->sinalpha = sin(alpha);
+    Q->cosalpha = cos(alpha);
 
     return P;
 }

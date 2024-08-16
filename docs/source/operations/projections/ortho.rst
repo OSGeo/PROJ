@@ -37,7 +37,10 @@ around a given latitude and longitude.
           ellipsoid must be forced to a sphere, for example by adding a ``+f=0``
           parameter.
 
-This projection method corresponds to ``EPSG:9840``.
+.. note:: Parameters ``k_0`` and ``alpha`` are added in PROJ 9.5.0
+
+This projection method corresponds to ``EPSG:9840``
+(or ``EPSG:1130`` with ``k_0`` or ``alpha``).
 
 Parameters
 ################################################################################
@@ -47,6 +50,22 @@ Parameters
 .. include:: ../options/lon_0.rst
 
 .. include:: ../options/lat_0.rst
+
+.. option:: +alpha=<value>
+
+    .. versionadded:: 9.5.0
+
+    Azimuth clockwise from north at the center of projection.
+
+    *Defaults to 0.0.*
+
+.. option:: +k_0=<value>
+
+   .. versionadded:: 9.5.0
+
+    Scale factor. Determines scale factor used in the projection.
+
+    *Defaults to 1.0.*
 
 .. include:: ../options/ellps.rst
 

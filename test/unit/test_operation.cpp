@@ -3607,6 +3607,52 @@ TEST(operation, orthographic_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, local_orthographic_export) {
+    auto conv = Conversion::createLocalOrthographic(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Scale(1.25), Length(4),
+        Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=ortho +lat_0=1 +lon_0=2 +alpha=3 +k=1.25 +x_0=4 +y_0=5");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
+              "CONVERSION[\"Local Orthographic\",\n"
+              "    METHOD[\"Local Orthographic\",\n"
+              "        ID[\"EPSG\",1130]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Azimuth at projection centre\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8813]],\n"
+              "    PARAMETER[\"Scale factor at projection centre\",1.25,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8815]],\n"
+              "    PARAMETER[\"False easting\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Local Orthographic\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"azimuth\",3],\n"
+        "PARAMETER[\"scale_factor\",1.25],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, american_polyconic_export) {
     auto conv = Conversion::createAmericanPolyconic(
         PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));
