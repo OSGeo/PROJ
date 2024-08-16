@@ -7415,12 +7415,12 @@ static const struct {
       {"Latitude_Of_Center", 4}},
      "Local Orthographic",
      {
-         {"Latitude of natural origin", 4},
-         {"Longitude of natural origin", 3},
+         {"Latitude of projection centre", 4},
+         {"Longitude of projection centre", 3},
          {"Azimuth at projection centre", 15},
          {"Scale factor at projection centre", 1.25},
-         {"False easting", 1},
-         {"False northing", 2},
+         {"Easting at projection centre", 1},
+         {"Northing at projection centre", 2},
      }},
 
     {"Winkel_Tripel",

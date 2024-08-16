@@ -1064,6 +1064,8 @@ EPSG_CONVERSION_PARAM_NAMES = {
     8813: 'Azimuth at projection centre',
     8814: 'Angle from Rectified to Skew Grid',
     8815: 'Scale factor at projection centre',
+    8816: 'Easting at projection centre',
+    8817: 'Northing at projection centre',
     8821: 'Latitude of false origin',
     8822: 'Longitude of false origin',
     8823: 'Latitude of 1st standard parallel',
@@ -1173,6 +1175,18 @@ MAPPED_PROJCS: Dict[str, ConversionMapping] = {
             8802: 'Central_Meridian',
             8806: 'False_Easting',
             8807: 'False_Northing',
+        }
+    ),
+    'Local': ConversionMapping(
+        epsg_code='1130',
+        epsg_name='Local Orthographic',
+        param_mapping={
+            8811: 'Latitude_Of_Center',
+            8812: 'Longitude_Of_Center',
+            8813: 'Azimuth',
+            8815: 'Scale_Factor',
+            8816: 'False_Easting',
+            8817: 'False_Northing',
         }
     ),
 

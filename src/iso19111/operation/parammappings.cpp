@@ -367,23 +367,23 @@ static const ParamMapping *const paramsHomTwoPoint[] = {
     &paramFalseNorthingProjectionCentre,
     nullptr};
 
-static const ParamMapping *const paramsNatOriginAzimuthScale[] = {
-    &paramLatitudeNatOrigin,
-    &paramLongitudeNatOrigin,
-    &paramAzimuth,
-    &paramScaleFactorProjectionCentre,
-    &paramFalseEasting,
-    &paramFalseNorthing,
-    nullptr};
-
 static const ParamMapping *const paramsIMWP[] = {
     &paramLongitudeNatOrigin, &paramLatFirstPoint, &paramLatSecondPoint,
     &paramFalseEasting,       &paramFalseNorthing, nullptr};
 
-static const ParamMapping paramLongCentreLongCenter = {
-    EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN,
-    EPSG_CODE_PARAMETER_LONGITUDE_OF_ORIGIN, WKT1_LONGITUDE_OF_CENTER,
+static const ParamMapping paramLongCentre = {
+    EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
+    EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE, WKT1_LONGITUDE_OF_CENTER,
     common::UnitOfMeasure::Type::ANGULAR, lon_0};
+
+static const ParamMapping *const paramsLocalOrthographic[] = {
+    &paramLatCentreLatCenter,
+    &paramLongCentre,
+    &paramAzimuth,
+    &paramScaleFactorProjectionCentre,
+    &paramFalseEastingProjectionCentre,
+    &paramFalseNorthingProjectionCentre,
+    nullptr};
 
 static const ParamMapping paramColatitudeConeAxis = {
     EPSG_NAME_PARAMETER_COLATITUDE_CONE_AXIS,
@@ -402,6 +402,11 @@ static const ParamMapping paramScaleFactorPseudoStdParallel = {
     EPSG_CODE_PARAMETER_SCALE_FACTOR_PSEUDO_STANDARD_PARALLEL,
     WKT1_SCALE_FACTOR, common::UnitOfMeasure::Type::SCALE,
     k}; /* ignored by PROJ currently */
+
+static const ParamMapping paramLongCentreLongCenter = {
+    EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN,
+    EPSG_CODE_PARAMETER_LONGITUDE_OF_ORIGIN, WKT1_LONGITUDE_OF_CENTER,
+    common::UnitOfMeasure::Type::ANGULAR, lon_0};
 
 static const ParamMapping *const krovakParameters[] = {
     &paramLatCentreLatCenter,
@@ -499,11 +504,6 @@ static const ParamMapping paramLatLoxim = {
 static const ParamMapping *const paramsLoxim[] = {
     &paramLatLoxim, &paramLongitudeNatOrigin, &paramFalseEasting,
     &paramFalseNorthing, nullptr};
-
-static const ParamMapping paramLongCentre = {
-    EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
-    EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE, WKT1_LONGITUDE_OF_CENTER,
-    common::UnitOfMeasure::Type::ANGULAR, lon_0};
 
 static const ParamMapping paramLabordeObliqueMercatorAzimuth = {
     EPSG_NAME_PARAMETER_AZIMUTH_PROJECTION_CENTRE,
@@ -832,7 +832,7 @@ static const MethodMapping projectionMethodMappings[] = {
      "Orthographic", "ortho", nullptr, paramsNatOrigin},
 
     {EPSG_NAME_METHOD_LOCAL_ORTHOGRAPHIC, EPSG_CODE_METHOD_LOCAL_ORTHOGRAPHIC,
-     "Local Orthographic", "ortho", nullptr, paramsNatOriginAzimuthScale},
+     "Local Orthographic", "ortho", nullptr, paramsLocalOrthographic},
 
     {PROJ_WKT2_NAME_ORTHOGRAPHIC_SPHERICAL, 0, "Orthographic", "ortho", "f=0",
      paramsNatOrigin},
