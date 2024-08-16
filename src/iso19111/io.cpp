@@ -11866,6 +11866,13 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
                 axisType = AxisType::SOUTH_POLE;
             }
         }
+    } else if (step.name == "ortho") {
+        const std::string &k = getParamValueK(step);
+        if ((!k.empty() && getNumericValue(k) != 1.0) ||
+            (hasParamValue(step, "alpha") &&
+             getNumericValue(getParamValue(step, "alpha")) != 0.0)) {
+            mapping = getMapping(EPSG_CODE_METHOD_LOCAL_ORTHOGRAPHIC);
+        }
     }
 
     UnitOfMeasure unit = buildUnit(step, "units", "to_meter");

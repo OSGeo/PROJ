@@ -595,6 +595,7 @@ osgeo::proj::operation::Conversion::createLambertConicConformal_2SP_Michigan(osg
 osgeo::proj::operation::Conversion::createLambertConicConformal_2SP(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createLambertCylindricalEqualArea(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createLambertCylindricalEqualAreaSpherical(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createLocalOrthographic(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createMercatorSpherical(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createMercatorVariantA(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createMercatorVariantB(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
@@ -938,6 +939,7 @@ proj_create_conversion_lambert_conic_conformal_2sp_belgium
 proj_create_conversion_lambert_conic_conformal_2sp_michigan
 proj_create_conversion_lambert_cylindrical_equal_area
 proj_create_conversion_lambert_cylindrical_equal_area_spherical
+proj_create_conversion_local_orthographic
 proj_create_conversion_mercator_variant_a
 proj_create_conversion_mercator_variant_b
 proj_create_conversion_miller_cylindrical

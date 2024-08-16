@@ -2095,6 +2095,12 @@ PJ PROJ_DLL *proj_create_conversion_orthographic(
     double ang_unit_conv_factor, const char *linear_unit_name,
     double linear_unit_conv_factor);
 
+PJ PROJ_DLL *proj_create_conversion_local_orthographic(
+    PJ_CONTEXT *ctx, double center_lat, double center_long, double azimuth,
+    double scale, double false_easting, double false_northing,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor);
+
 PJ PROJ_DLL *proj_create_conversion_american_polyconic(
     PJ_CONTEXT *ctx, double center_lat, double center_long,
     double false_easting, double false_northing, const char *ang_unit_name,

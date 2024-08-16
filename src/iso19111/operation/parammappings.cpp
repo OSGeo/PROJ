@@ -367,6 +367,15 @@ static const ParamMapping *const paramsHomTwoPoint[] = {
     &paramFalseNorthingProjectionCentre,
     nullptr};
 
+static const ParamMapping *const paramsNatOriginAzimuthScale[] = {
+    &paramLatitudeNatOrigin,
+    &paramLongitudeNatOrigin,
+    &paramAzimuth,
+    &paramScaleFactorProjectionCentre,
+    &paramFalseEasting,
+    &paramFalseNorthing,
+    nullptr};
+
 static const ParamMapping *const paramsIMWP[] = {
     &paramLongitudeNatOrigin, &paramLatFirstPoint, &paramLatSecondPoint,
     &paramFalseEasting,       &paramFalseNorthing, nullptr};
@@ -821,6 +830,9 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {EPSG_NAME_METHOD_ORTHOGRAPHIC, EPSG_CODE_METHOD_ORTHOGRAPHIC,
      "Orthographic", "ortho", nullptr, paramsNatOrigin},
+
+    {EPSG_NAME_METHOD_LOCAL_ORTHOGRAPHIC, EPSG_CODE_METHOD_LOCAL_ORTHOGRAPHIC,
+     "Local Orthographic", "ortho", nullptr, paramsNatOriginAzimuthScale},
 
     {PROJ_WKT2_NAME_ORTHOGRAPHIC_SPHERICAL, 0, "Orthographic", "ortho", "f=0",
      paramsNatOrigin},
