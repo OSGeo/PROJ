@@ -5429,6 +5429,12 @@ accept      -122.3846388888889      37.62607694444444
 expect      876.13676       98.97406
 roundtrip   100
 
+# Same with not zero false easting and false northing
+operation   +proj=ortho +lat_0=37.628969166666664 +lon_0=-122.39394166666668 +k_0=0.9999968 +alpha=27.7927777777777 +x_0=10 +y_0=20 +ellps=GRS80
+tolerance   0.1 mm
+accept      -122.3846388888889      37.62607694444444
+expect      886.13676       118.97406
+roundtrip   100
 
 ===============================================================================
 # Perspective Conic
