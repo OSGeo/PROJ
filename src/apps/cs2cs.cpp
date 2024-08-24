@@ -67,6 +67,8 @@ static bool destIsLongLat = false;
 static double destToRadians = 0.0;
 static bool destIsLatLong = false;
 
+static bool romanNumerals = false;
+
 static int reversein = 0, /* != 0 reverse input arguments */
     reverseout = 0,       /* != 0 reverse output arguments */
     echoin = 0,           /* echo input data to output line */
@@ -93,6 +95,54 @@ using namespace NS_PROJ::io;
 using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::util;
 using namespace NS_PROJ::internal;
+
+static std::string degToRoman(double angle, const std::string &pos,
+                       const std::string &neg) {
+    const std::string sign = angle > 0.0 ? pos : neg;
+    angle = fabs(angle);
+    double r = angle;
+    r = floor(r * 3600 + .0005);
+    int sec = (int)fmod(r, 60.);
+    r = floor(r / 60.);
+    int min = (int)fmod(r, 60.);
+    r = floor(r / 60.);
+    int deg = (int)r;
+
+    auto intToRoman = [](int i) {
+        int unit = i % 10;
+        int tenth = i / 10 % 10;
+        int houndr = i / 100 % 10;
+        auto oneDigit = [](int digit, const std::string &one,
+                           const std::string &five, const std::string &ten) {
+            switch (digit) {
+            case (1):
+                return one;
+            case (2):
+                return one + one;
+            case (3):
+                return one + one + one;
+            case (4):
+                return one + five;
+            case (5):
+                return five;
+            case (6):
+                return five + one;
+            case (7):
+                return five + one + one;
+            case (8):
+                return five + one + one + one;
+            case (9):
+                return one + ten;
+            default:
+                return std::string{};
+            }
+        };
+        return oneDigit(houndr, "C", "D", "M") +
+               oneDigit(tenth, "X", "L", "C") + oneDigit(unit, "I", "V", "X");
+    };
+    return intToRoman(deg) + "d" + intToRoman(min) + "'" + intToRoman(sec) +
+           "\"" + sign;
+}
 
 /************************************************************************/
 /*                              process()                               */
@@ -208,11 +258,21 @@ static void process(FILE *fid)
                     fputs(rtodms(pline, sizeof(pline), data.u, 'N', 'S'),
                           stdout);
                 } else {
-                    fputs(rtodms(pline, sizeof(pline), data.u, 'N', 'S'),
-                          stdout);
-                    putchar('\t');
-                    fputs(rtodms(pline, sizeof(pline), data.v, 'E', 'W'),
-                          stdout);
+                    if (romanNumerals) {
+                        std::string ns =
+                            (degToRoman(data.u * RAD_TO_DEG, "S", "M"));
+                        std::string ew =
+                            (degToRoman(data.v * RAD_TO_DEG, "OR", "OC"));
+                        fputs(ns.c_str(), stdout);
+                        putchar('\t');
+                        fputs(ew.c_str(), stdout);
+                    } else {
+                        fputs(rtodms(pline, sizeof(pline), data.u, 'N', 'S'),
+                              stdout);
+                        putchar('\t');
+                        fputs(rtodms(pline, sizeof(pline), data.v, 'E', 'W'),
+                              stdout);
+                    }
                 }
             } else if (reverseout) {
                 fputs(rtodms(pline, sizeof(pline), data.v, 'N', 'S'), stdout);
@@ -506,6 +566,10 @@ int main(int argc, char **argv) {
                 std::exit(1);
             }
             targetEpoch = *argv;
+        } else if (strcmp(*argv, "--roman") == 0) {
+            ++argv;
+            --argc;
+            romanNumerals = true;
         } else if (**argv == '-') {
             for (arg = *argv;;) {
                 switch (*++arg) {
