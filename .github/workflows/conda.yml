@@ -22,12 +22,12 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # macos-12: Intel
+        # macos-13: Intel
         # macos-14: arm64
-        platform: ['ubuntu-latest','windows-latest','macos-12','macos-14']
+        platform: ['ubuntu-latest','windows-latest','macos-13','macos-14']
 
     env:
-      PLATFORM: ${{ matrix.platform }}
+      GHA_CI_PLATFORM: ${{ matrix.platform }}
 
     steps:
     - uses: actions/checkout@v4

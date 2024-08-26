@@ -10,8 +10,7 @@ git clone https://github.com/conda-forge/proj.4-feedstock.git
 cd proj.4-feedstock
 cat > recipe/recipe_clobber.yaml <<EOL
 source:
-  git_url: https://github.com/OSGeo/PROJ.git
-  git_rev: ${GITHUB_SHA}
+  path: ../../../PROJ
   url:
   sha256:
   patches:
