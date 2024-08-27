@@ -1,0 +1,91 @@
+# ITRF2020 params are in mm/year, PJ_helmert uses m/year
+
+# Generated with generate_itrf2020.py from EPSG database
+
+<ITRF2014> +proj=helmert +x=-0.0014 +y=-0.0009 +z=0.0014 +s=-0.00042 +dy=-0.0001 +dz=0.0002 +t_epoch=2015 +convention=position_vector
+
+<ITRF2008> +proj=helmert +x=0.0002 +y=0.001 +z=0.0033 +s=-0.00029 +dy=-0.0001 +dz=0.0001 +ds=3e-05 +t_epoch=2015 +convention=position_vector
+
+<ITRF2005> +proj=helmert +x=0.0027 +y=0.0001 +z=-0.0014 +s=0.00065 +dx=0.0003 +dy=-0.0001 +dz=0.0001 +ds=3e-05 +t_epoch=2015 +convention=position_vector
+
+<ITRF2000> +proj=helmert +x=-0.0002 +y=0.0008 +z=-0.0342 +s=0.00225 +dx=0.0001 +dz=-0.0017 +ds=0.00011 +t_epoch=2015 +convention=position_vector
+
+<ITRF97> +proj=helmert +x=0.0065 +y=-0.0039 +z=-0.0779 +rz=0.00036 +s=0.00398 +dx=0.0001 +dy=-0.0006 +dz=-0.0031 +drz=2e-05 +ds=0.00012 +t_epoch=2015 +convention=position_vector
+
+<ITRF96> +proj=helmert +x=0.0065 +y=-0.0039 +z=-0.0779 +rz=0.00036 +s=0.00398 +dx=0.0001 +dy=-0.0006 +dz=-0.0031 +drz=2e-05 +ds=0.00012 +t_epoch=2015 +convention=position_vector
+
+<ITRF94> +proj=helmert +x=0.0065 +y=-0.0039 +z=-0.0779 +rz=0.00036 +s=0.00398 +dx=0.0001 +dy=-0.0006 +dz=-0.0031 +drz=2e-05 +ds=0.00012 +t_epoch=2015 +convention=position_vector
+
+<ITRF93> +proj=helmert +x=-0.0658 +y=0.0019 +z=-0.0713 +rx=-0.00336 +ry=-0.00433 +rz=0.00075 +s=0.00447 +dx=-0.0028 +dy=-0.0002 +dz=-0.0023 +drx=-0.00011 +dry=-0.00019 +drz=7e-05 +ds=0.00012 +t_epoch=2015 +convention=position_vector
+
+<ITRF92> +proj=helmert +x=0.0145 +y=-0.0019 +z=-0.0859 +rz=0.00036 +s=0.00327 +dx=0.0001 +dy=-0.0006 +dz=-0.0031 +drz=2e-05 +ds=0.00012 +t_epoch=2015 +convention=position_vector
+
+<ITRF91> +proj=helmert +x=0.0265 +y=0.0121 +z=-0.0919 +rz=0.00036 +s=0.00467 +dx=0.0001 +dy=-0.0006 +dz=-0.0031 +drz=2e-05 +ds=0.00012 +t_epoch=2015 +convention=position_vector
+
+<ITRF90> +proj=helmert +x=0.0245 +y=0.0081 +z=-0.1079 +rz=0.00036 +s=0.00497 +dx=0.0001 +dy=-0.0006 +dz=-0.0031 +drz=2e-05 +ds=0.00012 +t_epoch=2015 +convention=position_vector
+
+<ITRF89> +proj=helmert +x=0.0295 +y=0.0321 +z=-0.1459 +rz=0.00036 +s=0.00837 +dx=0.0001 +dy=-0.0006 +dz=-0.0031 +drz=2e-05 +ds=0.00012 +t_epoch=2015 +convention=position_vector
+
+<ITRF88> +proj=helmert +x=0.0245 +y=-0.0039 +z=-0.1699 +rx=0.0001 +rz=0.00036 +s=0.01147 +dx=0.0001 +dy=-0.0006 +dz=-0.0031 +drz=2e-05 +ds=0.00012 +t_epoch=2015 +convention=position_vector
+
+# ITRF2020 Plate Motion Model parameters
+#
+# As described in https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2023GL106373
+# (and also in https://itrf.ign.fr/docs/solutions/itrf2020/ITRF2020-PMM.dat, but with
+# different units)
+
+<AMUR> +proj=helmert +drx=-0.000131 +dry=-0.000551 +drz=0.000837 +convention=position_vector
+
+<ANTA> +proj=helmert +drx=-0.000269 +dry=-0.000312 +drz=0.000678 +convention=position_vector
+
+<ARAB> +proj=helmert +drx=0.001129 +dry=-0.000146 +drz=0.001438 +convention=position_vector
+
+<AUST> +proj=helmert +drx=0.001487 +dry=0.001175 +drz=0.001223 +convention=position_vector
+
+<CARB> +proj=helmert +drx=0.000207 +dry=-0.001422 +drz=0.000726 +convention=position_vector
+
+<EURA> +proj=helmert +drx=-0.000085 +dry=-0.000519 +drz=0.000753 +convention=position_vector
+
+<INDI> +proj=helmert +drx=0.001137 +dry=0.000013 +drz=0.001444 +convention=position_vector
+
+<NAZC> +proj=helmert +drx=-0.000327 +dry=-0.001561 +drz=0.001605 +convention=position_vector
+
+<NOAM> +proj=helmert +drx=0.000045 +dry=-0.000666 +drz=-0.000098 +convention=position_vector
+
+<NUBI> +proj=helmert +drx=0.000090 +dry=-0.000585 +drz=0.000717 +convention=position_vector
+
+<PCFC> +proj=helmert +drx=-0.000404 +dry=0.001021 +drz=-0.002154 +convention=position_vector
+
+<SOAM> +proj=helmert +drx=-0.000261 +dry=-0.000282 +drz=-0.000157 +convention=position_vector
+
+<SOMA> +proj=helmert +drx=-0.000081 +dry=-0.000719 +drz=0.000864 +convention=position_vector
+
+# Plate names suffixed by _T (for Translation) that includes the translation
+# rates +dx=0.00037 +dy=0.00035 +dz=0.00074 given by Table 2 of the ITRF2020 plate motion model
+# paper
+
+<AMUR_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=-0.000131 +dry=-0.000551 +drz=0.000837 +convention=position_vector
+
+<ANTA_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=-0.000269 +dry=-0.000312 +drz=0.000678 +convention=position_vector
+
+<ARAB_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=0.001129 +dry=-0.000146 +drz=0.001438 +convention=position_vector
+
+<AUST_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=0.001487 +dry=0.001175 +drz=0.001223 +convention=position_vector
+
+<CARB_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=0.000207 +dry=-0.001422 +drz=0.000726 +convention=position_vector
+
+<EURA_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=-0.000085 +dry=-0.000519 +drz=0.000753 +convention=position_vector
+
+<INDI_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=0.001137 +dry=0.000013 +drz=0.001444 +convention=position_vector
+
+<NAZC_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=-0.000327 +dry=-0.001561 +drz=0.001605 +convention=position_vector
+
+<NOAM_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=0.000045 +dry=-0.000666 +drz=-0.000098 +convention=position_vector
+
+<NUBI_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=0.000090 +dry=-0.000585 +drz=0.000717 +convention=position_vector
+
+<PCFC_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=-0.000404 +dry=0.001021 +drz=-0.002154 +convention=position_vector
+
+<SOAM_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=-0.000261 +dry=-0.000282 +drz=-0.000157 +convention=position_vector
+
+<SOMA_T> +proj=helmert +dx=0.00037 +dy=0.00035 +dz=0.00074 +drx=-0.000081 +dry=-0.000719 +drz=0.000864 +convention=position_vector
