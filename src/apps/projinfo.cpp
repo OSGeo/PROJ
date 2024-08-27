@@ -30,6 +30,7 @@
 
 #define FROM_PROJ_CPP
 
+#include <cmath>
 #include <cstdlib>
 #include <fstream> // std::ifstream
 #include <iostream>
@@ -187,9 +188,21 @@ static ExtentPtr makeBboxFilter(DatabaseContextPtr dbContext,
             std::vector<double> bboxValues = {
                 c_locale_stod(bbox[0]), c_locale_stod(bbox[1]),
                 c_locale_stod(bbox[2]), c_locale_stod(bbox[3])};
-            bboxFilter = Extent::createFromBBOX(bboxValues[0], bboxValues[1],
-                                                bboxValues[2], bboxValues[3])
-                             .as_nullable();
+            const double west = bboxValues[0];
+            const double south = bboxValues[1];
+            const double east = bboxValues[2];
+            const double north = bboxValues[3];
+            constexpr double SOME_MARGIN = 10;
+            if (south < -90 - SOME_MARGIN && std::fabs(west) <= 90 &&
+                std::fabs(east) <= 90)
+                std::cerr << "Warning: suspicious south latitude: " << south
+                          << std::endl;
+            if (north > 90 + SOME_MARGIN && std::fabs(west) <= 90 &&
+                std::fabs(east) <= 90)
+                std::cerr << "Warning: suspicious north latitude: " << north
+                          << std::endl;
+            bboxFilter =
+                Extent::createFromBBOX(west, south, east, north).as_nullable();
         } catch (const std::exception &e) {
             std::cerr << "Invalid value for option --bbox: " << bboxStr << ", "
                       << e.what() << std::endl;

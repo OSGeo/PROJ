@@ -238,6 +238,27 @@ GeographicBoundingBoxNNPtr GeographicBoundingBox::create(double west,
         throw InvalidValueTypeException(
             "GeographicBoundingBox::create() does not accept NaN values");
     }
+    if (south > north) {
+        throw InvalidValueTypeException(
+            "GeographicBoundingBox::create() does not accept south > north");
+    }
+    // Avoid creating a degenerate bounding box if reduced to a point or a line
+    if (west == east) {
+        if (west > -180)
+            west =
+                std::nextafter(west, -std::numeric_limits<double>::infinity());
+        if (east < 180)
+            east =
+                std::nextafter(east, std::numeric_limits<double>::infinity());
+    }
+    if (south == north) {
+        if (south > -90)
+            south =
+                std::nextafter(south, -std::numeric_limits<double>::infinity());
+        if (north < 90)
+            north =
+                std::nextafter(north, std::numeric_limits<double>::infinity());
+    }
     return GeographicBoundingBox::nn_make_shared<GeographicBoundingBox>(
         west, south, east, north);
 }
