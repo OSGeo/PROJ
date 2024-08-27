@@ -284,16 +284,6 @@ TEST(metadata, extent_edge_cases) {
         optional<std::string>(), std::vector<GeographicExtentNNPtr>(),
         std::vector<VerticalExtentNNPtr>(), std::vector<TemporalExtentNNPtr>());
 
-    {
-        auto A = Extent::createFromBBOX(-180, -90, 180, 90);
-        auto B = Extent::createFromBBOX(180, -90, 180, 90);
-        EXPECT_FALSE(A->intersects(B));
-        EXPECT_FALSE(B->intersects(A));
-        EXPECT_FALSE(A->contains(B));
-        EXPECT_TRUE(A->intersection(B) == nullptr);
-        EXPECT_TRUE(B->intersection(A) == nullptr);
-    }
-
     EXPECT_THROW(Extent::createFromBBOX(
                      std::numeric_limits<double>::quiet_NaN(), -90, 180, 90),
                  InvalidValueTypeException);
@@ -305,6 +295,10 @@ TEST(metadata, extent_edge_cases) {
                  InvalidValueTypeException);
     EXPECT_THROW(Extent::createFromBBOX(
                      -180, -90, 180, std::numeric_limits<double>::quiet_NaN()),
+                 InvalidValueTypeException);
+
+    // South > north
+    EXPECT_THROW(Extent::createFromBBOX(-100, 10, 100, 0),
                  InvalidValueTypeException);
 
     // Scenario of https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=57328
@@ -324,6 +318,66 @@ TEST(metadata, extent_edge_cases) {
         EXPECT_FALSE(B->intersects(A));
         EXPECT_TRUE(A->intersection(B) == nullptr);
         EXPECT_TRUE(B->intersection(A) == nullptr);
+    }
+
+    // Test degenerate bounding box on a point
+    {
+        auto A = Extent::createFromBBOX(1, 2, 1, 2);
+        auto B = Extent::createFromBBOX(-10, -10, 10, 10);
+        EXPECT_TRUE(A->intersects(B));
+        EXPECT_TRUE(B->intersects(A));
+        EXPECT_FALSE(A->contains(B));
+        EXPECT_TRUE(B->contains(A));
+        EXPECT_TRUE(A->intersection(B) != nullptr);
+        EXPECT_TRUE(B->intersection(A) != nullptr);
+    }
+
+    // Test degenerate bounding box on a line at long=-180
+    {
+        auto A = Extent::createFromBBOX(-180, 2, -180, 3);
+        auto B = Extent::createFromBBOX(-180, -90, 180, 90);
+        EXPECT_TRUE(A->intersects(B));
+        EXPECT_TRUE(B->intersects(A));
+        EXPECT_FALSE(A->contains(B));
+        EXPECT_TRUE(B->contains(A));
+        EXPECT_TRUE(A->intersection(B) != nullptr);
+        EXPECT_TRUE(B->intersection(A) != nullptr);
+    }
+
+    // Test degenerate bounding box on a line at long=180
+    {
+        auto A = Extent::createFromBBOX(180, 2, 180, 3);
+        auto B = Extent::createFromBBOX(-180, -90, 180, 90);
+        EXPECT_TRUE(A->intersects(B));
+        EXPECT_TRUE(B->intersects(A));
+        EXPECT_FALSE(A->contains(B));
+        EXPECT_TRUE(B->contains(A));
+        EXPECT_TRUE(A->intersection(B) != nullptr);
+        EXPECT_TRUE(B->intersection(A) != nullptr);
+    }
+
+    // Test degenerate bounding box on a line at lat=90
+    {
+        auto A = Extent::createFromBBOX(2, 90, 3, 90);
+        auto B = Extent::createFromBBOX(-180, -90, 180, 90);
+        EXPECT_TRUE(A->intersects(B));
+        EXPECT_TRUE(B->intersects(A));
+        EXPECT_FALSE(A->contains(B));
+        EXPECT_TRUE(B->contains(A));
+        EXPECT_TRUE(A->intersection(B) != nullptr);
+        EXPECT_TRUE(B->intersection(A) != nullptr);
+    }
+
+    // Test degenerate bounding box on a line at lat=-90
+    {
+        auto A = Extent::createFromBBOX(2, -90, 3, -90);
+        auto B = Extent::createFromBBOX(-180, -90, 180, 90);
+        EXPECT_TRUE(A->intersects(B));
+        EXPECT_TRUE(B->intersects(A));
+        EXPECT_FALSE(A->contains(B));
+        EXPECT_TRUE(B->contains(A));
+        EXPECT_TRUE(A->intersection(B) != nullptr);
+        EXPECT_TRUE(B->intersection(A) != nullptr);
     }
 }
 
