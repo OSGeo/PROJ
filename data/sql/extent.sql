@@ -3752,3 +3752,4 @@ INSERT INTO "extent" VALUES('EPSG','4773','Europe - 30°E to 36°E and ETRF by c
 INSERT INTO "extent" VALUES('EPSG','4774','UK - London to Edinburgh','United Kingdom (UK) - on or related to the east coast mainline rail route from London (Kings Cross) via Newcastle to Edinburgh.',51.45,56.1,-3.45,0.05,0);
 INSERT INTO "extent" VALUES('EPSG','4775','UK - London to Glasgow','United Kingdom (UK) - on or related to the west coast mainline rail route from London (Euston) via Carlisle to Glasgow.',51.4,55.92,-4.33,-0.04,0);
 INSERT INTO "extent" VALUES('EPSG','4776','Greenland - offshore','Greenland - offshore.',56.38,87.03,-75.0,7.99,0);
+INSERT INTO "extent" VALUES('EPSG','4777','Brazil - Porto Alegre municipality','Brazil - Porto Alegre municipality.',-30.27,-29.93,-51.3,-51.01,0);
