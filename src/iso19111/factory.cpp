@@ -627,8 +627,23 @@ SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
 #ifdef REOPEN_SQLITE_DB_AFTER_FORK
     if (firstTime_) {
         firstTime_ = false;
-        pthread_atfork(nullptr, nullptr,
-                       []() { SQLiteHandleCache::get().invalidateHandles(); });
+        pthread_atfork(
+            []() {
+                // This mutex needs to be acquired by 'invalidateHandles()'.
+                // The forking thread needs to own this mutex during the fork.
+                // Otherwise there's an opporunity for another thread to own
+                // the mutex during the fork, leaving the child process unable
+                // to acquire the mutex in invalidateHandles().
+                SQLiteHandleCache::get().sMutex_.lock();
+            },
+            []() {
+                SQLiteHandleCache::get().sMutex_.unlock();
+            },
+            []() {
+                SQLiteHandleCache::get().sMutex_.unlock();
+                SQLiteHandleCache::get().invalidateHandles();
+            }
+        );
     }
 #endif
 
