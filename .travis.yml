@@ -2,9 +2,14 @@
 # with Travis-ci.org
 language: cpp
 
+# FIXME: Travis-CI builds are disabled
 branches:
-  except:
-  - /^(cherry-pick-)?backport-\d+-to-/
+  only:
+    - disabled_disabled
+
+#branches:
+#  except:
+#  - /^(cherry-pick-)?backport-\d+-to-/
 
 cache:
     directories:
