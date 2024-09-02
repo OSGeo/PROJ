@@ -7984,3 +7984,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10622','NAD83(2011) / SF
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10627','ETRS89 / ECML14 SnakeGrid + Newlyn height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10626','ETRS89 / ECML14 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10632','ETRS89 / WC05 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10659','ETRS89 + EOMA 1980 height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10665','Porto Alegre Cartographic Reference System (SCR-POA)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4801','Bern 1898 (Bern)','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21780','Bern 1898 (Bern) / LV03C','EPSG');

@@ -2157,6 +2157,7 @@ bool Transformation::isGeographic3DToGravityRelatedHeight(
         "1127", // Geographic3D to Depth (gtg)
         "1128", // Geog3D to Geog2D+Depth (gtg)
         "1129", // Vertical Offset by Grid Interpolation (gtg)
+        "1135", // Geog3D to Geog2D+GravityRelatedHeight (NGS bin)
         "9661", // Geographic3D to GravityRelatedHeight (EGM)
         "9662", // Geographic3D to GravityRelatedHeight (Ausgeoid98)
         "9663", // Geographic3D to GravityRelatedHeight (OSGM-GB)
