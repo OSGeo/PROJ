@@ -3940,16 +3940,99 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
         doFilterAndCheckPerfectOp = !res.empty();
     }
 
-    if (res.empty() && !context.inCreateOperationsWithDatumPivotAntiRecursion &&
+    // Browse through candidate operations and check if their area of use
+    // is sufficiently large compared to the area of use of the
+    // source/target CRS. If it is not, we might need to extend the lookup
+    // to using intermediate CRSs.
+    // But only do that if we have a relatively small number of solutions.
+    // Otherwise we might just spend time appending more dubious solutions.
+    bool tooSmallAreas = false;
+    // 10: arbitrary threshold so that particular case triggers for
+    // EPSG:9989 (ITRF2000) to EPSG:4937 (ETRS89), but not for
+    // "WGS 84" to "NAD83(CSRS)v2", to avoid excessive computation time.
+    if (!res.empty() && res.size() < 10) {
+        const auto &areaOfInterest = context.context->getAreaOfInterest();
+        double targetArea = 0.0;
+        if (areaOfInterest) {
+            targetArea = getPseudoArea(NN_NO_CHECK(areaOfInterest));
+        } else if (context.extent1) {
+            if (context.extent2) {
+                auto intersection =
+                    context.extent1->intersection(NN_NO_CHECK(context.extent2));
+                if (intersection)
+                    targetArea = getPseudoArea(NN_NO_CHECK(intersection));
+            } else {
+                targetArea = getPseudoArea(NN_NO_CHECK(context.extent1));
+            }
+        } else if (context.extent2) {
+            targetArea = getPseudoArea(NN_NO_CHECK(context.extent2));
+        }
+        if (targetArea > 0) {
+            tooSmallAreas = true;
+            for (const auto &op : res) {
+                bool dummy = false;
+                auto extentOp = getExtent(op, true, dummy);
+                double area = 0.0;
+                if (extentOp) {
+                    if (areaOfInterest) {
+                        area = getPseudoArea(extentOp->intersection(
+                            NN_NO_CHECK(areaOfInterest)));
+                    } else if (context.extent1 && context.extent2) {
+                        auto x = extentOp->intersection(
+                            NN_NO_CHECK(context.extent1));
+                        auto y = extentOp->intersection(
+                            NN_NO_CHECK(context.extent2));
+                        area = getPseudoArea(x) + getPseudoArea(y) -
+                               ((x && y) ? getPseudoArea(
+                                               x->intersection(NN_NO_CHECK(y)))
+                                         : 0.0);
+                    } else if (context.extent1) {
+                        area = getPseudoArea(extentOp->intersection(
+                            NN_NO_CHECK(context.extent1)));
+                    } else if (context.extent2) {
+                        area = getPseudoArea(extentOp->intersection(
+                            NN_NO_CHECK(context.extent2)));
+                    } else {
+                        area = getPseudoArea(extentOp);
+                    }
+                }
+
+                constexpr double HALF_RATIO = 0.5;
+                if (area > HALF_RATIO * targetArea) {
+                    tooSmallAreas = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    if ((res.empty() || tooSmallAreas) &&
+        !context.inCreateOperationsWithDatumPivotAntiRecursion &&
         !resFindDirectNonEmptyBeforeFiltering && geodSrc && geodDst &&
         !sameGeodeticDatum && context.context->getIntermediateCRS().empty() &&
         context.context->getAllowUseIntermediateCRS() !=
             CoordinateOperationContext::IntermediateCRSUse::NEVER) {
         // Currently triggered by "IG05/12 Intermediate CRS" to ITRF2014
+
+        std::set<std::string> oSetNames;
+        if (tooSmallAreas) {
+            for (const auto &op : res) {
+                oSetNames.insert(op->nameStr());
+            }
+        }
         auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
             sourceCRS, targetCRS, context, true);
-        res.insert(res.end(), resWithIntermediate.begin(),
-                   resWithIntermediate.end());
+        if (tooSmallAreas && !res.empty()) {
+            // Only insert operations we didn't already find
+            for (const auto &op : resWithIntermediate) {
+                if (oSetNames.find(op->nameStr()) == oSetNames.end()) {
+                    res.emplace_back(op);
+                }
+            }
+        } else {
+            res.insert(res.end(), resWithIntermediate.begin(),
+                       resWithIntermediate.end());
+        }
         doFilterAndCheckPerfectOp = !res.empty();
     }
 
