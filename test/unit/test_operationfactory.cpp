@@ -1192,12 +1192,14 @@ TEST(operation, geogCRS_to_geogCRS_context_lonlat_vs_latlon_crs) {
         authFactory->createCoordinateReferenceSystem("10310"), // RGNC15
         ctxt);
     ASSERT_EQ(list.size(), 3U);
-    // Check that we get direct transformation, and not through WGS 84
+    EXPECT_EQ(list[0]->nameStr(),
+              "RGNC91-93 to WGS 84 (1) + Inverse of RGNC15 to WGS 84 (1)");
+    // Check that we get direct transformation, and not only through WGS 84
     // The difficulty here is that the transformation is registered between
     // "RGNC91-93 (lon-lat)" et "RGNC15 (lon-lat)"
-    EXPECT_EQ(list[0]->nameStr(), "axis order change (2D) + RGNC91-93 to "
-                                  "RGNC15 (2) + axis order change (2D)");
     EXPECT_EQ(list[1]->nameStr(), "axis order change (2D) + RGNC91-93 to "
+                                  "RGNC15 (2) + axis order change (2D)");
+    EXPECT_EQ(list[2]->nameStr(), "axis order change (2D) + RGNC91-93 to "
                                   "RGNC15 (1) + axis order change (2D)");
 }
 
@@ -10936,4 +10938,39 @@ TEST(operation, createOperation_epsg_10622_local_orthographic) {
               "+lat_0=37.6289686531 +lon_0=-122.3939412704 "
               "+alpha=27.7928209333 +k=0.9999968 +x_0=0 +y_0=0 +ellps=GRS80 "
               "+step +proj=unitconvert +xy_in=m +xy_out=us-ft");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_ITRF2000_to_ETRS89) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // ITRF2000
+        authFactoryEPSG->createCoordinateReferenceSystem("9989"),
+        // ETRS89
+        authFactoryEPSG->createCoordinateReferenceSystem("4937"), ctxt);
+
+    // Check that we find a mix of grid-based (NKG ones, with very narrow area
+    // of use, but easier to lookup) and non-grid based operations (wider area
+    // of use, but require more effort to infer)
+    bool foundNonGridBasedOp = false;
+    bool foundGridBaseOp = false;
+    for (const auto &op : list) {
+        if (!op->hasBallparkTransformation()) {
+            if (op->gridsNeeded(dbContext, false).empty())
+                foundNonGridBasedOp = true;
+            else
+                foundGridBaseOp = true;
+        }
+    }
+    EXPECT_TRUE(foundNonGridBasedOp);
+    EXPECT_TRUE(foundGridBaseOp);
 }

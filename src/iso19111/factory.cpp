@@ -636,14 +636,11 @@ SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
                 // to acquire the mutex in invalidateHandles().
                 SQLiteHandleCache::get().sMutex_.lock();
             },
-            []() {
-                SQLiteHandleCache::get().sMutex_.unlock();
-            },
+            []() { SQLiteHandleCache::get().sMutex_.unlock(); },
             []() {
                 SQLiteHandleCache::get().sMutex_.unlock();
                 SQLiteHandleCache::get().invalidateHandles();
-            }
-        );
+            });
     }
 #endif
 
@@ -8142,6 +8139,25 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         }
     }
 
+    std::string sourceDatumPubDate;
+    const auto sourceDatum = sourceGeodCRS->datumNonNull(d->context());
+    if (sourceDatum->publicationDate().has_value()) {
+        sourceDatumPubDate = sourceDatum->publicationDate()->toString();
+    }
+
+    std::string targetDatumPubDate;
+    const auto targetDatum = targetGeodCRS->datumNonNull(d->context());
+    if (targetDatum->publicationDate().has_value()) {
+        targetDatumPubDate = targetDatum->publicationDate()->toString();
+    }
+
+    const std::string mostAncientDatumPubDate =
+        (!targetDatumPubDate.empty() &&
+         (sourceDatumPubDate.empty() ||
+          targetDatumPubDate < sourceDatumPubDate))
+            ? targetDatumPubDate
+            : sourceDatumPubDate;
+
     auto opFactory = operation::CoordinateOperationFactory::create();
     for (const auto &pair : candidates) {
         const auto &trfmSource = pair.first;
@@ -8167,6 +8183,37 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         const auto &op2Target = op2NN->targetCRS();
         if (!(op1Source && op1Target && op2Source && op2Target)) {
             continue;
+        }
+
+        // Skip operations using a datum that is older than the source or
+        // target datum (e.g to avoid ED50 to WGS84 to go through NTF)
+        if (!mostAncientDatumPubDate.empty()) {
+            const auto isOlderCRS = [this, &mostAncientDatumPubDate](
+                                        const crs::CRSPtr &crs) {
+                const auto geogCRS =
+                    dynamic_cast<const crs::GeodeticCRS *>(crs.get());
+                if (geogCRS) {
+                    const auto datum = geogCRS->datumNonNull(d->context());
+                    // Hum, theoretically we'd want to check
+                    // datum->publicationDate()->toString() <
+                    // mostAncientDatumPubDate but that would exclude doing
+                    // IG05/12 Intermediate CRS to ITRF2014 through ITRF2008,
+                    // since IG05/12 Intermediate CRS has been published later
+                    // than ITRF2008. So use a cut of date for ancient vs
+                    // "modern" era.
+                    constexpr const char *CUT_OFF_DATE = "1900-01-01";
+                    if (datum->publicationDate().has_value() &&
+                        datum->publicationDate()->toString() < CUT_OFF_DATE &&
+                        mostAncientDatumPubDate > CUT_OFF_DATE) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            if (isOlderCRS(op1Source) || isOlderCRS(op1Target) ||
+                isOlderCRS(op2Source) || isOlderCRS(op2Target))
+                continue;
         }
 
         std::vector<operation::CoordinateOperationNNPtr> steps;
