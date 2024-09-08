@@ -103,6 +103,8 @@
     internal_proj_coordoperation_has_ballpark_transformation
 #define proj_coordoperation_is_instantiable                                    \
     internal_proj_coordoperation_is_instantiable
+#define proj_coordoperation_requires_per_coordinate_input_time                 \
+    internal_proj_coordoperation_requires_per_coordinate_input_time
 #define proj_create internal_proj_create
 #define proj_create_argv internal_proj_create_argv
 #define proj_create_cartesian_2D_cs internal_proj_create_cartesian_2D_cs
@@ -178,6 +180,8 @@
     internal_proj_create_conversion_lambert_cylindrical_equal_area
 #define proj_create_conversion_lambert_cylindrical_equal_area_spherical        \
     internal_proj_create_conversion_lambert_cylindrical_equal_area_spherical
+#define proj_create_conversion_local_orthographic                              \
+    internal_proj_create_conversion_local_orthographic
 #define proj_create_conversion_mercator_variant_a                              \
     internal_proj_create_conversion_mercator_variant_a
 #define proj_create_conversion_mercator_variant_b                              \
