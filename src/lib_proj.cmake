@@ -28,6 +28,7 @@ print_variable(ENABLE_IPO)
 ##############################################
 
 set(SRC_LIBPROJ_PROJECTIONS
+  projections/dymaxion.cpp
   projections/aeqd.cpp
   projections/adams.cpp
   projections/gnom.cpp
