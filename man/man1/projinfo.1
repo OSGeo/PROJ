@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "PROJINFO" "1" "01 Mar 2024" "9.4" "PROJ"
+.TH "PROJINFO" "1" "15 Sep 2024" "9.5" "PROJ"
 .SH NAME
 projinfo \- Geodetic object and coordinate operation queries
 .SH SYNOPSIS
@@ -55,7 +55,8 @@ projinfo \- Geodetic object and coordinate operation queries
 \-\-list\-crs [list\-crs\-filter] |
 \-\-dump\-db\-structure [{object_definition} | {object_reference}] |
 {object_definition} | {object_reference} |
-[\-\-s_epoch {epoch}] \-t {srs_def} [\-\-t_epoch {epoch}])
+(\-s {srs_def} [\-\-s_epoch {epoch}] \-t {srs_def} [\-\-t_epoch {epoch}]) |
+({srs_def} {srs_def})
 
 .in -2
 .fi
@@ -100,6 +101,8 @@ a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + E
 {object_reference} is a filename preceded by the \(aq@\(aq character.  The
 file referenced by the {object_reference} must contain a valid
 {object_definition}.
+.sp
+The usage of "{srs_def} {srs_def}" is equivalent to "\-s {srs_def} \-t {srs_def}" (\fIadded in 9.5\fP).
 .UNINDENT
 .UNINDENT
 .SH DESCRIPTION
