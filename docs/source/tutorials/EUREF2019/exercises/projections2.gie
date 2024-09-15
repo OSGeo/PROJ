@@ -77,7 +77,7 @@ expect      1371811.19          218598.22
    By reducing the scale factor, the line of zero distance distortion degenerates
    into two lines, north and south of the standard parallel.
 
-   For the abovementioned point in Tallinn, the distance error is around 0.002%,
+   For the above-mentioned point in Tallinn, the distance error is around 0.002%,
    but this can be reduced to zero by varying the scaling factor.
 
    Even by trial and error it is not hard to reduce it to a few millionths of a

@@ -98,8 +98,8 @@ data:
 
     wget --mirror https://cdn.proj.org/
 
-Acknowledgments
----------------
+Acknowledgements
+----------------
 
 The s3://cdn.proj.org bucket is hosted by the
 `Amazon Public Datasets program <https://aws.amazon.com/opendata/public-datasets/>`_.
