@@ -4,19 +4,13 @@ Test 5110, Lambert Azimuthal Equal Area, v2-0_2011-06-28.
 
 --------------------------------------------------------------------------------
 
-# ETRS89
-<4258> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0  <>
+<gie-strict>
 
-# ETRS89 / LAEA Europe
-<3035> +proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000
-       +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m  <>
-
-
-<gie>
+use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4258 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4258 +inv \
            +step +init=epsg:3035
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -64,8 +58,8 @@ accept    10.0 50.0
 expect    4321000.0 2987510.567
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:3035 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:3035 +inv \
            +step +init=epsg:4258
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -113,8 +107,8 @@ accept    4321000.0 2987510.567
 expect    10.0 50.0
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4258 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4258 +inv \
            +step +init=epsg:3035
 --------------------------------------------------------------------------------
 tolerance  0.006 m
@@ -161,4 +155,4 @@ tolerance  0.006 m
 accept    10.0 50.0
 roundtrip 1000
 
-</gie>
+</gie-strict>
