@@ -26,7 +26,7 @@ This can be used to implement:
 
 - EPSG "Affine parametric transformation" of code 9624 by setting `A0`, `A1`, `A2`,
   `B0`, `B1`, `B2` EPSG parameters to respectively `xoff`, `s11`, `s12`, `yoff`,
-  `s21`, `s21` PROJ parameters.
+  `s21`, `s22` PROJ parameters.
 
 - EPSG "Similarity transformation" of code 9621 by setting:
 
