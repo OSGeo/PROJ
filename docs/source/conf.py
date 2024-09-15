@@ -25,10 +25,10 @@ title = "PROJ coordinate transformation software library"
 author = "PROJ contributors"
 
 # The major project version, used as the replacement for |version|
-version = "9.5"
+version = "9.6"
 
 # The full project version, used as the replacement for |release|
-release = "9.5.0-dev"
+release = "9.6.0-dev"
 
 # PROJ-data version
 data_version = "1.19"
