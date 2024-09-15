@@ -3,6 +3,76 @@
 News
 ###############################################################################
 
+9.5.0 Release Notes
+++++++++++++++++++++
+*Septemper 15th 2024*
+
+Updates
+-------
+
+  * Database: add constraint for unicity of CRS and operation names (`#4071 <https://github.com/OSGeo/PROJ/issues/4071>`_)
+
+  * Make a few more functions that accept a ``PJ*`` to actually acccept a ``const PJ*`` (`#4074 <https://github.com/OSGeo/PROJ/issues/4074>`_)
+
+  * Database: Increase consistency in trigger checks (`#4080 <https://github.com/OSGeo/PROJ/issues/4080>`_)
+
+  * Speed-up ``+proj=cart +inv`` (`#4087 <https://github.com/OSGeo/PROJ/issues/4087>`_)
+
+  * Added EPSG:9656 "Cartesian Grid Offsets" operation method, and imported related records (`#4094 <https://github.com/OSGeo/PROJ/issues/4094>`_)
+
+  * Add a :cpp:func:`WKTParser::grammarErrorList()` method so that :c:func:`proj_create_from_wkt()` can behave as documented (`#4108 <https://github.com/OSGeo/PROJ/issues/4108>`_)
+
+  * :cpp:func:`CRS::stripVerticalComponent()`: Redirect it to ``demoteTo2D(std::string(), nullptr)`` (`#4127 <https://github.com/OSGeo/PROJ/issues/4127>`_)
+
+  * Add :c:func:`proj_context_set_user_writable_directory()` to public API (`#4144 <https://github.com/OSGeo/PROJ/issues/4144>`_)
+
+  * CMake: for Windows builds, defaults PROJ DLL to be just ``proj_${PROJ_MAJOR_VERSION}.dll`` (`#4167 <https://github.com/OSGeo/PROJ/issues/4167>`_)
+
+  * Add ``toWGS84AutocorrectWrongValues()`` method and use it in PROJ.4 and WKT1 CRS import (`#4172 <https://github.com/OSGeo/PROJ/issues/4172>`_)
+
+  * WKT import: add support for Oracle WKT "Albers_Conical_Equal_Area" spelling (`#4181 <https://github.com/OSGeo/PROJ/issues/4181>`_)
+
+  * Limit number of C++ exceptions thrown & caught internally (`#4183 <https://github.com/OSGeo/PROJ/issues/4183>`_)
+
+  * Database: update to EPSG 11.016 (`#4241 <https://github.com/OSGeo/PROJ/issues/4241>`_)
+
+  * CMake: add option ``EMBED_PROJ_DATA_PATH`` (`#4207 <https://github.com/OSGeo/PROJ/issues/4207>`_)
+
+  * Add SEA Inverse projection (`#4211 <https://github.com/OSGeo/PROJ/issues/4211>`_)
+
+  * :program:`projinfo`: Add 2 args equivalent to usage of `-s` and `-t` (`#4218 <https://github.com/OSGeo/PROJ/issues/4218>`_)
+
+  *  CMake: add ``TESTING_USE_NETWORK`` configure option (`#4220 <https://github.com/OSGeo/PROJ/issues/4220>`_)
+
+  * Add ``PROJ_ERR_COORD_TRANSFM_MISSING_TIME`` and :c:func:`proj_coordoperation_requires_per_coordinate_input_time()` (`#4221 <https://github.com/OSGeo/PROJ/issues/4221>`_)
+
+  * Add new Conversion "Local Orthographic" (#4228, #4229)
+
+  * Add data/ITRF2020 with ITRF2020 to ITRFother, and ITRF2020 plate motion models (`#4235 <https://github.com/OSGeo/PROJ/issues/4235>`_)
+
+Bug fixes
+---------
+
+  * Fix ``imoll`` and ``imoll_o`` zone calculations to correct inverse transformations near the "seams" (`#4159 <https://github.com/OSGeo/PROJ/issues/4159>`_)
+
+  * Fix wrong EPSG conversion code for UTM south (`#4166 <https://github.com/OSGeo/PROJ/issues/4166>`_)
+
+  * ``BoundCRS::exportToPROJ()``: handle case of NADCON conus grid (`#4168 <https://github.com/OSGeo/PROJ/issues/4168>`_)
+
+  * ``+proj=gridshift``: make projected grids work with `PROJ_NETWORK=ON` (`#4174 <https://github.com/OSGeo/PROJ/issues/4174>`_)
+
+  * :cpp:func:`createOperations()`: make it work when transforming from/to a CompoundCRS with a DerivedVerticalCRS with ellipsoidal height (`#4176 <https://github.com/OSGeo/PROJ/issues/4176>`_)
+
+  * Support default context as ``nullptr`` in ``CoordinateTransformer`` (`#4177 <https://github.com/OSGeo/PROJ/issues/4177>`_)
+
+  * :program:`cct`: emit error message and return error code when not being able to open input file (`#4200 <https://github.com/OSGeo/PROJ/issues/4200>`_)
+
+  * Fix race condition surrounding DB reopening during fork (`#4231 <https://github.com/OSGeo/PROJ/issues/4231>`_)
+
+  * :cpp:func:`GeographicBoundingBox::create()`: accept degenerate bounding box reduced to a point or a line (`#4237 <https://github.com/OSGeo/PROJ/issues/4237>`_)
+
+  * :cpp:func:`createOperation()`: tune so that ITRF2000->ETRS89 does not return only NKG grid based operations but also time-dependent Helmert (`#4244 <https://github.com/OSGeo/PROJ/issues/4244>`_)
+
 9.4.1 Release Notes
 ++++++++++++++++++++
 *June 1st 2024*
