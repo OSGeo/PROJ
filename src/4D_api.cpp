@@ -2617,7 +2617,7 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
         } else {
             PJ *candidateOp = nullptr;
             // If there's just a single coordinate operation which is
-            // instanciable, use it.
+            // instantiable, use it.
             for (const auto &op : P->alternativeCoordinateOperations) {
                 if (op.isInstantiable()) {
                     if (candidateOp == nullptr) {

@@ -278,3 +278,10 @@ html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL", "")
 # Tell Jinja2 templates the build is running on Read the Docs
 if os.environ.get("READTHEDOCS", "") == "True":
     html_context["READTHEDOCS"] = True
+
+# -- Spelling --------------------------------------------------
+
+# Avoid running git
+spelling_ignore_contributor_names = False
+
+spelling_word_list_filename = ["spelling_wordlist.txt"]

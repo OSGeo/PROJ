@@ -4523,7 +4523,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
         if (isNull(csNode) && ci_equal(nodeValue, WKTConstants::BASEPROJCRS) &&
             !isNull(conversionNode)) {
             // A BASEPROJCRS (as of WKT2 18-010r11) normally lacks an explicit
-            // CS[] which cause issues to properly instanciate it. So we first
+            // CS[] which cause issues to properly instantiate it. So we first
             // start by trying to identify the BASEPROJCRS by its id or name.
             // And fallback to exploring the conversion parameters to infer the
             // CS AXIS unit from the linear parameter unit... Not fully bullet

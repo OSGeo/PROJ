@@ -30,7 +30,7 @@ Modified Krovak
 
    proj-string: ``+proj=mod_krovak``
 
-Modified Krovak builts upon traditional :ref:`krovak`, with corrective terms that
+Modified Krovak builds upon traditional :ref:`krovak`, with corrective terms that
 are better suited when using it with the S-JTSK/05 datum. This method is specific
 to the Czech Republic. Due to the corrective terms, this projection method is
 no longer strictly conformal.
