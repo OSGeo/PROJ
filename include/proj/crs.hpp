@@ -165,6 +165,9 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
     getResolvedCRS(const CRSNNPtr &crs,
                    const io::AuthorityFactoryPtr &authFactory,
                    metadata::ExtentPtr &extentOut);
+
+    PROJ_INTERNAL std::string getOriginatingAuthName() const;
+
     //! @endcond
 
   protected:

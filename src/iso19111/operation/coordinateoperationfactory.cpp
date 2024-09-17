@@ -2001,12 +2001,21 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
         auto geodSrc = dynamic_cast<crs::GeodeticCRS *>(sourceCRS.get());
         auto geodDst = dynamic_cast<crs::GeodeticCRS *>(targetCRS.get());
         if (geodSrc) {
+            const std::string originatingAuthSrc =
+                geodSrc->getOriginatingAuthName();
             const auto dbContext = authFactory->databaseContext().as_nullable();
             const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
                 authFactory, geodSrc, geodSrc->datumNonNull(dbContext)));
             std::vector<CoordinateOperationNNPtr> res;
             for (const auto &candidateSrcGeod : candidatesSrcGeod) {
-                if (candidateSrcGeod->coordinateSystem()->axisList().size() ==
+                // Restrict to using only objects that have the same authority
+                // as geodSrc.
+                const auto &candidateIds = candidateSrcGeod->identifiers();
+                if ((originatingAuthSrc.empty() ||
+                     (candidateIds.size() == 1 &&
+                      *(candidateIds[0]->codeSpace()) == originatingAuthSrc) ||
+                     candidateIds.size() > 1) &&
+                    candidateSrcGeod->coordinateSystem()->axisList().size() ==
                         geodSrc->coordinateSystem()->axisList().size() &&
                     ((dynamic_cast<crs::GeographicCRS *>(sourceCRS.get()) !=
                       nullptr) ==
@@ -2022,6 +2031,7 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
                             continue;
                         }
                     }
+
                     const auto opsWithIntermediate =
                         findsOpsInRegistryWithIntermediate(
                             candidateSrcGeod, targetCRS, context,
