@@ -1783,17 +1783,19 @@ getCandidateAuthorities(const io::AuthorityFactoryPtr &authFactory,
                         const std::string &targetAuthName) {
     const auto &authFactoryName = authFactory->getAuthority();
     std::vector<std::string> authorities;
-    if (authFactoryName == "any") {
-        authorities.emplace_back();
-    }
     if (authFactoryName.empty()) {
-        authorities = authFactory->databaseContext()->getAllowedAuthorities(
-            srcAuthName, targetAuthName);
+        for (const std::string &authName :
+             authFactory->databaseContext()->getAllowedAuthorities(
+                 srcAuthName, targetAuthName)) {
+            authorities.emplace_back(authName == "any" ? std::string()
+                                                       : authName);
+        }
         if (authorities.empty()) {
             authorities.emplace_back();
         }
     } else {
-        authorities.emplace_back(authFactoryName);
+        authorities.emplace_back(authFactoryName == "any" ? std::string()
+                                                          : authFactoryName);
     }
     return authorities;
 }
@@ -1830,9 +1832,7 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirect(
             const auto authorities(getCandidateAuthorities(
                 authFactory, srcAuthName, targetAuthName));
             std::vector<CoordinateOperationNNPtr> res;
-            for (const auto &authority : authorities) {
-                const auto authName =
-                    authority == "any" ? std::string() : authority;
+            for (const auto &authName : authorities) {
                 const auto tmpAuthFactory = io::AuthorityFactory::create(
                     authFactory->databaseContext(), authName);
                 auto resTmp =
@@ -1902,9 +1902,7 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirectTo(
         const auto authorities(getCandidateAuthorities(
             authFactory, targetAuthName, targetAuthName));
         std::vector<CoordinateOperationNNPtr> res;
-        for (const auto &authority : authorities) {
-            const auto authName =
-                authority == "any" ? std::string() : authority;
+        for (const auto &authName : authorities) {
             const auto tmpAuthFactory = io::AuthorityFactory::create(
                 authFactory->databaseContext(), authName);
             auto resTmp =
