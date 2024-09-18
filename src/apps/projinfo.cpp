@@ -841,6 +841,11 @@ static void outputOperationSummary(
         } catch (const std::exception &) {
         }
     }
+
+    if (op->requiresPerCoordinateInputTime()) {
+        std::cout << ", time-dependent operation";
+    }
+
     std::cout << std::endl;
 }
 
