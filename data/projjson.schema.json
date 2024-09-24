@@ -227,6 +227,155 @@
       "unevaluatedProperties": false
     },
 
+    "ellipsoidal_coordinate_system": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/coordinate_system" }
+      ],
+      "properties": {
+        "subtype": { "type": "string", "enum": ["ellipsoidal"] },
+        "axis": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 3,
+            "items": { "$ref": "#/definitions/axis" }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "affine_coordinate_system": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/coordinate_system" }
+      ],
+      "properties": {
+        "subtype": { "type": "string", "enum": ["affine"] },
+        "axis": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 3,
+            "items": { "$ref": "#/definitions/axis" }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "cylindrical_coordinate_system": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/coordinate_system" }
+      ],
+      "properties": {
+        "subtype": { "type": "string", "enum": ["cylindrical"] },
+        "axis": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": { "$ref": "#/definitions/axis" }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "linear_coordinate_system": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/coordinate_system" }
+      ],
+      "properties": {
+        "subtype": { "type": "string", "enum": ["linear"] },
+        "axis": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": { "$ref": "#/definitions/axis" }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "ordinal_coordinate_system": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/coordinate_system" }
+      ],
+      "properties": {
+        "subtype": { "type": "string", "enum": ["ordinal"] },
+        "axis": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/axis" }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "polar_coordinate_system": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/coordinate_system" }
+      ],
+      "properties": {
+        "subtype": { "type": "string", "enum": ["polar"] },
+        "axis": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/axis" }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "spherical_coordinate_system": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/coordinate_system" }
+      ],
+      "properties": {
+        "subtype": { "type": "string", "enum": ["spherical"] },
+        "axis": {
+            "type": "array",
+            "$remark": "We allow 2 as a minimum for Planetocentric spherical coordinate systems",
+            "minItems": 2,
+            "maxItems": 3,
+            "items": { "$ref": "#/definitions/axis" }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "Cartesian_coordinate_system": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/coordinate_system" }
+      ],
+      "properties": {
+        "subtype": { "type": "string", "enum": ["Cartesian"] },
+        "axis": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 3,
+            "items": { "$ref": "#/definitions/axis" }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "Cartesian_coordinate_system_3_axis": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/Cartesian_coordinate_system" }
+      ],
+      "properties": {
+        "axis": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": { "$ref": "#/definitions/axis" }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
     "crs": {
       "oneOf": [
         { "$ref": "#/definitions/bound_crs" },
@@ -238,11 +387,18 @@
         { "$ref": "#/definitions/derived_temporal_crs" },
         { "$ref": "#/definitions/derived_vertical_crs" },
         { "$ref": "#/definitions/engineering_crs" },
-        { "$ref": "#/definitions/geodetic_crs" },
+        { "$ref": "#/definitions/geodetic_crs_or_geographic_crs" },
         { "$ref": "#/definitions/parametric_crs" },
         { "$ref": "#/definitions/projected_crs" },
         { "$ref": "#/definitions/temporal_crs" },
         { "$ref": "#/definitions/vertical_crs" }
+      ]
+    },
+
+    "geodetic_crs_or_geographic_crs": {
+      "oneOf": [
+        { "$ref": "#/definitions/geodetic_crs" },
+        { "$ref": "#/definitions/geographic_crs" }
       ]
     },
 
@@ -326,7 +482,7 @@
                   "enum": ["DerivedGeodeticCRS",
                            "DerivedGeographicCRS"] },
         "name": { "type": "string" },
-        "base_crs": { "$ref": "#/definitions/geodetic_crs" },
+        "base_crs": { "$ref": "#/definitions/abstract_geodetic_crs" },
         "conversion": { "$ref": "#/definitions/conversion" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" }
      },
@@ -496,10 +652,9 @@
       "unevaluatedProperties": false
     },
 
-    "geodetic_crs": {
+    "abstract_geodetic_crs": {
       "type": "object",
       "properties": {
-        "type": { "type": "string", "enum": ["GeodeticCRS", "GeographicCRS"] },
         "name": { "type": "string" },
         "datum": {
             "oneOf": [
@@ -508,7 +663,13 @@
             ]
         },
         "datum_ensemble": { "$ref": "#/definitions/datum_ensemble" },
-        "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "coordinate_system": {
+          "oneOf": [
+            { "$ref": "#/definitions/Cartesian_coordinate_system_3_axis" },
+            { "$ref": "#/definitions/spherical_coordinate_system" },
+            { "$ref": "#/definitions/ellipsoidal_coordinate_system" }
+          ]
+        },
         "deformation_models": {
           "type": "array",
           "items": { "$ref": "#/definitions/deformation_model" }
@@ -519,7 +680,31 @@
       "allOf": [
         { "$ref": "#/definitions/object_usage" },
         { "$ref": "#/definitions/one_and_only_one_of_datum_or_datum_ensemble" }
-      ],
+      ]
+    },
+
+    "geodetic_crs": {
+      "type": "object",
+      "allOf": [ { "$ref": "#/definitions/abstract_geodetic_crs" } ],
+      "properties": {
+        "type": { "type": "string", "enum": ["GeodeticCRS"] },
+        "coordinate_system": {
+          "oneOf": [
+            { "$ref": "#/definitions/Cartesian_coordinate_system_3_axis" },
+            { "$ref": "#/definitions/spherical_coordinate_system" }
+          ]
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "geographic_crs": {
+      "type": "object",
+      "allOf": [ { "$ref": "#/definitions/abstract_geodetic_crs" } ],
+      "properties": {
+        "type": { "type": "string", "enum": ["GeographicCRS"] },
+        "coordinate_system": { "$ref": "#/definitions/ellipsoidal_coordinate_system" }
+      },
       "unevaluatedProperties": false
     },
 
@@ -761,9 +946,9 @@
         "type": { "type": "string",
                   "enum": ["ProjectedCRS"] },
         "name": { "type": "string" },
-        "base_crs": { "$ref": "#/definitions/geodetic_crs" },
+        "base_crs": { "$ref": "#/definitions/abstract_geodetic_crs" },
         "conversion": { "$ref": "#/definitions/conversion" },
-        "coordinate_system": { "$ref": "#/definitions/coordinate_system" }
+        "coordinate_system": { "$ref": "#/definitions/Cartesian_coordinate_system" }
      },
      "required" : [ "name", "base_crs", "conversion", "coordinate_system" ],
      "unevaluatedProperties": false
