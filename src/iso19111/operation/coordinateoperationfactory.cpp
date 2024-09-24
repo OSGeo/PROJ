@@ -1783,17 +1783,19 @@ getCandidateAuthorities(const io::AuthorityFactoryPtr &authFactory,
                         const std::string &targetAuthName) {
     const auto &authFactoryName = authFactory->getAuthority();
     std::vector<std::string> authorities;
-    if (authFactoryName == "any") {
-        authorities.emplace_back();
-    }
     if (authFactoryName.empty()) {
-        authorities = authFactory->databaseContext()->getAllowedAuthorities(
-            srcAuthName, targetAuthName);
+        for (const std::string &authName :
+             authFactory->databaseContext()->getAllowedAuthorities(
+                 srcAuthName, targetAuthName)) {
+            authorities.emplace_back(authName == "any" ? std::string()
+                                                       : authName);
+        }
         if (authorities.empty()) {
             authorities.emplace_back();
         }
     } else {
-        authorities.emplace_back(authFactoryName);
+        authorities.emplace_back(authFactoryName == "any" ? std::string()
+                                                          : authFactoryName);
     }
     return authorities;
 }
@@ -1830,9 +1832,7 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirect(
             const auto authorities(getCandidateAuthorities(
                 authFactory, srcAuthName, targetAuthName));
             std::vector<CoordinateOperationNNPtr> res;
-            for (const auto &authority : authorities) {
-                const auto authName =
-                    authority == "any" ? std::string() : authority;
+            for (const auto &authName : authorities) {
                 const auto tmpAuthFactory = io::AuthorityFactory::create(
                     authFactory->databaseContext(), authName);
                 auto resTmp =
@@ -1902,9 +1902,7 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirectTo(
         const auto authorities(getCandidateAuthorities(
             authFactory, targetAuthName, targetAuthName));
         std::vector<CoordinateOperationNNPtr> res;
-        for (const auto &authority : authorities) {
-            const auto authName =
-                authority == "any" ? std::string() : authority;
+        for (const auto &authName : authorities) {
             const auto tmpAuthFactory = io::AuthorityFactory::create(
                 authFactory->databaseContext(), authName);
             auto resTmp =
@@ -2003,12 +2001,21 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
         auto geodSrc = dynamic_cast<crs::GeodeticCRS *>(sourceCRS.get());
         auto geodDst = dynamic_cast<crs::GeodeticCRS *>(targetCRS.get());
         if (geodSrc) {
+            const std::string originatingAuthSrc =
+                geodSrc->getOriginatingAuthName();
             const auto dbContext = authFactory->databaseContext().as_nullable();
             const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
                 authFactory, geodSrc, geodSrc->datumNonNull(dbContext)));
             std::vector<CoordinateOperationNNPtr> res;
             for (const auto &candidateSrcGeod : candidatesSrcGeod) {
-                if (candidateSrcGeod->coordinateSystem()->axisList().size() ==
+                // Restrict to using only objects that have the same authority
+                // as geodSrc.
+                const auto &candidateIds = candidateSrcGeod->identifiers();
+                if ((originatingAuthSrc.empty() ||
+                     (candidateIds.size() == 1 &&
+                      *(candidateIds[0]->codeSpace()) == originatingAuthSrc) ||
+                     candidateIds.size() > 1) &&
+                    candidateSrcGeod->coordinateSystem()->axisList().size() ==
                         geodSrc->coordinateSystem()->axisList().size() &&
                     ((dynamic_cast<crs::GeographicCRS *>(sourceCRS.get()) !=
                       nullptr) ==
@@ -2024,6 +2031,7 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
                             continue;
                         }
                     }
+
                     const auto opsWithIntermediate =
                         findsOpsInRegistryWithIntermediate(
                             candidateSrcGeod, targetCRS, context,
