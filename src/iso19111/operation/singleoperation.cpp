@@ -1173,9 +1173,12 @@ SingleOperation::SingleOperation(const OperationMethodNNPtr &methodIn)
     const auto &methodName = d->method_->nameStr();
     setRequiresPerCoordinateInputTime(
         isTimeDependent(methodName) ||
-        methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
-        methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-        methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D ||
         methodEPSGCode ==
             EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC ||
         methodEPSGCode ==
