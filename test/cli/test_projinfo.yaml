@@ -1392,24 +1392,24 @@ tests:
 - args: -s "AGD66" -t "WGS 84 (G1762)" --spatial-test intersects --summary
   out: |
     Candidate operations found: 19
-    unknown id, AGD66 to WGS 84 (18) + WGS 84 to WGS 84 (G1762), 5 m, Australia - offshore including EEZ.
+    unknown id, AGD66 to WGS 84 (18) + WGS 84 to WGS 84 (G1762), 5 m, Australia - offshore including EEZ., time-dependent operation
     unknown id, AGD66 to WGS 84 (16) + WGS 84 to WGS 84 (G1762), 7 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
     unknown id, AGD66 to WGS 84 (20) + WGS 84 to WGS 84 (G1762), 11 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
-    unknown id, AGD66 to WGS 84 (15) + WGS 84 to WGS 84 (G1762), 5 m, Australia - Northern Territory.
-    unknown id, AGD66 to WGS 84 (13) + WGS 84 to WGS 84 (G1762), 5 m, Australia - New South Wales and Victoria.
+    unknown id, AGD66 to WGS 84 (15) + WGS 84 to WGS 84 (G1762), 5 m, Australia - Northern Territory., time-dependent operation
+    unknown id, AGD66 to WGS 84 (13) + WGS 84 to WGS 84 (G1762), 5 m, Australia - New South Wales and Victoria., time-dependent operation
     unknown id, AGD66 to WGS 84 (21) + WGS 84 to WGS 84 (G1762), 7 m, Papua New Guinea - mainland onshore.
-    unknown id, AGD66 to WGS 84 (14) + WGS 84 to WGS 84 (G1762), 5 m, Australia - Tasmania including islands - onshore.
+    unknown id, AGD66 to WGS 84 (14) + WGS 84 to WGS 84 (G1762), 5 m, Australia - Tasmania including islands - onshore., time-dependent operation
     unknown id, AGD66 to WGS 84 (19) + WGS 84 to WGS 84 (G1762), 4 m, Papua New Guinea - Papuan fold and thrust belt.
     unknown id, AGD66 to WGS 84 (22) + WGS 84 to WGS 84 (G1762), 6 m, Papua New Guinea - Papuan fold and thrust belt.
     unknown id, AGD66 to WGS 84 (23) + WGS 84 to WGS 84 (G1762), 6 m, Papua New Guinea - North Fly area (between 5°04'S and 6°36'S and west of 141°32'E).
-    unknown id, AGD66 to WGS 84 (12) + WGS 84 to WGS 84 (G1762), 5 m, Australia - Australian Capital Territory.
-    unknown id, AGD66 to GDA94 (11) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.75 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
-    unknown id, AGD66 to GDA94 (12) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 3.25 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
+    unknown id, AGD66 to WGS 84 (12) + WGS 84 to WGS 84 (G1762), 5 m, Australia - Australian Capital Territory., time-dependent operation
+    unknown id, AGD66 to GDA94 (11) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.75 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria., time-dependent operation
+    unknown id, AGD66 to GDA94 (12) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 3.25 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria., time-dependent operation
     unknown id, AGD66 to WGS 84 (17) + WGS 84 to WGS 84 (G1762), 4.9 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
-    unknown id, AGD66 to GDA94 (9) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 1.25 m, Australia - Northern Territory.
-    unknown id, AGD66 to GDA94 (4) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 1.25 m, Australia - New South Wales and Victoria.
-    unknown id, AGD66 to GDA94 (8) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 1.25 m, Australia - Tasmania including islands - onshore.
-    unknown id, AGD66 to GDA94 (19) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.75 m, Australia - Australian Capital Territory.
+    unknown id, AGD66 to GDA94 (9) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 1.25 m, Australia - Northern Territory., time-dependent operation
+    unknown id, AGD66 to GDA94 (4) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 1.25 m, Australia - New South Wales and Victoria., time-dependent operation
+    unknown id, AGD66 to GDA94 (8) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 1.25 m, Australia - Tasmania including islands - onshore., time-dependent operation
+    unknown id, AGD66 to GDA94 (19) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.75 m, Australia - Australian Capital Territory., time-dependent operation
     unknown id, Ballpark geographic offset from AGD66 to WGS 84 (G1762), unknown accuracy, World, has ballpark transformation
 - args: -s EPSG:31467 -t ETRS89 --spatial-test intersects --grid-check none --bbox 8,48,9,49 --summary
   out: |
@@ -1717,7 +1717,7 @@ tests:
   args: -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpark
   out: |
     Candidate operations found: 1
-    NKG:ITRF2014_TO_DK, ITRF2014 to ETRS89(DK), 0.01 m, Denmark - onshore and offshore.
+    NKG:ITRF2014_TO_DK, ITRF2014 to ETRS89(DK), 0.01 m, Denmark - onshore and offshore., time-dependent operation
 - args: --dump-db-structure
   head: 5
   out: |
