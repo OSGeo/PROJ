@@ -4780,7 +4780,7 @@ PointMotionOperation::~PointMotionOperation() = default;
  * @param values Vector of GeneralOperationParameterNNPtr.
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new PointMotionOperation.
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 PointMotionOperationNNPtr PointMotionOperation::create(
     const util::PropertyMap &properties, const crs::CRSNNPtr &crsIn,
@@ -4833,7 +4833,7 @@ PointMotionOperationNNPtr PointMotionOperation::create(
  * values.size() == parameters.size()
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new PointMotionOperation.
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 PointMotionOperationNNPtr PointMotionOperation::create(
     const util::PropertyMap &propertiesOperation, const crs::CRSNNPtr &crsIn,

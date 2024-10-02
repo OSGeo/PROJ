@@ -2004,7 +2004,7 @@ void DatumEnsemble::_exportToJSON(
  * @param datumsIn Array of at least 2 datums.
  * @param accuracy Accuracy of the datum ensemble
  * @return new DatumEnsemble.
- * @throw util::Exception
+ * @throw util::Exception in case of error.
  */
 DatumEnsembleNNPtr DatumEnsemble::create(
     const util::PropertyMap &properties,

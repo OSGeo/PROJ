@@ -68,7 +68,7 @@ class TINShiftFile {
   public:
     /** Parse the provided serialized JSON content and return an object.
      *
-     * @throws ParsingException
+     * @throws ParsingException in case of error.
      */
     static std::unique_ptr<TINShiftFile> parse(const std::string &text);
 
