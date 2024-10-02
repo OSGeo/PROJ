@@ -36,6 +36,10 @@
 #pragma GCC diagnostic pop
 #endif
 
+#ifdef EMBED_RESOURCE_FILES
+#include "memvfs.h"
+#endif
+
 #include <cstdlib>
 #include <cstring>
 #include <sstream> // std::ostringstream
@@ -138,19 +142,28 @@ static void projSqlite3LogCallback(void *, int iErrCode, const char *zMsg) {
     fprintf(stderr, "SQLite3 message: (code %d) %s\n", iErrCode, zMsg);
 }
 
+namespace {
+struct InstallSqliteLogger {
+    InstallSqliteLogger() {
+        if (getenv("PROJ_LOG_SQLITE3") != nullptr) {
+            sqlite3_config(SQLITE_CONFIG_LOG, projSqlite3LogCallback, nullptr);
+        }
+    }
+
+    static InstallSqliteLogger &GetSingleton() {
+        static InstallSqliteLogger installSqliteLogger;
+        return installSqliteLogger;
+    }
+};
+} // namespace
+
+// ---------------------------------------------------------------------------
+
 std::unique_ptr<SQLite3VFS> SQLite3VFS::create(bool fakeSync, bool fakeLock,
                                                bool skipStatJournalAndWAL) {
 
     // Install SQLite3 logger if PROJ_LOG_SQLITE3 env var is defined
-    struct InstallSqliteLogger {
-        InstallSqliteLogger() {
-            if (getenv("PROJ_LOG_SQLITE3") != nullptr) {
-                sqlite3_config(SQLITE_CONFIG_LOG, projSqlite3LogCallback,
-                               nullptr);
-            }
-        }
-    };
-    static InstallSqliteLogger installSqliteLogger;
+    InstallSqliteLogger::GetSingleton();
 
     // Call to sqlite3_initialize() is normally not needed, except for
     // people building SQLite3 with -DSQLITE_OMIT_AUTOINIT
@@ -194,6 +207,36 @@ std::unique_ptr<SQLite3VFS> SQLite3VFS::create(bool fakeSync, bool fakeLock,
     vfsUnique->vfs_ = nullptr;
     return nullptr;
 }
+
+// ---------------------------------------------------------------------------
+
+#ifdef EMBED_RESOURCE_FILES
+
+/* static */
+std::unique_ptr<SQLite3VFS> SQLite3VFS::createMem() {
+    // Install SQLite3 logger if PROJ_LOG_SQLITE3 env var is defined
+    InstallSqliteLogger::GetSingleton();
+
+    // Call to sqlite3_initialize() is normally not needed, except for
+    // people building SQLite3 with -DSQLITE_OMIT_AUTOINIT
+    sqlite3_initialize();
+
+    auto vfs = new pj_sqlite3_vfs();
+
+    auto vfsUnique = std::unique_ptr<SQLite3VFS>(new SQLite3VFS(vfs));
+
+    std::ostringstream buffer;
+    buffer << vfs;
+    vfs->namePtr = buffer.str();
+    if (pj_sqlite3_memvfs_init(vfs, vfs->namePtr.c_str()) == SQLITE_OK) {
+        return vfsUnique;
+    }
+    delete vfsUnique->vfs_;
+    vfsUnique->vfs_ = nullptr;
+    return nullptr;
+}
+
+#endif
 
 // ---------------------------------------------------------------------------
 
