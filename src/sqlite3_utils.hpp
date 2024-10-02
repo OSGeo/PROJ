@@ -62,6 +62,11 @@ class SQLite3VFS {
 
     static std::unique_ptr<SQLite3VFS> create(bool fakeSync, bool fakeLock,
                                               bool skipStatJournalAndWAL);
+
+#ifdef EMBED_RESOURCE_FILES
+    static std::unique_ptr<SQLite3VFS> createMem();
+#endif
+
     const char *name() const;
     sqlite3_vfs *raw() { return vfs_; }
 };
