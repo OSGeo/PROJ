@@ -196,7 +196,8 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     coordinateTransformer(PJ_CONTEXT *ctx) const;
 
     /** \brief Return the inverse of the coordinate operation.
-     * @throw util::UnsupportedOperationException
+     *
+     * \throw util::UnsupportedOperationException if inverse is not available
      */
     PROJ_DLL virtual CoordinateOperationNNPtr inverse() const = 0;
 
