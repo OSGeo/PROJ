@@ -66,15 +66,15 @@ function(FileEmbedGenerate file generated_c)
 const uint8_t ${c_name}_data[] = {
     ${output_c}
 }\;
-unsigned ${c_name}_size = sizeof(${c_name}_data)\;
+const unsigned ${c_name}_size = sizeof(${c_name}_data)\;
 ")
 
     set(output_h "
 #ifndef ${c_name}_H
 #define ${c_name}_H
-#include \"stdint.h\"
+#include <stdint.h>
 extern const uint8_t ${c_name}_data[]\;
-extern unsigned ${c_name}_size\;
+extern const unsigned ${c_name}_size\;
 #endif // ${c_name}_H
     ")
 
