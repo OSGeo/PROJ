@@ -246,6 +246,7 @@ static void PROJ_SQLITE_intersects_bbox(sqlite3_context *pContext,
 // ---------------------------------------------------------------------------
 
 class SQLiteHandle {
+    std::string path_{};
     sqlite3 *sqlite_handle_ = nullptr;
     bool close_handle_ = true;
 
@@ -277,6 +278,8 @@ class SQLiteHandle {
 
   public:
     ~SQLiteHandle();
+
+    const std::string &path() const { return path_; }
 
     sqlite3 *handle() { return sqlite_handle_; }
 
@@ -388,6 +391,7 @@ std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
     handle->vfs_ = std::move(vfs);
 #endif
     handle->initialize();
+    handle->path_ = path;
     handle->checkDatabaseLayout(path, path, std::string());
     return handle;
 }
@@ -1256,7 +1260,7 @@ void DatabaseContext::Private::open(const std::string &databasePath,
 
     sqlite_handle_ = SQLiteHandleCache::get().getHandle(path, ctx);
 
-    databasePath_ = std::move(path);
+    databasePath_ = sqlite_handle_->path();
 }
 
 // ---------------------------------------------------------------------------

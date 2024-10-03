@@ -313,8 +313,13 @@ static int memOpen(sqlite3_vfs *pVfs, const char *zName, sqlite3_file *pFile,
                    int flags, int *pOutFlags) {
     MemFile *p = (MemFile *)pFile;
     memset(p, 0, sizeof(*p));
-    if ((flags & SQLITE_OPEN_MAIN_DB) == 0)
-        return SQLITE_CANTOPEN;
+    if ((flags & SQLITE_OPEN_MAIN_DB) == 0) {
+        /* Modification w.r.t upstream: instead of returning SQLITE_CANTOPEN,
+         * delegate to orign VFS. Typically for temporary file creation.
+         */
+        return ORIGVFS(pVfs)->xOpen(ORIGVFS(pVfs), zName, pFile, flags,
+                                    pOutFlags);
+    }
     p->aData = (unsigned char *)sqlite3_uri_int64(zName, "ptr", 0);
     if (p->aData == 0)
         return SQLITE_CANTOPEN;
@@ -430,6 +435,12 @@ int pj_sqlite3_memvfs_init(sqlite3_vfs *vfs, const char *vfs_name) {
     if (!defaultVFS)
         return SQLITE_ERROR;
     vfs->szOsFile = sizeof(MemFile);
+    /* Modification w.r.t upstream: as we might delegate file opening
+     * to default VFS for temporary files, we need to make sure szOsFile is
+     * the maximum of our own need and of the default VFS.
+     */
+    if (vfs->szOsFile < defaultVFS->szOsFile)
+        vfs->szOsFile = defaultVFS->szOsFile;
     return sqlite3_vfs_register(vfs, 0);
 }
 
