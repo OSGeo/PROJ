@@ -8877,6 +8877,22 @@ TEST(wkt_parse, invalid_VERTCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, invalid_esri_VERTCS) {
+
+    // VDATUM without child
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\","
+                     "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+                     "PRIMEM[\"Greenwich\",0.0],"
+                     "UNIT[\"Degree\",0.0174532925199433]],"
+                     "VERTCS[\"EGM96_Geoid\",VDATUM,"
+                     "PARAMETER[\"Vertical_Shift\",0.0],"
+                     "PARAMETER[\"Direction\",1.0],UNIT[\"Meter\",1.0]]"),
+                 ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid_VERT_CS) {
 
     EXPECT_NO_THROW(WKTParser().createFromWKT(
