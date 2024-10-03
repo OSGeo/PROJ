@@ -42,6 +42,7 @@
 #include <sqlite3.h>
 
 #include <assert.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "memvfs.h"
@@ -64,10 +65,16 @@
 typedef struct sqlite3_vfs MemVfs;
 typedef struct MemFile MemFile;
 
+typedef struct MemVfsAppData {
+    const void *buffer;
+    size_t bufferSize;
+    sqlite3_vfs *pBaseVFS;
+} MemVfsAppData;
+
 /* Access to a lower-level VFS that (might) implement dynamic loading,
 ** access to randomness, etc.
 */
-#define ORIGVFS(p) ((sqlite3_vfs *)((p)->pAppData))
+#define ORIGVFS(p) (((MemVfsAppData *)((p)->pAppData))->pBaseVFS)
 
 /* An open file */
 struct MemFile {
@@ -312,6 +319,7 @@ static int memUnfetch(sqlite3_file *pFile, sqlite3_int64 iOfst, void *pPage) {
 static int memOpen(sqlite3_vfs *pVfs, const char *zName, sqlite3_file *pFile,
                    int flags, int *pOutFlags) {
     MemFile *p = (MemFile *)pFile;
+    MemVfsAppData *appData = (MemVfsAppData *)(pVfs->pAppData);
     memset(p, 0, sizeof(*p));
     if ((flags & SQLITE_OPEN_MAIN_DB) == 0) {
         /* Modification w.r.t upstream: instead of returning SQLITE_CANTOPEN,
@@ -320,11 +328,13 @@ static int memOpen(sqlite3_vfs *pVfs, const char *zName, sqlite3_file *pFile,
         return ORIGVFS(pVfs)->xOpen(ORIGVFS(pVfs), zName, pFile, flags,
                                     pOutFlags);
     }
-    p->aData = (unsigned char *)sqlite3_uri_int64(zName, "ptr", 0);
-    if (p->aData == 0)
+    if ((uintptr_t)(appData->buffer) !=
+        (uintptr_t)sqlite3_uri_int64(zName, "ptr", 0)) {
         return SQLITE_CANTOPEN;
+    }
+    p->aData = (unsigned char *)(appData->buffer);
     p->sz = sqlite3_uri_int64(zName, "sz", 0);
-    if (p->sz < 0)
+    if (p->sz < 0 || (size_t)p->sz != appData->bufferSize)
         return SQLITE_CANTOPEN;
     p->szMax = sqlite3_uri_int64(zName, "max", p->sz);
     if (p->szMax < p->sz)
@@ -427,13 +437,19 @@ static int memCurrentTimeInt64(sqlite3_vfs *pVfs, sqlite3_int64 *p) {
 /*
  * Register the new VFS.
  */
-int pj_sqlite3_memvfs_init(sqlite3_vfs *vfs, const char *vfs_name) {
+int pj_sqlite3_memvfs_init(sqlite3_vfs *vfs, const char *vfs_name,
+                           const void *buffer, size_t bufferSize) {
     memcpy(vfs, &mem_vfs, sizeof(mem_vfs));
     vfs->zName = vfs_name;
     sqlite3_vfs *defaultVFS = sqlite3_vfs_find(NULL);
-    vfs->pAppData = defaultVFS;
     if (!defaultVFS)
         return SQLITE_ERROR;
+    MemVfsAppData *appData =
+        (MemVfsAppData *)sqlite3_malloc(sizeof(MemVfsAppData));
+    appData->buffer = buffer;
+    appData->bufferSize = bufferSize;
+    appData->pBaseVFS = defaultVFS;
+    vfs->pAppData = appData;
     vfs->szOsFile = sizeof(MemFile);
     /* Modification w.r.t upstream: as we might delegate file opening
      * to default VFS for temporary files, we need to make sure szOsFile is
@@ -442,6 +458,11 @@ int pj_sqlite3_memvfs_init(sqlite3_vfs *vfs, const char *vfs_name) {
     if (vfs->szOsFile < defaultVFS->szOsFile)
         vfs->szOsFile = defaultVFS->szOsFile;
     return sqlite3_vfs_register(vfs, 0);
+}
+
+void pj_sqlite3_memvfs_deallocate_user_data(sqlite3_vfs *vfs) {
+    sqlite3_free(vfs->pAppData);
+    vfs->pAppData = NULL;
 }
 
 #ifdef _MSC_VER
