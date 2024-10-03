@@ -4786,14 +4786,15 @@ VerticalReferenceFrameNNPtr WKTParser::Private::buildVerticalReferenceFrame(
     const auto *nodeP = node->GP();
     const std::string &name(nodeP->value());
     auto &props = buildProperties(node);
+    const auto &children = nodeP->children();
 
-    if (esriStyle_ && dbContext_) {
+    if (esriStyle_ && dbContext_ && !children.empty()) {
         std::string outTableName;
         std::string authNameFromAlias;
         std::string codeFromAlias;
         auto authFactory =
             AuthorityFactory::create(NN_NO_CHECK(dbContext_), std::string());
-        const std::string datumName = stripQuotes(nodeP->children()[0]);
+        const std::string datumName = stripQuotes(children[0]);
         auto officialName = authFactory->getOfficialNameFromAlias(
             datumName, "vertical_datum", "ESRI", false, outTableName,
             authNameFromAlias, codeFromAlias);
@@ -4803,7 +4804,6 @@ VerticalReferenceFrameNNPtr WKTParser::Private::buildVerticalReferenceFrame(
     }
 
     if (ci_equal(name, WKTConstants::VERT_DATUM)) {
-        const auto &children = nodeP->children();
         if (children.size() >= 2) {
             props.set("VERT_DATUM_TYPE", children[1]->GP()->value());
         }
