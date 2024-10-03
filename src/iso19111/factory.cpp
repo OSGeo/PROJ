@@ -341,12 +341,13 @@ std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
 
 #ifdef EMBED_RESOURCE_FILES
     if (path == EMBEDDED_PROJ_DB && ctx->custom_sqlite3_vfs_name.empty()) {
-        vfs = SQLite3VFS::createMem();
+        unsigned int proj_db_size = 0;
+        const unsigned char *proj_db = pj_get_embedded_proj_db(&proj_db_size);
+
+        vfs = SQLite3VFS::createMem(proj_db, proj_db_size);
         if (vfs == nullptr) {
             throw FactoryException("Open of " + path + " failed");
         }
-        unsigned int proj_db_size = 0;
-        const unsigned char *proj_db = pj_get_embedded_proj_db(&proj_db_size);
 
         std::ostringstream buffer;
         buffer << "file:/proj.db?immutable=1&ptr=";

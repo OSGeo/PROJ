@@ -7,7 +7,9 @@
 extern "C" {
 #endif
 
-int pj_sqlite3_memvfs_init(sqlite3_vfs *vfs, const char *vfs_name);
+int pj_sqlite3_memvfs_init(sqlite3_vfs *vfs, const char *vfs_name,
+                           const void *buffer, size_t bufferSize);
+void pj_sqlite3_memvfs_deallocate_user_data(sqlite3_vfs *vfs);
 
 #ifdef __cplusplus
 }
