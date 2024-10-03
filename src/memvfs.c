@@ -32,9 +32,6 @@
 **    maxsz=        The maximum size of the database.  In other words, the
 **                  amount of space allocated for the ptr= buffer.
 **
-**    freeonclose=  If true, then sqlite3_free() is called on the ptr=
-**                  value when the connection closes.
-**
 ** The ptr= and sz= query parameters are required.  If maxsz= is omitted,
 ** then it defaults to the sz= value.  Parameter values can be in either
 ** decimal or hexadecimal.  The filename in the URI is ignored.
@@ -66,7 +63,7 @@ typedef struct sqlite3_vfs MemVfs;
 typedef struct MemFile MemFile;
 
 typedef struct MemVfsAppData {
-    const void *buffer;
+    const unsigned char *buffer;
     size_t bufferSize;
     sqlite3_vfs *pBaseVFS;
 } MemVfsAppData;
@@ -78,11 +75,10 @@ typedef struct MemVfsAppData {
 
 /* An open file */
 struct MemFile {
-    sqlite3_file base;    /* IO methods */
-    sqlite3_int64 sz;     /* Size of the file */
-    sqlite3_int64 szMax;  /* Space allocated to aData */
-    unsigned char *aData; /* content of the file */
-    int bFreeOnClose;     /* Invoke sqlite3_free() on aData at close */
+    sqlite3_file base;          /* IO methods */
+    sqlite3_int64 sz;           /* Size of the file */
+    sqlite3_int64 szMax;        /* Space allocated to aData */
+    const unsigned char *aData; /* content of the file */
 };
 
 /*
@@ -175,12 +171,7 @@ static const sqlite3_io_methods mem_io_methods = {
 ** The pData pointer is owned by the application, so there is nothing
 ** to free.
 */
-static int memClose(sqlite3_file *pFile) {
-    MemFile *p = (MemFile *)pFile;
-    if (p->bFreeOnClose)
-        sqlite3_free(p->aData);
-    return SQLITE_OK;
-}
+static int memClose(sqlite3_file *pFile) { return SQLITE_OK; }
 
 /*
 ** Read data from an mem-file.
@@ -197,30 +188,14 @@ static int memRead(sqlite3_file *pFile, void *zBuf, int iAmt,
 */
 static int memWrite(sqlite3_file *pFile, const void *z, int iAmt,
                     sqlite_int64 iOfst) {
-    MemFile *p = (MemFile *)pFile;
-    if (iOfst + iAmt > p->sz) {
-        if (iOfst + iAmt > p->szMax)
-            return SQLITE_FULL;
-        if (iOfst > p->sz)
-            memset(p->aData + p->sz, 0, iOfst - p->sz);
-        p->sz = iOfst + iAmt;
-    }
-    memcpy(p->aData + iOfst, z, iAmt);
-    return SQLITE_OK;
+    return SQLITE_READONLY;
 }
 
 /*
 ** Truncate an mem-file.
 */
 static int memTruncate(sqlite3_file *pFile, sqlite_int64 size) {
-    MemFile *p = (MemFile *)pFile;
-    if (size > p->sz) {
-        if (size > p->szMax)
-            return SQLITE_FULL;
-        memset(p->aData + p->sz, 0, size - p->sz);
-    }
-    p->sz = size;
-    return SQLITE_OK;
+    return SQLITE_READONLY;
 }
 
 /*
@@ -332,14 +307,13 @@ static int memOpen(sqlite3_vfs *pVfs, const char *zName, sqlite3_file *pFile,
         (uintptr_t)sqlite3_uri_int64(zName, "ptr", 0)) {
         return SQLITE_CANTOPEN;
     }
-    p->aData = (unsigned char *)(appData->buffer);
+    p->aData = appData->buffer;
     p->sz = sqlite3_uri_int64(zName, "sz", 0);
     if (p->sz < 0 || (size_t)p->sz != appData->bufferSize)
         return SQLITE_CANTOPEN;
     p->szMax = sqlite3_uri_int64(zName, "max", p->sz);
     if (p->szMax < p->sz)
         return SQLITE_CANTOPEN;
-    p->bFreeOnClose = sqlite3_uri_boolean(zName, "freeonclose", 0);
     pFile->pMethods = &mem_io_methods;
     return SQLITE_OK;
 }
