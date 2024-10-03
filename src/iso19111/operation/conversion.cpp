@@ -183,7 +183,7 @@ Conversion::alterParametersLinearUnit(const common::UnitOfMeasure &unit,
  * @param methodIn the operation method.
  * @param values the values.
  * @return a new Conversion.
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 ConversionNNPtr Conversion::create(const util::PropertyMap &properties,
                                    const OperationMethodNNPtr &methodIn,
@@ -212,7 +212,7 @@ ConversionNNPtr Conversion::create(const util::PropertyMap &properties,
  * @param values the operation values. Constraint:
  * values.size() == parameters.size()
  * @return a new Conversion.
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 ConversionNNPtr Conversion::create(
     const util::PropertyMap &propertiesConversion,

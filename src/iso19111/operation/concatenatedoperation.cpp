@@ -161,7 +161,7 @@ static bool areCRSMoreOrLessEquivalent(const crs::CRS *a, const crs::CRS *b) {
  * @param operationsIn Vector of the CoordinateOperation steps.
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new Transformation.
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 ConcatenatedOperationNNPtr ConcatenatedOperation::create(
     const util::PropertyMap &properties,
@@ -659,7 +659,7 @@ void ConcatenatedOperation::fixStepsDirection(
  * @param checkExtent Whether we should check the non-emptiness of the
  * intersection
  * of the extents of the operations
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 CoordinateOperationNNPtr ConcatenatedOperation::createComputeMetadata(
     const std::vector<CoordinateOperationNNPtr> &operationsIn,
