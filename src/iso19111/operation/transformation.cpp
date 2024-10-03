@@ -188,7 +188,8 @@ Transformation::demoteTo2D(const std::string &,
  * otherwise an empty vector is returned in case of failure.
  * @return a vector of 7 values if valid, otherwise a io::FormattingException
  * is thrown.
- * @throws io::FormattingException
+ * @throws io::FormattingException in case of error, if canThrowException is
+ * true
  */
 std::vector<double> Transformation::getTOWGS84Parameters(
     bool canThrowException) const // throw(io::FormattingException)
@@ -345,7 +346,7 @@ std::vector<double> Transformation::getTOWGS84Parameters(
  * @param values Vector of GeneralOperationParameterNNPtr.
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new Transformation.
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 TransformationNNPtr Transformation::create(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
@@ -388,7 +389,7 @@ TransformationNNPtr Transformation::create(
  * values.size() == parameters.size()
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new Transformation.
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 TransformationNNPtr
 Transformation::create(const util::PropertyMap &propertiesTransformation,
@@ -849,7 +850,7 @@ TransformationNNPtr Transformation::createTimeDependentPositionVector(
  * @param referenceEpochYear Parameter reference epoch (in decimal year)
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new Transformation.
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 TransformationNNPtr Transformation::createTimeDependentCoordinateFrameRotation(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
@@ -938,7 +939,7 @@ static TransformationNNPtr _createMolodensky(
  * the ellipsoids used in the target and source CRS.
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new Transformation.
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 TransformationNNPtr Transformation::createMolodensky(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
@@ -975,7 +976,7 @@ TransformationNNPtr Transformation::createMolodensky(
  * the ellipsoids used in the target and source CRS.
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new Transformation.
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 TransformationNNPtr Transformation::createAbridgedMolodensky(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
@@ -1002,7 +1003,7 @@ TransformationNNPtr Transformation::createAbridgedMolodensky(
  * or 7 double values (Translation_X,_Y,_Z, Rotation_X,_Y,_Z, Scale_Difference)
  * passed to createPositionVector()
  * @return new Transformation.
- * @throws InvalidOperation
+ * @throws InvalidOperation if the object cannot be constructed.
  */
 TransformationNNPtr Transformation::createTOWGS84(
     const crs::CRSNNPtr &sourceCRSIn,

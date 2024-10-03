@@ -5197,7 +5197,7 @@ CompoundCRS::componentReferenceSystems() PROJ_PURE_DEFN {
  * At minimum the name should be defined.
  * @param components the component CRS of the CompoundCRS.
  * @return new CompoundCRS.
- * @throw InvalidCompoundCRSException
+ * @throw InvalidCompoundCRSException if the object cannot be constructed.
  */
 CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
                                      const std::vector<CRSNNPtr> &components) {
@@ -5299,7 +5299,7 @@ CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
  * At minimum the name should be defined.
  * @param components the component CRS of the CompoundCRS.
  * @return new CRS.
- * @throw InvalidCompoundCRSException
+ * @throw InvalidCompoundCRSException if the object cannot be constructed.
  */
 CRSNNPtr CompoundCRS::createLax(const util::PropertyMap &properties,
                                 const std::vector<CRSNNPtr> &components,

@@ -720,7 +720,7 @@ class PROJ_GCC_DLL IPROJStringExportable {
      *
      * @param formatter PROJ string formatter.
      * @return a PROJ string.
-     * @throw FormattingException */
+     * @throw FormattingException if cannot be exported as a PROJ string */
     PROJ_DLL std::string exportToPROJString(
         PROJStringFormatter *formatter) const; // throw(FormattingException)
 
