@@ -375,16 +375,12 @@ function (is_sharp_embed_available res)
 endfunction()
 
 is_sharp_embed_available(IS_SHARP_EMBED_AVAILABLE_RES)
-if (NOT BUILD_SHARED_LIBS AND IS_SHARP_EMBED_AVAILABLE_RES)
+if (NOT BUILD_SHARED_LIBS)
     set(DEFAULT_EMBED_RESOURCE_FILES ON)
 else()
     set(DEFAULT_EMBED_RESOURCE_FILES OFF)
 endif()
-option(EMBED_RESOURCE_FILES "Whether resource files (limited to proj.db) should be embedded into the PROJ library (only available with a C23 compatible compiler)" ${DEFAULT_EMBED_RESOURCE_FILES})
-
-if (EMBED_RESOURCE_FILES AND NOT IS_SHARP_EMBED_AVAILABLE_RES)
-  message(FATAL_ERROR "C23 #embed not available with this compiler")
-endif()
+option(EMBED_RESOURCE_FILES "Whether resource files (limited to proj.db) should be embedded into the PROJ library" ${DEFAULT_EMBED_RESOURCE_FILES})
 
 option(USE_ONLY_EMBEDDED_RESOURCE_FILES "Whether embedded resource files (limited to proj.db) should be used (should nominally be used together with EMBED_RESOURCE_FILES=ON, otherwise this will result in non-functional builds)" OFF)
 
