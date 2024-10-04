@@ -44,7 +44,7 @@ Next we create the :c:type:`PJ` transformation object ``P`` with the function
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 23-31
+  :lines: 23-30
   :dedent: 4
 
 Here we have set up a transformation from geographic coordinates to UTM zone
@@ -141,7 +141,7 @@ most projected CRS.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 36-42
+  :lines: 36-41
   :dedent: 4
 
 Next we create a :c:type:`PJ_COORD` coordinate object, using the function
