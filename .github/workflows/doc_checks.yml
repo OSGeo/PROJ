@@ -26,6 +26,11 @@ jobs:
     steps:
     - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
+    - name: Update sphinx-rtd-theme
+      shell: bash -l {0}
+      run: |
+          pip install -U "sphinx-rtd-theme>=3.0.0"
+
     - name: Print versions
       shell: bash -l {0}
       run: |
