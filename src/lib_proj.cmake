@@ -412,9 +412,21 @@ if (EMBED_RESOURCE_FILES AND NOT IS_SHARP_EMBED_AVAILABLE_RES)
         DEPENDS generate_proj_db "${PROJECT_BINARY_DIR}/data/proj.db"
     )
     target_sources(proj PRIVATE embedded_resources.c "${EMBEDDED_PROJ_DB}")
+
+    set(EMBEDDED_PROJ_INI "file_embed/proj_ini.c")
+    add_custom_command(
+        OUTPUT "${EMBEDDED_PROJ_INI}"
+        COMMAND ${CMAKE_COMMAND}
+        -DRUN_FILE_EMBED_GENERATE=1
+        "-DFILE_EMBED_GENERATE_PATH=${PROJECT_SOURCE_DIR}/data/proj.ini"
+        -P ${PROJECT_SOURCE_DIR}/cmake/FileEmbed.cmake
+        DEPENDS "${PROJECT_SOURCE_DIR}/data/proj.ini"
+    )
+    target_sources(proj PRIVATE embedded_resources.c "${EMBEDDED_PROJ_DB}" "${EMBEDDED_PROJ_INI}")
 elseif(EMBED_RESOURCE_FILES AND IS_SHARP_EMBED_AVAILABLE_RES)
     add_library(proj_resources OBJECT embedded_resources.c)
     target_compile_definitions(proj_resources PRIVATE "PROJ_DB=\"${PROJECT_BINARY_DIR}/data/proj.db\"")
+    target_compile_definitions(proj_resources PRIVATE "PROJ_INI=\"${PROJECT_SOURCE_DIR}/data/proj.ini\"")
     target_compile_definitions(proj_resources PRIVATE USE_SHARP_EMBED)
     add_dependencies(proj_resources generate_proj_db)
     option(PROJ_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE "Set ON to produce -fPIC code" ${BUILD_SHARED_LIBS})
