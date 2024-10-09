@@ -1505,3 +1505,11 @@ tests:
   in: 16.248285304 -61.484212843 53.073
   out: |
     661991.318	1796999.201 93.846
+- comment: Test --roman
+  args: EPSG:4326 EPSG:10606 --roman
+  in: |
+    45d8'47.014"N	1d53'20.681"E 0.000
+    49d28'26.014"S	4d6'18.281"W 0.000
+  out: |
+    XLVdVIII'XLVII"S	IdLIII'XX"OR 0.000
+    XLIXdXXVIII'XXVI"M	IVdVI'XVIII"OC 0.000
