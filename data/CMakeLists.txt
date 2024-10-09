@@ -11,7 +11,7 @@ if(NOT IS_DIRECTORY ${PROJ_DB_CACHE_DIR})
   endif()
 endif()
 
-set(CONFIG_FILES
+set(PROJ_INI
   proj.ini
 )
 
@@ -60,7 +60,7 @@ add_custom_command(
 add_custom_target(generate_proj_db ALL DEPENDS ${PROJ_DB})
 
 if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
-  foreach(FILE ${CONFIG_FILES} ${PROJ_DICTIONARY} ${GRIDSHIFT_FILES})
+  foreach(FILE ${PROJ_INI} ${PROJ_DICTIONARY} ${GRIDSHIFT_FILES})
     configure_file(${FILE} ${FILE} COPYONLY)
   endforeach()
 endif()
@@ -78,7 +78,7 @@ set(DATA_FOR_TESTS
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/for_tests)
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/for_tests/tests)
 
-foreach(FILE ${DATA_FOR_TESTS} ${CONFIG_FILES})
+foreach(FILE ${DATA_FOR_TESTS} ${PROJ_INI})
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${FILE} ${CMAKE_CURRENT_BINARY_DIR}/for_tests/${FILE} COPYONLY)
 endforeach()
 
@@ -109,7 +109,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/conus "${CMAKE_CURRENT_BINARY_D
 #install
 #
 set(ALL_DATA_FILE
-  ${CONFIG_FILES}
   ${PROJ_DICTIONARY}
   ${GRIDSHIFT_FILES}
   ${SCHEMA_FILES}
@@ -117,7 +116,7 @@ set(ALL_DATA_FILE
 )
 
 if (NOT USE_ONLY_EMBEDDED_RESOURCE_FILES)
-    list(APPEND ALL_DATA_FILE ${PROJ_DB})
+    list(APPEND ALL_DATA_FILE ${PROJ_INI} ${PROJ_DB})
 endif()
 
 install(

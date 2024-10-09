@@ -69,6 +69,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef EMBED_RESOURCE_FILES
+#include "embedded_resources.h"
+#endif
+
 //! @cond Doxygen_Suppress
 
 using namespace NS_PROJ::internal;
@@ -1850,21 +1854,32 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
     }
 
     ctx->iniFileLoaded = true;
-    auto file = std::unique_ptr<NS_PROJ::File>(
-        reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
-            ctx, "proj.ini", "rb", pj_open_file_with_manager, nullptr, 0)));
-    if (!file)
-        return;
-    file->seek(0, SEEK_END);
-    const auto filesize = file->tell();
-    if (filesize == 0 || filesize > 100 * 1024U)
-        return;
-    file->seek(0, SEEK_SET);
     std::string content;
-    content.resize(static_cast<size_t>(filesize));
-    const auto nread = file->read(&content[0], content.size());
-    if (nread != content.size())
+    std::unique_ptr<NS_PROJ::File> file;
+#ifndef USE_ONLY_EMBEDDED_RESOURCE_FILES
+    file.reset(reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
+        ctx, "proj.ini", "rb", pj_open_file_with_manager, nullptr, 0)));
+#endif
+    if (!file) {
+#ifdef EMBED_RESOURCE_FILES
+        unsigned int content_size = 0;
+        const char *c_content = pj_get_embedded_proj_ini(&content_size);
+        content.assign(c_content, content_size);
+#else
         return;
+#endif
+    }
+    if (file) {
+        file->seek(0, SEEK_END);
+        const auto filesize = file->tell();
+        if (filesize == 0 || filesize > 100 * 1024U)
+            return;
+        file->seek(0, SEEK_SET);
+        content.resize(static_cast<size_t>(filesize));
+        const auto nread = file->read(&content[0], content.size());
+        if (nread != content.size())
+            return;
+    }
     content += '\n';
     size_t pos = 0;
     while (pos != std::string::npos) {
