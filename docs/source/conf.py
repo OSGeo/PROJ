@@ -9,8 +9,6 @@ import os
 import sys
 from datetime import date
 
-import sphinx_rtd_theme
-
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("_extensions"))
 
@@ -119,7 +117,7 @@ html_theme = "sphinx_rtd_theme"
 html_theme_options = {
     "canonical_url": "https://proj.org",
     "logo_only": True,
-    "display_version": True,
+    "version_selector": True,
     "prev_next_buttons_location": "both",
     "style_external_links": False,
     "style_nav_header_background": "#353130",
@@ -130,9 +128,6 @@ html_theme_options = {
     "includehidden": True,
     "titles_only": False,
 }
-
-# Add any paths that contain custom themes here, relative to this directory
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Display "Edit on GitHub" link on each page
 # https://docs.readthedocs.io/en/stable/guides/edit-source-links-sphinx.html
@@ -154,7 +149,7 @@ html_favicon = "../images/favicon.png"
 # Add any paths that contain custom static files (such as style sheets)
 html_static_path = ["_static"]
 
-htm_css_files = [
+html_css_files = [
     "theme_overrides.css",  # override wide tables in RTD theme
 ]
 
