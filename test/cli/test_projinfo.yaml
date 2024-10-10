@@ -1834,3 +1834,7 @@ tests:
   out: |
     Candidate operations found: 1
     unknown id, Null geographic offset from NAD83(CSRS)v7 (geog2D) to NAD83(CSRS)v7 (geog3D) + Canada velocity grid v7 from epoch 1997 to epoch 2010 + Null geographic offset from NAD83(CSRS)v7 (geog3D) to NAD83(CSRS)v7 (geog2D), 0.01 m, Canada - onshore - Alberta; British Columbia (BC); Manitoba; New Brunswick (NB); Newfoundland and Labrador; Northwest Territories (NWT); Nova Scotia (NS); Nunavut; Ontario; Prince Edward Island (PEI); Quebec; Saskatchewan; Yukon.
+- comment: >
+    Test that "CGVD28 height" to "CGVD28(HTv2.0) height" is a no-op
+  args: -s "CGVD28 height" -t "CGVD28(HTv2.0) height" -o PROJ -q
+  out: +proj=noop

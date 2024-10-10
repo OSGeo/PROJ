@@ -6185,7 +6185,7 @@ TEST(
             NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
         ASSERT_GE(list.size(), 2U);
         EXPECT_EQ(list[0]->nameStr(),
-                  "Inverse of NAD83(CSRS)v6 to CGVD28 height (1) + "
+                  "Inverse of NAD83(CSRS)v6 to CGVD28(HTv2.0) height (1) + "
                   "NAD83(CSRS)v6 to CGVD2013(CGG2013) height (1) "
                   "using Null geographic offset "
                   "from NAD83(CSRS)v6 (geog3D) to NAD83(CSRS)v6 (geog2D) + "
