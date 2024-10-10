@@ -4009,8 +4009,10 @@ bool SingleOperation::exportToPROJStringGeneric(
         sourceCRSVert->addLinearUnitConvert(formatter);
         formatter->stopInversion();
 
-        formatter->addStep("geogoffset");
-        formatter->addParam("dh", offsetHeight);
+        if (offsetHeight != 0) {
+            formatter->addStep("geogoffset");
+            formatter->addParam("dh", offsetHeight);
+        }
 
         targetCRSVert->addLinearUnitConvert(formatter);
 
