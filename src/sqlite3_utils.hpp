@@ -41,10 +41,11 @@ NS_PROJ_START
 
 // ---------------------------------------------------------------------------
 
-struct pj_sqlite3_vfs : public sqlite3_vfs {
+struct pj_sqlite3_vfs {
+    sqlite3_vfs base{};
     std::string namePtr{};
-    bool fakeSync = false;
-    bool fakeLock = false;
+
+    virtual ~pj_sqlite3_vfs();
 };
 
 // ---------------------------------------------------------------------------
@@ -62,8 +63,14 @@ class SQLite3VFS {
 
     static std::unique_ptr<SQLite3VFS> create(bool fakeSync, bool fakeLock,
                                               bool skipStatJournalAndWAL);
+
+#ifdef EMBED_RESOURCE_FILES
+    static std::unique_ptr<SQLite3VFS> createMem(const void *membuffer,
+                                                 size_t bufferSize);
+#endif
+
     const char *name() const;
-    sqlite3_vfs *raw() { return vfs_; }
+    sqlite3_vfs *raw() { return &(vfs_->base); }
 };
 
 // ---------------------------------------------------------------------------

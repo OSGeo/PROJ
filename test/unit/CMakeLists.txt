@@ -184,7 +184,14 @@ set_property(TEST proj_test_cpp_api
 if(TIFF_ENABLED)
   target_compile_definitions(proj_test_cpp_api PRIVATE -DTIFF_ENABLED)
 endif()
- 
+
+if(EMBED_RESOURCE_FILES)
+    target_compile_definitions(proj_test_cpp_api PRIVATE EMBED_RESOURCE_FILES)
+endif()
+if (USE_ONLY_EMBEDDED_RESOURCE_FILES)
+    target_compile_definitions(proj_test_cpp_api PRIVATE USE_ONLY_EMBEDDED_RESOURCE_FILES)
+endif()
+
 add_executable(gie_self_tests
   main.cpp
   gie_self_tests.cpp)

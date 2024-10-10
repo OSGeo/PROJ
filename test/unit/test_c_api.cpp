@@ -4677,6 +4677,7 @@ TEST_F(CApi, proj_as_projjson) {
 
 // ---------------------------------------------------------------------------
 
+#if !defined(EMBED_RESOURCE_FILES) && !defined(USE_ONLY_EMBEDDED_RESOURCE_FILES)
 TEST_F(CApi, proj_context_copy_from_default) {
     auto c_path = proj_context_get_database_path(m_ctxt);
     ASSERT_TRUE(c_path != nullptr);
@@ -4726,6 +4727,7 @@ TEST_F(CApi, proj_context_copy_from_default) {
     std::string new_db_path(c_new_path);
     ASSERT_EQ(new_db_path, tmp_filename);
 }
+#endif
 
 // ---------------------------------------------------------------------------
 
