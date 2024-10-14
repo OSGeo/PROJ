@@ -747,8 +747,10 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1386','WC05-IRF','EPSG'
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1385','ECML14-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1388','GLLAT(2023)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1387','GLMSL(2023)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1384','CGVD28(HTv2.0)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1081','DB_REF2003','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1081','DB_REF2016','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1390','BSCD2000','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -7990,6 +7992,7 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10659','ETRS89 + EOMA 198
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10665','Porto Alegre Cartographic Reference System (SCR-POA)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4801','Bern 1898 (Bern)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21780','Bern 1898 (Bern) / LV03C','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','10588','CGVD28(HT2)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5682','DB_REF2016 / 3GK zone 2 E-N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5682','DB_REF2003 / 3-degree Gauss-Kruger zone 2 (E-N)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5683','DB_REF2016 / 3GK zone 3 E-N','EPSG');
