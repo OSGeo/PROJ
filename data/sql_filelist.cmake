@@ -1,9 +1,25 @@
 set(SQL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/sql")
+
+set(SQL_FILES_CONSISTENCY_CHECKS_TRIGGERS
+  "${SQL_DIR}/consistency_checks_triggers.sql"
+  "${SQL_DIR}/conversion_triggers.sql"
+  "${SQL_DIR}/conversion_triggers_hand_written.sql"
+)
+
+# When setting PROJ_DB_EXTRA_VALIDATION=OFF, we defer the insertion of check triggers
+# until the very end to save build time. We also entirerly skip running
+# final_consistency_checks.sql.
+# Typical build time with PROJ_DB_EXTRA_VALIDATION=ON: 60 seconds
+# Typical build time with PROJ_DB_EXTRA_VALIDATION=OFF: 3.7 seconds
+
 set(SQL_FILES
   "${SQL_DIR}/begin.sql"
   "${SQL_DIR}/proj_db_table_defs.sql"
-  "${SQL_DIR}/consistency_checks_triggers.sql"
-  "${SQL_DIR}/conversion_triggers.sql"
+)
+if (PROJ_DB_EXTRA_VALIDATION)
+  list(APPEND SQL_FILES ${SQL_FILES_CONSISTENCY_CHECKS_TRIGGERS})
+endif()
+list(APPEND SQL_FILES
   "${SQL_DIR}/customizations_early.sql"
   "${SQL_DIR}/metadata.sql"
   "${SQL_DIR}/unit_of_measure.sql"
@@ -46,3 +62,9 @@ set(SQL_FILES
   "${SQL_DIR}/nkg_post_customizations.sql"
   "${SQL_DIR}/commit.sql"
 )
+if (NOT PROJ_DB_EXTRA_VALIDATION)
+  list(APPEND SQL_FILES ${SQL_FILES_CONSISTENCY_CHECKS_TRIGGERS})
+else()
+  list(APPEND SQL_FILES "${SQL_DIR}/final_consistency_checks.sql")
+endif()
+list(APPEND SQL_FILES "${SQL_DIR}/analyze_vacuum.sql")
