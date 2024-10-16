@@ -31,9 +31,9 @@ jobs:
             id: regular
             PROJ_CMAKE_BUILD_OPTIONS: ""
 
-          - name: Without TIFF
+          - name: Without TIFF, with PROJ_DB_FAST_BUILD=ON
             id: without_tiff
-            PROJ_CMAKE_BUILD_OPTIONS: "-DENABLE_TIFF=OFF"
+            PROJ_CMAKE_BUILD_OPTIONS: "-DENABLE_TIFF=OFF -DPROJ_DB_FAST_BUILD=ON"
 
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:

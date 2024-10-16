@@ -432,6 +432,23 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
     Path to an existing directory used to cache :file:`proj.db` to speed-up
     subsequent builds without modifications to source SQL files.
 
+.. option:: PROJ_DB_FAST_BUILD=OFF
+
+    .. versionadded:: 9.5.1
+
+    By default, creation of :file:`proj.db` involves inserting consistency check
+    triggers before inserting data records, to be able to catch potential
+    inconsistencies. Such checks are useful for core PROJ developers when they
+    update the database content, or for advanced PROJ users that customize the
+    content of the database. However those checks come with a non-negligible cost.
+    On modern hardware, building :file:`proj.db` with those checks enabled takes
+    about 50 to 60 seconds (and on scenarios where PROJ is built for other
+    architectures with full emulation, several hours). When setting this option
+    to ON, those triggers are inserted after data records, which decreases the
+    build time to about 3 seconds.
+    In short, setting this option to ON is safe if you do not customize yourself
+    the .sql files used to build :file:`proj.db`
+
 .. option:: TESTING_USE_NETWORK=ON
 
     .. versionadded:: 9.5
