@@ -31,6 +31,10 @@ jobs:
             id: regular
             PROJ_CMAKE_BUILD_OPTIONS: ""
 
+          - name: EMBED_RESOURCE_FILES
+            id: EMBED_RESOURCE_FILES
+            PROJ_CMAKE_BUILD_OPTIONS: "-DEMBED_RESOURCE_FILES=ON"
+
           - name: Without TIFF
             id: without_tiff
             PROJ_CMAKE_BUILD_OPTIONS: "-DENABLE_TIFF=OFF"

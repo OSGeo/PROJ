@@ -1372,6 +1372,7 @@ tests:
     PROJ_DATA: $tmpdir
     PROJ_DEBUG: 2
     PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY: YES
+    PROJ_ONLY_BEST_DEFAULT: ""
   args: EPSG:4326+5773 EPSG:4326+5782
   in: 39 -3 0
   grep-v: pj_open_lib
