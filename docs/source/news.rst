@@ -38,7 +38,7 @@ Updates
 
   * CMake: add option ``EMBED_PROJ_DATA_PATH`` (`#4207 <https://github.com/OSGeo/PROJ/issues/4207>`_)
 
-  * Add SEA Inverse projection (`#4211 <https://github.com/OSGeo/PROJ/issues/4211>`_)
+  * Add Inverse to Icosahedral Snyder Equal-Area (ISEA) projection (`#4211 <https://github.com/OSGeo/PROJ/issues/4211>`_)
 
   * :program:`projinfo`: Add 2 args equivalent to usage of `-s` and `-t` (`#4218 <https://github.com/OSGeo/PROJ/issues/4218>`_)
 
