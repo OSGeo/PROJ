@@ -826,6 +826,10 @@ Various
     instantiated from a EPSG CRS code. The factors computed will be those of the
     map projection implied by the transformation from the base geographic CRS of
     the projected CRS to the projected CRS.
+    Starting with PROJ 9.6, to improve performance on repeated calls on a
+    projected CRS object, the above steps will modify the internal state of the
+    provided P object, and thus calling this function concurrently from multiple
+    threads on the same P object will no longer be supported.
 
     The input geodetic coordinate lp should be such that lp.lam is the longitude
     in radian, and lp.phi the latitude in radian (thus independently of the

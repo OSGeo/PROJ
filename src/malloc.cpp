@@ -166,6 +166,8 @@ PJ *pj_default_destructor(PJ *P, int errlev) { /* Destructor */
     proj_destroy(P->hgridshift);
     proj_destroy(P->vgridshift);
 
+    proj_destroy(P->cached_op_for_proj_factors);
+
     free(static_cast<struct pj_opaque *>(P->opaque));
     delete P;
     return nullptr;
