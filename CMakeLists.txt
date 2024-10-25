@@ -341,9 +341,10 @@ set(PROJ_DATA_PATH "${CMAKE_INSTALL_FULL_DATADIR}/proj")
 ################################################################################
 # Tests
 ################################################################################
-include(CTest)
 
+option(BUILD_TESTING "Build the testing tree." ON)
 if(BUILD_TESTING)
+  enable_testing()
   include(ProjTest)
 else()
   message(STATUS "Testing disabled")
