@@ -675,6 +675,9 @@ struct PJconsts {
         true; /* to remove in PROJ 10? */
     bool skipNonInstantiable = true;
 
+    // Used internally by proj_factors()
+    PJ *cached_op_for_proj_factors = nullptr;
+
     /*************************************************************************************
 
                  E N D   O F    G E N E R A L   P A R A M E T E R   S T R U C T
@@ -916,7 +919,8 @@ COMPLEX pj_zpoly1(COMPLEX, const COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, const COMPLEX *, int, COMPLEX *);
 
 int pj_deriv(PJ_LP, double, const PJ *, struct DERIVS *);
-int pj_factors(PJ_LP, const PJ *, double, struct FACTORS *);
+int pj_factors(PJ_LP, PJ *toplevel, const PJ *internal, double,
+               struct FACTORS *);
 
 void *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
