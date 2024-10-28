@@ -46,6 +46,8 @@ if (NOT "${PROJ_DB_SQL_MD5}" STREQUAL "${PROJ_DB_SQL_EXPECTED_MD5}")
     endif()
 endif()
 
+set(generate_proj_db ON)
+
 if(IS_DIRECTORY ${PROJ_DB_CACHE_DIR})
   set(USE_PROJ_DB_CACHE_DIR TRUE)
   set(PROJ_DB_SQL_MD5_FILE "${PROJ_DB_CACHE_DIR}/proj.db.sql.md5")
@@ -58,18 +60,21 @@ if(IS_DIRECTORY ${PROJ_DB_CACHE_DIR})
     message(STATUS "Reusing cached proj.db from ${PROJ_DB_CACHE_DIR}")
     get_filename_component(PROJ_DB_DIR "${PROJ_DB}" DIRECTORY)
     file(COPY "${CACHED_PROJ_DB}" DESTINATION "${PROJ_DB_DIR}")
-    return()
+    file(TOUCH "${PROJ_DB}")
+    set(generate_proj_db OFF)
   endif()
 endif()
 
-execute_process(COMMAND "${EXE_SQLITE3}" "${PROJ_DB}"
-                INPUT_FILE "${ALL_SQL_IN}"
-                RESULT_VARIABLE STATUS)
+if (generate_proj_db)
+    execute_process(COMMAND "${EXE_SQLITE3}" "${PROJ_DB}"
+                    INPUT_FILE "${ALL_SQL_IN}"
+                    RESULT_VARIABLE STATUS)
 
-if(STATUS AND NOT STATUS EQUAL 0)
-  message(FATAL_ERROR "Build of proj.db failed")
-elseif(USE_PROJ_DB_CACHE_DIR)
-  message(STATUS "Saving cache: ${CACHED_PROJ_DB}")
-  file(COPY "${PROJ_DB}" DESTINATION "${PROJ_DB_CACHE_DIR}")
-  file(WRITE "${PROJ_DB_SQL_MD5_FILE}" "${PROJ_DB_SQL_MD5}\n")
+    if(STATUS AND NOT STATUS EQUAL 0)
+      message(FATAL_ERROR "Build of proj.db failed")
+    elseif(USE_PROJ_DB_CACHE_DIR)
+      message(STATUS "Saving cache: ${CACHED_PROJ_DB}")
+      file(COPY "${PROJ_DB}" DESTINATION "${PROJ_DB_CACHE_DIR}")
+      file(WRITE "${PROJ_DB_SQL_MD5_FILE}" "${PROJ_DB_SQL_MD5}\n")
+    endif()
 endif()

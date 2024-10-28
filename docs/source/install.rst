@@ -446,6 +446,26 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
     Embed ``PROJ_DATA`` hard-coded alternative path for data files location. Disable to avoid setting this non-relocatable hard-coded path. Default ON.
 
+.. option:: EMBED_RESOURCE_FILES=ON/OFF
+
+    .. versionadded:: 9.6
+
+    Default is OFF for shared library builds (BUILD_SHARED_LIBS=ON), and ON
+    for static library builds (BUILD_SHARED_LIBS=OFF).
+    When ON, :file:`proj.db` and :file:`proj.ini` will be embedded into the PROJ library.
+
+.. option:: USE_ONLY_EMBEDDED_RESOURCE_FILES=ON/OFF
+
+    .. versionadded:: 9.6
+
+    Even if EMBED_RESOURCE_FILES=ON, by default PROJ will still try to locate
+    :file:`proj.db` and :file:`proj.ini` on the file system, and fallback to the
+    embedded version if not found.
+    By setting USE_ONLY_EMBEDDED_RESOURCE_FILES=ON, no attempt at locating
+    those files on the file system is made. Default is OFF.
+    Users will also typically want to set EMBED_PROJ_DATA_PATH=OFF if setting
+    USE_ONLY_EMBEDDED_RESOURCE_FILES=OFF.
+
 
 Building on Windows with vcpkg and Visual Studio 2017 or 2019
 --------------------------------------------------------------------------------

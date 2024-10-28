@@ -76,6 +76,10 @@
 
 #include <sqlite3.h>
 
+#ifdef EMBED_RESOURCE_FILES
+#include "embedded_resources.h"
+#endif
+
 // Custom SQLite VFS as our database is not supposed to be modified in
 // parallel. This is slightly faster
 #define ENABLE_CUSTOM_LOCKLESS_VFS
@@ -129,6 +133,10 @@ constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 constexpr int DATABASE_LAYOUT_VERSION_MINOR = 4;
 
 constexpr size_t N_MAX_PARAMS = 7;
+
+#ifdef EMBED_RESOURCE_FILES
+constexpr const char *EMBEDDED_PROJ_DB = "__embedded_proj_db__";
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -238,6 +246,7 @@ static void PROJ_SQLITE_intersects_bbox(sqlite3_context *pContext,
 // ---------------------------------------------------------------------------
 
 class SQLiteHandle {
+    std::string path_{};
     sqlite3 *sqlite_handle_ = nullptr;
     bool close_handle_ = true;
 
@@ -248,7 +257,7 @@ class SQLiteHandle {
     int nLayoutVersionMajor_ = 0;
     int nLayoutVersionMinor_ = 0;
 
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
+#if defined(ENABLE_CUSTOM_LOCKLESS_VFS) || defined(EMBED_RESOURCE_FILES)
     std::unique_ptr<SQLite3VFS> vfs_{};
 #endif
 
@@ -269,6 +278,8 @@ class SQLiteHandle {
 
   public:
     ~SQLiteHandle();
+
+    const std::string &path() const { return path_; }
 
     sqlite3 *handle() { return sqlite_handle_; }
 
@@ -312,8 +323,9 @@ SQLiteHandle::~SQLiteHandle() {
 // ---------------------------------------------------------------------------
 
 std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
-                                                 const std::string &path) {
+                                                 const std::string &pathIn) {
 
+    std::string path(pathIn);
     const int sqlite3VersionNumber = sqlite3_libversion_number();
     // Minimum version for correct performance: 3.11
     if (sqlite3VersionNumber < 3 * 1000000 + 11 * 1000) {
@@ -323,9 +335,35 @@ std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
     }
 
     std::string vfsName;
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
+#if defined(ENABLE_CUSTOM_LOCKLESS_VFS) || defined(EMBED_RESOURCE_FILES)
     std::unique_ptr<SQLite3VFS> vfs;
-    if (ctx->custom_sqlite3_vfs_name.empty()) {
+#endif
+
+#ifdef EMBED_RESOURCE_FILES
+    if (path == EMBEDDED_PROJ_DB && ctx->custom_sqlite3_vfs_name.empty()) {
+        unsigned int proj_db_size = 0;
+        const unsigned char *proj_db = pj_get_embedded_proj_db(&proj_db_size);
+
+        vfs = SQLite3VFS::createMem(proj_db, proj_db_size);
+        if (vfs == nullptr) {
+            throw FactoryException("Open of " + path + " failed");
+        }
+
+        std::ostringstream buffer;
+        buffer << "file:/proj.db?immutable=1&ptr=";
+        buffer << reinterpret_cast<uintptr_t>(proj_db);
+        buffer << "&sz=";
+        buffer << proj_db_size;
+        buffer << "&max=";
+        buffer << proj_db_size;
+        buffer << "&vfs=";
+        buffer << vfs->name();
+        path = buffer.str();
+    } else
+#endif
+
+#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
+        if (ctx->custom_sqlite3_vfs_name.empty()) {
         vfs = SQLite3VFS::create(false, true, true);
         if (vfs == nullptr) {
             throw FactoryException("Open of " + path + " failed");
@@ -350,10 +388,11 @@ std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
     }
     auto handle =
         std::shared_ptr<SQLiteHandle>(new SQLiteHandle(sqlite_handle, true));
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
+#if defined(ENABLE_CUSTOM_LOCKLESS_VFS) || defined(EMBED_RESOURCE_FILES)
     handle->vfs_ = std::move(vfs);
 #endif
     handle->initialize();
+    handle->path_ = path;
     handle->checkDatabaseLayout(path, path, std::string());
     return handle;
 }
@@ -454,8 +493,12 @@ SQLResultSet SQLiteHandle::run(sqlite3_stmt *stmt, const std::string &sql,
         } else if (ret == SQLITE_DONE) {
             break;
         } else {
-            throw FactoryException("SQLite error on " + sql + ": " +
-                                   sqlite3_errmsg(sqlite_handle_));
+            throw FactoryException(std::string("SQLite error on ")
+                                       .append(sql)
+                                       .append(": code = ")
+                                       .append(internal::toString(ret))
+                                       .append(", msg = ")
+                                       .append(sqlite3_errmsg(sqlite_handle_)));
         }
     }
     return result;
@@ -1200,18 +1243,25 @@ void DatabaseContext::Private::open(const std::string &databasePath,
     setPjCtxt(ctx);
     std::string path(databasePath);
     if (path.empty()) {
+#ifndef USE_ONLY_EMBEDDED_RESOURCE_FILES
         path.resize(2048);
         const bool found =
             pj_find_file(pjCtxt(), "proj.db", &path[0], path.size() - 1) != 0;
         path.resize(strlen(path.c_str()));
-        if (!found) {
+        if (!found)
+#endif
+        {
+#ifdef EMBED_RESOURCE_FILES
+            path = EMBEDDED_PROJ_DB;
+#else
             throw FactoryException("Cannot find proj.db");
+#endif
         }
     }
 
     sqlite_handle_ = SQLiteHandleCache::get().getHandle(path, ctx);
 
-    databasePath_ = std::move(path);
+    databasePath_ = sqlite_handle_->path();
 }
 
 // ---------------------------------------------------------------------------

@@ -350,6 +350,45 @@ else()
 endif()
 
 ################################################################################
+# Whether we should embed resources
+################################################################################
+
+function (is_sharp_embed_available res)
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.21 AND
+        ((CMAKE_C_COMPILER_ID STREQUAL "GNU") OR (CMAKE_C_COMPILER_ID STREQUAL "Clang")))
+        # CMAKE_C_STANDARD=23 only supported since CMake 3.21
+        set(TEST_SHARP_EMBED
+          "static const unsigned char embedded[] = {\n#embed __FILE__\n};\nint main() { (void)embedded; return 0;}"
+        )
+        set(CMAKE_C_STANDARD_BACKUP "${CMAKE_C_STANDARD}")
+        set(CMAKE_C_STANDARD "23")
+        check_c_source_compiles("${TEST_SHARP_EMBED}" _TEST_SHARP_EMBED)
+        set(CMAKE_C_STANDARD "${CMAKE_C_STANDARD_BACKUP}")
+        if (_TEST_SHARP_EMBED)
+            set(${res} ON PARENT_SCOPE)
+        else()
+            set(${res} OFF PARENT_SCOPE)
+        endif()
+    else()
+        set(${res} OFF PARENT_SCOPE)
+    endif()
+endfunction()
+
+is_sharp_embed_available(IS_SHARP_EMBED_AVAILABLE_RES)
+if (NOT BUILD_SHARED_LIBS)
+    set(DEFAULT_EMBED_RESOURCE_FILES ON)
+else()
+    set(DEFAULT_EMBED_RESOURCE_FILES OFF)
+endif()
+option(EMBED_RESOURCE_FILES "Whether resource files (limited to proj.db) should be embedded into the PROJ library" ${DEFAULT_EMBED_RESOURCE_FILES})
+
+option(USE_ONLY_EMBEDDED_RESOURCE_FILES "Whether embedded resource files (limited to proj.db) should be used (should nominally be used together with EMBED_RESOURCE_FILES=ON, otherwise this will result in non-functional builds)" OFF)
+
+if (USE_ONLY_EMBEDDED_RESOURCE_FILES AND NOT EMBED_RESOURCE_FILES)
+  message(WARNING "USE_ONLY_EMBEDDED_RESOURCE_FILES=ON set but EMBED_RESOURCE_FILES=OFF: some drivers will lack required resource files")
+endif()
+
+################################################################################
 # Build configured components
 ################################################################################
 include_directories(${PROJ_SOURCE_DIR}/src)
@@ -432,3 +471,5 @@ endif()
 
 configure_file(cmake/uninstall.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/proj_uninstall.cmake @ONLY)
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/proj_uninstall.cmake)
+
+message(STATUS "EMBED_RESOURCE_FILES=${EMBED_RESOURCE_FILES}")
