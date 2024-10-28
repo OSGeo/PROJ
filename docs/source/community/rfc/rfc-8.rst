@@ -6,7 +6,7 @@ PROJ RFC-8: Embedding resource files into libproj
 
 :Author: Even Rouault
 :Contact: even.rouault @ spatialys.com
-:Status: Draft
+:Status: Adopted, implemented
 :Implementation target: PROJ 9.6
 :Last Updated: 2024-Oct-01
 
@@ -184,7 +184,7 @@ Related issues and PRs
 Voting history
 --------------
 
-TBD
++1 from PSC members KurtS, KristianE, JavierJS, ThomasK and EvenR
 
 
 .. below is an allow-list for spelling checker.
