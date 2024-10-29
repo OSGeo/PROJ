@@ -196,3 +196,8 @@ Voting history
     FileEmbed
     CMakeLists
     iso
+    KurtS
+    KristianE
+    ThomasK
+    JavierJS
+    EvenR
