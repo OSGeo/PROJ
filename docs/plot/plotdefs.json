@@ -270,6 +270,18 @@
         "type": "poly"
     },
     {
+        "filename": "dymaxion.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "dymaxion",
+        "projstring": "+proj=dymaxion",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
         "filename": "eck1.png",
         "latmax": 90,
         "latmin": -90,
