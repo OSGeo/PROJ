@@ -54,63 +54,13 @@ inline bool is_point_in_face(const PJ_XYZ *p, const pj_face * face) {
 }
 
 
-// inline double compute_xyz_dist_sq(const PJ_XYZ * p, const PJ_XYZ * q) {
-//     double dx = (p->x - q->x);
-//     double dy = (p->y - q->y);
-//     double dz = (p->z - q->z);
-//     return dx * dx + dy * dy + dz * dz;
-// }
-
-// inline double compute_xy_dist_sq(const PJ_XY * p, const PJ_XY * q) {
-//     double dx = (p->x - q->x);
-//     double dy = (p->y - q->y);
-//     return dx * dx + dy * dy;
-// }
-
 inline unsigned char get_ico_face_index(const PJ_XYZ *p) {
     for (unsigned char i=0; i < 23; i++) {
         if (is_point_in_face(p, &ico_faces[i])) {
             return i;
         }
     }
-    // return 0;
-    
-    // USING CENTERS 
-    // unsigned char id = 0;
-    // double min_dist = compute_xyz_dist_sq(p, &ico_20_centers[0]);
-    // for (unsigned char i=0; i < 20; i++) {
-    //     double dist = compute_xyz_dist_sq(p, &ico_20_centers[i]);
-    //     if (dist < min_dist) {
-    //         min_dist = dist;
-    //         id = i;
-    //     }
-    // }
-    // if (id < 18) {
-    //     return id;
-    // } else if (id == 19) { // Antartica split case
-    //     if (
-    //         compute_xyz_dist_sq(p, &ico_2_centers[0]) < compute_xyz_dist_sq(p, &ico_2_centers[1])
-    //     ) {
-    //         return 18;
-    //     } else {
-    //         return 19;
-    //     }
-    // } else if (id == 18) { // Japan split case
-    //     double d1 = compute_xyz_dist_sq(p, &ico_3_centers[0]);
-    //     double d2 = compute_xyz_dist_sq(p, &ico_3_centers[1]);
-    //     double d3 = compute_xyz_dist_sq(p, &ico_3_centers[2]);
-    //     if (d1 < d2 && d1 < d3) {
-    //         return 20;
-    //     } else if (d2 < d1 && d2 < d3) {
-    //         return 21;
-    //     } else {
-    //         return 22;
-    //     }
-    // }
-    // USING CENTERS OVER 
 
-
-    // Shall not be reached
     return 23;
 }
 
@@ -121,34 +71,7 @@ inline unsigned char get_dym_face_index(const PJ_XY *p) {
             return i;
         }
     }
-    // unsigned char id = 0;
-    // double min_dist = compute_xy_dist_sq(p, &dymaxion_22_centers[0]);
-    // for (unsigned char i=0; i < 20; i++) {
-    //     double dist = compute_xy_dist_sq(p, &dymaxion_22_centers[i]);
-    //     if (dist < min_dist) {
-    //         min_dist = dist;
-    //         id = i;
-    //     }
-    // }
-    // if (id < 18) {
-    //     return id;
-    // } else if (id == 18) { // Japan ocean split case
-    //     if (
-    //         compute_xy_dist_sq(p, &dymaxion_2_centers[0]) < compute_xy_dist_sq(p, &dymaxion_2_centers[1])
-    //     ) {
-    //         return 20;
-    //     } else {
-    //         return 21;
-    //     }
-    // } else if (id == 19) { // 19 from Face 15 -> ocean (18)
-    //   return 18;
-    // } else if (id == 20) { // 20 from Face 15 NEW -> antartica (19)
-    //   return 19;
-    // } else if (id == 21) { // 21 from Face 8 NEW -> japan (22)
-    //   return 22;
-    // }
 
-    // // Shall not be reached
     return 23;
 }
 
@@ -207,17 +130,12 @@ inline PJ_XYZ cartesian_to_ico(const PJ_XYZ *p, unsigned char face_id) {
 //
 // ============================================
 static PJ_XY dymaxion_forward(PJ_LP lp, PJ *P) {
-    // struct pj_s2 *Q = static_cast<struct pj_s2 *>(P->opaque);
     double lat;
-
-    // printf("PROJ IN (phi, lam): %lf, %lf\n", lp.phi, lp.lam);
-
 
     /* Convert the geodetic latitude to a geocentric latitude.
      * This corresponds to the shift from the ellipsoid to the sphere
      * described in [LK12]. */
     if (P->es != 0.0) {
-        // double a_squared = P->a * P->a;
         double one_minus_f = 1.0 - (P->a - P->b) / P->a;
         double one_minus_f_squared = one_minus_f * one_minus_f;
         lat = atan(one_minus_f_squared * tan(lp.phi));
@@ -240,73 +158,40 @@ static PJ_XY dymaxion_forward(PJ_LP lp, PJ *P) {
 
     PJ_XYZ cartesianPoint{x, y, z};
 
-    // printf("CARTESIAN: %lf, %lf, %lf\n", x, y, z);
-
     unsigned char face_id = get_ico_face_index(&cartesianPoint);
-    // printf("FACE ID: %d\n", face_id);
 
     PJ_XYZ icoPoint = cartesian_to_ico(&cartesianPoint, face_id);
 
-    // printf("ICO: %lf, %lf, %lf\n", icoPoint.x, icoPoint.y, icoPoint.z);
-
-
     PJ_XY dymaxionPoint = ico_to_dym(&icoPoint, face_id);
-
-    // printf("PROJ OUT: %lf, %lf\n", dymaxionPoint.x, dymaxionPoint.y);
 
 
     return dymaxionPoint;
 }
 
-//  echo 72.35787652  69.22776711 | bin/proj +proj=dymaxion
-//  echo 8877734.55  21320168.80   | bin/invproj -f "%.3f" +proj=dymaxion
-
-//  echo  224.71153553 109.61616828  | bin/proj +proj=dymaxion
-//  echo    | bin/invproj -f "%.3f" +proj=dymaxion 
-
-//  echo    | bin/proj +proj=dymaxion
-//  echo    | bin/invproj -f "%.3f" +proj=dymaxion 
-
 
 static PJ_LP dymaxion_inverse(PJ_XY xy, PJ *P) {
-    // printf("REVERSE NOT IMPPLEMENTED !!");
     PJ_LP lp = {0.0, 0.0};
 
-    // printf("INVPROJ IN: %lf, %lf\n", xy.x, xy.y);
-
-
     unsigned char face_id = get_dym_face_index(&xy);
-    // printf("(inv) FACE ID: %d\n", face_id);
 
     if (face_id == 23) {
-    //   printf("INVPROJ BAD: %lf, %lf\n", xy.x, xy.y);
-
-      lp.lam = HUGE_VAL;
-      lp.phi = HUGE_VAL;
-      return lp;
+        // Point lies outside icosahedron net faces
+        lp.lam = HUGE_VAL;
+        lp.phi = HUGE_VAL;
+        return lp;
     }
 
 
     PJ_XYZ sphereCoords = dym_to_ico(&xy, face_id);
-
-    // printf("ICO: %lf, %lf, %lf\n", sphereCoords.x, sphereCoords.y, sphereCoords.z);
-    // unsigned char other_face_id = get_ico_face_index(&sphereCoords);
-    // printf("OTHER FACE ID: %d\n", other_face_id);
 
     double norm = sqrtl((sphereCoords.x * sphereCoords.x) + (sphereCoords.y * sphereCoords.y) + (sphereCoords.z * sphereCoords.z));
     double q = sphereCoords.x / norm;
     double r = sphereCoords.y / norm;
     double s = sphereCoords.z / norm;
 
-    // printf("CARTESIAN: %lf, %lf, %lf\n", q, r, s);
-
-    // printf("p: %lf\n", s);
     // Get the spherical angles from the x y z
     lp.phi = acos(-s) - M_HALFPI;
     lp.lam = atan2(r, q);
-
-    // printf("SPHERE: %lf, %lf\n", lp.phi, lp.lam);
-
 
     /* Apply the shift from the sphere to the ellipsoid as described
      * in [LK12]. */
@@ -323,9 +208,6 @@ static PJ_LP dymaxion_inverse(PJ_XY xy, PJ *P) {
             lp.phi = -lp.phi;
         }
     }
-
-    // printf("INVPROJ OUT (phi, lam): %lf, %lf\n", lp.phi, lp.lam);
-
 
     return lp;
 }
