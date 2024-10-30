@@ -1,4 +1,4 @@
-set(SQL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/sql")
+set(SQL_DIR "${CMAKE_CURRENT_LIST_DIR}/sql")
 
 set(SQL_FILES_CONSISTENCY_CHECKS_TRIGGERS
   "${SQL_DIR}/consistency_checks_triggers.sql"
