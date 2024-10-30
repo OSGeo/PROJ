@@ -2298,6 +2298,16 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','10623','ECML14-IRF',NULL,'geographic 2
 INSERT INTO "usage" VALUES('EPSG','21387','geodetic_crs','EPSG','10623','EPSG','4774','EPSG','1141');
 INSERT INTO "geodetic_crs" VALUES('EPSG','10628','WC05-IRF',NULL,'geographic 2D','EPSG','6422','EPSG','1386',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','21381','geodetic_crs','EPSG','10628','EPSG','4775','EPSG','1141');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10669','RGM23',NULL,'geocentric','EPSG','6500','EPSG','1389',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21846','geodetic_crs','EPSG','10669','EPSG','1159','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10670','RGM23',NULL,'geographic 3D','EPSG','6423','EPSG','1389',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21845','geodetic_crs','EPSG','10670','EPSG','1159','EPSG','1182');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10671','RGM23',NULL,'geographic 2D','EPSG','6422','EPSG','1389',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21844','geodetic_crs','EPSG','10671','EPSG','1159','EPSG','1183');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10672','RGM23 (lon-lat)',NULL,'geographic 3D','EPSG','6426','EPSG','1389',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21686','geodetic_crs','EPSG','10672','EPSG','1159','EPSG','1189');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10673','RGM23 (lon-lat)',NULL,'geographic 2D','EPSG','6424','EPSG','1389',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21687','geodetic_crs','EPSG','10673','EPSG','1159','EPSG','1189');
 INSERT INTO "geodetic_crs" VALUES('EPSG','20033','MWC18-IRF',NULL,'geographic 2D','EPSG','6422','EPSG','1324',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18335','geodetic_crs','EPSG','20033','EPSG','4666','EPSG','1141');
 INSERT INTO "geodetic_crs" VALUES('EPSG','20039','SIRGAS-Chile 2021',NULL,'geocentric','EPSG','6500','EPSG','1327',NULL,0);
