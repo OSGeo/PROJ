@@ -31,11 +31,11 @@ static PJ_XYZ pj_hgridshift_forward_3d(PJ_LPZ lpz, PJ *P) {
     point.lpz = lpz;
 
     if (Q->defer_grid_opening) {
-        Q->defer_grid_opening = false;
         Q->grids = pj_hgrid_init(P, "grids");
         if (proj_errno(P)) {
             return proj_coord_error().xyz;
         }
+        Q->defer_grid_opening = false;
     }
 
     if (!Q->grids.empty()) {
@@ -53,11 +53,11 @@ static PJ_LPZ pj_hgridshift_reverse_3d(PJ_XYZ xyz, PJ *P) {
     point.xyz = xyz;
 
     if (Q->defer_grid_opening) {
-        Q->defer_grid_opening = false;
         Q->grids = pj_hgrid_init(P, "grids");
         if (proj_errno(P)) {
             return proj_coord_error().lpz;
         }
+        Q->defer_grid_opening = false;
     }
 
     if (!Q->grids.empty()) {

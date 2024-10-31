@@ -54,11 +54,11 @@ struct xyzgridshiftData {
 static bool get_grid_values(PJ *P, xyzgridshiftData *Q, const PJ_LP &lp,
                             double &dx, double &dy, double &dz) {
     if (Q->defer_grid_opening) {
-        Q->defer_grid_opening = false;
         Q->grids = pj_generic_grid_init(P, "grids");
         if (proj_errno(P)) {
             return false;
         }
+        Q->defer_grid_opening = false;
     }
 
     GenericShiftGridSet *gridset = nullptr;

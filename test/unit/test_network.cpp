@@ -1234,26 +1234,241 @@ TEST(networking, network_endpoint_env_variable) {
 
 #ifdef CURL_ENABLED
 
-TEST(networking, network_endpoint_api) {
+TEST(networking, network_endpoint_api_and_not_reachable_gridshift) {
     auto ctx = proj_context_create();
     proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
     proj_context_set_url_endpoint(ctx, "http://0.0.0.0");
 
-    // NAD83 to NAD83(HARN) in West-Virginia. Using wvhpgn.tif
+    // NAD83 to NAD83(HARN) using
+    // us_noaa_nadcon5_nad83_1986_nad83_harn_conus.tif
     auto P = proj_create_crs_to_crs(ctx, "EPSG:4269", "EPSG:4152", nullptr);
     ASSERT_NE(P, nullptr);
 
     PJ_COORD c;
-    c.xyz.x = 40;  // lat
-    c.xyz.y = -80; // long
-    c.xyz.z = 0;
-    c = proj_trans(P, PJ_FWD, c);
+    c.xyzt.x = 40;  // lat
+    c.xyzt.y = -80; // long
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
+
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_FWD, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description,
+                     "NAD83 to NAD83(HARN) (47)");
+        proj_destroy(last_op);
+    }
+
+    proj_errno_reset(P);
+
+    // Check again. Cf https://github.com/pyproj4/pyproj/issues/705
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_FWD, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description,
+                     "NAD83 to NAD83(HARN) (47)");
+        proj_destroy(last_op);
+    }
+
+    proj_errno_reset(P);
+
+    // Check also reverse direction
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_INV, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description,
+                     "NAD83 to NAD83(HARN) (47)");
+        proj_destroy(last_op);
+    }
 
     proj_destroy(P);
     proj_context_destroy(ctx);
+}
 
-    EXPECT_EQ(c.xyz.x, HUGE_VAL);
+#endif
+
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+TEST(networking, network_endpoint_api_and_not_reachable_xyzgridshift) {
+    auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
+    proj_context_set_enable_network(ctx, true);
+    proj_context_set_url_endpoint(ctx, "http://0.0.0.0");
+
+    // NTF to RGF93 using fr_ign_gr3df97a.tif
+    auto P = proj_create_crs_to_crs(ctx, "EPSG:4275", "EPSG:4171", nullptr);
+    ASSERT_NE(P, nullptr);
+
+    PJ_COORD c;
+    c.xyzt.x = 49; // lat
+    c.xyzt.y = 2;  // long
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
+
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_FWD, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description, "NTF to RGF93 v1 (1)");
+        proj_destroy(last_op);
+    }
+
+    proj_errno_reset(P);
+
+    // Check again. Cf https://github.com/pyproj4/pyproj/issues/705
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_FWD, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description, "NTF to RGF93 v1 (1)");
+        proj_destroy(last_op);
+    }
+
+    proj_errno_reset(P);
+
+    // Check also reverse direction
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_INV, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description, "NTF to RGF93 v1 (1)");
+        proj_destroy(last_op);
+    }
+
+    proj_destroy(P);
+    proj_context_destroy(ctx);
+}
+
+#endif
+
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+TEST(networking, network_endpoint_api_and_not_reachable_hgridshift) {
+    auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
+    proj_context_set_enable_network(ctx, true);
+    proj_context_set_url_endpoint(ctx, "http://0.0.0.0");
+
+    // MGI to ETRS89 using at_bev_AT_GIS_GRID_2021_09_28.tif
+    auto P = proj_create_crs_to_crs(ctx, "EPSG:4312", "EPSG:4258", nullptr);
+    ASSERT_NE(P, nullptr);
+
+    PJ_COORD c;
+    c.xyzt.x = 48; // lat
+    c.xyzt.y = 15; // long
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
+
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_FWD, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (8)");
+        proj_destroy(last_op);
+    }
+
+    proj_errno_reset(P);
+
+    // Check again. Cf https://github.com/pyproj4/pyproj/issues/705
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_FWD, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (8)");
+        proj_destroy(last_op);
+    }
+
+    proj_errno_reset(P);
+
+    // Check also reverse direction
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_INV, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (8)");
+        proj_destroy(last_op);
+    }
+
+    proj_destroy(P);
+    proj_context_destroy(ctx);
+}
+
+#endif
+
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+TEST(networking, network_endpoint_api_and_not_reachable_vgridshift) {
+    auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
+    proj_context_set_enable_network(ctx, true);
+    proj_context_set_url_endpoint(ctx, "http://0.0.0.0");
+
+    // "POSGAR 2007 to SRVN16 height (1)" using ar_ign_GEOIDE-Ar16.tif
+    auto P = proj_create_crs_to_crs(ctx, "EPSG:5342", "EPSG:9521", nullptr);
+    ASSERT_NE(P, nullptr);
+
+    PJ_COORD c;
+    c.xyzt.x = -40; // lat
+    c.xyzt.y = -60; // long
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
+
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_FWD, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description,
+                     "POSGAR 2007 to SRVN16 height (1)");
+        proj_destroy(last_op);
+    }
+
+    proj_errno_reset(P);
+
+    // Check again. Cf https://github.com/pyproj4/pyproj/issues/705
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_FWD, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description,
+                     "POSGAR 2007 to SRVN16 height (1)");
+        proj_destroy(last_op);
+    }
+
+    proj_errno_reset(P);
+
+    // Check also reverse direction
+    {
+        PJ_COORD c2 = proj_trans(P, PJ_INV, c);
+        EXPECT_EQ(c2.xyz.x, HUGE_VAL);
+        EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
+        PJ *last_op = proj_trans_get_last_used_operation(P);
+        EXPECT_STREQ(proj_pj_info(last_op).description,
+                     "POSGAR 2007 to SRVN16 height (1)");
+        proj_destroy(last_op);
+    }
+
+    proj_destroy(P);
+    proj_context_destroy(ctx);
 }
 
 #endif

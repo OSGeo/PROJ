@@ -725,11 +725,11 @@ PJ_XYZ gridshiftData::grid_apply_internal(
 
 bool gridshiftData::loadGridsIfNeeded(PJ *P) {
     if (m_defer_grid_opening) {
-        m_defer_grid_opening = false;
         m_grids = pj_generic_grid_init(P, "grids");
         if (proj_errno(P)) {
             return false;
         }
+        m_defer_grid_opening = false;
         bool isProjectedCoord;
         if (!checkGridTypes(P, isProjectedCoord)) {
             return false;

@@ -210,11 +210,13 @@ PJ *pj_obj_create(PJ_CONTEXT *ctx, const BaseObjectNNPtr &objIn) {
                     PROJStringFormatter::Convention::PROJ_5,
                     std::move(dbContext));
                 auto projString = coordop->exportToPROJString(formatter.get());
-                if (proj_context_is_network_enabled(ctx)) {
+                const bool defer_grid_opening_backup = ctx->defer_grid_opening;
+                if (!defer_grid_opening_backup &&
+                    proj_context_is_network_enabled(ctx)) {
                     ctx->defer_grid_opening = true;
                 }
                 auto pj = pj_create_internal(ctx, projString.c_str());
-                ctx->defer_grid_opening = false;
+                ctx->defer_grid_opening = defer_grid_opening_backup;
                 if (pj) {
                     pj->iso_obj = objIn;
                     pj->iso_obj_is_coordinate_operation = true;
