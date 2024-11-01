@@ -80,6 +80,7 @@ struct GridInfo {
 struct gridshiftData {
     ListOfGenericGrids m_grids{};
     bool m_defer_grid_opening = false;
+    int m_error_code_in_defer_grid_opening = 0;
     bool m_bHasHorizontalOffset = false;
     bool m_bHasGeographic3DOffset = false;
     bool m_bHasEllipsoidalHeightOffset = false;
@@ -724,10 +725,14 @@ PJ_XYZ gridshiftData::grid_apply_internal(
 // ---------------------------------------------------------------------------
 
 bool gridshiftData::loadGridsIfNeeded(PJ *P) {
-    if (m_defer_grid_opening) {
+    if (m_error_code_in_defer_grid_opening) {
+        proj_errno_set(P, m_error_code_in_defer_grid_opening);
+        return false;
+    } else if (m_defer_grid_opening) {
         m_defer_grid_opening = false;
         m_grids = pj_generic_grid_init(P, "grids");
-        if (proj_errno(P)) {
+        m_error_code_in_defer_grid_opening = proj_errno(P);
+        if (m_error_code_in_defer_grid_opening) {
             return false;
         }
         bool isProjectedCoord;

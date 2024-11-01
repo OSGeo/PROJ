@@ -22,6 +22,7 @@ struct hgridshiftData {
     double t_epoch = 0;
     ListOfHGrids grids{};
     bool defer_grid_opening = false;
+    int error_code_in_defer_grid_opening = 0;
 };
 } // anonymous namespace
 
@@ -33,9 +34,11 @@ static PJ_XYZ pj_hgridshift_forward_3d(PJ_LPZ lpz, PJ *P) {
     if (Q->defer_grid_opening) {
         Q->defer_grid_opening = false;
         Q->grids = pj_hgrid_init(P, "grids");
-        if (proj_errno(P)) {
-            return proj_coord_error().xyz;
-        }
+        Q->error_code_in_defer_grid_opening = proj_errno(P);
+    }
+    if (Q->error_code_in_defer_grid_opening) {
+        proj_errno_set(P, Q->error_code_in_defer_grid_opening);
+        return proj_coord_error().xyz;
     }
 
     if (!Q->grids.empty()) {
@@ -55,9 +58,11 @@ static PJ_LPZ pj_hgridshift_reverse_3d(PJ_XYZ xyz, PJ *P) {
     if (Q->defer_grid_opening) {
         Q->defer_grid_opening = false;
         Q->grids = pj_hgrid_init(P, "grids");
-        if (proj_errno(P)) {
-            return proj_coord_error().lpz;
-        }
+        Q->error_code_in_defer_grid_opening = proj_errno(P);
+    }
+    if (Q->error_code_in_defer_grid_opening) {
+        proj_errno_set(P, Q->error_code_in_defer_grid_opening);
+        return proj_coord_error().lpz;
     }
 
     if (!Q->grids.empty()) {

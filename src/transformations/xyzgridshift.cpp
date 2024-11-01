@@ -45,6 +45,7 @@ struct xyzgridshiftData {
     bool grid_ref_is_input = true;
     ListOfGenericGrids grids{};
     bool defer_grid_opening = false;
+    int error_code_in_defer_grid_opening = 0;
     double multiplier = 1.0;
 };
 } // anonymous namespace
@@ -56,9 +57,11 @@ static bool get_grid_values(PJ *P, xyzgridshiftData *Q, const PJ_LP &lp,
     if (Q->defer_grid_opening) {
         Q->defer_grid_opening = false;
         Q->grids = pj_generic_grid_init(P, "grids");
-        if (proj_errno(P)) {
-            return false;
-        }
+        Q->error_code_in_defer_grid_opening = proj_errno(P);
+    }
+    if (Q->error_code_in_defer_grid_opening) {
+        proj_errno_set(P, Q->error_code_in_defer_grid_opening);
+        return false;
     }
 
     GenericShiftGridSet *gridset = nullptr;
