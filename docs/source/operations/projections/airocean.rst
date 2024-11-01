@@ -6,7 +6,7 @@ Airocean
 
 The Airocean map projection is a icosahedron polyhedral projection that intends
 to lay down continental landmasses into a contiguous map with minimal scale and angular
-distorsion while preserving land surfaces from (most) interruptions.
+distortion while preserving land surfaces from (most) interruptions.
 In comparison to the Snyder's Icosahedral Equal Area, this projection relies on a specific way 
 to orient and cut the icosahedron so that most interruptions lie within the ocean. The projection
 was first invented by Buckminster Fuller in 1943 using a cuboctahedron as basis.
@@ -38,9 +38,9 @@ was formally mathematically defined :cite:`Gray1995`.
    proj-string: ``+proj=airocean``
 
 .. note::
-   The airocean map of the whole globe has an extent of approximatelly
+   The airocean map of the whole globe has an extent of approximately
    :math:`[0, 0, 17404000, 36844000]` in meters. Although the airocean map has no
-   true up or down, the choice was made to lay it out vertically, from Antartica to Australia.
+   true up or down, the choice was made to lay it out vertically, from Antarctica to Australia.
 
 
 Parameters

@@ -4,6 +4,8 @@ adams
 advertized
 aea
 aeqd
+airocean
+Airocean
 affine
 Affine
 Agri
@@ -105,6 +107,7 @@ Boucher
 boundcrs
 boundCRS
 Bregler
+Buckminster
 brussels
 cadastral
 cadastre
@@ -210,6 +213,7 @@ ctable
 CTable
 CTest
 ctx
+cuboctahedron
 cURL
 customizability
 customizations
