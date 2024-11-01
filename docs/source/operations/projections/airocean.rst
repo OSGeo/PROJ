@@ -1,12 +1,12 @@
-.. _dymaxion:
+.. _airocean:
 
 ********************************************************************************
-Dymaxion Fuller
+Airocean
 ********************************************************************************
 
-The Dymaxion Fuller map projection is a icosahedron polyhedral projection that intends
+The Airocean map projection is based on the Dymaxion Fuller projection, which is a icosahedron polyhedral projection that intends
 to lay down continental landmasses into a contiguous map with minimal scale and angular
-distorsion while having as few land interruptions as possible.
+distorsion while preserving land surfaces from (most) interruptions.
 In comparison to the Snyder's Icosahedral Equal Area, this projection relies on a specific way 
 to orient and cut the icosahedron so that most interruptions lie within the ocean. The projection
 was first invented by Buckminster Fuller in 1943 using a cubostahedron as basis.
@@ -20,7 +20,7 @@ was formally mathematically defined :cite:`Gray1995`.
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Alias**           | dymaxion                                                 |
+| **Alias**           | airocean                                                 |
 +---------------------+----------------------------------------------------------+
 | **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
@@ -30,16 +30,16 @@ was formally mathematically defined :cite:`Gray1995`.
 +---------------------+----------------------------------------------------------+
 
 
-.. figure:: ./images/dymaxion.png
+.. figure:: ./images/airocean.png
    :width: 500 px
    :align: center
-   :alt:   Dymaxion Fuller
+   :alt:   Airocean
 
-   proj-string: ``+proj=dymaxion``
+   proj-string: ``+proj=airocean``
 
 .. note::
-   The output dymaxion map applied to the whole globe has an extent of roughly
-   :math:`[0, 0, 17404000, 36844000]` in meters. Although the dymaxion map has no
+   The airocean map of the whole globe has an extent of approximatelly
+   :math:`[0, 0, 17404000, 36844000]` in meters. Although the airocean map has no
    true up or down, the choice was made to lay it out vertically, from Antartica to Australia.
 
 

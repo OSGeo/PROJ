@@ -270,13 +270,13 @@
         "type": "poly"
     },
     {
-        "filename": "dymaxion.png",
+        "filename": "airocean.png",
         "latmax": 90,
         "latmin": -90,
         "lonmax": 180,
         "lonmin": -180,
-        "name": "dymaxion",
-        "projstring": "+proj=dymaxion",
+        "name": "airocean",
+        "projstring": "+proj=airocean",
         "res": "low",
         "type": "line",
         "delta_cut": 1e6
