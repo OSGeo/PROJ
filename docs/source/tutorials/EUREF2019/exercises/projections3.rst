@@ -84,7 +84,7 @@ consider in which situation use of each of the algorithms is  appropriate.
 Exercise 3a
 ===========
 
-As a baseline, determine the roundtrip accuracy of the default algorirthm
+As a baseline, determine the roundtrip accuracy of the default algorithm
 using UTM zone 22.
 
 .. literalinclude:: projections3.gie

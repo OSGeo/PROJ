@@ -1520,7 +1520,7 @@ INSERT INTO "extent" VALUES('EPSG','2540','World - N hemisphere - 3-degree CM 04
 INSERT INTO "extent" VALUES('EPSG','2541','Germany - West Germany N','Germany - states of former West Germany - onshore north of 52°20''N.',52.33,55.09,6.56,11.59,0);
 INSERT INTO "extent" VALUES('EPSG','2542','Germany - West Germany C','Germany - states of former West Germany - between 50°20''N and 52°20''N.',50.33,52.34,5.86,12.03,0);
 INSERT INTO "extent" VALUES('EPSG','2543','Germany - West Germany S','Germany - states of former West Germany - south of 50°20''N.',47.27,50.34,6.11,13.84,0);
-INSERT INTO "extent" VALUES('EPSG','2544','Germany - Thuringen','Germany - Thuringen.',50.2,51.64,9.92,12.56,0);
+INSERT INTO "extent" VALUES('EPSG','2544','Germany - Thuringen','Germany - Thuringen.',50.2,51.65,9.87,12.66,0);
 INSERT INTO "extent" VALUES('EPSG','2545','Germany - Saxony','Germany - Sachsen.',50.2,51.66,11.89,15.04,0);
 INSERT INTO "extent" VALUES('EPSG','2546','Romania - offshore','Romania - offshore.',43.44,45.2,28.64,31.41,0);
 INSERT INTO "extent" VALUES('EPSG','2547','Serbia and Montenegro - Montenegro','Serbia and Montenegro - Montenegro.',41.82,43.53,18.44,20.37,1);
@@ -3753,3 +3753,5 @@ INSERT INTO "extent" VALUES('EPSG','4774','UK - London to Edinburgh','United Kin
 INSERT INTO "extent" VALUES('EPSG','4775','UK - London to Glasgow','United Kingdom (UK) - on or related to the west coast mainline rail route from London (Euston) via Carlisle to Glasgow.',51.4,55.92,-4.33,-0.04,0);
 INSERT INTO "extent" VALUES('EPSG','4776','Greenland - offshore','Greenland - offshore.',56.38,87.03,-75.0,7.99,0);
 INSERT INTO "extent" VALUES('EPSG','4777','Brazil - Porto Alegre municipality','Brazil - Porto Alegre municipality.',-30.27,-29.93,-51.3,-51.01,0);
+INSERT INTO "extent" VALUES('EPSG','4778','Canada - CGVD28(HTv2.0)','Canada - onshore and offshore between 41°N and 84°N and west of 48°W - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.',41.0,84.0,-141.01,-48.0,0);
+INSERT INTO "extent" VALUES('EPSG','4779','Europe - Baltic Sea','Denmark, Estonia, Finland, Germany, Latvia, Lithuania, Norway, Poland, Russia and Sweden - offshore Baltic Sea including Skagerrak east of 8°30''E, Kattegat, Gulf of Bothnia, and Gulf of Finland.',53.88,65.92,8.5,30.23,0);

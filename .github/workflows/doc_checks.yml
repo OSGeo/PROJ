@@ -1,0 +1,59 @@
+name: Docs
+
+on:
+    push:
+        branches-ignore:
+            - 'backport**'
+            - 'dependabot**'
+    pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    name: Documentation checks
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    container: ghcr.io/osgeo/proj-docs
+
+    steps:
+    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+    - name: Update sphinx-rtd-theme
+      shell: bash -l {0}
+      run: |
+          pip install -U "sphinx-rtd-theme>=3.0.0"
+
+    - name: Print versions
+      shell: bash -l {0}
+      run: |
+          python3 --version
+          sphinx-build --version
+          python3 -m pip list --not-required --format=columns
+    - name: Lint .rst files
+      shell: bash -l {0}
+      run: |
+        set -eu
+        if find . -name '*.rst' | xargs grep -P '\t'; then echo 'Tabs are bad, please use four spaces in .rst files.'; false; fi
+        if find . -name '*.rst' | xargs grep "\.\.versionadded"; then echo 'Wrong annotation. Should be .. versionadded'; false; fi
+        if find . -name '*.rst' | xargs grep "\.\.note"; then echo 'Wrong annotation. Should be .. note'; false; fi
+        if find . -name '*.rst' | xargs grep "\.\.warning"; then echo 'Wrong annotation. Should be .. warning'; false; fi
+        if find . -name '*.rst' | xargs grep "\.\.codeblock"; then echo 'Wrong annotation. Should be .. codeblock'; false; fi
+      working-directory: ./docs
+    - name: Doxygen
+      shell: bash -l {0}
+      run: |
+        make .doxygen_up_to_date
+      working-directory: ./docs
+    - name: Spelling
+      shell: bash -l {0}
+      run: |
+        make spelling SPHINXOPTS=-W
+      working-directory: ./docs

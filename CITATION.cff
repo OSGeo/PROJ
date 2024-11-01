@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: Please cite this software using these metadata or in the CITATION file.
 type: software
 title: PROJ
-version: 9.4.0
-date-released: 2024-03-01
+version: 9.5.0
+date-released: 2024-09-15
 doi: 10.5281/zenodo.5884394
 abstract: PROJ is a generic coordinate transformation software that transforms
   geospatial coordinates from one coordinate reference system (CRS) to another.
@@ -24,11 +24,11 @@ authors:
     affiliation: Planet Labs Inc
   - given-names: Kristian
     family-names: Evers
-    affiliation: Danish Agency for Data Supply and Infrastructure
+    affiliation: Danish Agency for Climate Data
     orcid: https://orcid.org/0000-0002-1310-4576
   - given-names: Thomas
     family-names: Knudsen
-    affiliation: Danish Agency for Data Supply and Infrastructure
+    affiliation: Danish Agency for Climate Data
   - given-names: Howard
     family-names: Butler
     affiliation: Hobu Inc

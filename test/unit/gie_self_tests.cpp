@@ -611,9 +611,19 @@ TEST(gie, info_functions) {
         PJ_COORD c;
         c.lp.lam = proj_torad(10.729030600);
         c.lp.phi = proj_torad(59.916494500);
-        const auto factors2 = proj_factors(P, c);
 
-        EXPECT_NEAR(factors2.meridional_scale, 1 - 28.54587730 * 1e-5, 1e-8);
+        {
+            const auto factors2 = proj_factors(P, c);
+            EXPECT_NEAR(factors2.meridional_scale, 1 - 28.54587730 * 1e-5,
+                        1e-8);
+        }
+
+        // Try again to test caching of internal objects
+        {
+            const auto factors2 = proj_factors(P, c);
+            EXPECT_NEAR(factors2.meridional_scale, 1 - 28.54587730 * 1e-5,
+                        1e-8);
+        }
 
         proj_destroy(P);
     }

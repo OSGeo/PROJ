@@ -76,6 +76,10 @@
 
 #include <sqlite3.h>
 
+#ifdef EMBED_RESOURCE_FILES
+#include "embedded_resources.h"
+#endif
+
 // Custom SQLite VFS as our database is not supposed to be modified in
 // parallel. This is slightly faster
 #define ENABLE_CUSTOM_LOCKLESS_VFS
@@ -129,6 +133,10 @@ constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 constexpr int DATABASE_LAYOUT_VERSION_MINOR = 4;
 
 constexpr size_t N_MAX_PARAMS = 7;
+
+#ifdef EMBED_RESOURCE_FILES
+constexpr const char *EMBEDDED_PROJ_DB = "__embedded_proj_db__";
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -238,6 +246,7 @@ static void PROJ_SQLITE_intersects_bbox(sqlite3_context *pContext,
 // ---------------------------------------------------------------------------
 
 class SQLiteHandle {
+    std::string path_{};
     sqlite3 *sqlite_handle_ = nullptr;
     bool close_handle_ = true;
 
@@ -248,7 +257,7 @@ class SQLiteHandle {
     int nLayoutVersionMajor_ = 0;
     int nLayoutVersionMinor_ = 0;
 
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
+#if defined(ENABLE_CUSTOM_LOCKLESS_VFS) || defined(EMBED_RESOURCE_FILES)
     std::unique_ptr<SQLite3VFS> vfs_{};
 #endif
 
@@ -269,6 +278,8 @@ class SQLiteHandle {
 
   public:
     ~SQLiteHandle();
+
+    const std::string &path() const { return path_; }
 
     sqlite3 *handle() { return sqlite_handle_; }
 
@@ -312,8 +323,9 @@ SQLiteHandle::~SQLiteHandle() {
 // ---------------------------------------------------------------------------
 
 std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
-                                                 const std::string &path) {
+                                                 const std::string &pathIn) {
 
+    std::string path(pathIn);
     const int sqlite3VersionNumber = sqlite3_libversion_number();
     // Minimum version for correct performance: 3.11
     if (sqlite3VersionNumber < 3 * 1000000 + 11 * 1000) {
@@ -323,9 +335,35 @@ std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
     }
 
     std::string vfsName;
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
+#if defined(ENABLE_CUSTOM_LOCKLESS_VFS) || defined(EMBED_RESOURCE_FILES)
     std::unique_ptr<SQLite3VFS> vfs;
-    if (ctx->custom_sqlite3_vfs_name.empty()) {
+#endif
+
+#ifdef EMBED_RESOURCE_FILES
+    if (path == EMBEDDED_PROJ_DB && ctx->custom_sqlite3_vfs_name.empty()) {
+        unsigned int proj_db_size = 0;
+        const unsigned char *proj_db = pj_get_embedded_proj_db(&proj_db_size);
+
+        vfs = SQLite3VFS::createMem(proj_db, proj_db_size);
+        if (vfs == nullptr) {
+            throw FactoryException("Open of " + path + " failed");
+        }
+
+        std::ostringstream buffer;
+        buffer << "file:/proj.db?immutable=1&ptr=";
+        buffer << reinterpret_cast<uintptr_t>(proj_db);
+        buffer << "&sz=";
+        buffer << proj_db_size;
+        buffer << "&max=";
+        buffer << proj_db_size;
+        buffer << "&vfs=";
+        buffer << vfs->name();
+        path = buffer.str();
+    } else
+#endif
+
+#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
+        if (ctx->custom_sqlite3_vfs_name.empty()) {
         vfs = SQLite3VFS::create(false, true, true);
         if (vfs == nullptr) {
             throw FactoryException("Open of " + path + " failed");
@@ -350,10 +388,11 @@ std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
     }
     auto handle =
         std::shared_ptr<SQLiteHandle>(new SQLiteHandle(sqlite_handle, true));
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
+#if defined(ENABLE_CUSTOM_LOCKLESS_VFS) || defined(EMBED_RESOURCE_FILES)
     handle->vfs_ = std::move(vfs);
 #endif
     handle->initialize();
+    handle->path_ = path;
     handle->checkDatabaseLayout(path, path, std::string());
     return handle;
 }
@@ -454,8 +493,12 @@ SQLResultSet SQLiteHandle::run(sqlite3_stmt *stmt, const std::string &sql,
         } else if (ret == SQLITE_DONE) {
             break;
         } else {
-            throw FactoryException("SQLite error on " + sql + ": " +
-                                   sqlite3_errmsg(sqlite_handle_));
+            throw FactoryException(std::string("SQLite error on ")
+                                       .append(sql)
+                                       .append(": code = ")
+                                       .append(internal::toString(ret))
+                                       .append(", msg = ")
+                                       .append(sqlite3_errmsg(sqlite_handle_)));
         }
     }
     return result;
@@ -1200,18 +1243,25 @@ void DatabaseContext::Private::open(const std::string &databasePath,
     setPjCtxt(ctx);
     std::string path(databasePath);
     if (path.empty()) {
+#ifndef USE_ONLY_EMBEDDED_RESOURCE_FILES
         path.resize(2048);
         const bool found =
             pj_find_file(pjCtxt(), "proj.db", &path[0], path.size() - 1) != 0;
         path.resize(strlen(path.c_str()));
-        if (!found) {
+        if (!found)
+#endif
+        {
+#ifdef EMBED_RESOURCE_FILES
+            path = EMBEDDED_PROJ_DB;
+#else
             throw FactoryException("Cannot find proj.db");
+#endif
         }
     }
 
     sqlite_handle_ = SQLiteHandleCache::get().getHandle(path, ctx);
 
-    databasePath_ = std::move(path);
+    databasePath_ = sqlite_handle_->path();
 }
 
 // ---------------------------------------------------------------------------
@@ -2905,7 +2955,7 @@ DatabaseContext::DatabaseContext() : d(internal::make_unique<Private>()) {}
  * provided, they must be separated by the colon (:) character on Unix, and
  * on Windows, by the semi-colon (;) character.
  * @param ctx Context used for file search.
- * @throw FactoryException
+ * @throw FactoryException if the database cannot be opened.
  */
 DatabaseContextNNPtr
 DatabaseContext::create(const std::string &databasePath,
@@ -2990,7 +3040,7 @@ const char *DatabaseContext::getMetadata(const char *key) const {
  *
  * Only one session may be active at a time for a given database context.
  *
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  * @since 8.1
  */
 void DatabaseContext::startInsertStatementsSession() {
@@ -3052,7 +3102,7 @@ void DatabaseContext::startInsertStatementsSession() {
  * @return the suggested code, that is guaranteed to not conflict with an
  * existing one.
  *
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  * @since 8.1
  */
 std::string
@@ -3138,7 +3188,7 @@ DatabaseContext::suggestsCodeFor(const common::IdentifiedObjectNNPtr &object,
  *                           added to it. Note that unit, coordinate
  *                           systems, projection methods and parameters will in
  *                           any case be allowed to refer to EPSG.
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  * @since 8.1
  */
 std::vector<std::string> DatabaseContext::getInsertStatementsFor(
@@ -3502,7 +3552,7 @@ static std::string getUniqueEsriAlias(const std::list<std::string> &l) {
  *                  column of the "geodetic_crs" table.
  * @param source Source of the alias. Mandatory
  * @return Alias name (or empty if not found).
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 std::string
 DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
@@ -3645,7 +3695,7 @@ std::list<std::string> DatabaseContext::getAliases(
  * @param authName Authority name of the object.
  * @param code Code of the object
  * @return Name (or empty)
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 std::string DatabaseContext::getName(const std::string &tableName,
                                      const std::string &authName,
@@ -3668,7 +3718,7 @@ std::string DatabaseContext::getName(const std::string &tableName,
  * @param authName Authority name of the object.
  * @param code Code of the object
  * @return Text definition (or empty)
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 std::string DatabaseContext::getTextDefinition(const std::string &tableName,
                                                const std::string &authName,
@@ -3688,7 +3738,7 @@ std::string DatabaseContext::getTextDefinition(const std::string &tableName,
 /** \brief Return the allowed authorities when researching transformations
  * between different authorities.
  *
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 std::vector<std::string> DatabaseContext::getAllowedAuthorities(
     const std::string &sourceAuthName,
@@ -4304,8 +4354,8 @@ AuthorityFactory::CRSInfo::CRSInfo()
  *
  * @param code Object code allocated by authority. (e.g. "4326")
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 util::BaseObjectNNPtr
@@ -4412,8 +4462,8 @@ static FactoryException buildFactoryException(const char *type,
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 metadata::ExtentNNPtr
@@ -4467,8 +4517,8 @@ AuthorityFactory::createExtent(const std::string &code) const {
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 UnitOfMeasureNNPtr
@@ -4569,8 +4619,8 @@ static double normalizeMeasure(const std::string &uom_code,
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 datum::PrimeMeridianNNPtr
@@ -4621,7 +4671,7 @@ AuthorityFactory::createPrimeMeridian(const std::string &code) const {
  * @param semi_major_axis Approximate semi-major axis.
  * @param tolerance Relative error allowed.
  * @return celestial body name if one single match found.
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 
 std::string
@@ -4660,8 +4710,8 @@ AuthorityFactory::identifyBodyFromSemiMajorAxis(double semi_major_axis,
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 datum::EllipsoidNNPtr
@@ -4729,8 +4779,8 @@ AuthorityFactory::createEllipsoid(const std::string &code) const {
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 datum::GeodeticReferenceFrameNNPtr
@@ -4860,8 +4910,8 @@ void AuthorityFactory::createGeodeticDatumOrEnsemble(
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 datum::VerticalReferenceFrameNNPtr
@@ -4959,8 +5009,8 @@ void AuthorityFactory::createVerticalDatumOrEnsemble(
  * @param code Object code allocated by authority.
  * @param type "geodetic_datum", "vertical_datum" or empty string if unknown
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 datum::DatumEnsembleNNPtr
@@ -5014,8 +5064,8 @@ AuthorityFactory::createDatumEnsemble(const std::string &code,
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 datum::DatumNNPtr AuthorityFactory::createDatum(const std::string &code) const {
@@ -5062,8 +5112,8 @@ static cs::MeridianPtr createMeridian(const std::string &val) {
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 cs::CoordinateSystemNNPtr
@@ -5197,8 +5247,8 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 crs::GeodeticCRSNNPtr
@@ -5212,8 +5262,8 @@ AuthorityFactory::createGeodeticCRS(const std::string &code) const {
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 crs::GeographicCRSNNPtr
@@ -5367,8 +5417,8 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 crs::VerticalCRSNNPtr
@@ -5432,8 +5482,8 @@ AuthorityFactory::createVerticalCRS(const std::string &code) const {
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 operation::ConversionNNPtr
@@ -5548,8 +5598,8 @@ AuthorityFactory::createConversion(const std::string &code) const {
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 crs::ProjectedCRSNNPtr
@@ -5687,8 +5737,8 @@ AuthorityFactory::Private::createProjectedCRSEnd(const std::string &code,
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 crs::CompoundCRSNNPtr
@@ -5734,8 +5784,8 @@ AuthorityFactory::createCompoundCRS(const std::string &code) const {
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 crs::CRSNNPtr AuthorityFactory::createCoordinateReferenceSystem(
@@ -5857,8 +5907,8 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
  *
  * @param code Object code allocated by authority.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  * @since 9.4
  */
 
@@ -5949,8 +5999,8 @@ static operation::ParameterValueNNPtr createAngle(const std::string &value,
  * @param usePROJAlternativeGridNames Whether PROJ alternative grid names
  * should be substituted to the official grid names.
  * @return object.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
@@ -6631,8 +6681,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
  * @param sourceCRSCode Source CRS code allocated by authority.
  * @param targetCRSCode Source CRS code allocated by authority.
  * @return list of coordinate operations
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 std::vector<operation::CoordinateOperationNNPtr>
@@ -6652,7 +6702,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
  *
  * @param code crs code allocated by authority.
  * @return list of geoid model names
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 
 std::list<std::string>
@@ -6764,8 +6814,8 @@ AuthorityFactory::getGeoidModels(const std::string &code) const {
  * @param intersectingExtent2 Optional extent that the resulting operations
  * must intersect.
  * @return list of coordinate operations
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 std::vector<operation::CoordinateOperationNNPtr>
@@ -7186,8 +7236,8 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
  * @param intersectingExtent2 Optional extent that the resulting operations
  * must intersect.
  * @return list of coordinate operations
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 
 std::vector<operation::CoordinateOperationNNPtr>
@@ -8281,7 +8331,7 @@ const std::string &AuthorityFactory::getAuthority() PROJ_PURE_DEFN {
  * @param allowDeprecated whether we should return deprecated objects as well.
  * @return the set of authority codes for spatial reference objects of the given
  * type
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 std::set<std::string>
 AuthorityFactory::getAuthorityCodes(const ObjectType &type,
@@ -8389,8 +8439,8 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
  *
  * @param code Object code allocated by authority. (e.g. "4326")
  * @return description.
- * @throw NoSuchAuthorityCodeException
- * @throw FactoryException
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
  */
 std::string
 AuthorityFactory::getDescriptionText(const std::string &code) const {
@@ -8423,7 +8473,7 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
  * a CRS object for each of them and getting the information from this CRS
  * object, but this implementation has much less overhead.
  *
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
 
@@ -8564,7 +8614,7 @@ AuthorityFactory::CelestialBodyInfo::CelestialBodyInfo() : authName{}, name{} {}
 // ---------------------------------------------------------------------------
 
 /** \brief Return the list of units.
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  *
  * @since 7.1
  */
@@ -8614,7 +8664,7 @@ std::list<AuthorityFactory::UnitInfo> AuthorityFactory::getUnitList() const {
 // ---------------------------------------------------------------------------
 
 /** \brief Return the list of celestial bodies.
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  *
  * @since 8.1
  */
@@ -8656,7 +8706,7 @@ AuthorityFactory::getCelestialBodyList() const {
  * @param outAuthName Authority name of the official name that has been found.
  * @param outCode Code of the official name that has been found.
  * @return official name (or empty if not found).
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 std::string AuthorityFactory::getOfficialNameFromAlias(
     const std::string &aliasedName, const std::string &tableName,
@@ -8764,7 +8814,7 @@ std::string AuthorityFactory::getOfficialNameFromAlias(
  * @param limitResultCount Maximum number of results to return.
  * Or 0 for unlimited.
  * @return list of matched objects.
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 std::list<common::IdentifiedObjectNNPtr>
 AuthorityFactory::createObjectsFromName(
@@ -8797,7 +8847,7 @@ AuthorityFactory::createObjectsFromName(
  * @param limitResultCount Maximum number of results to return.
  * Or 0 for unlimited.
  * @return list of matched objects.
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 std::list<AuthorityFactory::PairObjectName>
 AuthorityFactory::createObjectsFromNameEx(
@@ -9300,7 +9350,7 @@ AuthorityFactory::createObjectsFromNameEx(
  * @param name Searched name.
  * @param approximateMatch Whether approximate name identification is allowed.
  * @return list of (auth_name, code) of matched objects.
- * @throw FactoryException
+ * @throw FactoryException in case of error.
  */
 std::list<std::pair<std::string, std::string>>
 AuthorityFactory::listAreaOfUseFromName(const std::string &name,

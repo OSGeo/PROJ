@@ -1,5 +1,72 @@
 # PROJ Release Notes
 
+## 9.5.0
+
+### Updates
+
+* Database: add constraint for unicity of CRS and operation names (#4071)
+
+* Make a few more functions that accept a `PJ*` to actually acccept a `const PJ*` (#4074)
+
+* Database: Increase consistency in trigger checks (#4080)
+
+* Speed-up `+proj=cart +inv` (#4087)
+
+* Added EPSG:9656 "Cartesian Grid Offsets" operation method, and imported related records (#4094)
+
+* Add a `WKTParser::grammarErrorList()` method so that `proj_create_from_wkt()` can behave as documented (#4108)
+
+* `CRS::stripVerticalComponent()`: Redirect it to `demoteTo2D(std::string(), nullptr)` (#4127)
+
+* Add `proj_context_set_user_writable_directory()` to public API (#4144)
+
+* CMake: for Windows builds, defaults PROJ DLL to be just `proj_${PROJ_MAJOR_VERSION}.dll` (#4167)
+
+* Add `toWGS84AutocorrectWrongValues()` method and use it in PROJ.4 and WKT1 CRS import (#4172)
+
+* WKT import: add support for Oracle WKT "Albers_Conical_Equal_Area" spelling (#4181)
+
+* Limit number of C++ exceptions thrown & caught internally (#4183)
+
+* Database: update to EPSG 11.016 (#4241)
+
+* CMake: add option `EMBED_PROJ_DATA_PATH` (#4207)
+
+* Add SEA Inverse projection (#4211)
+
+* projinfo: Add 2 args equivalent to usage of `-s` and `-t` (#4218)
+
+*  CMake: add TESTING_USE_NETWORK configure option (#4220)
+
+* Add `PROJ_ERR_COORD_TRANSFM_MISSING_TIME` and `proj_coordoperation_requires_per_coordinate_input_time()` (#4221)
+
+* Add new Conversion "Local Orthographic" (#4228, #4229)
+
+* Add data/ITRF2020 with ITRF2020 to ITRFother, and ITRF2020 plate motion models (#4235)
+
+### Bug Fixes
+
+* Fix `imoll` and `imoll_o` zone calculations to correct inverse transformations near the "seams" (#4159)
+
+* Fix wrong EPSG conversion code for UTM south (#4166)
+
+* BoundCRS::exportToPROJ(): handle case of NADCON conus grid (#4168)
+
+* `+proj=gridshift`: make projected grids work with `PROJ_NETWORK=ON` (#4174)
+
+* `createOperations()`: make it work when transforming from/to a CompoundCRS with a DerivedVerticalCRS with ellipsoidal height (#4176)
+
+* Support default context as `nullptr` in `CoordinateTransformer` (#4177)
+
+* cct: emit error message and return error code when not being able to open input file (#4200)
+
+* Fix race condition surrounding DB reopening during fork (#4231)
+
+* `GeographicBoundingBox::create()`: accept degenerate bounding box reduced to a point or a line (#4237)
+
+* `createOperation()`: tune so that ITRF2000->ETRS89 does not return only NKG grid based operations but also time-dependent Helmert (#4244)
+
+
 ## 9.4.1
 
 ### Updates
@@ -7,6 +74,8 @@
 * Database: update to EPSG v11.006 (#4086)
 
 * Database: update ESRI dataset to ArcGIS Pro 3.3 (#4143)
+
+* Process `EPSG_CODE_METHOD_VERTICALGRID_GTG` properly with code 1129 (#4213)
 
 ### Bug fixes
 

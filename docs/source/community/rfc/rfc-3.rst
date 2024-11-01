@@ -132,7 +132,7 @@ This RFC comes with a set of guidelines for handling dependencies for PROJ in
 the future. Up until now dependencies hasn't been handled consistently,  with
 some dependencies not being approved formally by the projects governing body.
 Therefore minimum versions of PROJ dependencies is proposed so that at the
-acception of this RFC PROJ will have the following external requirements:
+approval of this RFC PROJ will have the following external requirements:
 
 * C99 (was C89)
 * C++11 (already approved in :ref:`RFC2 <rfc2>`)

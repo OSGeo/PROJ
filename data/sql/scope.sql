@@ -267,3 +267,4 @@ INSERT INTO "scope" VALUES('EPSG','1287','Continental mapping of raster data.',0
 INSERT INTO "scope" VALUES('EPSG','1288','Change of coordinate epoch in 2-dimensions (φλ horizontal only).',0);
 INSERT INTO "scope" VALUES('EPSG','1289','Geodesy. Defines ETRF2020.',0);
 INSERT INTO "scope" VALUES('EPSG','1290','Pan-European conformal mapping at scales larger than 1:500,000, engineering survey and topographic mapping at all scales.',0);
+INSERT INTO "scope" VALUES('EPSG','1291','Reference surface for depths in BSHC offshore products for the Baltic Sea (including nautical maps, bathymetry data, water level corrections, etc.).',0);

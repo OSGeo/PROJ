@@ -67,7 +67,7 @@ class SpatialExtent {
   public:
     /** Parse the provided object as an extent.
      *
-     * @throws ParsingException
+     * @throws ParsingException in case of error.
      */
     static SpatialExtent parse(const json &j);
 
@@ -131,7 +131,7 @@ class Component {
   public:
     /** Parse the provided object as a component.
      *
-     * @throws ParsingException
+     * @throws ParsingException in case of error.
      */
     static Component parse(const json &j);
 
@@ -292,7 +292,7 @@ class MasterFile {
   public:
     /** Parse the provided serialized JSON content and return an object.
      *
-     * @throws ParsingException
+     * @throws ParsingException in case of error.
      */
     static std::unique_ptr<MasterFile> parse(const std::string &text);
 

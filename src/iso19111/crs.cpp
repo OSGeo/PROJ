@@ -92,6 +92,10 @@ NS_PROJ_START
 
 namespace crs {
 
+//! @cond Doxygen_Suppress
+constexpr const char *PROMOTED_TO_3D_PRELUDE = "Promoted to 3D from ";
+//! @endcond
+
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
@@ -1257,6 +1261,40 @@ CRS::getNonDeprecated(const io::DatabaseContextNNPtr &dbContext) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+/** \brief Return the authority name to which this object is registered, or
+ * has an indirect provenance.
+ *
+ * Typically this method called on EPSG:4269 (NAD83) promoted to 3D will return
+ * "EPSG".
+ *
+ * Returns empty string if more than an authority or no originating authority is
+ * found.
+ */
+std::string CRS::getOriginatingAuthName() const {
+    const auto &ids = identifiers();
+    if (ids.size() == 1) {
+        return *(ids[0]->codeSpace());
+    }
+    if (ids.size() > 1) {
+        return std::string();
+    }
+    const auto &l_remarks = remarks();
+    if (starts_with(l_remarks, PROMOTED_TO_3D_PRELUDE)) {
+        const auto pos = l_remarks.find(':');
+        if (pos != std::string::npos) {
+            return l_remarks.substr(strlen(PROMOTED_TO_3D_PRELUDE),
+                                    pos - strlen(PROMOTED_TO_3D_PRELUDE));
+        }
+    }
+    return std::string();
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return a variant of this CRS "promoted" to a 3D one, if not already
  * the case.
  *
@@ -1314,7 +1352,7 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
         const auto &l_identifiers = identifiers();
         const auto &l_remarks = remarks();
         if (l_identifiers.size() == 1) {
-            std::string remarks("Promoted to 3D from ");
+            std::string remarks(PROMOTED_TO_3D_PRELUDE);
             remarks += *(l_identifiers[0]->codeSpace());
             remarks += ':';
             remarks += l_identifiers[0]->code();
@@ -5159,7 +5197,7 @@ CompoundCRS::componentReferenceSystems() PROJ_PURE_DEFN {
  * At minimum the name should be defined.
  * @param components the component CRS of the CompoundCRS.
  * @return new CompoundCRS.
- * @throw InvalidCompoundCRSException
+ * @throw InvalidCompoundCRSException if the object cannot be constructed.
  */
 CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
                                      const std::vector<CRSNNPtr> &components) {
@@ -5261,7 +5299,7 @@ CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
  * At minimum the name should be defined.
  * @param components the component CRS of the CompoundCRS.
  * @return new CRS.
- * @throw InvalidCompoundCRSException
+ * @throw InvalidCompoundCRSException if the object cannot be constructed.
  */
 CRSNNPtr CompoundCRS::createLax(const util::PropertyMap &properties,
                                 const std::vector<CRSNNPtr> &components,

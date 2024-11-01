@@ -142,7 +142,7 @@ center longitude.  So ``+lon_wrap=180`` means wrap longitudes in the range 0 to
 ::
 
     $ echo -1 0 cs2cs +proj=longlat +to +proj=longlat +lon_wrap=180
-    359dE	0dN 0.000
+    359dE   0dN 0.000
 
 Note that ``+over`` does **not** disable ``+lon_wrap``.
 
@@ -190,7 +190,7 @@ meridian.
 
     cs2cs +proj=latlong +datum=WGS84 +to +proj=latlong +datum=WGS84 +pm=lisbon
     0 0
-    9d7'54.862"E	0dN 0.000
+    9d7'54.862"E    0dN 0.000
 
 Decimal degrees can also be simply specified for the prime meridian.
 

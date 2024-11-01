@@ -1533,6 +1533,51 @@ TEST(operation, geogCRS_without_id_to_geogCRS_3D_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_promoted_to_3D_to_geogCRS_3D_context) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactoryEPSG->createCoordinateReferenceSystem("4269")
+                ->promoteTo3D(std::string(),
+                              dbContext), // NAD83 (86) promoted to 3D
+            authFactoryEPSG->createCoordinateReferenceSystem(
+                "6319"), // NAD83 (2011) 3D
+            ctxt);
+        ASSERT_GE(list.size(), 1U);
+        // Check we don't get an ESRI operation
+        EXPECT_EQ(list[0]->nameStr(), "NAD83 to NAD83(HARN) (47) + "
+                                      "NAD83(HARN) to NAD83(FBN) (1) + "
+                                      "NAD83(FBN) to NAD83(NSRS2007) (1) + "
+                                      "NAD83(NSRS2007) to NAD83(2011) (1)");
+    }
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactoryEPSG->createCoordinateReferenceSystem(
+                "6319"), // NAD83 (2011) 3D
+            authFactoryEPSG->createCoordinateReferenceSystem("4269")
+                ->promoteTo3D(std::string(),
+                              dbContext), // NAD83 (86) promoted to 3D
+            ctxt);
+        ASSERT_GE(list.size(), 1U);
+        // Check we don't get an ESRI operation
+        EXPECT_EQ(list[0]->nameStr(),
+                  "Inverse of NAD83(NSRS2007) to NAD83(2011) (1) + "
+                  "Inverse of NAD83(FBN) to NAD83(NSRS2007) (1) + "
+                  "Inverse of NAD83(HARN) to NAD83(FBN) (1) + "
+                  "Inverse of NAD83 to NAD83(HARN) (47)");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 static GeodeticCRSNNPtr createGeocentricDatumWGS84() {
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
@@ -6140,7 +6185,7 @@ TEST(
             NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
         ASSERT_GE(list.size(), 2U);
         EXPECT_EQ(list[0]->nameStr(),
-                  "Inverse of NAD83(CSRS)v6 to CGVD28 height (1) + "
+                  "Inverse of NAD83(CSRS)v6 to CGVD28(HTv2.0) height (1) + "
                   "NAD83(CSRS)v6 to CGVD2013(CGG2013) height (1) "
                   "using Null geographic offset "
                   "from NAD83(CSRS)v6 (geog3D) to NAD83(CSRS)v6 (geog2D) + "

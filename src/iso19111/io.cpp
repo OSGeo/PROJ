@@ -1208,7 +1208,7 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
  *
  * @param wkt the WKT string to parse.
  * @param indexStart the start index in the wkt string.
- * @throw ParsingException
+ * @throw ParsingException if the string cannot be parsed.
  */
 WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart) {
     size_t indexEnd;
@@ -4523,7 +4523,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
         if (isNull(csNode) && ci_equal(nodeValue, WKTConstants::BASEPROJCRS) &&
             !isNull(conversionNode)) {
             // A BASEPROJCRS (as of WKT2 18-010r11) normally lacks an explicit
-            // CS[] which cause issues to properly instanciate it. So we first
+            // CS[] which cause issues to properly instantiate it. So we first
             // start by trying to identify the BASEPROJCRS by its id or name.
             // And fallback to exploring the conversion parameters to infer the
             // CS AXIS unit from the linear parameter unit... Not fully bullet
@@ -4786,14 +4786,15 @@ VerticalReferenceFrameNNPtr WKTParser::Private::buildVerticalReferenceFrame(
     const auto *nodeP = node->GP();
     const std::string &name(nodeP->value());
     auto &props = buildProperties(node);
+    const auto &children = nodeP->children();
 
-    if (esriStyle_ && dbContext_) {
+    if (esriStyle_ && dbContext_ && !children.empty()) {
         std::string outTableName;
         std::string authNameFromAlias;
         std::string codeFromAlias;
         auto authFactory =
             AuthorityFactory::create(NN_NO_CHECK(dbContext_), std::string());
-        const std::string datumName = stripQuotes(nodeP->children()[0]);
+        const std::string datumName = stripQuotes(children[0]);
         auto officialName = authFactory->getOfficialNameFromAlias(
             datumName, "vertical_datum", "ESRI", false, outTableName,
             authNameFromAlias, codeFromAlias);
@@ -4803,7 +4804,6 @@ VerticalReferenceFrameNNPtr WKTParser::Private::buildVerticalReferenceFrame(
     }
 
     if (ci_equal(name, WKTConstants::VERT_DATUM)) {
-        const auto &children = nodeP->children();
         if (children.size() >= 2) {
             props.set("VERT_DATUM_TYPE", children[1]->GP()->value());
         }
@@ -8132,7 +8132,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * easting, northing axis order (except the ones with Transverse Mercator South
  * Orientated projection). In that mode, the epsg:XXXX syntax will be also
  * interpreted the same way.
- * @throw ParsingException
+ * @throw ParsingException if the string cannot be parsed.
  */
 BaseObjectNNPtr createFromUserInput(const std::string &text,
                                     const DatabaseContextPtr &dbContext,
@@ -8179,7 +8179,7 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  *
  * @param text One of the above mentioned text format
  * @param ctx PROJ context
- * @throw ParsingException
+ * @throw ParsingException if the string cannot be parsed.
  */
 BaseObjectNNPtr createFromUserInput(const std::string &text, PJ_CONTEXT *ctx) {
     DatabaseContextPtr dbContext;
@@ -8211,7 +8211,7 @@ BaseObjectNNPtr createFromUserInput(const std::string &text, PJ_CONTEXT *ctx) {
  * in warningList(). This does not prevent more severe errors to cause an
  * exception to be thrown.
  *
- * @throw ParsingException
+ * @throw ParsingException if the string cannot be parsed.
  */
 BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
 
@@ -12183,7 +12183,7 @@ struct PJContextHolder {
  * The projString must contain +type=crs for the object to be detected as a
  * CRS instead of a CoordinateOperation.
  *
- * @throw ParsingException
+ * @throw ParsingException if the string cannot be parsed.
  */
 BaseObjectNNPtr
 PROJStringParser::createFromPROJString(const std::string &projString) {

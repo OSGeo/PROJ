@@ -79,7 +79,7 @@ Parameters
 
     *Defaults to diamond.*
 
-    .. warning:: This option was wrongly introduced introduced in 8.2.1 with the
+    .. warning:: This option was wrongly introduced in 8.2.1 with the
                  ``type`` name, which was inappropriate as it conflicted with
                  the ``+type=crs`` general hint.
 

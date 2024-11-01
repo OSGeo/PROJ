@@ -3,6 +3,76 @@
 News
 ###############################################################################
 
+9.5.0 Release Notes
+++++++++++++++++++++
+*Septemper 15th 2024*
+
+Updates
+-------
+
+  * Database: add constraint for unicity of CRS and operation names (`#4071 <https://github.com/OSGeo/PROJ/issues/4071>`_)
+
+  * Make a few more functions that accept a ``PJ*`` to actually accept a ``const PJ*`` (`#4074 <https://github.com/OSGeo/PROJ/issues/4074>`_)
+
+  * Database: Increase consistency in trigger checks (`#4080 <https://github.com/OSGeo/PROJ/issues/4080>`_)
+
+  * Speed-up ``+proj=cart +inv`` (`#4087 <https://github.com/OSGeo/PROJ/issues/4087>`_)
+
+  * Added EPSG:9656 "Cartesian Grid Offsets" operation method, and imported related records (`#4094 <https://github.com/OSGeo/PROJ/issues/4094>`_)
+
+  * Add a :cpp:func:`WKTParser::grammarErrorList()` method so that :c:func:`proj_create_from_wkt()` can behave as documented (`#4108 <https://github.com/OSGeo/PROJ/issues/4108>`_)
+
+  * :cpp:func:`CRS::stripVerticalComponent()`: Redirect it to ``demoteTo2D(std::string(), nullptr)`` (`#4127 <https://github.com/OSGeo/PROJ/issues/4127>`_)
+
+  * Add :c:func:`proj_context_set_user_writable_directory()` to public API (`#4144 <https://github.com/OSGeo/PROJ/issues/4144>`_)
+
+  * CMake: for Windows builds, defaults PROJ DLL to be just ``proj_${PROJ_MAJOR_VERSION}.dll`` (`#4167 <https://github.com/OSGeo/PROJ/issues/4167>`_)
+
+  * Add ``toWGS84AutocorrectWrongValues()`` method and use it in PROJ.4 and WKT1 CRS import (`#4172 <https://github.com/OSGeo/PROJ/issues/4172>`_)
+
+  * WKT import: add support for Oracle WKT "Albers_Conical_Equal_Area" spelling (`#4181 <https://github.com/OSGeo/PROJ/issues/4181>`_)
+
+  * Limit number of C++ exceptions thrown & caught internally (`#4183 <https://github.com/OSGeo/PROJ/issues/4183>`_)
+
+  * Database: update to EPSG 11.016 (`#4241 <https://github.com/OSGeo/PROJ/issues/4241>`_)
+
+  * CMake: add option ``EMBED_PROJ_DATA_PATH`` (`#4207 <https://github.com/OSGeo/PROJ/issues/4207>`_)
+
+  * Add Inverse to Icosahedral Snyder Equal-Area (ISEA) projection (`#4211 <https://github.com/OSGeo/PROJ/issues/4211>`_)
+
+  * :program:`projinfo`: Add 2 args equivalent to usage of `-s` and `-t` (`#4218 <https://github.com/OSGeo/PROJ/issues/4218>`_)
+
+  *  CMake: add ``TESTING_USE_NETWORK`` configure option (`#4220 <https://github.com/OSGeo/PROJ/issues/4220>`_)
+
+  * Add ``PROJ_ERR_COORD_TRANSFM_MISSING_TIME`` and :c:func:`proj_coordoperation_requires_per_coordinate_input_time()` (`#4221 <https://github.com/OSGeo/PROJ/issues/4221>`_)
+
+  * Add new Conversion "Local Orthographic" (#4228, #4229)
+
+  * Add data/ITRF2020 with ITRF2020 to ITRFother, and ITRF2020 plate motion models (`#4235 <https://github.com/OSGeo/PROJ/issues/4235>`_)
+
+Bug fixes
+---------
+
+  * Fix ``imoll`` and ``imoll_o`` zone calculations to correct inverse transformations near the "seams" (`#4159 <https://github.com/OSGeo/PROJ/issues/4159>`_)
+
+  * Fix wrong EPSG conversion code for UTM south (`#4166 <https://github.com/OSGeo/PROJ/issues/4166>`_)
+
+  * ``BoundCRS::exportToPROJ()``: handle case of NADCON conus grid (`#4168 <https://github.com/OSGeo/PROJ/issues/4168>`_)
+
+  * ``+proj=gridshift``: make projected grids work with `PROJ_NETWORK=ON` (`#4174 <https://github.com/OSGeo/PROJ/issues/4174>`_)
+
+  * :cpp:func:`createOperations()`: make it work when transforming from/to a CompoundCRS with a DerivedVerticalCRS with ellipsoidal height (`#4176 <https://github.com/OSGeo/PROJ/issues/4176>`_)
+
+  * Support default context as ``nullptr`` in ``CoordinateTransformer`` (`#4177 <https://github.com/OSGeo/PROJ/issues/4177>`_)
+
+  * :program:`cct`: emit error message and return error code when not being able to open input file (`#4200 <https://github.com/OSGeo/PROJ/issues/4200>`_)
+
+  * Fix race condition surrounding DB reopening during fork (`#4231 <https://github.com/OSGeo/PROJ/issues/4231>`_)
+
+  * :cpp:func:`GeographicBoundingBox::create()`: accept degenerate bounding box reduced to a point or a line (`#4237 <https://github.com/OSGeo/PROJ/issues/4237>`_)
+
+  * :cpp:func:`createOperation()`: tune so that ITRF2000->ETRS89 does not return only NKG grid based operations but also time-dependent Helmert (`#4244 <https://github.com/OSGeo/PROJ/issues/4244>`_)
+
 9.4.1 Release Notes
 ++++++++++++++++++++
 *June 1st 2024*
@@ -66,7 +136,7 @@ Updates
 
 * ``+proj=gridshift``: enhance to support grids referenced in projected CRS, and with easting_offset/northing_offset corrections (`#4038 <https://github.com/OSGeo/PROJ/issues/4038>`_)
 
-* Tune concatenated operation instanciation, reference CR2005 geoid for Czechia and add (disabled by default) records for Czechia S-JTSK/05 based transformations (`#4044 <https://github.com/OSGeo/PROJ/issues/4044>`_)
+* Tune concatenated operation instantiation, reference CR2005 geoid for Czechia and add (disabled by default) records for Czechia S-JTSK/05 based transformations (`#4044 <https://github.com/OSGeo/PROJ/issues/4044>`_)
 
 * Database: update to EPSG v11.004 (`#4062 <https://github.com/OSGeo/PROJ/issues/4062>`_)
 
@@ -223,7 +293,7 @@ Bug fixes
 
 * ESRI WKT: improve roundtrip of name and definition for UPS WGS84 CRS (`#3720 <https://github.com/OSGeo/PROJ/issues/3720>`_)
 
-* CRS instanciation from PROJ.4 string: set 'Unknown based on XXXX ellipsoid' datum name when instanciating from known +a, +rf (`#3727 <https://github.com/OSGeo/PROJ/issues/3727>`_)
+* CRS instantiation from PROJ.4 string: set 'Unknown based on XXXX ellipsoid' datum name when instantiating from known +a, +rf (`#3727 <https://github.com/OSGeo/PROJ/issues/3727>`_)
 
 * :program:`cs2cs` / ``proj_create_crs_to_crs()``: fix regression with geocentric CRS (`#3729 <https://github.com/OSGeo/PROJ/issues/3729>`_)
 
@@ -259,14 +329,14 @@ Updates
   * Added option ``ONLY_BEST=YES`` (`#3535 <https://github.com/OSGeo/PROJ/issues/3535>`_)
 
     When enabled only use the best possible transformation between two CRS's can be
-    instantiated. If the best possible transfomations can't be instantiated it will
+    instantiated. If the best possible transformations can't be instantiated it will
     fail instead of opting for the next best transformation.
 
     With ``ONLY_BEST=YES`` a transformation will fail if a needed grid is unavailable.
 
     The option can be toggled in ``proj.ini`` and with ``--only-best`` in :program:`cs2cs`.
 
-  * Implement 'Similarity transformation' (EPSG:9621) and import related tranformations from EPSG (`#3578 <https://github.com/OSGeo/PROJ/issues/3578>`_)
+  * Implement 'Similarity transformation' (EPSG:9621) and import related transformations from EPSG (`#3578 <https://github.com/OSGeo/PROJ/issues/3578>`_)
 
   * Optimise transformations between GDA94, GDA2020 and WGS84 (`#3621 <https://github.com/OSGeo/PROJ/issues/3621>`_)
 
@@ -367,7 +437,7 @@ Bug fixes
 
 * ProjectedCRS::identify(): Relax trust in id/authority in definition to identify (`#3532 <https://github.com/OSGeo/PROJ/issues/3532>`_)
 
-* Fix instantion of http://www.opengis.net/def/crs/IAU/2015/xxx URNs (`#3569 <https://github.com/OSGeo/PROJ/issues/3569>`_)
+* Fix instantiation of http://www.opengis.net/def/crs/IAU/2015/xxx URNs (`#3569 <https://github.com/OSGeo/PROJ/issues/3569>`_)
 
 * Fix :c:func:`proj_normalize_for_visualization()` on a transformation with ``FORCE_OVERb=YES`` (`#3570 <https://github.com/OSGeo/PROJ/issues/3570>`_)
 
@@ -508,7 +578,7 @@ Updates
 
   * Make it possible to determine which grid files were actually used during a transformation (`#3180 <https://github.com/OSGeo/PROJ/issues/3180>`_)
 
-  * Transformation: no longer do vertical trasnformation when doing compound CRS to 2D CRS / add --3d to cs2cs (`#3119 <https://github.com/OSGeo/PROJ/issues/3119>`_)
+  * Transformation: no longer do vertical transformation when doing compound CRS to 2D CRS / add --3d to cs2cs (`#3119 <https://github.com/OSGeo/PROJ/issues/3119>`_)
 
   * Deprecate PROJ4 CMake name (`#3094 <https://github.com/OSGeo/PROJ/issues/3094>`_)
 
@@ -852,7 +922,7 @@ Bug Fixes
 * ortho: remove useless and invalid log trace (`#2777 <https://github.com/OSGeo/PROJ/issues/2777>`_)
 
 * CMake: remove external nlohmann_json from INTERFACE_LINK_LIBRARIES target (`#2781 <https://github.com/OSGeo/PROJ/issues/2781>`_)
-* reateOperations(): fix SourceTargetCRSExtentUse::NONE mode (`#2783 <https://github.com/OSGeo/PROJ/issues/2783>`_)
+* createOperations(): fix SourceTargetCRSExtentUse::NONE mode (`#2783 <https://github.com/OSGeo/PROJ/issues/2783>`_)
 
 * GeoTIFF grid reading: perf improvements (`#2788 <https://github.com/OSGeo/PROJ/issues/2788>`_)
 
@@ -1201,7 +1271,7 @@ Bug fixes
 
 * Avoid core dumps when copying contexts in certain scenarios (`#2324 <https://github.com/OSGeo/PROJ/issues/2324>`_)
 
-* :c:func:`proj_trans()`: reset errno before attemptying a retry with a new
+* :c:func:`proj_trans()`: reset errno before attempting a retry with a new
   coordinate operation (`#2353 <https://github.com/OSGeo/PROJ/issues/2353>`_)
 
 * PROJJSON schema corrected to allow prime meridians values with
@@ -1248,7 +1318,7 @@ Bug fixes
 
 * Helmert 2D: do not require a useless +convention= parameter (`#2305 <https://github.com/OSGeo/PROJ/issues/2305>`_)
 
-* Fix a few spelling errors ("vgridshit" vs. "vgridshift") (`#2307 <https://github.com/OSGeo/PROJ/issues/2307>`_)
+* Fix a few spelling errors related to "vgridshift" (`#2307 <https://github.com/OSGeo/PROJ/issues/2307>`_)
 
 * Fix ability to identify EPSG:2154 as a candidate for 'RGF93_Lambert_93' (`#2316 <https://github.com/OSGeo/PROJ/issues/2316>`_)
 
@@ -1598,7 +1668,7 @@ Updates
   WKT2_2018 to WKT2_2019 to reflect the proper name of the standard (`#1585 <https://github.com/OSGeo/PROJ/issues/1585>`_)
 
 * Improvements in transformations from/to WGS 84 (Gxxxx) realizations and
-  vertical <--> geog transormations (`#1608 <https://github.com/OSGeo/PROJ/issues/1608>`_)
+  vertical <--> geog transformations (`#1608 <https://github.com/OSGeo/PROJ/issues/1608>`_)
 
 * Update to version 1.50 of the geodesic library (`#1629 <https://github.com/OSGeo/PROJ/issues/1629>`_)
 
@@ -2015,7 +2085,7 @@ transformation capabilities to a more complete library supporting coordinate
 transformations and coordinate reference systems.
 
 As a foundation for other enhancements, PROJ now includes a C++ implementation
-of the modelisation propopsed by the ISO-19111:2019 standard / OGC Abstract
+of the modelisation proposed by the ISO-19111:2019 standard / OGC Abstract
 Specification Topic 2: "Referencing By Coordinates", for geodetic reference
 frames (datums), coordinate reference systems and coordinate operations.
 Construction and query of those geodetic objects is available through a new C++
@@ -2035,7 +2105,7 @@ IOGP EPSG dataset (v9.6.0 release), the IGNF (French national mapping agency)
 geodetic registry and the ESRI projection engine database. PROJ is now the
 reference software in the "OSGeo C stack" for this CRS and coordinate operation
 database, whereas previously this functionality was spread over PROJ, GDAL and
-libgeotiff, and used CSV or other adhoc text-based formats.
+libgeotiff, and used CSV or other ad hoc text-based formats.
 
 Late-binding coordinate operation capabilities, that takes  metadata such as
 area of use and accuracy into account, has been added. This can avoid in a

@@ -9667,7 +9667,7 @@ proj_get_geoid_models_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CoordinateMetadata object
+/** \brief Instantiate a CoordinateMetadata object
  *
  * @since 9.4
  */
