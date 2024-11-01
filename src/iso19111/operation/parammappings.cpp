@@ -589,7 +589,7 @@ static const ParamMapping *const paramsGeographicTopocentric[] = {
     &paramLatTopoOrigin, &paramLongTopoOrigin, &paramHeightTopoOriginWithH0,
     nullptr};
 
-static const MethodMapping projectionMethodMappings[] = {
+static const MethodMapping gProjectionMethodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
      "Transverse_Mercator", "tmerc", nullptr, paramsNatOriginScaleK},
 
@@ -945,9 +945,9 @@ static const MethodMapping projectionMethodMappings[] = {
 };
 
 const MethodMapping *getProjectionMethodMappings(size_t &nElts) {
-    nElts =
-        sizeof(projectionMethodMappings) / sizeof(projectionMethodMappings[0]);
-    return projectionMethodMappings;
+    nElts = sizeof(gProjectionMethodMappings) /
+            sizeof(gProjectionMethodMappings[0]);
+    return gProjectionMethodMappings;
 }
 
 #define METHOD_NAME_CODE(method)                                               \
@@ -1050,7 +1050,7 @@ const MethodNameCode *getMethodNameCodes(size_t &nElts) {
 #define PARAM_NAME_CODE(method)                                                \
     { EPSG_NAME_PARAMETER_##method, EPSG_CODE_PARAMETER_##method }
 
-const struct ParamNameCode paramNameCodes[] = {
+const struct ParamNameCode gParamNameCodes[] = {
     // Parameters of projection methods
     PARAM_NAME_CODE(COLATITUDE_CONE_AXIS),
     PARAM_NAME_CODE(LATITUDE_OF_NATURAL_ORIGIN),
@@ -1131,8 +1131,8 @@ const struct ParamNameCode paramNameCodes[] = {
 };
 
 const ParamNameCode *getParamNameCodes(size_t &nElts) {
-    nElts = sizeof(paramNameCodes) / sizeof(paramNameCodes[0]);
-    return paramNameCodes;
+    nElts = sizeof(gParamNameCodes) / sizeof(gParamNameCodes[0]);
+    return gParamNameCodes;
 }
 
 static const ParamMapping paramUnitConversionScalar = {
@@ -1475,7 +1475,7 @@ static const ParamMapping *const paramsPoleRotationNetCDFCFConvention[] = {
     &paramGridNorthPoleLatitudeNetCDF, &paramGridNorthPoleLongitudeNetCDF,
     &paramNorthPoleGridLongitudeNetCDF, nullptr};
 
-static const MethodMapping otherMethodMappings[] = {
+static const MethodMapping gOtherMethodMappings[] = {
     {EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT,
      EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT, nullptr, nullptr, nullptr,
      paramsChangeVerticalUnit},
@@ -1641,14 +1641,14 @@ static const MethodMapping otherMethodMappings[] = {
 };
 
 const MethodMapping *getOtherMethodMappings(size_t &nElts) {
-    nElts = sizeof(otherMethodMappings) / sizeof(otherMethodMappings[0]);
-    return otherMethodMappings;
+    nElts = sizeof(gOtherMethodMappings) / sizeof(gOtherMethodMappings[0]);
+    return gOtherMethodMappings;
 }
 
 // ---------------------------------------------------------------------------
 
 PROJ_NO_INLINE const MethodMapping *getMapping(int epsg_code) noexcept {
-    for (const auto &mapping : projectionMethodMappings) {
+    for (const auto &mapping : gProjectionMethodMappings) {
         if (mapping.epsg_code == epsg_code) {
             return &mapping;
         }
@@ -1661,7 +1661,7 @@ PROJ_NO_INLINE const MethodMapping *getMapping(int epsg_code) noexcept {
 const MethodMapping *getMapping(const OperationMethod *method) noexcept {
     const std::string &name(method->nameStr());
     const int epsg_code = method->getEPSGCode();
-    for (const auto &mapping : projectionMethodMappings) {
+    for (const auto &mapping : gProjectionMethodMappings) {
         if ((epsg_code != 0 && mapping.epsg_code == epsg_code) ||
             metadata::Identifier::isEquivalentName(mapping.wkt2_name,
                                                    name.c_str())) {
@@ -1679,7 +1679,7 @@ const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) noexcept {
         return getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR);
     }
 
-    for (const auto &mapping : projectionMethodMappings) {
+    for (const auto &mapping : gProjectionMethodMappings) {
         if (mapping.wkt1_name && metadata::Identifier::isEquivalentName(
                                      mapping.wkt1_name, wkt1_name.c_str())) {
             return &mapping;
@@ -1690,13 +1690,13 @@ const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) noexcept {
 // ---------------------------------------------------------------------------
 
 const MethodMapping *getMapping(const char *wkt2_name) noexcept {
-    for (const auto &mapping : projectionMethodMappings) {
+    for (const auto &mapping : gProjectionMethodMappings) {
         if (metadata::Identifier::isEquivalentName(mapping.wkt2_name,
                                                    wkt2_name)) {
             return &mapping;
         }
     }
-    for (const auto &mapping : otherMethodMappings) {
+    for (const auto &mapping : gOtherMethodMappings) {
         if (metadata::Identifier::isEquivalentName(mapping.wkt2_name,
                                                    wkt2_name)) {
             return &mapping;
@@ -1710,7 +1710,7 @@ const MethodMapping *getMapping(const char *wkt2_name) noexcept {
 std::vector<const MethodMapping *>
 getMappingsFromPROJName(const std::string &projName) {
     std::vector<const MethodMapping *> res;
-    for (const auto &mapping : projectionMethodMappings) {
+    for (const auto &mapping : gProjectionMethodMappings) {
         if (mapping.proj_name_main && projName == mapping.proj_name_main) {
             res.push_back(&mapping);
         }
