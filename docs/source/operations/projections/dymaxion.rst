@@ -5,10 +5,10 @@ Dymaxion Fuller
 ********************************************************************************
 
 The Dymaxion Fuller map projection is a icosahedron polyhedral projection that intends
-to lay out most of continental landmasses unto a flat surface with as few land cuts
-as possible while minimizing scale and angular distorsion.
+to lay down continental landmasses into a contiguous map with minimal scale and angular
+distorsion while having as few land interruptions as possible.
 In comparison to the Snyder's Icosahedral Equal Area, this projection relies on a specific way 
-to orient and cut the icosahedron so that most interruptions lie in the ocean. The projection
+to orient and cut the icosahedron so that most interruptions lie within the ocean. The projection
 was first invented by Buckminster Fuller in 1943 using a cubostahedron as basis.
 The idea to use an icosahedron came later in 1954, and it wasn't until 1978 that the projection 
 was formally mathematically defined :cite:`Gray1995`.
@@ -36,6 +36,11 @@ was formally mathematically defined :cite:`Gray1995`.
    :alt:   Dymaxion Fuller
 
    proj-string: ``+proj=dymaxion``
+
+.. note::
+   The output dymaxion map applied to the whole globe has an extent of roughly
+   :math:`[0, 0, 17404000, 36844000]` in meters. Although the dymaxion map has no
+   true up or down, the choice was made to lay it out vertically, from Antartica to Australia.
 
 
 Parameters
