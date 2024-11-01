@@ -202,6 +202,7 @@ static PJ_LP airocean_inverse(PJ_XY xy, PJ *P) {
 
     if (face_id == 23) {
         // Point lies outside icosahedron net faces
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
         return lp;
