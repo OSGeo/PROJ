@@ -4,12 +4,12 @@
 Airocean
 ********************************************************************************
 
-The Airocean map projection is based on the Dymaxion Fuller projection, which is a icosahedron polyhedral projection that intends
+The Airocean map projection is a icosahedron polyhedral projection that intends
 to lay down continental landmasses into a contiguous map with minimal scale and angular
 distorsion while preserving land surfaces from (most) interruptions.
 In comparison to the Snyder's Icosahedral Equal Area, this projection relies on a specific way 
 to orient and cut the icosahedron so that most interruptions lie within the ocean. The projection
-was first invented by Buckminster Fuller in 1943 using a cubostahedron as basis.
+was first invented by Buckminster Fuller in 1943 using a cuboctahedron as basis.
 The idea to use an icosahedron came later in 1954, and it wasn't until 1978 that the projection 
 was formally mathematically defined :cite:`Gray1995`.
 
