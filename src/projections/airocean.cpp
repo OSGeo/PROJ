@@ -131,6 +131,7 @@ inline PJ_XYZ cartesian_to_ico(const PJ_XYZ *p, unsigned char face_id) {
     const PJ_XYZ * center = &ico_centers[face_id];
     const PJ_XYZ * normal = &ico_normals[face_id];
 
+    // cppcheck-suppress unreadVariable
     double a = 1.0 - (
         center->x * normal->x +
         center->y * normal->y +
