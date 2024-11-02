@@ -23,6 +23,7 @@ struct vgridshiftData {
     double forward_multiplier = 0;
     ListOfVGrids grids{};
     bool defer_grid_opening = false;
+    int error_code_in_defer_grid_opening = 0;
 };
 } // anonymous namespace
 
@@ -60,9 +61,11 @@ static PJ_XYZ pj_vgridshift_forward_3d(PJ_LPZ lpz, PJ *P) {
         Q->defer_grid_opening = false;
         Q->grids = pj_vgrid_init(P, "grids");
         deal_with_vertcon_gtx_hack(P);
-        if (proj_errno(P)) {
-            return proj_coord_error().xyz;
-        }
+        Q->error_code_in_defer_grid_opening = proj_errno(P);
+    }
+    if (Q->error_code_in_defer_grid_opening) {
+        proj_errno_set(P, Q->error_code_in_defer_grid_opening);
+        return proj_coord_error().xyz;
     }
 
     if (!Q->grids.empty()) {
@@ -84,9 +87,11 @@ static PJ_LPZ pj_vgridshift_reverse_3d(PJ_XYZ xyz, PJ *P) {
         Q->defer_grid_opening = false;
         Q->grids = pj_vgrid_init(P, "grids");
         deal_with_vertcon_gtx_hack(P);
-        if (proj_errno(P)) {
-            return proj_coord_error().lpz;
-        }
+        Q->error_code_in_defer_grid_opening = proj_errno(P);
+    }
+    if (Q->error_code_in_defer_grid_opening) {
+        proj_errno_set(P, Q->error_code_in_defer_grid_opening);
+        return proj_coord_error().lpz;
     }
 
     if (!Q->grids.empty()) {
