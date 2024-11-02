@@ -4,6 +4,8 @@
 Airocean
 ********************************************************************************
 
+.. versionadded:: 9.6.0
+
 The Airocean map projection is a icosahedron polyhedral projection that intends
 to lay down continental landmasses into a contiguous map with minimal scale and angular
 distortion while preserving land surfaces from (most) interruptions.
