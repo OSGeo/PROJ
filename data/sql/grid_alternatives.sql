@@ -123,6 +123,9 @@ VALUES
 -- de_lgvl_saarland - LVGL Saarland
 ('SeTa2016.gsb','de_lgvl_saarland_SeTa2016.tif','SeTa2016.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/de_lgvl_saarland_SeTa2016.tif',1,1,NULL),
 
+-- de_tlbg_thueringen - TLBG Thüringen
+('de_tlbg_thuringen_NTv2gridTH.gsb','de_tlbg_thueringen_NTv2gridTH.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/de_tlbg_thueringen_NTv2gridTH.tif',1,1,NULL),
+
 -- dk_sdfe - Danish Agency for Data Supply and Efficiency
 -- Denmark mainland
 ('dnn.gtx','dk_sdfe_dnn.tif','dnn.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/dk_sdfe_dnn.tif',1,1,NULL),
