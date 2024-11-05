@@ -884,6 +884,10 @@ INSERT INTO "compound_crs" VALUES('EPSG','10660','HD72 / EOV + EOMA 1980 height'
 INSERT INTO "usage" VALUES('EPSG','21616','compound_crs','EPSG','10660','EPSG','1119','EPSG','1056');
 INSERT INTO "compound_crs" VALUES('EPSG','10679','ETRS89 + BSCD2000 depth',NULL,'EPSG','4258','EPSG','10678',0);
 INSERT INTO "usage" VALUES('EPSG','21815','compound_crs','EPSG','10679','EPSG','4779','EPSG','1291');
+INSERT INTO "compound_crs" VALUES('EPSG','10686','Slovenia 1996 + SVS2000 height',NULL,'EPSG','4765','EPSG','5779',0);
+INSERT INTO "usage" VALUES('EPSG','21887','compound_crs','EPSG','10686','EPSG','3307','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','10687','Slovenia 1996 / Slovene National Grid + SVS2000 height',NULL,'EPSG','3794','EPSG','5779',0);
+INSERT INTO "usage" VALUES('EPSG','21888','compound_crs','EPSG','10687','EPSG','3307','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);
