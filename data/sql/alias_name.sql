@@ -8009,3 +8009,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5685','DB_REF2016 / 3-de
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5682','DB_REF2016 / 3-degree Gauss-Kruger zone 2 (E-N)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10671','RGM23 (lat-lon)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10670','RGM23 (lat-lon)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5779','SVS2000/Trst ','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8690','SVS2010/Koper','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10686','D96 + SVS2000/Trst','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10687','D96/TM + SVS2000/Trst','EPSG');
