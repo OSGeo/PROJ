@@ -227,6 +227,10 @@ VALUES
 ('NOT-YET-IN-GRID-TRANSFORMATION-fr_ign_ggpf08-Tikehau.tif','fr_ign_ggpf08-Tikehau.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggpf08-Tikehau.tif',1,1,NULL),
 ('NOT-YET-IN-GRID-TRANSFORMATION-fr_ign_ggpf08-Tubuai.tif','fr_ign_ggpf08-Tubuai.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggpf08-Tubuai.tif',1,1,NULL),
 
+-- hu_bme - Budapest University of Technology and Economics
+('hu_bme_geoid2014.tif','hu_bme_geoid2014.tif', 'geoid_eht2014.gtx', 'GTiff', 'geoid_like', 0, NULL, 'https://cdn.proj.org/hu_bme_geoid2014.tif', 1, 1, NULL),
+('hu_bme_hd72corr.gsb', 'hu_bme_hd72corr.tif', 'etrs2eov_notowgs.gsb', 'GTiff', 'hgridshift', 0, NULL, 'https://cdn.proj.org/hu_bme_hd72corr.tif', 1, 1, NULL),
+
 -- is_lmi - National Land Survey of Iceland
 ('Icegeoid_ISN2004.gri','is_lmi_Icegeoid_ISN2004.tif','Icegeoid_ISN2004.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/is_lmi_Icegeoid_ISN2004.tif',1,1,NULL),
 ('Icegeoid_ISN93.gri','is_lmi_Icegeoid_ISN93.tif','Icegeoid_ISN93.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/is_lmi_Icegeoid_ISN93.tif',1,1,NULL),
