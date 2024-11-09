@@ -13689,12 +13689,37 @@ TEST(io, createFromUserInput) {
         auto obj = createFromUserInput("NGF IGN69 height", dbContext);
         auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
         EXPECT_TRUE(crs != nullptr);
-        EXPECT_EQ(crs->nameStr(), "NGF-IGN69 height");
+        EXPECT_EQ(crs->nameStr(), "NGF-IGN69 height"); // EPSG:5720
+    }
+
+    {
+        // Approximate match of a vertical CRS
+        auto obj = createFromUserInput("NGF IGN1969", dbContext);
+        auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+        EXPECT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(), "NGF-IGN 1969"); // IGNF69:IGN69
+    }
+
+    {
+        // Approximate match of a vertical CRS
+        auto obj = createFromUserInput("NGF IGN69", dbContext);
+        auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+        EXPECT_TRUE(crs != nullptr);
+        // Questionnable if we shouldn't match EPSG:5720 instead
+        EXPECT_EQ(crs->nameStr(), "NGF-IGN 1969"); // IGNF69:IGN69
     }
 
     {
         // Exact match on each piece of the compound CRS
         auto obj = createFromUserInput("WGS 84 + EGM96 height", dbContext);
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(), "WGS 84 + EGM96 height");
+    }
+
+    {
+        // Approximate match
+        auto obj = createFromUserInput("WGS 84 + EGM96", dbContext);
         auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         EXPECT_EQ(crs->nameStr(), "WGS 84 + EGM96 height");
@@ -13783,6 +13808,18 @@ TEST(io, createFromUserInput) {
         ASSERT_TRUE(coordinateMetadata != nullptr);
         EXPECT_EQ(coordinateMetadata->coordinateEpochAsDecimalYear(), 2025.1);
     }
+
+    {
+        // Approximate match involving using "north" instead of N and lacking
+        // "zone"
+        auto obj = createFromUserInput("WGS 84 UTM 31 north", dbContext);
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(), "WGS 84 / UTM zone 31N");
+    }
+
+    // Should not match WGS84 or IGM85
+    EXPECT_THROW(createFromUserInput("WGS 85", dbContext), ParsingException);
 }
 
 // ---------------------------------------------------------------------------

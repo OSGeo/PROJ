@@ -397,11 +397,15 @@ class PROJ_GCC_DLL Identifier : public util::BaseObject,
 
     PROJ_DLL static bool isEquivalentName(const char *a,
                                           const char *b) noexcept;
+    PROJ_DLL static bool
+    isEquivalentName(const char *a, const char *b,
+                     bool biggerDifferencesAllowed) noexcept;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL static std::string
-        canonicalizeName(const std::string &str);
+        canonicalizeName(const std::string &str,
+                         bool biggerDifferencesAllowed = true);
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)

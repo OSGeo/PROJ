@@ -370,6 +370,7 @@ static BaseObjectNNPtr buildObject(
                         limitResultCount);
                     if (res.size() == 1) {
                         obj = res.front().as_nullable();
+                        break;
                     } else {
                         for (const auto &l_obj : res) {
                             if (Identifier::isEquivalentName(
