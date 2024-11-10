@@ -18,7 +18,7 @@ was formally mathematically defined :cite:`Gray1995`.
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Polyhedral, equal area                                   |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical                           |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
