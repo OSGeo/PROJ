@@ -88,7 +88,7 @@ namespace { // anonymous namespace
             memcpy(this->air_ico_trans, base_air_ico_trans, sizeof(double[23][4][4]));
         }
 
-        void mult4x4(const double m1[4][4], const double m2[4][4], double res[4][4]) {
+        static void mult4x4(const double m1[4][4], const double m2[4][4], double res[4][4]) {
             for (unsigned char i = 0; i < 4; ++i)
                 for (unsigned char j = 0; j < 4; ++j)
                     res[i][j] = (m1[i][0] * m2[0][j])
