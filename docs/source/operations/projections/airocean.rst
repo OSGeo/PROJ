@@ -50,6 +50,12 @@ Parameters
 
 .. note:: All parameters are optional for the projection.
 
+.. option:: +orient=<string>
+
+    Can be set to either ``vertical`` or ``horizontal``.
+
+    *Defaults to vertical*
+
 .. include:: ../options/lon_0.rst
 
 .. include:: ../options/R.rst
