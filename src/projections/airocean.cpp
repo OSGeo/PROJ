@@ -17,9 +17,9 @@ PROJ_HEAD(airocean, "Airocean") "\n\tMisc, Sph&Ell";
 
 namespace { // anonymous namespace
     struct pj_face {
-        const PJ_XYZ p1;
-        const PJ_XYZ p2;
-        const PJ_XYZ p3;
+        PJ_XYZ p1;
+        PJ_XYZ p2;
+        PJ_XYZ p3;
     };
 }
 
@@ -88,7 +88,7 @@ namespace { // anonymous namespace
             memcpy(this->air_ico_trans, base_air_ico_trans, sizeof(double[23][4][4]));
         }
 
-        static void mult4x4(const double m1[4][4], const double m2[4][4], double res[4][4]) {
+        static void mat_mult(const double m1[4][4], const double m2[4][4], double res[4][4]) {
             for (unsigned char i = 0; i < 4; ++i)
                 for (unsigned char j = 0; j < 4; ++j)
                     res[i][j] = (m1[i][0] * m2[0][j])
@@ -97,13 +97,24 @@ namespace { // anonymous namespace
                             + (m1[i][3] * m2[3][j]);
         }
 
+        static PJ_XYZ vec_mult(const double m[4][4], const PJ_XYZ * v) {
+            double x = m[0][0] * v->x + m[0][1] * v->y + m[0][2] * v->z + m[0][3];
+            double y = m[1][0] * v->x + m[1][1] * v->y + m[1][2] * v->z + m[1][3];
+            double z = m[2][0] * v->x + m[2][1] * v->y + m[2][2] * v->z + m[2][3];
+            return {x, y, z};
+        }
+
         void transform(const double m[4][4], const double inv_m[4][4]) {
             for (unsigned char i=0; i < 23; i++) {
-                mult4x4(m, base_ico_air_trans[i], this->ico_air_trans[i]);
+                mat_mult(m, base_ico_air_trans[i], this->ico_air_trans[i]);
+                mat_mult(base_air_ico_trans[i], inv_m, this->air_ico_trans[i]);
+                this->airocean_faces[i] = {
+                    vec_mult(m, &base_airocean_faces[i].p1),
+                    vec_mult(m, &base_airocean_faces[i].p2),
+                    vec_mult(m, &base_airocean_faces[i].p3),
+                };
             }
-            for (unsigned char i=0; i < 23; i++) {
-                mult4x4(base_air_ico_trans[i], inv_m, this->air_ico_trans[i]);
-            }
+
         }
 
 
