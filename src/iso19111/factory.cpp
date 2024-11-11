@@ -878,6 +878,7 @@ struct DatabaseContext::Private {
 
     lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
         CACHE_SIZE};
+    lru11::Cache<std::string, std::string> cacheNames_{CACHE_SIZE};
 
     std::vector<VersionedAuthName> cacheAuthNameWithVersion_{};
 
@@ -1043,6 +1044,7 @@ void DatabaseContext::Private::clearCaches() {
     cacheGridInfo_.clear();
     cacheAllowedAuthorities_.clear();
     cacheAliasNames_.clear();
+    cacheNames_.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -3712,14 +3714,23 @@ std::list<std::string> DatabaseContext::getAliases(
 std::string DatabaseContext::getName(const std::string &tableName,
                                      const std::string &authName,
                                      const std::string &code) const {
+    std::string res;
+    const auto key(tableName + authName + code);
+    if (d->cacheNames_.tryGet(key, res)) {
+        return res;
+    }
+
     std::string sql("SELECT name FROM \"");
     sql += replaceAll(tableName, "\"", "\"\"");
     sql += "\" WHERE auth_name = ? AND code = ?";
-    auto res = d->run(sql, {authName, code});
-    if (res.empty()) {
-        return std::string();
+    auto sqlRes = d->run(sql, {authName, code});
+    if (sqlRes.empty()) {
+        res.clear();
+    } else {
+        res = sqlRes.front()[0];
     }
-    return res.front()[0];
+    d->cacheNames_.insert(key, res);
+    return res;
 }
 
 // ---------------------------------------------------------------------------
