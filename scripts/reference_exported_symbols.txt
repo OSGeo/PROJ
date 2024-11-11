@@ -523,6 +523,7 @@ osgeo::proj::metadata::Identifier::description() const
 osgeo::proj::metadata::Identifier::~Identifier()
 osgeo::proj::metadata::Identifier::Identifier(osgeo::proj::metadata::Identifier const&)
 osgeo::proj::metadata::Identifier::isEquivalentName(char const*, char const*)
+osgeo::proj::metadata::Identifier::isEquivalentName(char const*, char const*, bool)
 osgeo::proj::metadata::Identifier::uri() const
 osgeo::proj::metadata::Identifier::version() const
 osgeo::proj::metadata::PositionalAccuracy::create(std::string const&)

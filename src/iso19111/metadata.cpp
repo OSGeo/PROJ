@@ -1215,6 +1215,14 @@ static bool isIgnoredChar(char ch) {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+static char lower(char ch) {
+    return ch >= 'A' && ch <= 'Z' ? ch - 'A' + 'a' : ch;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 static const struct utf8_to_lower {
     const char *utf8;
     char ascii;
@@ -1249,21 +1257,94 @@ static const struct utf8_to_lower *get_ascii_replacement(const char *c_str) {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-std::string Identifier::canonicalizeName(const std::string &str) {
+
+/** Checks if needle is a substring of c_str.
+ *
+ * e.g matchesLowerCase("JavaScript", "java") returns true
+ */
+static bool matchesLowerCase(const char *c_str, const char *needle) {
+    size_t i = 0;
+    for (; c_str[i] && needle[i]; ++i) {
+        if (lower(c_str[i]) != lower(needle[i])) {
+            return false;
+        }
+    }
+    return needle[i] == 0;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+static inline bool isdigit(char ch) { return ch >= '0' && ch <= '9'; }
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+std::string Identifier::canonicalizeName(const std::string &str,
+                                         bool biggerDifferencesAllowed) {
     std::string res;
     const char *c_str = str.c_str();
     for (size_t i = 0; c_str[i] != 0; ++i) {
-        const auto ch = c_str[i];
+        const auto ch = lower(c_str[i]);
         if (ch == ' ' && c_str[i + 1] == '+' && c_str[i + 2] == ' ') {
             i += 2;
             continue;
         }
-        if (ch == '1' && !res.empty() &&
-            !(res.back() >= '0' && res.back() <= '9') && c_str[i + 1] == '9' &&
-            c_str[i + 2] >= '0' && c_str[i + 2] <= '9') {
+
+        // Canonicalize "19dd" (where d is a digit) as "dd"
+        if (ch == '1' && !res.empty() && !isdigit(res.back()) &&
+            c_str[i + 1] == '9' && isdigit(c_str[i + 2]) &&
+            isdigit(c_str[i + 3])) {
             ++i;
             continue;
         }
+
+        if (biggerDifferencesAllowed) {
+
+            const auto skipSubstring = [](char l_ch, const char *l_str,
+                                          size_t &idx, const char *substr) {
+                if (l_ch == substr[0] && idx > 0 &&
+                    isIgnoredChar(l_str[idx - 1]) &&
+                    matchesLowerCase(l_str + idx, substr)) {
+                    idx += strlen(substr) - 1;
+                    return true;
+                }
+                return false;
+            };
+
+            // Skip "zone" or "height" if preceding character is a space
+            if (skipSubstring(ch, c_str, i, "zone") ||
+                skipSubstring(ch, c_str, i, "height")) {
+                continue;
+            }
+
+            // Replace a substring by its first character if preceding character
+            // is a space or a digit
+            const auto replaceByFirstChar = [](char l_ch, const char *l_str,
+                                               size_t &idx, const char *substr,
+                                               std::string &l_res) {
+                if (l_ch == substr[0] && idx > 0 &&
+                    (isIgnoredChar(l_str[idx - 1]) ||
+                     isdigit(l_str[idx - 1])) &&
+                    matchesLowerCase(l_str + idx, substr)) {
+                    l_res.push_back(l_ch);
+                    idx += strlen(substr) - 1;
+                    return true;
+                }
+                return false;
+            };
+
+            // Replace "north" or "south" by its first character if preceding
+            // character is a space or a digit
+            if (replaceByFirstChar(ch, c_str, i, "north", res) ||
+                replaceByFirstChar(ch, c_str, i, "south", res)) {
+                continue;
+            }
+        }
+
         if (static_cast<unsigned char>(ch) > 127) {
             const auto *replacement = get_ascii_replacement(c_str + i);
             if (replacement) {
@@ -1273,7 +1354,7 @@ std::string Identifier::canonicalizeName(const std::string &str) {
             }
         }
         if (!isIgnoredChar(ch)) {
-            res.push_back(static_cast<char>(::tolower(ch)));
+            res.push_back(ch);
         }
     }
     return res;
@@ -1286,15 +1367,22 @@ std::string Identifier::canonicalizeName(const std::string &str) {
  *
  * Two names are equivalent by removing any space, underscore, dash, slash,
  * { or } character from them, and comparing in a case insensitive way.
+ *
+ * @param a first string
+ * @param b second string
+ * @param biggerDifferencesAllowed if true, "height" and "zone" words are
+ * ignored, and "north" is shortened as "n" and "south" as "n".
+ * @since 9.6
  */
-bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
+bool Identifier::isEquivalentName(const char *a, const char *b,
+                                  bool biggerDifferencesAllowed) noexcept {
     size_t i = 0;
     size_t j = 0;
     char lastValidA = 0;
     char lastValidB = 0;
     while (a[i] != 0 || b[j] != 0) {
-        char aCh = a[i];
-        char bCh = b[j];
+        char aCh = lower(a[i]);
+        char bCh = lower(b[j]);
         if (aCh == ' ' && a[i + 1] == '+' && a[i + 2] == ' ' && a[i + 3] != 0) {
             i += 3;
             continue;
@@ -1311,18 +1399,69 @@ bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
             ++j;
             continue;
         }
-        if (aCh == '1' && !(lastValidA >= '0' && lastValidA <= '9') &&
-            a[i + 1] == '9' && a[i + 2] >= '0' && a[i + 2] <= '9') {
+
+        // Canonicalize "19dd" (where d is a digit) as "dd"
+        if (aCh == '1' && !isdigit(lastValidA) && a[i + 1] == '9' &&
+            isdigit(a[i + 2]) && isdigit(a[i + 3])) {
             i += 2;
             lastValidA = '9';
             continue;
         }
-        if (bCh == '1' && !(lastValidB >= '0' && lastValidB <= '9') &&
-            b[j + 1] == '9' && b[j + 2] >= '0' && b[j + 2] <= '9') {
+        if (bCh == '1' && !isdigit(lastValidB) && b[j + 1] == '9' &&
+            isdigit(b[j + 2]) && isdigit(b[j + 3])) {
             j += 2;
             lastValidB = '9';
             continue;
         }
+
+        if (biggerDifferencesAllowed) {
+            // Skip a substring if preceding character is a space
+            const auto skipSubString = [](char ch, const char *str, size_t &idx,
+                                          const char *substr) {
+                if (ch == substr[0] && idx > 0 && isIgnoredChar(str[idx - 1]) &&
+                    matchesLowerCase(str + idx, substr)) {
+                    idx += strlen(substr);
+                    return true;
+                }
+                return false;
+            };
+
+            bool skip = false;
+            if (skipSubString(aCh, a, i, "zone"))
+                skip = true;
+            if (skipSubString(bCh, b, j, "zone"))
+                skip = true;
+            if (skip)
+                continue;
+
+            if (skipSubString(aCh, a, i, "height"))
+                skip = true;
+            if (skipSubString(bCh, b, j, "height"))
+                skip = true;
+            if (skip)
+                continue;
+
+            // Replace a substring by its first character if preceding character
+            // is a space or a digit
+            const auto replaceByFirstChar = [](char ch, const char *str,
+                                               size_t &idx,
+                                               const char *substr) {
+                if (ch == substr[0] && idx > 0 &&
+                    (isIgnoredChar(str[idx - 1]) || isdigit(str[idx - 1])) &&
+                    matchesLowerCase(str + idx, substr)) {
+                    idx += strlen(substr) - 1;
+                    return true;
+                }
+                return false;
+            };
+
+            if (!replaceByFirstChar(aCh, a, i, "north"))
+                replaceByFirstChar(aCh, a, i, "south");
+
+            if (!replaceByFirstChar(bCh, b, j, "north"))
+                replaceByFirstChar(bCh, b, j, "south");
+        }
+
         if (static_cast<unsigned char>(aCh) > 127) {
             const auto *replacement = get_ascii_replacement(a + i);
             if (replacement) {
@@ -1337,8 +1476,7 @@ bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
                 j += strlen(replacement->utf8) - 1;
             }
         }
-        if ((aCh == 0 && bCh != 0) || (aCh != 0 && bCh == 0) ||
-            ::tolower(aCh) != ::tolower(bCh)) {
+        if (aCh != bCh) {
             return false;
         }
         lastValidA = aCh;
@@ -1349,6 +1487,17 @@ bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
             ++j;
     }
     return true;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns whether two names are considered equivalent.
+ *
+ * Two names are equivalent by removing any space, underscore, dash, slash,
+ * { or } character from them, and comparing in a case insensitive way.
+ */
+bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
+    return isEquivalentName(a, b, /* biggerDifferencesAllowed = */ true);
 }
 
 // ---------------------------------------------------------------------------

@@ -9171,7 +9171,8 @@ AuthorityFactory::createObjectsFromNameEx(
         auto sqlRes = d->run(sql, params);
         bool isFirst = true;
         bool firstIsDeprecated = false;
-        bool foundExactMatch = false;
+        size_t countExactMatch = 0;
+        size_t countExactMatchOnAlias = 0;
         std::size_t hashCodeFirstMatch = 0;
         for (const auto &row : sqlRes) {
             const auto &name = row[3];
@@ -9262,9 +9263,12 @@ AuthorityFactory::createObjectsFromNameEx(
                 throw std::runtime_error("Unsupported table_name");
             };
             const auto obj = getObject(table_name, code);
-            if (metadata::Identifier::canonicalizeName(obj->nameStr()) ==
-                canonicalizedSearchedName) {
-                foundExactMatch = true;
+            if (metadata::Identifier::isEquivalentName(
+                    obj->nameStr().c_str(), searchedName.c_str(), false)) {
+                countExactMatch++;
+            } else if (metadata::Identifier::isEquivalentName(
+                           name.c_str(), searchedName.c_str(), false)) {
+                countExactMatchOnAlias++;
             }
 
             const auto objPtr = obj.get();
@@ -9280,14 +9284,21 @@ AuthorityFactory::createObjectsFromNameEx(
             }
         }
 
-        // If we found a name that is an exact match, and all objects have the
-        // same type, and we are not in approximate mode, only keep the
-        // object(s) with the exact name match.
-        if (foundExactMatch && hashCodeFirstMatch != 0 && !approximateMatch) {
+        // If we found several objects that are an exact match, and all objects
+        // have the same type, and we are not in approximate mode, only keep the
+        // objects with the exact name match.
+        if ((countExactMatch + countExactMatchOnAlias) >= 1 &&
+            hashCodeFirstMatch != 0 && !approximateMatch) {
             std::list<PairObjectName> resTmp;
+            bool biggerDifferencesAllowed = (countExactMatch == 0);
             for (const auto &pair : res) {
-                if (metadata::Identifier::canonicalizeName(
-                        pair.first->nameStr()) == canonicalizedSearchedName) {
+                if (metadata::Identifier::isEquivalentName(
+                        pair.first->nameStr().c_str(), searchedName.c_str(),
+                        biggerDifferencesAllowed) ||
+                    (countExactMatch == 0 &&
+                     metadata::Identifier::isEquivalentName(
+                         pair.second.c_str(), searchedName.c_str(),
+                         biggerDifferencesAllowed))) {
                     resTmp.emplace_back(pair);
                 }
             }
@@ -9298,6 +9309,7 @@ AuthorityFactory::createObjectsFromNameEx(
     auto sortLambda = [](const PairObjectName &a, const PairObjectName &b) {
         const auto &aName = a.first->nameStr();
         const auto &bName = b.first->nameStr();
+
         if (aName.size() < bName.size()) {
             return true;
         }
