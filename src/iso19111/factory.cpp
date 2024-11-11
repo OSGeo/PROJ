@@ -847,6 +847,7 @@ struct DatabaseContext::Private {
     std::string databasePath_{};
     std::vector<std::string> auxiliaryDatabasePaths_{};
     std::shared_ptr<SQLiteHandle> sqlite_handle_{};
+    unsigned int queryCounter_ = 0;
     std::map<std::string, sqlite3_stmt *> mapSqlToStatement_{};
     PJ_CONTEXT *pjCtxt_ = nullptr;
     int recLevel_ = 0;
@@ -1417,6 +1418,8 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
         mapSqlToStatement_.insert(
             std::pair<std::string, sqlite3_stmt *>(sql, stmt));
     }
+
+    ++queryCounter_;
 
     return l_handle->run(stmt, sql, parameters, useMaxFloatPrecision);
 }
@@ -3486,6 +3489,15 @@ bool DatabaseContext::lookForGridInfo(
     info.found = ret;
     d->cache(key, info);
     return ret;
+}
+
+// ---------------------------------------------------------------------------
+
+/** Returns the number of queries to the database since the creation of this
+ * instance.
+ */
+unsigned int DatabaseContext::getQueryCounter() const {
+    return d->queryCounter_;
 }
 
 // ---------------------------------------------------------------------------
