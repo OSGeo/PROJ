@@ -684,10 +684,12 @@ TEST(operation, geogCRS_to_geogCRS_compatible_unknown_celestial_body) {
     auto srcCRS = nn_dynamic_pointer_cast<CRS>(objSrc);
     auto objDst =
         createFromUserInput("+proj=longlat +R=10001 +type=crs", dbContext);
+    const auto queryCounterBefore = dbContext->getQueryCounter();
     auto dstCRS = nn_dynamic_pointer_cast<CRS>(objDst);
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         NN_NO_CHECK(srcCRS), NN_NO_CHECK(dstCRS), ctxt);
+    EXPECT_EQ(dbContext->getQueryCounter(), queryCounterBefore);
     ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=noop");
@@ -3063,11 +3065,13 @@ TEST(operation, createOperation_boundCRS_identified_by_datum) {
               "+ellps=clrk80ign +step +proj=pop +v_3 +step +proj=utm +zone=32 "
               "+ellps=clrk80ign");
 
-    auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    const auto queryCounterBefore = dbContext->getQueryCounter();
     auto list = CoordinateOperationFactory::create()->createOperations(
         NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest), ctxt);
+    EXPECT_EQ(dbContext->getQueryCounter(), queryCounterBefore);
     ASSERT_EQ(list.size(), 1U);
     EXPECT_TRUE(list[0]->isEquivalentTo(op.get()));
 }
@@ -3092,6 +3096,17 @@ TEST(operation, boundCRS_of_clrk_66_geogCRS_to_nad83_geogCRS) {
               "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +proj=hgridshift +grids=ntv1_can.dat,conus "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    const auto queryCounterBefore = dbContext->getQueryCounter();
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest), ctxt);
+    // Two extra queries related to the conus grid
+    EXPECT_EQ(dbContext->getQueryCounter(), queryCounterBefore + 2);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_TRUE(list[0]->isEquivalentTo(op.get()));
 }
 
 // ---------------------------------------------------------------------------

@@ -1557,8 +1557,13 @@ bool GeodeticReferenceFrame::_isEquivalentTo(
 bool GeodeticReferenceFrame::hasEquivalentNameToUsingAlias(
     const IdentifiedObject *other,
     const io::DatabaseContextPtr &dbContext) const {
-    if (nameStr() == "unknown" || other->nameStr() == "unknown") {
+    if (nameStr() == other->nameStr() || nameStr() == "unknown" ||
+        other->nameStr() == "unknown") {
         return true;
+    }
+    if (ci_starts_with(nameStr(), UNKNOWN_BASED_ON) ||
+        ci_starts_with(other->nameStr(), UNKNOWN_BASED_ON)) {
+        return false;
     }
     if (dbContext) {
         if (!identifiers().empty()) {
