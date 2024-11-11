@@ -10888,7 +10888,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
             } else {
                 return GeodeticReferenceFrame::create(
                     PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                      "Unknown based on " +
+                                      UNKNOWN_BASED_ON +
                                           grf->ellipsoid()->nameStr() +
                                           " ellipsoid" + datumNameSuffix),
                     grf->ellipsoid(), grf->anchorDefinition(), pm);
@@ -10961,18 +10961,18 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
             if (ellpsStr == "WGS84") {
                 return GeodeticReferenceFrame::create(
                     grfMap.set(IdentifiedObject::NAME_KEY,
-                               title.empty()
-                                   ? "Unknown based on WGS 84 ellipsoid" +
-                                         datumNameSuffix
-                                   : title),
+                               title.empty() ? std::string(UNKNOWN_BASED_ON)
+                                                   .append("WGS 84 ellipsoid")
+                                                   .append(datumNameSuffix)
+                                             : title),
                     Ellipsoid::WGS84, optionalEmptyString, pm);
             } else if (ellpsStr == "GRS80") {
                 return GeodeticReferenceFrame::create(
                     grfMap.set(IdentifiedObject::NAME_KEY,
-                               title.empty()
-                                   ? "Unknown based on GRS 1980 ellipsoid" +
-                                         datumNameSuffix
-                                   : title),
+                               title.empty() ? std::string(UNKNOWN_BASED_ON)
+                                                   .append("GRS 1980 ellipsoid")
+                                                   .append(datumNameSuffix)
+                                             : title),
                     Ellipsoid::GRS1980, optionalEmptyString, pm);
             } else {
                 auto proj_ellps = proj_list_ellps();
@@ -11006,9 +11006,10 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
                         return GeodeticReferenceFrame::create(
                             grfMap.set(IdentifiedObject::NAME_KEY,
                                        title.empty()
-                                           ? std::string("Unknown based on ") +
-                                                 proj_ellps[i].name +
-                                                 " ellipsoid" + datumNameSuffix
+                                           ? std::string(UNKNOWN_BASED_ON)
+                                                 .append(proj_ellps[i].name)
+                                                 .append(" ellipsoid")
+                                                 .append(datumNameSuffix)
                                            : title),
                             NN_NO_CHECK(ellipsoid), optionalEmptyString, pm);
                     }
@@ -11041,7 +11042,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
         std::string datumName(title);
         if (title.empty()) {
             if (ellipsoid->nameStr() != "unknown") {
-                datumName = "Unknown based on ";
+                datumName = UNKNOWN_BASED_ON;
                 datumName += ellipsoid->nameStr();
                 datumName += " ellipsoid";
             } else {

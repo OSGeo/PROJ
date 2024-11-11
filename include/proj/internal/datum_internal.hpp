@@ -42,4 +42,6 @@ constexpr const char *NON_EARTH_BODY = "Non-Earth body";
 // which is a 0.59% relative difference.
 constexpr double REL_ERROR_FOR_SAME_CELESTIAL_BODY = 0.007;
 
+constexpr const char *UNKNOWN_BASED_ON = "Unknown based on ";
+
 #endif // DATUM_INTERNAL_HH_INCLUDED
