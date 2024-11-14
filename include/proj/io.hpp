@@ -913,6 +913,8 @@ class PROJ_GCC_DLL DatabaseContext {
                                   bool &directDownload, bool &openLicense,
                                   bool &gridAvailable) const;
 
+    PROJ_DLL unsigned int getQueryCounter() const;
+
     PROJ_INTERNAL std::string
     getProjGridName(const std::string &oldProjGridName);
 

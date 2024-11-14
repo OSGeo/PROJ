@@ -847,6 +847,7 @@ struct DatabaseContext::Private {
     std::string databasePath_{};
     std::vector<std::string> auxiliaryDatabasePaths_{};
     std::shared_ptr<SQLiteHandle> sqlite_handle_{};
+    unsigned int queryCounter_ = 0;
     std::map<std::string, sqlite3_stmt *> mapSqlToStatement_{};
     PJ_CONTEXT *pjCtxt_ = nullptr;
     int recLevel_ = 0;
@@ -877,6 +878,7 @@ struct DatabaseContext::Private {
 
     lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
         CACHE_SIZE};
+    lru11::Cache<std::string, std::string> cacheNames_{CACHE_SIZE};
 
     std::vector<VersionedAuthName> cacheAuthNameWithVersion_{};
 
@@ -1042,6 +1044,7 @@ void DatabaseContext::Private::clearCaches() {
     cacheGridInfo_.clear();
     cacheAllowedAuthorities_.clear();
     cacheAliasNames_.clear();
+    cacheNames_.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -1417,6 +1420,8 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
         mapSqlToStatement_.insert(
             std::pair<std::string, sqlite3_stmt *>(sql, stmt));
     }
+
+    ++queryCounter_;
 
     return l_handle->run(stmt, sql, parameters, useMaxFloatPrecision);
 }
@@ -3490,6 +3495,15 @@ bool DatabaseContext::lookForGridInfo(
 
 // ---------------------------------------------------------------------------
 
+/** Returns the number of queries to the database since the creation of this
+ * instance.
+ */
+unsigned int DatabaseContext::getQueryCounter() const {
+    return d->queryCounter_;
+}
+
+// ---------------------------------------------------------------------------
+
 bool DatabaseContext::isKnownName(const std::string &name,
                                   const std::string &tableName) const {
     std::string sql("SELECT 1 FROM \"");
@@ -3700,14 +3714,23 @@ std::list<std::string> DatabaseContext::getAliases(
 std::string DatabaseContext::getName(const std::string &tableName,
                                      const std::string &authName,
                                      const std::string &code) const {
+    std::string res;
+    const auto key(tableName + authName + code);
+    if (d->cacheNames_.tryGet(key, res)) {
+        return res;
+    }
+
     std::string sql("SELECT name FROM \"");
     sql += replaceAll(tableName, "\"", "\"\"");
     sql += "\" WHERE auth_name = ? AND code = ?";
-    auto res = d->run(sql, {authName, code});
-    if (res.empty()) {
-        return std::string();
+    auto sqlRes = d->run(sql, {authName, code});
+    if (sqlRes.empty()) {
+        res.clear();
+    } else {
+        res = sqlRes.front()[0];
     }
-    return res.front()[0];
+    d->cacheNames_.insert(key, res);
+    return res;
 }
 
 // ---------------------------------------------------------------------------

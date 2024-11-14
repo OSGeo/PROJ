@@ -1720,7 +1720,7 @@ void CoordinateOperationFactory::Private::buildCRSIds(
             }
         }
     }
-    if (ids.empty()) {
+    if (ids.empty() && !ci_equal(crs->nameStr(), "unknown")) {
         std::vector<io::AuthorityFactory::ObjectType> allowedObjects;
         auto geogCRS = dynamic_cast<const crs::GeographicCRS *>(crs.get());
         if (geogCRS) {
@@ -1809,6 +1809,13 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirect(
     Private::Context &context, bool &resNonEmptyBeforeFiltering) {
     const auto &authFactory = context.context->getAuthorityFactory();
     assert(authFactory);
+
+    if ((sourceCRS->identifiers().empty() &&
+         ci_equal(sourceCRS->nameStr(), "unknown")) ||
+        (targetCRS->identifiers().empty() &&
+         ci_equal(targetCRS->nameStr(), "unknown"))) {
+        return {};
+    }
 
 #ifdef TRACE_CREATE_OPERATIONS
     ENTER_BLOCK("findOpsInRegistryDirect(" + objectAsStr(sourceCRS.get()) +
@@ -1991,21 +1998,39 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
                 objectAsStr(sourceCRS.get()) + " --> " +
                 objectAsStr(targetCRS.get()) + ")");
 #endif
-
     const auto &authFactory = context.context->getAuthorityFactory();
     assert(authFactory);
+
+    const auto dbContext = authFactory->databaseContext().as_nullable();
+    const auto geodSrc = dynamic_cast<crs::GeodeticCRS *>(sourceCRS.get());
+    const auto datumSrc =
+        geodSrc ? geodSrc->datumNonNull(dbContext).as_nullable() : nullptr;
+    // Optimization: check if the source/target CRS have no chance to match
+    // a database entry
+    if (datumSrc && datumSrc->identifiers().empty() &&
+        (ci_equal(datumSrc->nameStr(), "unknown") ||
+         ci_starts_with(datumSrc->nameStr(), UNKNOWN_BASED_ON)))
+        return {};
+    if (!geodSrc && dynamic_cast<crs::BoundCRS *>(sourceCRS.get()))
+        return {};
+    const auto geodDst = dynamic_cast<crs::GeodeticCRS *>(targetCRS.get());
+    const auto datumDst =
+        geodDst ? geodDst->datumNonNull(dbContext).as_nullable() : nullptr;
+    if (datumDst && datumDst->identifiers().empty() &&
+        (ci_equal(datumDst->nameStr(), "unknown") ||
+         ci_starts_with(datumDst->nameStr(), UNKNOWN_BASED_ON)))
+        return {};
+    if (!geodDst && dynamic_cast<crs::BoundCRS *>(targetCRS.get()))
+        return {};
 
     std::list<std::pair<std::string, std::string>> sourceIds;
     buildCRSIds(sourceCRS, context, sourceIds);
     if (sourceIds.empty()) {
-        auto geodSrc = dynamic_cast<crs::GeodeticCRS *>(sourceCRS.get());
-        auto geodDst = dynamic_cast<crs::GeodeticCRS *>(targetCRS.get());
         if (geodSrc) {
             const std::string originatingAuthSrc =
                 geodSrc->getOriginatingAuthName();
-            const auto dbContext = authFactory->databaseContext().as_nullable();
             const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
-                authFactory, geodSrc, geodSrc->datumNonNull(dbContext)));
+                authFactory, geodSrc, NN_NO_CHECK(datumSrc)));
             std::vector<CoordinateOperationNNPtr> res;
             for (const auto &candidateSrcGeod : candidatesSrcGeod) {
                 // Restrict to using only objects that have the same authority
@@ -2022,11 +2047,11 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
                      (dynamic_cast<crs::GeographicCRS *>(
                           candidateSrcGeod.get()) != nullptr))) {
                     if (geodDst) {
-                        const auto srcDatum =
+                        const auto candidateSrcDatum =
                             candidateSrcGeod->datumNonNull(dbContext);
-                        const auto dstDatum = geodDst->datumNonNull(dbContext);
-                        const bool sameGeodeticDatum =
-                            isSameGeodeticDatum(srcDatum, dstDatum, dbContext);
+                        const bool sameGeodeticDatum = isSameGeodeticDatum(
+                            candidateSrcDatum, NN_NO_CHECK(datumDst),
+                            dbContext);
                         if (sameGeodeticDatum) {
                             continue;
                         }
@@ -3078,10 +3103,21 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     const auto &authFactory = context.context->getAuthorityFactory();
     const auto &dbContext = authFactory->databaseContext();
 
-    const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
-        authFactory, geodSrc, geodSrc->datumNonNull(dbContext.as_nullable())));
-    const auto candidatesDstGeod(findCandidateGeodCRSForDatum(
-        authFactory, geodDst, geodDst->datumNonNull(dbContext.as_nullable())));
+    const auto srcDatum = geodSrc->datumNonNull(dbContext.as_nullable());
+    if (srcDatum->identifiers().empty() &&
+        (ci_equal(srcDatum->nameStr(), "unknown") ||
+         ci_starts_with(srcDatum->nameStr(), UNKNOWN_BASED_ON)))
+        return;
+    const auto dstDatum = geodDst->datumNonNull(dbContext.as_nullable());
+    if (dstDatum->identifiers().empty() &&
+        (ci_equal(dstDatum->nameStr(), "unknown") ||
+         ci_starts_with(dstDatum->nameStr(), UNKNOWN_BASED_ON)))
+        return;
+
+    const auto candidatesSrcGeod(
+        findCandidateGeodCRSForDatum(authFactory, geodSrc, srcDatum));
+    const auto candidatesDstGeod(
+        findCandidateGeodCRSForDatum(authFactory, geodDst, dstDatum));
 
     const bool sourceAndTargetAre3D =
         geodSrc->coordinateSystem()->axisList().size() == 3 &&
