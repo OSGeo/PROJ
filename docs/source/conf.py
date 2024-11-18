@@ -149,6 +149,9 @@ html_favicon = "../images/favicon.png"
 # Add any paths that contain custom static files (such as style sheets)
 html_static_path = ["_static"]
 
+# For robots.txt
+html_extra_path = ["extra_path"]
+
 html_css_files = [
     "theme_overrides.css",  # override wide tables in RTD theme
 ]
