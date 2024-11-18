@@ -74,3 +74,4 @@ automatically fetch resource files that are not present locally from the CDN.
 ## Citing PROJ in publications
 
 See [CITATION](CITATION)
+
