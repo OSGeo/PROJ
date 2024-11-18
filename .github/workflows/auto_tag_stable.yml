@@ -43,5 +43,5 @@ jobs:
           git add .dummy-file
           # Do that so that stable doesn't have the same git sha as the stable branch, so ReadTheDocs triggers a build
           git commit -a -m "Add .dummy-file"
-          git tag -f stable
+          git checkout -b stable
           git push -f origin stable
