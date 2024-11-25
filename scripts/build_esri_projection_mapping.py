@@ -34,6 +34,15 @@ import yaml
 # Map methods from pe_list_projection.csv to WKT2 naming
 
 config_str = """
+
+- Equidistant_Cylindrical:
+    WKT2_name: EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+        - Standard_Parallel_1: EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL
+
 - Plate_Carree:
     WKT2_name:
         - EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL
@@ -44,14 +53,6 @@ config_str = """
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
     Cond:
         - EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL = 0
-
-- Equidistant_Cylindrical:
-    WKT2_name: EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL
-    Params:
-        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
-        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
-        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
-        - Standard_Parallel_1: EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL
 
 - Miller_Cylindrical:
     WKT2_name: PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL
@@ -167,18 +168,6 @@ config_str = """
         - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
-
-- Behrmann:
-    WKT2_name: EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA
-    Params:
-        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
-        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
-        - Central_Meridian:
-            Name: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
-            Default: 0.0
-        - Standard_Parallel_1:
-            Name: EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL
-            Default: 30.0
 
 - Winkel_I:
     WKT2_name: "Winkel I"
@@ -364,6 +353,20 @@ config_str = """
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
         - Standard_Parallel_1: EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL
+
+- Behrmann:
+    WKT2_name: EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian:
+            Name: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+            Default: 0.0
+        - Standard_Parallel_1:
+            Name: EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL
+            Default: 30.0
+    Cond:
+        - EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL = 30
 
 # No example in pe_list_projection.csv: temptative mapping !
 - Hotine_Oblique_Mercator_Two_Point_Center:

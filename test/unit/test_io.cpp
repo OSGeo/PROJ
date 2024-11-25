@@ -7791,10 +7791,15 @@ static const struct {
 TEST(wkt_parse, esri_projcs) {
 
     for (const auto &projDef : esriProjDefs) {
-        std::string wkt("PROJCS[\"unnamed\",GEOGCS[\"unnamed\","
-                        "DATUM[\"unnamed\",SPHEROID[\"unnamed\","
-                        "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
-                        "UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"");
+        std::string wkt("PROJCS[\"");
+        if (strcmp(projDef.esriProjectionName, "Plate_Carree") == 0)
+            wkt += "Plate Carree";
+        else
+            wkt += "unnamed";
+        wkt += "\",GEOGCS[\"unnamed\","
+               "DATUM[\"unnamed\",SPHEROID[\"unnamed\","
+               "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+               "UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"";
         wkt += projDef.esriProjectionName;
         wkt += "\"],";
         for (const auto &param : projDef.esriParams) {
@@ -7829,6 +7834,28 @@ TEST(wkt_parse, esri_projcs) {
                 EXPECT_EQ(measure.value(), projDef.wkt2Params[i].second) << wkt;
             }
         }
+
+        auto wkt1Esri = crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI).get());
+        const char *expectedESRIProjectionName = projDef.esriProjectionName;
+        // Not totally sure about the below exceptions. They just capture the
+        // current state of things.
+        if (strcmp(projDef.esriProjectionName, "Transverse_Mercator_Complex") ==
+            0)
+            expectedESRIProjectionName = "Transverse_Mercator";
+        else if (strcmp(projDef.esriProjectionName,
+                        "Equidistant_Cylindrical_Ellipsoidal") == 0)
+            expectedESRIProjectionName = "Equidistant_Cylindrical";
+        else if (strcmp(projDef.esriProjectionName, "Mercator_Variant_C") == 0)
+            expectedESRIProjectionName = "Mercator";
+        else if (strcmp(projDef.esriProjectionName, "Gnomonic_Ellipsoidal") ==
+                 0)
+            expectedESRIProjectionName = "Gnomonic";
+        EXPECT_TRUE(wkt1Esri.find(std::string("PROJECTION[\"")
+                                      .append(expectedESRIProjectionName)) !=
+                    std::string::npos)
+            << "input: " << wkt << std::endl
+            << "output: " << wkt1Esri;
     }
 }
 
