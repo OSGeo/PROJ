@@ -4533,7 +4533,6 @@ void ProjectedCRS::_exportToJSON(
 
     writer->AddObjKey("base_crs");
     formatter->setAllowIDInImmediateChild();
-    formatter->setOmitTypeInImmediateChild();
     baseCRS()->_exportToJSON(formatter);
 
     writer->AddObjKey("conversion");
