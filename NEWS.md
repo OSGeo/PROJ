@@ -1,5 +1,37 @@
 # PROJ Release Notes
 
+## 9.5.1
+
+### Updates
+
+* Database: update to EPSG v11.021 (#4254, #4275, #4297)
+
+* Speed-up dramatically proj.db build time (#4280)
+
+* Database: ingest deprecated ESRI names to be able to better import old WKT ESRI (#4282)
+
+### Bug fixes
+
+* `findsOpsInRegistryWithIntermediate()`: Restrict to using known source/target CRS that have the same originating authority (#4252)
+
+* `isTimeDependent()`: Do not mark "static" Coordinate Frame helmert transformations as time-dependent, only time-dependent ones (#4259)
+
+* Fix clang-19 "warning: empty paragraph passed to '@throw' command [-Wdocumentation]" (#4263)
+
+* WKT importer: fix `nullptr` dereference on invalid `VERTCS[]` (#4266)
+
+* Fixed `sql_filelist.cmake` relative path issue (#4296)
+
+* Fail consistently on network error and grid transformations (#4302)
+
+* Fix `-Wshadow` warnings between `parammappings.cpp` and `singleoperation.cpp` with unity builds (#4304)
+
+* Removed leftover setting of `CMAKE_REQUIRED_FLAGS` (#4322)
+
+* WKT1 ESRI export: fix wrong mapping of Lambert Cylindrical Equal Area to Behrmann (#4328)
+
+* Numerous documentation fixes (#4248, #4267, #4291, #4293)
+
 ## 9.5.0
 
 ### Updates
