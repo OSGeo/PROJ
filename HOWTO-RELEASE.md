@@ -216,6 +216,11 @@ version numbers in the files.
 - CMakeLists.txt:       Update proj_version()
 - docs/source/conf.py:  Update version number
 
+Given the update of the PROJ_VERSION number, the expected MD5SUM of the database
+SQL files will be modified. Run a build, and update the PROJ_DB_SQL_EXPECTED_MD5
+variable in data/CMakeLists.txt with the value that CMake will provide in an
+error message.
+
 *Commit changes. Either to master or maintenance branch depending on the nature
 of the release.*
 
