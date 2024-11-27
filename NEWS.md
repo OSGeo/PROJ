@@ -4,7 +4,7 @@
 
 ### Updates
 
-* Database: update to EPSG v11.021 (#4254, #4275, #4297)
+* Database: update to EPSG v11.022 (#4254, #4275, #4297, #4312)
 
 * Speed-up dramatically proj.db build time (#4280)
 
