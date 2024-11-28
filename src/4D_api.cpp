@@ -1416,8 +1416,18 @@ static int target_crs_lon_lat_order(PJ_CONTEXT *transformer_ctx,
                                "Unable to retrieve target CRS");
         return -1;
     }
-    PJ *coord_system_pj =
-        proj_crs_get_coordinate_system(transformer_ctx, target_crs);
+    PJ *coord_system_pj;
+    if (proj_get_type(target_crs) == PJ_TYPE_COMPOUND_CRS) {
+        PJ *horiz_crs = proj_crs_get_sub_crs(transformer_ctx, target_crs, 0);
+        if (!horiz_crs)
+            return -1;
+        coord_system_pj =
+            proj_crs_get_coordinate_system(transformer_ctx, horiz_crs);
+        proj_destroy(horiz_crs);
+    } else {
+        coord_system_pj =
+            proj_crs_get_coordinate_system(transformer_ctx, target_crs);
+    }
     proj_destroy(target_crs);
     if (coord_system_pj == nullptr) {
         proj_context_log_debug(transformer_ctx,
