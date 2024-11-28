@@ -12244,25 +12244,35 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     if (d->steps_.size() == 1 && d->steps_[0].isInit &&
         !d->steps_[0].inverted) {
 
+        auto ctx = d->ctx_ ? d->ctx_ : proj_context_create();
+        if (!ctx) {
+            throw ParsingException("out of memory");
+        }
+        PJContextHolder contextHolder(ctx, ctx != d->ctx_);
+
         // Those used to come from a text init file
         // We only support them in compatibility mode
         const std::string &stepName = d->steps_[0].name;
         if (ci_starts_with(stepName, "epsg:") ||
             ci_starts_with(stepName, "IGNF:")) {
 
-            /* We create a new context so as to avoid messing up with the */
-            /* errorno of the main context, when trying to find the likely */
-            /* missing epsg file */
-            auto ctx = proj_context_create();
-            if (!ctx) {
-                throw ParsingException("out of memory");
-            }
-            PJContextHolder contextHolder(ctx, true);
-            if (d->ctx_) {
-                ctx->set_search_paths(d->ctx_->search_paths);
-                ctx->file_finder = d->ctx_->file_finder;
-                ctx->file_finder_user_data = d->ctx_->file_finder_user_data;
-            }
+            struct BackupContextErrno {
+                PJ_CONTEXT *m_ctxt = nullptr;
+                int m_last_errno = 0;
+
+                explicit BackupContextErrno(PJ_CONTEXT *ctxtIn)
+                    : m_ctxt(ctxtIn), m_last_errno(m_ctxt->last_errno) {
+                    m_ctxt->debug_level = PJ_LOG_ERROR;
+                }
+
+                ~BackupContextErrno() { m_ctxt->last_errno = m_last_errno; }
+
+                BackupContextErrno(const BackupContextErrno &) = delete;
+                BackupContextErrno &
+                operator=(const BackupContextErrno &) = delete;
+            };
+
+            BackupContextErrno backupContextErrno(ctx);
 
             bool usePROJ4InitRules = d->usePROJ4InitRules_;
             if (!usePROJ4InitRules) {
@@ -12368,12 +12378,6 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 }
             }
         }
-
-        auto ctx = d->ctx_ ? d->ctx_ : proj_context_create();
-        if (!ctx) {
-            throw ParsingException("out of memory");
-        }
-        PJContextHolder contextHolder(ctx, ctx != d->ctx_);
 
         paralist *init = pj_mkparam(("init=" + d->steps_[0].name).c_str());
         if (!init) {
