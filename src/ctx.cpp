@@ -129,6 +129,7 @@ projCppContext *pj_ctx::get_cpp_context() {
 /************************************************************************/
 
 void pj_ctx::set_search_paths(const std::vector<std::string> &search_paths_in) {
+    lookupedFiles.clear();
     search_paths = search_paths_in;
     delete[] c_compat_paths;
     c_compat_paths = nullptr;

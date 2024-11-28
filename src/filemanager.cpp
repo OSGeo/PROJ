@@ -1779,6 +1779,16 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
  */
 int pj_find_file(PJ_CONTEXT *ctx, const char *short_filename,
                  char *out_full_filename, size_t out_full_filename_size) {
+    const auto iter = ctx->lookupedFiles.find(short_filename);
+    if (iter != ctx->lookupedFiles.end()) {
+        if (iter->second.empty()) {
+            out_full_filename[0] = 0;
+            return 0;
+        }
+        snprintf(out_full_filename, out_full_filename_size, "%s",
+                 iter->second.c_str());
+        return 1;
+    }
     const bool old_network_enabled =
         proj_context_is_network_enabled(ctx) != FALSE;
     if (old_network_enabled)
@@ -1787,6 +1797,11 @@ int pj_find_file(PJ_CONTEXT *ctx, const char *short_filename,
         ctx, short_filename, out_full_filename, out_full_filename_size);
     if (old_network_enabled)
         proj_context_set_enable_network(ctx, true);
+    if (file) {
+        ctx->lookupedFiles[short_filename] = out_full_filename;
+    } else {
+        ctx->lookupedFiles[short_filename] = std::string();
+    }
     return file != nullptr;
 }
 

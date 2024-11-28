@@ -806,6 +806,9 @@ struct pj_ctx {
                                void *user_data) = nullptr;
     void *file_finder_user_data = nullptr;
 
+    // Cache result of pj_find_file()
+    std::map<std::string, std::string> lookupedFiles{};
+
     bool defer_grid_opening = false; // set transiently by pj_obj_create()
 
     projFileApiCallbackAndData fileApi{};
