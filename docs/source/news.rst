@@ -3,6 +3,42 @@
 News
 ###############################################################################
 
+9.5.1. Release Notes
+++++++++++++++++++++
+*December 1st 2024*
+
+Updates
+-------
+
+* Database: update to EPSG v11.022 (`#4254 <https://github.com/OSGeo/PROJ/issues/4254>`_, `#4275 <https://github.com/OSGeo/PROJ/issues/4275>`_, `#4297 <https://github.com/OSGeo/PROJ/issues/4297>`_, `#4312 <https://github.com/OSGeo/PROJ/issues/4312>`_)
+
+* Speed-up dramatically proj.db build time (`#4280 <https://github.com/OSGeo/PROJ/issues/4280>`_)
+
+* Database: ingest deprecated ESRI names to be able to better import old WKT ESRI (`#4282 <https://github.com/OSGeo/PROJ/issues/4282>`_)
+
+Bug fixes
+---------
+
+* `findsOpsInRegistryWithIntermediate()`: Restrict to using known source/target CRS that have the same originating authority (`#4252 <https://github.com/OSGeo/PROJ/issues/4252>`_)
+
+* `isTimeDependent()`: Do not mark "static" Coordinate Frame helmert transformations as time-dependent, only time-dependent ones (`#4259 <https://github.com/OSGeo/PROJ/issues/4259>`_)
+
+* Fix clang-19 "warning: empty paragraph passed to '@throw' command [-Wdocumentation]" (`#4263 <https://github.com/OSGeo/PROJ/issues/4263>`_)
+
+* WKT importer: fix ``nullptr`` dereference on invalid ``VERTCS[]`` (`#4266 <https://github.com/OSGeo/PROJ/issues/4266>`_)
+
+* Fixed ``sql_filelist.cmake`` relative path issue (`#4296 <https://github.com/OSGeo/PROJ/issues/4296>`_)
+
+* Fail consistently on network error and grid transformations (`#4302 <https://github.com/OSGeo/PROJ/issues/4302>`_)
+
+* Fix ``-Wshadow`` warnings between ``parammappings.cpp`` and ``singleoperation.cpp`` with unity builds (`#4304 <https://github.com/OSGeo/PROJ/issues/4304>`_)
+
+* Removed leftover setting of ``CMAKE_REQUIRED_FLAGS`` (`#4322 <https://github.com/OSGeo/PROJ/issues/4322>`_)
+
+* WKT1 ESRI export: fix wrong mapping of Lambert Cylindrical Equal Area to Behrmann (`#4328 <https://github.com/OSGeo/PROJ/issues/4328>`_)
+
+* Numerous documentation fixes (`#4248 <https://github.com/OSGeo/PROJ/issues/4248>`_, `#4267 <https://github.com/OSGeo/PROJ/issues/4267>`_, `#4291 <https://github.com/OSGeo/PROJ/issues/4291>`_, `#4293 <https://github.com/OSGeo/PROJ/issues/4293>`_)
+
 9.5.0 Release Notes
 ++++++++++++++++++++
 *Septemper 15th 2024*
