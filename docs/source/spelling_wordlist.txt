@@ -999,6 +999,7 @@ vsicurl
 vto
 vunits
 Warmerdam
+Wdocumentation
 webmerc
 Webmercator
 webpage
