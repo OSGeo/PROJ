@@ -6515,6 +6515,27 @@ TEST_F(CApi, proj_trans_bounds__south_pole) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_trans_bounds_to_compound_crs) {
+    // EPSG:9707 = "WGS 84 + EGM96 height"
+    auto P = proj_create_crs_to_crs(m_ctxt, "EPSG:4326", "EPSG:9707", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success =
+        proj_trans_bounds(m_ctxt, P, PJ_FWD, 40, -120, 64, -80, &out_left,
+                          &out_bottom, &out_right, &out_top, 0);
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, 40, 1e-8);
+    EXPECT_NEAR(out_bottom, -120, 1e-8);
+    EXPECT_NEAR(out_right, 64, 1e-8);
+    EXPECT_NEAR(out_top, -80, 1e-8);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_crs_has_point_motion_operation) {
     auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
     ASSERT_NE(ctxt, nullptr);
