@@ -11,6 +11,7 @@ Free and open source software
 - `GRASS GIS <http://grass.osgeo.org>`_  A raster/vector open source GIS
 - `libgeotiff <https://github.com/OSGeo/libgeotiff>`_ Library to read/write GeoTIFF keys
 - `MapServer <http://mapserver.org/index.html>`_  A popular web mapping application
+- `Mergin Maps <https://merginmaps.com/>`_ Field data collection app built on top of QGIS with cloud sync
 - `PDAL <https://pdal.io>`_  Point Cloud Data Abstraction Library
 - `PostGIS <http://www.postgis.net>`_ Spatial database extender for PostgreSQL
 - `QGIS <http://www.qgis.org>`_ A cross platform desktop GIS.
