@@ -504,6 +504,7 @@ The EPSG:32631 / "WGS 84 / UTM zone 31N" projected CRS can be expressed as
         "type": "ProjectedCRS",
         "name": "WGS 84 / UTM zone 31N",
         "base_crs": {
+            "type": "GeographicCRS",
             "name": "WGS 84",
             "datum": {
                 "type": "GeodeticReferenceFrame",
@@ -622,6 +623,12 @@ The EPSG:32631 / "WGS 84 / UTM zone 31N" projected CRS can be expressed as
             "code": 32631
         }
     }
+
+
+.. note::
+
+    The ``type`` member of the ``base_crs`` member was omitted in PROJ export of PROJJSON
+    prior to PROJ 9.6.
 
 CompoundCRS
 +++++++++++
