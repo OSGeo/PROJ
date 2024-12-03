@@ -4068,7 +4068,7 @@ TEST(factory, objectInsertion) {
 
     {
         auto ctxt = DatabaseContext::create();
-        // Tolerated withtout explicit stop
+        // Tolerated without explicit stop
         ctxt->startInsertStatementsSession();
     }
 

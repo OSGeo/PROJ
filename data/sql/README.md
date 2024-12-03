@@ -4,7 +4,7 @@
 
 - [diagram.xmi](diagram.xmi): to be opened with Umbrello
 - CRS related tables: ![CRS related tables](CRS.png)
-- Transformation releated tables: ![Transformation releated tables](Transformations.png)
+- Transformation related tables: ![Transformation related tables](Transformations.png)
 
 ## Hand generated files
 

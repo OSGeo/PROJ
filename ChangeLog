@@ -40,7 +40,7 @@
 2015-07-27 Even Rouault <even.rouault@spatialys.com>
 	* : Remove setlocale() use in pj_init_ctx(), and replace uses of atof() &
 	strtod() by their locale safe variants pj_atof() and pj_strtod().
-	Proj versions from now advertize #define PJ_LOCALE_SAFE 1 in proj_api.h
+	Proj versions from now advertise #define PJ_LOCALE_SAFE 1 in proj_api.h
 	and export pj_atof() & pj_strtod() (#226)
 
 2015-06-01 Charles Karney <https://github.com/cffk>
@@ -1491,7 +1491,7 @@ Rel. 4.4.4 2001/09/15
 
 2001-05-14  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* upraded config.sub and config.guess as per debian bug report 97374.
+	* upgraded config.sub and config.guess as per debian bug report 97374.
 
 Rel. 4.4.3 2001/04/20
 -------------------------------------------------------------------------
@@ -1714,7 +1714,7 @@ Rel. 4.3.1 94/2/16 Base-line
 -------------------------------------------------------------------------
 
 94/6/2
-	Transverse Mercator, spherical inverse fixed.  Misplaced parenthsis.
+	Transverse Mercator, spherical inverse fixed.  Misplaced parenthesis.
 
 94/10/5
 	Dropped dependency on FILENAME_MAX---too poorly defined in both
@@ -1756,14 +1756,14 @@ Rel. 4.3 94/2/16 Base-line
 	Added SPECIAL entry to conics Lambert, Albers and Equidistant.
 
 	Corrected nad/install.in test so as to only look for conus.lla.Z
-	as test for installation of NADCON datum matricies.
+	as test for installation of NADCON datum matrices.
 
 94/3/19
 	Problems with MAPGEN's mapdef choking on call to proj.  Fixed
 	with PROJ.4.3-patch-01.
 
 94/3/22
-	Bumb mode of handling memory allocation for 2D arrays, so that
+	Bump mode of handling memory allocation for 2D arrays, so that
 	execution of -L may not work on some systems.  Interim corrections
 	distributed with PROJ.4.3-patch-02.
 
@@ -1937,7 +1937,7 @@ Rel. 4.1.1 93/3/26 Base-line
 
 	pj_strerrno prototype added to projects.h
 
-	DOS option in strtod.c for MS C's lack of standard macros in neaders.
+	DOS option in strtod.c for MS C's lack of standard macros in headers.
 
 Rel. 4.1 93/3/8 Base-line --- @(#)CHANGE-LOG	4.14 95/09/23 GIE REL
 -------------------------------------------------------------------------

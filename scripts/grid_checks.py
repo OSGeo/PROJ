@@ -43,7 +43,7 @@ parser.add_argument('path_to_proj_data',
 
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('--not-in-grid-alternatives', dest='not_in_grid_alternatives', action='store_true',
-                   help='list grids mentionned in grid_transformation but missing in grid_alternatives')
+                   help='list grids mentioned in grid_transformation but missing in grid_alternatives')
 group.add_argument('--not-in-proj-data', dest='not_in_proj_data', action='store_true',
                    help='list grids registered in grid_alternatives, but missing in PROJ-data repository')
 group.add_argument('--not-in-db', dest='not_in_db', action='store_true',

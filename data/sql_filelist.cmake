@@ -7,7 +7,7 @@ set(SQL_FILES_CONSISTENCY_CHECKS_TRIGGERS
 )
 
 # When setting PROJ_DB_EXTRA_VALIDATION=OFF, we defer the insertion of check triggers
-# until the very end to save build time. We also entirerly skip running
+# until the very end to save build time. We also entirely skip running
 # final_consistency_checks.sql.
 # Typical build time with PROJ_DB_EXTRA_VALIDATION=ON: 60 seconds
 # Typical build time with PROJ_DB_EXTRA_VALIDATION=OFF: 3.7 seconds

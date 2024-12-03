@@ -48,7 +48,7 @@ instantiate objects of the database which are all tied to a non-generic authorit
   :language: c++
   :lines: 31
 
-We create a coordinate operation context, that can be customized to ammend
+We create a coordinate operation context, that can be customized to amend
 the way coordinate operations are computed. Here we ask for default settings,
 as we have a coordinate operation that just involves a "simple" map projection
 in the same datum.

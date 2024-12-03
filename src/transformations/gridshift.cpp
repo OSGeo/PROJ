@@ -969,13 +969,13 @@ PJ *PJ_TRANSFORMATION(gridshift, 0) {
         Q->m_skip_z_transform = true;
     }
 
-    // +coord_type not advertized in documentation on purpose for now.
+    // +coord_type not advertised in documentation on purpose for now.
     // It is probably useless to do it, as the only potential use case of it
-    // would be for PROJ itself when generating pipelines with defered grid
+    // would be for PROJ itself when generating pipelines with deferred grid
     // opening.
     if (pj_param(P->ctx, P->params, "tcoord_type").i) {
         // Check the coordinate type (projected/geographic) from the explicit
-        // +coord_type switch. This is mostly only useful in defered grid
+        // +coord_type switch. This is mostly only useful in deferred grid
         // opening, otherwise we have figured it out above in checkGridTypes()
         const char *coord_type = pj_param(P->ctx, P->params, "scoord_type").s;
         if (coord_type) {

@@ -60,7 +60,7 @@ From a code point of view, the entry point of the algorithm is the C++
 It combines several strategies:
 
   - look up in the PROJ database for available operations
-  - consider the pair (source CRS, target CRS) to synthetize operations depending
+  - consider the pair (source CRS, target CRS) to synthesize operations depending
     on the nature of the source and target CRS.
 
 Geographic CRS to Geographic CRS, with known identifiers
@@ -106,7 +106,7 @@ which can be used as an override).
 
 As those results all involve operations that does not have a perfect accuracy and that
 does not cover the area of use of the 2 CRSs, a
-'Ballpark geographic offset from NAD27 to NAD83' operation is synthetized by PROJ
+'Ballpark geographic offset from NAD27 to NAD83' operation is synthesized by PROJ
 (see :term:`Ballpark transformation`)
 
 .. _operations_computation_filtering:
@@ -476,10 +476,10 @@ because there is no such hub. This can occur for example when transforming from
 GDA94 to the latest realization at time of writing of WGS 84, WGS 84 (G1762).
 There are transformations between WGS 84 (G1762). Using the above described
 techniques, we would only find one non-ballpark operation taking the route:
-1. Conversion from GDA94 (geog2D) to GDA94 (geocentric): synthetized by PROJ
+1. Conversion from GDA94 (geog2D) to GDA94 (geocentric): synthesized by PROJ
 2. Inverse of ITRF2008 to GDA94 (1): from EPSG
 3. Inverse of WGS 84 (G1762) to ITRF2008 (1): from EPSG
-4. Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762): synthetized by PROJ
+4. Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762): synthesized by PROJ
 
 This is not bad, but the global validity area of use is "Australia - onshore and EEZ",
 whereas GDA94 has a larger area of use.
@@ -493,9 +493,9 @@ source and target CRS themselves. When there is a match, PROJ inserts the requir
 conversions between geographic and geocentric CRS to have a consistent concatenated
 operation, like the following:
 1. GDA94 to GDA2020 (1): from EPSG
-2. Conversion from GDA2020 (geog2D) to GDA2020 (geocentric): synthetized by PROJ
+2. Conversion from GDA2020 (geog2D) to GDA2020 (geocentric): synthesized by PROJ
 3. GDA2020 to WGS 84 (G1762) (1): from EPSG
-4. Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D): synthetized by PROJ
+4. Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D): synthesized by PROJ
 
 Projected CRS to any target CRS
 ---------------------------------------------------------------------------------
@@ -554,17 +554,17 @@ between those:
 
 
 But in cases where there is no match, the ``createOperationsVertToGeog`` method
-will be used to synthetize a ballpark vertical transformation, just taking care
+will be used to synthesize a ballpark vertical transformation, just taking care
 of unit changes, and axis reversal in case the vertical CRS was a depth rather than
 a height. Of course the results of such an operation are questionable, hence the
-ballpark qualifier and a unknown accuracy advertized for such an operation.
+ballpark qualifier and a unknown accuracy advertised for such an operation.
 
 Vertical CRS to a Vertical CRS
 ---------------------------------------------------------------------------------
 
 Overall logic is similar to the above case. There might be direct operations in
 the PROJ database, involving grid transformations or simple offsets. The fallback
-case is to synthetize a ballpark transformation.
+case is to synthesize a ballpark transformation.
 
 This is implemented by the ``createOperationsVertToVert`` method
 

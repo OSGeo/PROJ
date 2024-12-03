@@ -355,7 +355,7 @@ bool GeographicBoundingBox::Private::intersects(const Private &other) const {
         return true;
     }
 
-    // Check world coverage of othre bbox, and this bbox overlapping
+    // Check world coverage of other bbox, and this bbox overlapping
     // antimeridian (e.g. W=175 and E=-175)
     // Check W > E written for symmetry with the intersection() method.
     if (oW == -180.0 && oE == 180.0 && W > E) {
@@ -442,7 +442,7 @@ GeographicBoundingBox::Private::intersection(const Private &otherExtent) const {
                                               std::min(N, oN));
     }
 
-    // Check world coverage of othre bbox, and this bbox overlapping
+    // Check world coverage of other bbox, and this bbox overlapping
     // antimeridian (e.g. W=175 and E=-175)
     if (oW == -180.0 && oE == 180.0 && W > E) {
         return internal::make_unique<Private>(W, std::max(S, oS), E,

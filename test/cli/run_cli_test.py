@@ -58,7 +58,7 @@ Each test may have additional features:
 - `tmpdir` - create a temporary directory, and copy zero or more files
   listed in `copy`.
 
-Lastly, test resuls can be post-processed using several commands, processed
+Lastly, test results can be post-processed using several commands, processed
 in the same order they are specified:
 
 - `grep`: capture lines that match pattern

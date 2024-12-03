@@ -465,7 +465,7 @@ not formalized, is around the following lines:
   GEOID18 for the NAVD88 to NAD83/NAD83(2011) vertical adjustments. Each of these
   grids is considered by EPSG and PROJ has a separate object, with distinct filenames.
   The release of a new version does not cause the old grid to be automatically removed.
-  That said, due to advertized accuracies and supersession rules of the EPSG dataset, the
+  That said, due to advertised accuracies and supersession rules of the EPSG dataset, the
   most recent grid will generally be used for a CRS -> CRS transformation if the
   user uses proj_create_crs_to_crs() (with the exception that if a VERT_CRS WKT
   includes a GEOID_MODEL known to PROJ, an old version of the grid will be used).

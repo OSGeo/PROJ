@@ -48,7 +48,7 @@ def ingest_sqlite_dump(cursor, filename):
         else:
             line = str(line) # python2
 
-        # Historically this script was developped with code columns using TEXT
+        # Historically this script was developed with code columns using TEXT
         # so keep it that way to minimized changes in it, and in the diff of
         # generated .sql files
         line = line.replace('INTEGER_OR_TEXT', 'TEXT')

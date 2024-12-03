@@ -159,7 +159,7 @@ FOR EACH ROW BEGIN
         WHERE (SELECT 1 FROM metadata WHERE key = 'PROJ.VERSION' AND value LIKE '$%');
 
     -- Only available in sqlite >= 3.16. May be activated as soon as support for ubuntu 16 is dropped
-    -- check all foreign key contraints have an 'ON DELETE CASCADE'
+    -- check all foreign key constraints have an 'ON DELETE CASCADE'
     -- SELECT RAISE(ABORT, 'FK constraint with missing "ON DELETE CASCADE"')
     --     WHERE EXISTS (SELECT 1 FROM
     --             pragma_foreign_key_list(name),

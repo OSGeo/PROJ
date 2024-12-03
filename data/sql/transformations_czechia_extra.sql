@@ -67,7 +67,7 @@ INSERT INTO "concatenated_operation_step" VALUES('PROJ','S_JTSK_GEOG_TO_S_JTSK05
 INSERT INTO "usage" VALUES('PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG_USAGE','concatenated_operation','PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG','EPSG','1079','EPSG','1189');
 
 
--- CUZK recommands to do ETRS89 to S-JTSK / Krovak by doing:
+-- CUZK recommends to do ETRS89 to S-JTSK / Krovak by doing:
 -- 1) ETRS89 to S-JTSK/05 using a Helmert transformation (EPSG:5226)
 -- 2) S-JTSK/05 to S-JTSK/05 / Modified Krovak, using modified Krovak projection (EPSG:5512)
 -- 3) S-JTSK/05 / Modified Krovak to S-JTSK / Krovak using (reverse) grid table_yx_3_v1710.dat
@@ -100,7 +100,7 @@ INSERT INTO temp_var VALUES(
         '+step +proj=push +v_4 ' ||
         '+step +proj=set +v_4=0 +omit_inv ' ||
         '+step +proj=axisswap +order=1,2,4,3 +omit_inv ' ||  -- on forward path, save Baltic height in v_4 component...
-        '+step +proj=pop +v_3 +omit_inv ' || -- on forward parth, restore initial ellipsoidal height
+        '+step +proj=pop +v_3 +omit_inv ' || -- on forward path, restore initial ellipsoidal height
         '+step +proj=cart +ellps=GRS80 ' ||
         '+step +inv +proj=helmert +x=572.213 +y=85.334 +z=461.94 +rx=-4.9732 +ry=-1.529 +rz=-5.2484 +s=3.5378 +convention=coordinate_frame ' ||
         '+step +inv +proj=cart +ellps=bessel ' ||

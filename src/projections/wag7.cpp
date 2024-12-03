@@ -10,7 +10,7 @@ PROJ_HEAD(wag7, "Wagner VII") "\n\tMisc Sph, no inv";
 static PJ_XY wag7_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
 
-    (void)P; /* Shut up compiler warnnings about unused P */
+    (void)P; /* Shut up compiler warnings about unused P */
 
     xy.y = 0.90630778703664996 * sin(lp.phi);
     const double theta = asin(xy.y);

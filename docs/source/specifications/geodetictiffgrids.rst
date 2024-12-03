@@ -432,7 +432,7 @@ is an easy way to inspect such grid files:
     ``target_crs_epsg_code`` cannot be used.
     Its value should be a valid WKT string according to
     `WKT:2015 <http://docs.opengeospatial.org/is/12-063r5/12-063r5.html>`_
-    or `WKT:2019 <hhttp://docs.opengeospatial.org/is/18-010r7/18-010r7.html>`_
+    or `WKT:2019 <http://docs.opengeospatial.org/is/18-010r7/18-010r7.html>`_
     Ignored by PROJ currently.
 
   * The ``source_crs_epsg_code`` metadata item must be present if the source

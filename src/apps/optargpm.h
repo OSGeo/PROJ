@@ -518,7 +518,7 @@ OPTARGS *opt_parse(int argc, char **argv, const char *flags, const char *keys,
         o->optarg[i] = argv[0];
     }
 
-    /* Now, set up the agrc/argv pairs, and interpret args */
+    /* Now, set up the argc/argv pairs, and interpret args */
     o->argc = argc;
     o->argv = argv;
 

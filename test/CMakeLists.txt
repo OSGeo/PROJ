@@ -37,7 +37,7 @@ if(TESTING_USE_NETWORK)
       )
     else()
       message(WARNING
-        "Cannot establish if network is avalable - "
+        "Cannot establish if network is available - "
         "'curl' or 'ping' not found"
       )
     endif()

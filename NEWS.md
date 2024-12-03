@@ -38,7 +38,7 @@
 
 * Database: add constraint for unicity of CRS and operation names (#4071)
 
-* Make a few more functions that accept a `PJ*` to actually acccept a `const PJ*` (#4074)
+* Make a few more functions that accept a `PJ*` to actually accept a `const PJ*` (#4074)
 
 * Database: Increase consistency in trigger checks (#4080)
 
@@ -163,7 +163,7 @@
 * +proj=gridshift: enhance to support grids referenced in projected CRS,
   and with easting_offset/northing_offset corrections (#4038)
 
-* Tune concatenated operation instanciation, reference CR2005 geoid for
+* Tune concatenated operation instantiation, reference CR2005 geoid for
   Czechia and add (disabled by default) records for Czechia S-JTSK/05 based
   transformations (#4044)
 
@@ -330,8 +330,8 @@
 
 * ESRI WKT: improve roundtrip of name and definition for UPS WGS84 CRS (#3720)
 
-* CRS instanciation from PROJ.4 string: set 'Unknown based on XXXX ellipsoid'
-  datum name when instanciating from known +a, +rf (#3727)
+* CRS instantiation from PROJ.4 string: set 'Unknown based on XXXX ellipsoid'
+  datum name when instantiating from known +a, +rf (#3727)
 
 * cs2cs / proj_create_crs_to_crs(): fix regression with geocentric CRS (#3729)
 
@@ -365,7 +365,7 @@
   * Added option ONLY_BEST=YES (#3535)
 
     When enabled only use the best possible transformation between two CRS's can be
-    instantiated. If the best possible transfomations can't be instantiated it will
+    instantiated. If the best possible transformations can't be instantiated it will
     fail instead of opting for the next best transformation.
 
     With ONLY_BEST=YES a transformation will fail if a needed grid is unavailable.
@@ -373,7 +373,7 @@
     The option can be toggled in proj.ini and with --only-best in cs2cs.
 
   * Implement 'Similarity transformation' (EPSG:9621) and import related
-     tranformations from EPSG (#3578)
+     transformations from EPSG (#3578)
 
   * Optimise transformations between GDA94, GDA2020 and WGS84 (#3621)
 
@@ -611,7 +611,7 @@ The following functions have been deprecated and will be removed in a future ver
   * Make it possible to determine which grid files were actually used during a
     transformation (#3180)
 
-  * Transformation: no longer do vertical trasnformation when doing compound CRS
+  * Transformation: no longer do vertical transformation when doing compound CRS
     to 2D CRS / add --3d to cs2cs (#3119)
 
   * Deprecate PROJ4 CMake name (#3094)
@@ -866,7 +866,7 @@ Details about the build system unification can be found in PROJ RFC 7.
 
 * Detect ESRI WKT better in certain circumstances (#2823)
 
-* Fix performance issue on pipeline instanciation of huge (broken)
+* Fix performance issue on pipeline instantiation of huge (broken)
   pipelines (#2824)
 
 * Make sure to re-order projection parameters according to their canonical
@@ -877,7 +877,7 @@ Details about the build system unification can be found in PROJ RFC 7.
 * Fix error in implementation of Inverse ellipsoidal orthographic projection
   that cause convergence to sometimes fail (#2853)
 
-* Fix handling of edge-case coordinates in invers ortho ellipsoidal
+* Fix handling of edge-case coordinates in inverse ortho ellipsoidal
   oblique (#2855)
 
 * proj_normalize_for_visualization(): set input and output units when there
@@ -1082,7 +1082,7 @@ Details about the build system unification can be found in PROJ RFC 7.
   code) (#2661)
 
 * createOperation(): make sure no to discard deprecated operations if the
-  replacement uses an unknow grid (#2623)
+  replacement uses an unknown grid (#2623)
 
 * Fix build on Solaris 11.4 (#2621)
 
@@ -1367,7 +1367,7 @@ tweaks in the underlying API.
 
 ### Updates
 
-* Added various Brazillian grids to the database #2277
+* Added various Brazilian grids to the database #2277
 
 * Added geoid file for Canary Islands to the database #2312
 
@@ -1475,9 +1475,9 @@ tweaks in the underlying API.
      use discard change of ellipsoidal height if a Helmert transformation is
      involved (#2227)
 
-  * proj_list_units() deprecated, superceeded by proj_get_units_from_database()
+  * proj_list_units() deprecated, superseded by proj_get_units_from_database()
 
-  * proj_list_angular_units() deprecated, superceeded by proj_get_units_from_database()
+  * proj_list_angular_units() deprecated, superseded by proj_get_units_from_database()
 
 * Optimizations:
 
@@ -1674,7 +1674,7 @@ tweaks in the underlying API.
 The major feature in PROJ 7 is significantly improved handling of gridded
 models. This was implemented in RFC4 (<https://proj.org/community/rfc/rfc-4.html>).
 The main features of the RFC4 work is that PROJ now implements a new grid format,
-Geodetic TIFF grids, for exchaning gridded transformation models. In addition
+Geodetic TIFF grids, for exchanging gridded transformation models. In addition
 to the new grid format, PROJ can now also access grids online using a data
 store in the cloud.
 
@@ -1706,7 +1706,7 @@ for more info on how to migrate from the old to the new API.
   WKT2_2018 to WKT2_2019 to reflect the proper name of the standard (#1585)
 
 * Improvements in transformations from/to WGS 84 (Gxxxx) realizations and
-  vertical <--> geog transormations #1608
+  vertical <--> geog transformations #1608
 
 * Update to version 1.50 of the geodesic library (#1629)
 
@@ -2067,7 +2067,7 @@ Version 6.2.0 is made possible by the following contributors:
 * Do not include PROJ_LIB in proj_info().searchpath when context
   search path is set (#1498)
 
-* Use  correct delimeter for the current platform when parsing
+* Use  correct delimiter for the current platform when parsing
   PROJ_LIB (#1497)
 
 * Do not confuse 'ID74' CRS with WKT2 ID[] node (#1506)
@@ -2255,7 +2255,7 @@ CRSs.
   Mercator algorithm (etmerc). Old implementation available by adding
   +approx (#404)
 
-* Chaged behaviour: Default ellipsoid now set to GRS80 (was WGS84) (#1210)
+* Changed behaviour: Default ellipsoid now set to GRS80 (was WGS84) (#1210)
 
 * Allow multiple directories in PROJ_LIB environment variable (#1281)
 

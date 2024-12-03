@@ -30,7 +30,7 @@ int main(void) {
     // authorities. This can only be used for CoordinateOperationContext.
     auto authFactory = AuthorityFactory::create(dbContext, std::string());
 
-    // Create a coordinate operation context, that can be customized to ammend
+    // Create a coordinate operation context, that can be customized to amend
     // the way coordinate operations are computed. Here we ask for default
     // settings.
     auto coord_op_ctxt =

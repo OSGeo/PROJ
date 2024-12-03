@@ -2890,7 +2890,7 @@ TEST(crs, projectedCRS_identify_db) {
         EXPECT_EQ(res.front().second, 70);
     }
     {
-        // Identify from a WKT1 string wit explicit correct axis order
+        // Identify from a WKT1 string with explicit correct axis order
         auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
             "PROJCS[\"ETRS89 / UTM zone 32N (N-E)\",GEOGCS[\"ETRS89\","
             "DATUM[\"European_Terrestrial_Reference_System_1989\","
@@ -2912,7 +2912,7 @@ TEST(crs, projectedCRS_identify_db) {
         EXPECT_EQ(res.front().second, 100);
     }
     {
-        // Identify from a WKT1 string wit wrong axis order
+        // Identify from a WKT1 string with wrong axis order
         auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
             "PROJCS[\"ETRS89 / UTM zone 32N (N-E)\",GEOGCS[\"ETRS89\","
             "DATUM[\"European_Terrestrial_Reference_System_1989\","

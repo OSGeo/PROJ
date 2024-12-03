@@ -117,7 +117,7 @@ Pipelines
                 Without the push/pop steps the height would be affected by
                 the Helmert step.
 
-Projections3: Tranverse Mercator
+Projections3: Transverse Mercator
 ---------------------------------
 
 .. code-block::

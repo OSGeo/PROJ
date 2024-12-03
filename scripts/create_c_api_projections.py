@@ -125,7 +125,7 @@ for sectiondef in compounddef.iter('sectiondef'):
             header.write("PJ PROJ_DLL *" + decl + ";\n\n")
 
             briefdescription = func.find('briefdescription/para').xpath("normalize-space()")
-            briefdescription = briefdescription.replace("Instanciate ", "Instanciate a ProjectedCRS with ")
+            briefdescription = briefdescription.replace("Instantiate ", "Instantiate a ProjectedCRS with ")
 
             cppfile.write("// ---------------------------------------------------------------------------\n\n")
             cppfile.write("/** \\brief " + briefdescription + "\n")

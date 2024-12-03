@@ -74,7 +74,7 @@ static PJ_XY chamb_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     }
     if (i < 3) /* current point at control point */
         xy = Q->c[i].p;
-    else { /* point mean of intersepts */
+    else { /* point mean of intercepts */
         xy = Q->p;
         for (i = 0; i < 3; ++i) {
             j = i == 2 ? 0 : i + 1;

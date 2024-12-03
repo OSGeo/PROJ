@@ -135,7 +135,7 @@ UPDATE grid_transformation SET interpolation_crs_auth_name = 'EPSG',
 
 -- EPSG:1312 'NAD27 to NAD83 (3)' / NTv1_0.gsb has a accuracy of 1m whereas
 -- EPSG:1313 'NAD27 to NAD83 (4)' / NTv2_0.gsb has a accuracy of 1.5m
--- so we will never select automatically NTv2_0.gsb. Worse the advertize
+-- so we will never select automatically NTv2_0.gsb. Worse the advertise
 -- accuracy of the NTv1 method
 
 UPDATE grid_transformation SET accuracy = 2.0 WHERE auth_name = 'EPSG' AND code = '1312';

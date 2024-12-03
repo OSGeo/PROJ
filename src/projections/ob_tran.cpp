@@ -116,7 +116,7 @@ representation accepted by pj_init_ctx().
 
 This, however, also begs the question of whether we really need the
 paralist linked list representation, or if we could do with a simpler
-null-terminated argv style array? This would simplfy some code, and
+null-terminated argv style array? This would simplify some code, and
 keep memory allocations more localized.
 
 ***********************************************************************/

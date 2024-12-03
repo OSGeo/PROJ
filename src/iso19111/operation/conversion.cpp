@@ -2624,7 +2624,7 @@ Conversion::createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
 /** \brief Instantiate a conversion between a GeographicCRS and a spherical
  * planetocentric GeodeticCRS
  *
- * This method peforms conversion between geodetic latitude and geocentric
+ * This method performs conversion between geodetic latitude and geocentric
  * latitude
  *
  * @return a new Conversion.
