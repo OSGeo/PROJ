@@ -3545,7 +3545,11 @@ bool SingleOperation::exportToPROJStringGeneric(
             ((sourceCRSGeog &&
               sourceCRSGeog->coordinateSystem()->axisList().size() == 2) ||
              (targetCRSGeog &&
-              targetCRSGeog->coordinateSystem()->axisList().size() == 2));
+              targetCRSGeog->coordinateSystem()->axisList().size() == 2)) ||
+            (!sourceCRSGeog &&
+             dynamic_cast<const crs::CompoundCRS *>(l_sourceCRS.get())) ||
+            (!targetCRSGeog &&
+             dynamic_cast<const crs::CompoundCRS *>(l_targetCRS.get()));
 
         if (l_sourceCRS) {
             setupPROJGeodeticSourceCRS(formatter, NN_NO_CHECK(l_sourceCRS),
