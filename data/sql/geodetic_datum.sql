@@ -424,6 +424,10 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1366','COV23 Intermediate Reference 
 INSERT INTO "usage" VALUES('EPSG','20309','geodetic_datum','EPSG','1366','EPSG','4743','EPSG','1141');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1367','Brenner Base Tunnel 2000',NULL,'EPSG','7030','EPSG','8901','2000-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','20337','geodetic_datum','EPSG','1367','EPSG','4744','EPSG','1285');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1379','Saba',NULL,'EPSG','7022','EPSG','8901','2023-04-05',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22072','geodetic_datum','EPSG','1379','EPSG','4757','EPSG','1181');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1380','BES2020 Saba',NULL,'EPSG','7019','EPSG','8901',NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21849','geodetic_datum','EPSG','1380','EPSG','4757','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1382','European Terrestrial Reference Frame 2020',NULL,'EPSG','7019','EPSG','8901','2024-01-31',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','21225','geodetic_datum','EPSG','1382','EPSG','1298','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1383','World Geodetic System 1984 (G2296)',NULL,'EPSG','7030','EPSG','8901','2024-01-01',2024.0,NULL,NULL,NULL,0);

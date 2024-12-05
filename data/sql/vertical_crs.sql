@@ -504,6 +504,8 @@ INSERT INTO "vertical_crs" VALUES('EPSG','10565','GLLMSL(2022) height',NULL,'EPS
 INSERT INTO "usage" VALUES('EPSG','21000','vertical_crs','EPSG','10565','EPSG','3119','EPSG','1142');
 INSERT INTO "vertical_crs" VALUES('EPSG','10588','CGVD28(HTv2.0) height',NULL,'EPSG','6499','EPSG','1384',0);
 INSERT INTO "usage" VALUES('EPSG','21633','vertical_crs','EPSG','10588','EPSG','4778','EPSG','1132');
+INSERT INTO "vertical_crs" VALUES('EPSG','10642','Saba height',NULL,'EPSG','6499','EPSG','1381',0);
+INSERT INTO "usage" VALUES('EPSG','21486','vertical_crs','EPSG','10642','EPSG','4757','EPSG','1179');
 INSERT INTO "vertical_crs" VALUES('EPSG','10649','GLMSL(2023) depth',NULL,'EPSG','6498','EPSG','1387',0);
 INSERT INTO "usage" VALUES('EPSG','21472','vertical_crs','EPSG','10649','EPSG','4776','EPSG','1198');
 INSERT INTO "vertical_crs" VALUES('EPSG','10650','GLLAT(2023) depth',NULL,'EPSG','6498','EPSG','1388',0);

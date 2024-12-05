@@ -751,8 +751,10 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1384','CGVD28(HTv2.0)',
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1081','DB_REF2003','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1081','DB_REF2016','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1390','BSCD2000','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1380','BES2020','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1389','RGM23','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1389','Repère de référence Géodésique de Mayotte 2023','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1381','Saba','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -8009,6 +8011,11 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5685','DB_REF2016 / 3-de
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5682','DB_REF2016 / 3-degree Gauss-Kruger zone 2 (E-N)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10671','RGM23 (lat-lon)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10670','RGM23 (lat-lon)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10637','BES2020','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10638','BES2020','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10639','BES2020','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10641','Saba / Saba TM 2020','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10645','Saba / Saba TM 2020 + Saba height','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5779','SVS2000/Trst ','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8690','SVS2010/Koper','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10686','D96 + SVS2000/Trst','EPSG');
