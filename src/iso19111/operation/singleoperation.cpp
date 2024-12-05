@@ -3860,7 +3860,7 @@ bool SingleOperation::exportToPROJStringGeneric(
             parameterValueNumeric(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET,
                                   common::UnitOfMeasure::ARC_SECOND);
         double offsetHeight =
-            parameterValueNumericAsSI(EPSG_CODE_PARAMETER_GEOID_UNDULATION);
+            parameterValueNumericAsSI(EPSG_CODE_PARAMETER_GEOID_HEIGHT);
 
         auto sourceCRSGeog =
             dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
