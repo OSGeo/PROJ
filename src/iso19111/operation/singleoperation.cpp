@@ -3475,6 +3475,7 @@ bool SingleOperation::exportToPROJStringGeneric(
     bool fifteenParamsTransform = false;
     const auto &l_method = method();
     const auto &methodName = l_method->nameStr();
+    const bool isMethodInverseOf = starts_with(methodName, INVERSE_OF);
     const auto paramCount = parameterValues().size();
     const bool l_isTimeDependent = isTimeDependent(methodName);
     const bool isPositionVector =
@@ -4019,6 +4020,65 @@ bool SingleOperation::exportToPROJStringGeneric(
         return true;
     }
 
+    if (methodEPSGCode ==
+            EPSG_CODE_METHOD_GEOGRAPHIC3D_TO_GRAVITYRELATEDHEIGHT ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_GEOGRAPHIC3D_TO_GEOG2D_GRAVITYRELATEDHEIGHT) {
+        const crs::CRS *tgtCRS = targetCRS().get();
+        auto targetCRSVert = dynamic_cast<const crs::VerticalCRS *>(tgtCRS);
+        if (!targetCRSVert) {
+            throw io::FormattingException(
+                "Can apply Geographic3D to GravityRelatedHeight only to "
+                "VerticalCRS");
+        }
+
+        auto geoidHeight =
+            parameterValueNumericAsSI(EPSG_CODE_PARAMETER_GEOID_HEIGHT);
+
+        if (geoidHeight != 0) {
+            formatter->addStep("affine");
+            // In the forward direction (Geographic3D to GravityRelatedHeight)
+            // we subtract the geoid height
+            formatter->addParam("zoff",
+                                isMethodInverseOf ? geoidHeight : -geoidHeight);
+        }
+
+        targetCRSVert->addLinearUnitConvert(formatter);
+
+        return true;
+    } else if (
+        ci_equal(l_method->nameStr(),
+                 INVERSE_OF +
+                     EPSG_NAME_METHOD_GEOGRAPHIC3D_TO_GRAVITYRELATEDHEIGHT) ||
+        ci_equal(
+            l_method->nameStr(),
+            INVERSE_OF +
+                EPSG_NAME_METHOD_GEOGRAPHIC3D_TO_GEOG2D_GRAVITYRELATEDHEIGHT)) {
+        const crs::CRS *srcCRS = sourceCRS().get();
+        auto sourceCRSVert = dynamic_cast<const crs::VerticalCRS *>(srcCRS);
+        if (!sourceCRSVert) {
+            throw io::FormattingException(
+                "Can apply Inverse of Geographic3D to GravityRelatedHeight "
+                "only to VerticalCRS");
+        }
+
+        auto geoidHeight =
+            parameterValueNumericAsSI(EPSG_CODE_PARAMETER_GEOID_HEIGHT);
+
+        formatter->startInversion();
+        sourceCRSVert->addLinearUnitConvert(formatter);
+        formatter->stopInversion();
+
+        if (geoidHeight != 0) {
+            formatter->addStep("affine");
+            // In the forward direction (Geographic3D to GravityRelatedHeight)
+            // we subtract the geoid height
+            formatter->addParam("zoff", geoidHeight);
+        }
+
+        return true;
+    }
+
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTICAL_OFFSET_AND_SLOPE) {
 
         const crs::CRS *srcCRS = sourceCRS().get();
@@ -4091,8 +4151,6 @@ bool SingleOperation::exportToPROJStringGeneric(
             return true;
         }
     }
-
-    const bool isMethodInverseOf = starts_with(methodName, INVERSE_OF);
 
     const auto &NTv1Filename = _getNTv1Filename(this, true);
     const auto &NTv2Filename = _getNTv2Filename(this, true);

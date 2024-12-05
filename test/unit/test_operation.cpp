@@ -5969,3 +5969,93 @@ TEST(operation, export_of_Cartesian_Grid_Offsets_with_EngineeringCRS) {
                   PROJStringFormatter::create().get()),
               "+proj=affine +xoff=-550015 +yoff=-8780001");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, Geographic3DToGravityRelatedHeight) {
+
+    auto wkt =
+        "COORDINATEOPERATION[\"test\",\n"
+        "    SOURCECRS[\n"
+        "        GEOGCRS[\"foo\",\n"
+        "            DATUM[\"foo\",\n"
+        "                ELLIPSOID[\"International 1924\",6378388,297,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,3],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"ellipsoidal height (h)\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]]]],\n"
+        "    TARGETCRS[\n"
+        "        VERTCRS[\"foo height\",\n"
+        "            VDATUM[\"foo Vertical Datum\"],\n"
+        "            CS[vertical,1],\n"
+        "                AXIS[\"gravity-related height (H)\",up,\n"
+        "                    LENGTHUNIT[\"metre\",1]]]],\n"
+        "    METHOD[\"Geographic3D to GravityRelatedHeight\",\n"
+        "        ID[\"EPSG\",1136]],\n"
+        "    PARAMETER[\"Geoid height\",10,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8604]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=affine +zoff=-10");
+    EXPECT_EQ(transf->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +inv +proj=affine +zoff=-10");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, inverse_of_Geographic3DToGravityRelatedHeight) {
+
+    auto wkt =
+        "COORDINATEOPERATION[\"test\",\n"
+        "    SOURCECRS[\n"
+        "        VERTCRS[\"foo height\",\n"
+        "            VDATUM[\"foo Vertical Datum\"],\n"
+        "            CS[vertical,1],\n"
+        "                AXIS[\"gravity-related height (H)\",up,\n"
+        "                    LENGTHUNIT[\"metre\",1]]]],\n"
+        "    TARGETCRS[\n"
+        "        GEOGCRS[\"foo\",\n"
+        "            DATUM[\"foo\",\n"
+        "                ELLIPSOID[\"International 1924\",6378388,297,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,3],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"ellipsoidal height (h)\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]]]],\n"
+        "    METHOD[\"Inverse of Geographic3D to GravityRelatedHeight\",\n"
+        "        ID[\"INVERSE(EPSG)\",1136]],\n"
+        "    PARAMETER[\"Geoid height\",10,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8604]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=affine +zoff=10");
+    EXPECT_EQ(transf->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +inv +proj=affine +zoff=10");
+}
