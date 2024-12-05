@@ -48,7 +48,7 @@ Hints:
     - The projection center is determined from the UTM zone and can be
       determined by zone*6 - 183
 
-    - Tranverse Mercator parameters are documented at
+    - Transverse Mercator parameters are documented at
       https://proj.org/operations/projections/tmerc.html
 
     - For more info, see
@@ -66,7 +66,7 @@ expect      360965.5942     6256998.5609
 -------------------------------------------------------------------------------
 
 
-3. Explore the less accurate, but faster, version of the Tranverse Mercator
+3. Explore the less accurate, but faster, version of the Transverse Mercator
 -------------------------------------------------------------------------------
 As mentioned in the introduction to this set of exercises, two versions of the
 Transverse Mercator is implemented in PROJ. The default uses the Engsager/Poder

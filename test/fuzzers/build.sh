@@ -35,7 +35,7 @@ else
     PROJ_CMAKE_EXTRA_ARGS=""
 fi
 
-# build libcurl.a (builing against Ubuntu libcurl.a doesn't work easily)
+# build libcurl.a (building against Ubuntu libcurl.a doesn't work easily)
 cd curl
 autoreconf -i
 ./configure --disable-shared --with-openssl --without-libpsl --prefix=$SRC/install

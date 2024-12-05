@@ -40,12 +40,12 @@ Transverse Mercator.
   The projection center is determined from the UTM zone and can be
   determined by zone*6 - 183
 
-.. hint:: Tranverse Mercator parameters are documented at :ref:`tmerc`
+.. hint:: Transverse Mercator parameters are documented at :ref:`tmerc`
 
 .. literalinclude:: projections3.gie
   :lines: 60-64
 
-Exercise 3: The less accurate, but faster, version of the Tranverse Mercator
+Exercise 3: The less accurate, but faster, version of the Transverse Mercator
 -----------------------------------------------------------------------------
 
 As mentioned in the introduction to this set of exercises, two versions of the

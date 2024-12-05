@@ -159,7 +159,7 @@ and update the value to be x.y
 
 - Add the release notes from `NEWS.md` to `docs/source/news.rst`
 
-  These vim substitutions are helpfull when converting NEWS.md to rst:
+  These vim substitutions are helpful when converting NEWS.md to rst:
 
 ```sh
 :s!(\#\(\d\{4}\))!(`\#\1 <https://github.com/OSGeo/PROJ/issues/\1>`_)!

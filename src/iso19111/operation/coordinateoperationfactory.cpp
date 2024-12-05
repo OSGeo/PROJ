@@ -1504,7 +1504,7 @@ struct FilterResults {
 
         // If we have more than one result, and than the last result is the
         // default "Ballpark geographic offset" or "Ballpark geocentric
-        // translation" operations we have synthetized, and that at least one
+        // translation" operations we have synthesized, and that at least one
         // operation has the desired area of interest and does not require the
         // use of grids, remove it as all previous results are necessarily
         // better
@@ -1540,7 +1540,7 @@ struct FilterResults {
             bool dummy = false;
             const auto curExtent = getExtent(op, true, dummy);
             // If a concatenated operation has an identifier, consider it as
-            // a single step (to be opposed to synthetized concatenated
+            // a single step (to be opposed to synthesized concatenated
             // operations). Helps for example to get EPSG:8537,
             // "Egypt 1907 to WGS 84 (2)"
             const auto curStepCount =
@@ -3181,7 +3181,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
             1, std::max(opsEpochChangeSrc.size(), opsEpochChangeDst.size()));
         for (size_t iEpochChange = 0; iEpochChange < nIters; ++iEpochChange) {
             for (auto &opSecond : opsSecond) {
-                // Check that it is not a transformation synthetized by
+                // Check that it is not a transformation synthesized by
                 // ourselves
                 if (!hasIdentifiers(opSecond)) {
                     continue;
@@ -3229,7 +3229,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                 if (sourceAndTargetAre3D) {
 
                     // Force Helmert operations to use the 3D domain, even if
-                    // the ones we found in EPSG are advertized for the 2D
+                    // the ones we found in EPSG are advertised for the 2D
                     // domain.
                     auto concat = dynamic_cast<ConcatenatedOperation *>(
                         opSecondCloned.get());

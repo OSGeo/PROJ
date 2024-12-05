@@ -150,7 +150,7 @@ Hints:
 
     - Not all parameters need to be set.
 
-    - Pay attention to the units of the parameteres output by projinfo,
+    - Pay attention to the units of the parameters output by projinfo,
       you may have to convert them to standard units (e.g. mm -> m).
 
     - Note that the coordinates in the test now also includes a time tag in the

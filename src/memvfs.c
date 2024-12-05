@@ -298,7 +298,7 @@ static int memOpen(sqlite3_vfs *pVfs, const char *zName, sqlite3_file *pFile,
     memset(p, 0, sizeof(*p));
     if ((flags & SQLITE_OPEN_MAIN_DB) == 0) {
         /* Modification w.r.t upstream: instead of returning SQLITE_CANTOPEN,
-         * delegate to orign VFS. Typically for temporary file creation.
+         * delegate to origin VFS. Typically for temporary file creation.
          */
         return ORIGVFS(pVfs)->xOpen(ORIGVFS(pVfs), zName, pFile, flags,
                                     pOutFlags);

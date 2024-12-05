@@ -1,7 +1,6 @@
 accuracies
 Acknowledgements
 adams
-advertized
 aea
 aeqd
 affine
@@ -938,7 +937,6 @@ tpeqd
 tpers
 tradeoff
 tran
-Tranverse
 triangulations
 triaxial
 Trimetric

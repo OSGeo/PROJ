@@ -1612,7 +1612,7 @@ const datum::DatumEnsemblePtr &SingleCRS::datumEnsemble() PROJ_PURE_DEFN {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-/** \brief Return the real datum or a synthetized one if a datumEnsemble.
+/** \brief Return the real datum or a synthesized one if a datumEnsemble.
  */
 const datum::DatumNNPtr
 SingleCRS::datumNonNull(const io::DatabaseContextPtr &dbContext) const {
@@ -1821,7 +1821,7 @@ const datum::GeodeticReferenceFramePtr &GeodeticCRS::datum() PROJ_PURE_DEFN {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-/** \brief Return the real datum or a synthetized one if a datumEnsemble.
+/** \brief Return the real datum or a synthesized one if a datumEnsemble.
  */
 const datum::GeodeticReferenceFrameNNPtr
 GeodeticCRS::datumNonNull(const io::DatabaseContextPtr &dbContext) const {
@@ -3508,7 +3508,7 @@ const cs::VerticalCSNNPtr VerticalCRS::coordinateSystem() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-/** \brief Return the real datum or a synthetized one if a datumEnsemble.
+/** \brief Return the real datum or a synthesized one if a datumEnsemble.
  */
 const datum::VerticalReferenceFrameNNPtr
 VerticalCRS::datumNonNull(const io::DatabaseContextPtr &dbContext) const {

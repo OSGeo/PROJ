@@ -459,7 +459,7 @@ if(WIN32)
     if(MINGW AND BUILD_SHARED_LIBS AND APPEND_SOVERSION)
         set(PROJ_OUTPUT_NAME "proj" CACHE STRING "Name of the PROJ library")
     else()
-        # Detect major version update if re-using a CMake build directory where the
+        # Detect major version update if reusing a CMake build directory where the
         # PROJ version major number has been updated in the meantime.
         math(EXPR PROJ_VERSION_MAJOR_MINUS_ONE "${PROJ_VERSION_MAJOR} - 1")
         if(DEFINED PROJ_OUTPUT_NAME AND PROJ_OUTPUT_NAME STREQUAL "proj_${PROJ_VERSION_MAJOR_MINUS_ONE}")

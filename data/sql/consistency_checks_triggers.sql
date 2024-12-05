@@ -304,7 +304,7 @@ FOR EACH ROW BEGIN
                            (m.name LIKE '%geog3D domain%' AND crs.type != 'geographic 3D') OR
                            (m.name LIKE '%geocentric domain%' AND crs.type != 'geocentric')));
 
-    -- check that a time-dependent Helmert transformation has its source or target CRS being dyanmic
+    -- check that a time-dependent Helmert transformation has its source or target CRS being dynamic
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: a time-dependent Helmert transformations should have at least one of its source or target CRS dynamic')
         WHERE NEW.deprecated = 0
               AND EXISTS (SELECT 1 FROM coordinate_operation_method m

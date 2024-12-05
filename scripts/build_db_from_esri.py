@@ -2133,10 +2133,10 @@ def import_geogtran():
 
                 if not src_row:
                     if 'Molodensky_Badekas' in wkt2:
-                        # print('Skipping GEOGTRAN %s (EPSG source) since it uses a non-supported yet suported method'% esri_name)
+                        # print('Skipping GEOGTRAN %s (EPSG source) since it uses a non-supported yet supported method'% esri_name)
                         assert False  # no longer present in db
                     if 'NADCON5' in wkt2:
-                        print('Skipping NADCON5 %s (EPSG source) since it uses a non-supported yet suported method' % esri_name)
+                        print('Skipping NADCON5 %s (EPSG source) since it uses a non-supported yet supported method' % esri_name)
                         continue
 
                 assert src_row, row
