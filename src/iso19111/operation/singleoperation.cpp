@@ -4182,9 +4182,11 @@ bool SingleOperation::exportToPROJStringGeneric(
                 " " EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN);
         }
         const bool interpIsSrc = interpCRS->_isEquivalentTo(
-            sourceCRS().get(), util::IComparable::Criterion::EQUIVALENT);
+            sourceCRS().get(),
+            util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS);
         const bool interpIsTarget = interpCRS->_isEquivalentTo(
-            targetCRS().get(), util::IComparable::Criterion::EQUIVALENT);
+            targetCRS().get(),
+            util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS);
         if (!interpIsSrc && !interpIsTarget) {
             throw io::FormattingException(
                 "For"
