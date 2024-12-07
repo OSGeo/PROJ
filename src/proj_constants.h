@@ -640,6 +640,16 @@
 
 /* ------------------------------------------------------------------------ */
 
+#define EPSG_NAME_METHOD_GEOGRAPHIC3D_TO_GRAVITYRELATEDHEIGHT                  \
+    "Geographic3D to GravityRelatedHeight"
+#define EPSG_CODE_METHOD_GEOGRAPHIC3D_TO_GRAVITYRELATEDHEIGHT 1136
+
+#define EPSG_NAME_METHOD_GEOGRAPHIC3D_TO_GEOG2D_GRAVITYRELATEDHEIGHT           \
+    "Geog3D to Geog2D+GravityRelatedHeight"
+#define EPSG_CODE_METHOD_GEOGRAPHIC3D_TO_GEOG2D_GRAVITYRELATEDHEIGHT 1131
+
+/* ------------------------------------------------------------------------ */
+
 #define PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D                                 \
     "GravityRelatedHeight to Geographic3D"
 
@@ -764,6 +774,10 @@
 #define EPSG_NAME_PARAMETER_VERTICAL_OFFSET "Vertical Offset"
 #define EPSG_CODE_PARAMETER_VERTICAL_OFFSET 8603
 
+#define EPSG_NAME_PARAMETER_GEOID_HEIGHT "Geoid height"
+#define EPSG_CODE_PARAMETER_GEOID_HEIGHT 8604
+
+/* Geoid undulation is the name before EPSG v11.023 */
 #define EPSG_NAME_PARAMETER_GEOID_UNDULATION "Geoid undulation"
 #define EPSG_CODE_PARAMETER_GEOID_UNDULATION 8604
 

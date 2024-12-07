@@ -1274,7 +1274,7 @@ TransformationNNPtr Transformation::createGeographic2DWithHeightOffsets(
         VectorOfParameters{
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LATITUDE_OFFSET),
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET),
-            createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_GEOID_UNDULATION)},
+            createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_GEOID_HEIGHT)},
         VectorOfValues{offsetLat, offsetLong, offsetHeight}, accuracies);
 }
 
@@ -1680,7 +1680,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
                                           offsetLong.unit());
 
         const auto &offsetHeight =
-            parameterValueMeasure(EPSG_CODE_PARAMETER_GEOID_UNDULATION);
+            parameterValueMeasure(EPSG_CODE_PARAMETER_GEOID_HEIGHT);
         const common::Length newOffsetHeight(negate(offsetHeight.value()),
                                              offsetHeight.unit());
 

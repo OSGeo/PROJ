@@ -1095,7 +1095,8 @@ const struct ParamNameCode gParamNameCodes[] = {
     PARAM_NAME_CODE(VERTICAL_OFFSET),
     PARAM_NAME_CODE(EASTING_OFFSET),
     PARAM_NAME_CODE(NORTHING_OFFSET),
-    PARAM_NAME_CODE(GEOID_UNDULATION),
+    PARAM_NAME_CODE(GEOID_HEIGHT),
+    PARAM_NAME_CODE(GEOID_UNDULATION), // deprecated
     PARAM_NAME_CODE(A0),
     PARAM_NAME_CODE(A1),
     PARAM_NAME_CODE(A2),
@@ -1341,13 +1342,12 @@ static const ParamMapping paramLatitudeOffset = {
 static const ParamMapping *const paramsGeographic2DOffsets[] = {
     &paramLatitudeOffset, &paramLongitudeOffset, nullptr};
 
-static const ParamMapping paramGeoidUndulation = {
-    EPSG_NAME_PARAMETER_GEOID_UNDULATION, EPSG_CODE_PARAMETER_GEOID_UNDULATION,
-    nullptr, common::UnitOfMeasure::Type::LINEAR, nullptr};
+static const ParamMapping paramGeoidHeight = {
+    EPSG_NAME_PARAMETER_GEOID_HEIGHT, EPSG_CODE_PARAMETER_GEOID_HEIGHT, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
 
 static const ParamMapping *const paramsGeographic2DWithHeightOffsets[] = {
-    &paramLatitudeOffset, &paramLongitudeOffset, &paramGeoidUndulation,
-    nullptr};
+    &paramLatitudeOffset, &paramLongitudeOffset, &paramGeoidHeight, nullptr};
 
 static const ParamMapping paramVerticalOffset = {
     EPSG_NAME_PARAMETER_VERTICAL_OFFSET, EPSG_CODE_PARAMETER_VERTICAL_OFFSET,
@@ -1369,6 +1369,9 @@ static const ParamMapping *const paramsCartesianGridOffsets[] = {
 
 static const ParamMapping *const paramsVerticalOffsets[] = {
     &paramVerticalOffset, nullptr};
+
+static const ParamMapping *const paramsGeographic3DToGravityRelatedHeight[] = {
+    &paramGeoidHeight, nullptr};
 
 static const ParamMapping paramInclinationInLatitude = {
     EPSG_NAME_PARAMETER_INCLINATION_IN_LATITUDE,
@@ -1606,6 +1609,14 @@ static const MethodMapping gOtherMethodMappings[] = {
 
     {EPSG_NAME_METHOD_VERTICAL_OFFSET, EPSG_CODE_METHOD_VERTICAL_OFFSET,
      nullptr, nullptr, nullptr, paramsVerticalOffsets},
+
+    {EPSG_NAME_METHOD_GEOGRAPHIC3D_TO_GRAVITYRELATEDHEIGHT,
+     EPSG_CODE_METHOD_GEOGRAPHIC3D_TO_GRAVITYRELATEDHEIGHT, nullptr, nullptr,
+     nullptr, paramsGeographic3DToGravityRelatedHeight},
+
+    {EPSG_NAME_METHOD_GEOGRAPHIC3D_TO_GEOG2D_GRAVITYRELATEDHEIGHT,
+     EPSG_CODE_METHOD_GEOGRAPHIC3D_TO_GEOG2D_GRAVITYRELATEDHEIGHT, nullptr,
+     nullptr, nullptr, paramsGeographic3DToGravityRelatedHeight},
 
     {EPSG_NAME_METHOD_VERTICAL_OFFSET_AND_SLOPE,
      EPSG_CODE_METHOD_VERTICAL_OFFSET_AND_SLOPE, nullptr, nullptr, nullptr,

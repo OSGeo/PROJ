@@ -3475,6 +3475,7 @@ bool SingleOperation::exportToPROJStringGeneric(
     bool fifteenParamsTransform = false;
     const auto &l_method = method();
     const auto &methodName = l_method->nameStr();
+    const bool isMethodInverseOf = starts_with(methodName, INVERSE_OF);
     const auto paramCount = parameterValues().size();
     const bool l_isTimeDependent = isTimeDependent(methodName);
     const bool isPositionVector =
@@ -3863,7 +3864,7 @@ bool SingleOperation::exportToPROJStringGeneric(
             parameterValueNumeric(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET,
                                   common::UnitOfMeasure::ARC_SECOND);
         double offsetHeight =
-            parameterValueNumericAsSI(EPSG_CODE_PARAMETER_GEOID_UNDULATION);
+            parameterValueNumericAsSI(EPSG_CODE_PARAMETER_GEOID_HEIGHT);
 
         auto sourceCRSGeog =
             dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
@@ -4023,6 +4024,65 @@ bool SingleOperation::exportToPROJStringGeneric(
         return true;
     }
 
+    if (methodEPSGCode ==
+            EPSG_CODE_METHOD_GEOGRAPHIC3D_TO_GRAVITYRELATEDHEIGHT ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_GEOGRAPHIC3D_TO_GEOG2D_GRAVITYRELATEDHEIGHT) {
+        const crs::CRS *tgtCRS = targetCRS().get();
+        auto targetCRSVert = dynamic_cast<const crs::VerticalCRS *>(tgtCRS);
+        if (!targetCRSVert) {
+            throw io::FormattingException(
+                "Can apply Geographic3D to GravityRelatedHeight only to "
+                "VerticalCRS");
+        }
+
+        auto geoidHeight =
+            parameterValueNumericAsSI(EPSG_CODE_PARAMETER_GEOID_HEIGHT);
+
+        if (geoidHeight != 0) {
+            formatter->addStep("affine");
+            // In the forward direction (Geographic3D to GravityRelatedHeight)
+            // we subtract the geoid height
+            formatter->addParam("zoff",
+                                isMethodInverseOf ? geoidHeight : -geoidHeight);
+        }
+
+        targetCRSVert->addLinearUnitConvert(formatter);
+
+        return true;
+    } else if (
+        ci_equal(l_method->nameStr(),
+                 INVERSE_OF +
+                     EPSG_NAME_METHOD_GEOGRAPHIC3D_TO_GRAVITYRELATEDHEIGHT) ||
+        ci_equal(
+            l_method->nameStr(),
+            INVERSE_OF +
+                EPSG_NAME_METHOD_GEOGRAPHIC3D_TO_GEOG2D_GRAVITYRELATEDHEIGHT)) {
+        const crs::CRS *srcCRS = sourceCRS().get();
+        auto sourceCRSVert = dynamic_cast<const crs::VerticalCRS *>(srcCRS);
+        if (!sourceCRSVert) {
+            throw io::FormattingException(
+                "Can apply Inverse of Geographic3D to GravityRelatedHeight "
+                "only to VerticalCRS");
+        }
+
+        auto geoidHeight =
+            parameterValueNumericAsSI(EPSG_CODE_PARAMETER_GEOID_HEIGHT);
+
+        formatter->startInversion();
+        sourceCRSVert->addLinearUnitConvert(formatter);
+        formatter->stopInversion();
+
+        if (geoidHeight != 0) {
+            formatter->addStep("affine");
+            // In the forward direction (Geographic3D to GravityRelatedHeight)
+            // we subtract the geoid height
+            formatter->addParam("zoff", geoidHeight);
+        }
+
+        return true;
+    }
+
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTICAL_OFFSET_AND_SLOPE) {
 
         const crs::CRS *srcCRS = sourceCRS().get();
@@ -4095,8 +4155,6 @@ bool SingleOperation::exportToPROJStringGeneric(
             return true;
         }
     }
-
-    const bool isMethodInverseOf = starts_with(methodName, INVERSE_OF);
 
     const auto &NTv1Filename = _getNTv1Filename(this, true);
     const auto &NTv2Filename = _getNTv2Filename(this, true);
@@ -4186,9 +4244,11 @@ bool SingleOperation::exportToPROJStringGeneric(
                 " " EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN);
         }
         const bool interpIsSrc = interpCRS->_isEquivalentTo(
-            sourceCRS().get(), util::IComparable::Criterion::EQUIVALENT);
+            sourceCRS().get(),
+            util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS);
         const bool interpIsTarget = interpCRS->_isEquivalentTo(
-            targetCRS().get(), util::IComparable::Criterion::EQUIVALENT);
+            targetCRS().get(),
+            util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS);
         if (!interpIsSrc && !interpIsTarget) {
             throw io::FormattingException(
                 "For"

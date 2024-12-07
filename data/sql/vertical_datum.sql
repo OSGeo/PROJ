@@ -270,6 +270,8 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1375','Denmark Lowest Astronomic Tid
 INSERT INTO "usage" VALUES('EPSG','21041','vertical_datum','EPSG','1375','EPSG','4756','EPSG','1198');
 INSERT INTO "vertical_datum" VALUES('EPSG','1378','Greenland Local Mean Sea Level (2022)',NULL,'2022-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','20999','vertical_datum','EPSG','1378','EPSG','3119','EPSG','1142');
+INSERT INTO "vertical_datum" VALUES('EPSG','1381','Saba Vertical Datum',NULL,'2023-04-05',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21862','vertical_datum','EPSG','1381','EPSG','4757','EPSG','1179');
 INSERT INTO "vertical_datum" VALUES('EPSG','1384','Canadian Geodetic Vertical Datum of 1928 (Height Transformation version 2.0)',NULL,'2001-08-15',NULL,NULL,NULL,1997.0,0);
 INSERT INTO "usage" VALUES('EPSG','21632','vertical_datum','EPSG','1384','EPSG','4778','EPSG','1132');
 INSERT INTO "vertical_datum" VALUES('EPSG','1387','Greenland Mean Sea Level (2023)',NULL,'2024-06-18',NULL,NULL,NULL,NULL,0);
