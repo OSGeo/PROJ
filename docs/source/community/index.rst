@@ -15,6 +15,7 @@ contributor the community is always very welcoming.
    contributing
    code_contributions
    code_of_conduct
+   service_providers
    rfc/index
 
 .. Below section commented. to be refreshed for FOSS4G 2023
