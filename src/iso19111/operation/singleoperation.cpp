@@ -2159,7 +2159,6 @@ bool Transformation::isGeographic3DToGravityRelatedHeight(
         "1126", // Vertical change by geoid grid difference (NRCan)
         "1127", // Geographic3D to Depth (gtg)
         "1128", // Geog3D to Geog2D+Depth (gtg)
-        "1129", // Vertical Offset by Grid Interpolation (gtg)
         "1135", // Geog3D to Geog2D+GravityRelatedHeight (NGS bin)
         "9661", // Geographic3D to GravityRelatedHeight (EGM)
         "9662", // Geographic3D to GravityRelatedHeight (Ausgeoid98)
@@ -2312,6 +2311,7 @@ static bool isRegularVerticalGridMethod(int methodEPSGCode,
     return methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ||
            methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_BEV_AT ||
            methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX ||
+           methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_ASC ||
            methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTG ||
            methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_PL_TXT;
 }
