@@ -6059,3 +6059,108 @@ TEST(operation, inverse_of_Geographic3DToGravityRelatedHeight) {
                   PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=affine +zoff=10");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, CoordinateFrameRotationFullMatrixGeog2D) {
+
+    auto wkt =
+        "COORDINATEOPERATION[\"Saba to WGS 84 (1)\",\n"
+        "    VERSION[\"IOGP-Bes Saba\"],\n"
+        "    SOURCECRS[\n"
+        "        GEOGCRS[\"Saba\",\n"
+        "            DATUM[\"Saba\",\n"
+        "                ELLIPSOID[\"International 1924\",6378388,297,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,2],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",10636]]],\n"
+        "    TARGETCRS[\n"
+        "        GEOGCRS[\"WGS 84\",\n"
+        "            ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n"
+        "                MEMBER[\"World Geodetic System 1984 (Transit)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G730)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G873)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G1150)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G2139)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G2296)\"],\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                ENSEMBLEACCURACY[2.0]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,2],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",4326]]],\n"
+        "    METHOD[\"Coordinate Frame rotation full matrix (geog2D)\",\n"
+        "        ID[\"EPSG\",1133]],\n"
+        "    PARAMETER[\"X-axis translation\",1138.7432,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8605]],\n"
+        "    PARAMETER[\"Y-axis translation\",-2064.4761,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8606]],\n"
+        "    PARAMETER[\"Z-axis translation\",110.7016,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8607]],\n"
+        "    PARAMETER[\"X-axis rotation\",-214.615206,\n"
+        "        ANGLEUNIT[\"arc-second\",4.84813681109536E-06],\n"
+        "        ID[\"EPSG\",8608]],\n"
+        "    PARAMETER[\"Y-axis rotation\",479.360036,\n"
+        "        ANGLEUNIT[\"arc-second\",4.84813681109536E-06],\n"
+        "        ID[\"EPSG\",8609]],\n"
+        "    PARAMETER[\"Z-axis rotation\",-164.703951,\n"
+        "        ANGLEUNIT[\"arc-second\",4.84813681109536E-06],\n"
+        "        ID[\"EPSG\",8610]],\n"
+        "    PARAMETER[\"Scale difference\",-402.32073,\n"
+        "        SCALEUNIT[\"parts per million\",1E-06],\n"
+        "        ID[\"EPSG\",8611]],\n"
+        "    OPERATIONACCURACY[1.0]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=intl "
+              "+step +proj=helmert +exact "
+              "+x=1138.7432 +y=-2064.4761 +z=110.7016 "
+              "+rx=-214.615206 +ry=479.360036 +rz=-164.703951 +s=-402.32073 "
+              "+convention=coordinate_frame "
+              "+step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+    EXPECT_EQ(transf->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=WGS84 "
+              "+step +inv +proj=helmert +exact "
+              "+x=1138.7432 +y=-2064.4761 +z=110.7016 "
+              "+rx=-214.615206 +ry=479.360036 +rz=-164.703951 +s=-402.32073 "
+              "+convention=coordinate_frame "
+              "+step +inv +proj=cart +ellps=intl "
+              "+step +proj=pop +v_3 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
