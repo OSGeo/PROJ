@@ -2382,7 +2382,11 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
                 methodEPSGCode ==
                     EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
                 methodEPSGCode ==
+                    EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOCENTRIC ||
+                methodEPSGCode ==
                     EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_2D ||
                 methodEPSGCode ==
                     EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D ||
                 methodEPSGCode ==

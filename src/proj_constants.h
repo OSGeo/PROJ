@@ -410,9 +410,17 @@
     "Coordinate Frame rotation (geocentric domain)"
 #define EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC 1032
 
+#define EPSG_NAME_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOCENTRIC               \
+    "Coordinate Frame rotation full matrix (geocen)"
+#define EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOCENTRIC 1132
+
 #define EPSG_NAME_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D                        \
     "Coordinate Frame rotation (geog2D domain)"
 #define EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D 9607
+
+#define EPSG_NAME_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_2D            \
+    "Coordinate Frame rotation full matrix (geog2D)"
+#define EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_2D 1133
 
 #define EPSG_NAME_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D                        \
     "Coordinate Frame rotation (geog3D domain)"
