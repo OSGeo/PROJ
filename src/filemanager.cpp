@@ -143,6 +143,8 @@ std::string File::read_line(size_t maxLen, bool &maxLenReached,
 
 // ---------------------------------------------------------------------------
 
+#if !USE_ONLY_EMBEDDED_RESOURCE_FILES
+
 #ifdef _WIN32
 
 /* The bulk of utf8towc()/utf8fromwc() is derived from the utf.c module from
@@ -805,6 +807,8 @@ std::unique_ptr<File> FileStdio::open(PJ_CONTEXT *ctx, const char *filename,
 
 #endif // _WIN32
 
+#endif // !USE_ONLY_EMBEDDED_RESOURCE_FILES
+
 // ---------------------------------------------------------------------------
 
 class FileApiAdapter : public File {
@@ -893,6 +897,80 @@ std::unique_ptr<File> FileApiAdapter::open(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+#if EMBED_RESOURCE_FILES
+
+class FileMemory : public File {
+    PJ_CONTEXT *m_ctx;
+    const unsigned char *const m_data;
+    const size_t m_size;
+    size_t m_pos = 0;
+
+    FileMemory(const FileMemory &) = delete;
+    FileMemory &operator=(const FileMemory &) = delete;
+
+  protected:
+    FileMemory(const std::string &filename, PJ_CONTEXT *ctx,
+               const unsigned char *data, size_t size)
+        : File(filename), m_ctx(ctx), m_data(data), m_size(size) {}
+
+  public:
+    size_t read(void *buffer, size_t sizeBytes) override;
+    size_t write(const void *, size_t) override;
+    bool seek(unsigned long long offset, int whence = SEEK_SET) override;
+    unsigned long long tell() override { return m_pos; }
+    void reassign_context(PJ_CONTEXT *ctx) override { m_ctx = ctx; }
+
+    bool hasChanged() const override { return false; }
+
+    static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename,
+                                      FileAccess access,
+                                      const unsigned char *data, size_t size) {
+        if (access != FileAccess::READ_ONLY)
+            return nullptr;
+        return std::unique_ptr<File>(new FileMemory(filename, ctx, data, size));
+    }
+};
+
+size_t FileMemory::read(void *buffer, size_t sizeBytes) {
+    if (m_pos >= m_size)
+        return 0;
+    if (sizeBytes >= m_size - m_pos) {
+        const size_t bytesToCopy = m_size - m_pos;
+        memcpy(buffer, m_data + m_pos, bytesToCopy);
+        m_pos = m_size;
+        return bytesToCopy;
+    }
+    memcpy(buffer, m_data + m_pos, sizeBytes);
+    m_pos += sizeBytes;
+    return sizeBytes;
+}
+
+size_t FileMemory::write(const void *, size_t) {
+    // shouldn't happen given we have bailed out in open() in non read-only
+    // modes
+    return 0;
+}
+
+bool FileMemory::seek(unsigned long long offset, int whence) {
+    if (whence == SEEK_SET) {
+        m_pos = static_cast<size_t>(offset);
+        return m_pos == offset;
+    } else if (whence == SEEK_CUR) {
+        const unsigned long long newPos = m_pos + offset;
+        m_pos = static_cast<size_t>(newPos);
+        return m_pos == newPos;
+    } else {
+        if (offset != 0)
+            return false;
+        m_pos = m_size;
+        return true;
+    }
+}
+
+#endif
+
+// ---------------------------------------------------------------------------
+
 std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename,
                                         FileAccess access) {
     if (starts_with(filename, "http://") || starts_with(filename, "https://")) {
@@ -909,11 +987,31 @@ std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename,
     if (ctx->fileApi.open_cbk != nullptr) {
         return FileApiAdapter::open(ctx, filename, access);
     }
+
+    std::unique_ptr<File> ret;
+#if !(EMBED_RESOURCE_FILES && USE_ONLY_EMBEDDED_RESOURCE_FILES)
 #ifdef _WIN32
-    return FileWin32::open(ctx, filename, access);
+    ret = FileWin32::open(ctx, filename, access);
 #else
-    return FileStdio::open(ctx, filename, access);
+    ret = FileStdio::open(ctx, filename, access);
 #endif
+#endif
+
+#if EMBED_RESOURCE_FILES
+#if USE_ONLY_EMBEDDED_RESOURCE_FILES
+    if (!ret)
+#endif
+    {
+        unsigned int size = 0;
+        const unsigned char *in_memory_data =
+            pj_get_embedded_resource(filename, &size);
+        if (in_memory_data) {
+            ret = FileMemory::open(ctx, filename, access, in_memory_data, size);
+        }
+    }
+#endif
+
+    return ret;
 }
 
 // ---------------------------------------------------------------------------
@@ -1574,6 +1672,24 @@ static void *pj_open_lib_internal(
             errno = 0;
         }
 
+#if EMBED_RESOURCE_FILES
+        if (!fid && fname != name && name[0] != '.' && name[0] != '/' &&
+            name[0] != '~' && !starts_with(name, "http://") &&
+            !starts_with(name, "https://")) {
+            fid = open_file(ctx, name, mode);
+            if (fid) {
+                if (out_full_filename != nullptr &&
+                    out_full_filename_size > 0) {
+                    // cppcheck-suppress nullPointer
+                    strncpy(out_full_filename, name, out_full_filename_size);
+                    out_full_filename[out_full_filename_size - 1] = '\0';
+                }
+                fname = name;
+                errno = 0;
+            }
+        }
+#endif
+
         if (ctx->last_errno == 0 && errno != 0)
             proj_context_errno_set(ctx, errno);
 
@@ -1870,20 +1986,9 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
 
     ctx->iniFileLoaded = true;
     std::string content;
-    std::unique_ptr<NS_PROJ::File> file;
-#ifndef USE_ONLY_EMBEDDED_RESOURCE_FILES
-    file.reset(reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
-        ctx, "proj.ini", "rb", pj_open_file_with_manager, nullptr, 0)));
-#endif
-    if (!file) {
-#ifdef EMBED_RESOURCE_FILES
-        unsigned int content_size = 0;
-        const char *c_content = pj_get_embedded_proj_ini(&content_size);
-        content.assign(c_content, content_size);
-#else
-        return;
-#endif
-    }
+    auto file = std::unique_ptr<NS_PROJ::File>(
+        reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
+            ctx, "proj.ini", "rb", pj_open_file_with_manager, nullptr, 0)));
     if (file) {
         file->seek(0, SEEK_END);
         const auto filesize = file->tell();

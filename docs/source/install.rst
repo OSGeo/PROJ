@@ -450,19 +450,35 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
     .. versionadded:: 9.6
 
+    When ON, :file:`proj.db`, :file:`proj.ini` and ITRF resource files will be
+    embedded into the PROJ library.
     Default is OFF for shared library builds (BUILD_SHARED_LIBS=ON), and ON
     for static library builds (BUILD_SHARED_LIBS=OFF).
-    When ON, :file:`proj.db` and :file:`proj.ini` will be embedded into the PROJ library.
+
+.. option:: EMBED_GRIDS_DIRECTORY=<directory>
+
+    .. versionadded:: 9.6
+
+    Embed files from <directory> ending with .tif or .json in the PROJ library itself.
+
+    The pointed directory can potentially be the full PROJ-data package (uncompressed).
+    In that case, about 6 GB of free disk and 16 GB of RAM are required to build PROJ.
+
+    When using this parameter, EMBED_RESOURCE_FILES must be set to ON.
+
+    If the content of the directory changes, you need to run CMake again to
+    update the list of files.
 
 .. option:: USE_ONLY_EMBEDDED_RESOURCE_FILES=ON/OFF
 
     .. versionadded:: 9.6
 
     Even if EMBED_RESOURCE_FILES=ON, by default PROJ will still try to locate
-    :file:`proj.db` and :file:`proj.ini` on the file system, and fallback to the
-    embedded version if not found.
+    :file:`proj.db`, :file:`proj.ini`, ITRF resource files or grid files on the
+    file system, and fallback to the embedded version if not found.
     By setting USE_ONLY_EMBEDDED_RESOURCE_FILES=ON, no attempt at locating
-    those files on the file system is made. Default is OFF.
+    those files on the file system is made.
+    Default is OFF.
     Users will also typically want to set EMBED_PROJ_DATA_PATH=OFF if setting
     USE_ONLY_EMBEDDED_RESOURCE_FILES=OFF.
 

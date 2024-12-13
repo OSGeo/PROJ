@@ -6,7 +6,9 @@ extern "C" {
 #endif
 
 const unsigned char *pj_get_embedded_proj_db(unsigned int *pnSize);
-const char *pj_get_embedded_proj_ini(unsigned int *pnSize);
+
+const unsigned char *pj_get_embedded_resource(const char *filename,
+                                              unsigned int *pnSize);
 
 #ifdef __cplusplus
 }

@@ -15,20 +15,6 @@ set(PROJ_INI
   proj.ini
 )
 
-set(PROJ_DICTIONARY
-  world
-  other.extra
-  nad27
-  GL27
-  nad83
-  nad.lst
-  CH
-  ITRF2000
-  ITRF2008
-  ITRF2014
-  ITRF2020
-)
-
 #
 # gridshift file
 #
@@ -111,14 +97,13 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/conus "${CMAKE_CURRENT_BINARY_D
 #install
 #
 set(ALL_DATA_FILE
-  ${PROJ_DICTIONARY}
   ${GRIDSHIFT_FILES}
   ${SCHEMA_FILES}
   ${GEOTIFF_FILES}
 )
 
 if (NOT USE_ONLY_EMBEDDED_RESOURCE_FILES)
-    list(APPEND ALL_DATA_FILE ${PROJ_INI} ${PROJ_DB})
+    list(APPEND ALL_DATA_FILE ${PROJ_INI} ${PROJ_DB} ${PROJ_DICTIONARY})
 endif()
 
 install(
