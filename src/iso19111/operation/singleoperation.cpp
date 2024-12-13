@@ -3473,6 +3473,7 @@ bool SingleOperation::exportToPROJStringGeneric(
     bool sevenParamsTransform = false;
     bool threeParamsTransform = false;
     bool fifteenParamsTransform = false;
+    bool fullMatrix = false;
     const auto &l_method = method();
     const auto &methodName = l_method->nameStr();
     const bool isMethodInverseOf = starts_with(methodName, INVERSE_OF);
@@ -3484,10 +3485,19 @@ bool SingleOperation::exportToPROJStringGeneric(
     const bool isCoordinateFrame =
         ci_find(methodName, "Coordinate Frame") != std::string::npos ||
         ci_find(methodName, "CF") != std::string::npos;
-    if ((paramCount == 7 && isCoordinateFrame && !l_isTimeDependent) ||
-        methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
-        methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-        methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D) {
+    if (methodEPSGCode ==
+            EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOCENTRIC ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_2D) {
+        positionVectorConvention = false;
+        sevenParamsTransform = true;
+        fullMatrix = true;
+    } else if ((paramCount == 7 && isCoordinateFrame && !l_isTimeDependent) ||
+               methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
+               methodEPSGCode ==
+                   EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+               methodEPSGCode ==
+                   EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D) {
         positionVectorConvention = false;
         sevenParamsTransform = true;
     } else if (
@@ -3558,6 +3568,8 @@ bool SingleOperation::exportToPROJStringGeneric(
         }
 
         formatter->addStep("helmert");
+        if (fullMatrix)
+            formatter->addParam("exact");
         formatter->addParam("x", x);
         formatter->addParam("y", y);
         formatter->addParam("z", z);
