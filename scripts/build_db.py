@@ -499,6 +499,10 @@ BEGIN
             param_name[order - 1] = parameter_name
             param_value[order - 1] = parameter_value
             param_uom_auth_name[order - 1] = EPSG_AUTHORITY if uom_code else None
+            #if deprecated == 0 and parameter_name == "Scale factor at natural origin" and uom_code == 9001:
+            #    # For Uzbekistan coordinate reference system Transverse Mercator conversions of EPSG v11.024
+            #    print(f"Warning: for conversion {name} / {code}, paching invalid UoM for {parameter_name} from 9001 to 9201")
+            #    uom_code = 9201
             param_uom_code[order - 1] = uom_code
             param_uom_type[order - 1] = uom_type
             expected_order += 1

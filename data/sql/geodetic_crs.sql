@@ -2320,6 +2320,18 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','10672','RGM23 (lon-lat)',NULL,'geograp
 INSERT INTO "usage" VALUES('EPSG','21686','geodetic_crs','EPSG','10672','EPSG','1159','EPSG','1189');
 INSERT INTO "geodetic_crs" VALUES('EPSG','10673','RGM23 (lon-lat)',NULL,'geographic 2D','EPSG','6424','EPSG','1389',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','21687','geodetic_crs','EPSG','10673','EPSG','1159','EPSG','1189');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10688','EUREF-FIN',NULL,'geocentric','EPSG','6500','EPSG','1391',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21977','geodetic_crs','EPSG','10688','EPSG','1095','EPSG','1181');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10689','EUREF-FIN',NULL,'geographic 3D','EPSG','6423','EPSG','1391',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','21978','geodetic_crs','EPSG','10689','EPSG','1095','EPSG','1181');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10690','EUREF-FIN',NULL,'geographic 2D','EPSG','6422','EPSG','1391',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22200','geodetic_crs','EPSG','10690','EPSG','1095','EPSG','1183');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10723','UZGD2024',NULL,'geocentric','EPSG','6500','EPSG','1392',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22087','geodetic_crs','EPSG','10723','EPSG','1248','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10724','UZGD2024',NULL,'geographic 3D','EPSG','6423','EPSG','1392',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22088','geodetic_crs','EPSG','10724','EPSG','1248','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','10725','UZGD2024',NULL,'geographic 2D','EPSG','6422','EPSG','1392',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22089','geodetic_crs','EPSG','10725','EPSG','1248','EPSG','1183');
 INSERT INTO "geodetic_crs" VALUES('EPSG','20033','MWC18-IRF',NULL,'geographic 2D','EPSG','6422','EPSG','1324',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18335','geodetic_crs','EPSG','20033','EPSG','4666','EPSG','1141');
 INSERT INTO "geodetic_crs" VALUES('EPSG','20039','SIRGAS-Chile 2021',NULL,'geocentric','EPSG','6500','EPSG','1327',NULL,0);
