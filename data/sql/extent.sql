@@ -1060,7 +1060,7 @@ INSERT INTO "extent" VALUES('EPSG','2080','World - N hemisphere - 60°E to 66°E
 INSERT INTO "extent" VALUES('EPSG','2081','World - S hemisphere - 60°E to 66°E - by country','Between 60°E and 66°E, southern hemisphere between 80°S and equator, onshore and offshore.',-80.0,0.0,60.0,66.0,0);
 INSERT INTO "extent" VALUES('EPSG','2082','World - N hemisphere - 66°E to 72°E - by country','Between 66°E and 72°E, northern hemisphere between equator and 84°N, onshore and offshore. Afghanistan. India. Kazakhstan. Kyrgyzstan. Pakistan. Russian Federation. Tajikistan. Uzbekistan.',0.0,84.0,66.0,72.0,0);
 INSERT INTO "extent" VALUES('EPSG','2083','World - S hemisphere - 66°E to 72°E - by country','Between 66°E and 72°E, southern hemisphere between 80°S and equator, onshore and offshore.',-80.0,0.0,66.0,72.0,0);
-INSERT INTO "extent" VALUES('EPSG','2084','World - N hemisphere - 72°E to 78°E - by country','Between 72°E and 78°E, northern hemisphere between equator and 84°N, onshore and offshore. China. India. Kazakhstan. Kyrgyzstan. Maldives. Pakistan. Russian Federation. Tajikistan.',0.0,84.0,72.0,78.0,0);
+INSERT INTO "extent" VALUES('EPSG','2084','World - N hemisphere - 72°E to 78°E - by country','Between 72°E and 78°E, northern hemisphere between equator and 84°N, onshore and offshore. China. India. Kazakhstan. Kyrgyzstan. Maldives. Pakistan. Russian Federation. Tajikistan. Uzbekistan.',0.0,84.0,72.0,78.0,0);
 INSERT INTO "extent" VALUES('EPSG','2085','World - S hemisphere - 72°E to 78°E - by country','Between 72°E and 78°E, southern hemisphere between 80°S and equator, onshore and offshore.',-80.0,0.0,72.0,78.0,0);
 INSERT INTO "extent" VALUES('EPSG','2086','World - N hemisphere - 78°E to 84°E - by country','Between 78°E and 84°E, northern hemisphere between equator and 84°N, onshore and offshore. China. India. Kazakhstan. Kyrgyzstan. Nepal. Russian Federation. Sri Lanka.',0.0,84.0,78.0,84.0,0);
 INSERT INTO "extent" VALUES('EPSG','2087','World - S hemisphere - 78°E to 84°E - by country','Between 78°E and 84°E, southern hemisphere between 80°S and equator, onshore and offshore.',-80.0,0.0,78.0,84.0,0);
@@ -3756,3 +3756,11 @@ INSERT INTO "extent" VALUES('EPSG','4776','Greenland - offshore','Greenland - of
 INSERT INTO "extent" VALUES('EPSG','4777','Brazil - Porto Alegre municipality','Brazil - Porto Alegre municipality.',-30.27,-29.93,-51.3,-51.01,0);
 INSERT INTO "extent" VALUES('EPSG','4778','Canada - CGVD28(HTv2.0)','Canada - onshore and offshore between 41°N and 84°N and west of 48°W - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.',41.0,84.0,-141.01,-48.0,0);
 INSERT INTO "extent" VALUES('EPSG','4779','Europe - Baltic Sea','Denmark, Estonia, Finland, Germany, Latvia, Lithuania, Norway, Poland, Russia and Sweden - offshore Baltic Sea including Skagerrak east of 8°30''E, Kattegat, Gulf of Bothnia, and Gulf of Finland.',53.88,65.92,8.5,30.23,0);
+INSERT INTO "extent" VALUES('EPSG','4780','Vietnam - offshore','Vietnam - offshore.',5.67,21.45,102.2,112.55,0);
+INSERT INTO "extent" VALUES('EPSG','4781','Finland - west of 24°E','Finland - west of 24°E, onshore and offshore.',58.84,69.33,19.08,24.0,0);
+INSERT INTO "extent" VALUES('EPSG','4782','Finland - 24°E to 30°E','Finland - between 24°E and 30°E, onshore and offshore.',59.64,70.09,23.99,30.0,0);
+INSERT INTO "extent" VALUES('EPSG','4783','Finland - east of 30°E','Finland - east of 30°E.',61.73,67.71,30.0,31.59,0);
+INSERT INTO "extent" VALUES('EPSG','4784','Uzbekistan - west of 60°E','Uzbekistan - west of 60°E.',41.25,45.58,55.99,60.0,0);
+INSERT INTO "extent" VALUES('EPSG','4785','Uzbekistan - 60°E to 66°E','Uzbekistan - between 60°E and 66°E.',38.22,44.82,60.0,66.0,0);
+INSERT INTO "extent" VALUES('EPSG','4786','Uzbekistan - 66°E to 72°E','Uzbekistan - between 66°E and 72°E.',37.18,43.0,66.0,72.0,0);
+INSERT INTO "extent" VALUES('EPSG','4787','Uzbekistan - east of 72°E','Uzbekistan - east of 72°E.',40.26,41.21,72.0,73.17,0);

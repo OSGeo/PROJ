@@ -40,6 +40,20 @@ INSERT INTO "usage" VALUES(
     'EPSG','1024'  -- unknown
 );
 
+INSERT INTO "concatenated_operation" VALUES('PROJ','KKJ_TO_EUREF_FIN','KKJ to EUREF-FIN (using PROJ:YKJ_TO_ETRS35FIN)','Transformation based on a triangulated irregular network','EPSG','4123','EPSG','10690',NULL,NULL,0);
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','KKJ_TO_EUREF_FIN',1,'EPSG','18193');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','KKJ_TO_EUREF_FIN',2,'PROJ','YKJ_TO_ETRS35FIN');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','KKJ_TO_EUREF_FIN',3,'EPSG','16065');
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'KKJ_TO_EUREF_FIN_USAGE',
+    'concatenated_operation',
+    'PROJ',
+    'KKJ_TO_EUREF_FIN',
+    'EPSG','3333', -- extent
+    'EPSG','1024'  -- unknown
+);
+
 INSERT INTO other_transformation VALUES(
     'PROJ','N43_TO_N60','N43 height to N60 height',
     'Transformation based on a triangulated irregular network',
