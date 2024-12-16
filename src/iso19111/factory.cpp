@@ -6281,7 +6281,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     .set(common::IdentifiedObject::NAME_KEY, method_name);
 
             std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
-            if (!accuracy.empty()) {
+            if (!accuracy.empty() && accuracy != "999.0") {
                 accuracies.emplace_back(
                     metadata::PositionalAccuracy::create(accuracy));
             }
@@ -6393,7 +6393,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     .set(common::IdentifiedObject::NAME_KEY, method_name);
 
             std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
-            if (!accuracy.empty()) {
+            if (!accuracy.empty() && accuracy != "999.0") {
                 accuracies.emplace_back(
                     metadata::PositionalAccuracy::create(accuracy));
             }
@@ -6531,7 +6531,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             }
 
             std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
-            if (!accuracy.empty()) {
+            if (!accuracy.empty() && accuracy != "999.0") {
                 accuracies.emplace_back(
                     metadata::PositionalAccuracy::create(accuracy));
             }
@@ -6646,8 +6646,10 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
 
             std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
             if (!accuracy.empty()) {
-                accuracies.emplace_back(
-                    metadata::PositionalAccuracy::create(accuracy));
+                if (accuracy != "999.0") {
+                    accuracies.emplace_back(
+                        metadata::PositionalAccuracy::create(accuracy));
+                }
             } else {
                 // Try to compute a reasonable accuracy from the members
                 double totalAcc = -1;
