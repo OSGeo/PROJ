@@ -169,6 +169,9 @@ VALUES
 ('eur_nkg_nkgrf17vel.tif','eur_nkg_nkgrf17vel.tif',NULL,'GTiff','velocity_grid',0,NULL,'https://cdn.proj.org/eur_nkg_nkgrf17vel.tif',1,1,NULL),
 
 -- fi_nls - National Land Survey of Finland (MML)
+('fi_nls_fin2000.tif','fi_nls_fin2000.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fi_nls_fin2000.tif',1,1,NULL),
+('fi_nls_fin2005n00.tif','fi_nls_fin2005n00.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fi_nls_fin2005n00.tif',1,1,NULL),
+('fi_nls_fin2023n2000.tif','fi_nls_fin2023n2000.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fi_nls_fin2023n2000.tif',1,1,NULL),
 ('fi_nls_n43_n60.json','fi_nls_n43_n60.json',NULL,'JSON','tinshift',0,NULL,'https://cdn.proj.org/fi_nls_n43_n60.json',1,1,NULL),
 ('fi_nls_n60_n2000.json','fi_nls_n60_n2000.json',NULL,'JSON','tinshift',0,NULL,'https://cdn.proj.org/fi_nls_n60_n2000.json',1,1,NULL),
 ('fi_nls_ykj_etrs35fin.json','fi_nls_ykj_etrs35fin.json',NULL,'JSON','tinshift',0,NULL,'https://cdn.proj.org/fi_nls_ykj_etrs35fin.json',1,1,NULL),
