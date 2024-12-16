@@ -833,11 +833,11 @@ CREATE TABLE grid_transformation(
 
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
-    CONSTRAINT pk_grid_transformation PRIMARY KEY (auth_name, code),
+    CONSTRAINT pk_grid_transformation PRIMARY KEY (auth_name, code)
     --CONSTRAINT fk_grid_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code) ON DELETE CASCADE,
     --CONSTRAINT fk_grid_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code) ON DELETE CASCADE,
     --CONSTRAINT fk_grid_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code) ON DELETE CASCADE,
-    CONSTRAINT fk_grid_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code) ON DELETE CASCADE
+    -- CONSTRAINT fk_grid_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES crs_view(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 -- Table that describe packages/archives that contain several grids

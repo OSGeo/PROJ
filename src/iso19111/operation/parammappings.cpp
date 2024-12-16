@@ -1035,6 +1035,8 @@ const struct MethodNameCode methodNameCodesList[] = {
     METHOD_NAME_CODE(VERTICAL_OFFSET_AND_SLOPE),
     METHOD_NAME_CODE(NTV2),
     METHOD_NAME_CODE(NTV1),
+    METHOD_NAME_CODE(VERTICAL_OFFSET_BY_TIN_INTERPOLATION_JSON),
+    METHOD_NAME_CODE(CARTESIAN_GRID_OFFSETS_BY_TIN_INTERPOLATION_JSON),
     METHOD_NAME_CODE(NADCON),
     METHOD_NAME_CODE(NADCON5_2D),
     METHOD_NAME_CODE(NADCON5_3D),
@@ -1486,6 +1488,13 @@ static const ParamMapping *const paramsPoleRotationNetCDFCFConvention[] = {
     &paramGridNorthPoleLatitudeNetCDF, &paramGridNorthPoleLongitudeNetCDF,
     &paramNorthPoleGridLongitudeNetCDF, nullptr};
 
+static const ParamMapping paramTINOffsetFile = {
+    EPSG_NAME_PARAMETER_TIN_OFFSET_FILE, EPSG_CODE_PARAMETER_TIN_OFFSET_FILE,
+    nullptr, common::UnitOfMeasure::Type::NONE, nullptr};
+
+static const ParamMapping *const paramsTINOffsetFile[] = {&paramTINOffsetFile,
+                                                          nullptr};
+
 static const MethodMapping gOtherMethodMappings[] = {
     {EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT,
      EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT, nullptr, nullptr, nullptr,
@@ -1645,6 +1654,14 @@ static const MethodMapping gOtherMethodMappings[] = {
     {EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN,
      EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN, nullptr,
      nullptr, nullptr, paramsGeocentricTranslationGridInterpolationIGN},
+
+    {EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_TIN_INTERPOLATION_JSON,
+     EPSG_CODE_METHOD_VERTICAL_OFFSET_BY_TIN_INTERPOLATION_JSON, nullptr,
+     nullptr, nullptr, paramsTINOffsetFile},
+
+    {EPSG_NAME_METHOD_CARTESIAN_GRID_OFFSETS_BY_TIN_INTERPOLATION_JSON,
+     EPSG_CODE_METHOD_CARTESIAN_GRID_OFFSETS_BY_TIN_INTERPOLATION_JSON, nullptr,
+     nullptr, nullptr, paramsTINOffsetFile},
 
     {EPSG_NAME_METHOD_NADCON, EPSG_CODE_METHOD_NADCON, nullptr, nullptr,
      nullptr, paramsNADCON},
