@@ -569,36 +569,73 @@ void ConcatenatedOperation::fixStepsDirection(
                 auto newOp(Conversion::createGeographicGeocentric(
                     NN_NO_CHECK(prevOpTarget), NN_NO_CHECK(l_targetCRS)));
                 operationsInOut.insert(operationsInOut.begin() + i, newOp);
-                // Particular case for https://github.com/OSGeo/PROJ/issues/3819
-                // where the antepenultimate transformation goes to A
-                // (geographic 3D) // and the last transformation is a NADCON 3D
-                // but between A (geographic 2D) to B (geographic 2D), and the
-                // concatenated transformation target CRS is B (geographic 3D)
-                // This is due to an oddity of the EPSG database that registers
-                // the NADCON 3D transformation between the 2D geographic CRS
-                // and not the 3D ones.
-            } else if (i + 1 == operationsInOut.size() &&
-                       l_sourceCRS->nameStr() == prevOpTarget->nameStr() &&
-                       l_targetCRS->nameStr() == concatOpTargetCRS->nameStr() &&
-                       isGeographic(l_targetCRS.get()) &&
-                       isGeographic(concatOpTargetCRS.get()) &&
-                       isGeographic(l_sourceCRS.get()) &&
-                       isGeographic(prevOpTarget.get()) &&
-                       dynamic_cast<const crs::GeographicCRS *>(
-                           prevOpTarget.get())
-                               ->coordinateSystem()
-                               ->axisList()
-                               .size() == 3 &&
-                       dynamic_cast<const crs::GeographicCRS *>(
-                           l_sourceCRS.get())
-                               ->coordinateSystem()
-                               ->axisList()
-                               .size() == 2 &&
-                       dynamic_cast<const crs::GeographicCRS *>(
-                           l_targetCRS.get())
-                               ->coordinateSystem()
-                               ->axisList()
-                               .size() == 2) {
+            } else if (i == 0 &&
+                       concatOpSourceCRS->nameStr() == l_targetCRS->nameStr() &&
+                       isGeographic(concatOpSourceCRS.get()) &&
+                       isGeographic(l_sourceCRS.get())) {
+                // Particular case for EPSG:10675 "BES2020 to Saba height"
+                op = op->inverse();
+
+                // This logic to convert between Geog2D <--> Geog3D could
+                // potentiall by generalized...
+                operationsInOut.insert(
+                    operationsInOut.begin(),
+                    NN_CHECK_ASSERT(
+                        CoordinateOperationFactory::create()->createOperation(
+                            concatOpSourceCRS, NN_NO_CHECK(l_targetCRS))));
+
+                // This logic to convert between Geog2D <--> Geog3D could
+                // potentiall by generalized...
+                if (operationsInOut.size() >= 3 &&
+                    operationsInOut[1]->targetCRS() &&
+                    operationsInOut[2]->sourceCRS() &&
+                    !areCRSMoreOrLessEquivalent(
+                        operationsInOut[1]->targetCRS().get(),
+                        operationsInOut[2]->sourceCRS().get()) &&
+                    operationsInOut[1]->targetCRS()->nameStr() ==
+                        operationsInOut[2]->sourceCRS()->nameStr() &&
+                    isGeographic(operationsInOut[1]->targetCRS().get()) &&
+                    isGeographic(operationsInOut[2]->sourceCRS().get())) {
+                    operationsInOut.insert(
+                        operationsInOut.begin() + 2,
+                        NN_CHECK_ASSERT(
+                            CoordinateOperationFactory::create()
+                                ->createOperation(
+                                    NN_NO_CHECK(
+                                        operationsInOut[1]->targetCRS()),
+                                    NN_NO_CHECK(
+                                        operationsInOut[2]->sourceCRS()))));
+                }
+            }
+            // Particular case for https://github.com/OSGeo/PROJ/issues/3819
+            // where the antepenultimate transformation goes to A
+            // (geographic 3D)
+            // and the last transformation is a NADCON 3D
+            // but between A (geographic 2D) to B (geographic 2D), and the
+            // concatenated transformation target CRS is B (geographic 3D)
+            // This is due to an oddity of the EPSG database that registers
+            // the NADCON 3D transformation between the 2D geographic CRS
+            // and not the 3D ones.
+            else if (i + 1 == operationsInOut.size() &&
+                     l_sourceCRS->nameStr() == prevOpTarget->nameStr() &&
+                     l_targetCRS->nameStr() == concatOpTargetCRS->nameStr() &&
+                     isGeographic(l_targetCRS.get()) &&
+                     isGeographic(concatOpTargetCRS.get()) &&
+                     isGeographic(l_sourceCRS.get()) &&
+                     isGeographic(prevOpTarget.get()) &&
+                     dynamic_cast<const crs::GeographicCRS *>(
+                         prevOpTarget.get())
+                             ->coordinateSystem()
+                             ->axisList()
+                             .size() == 3 &&
+                     dynamic_cast<const crs::GeographicCRS *>(l_sourceCRS.get())
+                             ->coordinateSystem()
+                             ->axisList()
+                             .size() == 2 &&
+                     dynamic_cast<const crs::GeographicCRS *>(l_targetCRS.get())
+                             ->coordinateSystem()
+                             ->axisList()
+                             .size() == 2) {
                 const auto transf =
                     dynamic_cast<const Transformation *>(op.get());
                 if (transf &&
@@ -618,10 +655,20 @@ void ConcatenatedOperation::fixStepsDirection(
         auto l_sourceCRS = operationsInOut.front()->sourceCRS();
         if (l_sourceCRS && !areCRSMoreOrLessEquivalent(
                                l_sourceCRS.get(), concatOpSourceCRS.get())) {
-            throw InvalidOperation("The source CRS of the first step of "
-                                   "concatenated operation is not the same "
-                                   "as the source CRS of the concatenated "
-                                   "operation itself");
+            if (l_sourceCRS->nameStr() == concatOpSourceCRS->nameStr() &&
+                ((isGeographic(l_sourceCRS.get()) &&
+                  isGeocentric(concatOpSourceCRS.get())) ||
+                 (isGeocentric(l_sourceCRS.get()) &&
+                  isGeographic(concatOpSourceCRS.get())))) {
+                auto newOp(Conversion::createGeographicGeocentric(
+                    NN_NO_CHECK(l_sourceCRS), concatOpSourceCRS));
+                operationsInOut.push_back(newOp);
+            } else {
+                throw InvalidOperation("The source CRS of the first step of "
+                                       "concatenated operation is not the same "
+                                       "as the source CRS of the concatenated "
+                                       "operation itself");
+            }
         }
 
         auto l_targetCRS = operationsInOut.back()->targetCRS();

@@ -495,3 +495,5 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','10496','ETRS89 + DVR90(2013)
 INSERT INTO "usage" VALUES('EPSG','20516','concatenated_operation','EPSG','10496','EPSG','1080','EPSG','1273');
 INSERT INTO "concatenated_operation" VALUES('EPSG','10616','SRGI2013 + INAGeoid2020 v1 height to SRGI2013 + INAGeoid v2 height (1)','In central Java INAGeoid2020 v2 height minus INAGeoid2020 v1 height is approximately +0.2m (v1 surface is above the v2 surface). This difference varies significantly across Indonesia.','EPSG','9529','EPSG','20043',0.2,'BIG-Idn 2022',0);
 INSERT INTO "usage" VALUES('EPSG','21321','concatenated_operation','EPSG','10616','EPSG','1122','EPSG','1178');
+INSERT INTO "concatenated_operation" VALUES('EPSG','10675','BES2020 to Saba height (1)','Although documented with source and target CRSs in the geog2D domain, step 1 is a 3D transformation in which implicit concatenated operations through geocentric Cartesian coordinates should be used. Refer to EPSG Guidance Notes 7-1 and 7-2.','EPSG','10638','EPSG','10642',0.1,'NSDI-Bes 2023',0);
+INSERT INTO "usage" VALUES('EPSG','21877','concatenated_operation','EPSG','10675','EPSG','4757','EPSG','1133');

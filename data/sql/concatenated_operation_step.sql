@@ -504,3 +504,5 @@ INSERT INTO "concatenated_operation_step" VALUES('EPSG','10496',1,'EPSG','10492'
 INSERT INTO "concatenated_operation_step" VALUES('EPSG','10496',2,'EPSG','10494');
 INSERT INTO "concatenated_operation_step" VALUES('EPSG','10616',1,'EPSG','9629');
 INSERT INTO "concatenated_operation_step" VALUES('EPSG','10616',2,'EPSG','10145');
+INSERT INTO "concatenated_operation_step" VALUES('EPSG','10675',1,'EPSG','10646');
+INSERT INTO "concatenated_operation_step" VALUES('EPSG','10675',2,'EPSG','10657');

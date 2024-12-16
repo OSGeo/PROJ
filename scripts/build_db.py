@@ -930,13 +930,6 @@ def fill_concatenated_operation(proj_db_cursor):
         expected_order = 1
         steps_code = []
 
-        # FIXME: https://epsg.org/concatenated-operation_10675/BES2020-to-Saba-height-1.html ill defined in EPSG 11.023
-        # due to first step referencing BES2020 Saba geographic 2D (EPSG:10639), but source CRS of concatenated
-        # operation referencing BES2020 Saba geographic 3D (EPSG:10638)
-        if code == 10675:
-            print("FIXME! Skipping EPSG:10675 'BES2020 to Saba height (1)' for now")
-            continue
-
         iterator = proj_db_cursor.execute("SELECT op_path_step, single_operation_code FROM epsg_coordoperationpath WHERE concat_operation_code = ? ORDER BY op_path_step", (code,))
         for (order, single_operation_code) in iterator:
             assert order == expected_order

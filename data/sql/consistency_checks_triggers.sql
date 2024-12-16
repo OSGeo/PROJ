@@ -611,6 +611,25 @@ FOR EACH ROW BEGIN
             AND concat_op.source_crs_auth_name = step_op.target_crs_auth_name
             AND concat_op.source_crs_code = step_op.target_crs_code)
 
+        -- same as above, but check by CRS name, and only for geodetic CRS.
+        -- For example the concatenated operation EPSG:10675 ("BES2020 to Saba height (1)")
+        -- has EPSG:10638 "BES2020" (geographic 3D) as source CRS
+        -- but its first step is EPSG:10646 ("Saba to BES2020 Saba (1)") which has
+        -- EPSG:10639 "BES2020" (geographic 2D) as target CRS !
+        AND NOT EXISTS (
+            SELECT 1 FROM coordinate_operation_view step_op
+            LEFT JOIN concatenated_operation concat_op ON
+            concat_op.auth_name = NEW.operation_auth_name AND concat_op.code = NEW.operation_code
+            LEFT JOIN geodetic_crs concat_op_source_crs ON
+            concat_op_source_crs.auth_name = concat_op.source_crs_auth_name
+            AND concat_op_source_crs.code = concat_op.source_crs_code
+            LEFT JOIN geodetic_crs step_op_target_crs ON
+            step_op_target_crs.auth_name = step_op.target_crs_auth_name
+            AND step_op_target_crs.code = step_op.target_crs_code
+            WHERE concat_op.deprecated = 0
+            AND step_op.auth_name = NEW.step_auth_name AND step_op.code = NEW.step_code
+            AND concat_op_source_crs.name = step_op_target_crs.name)
+
         -- or if source_crs of step 1 is a conversion
         AND NOT EXISTS (
             SELECT 1 FROM conversion_table step_op
