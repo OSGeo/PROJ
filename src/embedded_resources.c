@@ -1,7 +1,11 @@
 #include "embedded_resources.h"
 
 #if USE_SHARP_EMBED
+
+#include "PROJ_DB_SQL_MD5.h"
+
 const unsigned char *pj_get_embedded_proj_db(unsigned int *pnSize) {
+    (void)PROJ_DB_SQL_MD5;
     static const unsigned char proj_db[] = {
 #embed PROJ_DB
     };

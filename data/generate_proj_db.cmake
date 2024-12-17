@@ -28,6 +28,8 @@ endfunction()
 
 generate_all_sql_in("${ALL_SQL_IN}" OFF PROJ_DB_SQL_MD5)
 
+file(WRITE "${DATA_BINARY_DIR}/PROJ_DB_SQL_MD5.h" "const char* PROJ_DB_SQL_MD5=\"${PROJ_DB_SQL_MD5}\";\n")
+
 if (NOT "${PROJ_DB_SQL_MD5}" STREQUAL "${PROJ_DB_SQL_EXPECTED_MD5}")
     message(WARNING "all.sql.in content has changed. Running extra validation checks when building proj.db...")
 
