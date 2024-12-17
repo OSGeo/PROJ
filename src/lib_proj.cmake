@@ -401,7 +401,14 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
     PROPERTIES COMPILE_FLAGS ${FP_PRECISE})
 endif()
 
-if (EMBED_RESOURCE_FILES AND NOT IS_SHARP_EMBED_AVAILABLE_RES)
+if (EMBED_RESOURCE_FILES)
+  add_library(proj_resources OBJECT embedded_resources.c)
+  add_dependencies(proj_resources generate_proj_db)
+  option(PROJ_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE "Set ON to produce -fPIC code" ${BUILD_SHARED_LIBS})
+  set_property(TARGET proj_resources PROPERTY POSITION_INDEPENDENT_CODE ${PROJ_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE})
+  target_sources(proj PRIVATE $<TARGET_OBJECTS:proj_resources>)
+
+  if (NOT IS_SHARP_EMBED_AVAILABLE_RES)
     set(EMBEDDED_PROJ_DB "file_embed/proj_db.c")
     add_custom_command(
         OUTPUT "${EMBEDDED_PROJ_DB}"
@@ -411,29 +418,81 @@ if (EMBED_RESOURCE_FILES AND NOT IS_SHARP_EMBED_AVAILABLE_RES)
         -P ${PROJECT_SOURCE_DIR}/cmake/FileEmbed.cmake
         DEPENDS generate_proj_db "${PROJECT_BINARY_DIR}/data/proj.db"
     )
-    target_sources(proj PRIVATE embedded_resources.c "${EMBEDDED_PROJ_DB}")
-
-    set(EMBEDDED_PROJ_INI "file_embed/proj_ini.c")
-    add_custom_command(
-        OUTPUT "${EMBEDDED_PROJ_INI}"
-        COMMAND ${CMAKE_COMMAND}
-        -DRUN_FILE_EMBED_GENERATE=1
-        "-DFILE_EMBED_GENERATE_PATH=${PROJECT_SOURCE_DIR}/data/proj.ini"
-        -P ${PROJECT_SOURCE_DIR}/cmake/FileEmbed.cmake
-        DEPENDS "${PROJECT_SOURCE_DIR}/data/proj.ini"
-    )
-    target_sources(proj PRIVATE embedded_resources.c "${EMBEDDED_PROJ_DB}" "${EMBEDDED_PROJ_INI}")
-elseif(EMBED_RESOURCE_FILES AND IS_SHARP_EMBED_AVAILABLE_RES)
-    add_library(proj_resources OBJECT embedded_resources.c)
+    target_sources(proj_resources PRIVATE "${EMBEDDED_PROJ_DB}")
+  else()
+    target_include_directories(proj_resources PRIVATE "${PROJECT_BINARY_DIR}/data")
+    set_source_files_properties(embedded_resources.c OBJECT_DEPENDS ${PROJECT_BINARY_DIR}/data/proj.db)
     target_compile_definitions(proj_resources PRIVATE "PROJ_DB=\"${PROJECT_BINARY_DIR}/data/proj.db\"")
-    target_compile_definitions(proj_resources PRIVATE "PROJ_INI=\"${PROJECT_SOURCE_DIR}/data/proj.ini\"")
     target_compile_definitions(proj_resources PRIVATE USE_SHARP_EMBED)
-    add_dependencies(proj_resources generate_proj_db)
-    option(PROJ_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE "Set ON to produce -fPIC code" ${BUILD_SHARED_LIBS})
-    set_property(TARGET proj_resources PROPERTY POSITION_INDEPENDENT_CODE ${PROJ_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE})
     set_target_properties(proj_resources PROPERTIES C_STANDARD 23)
-    target_sources(proj PRIVATE $<TARGET_OBJECTS:proj_resources>)
+  endif()
 endif()
+
+set(EMBED_GRIDS_DIRECTORY "" CACHE PATH "Directory that contains .tif and .json files to embed into libproj")
+set(FILES_TO_EMBED)
+if (EMBED_GRIDS_DIRECTORY)
+    if (NOT EMBED_RESOURCE_FILES)
+        message(FATAL_ERROR "EMBED_RESOURCE_FILES should be set to ON when EMBED_GRIDS_DIRECTORY is set")
+    endif()
+
+    if (NOT IS_DIRECTORY ${EMBED_GRIDS_DIRECTORY})
+        message(FATAL_ERROR "${EMBED_GRIDS_DIRECTORY} is not a valid directory")
+    endif()
+
+    file(GLOB FILES_TO_EMBED "${EMBED_GRIDS_DIRECTORY}/*.tif" "${EMBED_GRIDS_DIRECTORY}/*.json")
+    if (NOT FILES_TO_EMBED)
+        message(FATAL_ERROR "No .tif or .json files found in ${EMBED_GRIDS_DIRECTORY}")
+    endif()
+endif()
+
+if (EMBED_RESOURCE_FILES)
+    list(APPEND FILES_TO_EMBED "../data/proj.ini")
+    foreach(FILE ${PROJ_DICTIONARY})
+        list(APPEND FILES_TO_EMBED "../data/${FILE}")
+    endforeach()
+endif()
+
+if (FILES_TO_EMBED)
+    set(EMBEDDED_RESOURCES_C_PROLOG_CONTENT "")
+    set(EMBEDDED_RESOURCES_C_CONTENT "")
+    string(APPEND EMBEDDED_RESOURCES_C_CONTENT
+        "const unsigned char *pj_get_embedded_resource(const char* filename, unsigned int *pnSize)\n"
+        "{\n")
+    foreach(FILE ${FILES_TO_EMBED})
+        get_filename_component(FILENAME ${FILE} NAME)
+        message(STATUS "Embedding ${FILENAME}")
+        set(C_IDENTIFIER_RESOURCE_NAME "${FILENAME}")
+        string(REPLACE "." "_" C_IDENTIFIER_RESOURCE_NAME "${C_IDENTIFIER_RESOURCE_NAME}")
+        string(REPLACE "-" "_" C_IDENTIFIER_RESOURCE_NAME "${C_IDENTIFIER_RESOURCE_NAME}")
+        set(C_FILENAME "file_embed/${C_IDENTIFIER_RESOURCE_NAME}.c")
+        add_custom_command(
+            OUTPUT "${C_FILENAME}"
+            COMMAND ${CMAKE_COMMAND}
+            -DRUN_FILE_EMBED_GENERATE=1
+            "-DFILE_EMBED_GENERATE_PATH=${FILE}"
+            -P ${PROJECT_SOURCE_DIR}/cmake/FileEmbed.cmake
+            DEPENDS "${FILE}"
+        )
+
+        string(APPEND EMBEDDED_RESOURCES_C_CONTENT
+               "    if (strcmp(filename, \"${FILENAME}\") == 0)\n"
+               "    {\n"
+               "        *pnSize = ${C_IDENTIFIER_RESOURCE_NAME}_size;\n"
+               "        return ${C_IDENTIFIER_RESOURCE_NAME}_data;\n"
+               "    }\n")
+
+        target_sources(proj_resources PRIVATE "${C_FILENAME}")
+
+        string(APPEND EMBEDDED_RESOURCES_C_PROLOG_CONTENT "extern const uint8_t ${C_IDENTIFIER_RESOURCE_NAME}_data[];\n")
+        string(APPEND EMBEDDED_RESOURCES_C_PROLOG_CONTENT "extern const unsigned ${C_IDENTIFIER_RESOURCE_NAME}_size;\n")
+    endforeach()
+    string(APPEND EMBEDDED_RESOURCES_C_CONTENT
+           "    *pnSize = 0;\n"
+           "    return NULL;\n"
+           "}\n")
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/file_embed/embedded_resources.c" "${EMBEDDED_RESOURCES_C_PROLOG_CONTENT}\n${EMBEDDED_RESOURCES_C_CONTENT}")
+endif()
+
 if (EMBED_RESOURCE_FILES)
     target_sources(proj PRIVATE memvfs.c)
     target_compile_definitions(proj PRIVATE EMBED_RESOURCE_FILES)

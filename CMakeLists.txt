@@ -384,6 +384,21 @@ endif()
 ################################################################################
 # Build configured components
 ################################################################################
+
+set(PROJ_DICTIONARY
+  world
+  other.extra
+  nad27
+  GL27
+  nad83
+  nad.lst
+  CH
+  ITRF2000
+  ITRF2008
+  ITRF2014
+  ITRF2020
+)
+
 include_directories(${PROJ_SOURCE_DIR}/src)
 
 add_subdirectory(data)
