@@ -2700,60 +2700,81 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
         }
     }
 
-    if (methodEPSGCode == EPSG_CODE_METHOD_NEW_ZEALAND_DEFORMATION_MODEL) {
-        auto fileParameter =
-            parameterValue(EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
-                           EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
-        if (fileParameter &&
-            fileParameter->type() == ParameterValue::Type::FILENAME) {
+    static const struct {
+        int methodEPSGCode;
+        int gridFilenameParamEPSGCode;
+        const char *gridFilenameParamName;
+    } gridTransformations[] = {
+        {EPSG_CODE_METHOD_NEW_ZEALAND_DEFORMATION_MODEL,
+         EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
+         EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE},
+        {EPSG_CODE_METHOD_CARTESIAN_GRID_OFFSETS_BY_TIN_INTERPOLATION_JSON,
+         EPSG_CODE_PARAMETER_TIN_OFFSET_FILE,
+         EPSG_NAME_PARAMETER_TIN_OFFSET_FILE},
+        {EPSG_CODE_METHOD_VERTICAL_OFFSET_BY_TIN_INTERPOLATION_JSON,
+         EPSG_CODE_PARAMETER_TIN_OFFSET_FILE,
+         EPSG_NAME_PARAMETER_TIN_OFFSET_FILE},
+    };
 
-            const auto &filename = fileParameter->valueFile();
-            if (databaseContext->lookForGridAlternative(
-                    filename, projFilename, projGridFormat, inverseDirection)) {
+    for (const auto &gridTransf : gridTransformations) {
+        if (methodEPSGCode == gridTransf.methodEPSGCode) {
+            auto fileParameter =
+                parameterValue(gridTransf.gridFilenameParamName,
+                               gridTransf.gridFilenameParamEPSGCode);
+            if (fileParameter &&
+                fileParameter->type() == ParameterValue::Type::FILENAME) {
 
-                if (filename == projFilename) {
-                    if (inverseDirection) {
-                        throw util::UnsupportedOperationException(
-                            "Inverse direction for " + projFilename +
-                            " not supported");
+                const auto &filename = fileParameter->valueFile();
+                if (databaseContext->lookForGridAlternative(
+                        filename, projFilename, projGridFormat,
+                        inverseDirection)) {
+
+                    if (filename == projFilename) {
+                        if (inverseDirection) {
+                            throw util::UnsupportedOperationException(
+                                "Inverse direction for " + projFilename +
+                                " not supported");
+                        }
+                        return self;
                     }
-                    return self;
-                }
 
-                const auto l_sourceCRSNull = sourceCRS();
-                const auto l_targetCRSNull = targetCRS();
-                if (l_sourceCRSNull == nullptr) {
-                    throw util::UnsupportedOperationException(
-                        "Missing sourceCRS");
-                }
-                if (l_targetCRSNull == nullptr) {
-                    throw util::UnsupportedOperationException(
-                        "Missing targetCRS");
-                }
-                auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
-                auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-                auto parameters = std::vector<OperationParameterNNPtr>{
-                    createOpParamNameEPSGCode(
-                        EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
-                if (inverseDirection) {
-                    return Transformation::create(
-                               createPropertiesForInverse(
-                                   self.as_nullable().get(), true, false),
-                               l_targetCRS, l_sourceCRS, l_interpolationCRS,
-                               createSimilarPropertiesMethod(method()),
-                               parameters,
-                               {ParameterValue::createFilename(projFilename)},
-                               coordinateOperationAccuracies())
-                        ->inverseAsTransformation();
-                } else {
-                    return Transformation::create(
-                        createSimilarPropertiesOperation(self), l_sourceCRS,
-                        l_targetCRS, l_interpolationCRS,
-                        createSimilarPropertiesMethod(method()), parameters,
-                        {ParameterValue::createFilename(projFilename)},
-                        coordinateOperationAccuracies());
+                    const auto l_sourceCRSNull = sourceCRS();
+                    const auto l_targetCRSNull = targetCRS();
+                    if (l_sourceCRSNull == nullptr) {
+                        throw util::UnsupportedOperationException(
+                            "Missing sourceCRS");
+                    }
+                    if (l_targetCRSNull == nullptr) {
+                        throw util::UnsupportedOperationException(
+                            "Missing targetCRS");
+                    }
+                    auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
+                    auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
+                    auto parameters = std::vector<OperationParameterNNPtr>{
+                        createOpParamNameEPSGCode(
+                            gridTransf.gridFilenameParamEPSGCode)};
+                    if (inverseDirection) {
+                        return Transformation::create(
+                                   createPropertiesForInverse(
+                                       self.as_nullable().get(), true, false),
+                                   l_targetCRS, l_sourceCRS, l_interpolationCRS,
+                                   createSimilarPropertiesMethod(method()),
+                                   parameters,
+                                   {ParameterValue::createFilename(
+                                       projFilename)},
+                                   coordinateOperationAccuracies())
+                            ->inverseAsTransformation();
+                    } else {
+                        return Transformation::create(
+                            createSimilarPropertiesOperation(self), l_sourceCRS,
+                            l_targetCRS, l_interpolationCRS,
+                            createSimilarPropertiesMethod(method()), parameters,
+                            {ParameterValue::createFilename(projFilename)},
+                            coordinateOperationAccuracies());
+                    }
                 }
             }
+            break;
         }
     }
 
@@ -4760,6 +4781,87 @@ bool SingleOperation::exportToPROJStringGeneric(
             }
 
             targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+
+            return true;
+        }
+    }
+
+    if (methodEPSGCode ==
+        EPSG_CODE_METHOD_CARTESIAN_GRID_OFFSETS_BY_TIN_INTERPOLATION_JSON) {
+        auto sourceCRSProj =
+            dynamic_cast<const crs::ProjectedCRS *>(sourceCRS().get());
+        if (!sourceCRSProj) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName, " only to ProjectedCRS"));
+        }
+
+        auto targetCRSProj =
+            dynamic_cast<const crs::ProjectedCRS *>(targetCRS().get());
+        if (!targetCRSProj) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName, " only to ProjectedCRS"));
+        }
+
+        auto fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_TIN_OFFSET_FILE,
+                           EPSG_CODE_PARAMETER_TIN_OFFSET_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+
+            formatter->startInversion();
+            sourceCRSProj->addUnitConvertAndAxisSwap(formatter, false);
+            formatter->stopInversion();
+
+            if (isMethodInverseOf) {
+                formatter->startInversion();
+            }
+
+            formatter->addStep("tinshift");
+            formatter->addParam("file", fileParameter->valueFile());
+
+            if (isMethodInverseOf) {
+                formatter->stopInversion();
+            }
+
+            targetCRSProj->addUnitConvertAndAxisSwap(formatter, false);
+
+            return true;
+        }
+    }
+
+    if (methodEPSGCode ==
+        EPSG_CODE_METHOD_VERTICAL_OFFSET_BY_TIN_INTERPOLATION_JSON) {
+        auto sourceCRSVert =
+            dynamic_cast<const crs::VerticalCRS *>(sourceCRS().get());
+        if (!sourceCRSVert) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName, " only to VerticalCRS"));
+        }
+
+        auto targetCRSVert =
+            dynamic_cast<const crs::VerticalCRS *>(targetCRS().get());
+        if (!targetCRSVert) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName, " only to VerticalCRS"));
+        }
+
+        auto fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_TIN_OFFSET_FILE,
+                           EPSG_CODE_PARAMETER_TIN_OFFSET_FILE);
+
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+
+            if (isMethodInverseOf) {
+                formatter->startInversion();
+            }
+
+            formatter->addStep("tinshift");
+            formatter->addParam("file", fileParameter->valueFile());
+
+            if (isMethodInverseOf) {
+                formatter->stopInversion();
+            }
 
             return true;
         }

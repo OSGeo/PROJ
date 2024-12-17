@@ -742,6 +742,21 @@
 
 /* ------------------------------------------------------------------------ */
 
+/* TIN-based transformations */
+
+#define EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_TIN_INTERPOLATION_JSON             \
+    "Vertical Offset by TIN Interpolation (JSON)"
+#define EPSG_CODE_METHOD_VERTICAL_OFFSET_BY_TIN_INTERPOLATION_JSON 1137
+
+#define EPSG_NAME_METHOD_CARTESIAN_GRID_OFFSETS_BY_TIN_INTERPOLATION_JSON      \
+    "Cartesian Grid Offsets by TIN Interpolation (JSON)"
+#define EPSG_CODE_METHOD_CARTESIAN_GRID_OFFSETS_BY_TIN_INTERPOLATION_JSON 1138
+
+#define EPSG_NAME_PARAMETER_TIN_OFFSET_FILE "TIN offset file"
+#define EPSG_CODE_PARAMETER_TIN_OFFSET_FILE 1064
+
+/* ------------------------------------------------------------------------ */
+
 #define EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT 1069
 #define EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT "Change of Vertical Unit"
 

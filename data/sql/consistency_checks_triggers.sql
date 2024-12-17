@@ -346,6 +346,12 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: target_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.target_crs_auth_name AND crs_view.code = NEW.target_crs_code);
 
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: interpolation_crs(auth_name, code) not found')
+        WHERE NEW.interpolation_crs_code IS NOT NULL AND NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.interpolation_crs_auth_name AND crs_view.code = NEW.interpolation_crs_code);
+
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: interpolation_crs must be a GeodeticCRS on non-TIN shift based files')
+        WHERE NEW.method_name NOT LIKE '%JSON%' AND NEW.interpolation_crs_code IS NOT NULL AND NOT EXISTS (SELECT 1 FROM geodetic_crs WHERE geodetic_crs.auth_name = NEW.interpolation_crs_auth_name AND geodetic_crs.code = NEW.interpolation_crs_code);
+
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: source_crs must not be deprecated when grid_transformation is not deprecated')
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: target_crs must not be deprecated when grid_transformation is not deprecated')
