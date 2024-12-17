@@ -6467,17 +6467,23 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
     if (srcGeog == nullptr || dstGeog == nullptr) {
         return;
     }
-
-    // Use PointMotionOperations if appropriate and available
+    const bool srcGeogIsSameAsDstGeog = srcGeog->_isEquivalentTo(
+        dstGeog.get(), util::IComparable::Criterion::EQUIVALENT);
     const auto &authFactory = context.context->getAuthorityFactory();
     auto dbContext =
         authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
+    const auto intermGeogSrc = srcGeog->promoteTo3D(std::string(), dbContext);
+    const auto intermGeogDst =
+        srcGeogIsSameAsDstGeog ? intermGeogSrc
+                               : dstGeog->promoteTo3D(std::string(), dbContext);
+    const auto opsGeogSrcToGeogDst = createOperations(
+        intermGeogSrc, sourceEpoch, intermGeogDst, targetEpoch, context);
 
+    // Use PointMotionOperations if appropriate and available
     if (authFactory && sourceEpoch.has_value() && targetEpoch.has_value() &&
         !sourceEpoch->coordinateEpoch()._isEquivalentTo(
             targetEpoch->coordinateEpoch()) &&
-        srcGeog->_isEquivalentTo(dstGeog.get(),
-                                 util::IComparable::Criterion::EQUIVALENT)) {
+        srcGeogIsSameAsDstGeog) {
         const auto pmoSrc = authFactory->getPointMotionOperationsFor(
             NN_NO_CHECK(srcGeog), true);
         if (!pmoSrc.empty()) {
@@ -6603,9 +6609,20 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 // If we didn't find a non-ballpark transformation between
                 // the 2 vertical CRS, then try through intermediate geographic
                 // CRS
+                // Do that although when the geographic CRS of the source and
+                // target CRS are not the same, but only if they have a 3D
+                // known version, and there is a non-ballpark transformation
+                // between them.
+                // This helps for "GDA94 + AHD height" to "GDA2020 + AVWS
+                // height" going through GDA94 3D and GDA2020 3D
                 bTryThroughIntermediateGeogCRS =
                     (verticalTransforms.size() == 1 &&
-                     verticalTransforms.front()->hasBallparkTransformation());
+                     verticalTransforms.front()->hasBallparkTransformation()) ||
+                    (!srcGeogIsSameAsDstGeog &&
+                     !intermGeogSrc->identifiers().empty() &&
+                     !intermGeogDst->identifiers().empty() &&
+                     !opsGeogSrcToGeogDst.empty() &&
+                     !opsGeogSrcToGeogDst.front()->hasBallparkTransformation());
             }
         }
     }
@@ -6663,14 +6680,6 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         // WGS 84 + EGM96 --> ETRS89 + Belfast height where
         // there is a geoid model for EGM96 referenced to WGS 84
         // and a geoid model for Belfast height referenced to ETRS89
-        const auto intermGeogSrc =
-            srcGeog->promoteTo3D(std::string(), dbContext);
-        const bool intermGeogSrcIsSameAsIntermGeogDst =
-            srcGeog->_isEquivalentTo(dstGeog.get());
-        const auto intermGeogDst =
-            intermGeogSrcIsSameAsIntermGeogDst
-                ? intermGeogSrc
-                : dstGeog->promoteTo3D(std::string(), dbContext);
         const auto opsSrcToGeog = createOperations(
             sourceCRS, sourceEpoch, intermGeogSrc, sourceEpoch, context);
         const auto opsGeogToTarget = createOperations(
@@ -6710,9 +6719,6 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         double bestAccuracy = -1;
         size_t bestStepCount = 0;
         if (hasNonTrivialSrcTransf && hasNonTrivialTargetTransf) {
-            const auto opsGeogSrcToGeogDst =
-                createOperations(intermGeogSrc, sourceEpoch, intermGeogDst,
-                                 targetEpoch, context);
             // In first pass, exclude (horizontal) ballpark operations, but
             // accept them in second pass.
             for (int pass = 0; pass <= 1 && res.empty(); pass++) {
@@ -6741,7 +6747,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                             try {
                                 res.emplace_back(
                                     ConcatenatedOperation::createComputeMetadata(
-                                        intermGeogSrcIsSameAsIntermGeogDst
+                                        srcGeogIsSameAsDstGeog
                                             ? std::vector<
                                                   CoordinateOperationNNPtr>{op1,
                                                                             op3}

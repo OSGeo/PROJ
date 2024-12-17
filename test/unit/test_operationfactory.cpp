@@ -5992,6 +5992,44 @@ TEST(operation, compoundCRS_to_compoundCRS_context_helmert) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_compoundCRS_GDA94_AHD_to_GDA2020_AVWS) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // GDA94 + AHD height
+        authFactory->createCoordinateReferenceSystem("9464"),
+        // GDA2020 + AVWS height
+        authFactory->createCoordinateReferenceSystem("9462"), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(),
+              "Inverse of 'GDA94 to GDA94 + AHD height (1)' + "
+              "GDA94 to GDA2020 (1) + "
+              "GDA2020 to AVWS height (2)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=vgridshift +grids=au_ga_AUSGeoid09_V1.01.tif "
+              "+multiplier=1 "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=helmert +x=0.06155 +y=-0.01087 +z=-0.04019 "
+              "+rx=-0.0394924 +ry=-0.0327221 +rz=-0.0328979 +s=-0.009994 "
+              "+convention=coordinate_frame "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +inv +proj=vgridshift +grids=au_ga_AGQG_20201120.tif "
+              "+multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(
     operation,
     compoundCRS_to_compoundCRS_concatenated_operation_with_two_vert_transformation) {
