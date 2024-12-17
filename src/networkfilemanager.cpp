@@ -1595,6 +1595,11 @@ static std::string pj_context_get_bundle_path(PJ_CONTEXT *ctx) {
     return ctx->ca_bundle_path;
 }
 
+static bool pj_context_get_native_ca(PJ_CONTEXT *ctx) {
+    pj_load_ini(ctx);
+    return ctx->native_ca;
+}
+
 // ---------------------------------------------------------------------------
 
 CurlFileHandle::CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle)
@@ -1622,7 +1627,15 @@ CurlFileHandle::CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle)
 #if defined(SSL_OPTIONS)
     // https://curl.se/libcurl/c/CURLOPT_SSL_OPTIONS.html
     auto ssl_options = static_cast<long>(SSL_OPTIONS);
+    if (pj_context_get_native_ca(ctx)) {
+        ssl_options = ssl_options | CURLSSLOPT_NATIVE_CA;
+    }
     CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS, ssl_options));
+#else
+    if (pj_context_get_native_ca(ctx)){
+        CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS,
+                                        (long)CURLSSLOPT_NATIVE_CA));
+    }
 #endif
 
     const auto ca_bundle_path = pj_context_get_bundle_path(ctx);

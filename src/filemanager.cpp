@@ -1868,6 +1868,16 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
             ci_equal(proj_only_best_default, "TRUE");
     }
 
+    const char *native_ca = getenv("PROJ_NATIVE_CA");
+    if (native_ca && native_ca[0] != '\0'){
+        ctx->native_ca = ci_equal(native_ca, "ON") ||
+                        ci_equal(native_ca, "YES") ||
+                        ci_equal(native_ca, "TRUE");
+    }
+    else {
+        native_ca == nullptr;
+    }
+
     ctx->iniFileLoaded = true;
     std::string content;
     std::unique_ptr<NS_PROJ::File> file;
@@ -1942,6 +1952,11 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
                        key == "only_best_default") {
                 ctx->warnIfBestTransformationNotAvailableDefault = false;
                 ctx->errorIfBestTransformationNotAvailableDefault =
+                    ci_equal(value, "ON") || ci_equal(value, "YES") ||
+                    ci_equal(value, "TRUE");
+            }
+            else if (native_ca == nullptr && key == "native_ca"){
+                ctx->native_ca =
                     ci_equal(value, "ON") || ci_equal(value, "YES") ||
                     ci_equal(value, "TRUE");
             }
