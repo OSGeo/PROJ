@@ -2326,17 +2326,17 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
     CoordinateOperationPtr opSrcCRSToGeogCRS{};
     CoordinateOperationPtr verticalTransform{};
     CoordinateOperationPtr opGeogCRStoDstCRS{};
-    crs::GeographicCRSPtr interpolationGeogCRS{};
+    crs::SingleCRSPtr interpolationCRS{};
 
     MyPROJStringExportableHorizVerticalHorizPROJBased(
         const CoordinateOperationPtr &opSrcCRSToGeogCRSIn,
         const CoordinateOperationPtr &verticalTransformIn,
         const CoordinateOperationPtr &opGeogCRStoDstCRSIn,
-        const crs::GeographicCRSPtr &interpolationGeogCRSIn)
+        const crs::SingleCRSPtr &interpolationCRSIn)
         : opSrcCRSToGeogCRS(opSrcCRSToGeogCRSIn),
           verticalTransform(verticalTransformIn),
           opGeogCRStoDstCRS(opGeogCRStoDstCRSIn),
-          interpolationGeogCRS(interpolationGeogCRSIn) {}
+          interpolationCRS(interpolationCRSIn) {}
 
     ~MyPROJStringExportableHorizVerticalHorizPROJBased() override;
 
@@ -2382,7 +2382,11 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
                 methodEPSGCode ==
                     EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
                 methodEPSGCode ==
+                    EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOCENTRIC ||
+                methodEPSGCode ==
                     EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_2D ||
                 methodEPSGCode ==
                     EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D ||
                 methodEPSGCode ==
@@ -2412,12 +2416,20 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
             formatter->addParam("v_2");
         }
 
+        auto interpolationCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(interpolationCRS.get());
+        auto interpolationCRSProj =
+            dynamic_cast<const crs::ProjectedCRS *>(interpolationCRS.get());
+
         formatter->pushOmitZUnitConversion();
 
         opSrcCRSToGeogCRS->_exportToPROJString(formatter);
 
         formatter->startInversion();
-        interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(formatter);
+        if (interpolationCRSGeog)
+            interpolationCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+        else if (interpolationCRSProj)
+            interpolationCRSProj->addUnitConvertAndAxisSwap(formatter, false);
         formatter->stopInversion();
 
         formatter->popOmitZUnitConversion();
@@ -2428,7 +2440,10 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
 
         formatter->pushOmitZUnitConversion();
 
-        interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(formatter);
+        if (interpolationCRSGeog)
+            interpolationCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+        else if (interpolationCRSProj)
+            interpolationCRSProj->addUnitConvertAndAxisSwap(formatter, false);
 
         opGeogCRStoDstCRS->_exportToPROJString(formatter);
 
@@ -2678,12 +2693,12 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
     const operation::CoordinateOperationNNPtr &opSrcCRSToGeogCRS,
     const operation::CoordinateOperationNNPtr &verticalTransform,
     const operation::CoordinateOperationNNPtr &opGeogCRStoDstCRS,
-    const crs::GeographicCRSPtr &interpolationGeogCRS, bool checkExtent) {
+    const crs::SingleCRSPtr &interpolationCRS, bool checkExtent) {
 
     auto exportable =
         util::nn_make_shared<MyPROJStringExportableHorizVerticalHorizPROJBased>(
             opSrcCRSToGeogCRS, verticalTransform, opGeogCRStoDstCRS,
-            interpolationGeogCRS);
+            interpolationCRS);
 
     std::vector<CoordinateOperationNNPtr> ops;
     if (!(starts_with(opSrcCRSToGeogCRS->nameStr(), NULL_GEOGRAPHIC_OFFSET) &&
@@ -6452,17 +6467,23 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
     if (srcGeog == nullptr || dstGeog == nullptr) {
         return;
     }
-
-    // Use PointMotionOperations if appropriate and available
+    const bool srcGeogIsSameAsDstGeog = srcGeog->_isEquivalentTo(
+        dstGeog.get(), util::IComparable::Criterion::EQUIVALENT);
     const auto &authFactory = context.context->getAuthorityFactory();
     auto dbContext =
         authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
+    const auto intermGeogSrc = srcGeog->promoteTo3D(std::string(), dbContext);
+    const auto intermGeogDst =
+        srcGeogIsSameAsDstGeog ? intermGeogSrc
+                               : dstGeog->promoteTo3D(std::string(), dbContext);
+    const auto opsGeogSrcToGeogDst = createOperations(
+        intermGeogSrc, sourceEpoch, intermGeogDst, targetEpoch, context);
 
+    // Use PointMotionOperations if appropriate and available
     if (authFactory && sourceEpoch.has_value() && targetEpoch.has_value() &&
         !sourceEpoch->coordinateEpoch()._isEquivalentTo(
             targetEpoch->coordinateEpoch()) &&
-        srcGeog->_isEquivalentTo(dstGeog.get(),
-                                 util::IComparable::Criterion::EQUIVALENT)) {
+        srcGeogIsSameAsDstGeog) {
         const auto pmoSrc = authFactory->getPointMotionOperationsFor(
             NN_NO_CHECK(srcGeog), true);
         if (!pmoSrc.empty()) {
@@ -6588,9 +6609,20 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 // If we didn't find a non-ballpark transformation between
                 // the 2 vertical CRS, then try through intermediate geographic
                 // CRS
+                // Do that although when the geographic CRS of the source and
+                // target CRS are not the same, but only if they have a 3D
+                // known version, and there is a non-ballpark transformation
+                // between them.
+                // This helps for "GDA94 + AHD height" to "GDA2020 + AVWS
+                // height" going through GDA94 3D and GDA2020 3D
                 bTryThroughIntermediateGeogCRS =
                     (verticalTransforms.size() == 1 &&
-                     verticalTransforms.front()->hasBallparkTransformation());
+                     verticalTransforms.front()->hasBallparkTransformation()) ||
+                    (!srcGeogIsSameAsDstGeog &&
+                     !intermGeogSrc->identifiers().empty() &&
+                     !intermGeogDst->identifiers().empty() &&
+                     !opsGeogSrcToGeogDst.empty() &&
+                     !opsGeogSrcToGeogDst.front()->hasBallparkTransformation());
             }
         }
     }
@@ -6648,14 +6680,6 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         // WGS 84 + EGM96 --> ETRS89 + Belfast height where
         // there is a geoid model for EGM96 referenced to WGS 84
         // and a geoid model for Belfast height referenced to ETRS89
-        const auto intermGeogSrc =
-            srcGeog->promoteTo3D(std::string(), dbContext);
-        const bool intermGeogSrcIsSameAsIntermGeogDst =
-            srcGeog->_isEquivalentTo(dstGeog.get());
-        const auto intermGeogDst =
-            intermGeogSrcIsSameAsIntermGeogDst
-                ? intermGeogSrc
-                : dstGeog->promoteTo3D(std::string(), dbContext);
         const auto opsSrcToGeog = createOperations(
             sourceCRS, sourceEpoch, intermGeogSrc, sourceEpoch, context);
         const auto opsGeogToTarget = createOperations(
@@ -6695,9 +6719,6 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         double bestAccuracy = -1;
         size_t bestStepCount = 0;
         if (hasNonTrivialSrcTransf && hasNonTrivialTargetTransf) {
-            const auto opsGeogSrcToGeogDst =
-                createOperations(intermGeogSrc, sourceEpoch, intermGeogDst,
-                                 targetEpoch, context);
             // In first pass, exclude (horizontal) ballpark operations, but
             // accept them in second pass.
             for (int pass = 0; pass <= 1 && res.empty(); pass++) {
@@ -6726,7 +6747,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                             try {
                                 res.emplace_back(
                                     ConcatenatedOperation::createComputeMetadata(
-                                        intermGeogSrcIsSameAsIntermGeogDst
+                                        srcGeogIsSameAsDstGeog
                                             ? std::vector<
                                                   CoordinateOperationNNPtr>{op1,
                                                                             op3}
@@ -6856,15 +6877,14 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
 
     for (const auto &verticalTransform : verticalTransforms) {
 
-        auto interpolationGeogCRS = NN_NO_CHECK(srcGeog);
+        auto interpolationCRS =
+            NN_NO_CHECK(std::static_pointer_cast<crs::SingleCRS>(srcGeog));
         auto interpTransformCRS = verticalTransform->interpolationCRS();
         if (interpTransformCRS) {
-            auto nn_interpTransformCRS = NN_NO_CHECK(interpTransformCRS);
-            if (dynamic_cast<const crs::GeographicCRS *>(
-                    nn_interpTransformCRS.get())) {
-                interpolationGeogCRS = NN_NO_CHECK(
-                    util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
-                        nn_interpTransformCRS));
+            auto interpTransformSingleCRS =
+                std::static_pointer_cast<crs::SingleCRS>(interpTransformCRS);
+            if (interpTransformSingleCRS) {
+                interpolationCRS = NN_NO_CHECK(interpTransformSingleCRS);
             }
         } else {
             auto compSrc0BoundCrs =
@@ -6876,8 +6896,8 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                     compSrc0BoundCrs->hubCRS().get()) &&
                 compSrc0BoundCrs->hubCRS()->_isEquivalentTo(
                     compDst0BoundCrs->hubCRS().get())) {
-                interpolationGeogCRS = NN_NO_CHECK(
-                    util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+                interpolationCRS =
+                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<crs::SingleCRS>(
                         compSrc0BoundCrs->hubCRS()));
             }
         }
@@ -6915,7 +6935,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                       verticalTransform->nameStr().find(
                           "CGVD28 height to CGVD2013a(2002) height (1)") !=
                           std::string::npos))) {
-                    interpolationGeogCRS = std::move(nad83CSRSv7);
+                    interpolationCRS = std::move(nad83CSRSv7);
                 }
             } catch (const std::exception &) {
             }
@@ -6923,9 +6943,9 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
 
         const auto opSrcCRSToGeogCRS = createOperations(
             componentsSrc[0], util::optional<common::DataEpoch>(),
-            interpolationGeogCRS, util::optional<common::DataEpoch>(), context);
+            interpolationCRS, util::optional<common::DataEpoch>(), context);
         const auto opGeogCRStoDstCRS = createOperations(
-            interpolationGeogCRS, util::optional<common::DataEpoch>(),
+            interpolationCRS, util::optional<common::DataEpoch>(),
             componentsDst[0], util::optional<common::DataEpoch>(), context);
         for (const auto &opSrc : opSrcCRSToGeogCRS) {
             for (const auto &opDst : opGeogCRStoDstCRS) {
@@ -6933,7 +6953,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 try {
                     auto op = createHorizVerticalHorizPROJBased(
                         sourceCRS, targetCRS, opSrc, verticalTransform, opDst,
-                        interpolationGeogCRS, true);
+                        interpolationCRS, true);
                     res.emplace_back(op);
                 } catch (const InvalidOperationEmptyIntersection &) {
                 } catch (const io::FormattingException &) {

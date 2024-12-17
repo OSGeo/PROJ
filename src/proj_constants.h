@@ -410,9 +410,17 @@
     "Coordinate Frame rotation (geocentric domain)"
 #define EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC 1032
 
+#define EPSG_NAME_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOCENTRIC               \
+    "Coordinate Frame rotation full matrix (geocen)"
+#define EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOCENTRIC 1132
+
 #define EPSG_NAME_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D                        \
     "Coordinate Frame rotation (geog2D domain)"
 #define EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D 9607
+
+#define EPSG_NAME_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_2D            \
+    "Coordinate Frame rotation full matrix (geog2D)"
+#define EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_2D 1133
 
 #define EPSG_NAME_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D                        \
     "Coordinate Frame rotation (geog3D domain)"
@@ -731,6 +739,21 @@
 
 #define EPSG_CODE_METHOD_NADCON5_3D 1075
 #define EPSG_NAME_METHOD_NADCON5_3D "NADCON5 (3D)"
+
+/* ------------------------------------------------------------------------ */
+
+/* TIN-based transformations */
+
+#define EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_TIN_INTERPOLATION_JSON             \
+    "Vertical Offset by TIN Interpolation (JSON)"
+#define EPSG_CODE_METHOD_VERTICAL_OFFSET_BY_TIN_INTERPOLATION_JSON 1137
+
+#define EPSG_NAME_METHOD_CARTESIAN_GRID_OFFSETS_BY_TIN_INTERPOLATION_JSON      \
+    "Cartesian Grid Offsets by TIN Interpolation (JSON)"
+#define EPSG_CODE_METHOD_CARTESIAN_GRID_OFFSETS_BY_TIN_INTERPOLATION_JSON 1138
+
+#define EPSG_NAME_PARAMETER_TIN_OFFSET_FILE "TIN offset file"
+#define EPSG_CODE_PARAMETER_TIN_OFFSET_FILE 1064
 
 /* ------------------------------------------------------------------------ */
 
