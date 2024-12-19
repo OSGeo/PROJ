@@ -1991,7 +1991,7 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
                         ci_equal(native_ca, "TRUE");
     }
     else {
-        native_ca == nullptr;
+        native_ca = nullptr;
     }
 
     ctx->iniFileLoaded = true;
