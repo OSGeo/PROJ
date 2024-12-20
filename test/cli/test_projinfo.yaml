@@ -1730,7 +1730,7 @@ tests:
   tail: 4
   out: |
     INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MAJOR',1);
-    INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MINOR',4);
+    INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MINOR',5);
     INSERT INTO geodetic_crs VALUES('HOBU','XXXX','WGS 84','','geographic 2D','EPSG','6422','EPSG','6326',NULL,0);
     INSERT INTO usage VALUES('HOBU','USAGE_GEODETIC_CRS_XXXX','geodetic_crs','HOBU','XXXX','EPSG','1262','EPSG','1183');
 - args: -s EPSG:23030 -t EPSG:25830 --bbox -6,40,-5,41 --grid-check known_available --hide-ballpark --summary

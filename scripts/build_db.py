@@ -970,7 +970,7 @@ def fill_concatenated_operation(proj_db_cursor):
             '?,?,?, ?, ?,?, ?,?, ?, ?,?)', arg)
 
             for i in range(len(steps_code)):
-                proj_db_cursor.execute('INSERT INTO concatenated_operation_step VALUES (?,?,?,?,?)', (EPSG_AUTHORITY, code, i+1, EPSG_AUTHORITY,steps_code[i]))
+                proj_db_cursor.execute('INSERT INTO concatenated_operation_step VALUES (?,?,?,?,?,NULL)', (EPSG_AUTHORITY, code, i+1, EPSG_AUTHORITY,steps_code[i]))
 
 
 def fill_alias(proj_db_cursor):

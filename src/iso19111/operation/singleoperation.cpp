@@ -236,6 +236,42 @@ void CoordinateOperation::setCRSs(const crs::CRSNNPtr &sourceCRSIn,
 
 // ---------------------------------------------------------------------------
 
+void CoordinateOperation::setCRSsUpdateInverse(
+    const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
+    const crs::CRSPtr &interpolationCRSIn) {
+    setCRSs(sourceCRSIn, targetCRSIn, interpolationCRSIn);
+
+    auto invCO = dynamic_cast<InverseCoordinateOperation *>(this);
+    if (invCO) {
+        invCO->forwardOperation()->setCRSs(targetCRSIn, sourceCRSIn,
+                                           interpolationCRSIn);
+    }
+
+    auto transf = dynamic_cast<Transformation *>(this);
+    if (transf) {
+        transf->inverseAsTransformation()->setCRSs(targetCRSIn, sourceCRSIn,
+                                                   interpolationCRSIn);
+    }
+
+    auto concat = dynamic_cast<ConcatenatedOperation *>(this);
+    if (concat) {
+        auto first = concat->operations().front().get();
+        auto &firstTarget(first->targetCRS());
+        if (firstTarget) {
+            first->setCRSsUpdateInverse(sourceCRSIn, NN_NO_CHECK(firstTarget),
+                                        first->interpolationCRS());
+        }
+        auto last = concat->operations().back().get();
+        auto &lastSource(last->sourceCRS());
+        if (lastSource) {
+            last->setCRSsUpdateInverse(NN_NO_CHECK(lastSource), targetCRSIn,
+                                       last->interpolationCRS());
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 void CoordinateOperation::setInterpolationCRS(
     const crs::CRSPtr &interpolationCRSIn) {
     d->interpolationCRS_ = interpolationCRSIn;

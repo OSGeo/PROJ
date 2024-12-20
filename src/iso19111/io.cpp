@@ -3772,8 +3772,9 @@ WKTParser::Private::buildConcatenatedOperation(const WKTNodeNNPtr &node) {
         }
     }
 
-    ConcatenatedOperation::fixStepsDirection(
-        NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), operations, dbContext_);
+    ConcatenatedOperation::fixSteps(
+        NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), operations, dbContext_,
+        /* fixDirectionAllowed = */ true);
 
     std::vector<PositionalAccuracyNNPtr> accuracies;
     auto &accuracyNode = nodeP->lookForChild(WKTConstants::OPERATIONACCURACY);
@@ -6848,8 +6849,9 @@ JSONParser::buildConcatenatedOperation(const json &j) {
         operations.emplace_back(NN_NO_CHECK(op));
     }
 
-    ConcatenatedOperation::fixStepsDirection(sourceCRS, targetCRS, operations,
-                                             dbContext_);
+    ConcatenatedOperation::fixSteps(sourceCRS, targetCRS, operations,
+                                    dbContext_,
+                                    /* fixDirectionAllowed = */ true);
 
     std::vector<PositionalAccuracyNNPtr> accuracies;
     if (j.contains("accuracy")) {
