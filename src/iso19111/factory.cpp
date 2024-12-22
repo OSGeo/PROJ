@@ -6633,7 +6633,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 if (step_direction == "forward") {
                     ++countExplicitDirection;
                     operations.push_back(stepOp);
-                } else if (step_direction == "inverse") {
+                } else if (step_direction == "reverse") {
                     ++countExplicitDirection;
                     operations.push_back(stepOp->inverse());
                 } else {
