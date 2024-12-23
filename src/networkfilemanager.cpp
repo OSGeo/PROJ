@@ -1627,15 +1627,19 @@ CurlFileHandle::CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle)
 #if defined(SSL_OPTIONS)
     // https://curl.se/libcurl/c/CURLOPT_SSL_OPTIONS.html
     auto ssl_options = static_cast<long>(SSL_OPTIONS);
+#if CURL_AT_LEAST_VERSION(7, 71, 0)
     if (pj_context_get_native_ca(ctx)) {
         ssl_options = ssl_options | CURLSSLOPT_NATIVE_CA;
     }
+#endif
     CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS, ssl_options));
 #else
+#if CURL_AT_LEAST_VERSION(7, 71, 0)
     if (pj_context_get_native_ca(ctx)){
         CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS,
                                         (long)CURLSSLOPT_NATIVE_CA));
     }
+#endif
 #endif
 
     const auto ca_bundle_path = pj_context_get_bundle_path(ctx);
