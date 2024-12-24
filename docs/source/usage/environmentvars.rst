@@ -109,6 +109,8 @@ done by setting the variable with no content::
 
 .. envvar:: PROJ_NATIVE_CA
 
+    .. versionadded:: 9.6.0
+    
     When this is set to ON, the operating systems native CA store will be used for certificate verification
     If you set this option to ON and also set PROJ_CURL_CA_BUNDLE then during verification those certificates are
     searched in addition to the native CA store.
