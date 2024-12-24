@@ -106,3 +106,11 @@ done by setting the variable with no content::
     Define a custom path to the CA Bundle file. This can be useful if `curl`
     and :envvar:`PROJ_NETWORK` are enabled. Alternatively, the 
     :c:func:`proj_curl_set_ca_bundle_path` function can be used.
+
+.. envvar:: PROJ_NATIVE_CA
+
+    .. versionadded:: 9.6.0
+    
+    When this is set to ON, the operating systems native CA store will be used for certificate verification
+    If you set this option to ON and also set PROJ_CURL_CA_BUNDLE then during verification those certificates are
+    searched in addition to the native CA store.
