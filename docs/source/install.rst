@@ -146,7 +146,7 @@ Build requirements
 ++++++++++++++++++
 
 - C99 compiler
-- C++11 compiler
+- C++17 compiler
 - CMake >= 3.16
 - SQLite3 >= 3.11: headers and library for target architecture, and sqlite3 executable for build architecture
 - libtiff >= 4.0 (optional but recommended)
@@ -160,7 +160,7 @@ Test requirements
 
 These are only required if testing is built (see :option:`BUILD_TESTING`, default ON)
 
-- GoogleTest (GTest) >= 1.8.1; if not found and :option:`TESTING_USE_NETWORK` is ON, then version 1.12.1 is fetched from GitHub and locally installed
+- GoogleTest (GTest) >= 1.8.1; if not found and :option:`TESTING_USE_NETWORK` is ON, then version 1.15.2 is fetched from GitHub and locally installed
 - Python >= 3.7
 - `importlib_metadata <https://pypi.org/project/importlib-metadata/>`_ only needed for Python 3.7
 - One of either `PyYAML <https://pypi.org/project/PyYAML/>`_ or `ruamel.yaml <https://pypi.org/project/ruamel.yaml/>`_
