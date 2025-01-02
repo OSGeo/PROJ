@@ -33,15 +33,16 @@ jobs:
         run: ./scripts/cppcheck.sh
 
   other_checks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install Requirements
         run: |
-            sudo apt-get install python3-pip
-            sudo pip3 install cffconvert
+            sudo apt-get install -y --no-install-recommends python3-pip
+            sudo apt-get remove -y python3-jsonschema
+            sudo pip3 install --break-system-packages cffconvert
 
       - name: Validate citation file
         run: |
