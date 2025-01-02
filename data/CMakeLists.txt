@@ -31,7 +31,7 @@ set(ALL_SQL_IN "${CMAKE_CURRENT_BINARY_DIR}/all.sql.in")
 set(PROJ_DB "${CMAKE_CURRENT_BINARY_DIR}/proj.db")
 include(sql_filelist.cmake)
 
-set(PROJ_DB_SQL_EXPECTED_MD5 "648183209a519b679cca32c4cec988e2")
+set(PROJ_DB_SQL_EXPECTED_MD5 "8145b5734f4007f81b188ac3b690e8b3")
 
 add_custom_command(
   OUTPUT ${PROJ_DB}

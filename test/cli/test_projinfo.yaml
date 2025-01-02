@@ -1838,3 +1838,55 @@ tests:
     Test that "CGVD28 height" to "CGVD28(HTv2.0) height" is a no-op
   args: -s "CGVD28 height" -t "CGVD28(HTv2.0) height" -o PROJ -q
   out: +proj=noop
+- comment: >
+   Test custom records for WGS 84 realizations to EGM2008 (https://github.com/OSGeo/PROJ/issues/4362)
+  args: -s "WGS 84 (G1150) + EGM2008 height" -t "WGS 84 (G1674)" --3d -o PROJ -q
+  out: |
+    +proj=pipeline
+      +step +proj=axisswap +order=2,1
+      +step +proj=unitconvert +xy_in=deg +xy_out=rad
+      +step +proj=vgridshift +grids=us_nga_egm08_25.tif +multiplier=1
+      +step +proj=cart +ellps=WGS84
+      +step +proj=helmert +x=-0.0024 +y=0.0016 +z=0.0232 +rx=-0.00027 +ry=0.00027
+            +rz=-0.00038 +s=0.00208 +dx=-0.0001 +dy=-0.0001 +dz=0.0018 +drx=0 +dry=0
+            +drz=0 +ds=-8e-05 +t_epoch=2005 +convention=coordinate_frame
+      +step +inv +proj=cart +ellps=WGS84
+      +step +proj=unitconvert +xy_in=rad +xy_out=deg
+      +step +proj=axisswap +order=2,1
+- comment: >
+   Test 'WGS 84 (Gxxx) + EGM2008 height' to 'WGS 84 (Gyyy) + EGM2008 height'
+  args: -s "WGS 84 (G1150) + EGM2008 height" -t "WGS 84 (G1674) + EGM2008 height" -o PROJ -q
+  out: |
+    +proj=pipeline
+      +step +proj=axisswap +order=2,1
+      +step +proj=unitconvert +xy_in=deg +xy_out=rad
+      +step +proj=cart +ellps=WGS84
+      +step +proj=helmert +x=-0.0024 +y=0.0016 +z=0.0232 +rx=-0.00027 +ry=0.00027
+            +rz=-0.00038 +s=0.00208 +dx=-0.0001 +dy=-0.0001 +dz=0.0018 +drx=0 +dry=0
+            +drz=0 +ds=-8e-05 +t_epoch=2005 +convention=coordinate_frame
+      +step +inv +proj=cart +ellps=WGS84
+      +step +proj=unitconvert +xy_in=rad +xy_out=deg
+      +step +proj=axisswap +order=2,1
+- comment: >
+   Test that ETRF2000 to ETRF2014 only goes through ITRF2000, ITRF2008 or ITRF2014, and not ITRF9x or ITRF>2020
+  args: -s ETRF2000 -t ETRF2014 --3d --summary --authority EPSG
+  out: |
+    Candidate operations found: 6
+    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2014 to ETRF2000 (1) + ITRF2014 to ETRF2014 (2) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
+    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2014 to ETRF2000 (1) + ITRF2014 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
+    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2008 to ETRF2000 (1) + ITRF2008 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
+    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2005 to ETRF2000 (1) + ITRF2005 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
+    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2000 to ETRF2000 (2) + ITRF2000 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
+    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2000 to ETRF2000 (1) + ITRF2000 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
+- comment: >
+   Test that ETRF2000-PL to ETRF2014 is not negatively affected by https://github.com/OSGeo/PROJ/pull/4364 changes (the current actual result is not golden in any way, using ETRF2000 to ETRF2014 could probably make sense)
+  args: -s ETRF2000-PL -t ETRF2014 --summary
+  out: |
+    Candidate operations found: 1
+    unknown id, ETRF2000-PL to ETRS89 (1) + ETRS89 to ETRF2014, 0.1 m, Poland - onshore and offshore.
+- comment: >
+   Test WGS 84 (G1150) to WGS 84 (G2296)
+  args: -s "WGS 84 (G1150)" -t "WGS 84 (G2296)" --summary
+  out: |
+    Candidate operations found: 1
+    unknown id, Conversion from WGS 84 (G1150) (geog2D) to WGS 84 (G1150) (geocentric) + WGS 84 (G1150) to WGS 84 (G1762) (1) + WGS 84 (G1762) to WGS 84 (G2139) (1) + WGS 84 (G2139) to WGS 84 (G2296) (1) + Conversion from WGS 84 (G2296) (geocentric) to WGS 84 (G2296) (geog2D), 0.04 m, World

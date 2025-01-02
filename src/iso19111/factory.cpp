@@ -7308,7 +7308,8 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
                                           const std::string &code) {
         return !(d->run("SELECT 1 FROM coordinate_operation_view WHERE "
                         "(source_crs_auth_name = ? AND source_crs_code = ?) OR "
-                        "(target_crs_auth_name = ? AND target_crs_code = ?)",
+                        "(target_crs_auth_name = ? AND target_crs_code = ?) "
+                        "LIMIT 1",
                         {auth_name, code, auth_name, code})
                      .empty());
     };
@@ -7407,36 +7408,50 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ");
     std::string minDate;
     std::string criterionOnIntermediateCRS;
+
+    const auto sourceCRS = d->createFactory(sourceCRSAuthName)
+                               ->createCoordinateReferenceSystem(sourceCRSCode);
+    const auto targetCRS = d->createFactory(targetCRSAuthName)
+                               ->createCoordinateReferenceSystem(targetCRSCode);
+
+    const bool ETRFtoETRF = starts_with(sourceCRS->nameStr(), "ETRF") &&
+                            starts_with(targetCRS->nameStr(), "ETRF");
+
     if (allowedIntermediateObjectType == ObjectType::GEOGRAPHIC_CRS) {
-        auto sourceCRS = d->createFactory(sourceCRSAuthName)
-                             ->createGeodeticCRS(sourceCRSCode);
-        auto targetCRS = d->createFactory(targetCRSAuthName)
-                             ->createGeodeticCRS(targetCRSCode);
-        const auto &sourceDatum = sourceCRS->datum();
-        const auto &targetDatum = targetCRS->datum();
-        if (sourceDatum && sourceDatum->publicationDate().has_value() &&
-            targetDatum && targetDatum->publicationDate().has_value()) {
-            const auto sourceDate(sourceDatum->publicationDate()->toString());
-            const auto targetDate(targetDatum->publicationDate()->toString());
-            minDate = std::min(sourceDate, targetDate);
-            // Check that the datum of the intermediateCRS has a publication
-            // date most recent that the one of the source and the target CRS
-            // Except when using the usual WGS84 pivot which happens to have a
-            // NULL publication date.
-            criterionOnIntermediateCRS =
-                "AND EXISTS(SELECT 1 FROM geodetic_crs x "
-                "JOIN geodetic_datum y "
-                "ON "
-                "y.auth_name = x.datum_auth_name AND "
-                "y.code = x.datum_code "
-                "WHERE "
-                "x.auth_name = v1.target_crs_auth_name AND "
-                "x.code = v1.target_crs_code AND "
-                "x.type IN ('geographic 2D', 'geographic 3D') AND "
-                "(y.publication_date IS NULL OR "
-                "(y.publication_date >= '" +
-                minDate + "'))) ";
-        } else {
+        const auto &sourceGeogCRS =
+            dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
+        const auto &targetGeogCRS =
+            dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
+        if (sourceGeogCRS && targetGeogCRS) {
+            const auto &sourceDatum = sourceGeogCRS->datum();
+            const auto &targetDatum = targetGeogCRS->datum();
+            if (sourceDatum && sourceDatum->publicationDate().has_value() &&
+                targetDatum && targetDatum->publicationDate().has_value()) {
+                const auto sourceDate(
+                    sourceDatum->publicationDate()->toString());
+                const auto targetDate(
+                    targetDatum->publicationDate()->toString());
+                minDate = std::min(sourceDate, targetDate);
+                // Check that the datum of the intermediateCRS has a publication
+                // date most recent that the one of the source and the target
+                // CRS Except when using the usual WGS84 pivot which happens to
+                // have a NULL publication date.
+                criterionOnIntermediateCRS =
+                    "AND EXISTS(SELECT 1 FROM geodetic_crs x "
+                    "JOIN geodetic_datum y "
+                    "ON "
+                    "y.auth_name = x.datum_auth_name AND "
+                    "y.code = x.datum_code "
+                    "WHERE "
+                    "x.auth_name = v1.target_crs_auth_name AND "
+                    "x.code = v1.target_crs_code AND "
+                    "x.type IN ('geographic 2D', 'geographic 3D') AND "
+                    "(y.publication_date IS NULL OR "
+                    "(y.publication_date >= '" +
+                    minDate + "'))) ";
+            }
+        }
+        if (criterionOnIntermediateCRS.empty()) {
             criterionOnIntermediateCRS =
                 "AND EXISTS(SELECT 1 FROM geodetic_crs x WHERE "
                 "x.auth_name = v1.target_crs_auth_name AND "
@@ -7586,6 +7601,33 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     if (discardSuperseded) {
         res = filterOutSuperseded(std::move(res));
     }
+
+    const auto checkPivotForETRFToETRF =
+        [ETRFtoETRF, &sourceCRS,
+         &targetCRS](const crs::CRSPtr &intermediateCRS) {
+            // Make sure that ETRF2000 to ETRF2014 doesn't go throught ITRF9x or
+            // ITRF>2014
+            if (ETRFtoETRF && intermediateCRS &&
+                starts_with(intermediateCRS->nameStr(), "ITRF")) {
+                const auto normalizeDate = [](int v) {
+                    return (v >= 80 && v <= 99) ? v + 1900 : v;
+                };
+                const int srcDate = normalizeDate(
+                    atoi(sourceCRS->nameStr().c_str() + strlen("ETRF")));
+                const int tgtDate = normalizeDate(
+                    atoi(targetCRS->nameStr().c_str() + strlen("ETRF")));
+                const int intermDate = normalizeDate(
+                    atoi(intermediateCRS->nameStr().c_str() + strlen("ITRF")));
+                if (srcDate > 0 && tgtDate > 0 && intermDate > 0) {
+                    if (intermDate < std::min(srcDate, tgtDate) ||
+                        intermDate > std::max(srcDate, tgtDate)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        };
+
     for (const auto &row : res) {
         const auto &table1 = row[0];
         const auto &auth_name1 = row[1];
@@ -7602,6 +7644,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
                         code1, true, usePROJAlternativeGridNames, table1);
             if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
                                    targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
+            if (!checkPivotForETRFToETRF(op1->targetCRS())) {
                 continue;
             }
             auto op2 =
@@ -7642,6 +7687,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     if (discardSuperseded) {
         res = filterOutSuperseded(std::move(res));
     }
+
     for (const auto &row : res) {
         const auto &table1 = row[0];
         const auto &auth_name1 = row[1];
@@ -7658,6 +7704,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
                         code1, true, usePROJAlternativeGridNames, table1);
             if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
                                    targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
+            if (!checkPivotForETRFToETRF(op1->targetCRS())) {
                 continue;
             }
             auto op2 =
@@ -7737,6 +7786,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
                                    targetCRSAuthName, targetCRSCode)) {
                 continue;
             }
+            if (!checkPivotForETRFToETRF(op1->sourceCRS())) {
+                continue;
+            }
             auto op2 =
                 d->createFactory(auth_name2)
                     ->createCoordinateOperation(
@@ -7791,6 +7843,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
                         code1, true, usePROJAlternativeGridNames, table1);
             if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
                                    targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
+            if (!checkPivotForETRFToETRF(op1->sourceCRS())) {
                 continue;
             }
             auto op2 =
