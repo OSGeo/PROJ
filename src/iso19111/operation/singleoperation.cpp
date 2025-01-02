@@ -3482,8 +3482,28 @@ bool SingleOperation::exportToPROJStringGeneric(
 
         auto sourceCRSGeod =
             dynamic_cast<const crs::GeodeticCRS *>(sourceCRS().get());
+        if (!sourceCRSGeod) {
+            auto sourceCRSCompound =
+                dynamic_cast<const crs::CompoundCRS *>(sourceCRS().get());
+            if (sourceCRSCompound) {
+                sourceCRSGeod = dynamic_cast<const crs::GeodeticCRS *>(
+                    sourceCRSCompound->componentReferenceSystems()
+                        .front()
+                        .get());
+            }
+        }
         auto targetCRSGeod =
             dynamic_cast<const crs::GeodeticCRS *>(targetCRS().get());
+        if (!targetCRSGeod) {
+            auto targetCRSCompound =
+                dynamic_cast<const crs::CompoundCRS *>(targetCRS().get());
+            if (targetCRSCompound) {
+                targetCRSGeod = dynamic_cast<const crs::GeodeticCRS *>(
+                    targetCRSCompound->componentReferenceSystems()
+                        .front()
+                        .get());
+            }
+        }
         if (sourceCRSGeod && targetCRSGeod) {
             auto sourceCRSGeog =
                 dynamic_cast<const crs::GeographicCRS *>(sourceCRSGeod);
