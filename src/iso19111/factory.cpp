@@ -130,7 +130,7 @@ constexpr const char *CS_TYPE_ORDINAL = cs::OrdinalCS::WKT2_TYPE;
 constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 // If the code depends on the new additions, then DATABASE_LAYOUT_VERSION_MINOR
 // must be incremented.
-constexpr int DATABASE_LAYOUT_VERSION_MINOR = 4;
+constexpr int DATABASE_LAYOUT_VERSION_MINOR = 5;
 
 constexpr size_t N_MAX_PARAMS = 7;
 
@@ -6600,7 +6600,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
         }
 
         auto resSteps = d->runWithCodeParam(
-            "SELECT step_auth_name, step_code FROM "
+            "SELECT step_auth_name, step_code, step_direction FROM "
             "concatenated_operation_step WHERE operation_auth_name = ? "
             "AND operation_code = ? ORDER BY step_number",
             code);
@@ -6620,22 +6620,41 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const bool deprecated = deprecated_str == "1";
 
             std::vector<operation::CoordinateOperationNNPtr> operations;
+            size_t countExplicitDirection = 0;
             for (const auto &rowStep : resSteps) {
                 const auto &step_auth_name = rowStep[0];
                 const auto &step_code = rowStep[1];
-                operations.push_back(
+                const auto &step_direction = rowStep[2];
+                auto stepOp =
                     d->createFactory(step_auth_name)
                         ->createCoordinateOperation(step_code, false,
                                                     usePROJAlternativeGridNames,
-                                                    std::string()));
+                                                    std::string());
+                if (step_direction == "forward") {
+                    ++countExplicitDirection;
+                    operations.push_back(stepOp);
+                } else if (step_direction == "reverse") {
+                    ++countExplicitDirection;
+                    operations.push_back(stepOp->inverse());
+                } else {
+                    operations.push_back(stepOp);
+                }
             }
 
-            operation::ConcatenatedOperation::fixStepsDirection(
+            if (countExplicitDirection > 0 &&
+                countExplicitDirection != resSteps.size()) {
+                throw FactoryException("not all steps have a defined direction "
+                                       "for concatenated operation " +
+                                       code);
+            }
+
+            const bool fixDirectionAllowed = (countExplicitDirection == 0);
+            operation::ConcatenatedOperation::fixSteps(
                 d->createFactory(source_crs_auth_name)
                     ->createCoordinateReferenceSystem(source_crs_code),
                 d->createFactory(target_crs_auth_name)
                     ->createCoordinateReferenceSystem(target_crs_code),
-                operations, d->context());
+                operations, d->context(), fixDirectionAllowed);
 
             auto props = d->createPropertiesSearchUsages(
                 type, code, name, deprecated, description);

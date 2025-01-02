@@ -1002,6 +1002,7 @@ CREATE TABLE concatenated_operation_step(
     step_number INTEGER NOT NULL CHECK (step_number >= 1),
     step_auth_name TEXT NOT NULL CHECK (length(step_auth_name) >= 1),
     step_code INTEGER_OR_TEXT NOT NULL CHECK (length(step_code) >= 1),
+    step_direction TEXT DEFAULT NULL CHECK (step_direction IS NULL OR step_direction IN ('forward', 'reverse')), -- much needed extension to OGC Topic 2 ! If setting the direction on one step, it must be set on all steps.
 
     CONSTRAINT pk_concatenated_operation_step PRIMARY KEY (operation_auth_name, operation_code, step_number)
     --CONSTRAINT fk_concatenated_operation_step_to_operation FOREIGN KEY (step_auth_name, step_code) REFERENCES coordinate_operation(auth_name, code) ON DELETE CASCADE

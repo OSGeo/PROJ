@@ -61,9 +61,9 @@ UPDATE other_transformation SET accuracy = 0.1 WHERE name = 'S-JTSK to S-JTSK/05
 INSERT INTO "concatenated_operation" VALUES(
     'PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG','S-JTSK (EPSG:4156) to S-JTSK/05 (EPSG:5228)',
     'Transformation based on grid table_yx_3_v1710.dat','EPSG','4156','EPSG','5228',NULL,NULL,0);
-INSERT INTO "concatenated_operation_step" VALUES('PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG',1,'EPSG','5510');
-INSERT INTO "concatenated_operation_step" VALUES('PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG',2,'PROJ','S_JTSK_E_N_TO_S_JTSK05_E_N');
-INSERT INTO "concatenated_operation_step" VALUES('PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG',3,'EPSG','5512');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG',1,'EPSG','5510','reverse');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG',2,'PROJ','S_JTSK_E_N_TO_S_JTSK05_E_N','forward');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG',3,'EPSG','5512','forward');
 INSERT INTO "usage" VALUES('PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG_USAGE','concatenated_operation','PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG','EPSG','1079','EPSG','1189');
 
 
@@ -75,9 +75,9 @@ INSERT INTO "usage" VALUES('PROJ','S_JTSK_GEOG_TO_S_JTSK05_GEOG_USAGE','concaten
 INSERT INTO "concatenated_operation" VALUES(
     'PROJ','ETRS89_TO_S_JTSK_E_N','ETRS89 to S-JTSK / Krovak East North (EPSG:5514)',
     'Transformation based on grid table_yx_3_v1710.dat','EPSG','4258','EPSG','5514',NULL,NULL,0);
-INSERT INTO "concatenated_operation_step" VALUES('PROJ','ETRS89_TO_S_JTSK_E_N',1,'EPSG','5226');
-INSERT INTO "concatenated_operation_step" VALUES('PROJ','ETRS89_TO_S_JTSK_E_N',2,'EPSG','5512');
-INSERT INTO "concatenated_operation_step" VALUES('PROJ','ETRS89_TO_S_JTSK_E_N',3,'PROJ','S_JTSK_E_N_TO_S_JTSK05_E_N'); -- in reverse direction
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','ETRS89_TO_S_JTSK_E_N',1,'EPSG','5226','reverse');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','ETRS89_TO_S_JTSK_E_N',2,'EPSG','5512','forward');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','ETRS89_TO_S_JTSK_E_N',3,'PROJ','S_JTSK_E_N_TO_S_JTSK05_E_N','reverse');
 INSERT INTO "usage" VALUES('PROJ','ETRS89_TO_S_JTSK_E_N_USAGE','concatenated_operation','PROJ','ETRS89_TO_S_JTSK_E_N','EPSG','1079','EPSG','1189');
 
 

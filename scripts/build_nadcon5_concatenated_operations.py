@@ -67,7 +67,7 @@ def gen_transformations(sql, transformations, crs_dict, short_area_of_use, exten
                 target_crs_name = transformations[k][1]
                 step_code = transformations[k][2]
                 acc = transformations[k][3]
-                sql += f"INSERT INTO concatenated_operation_step VALUES('PROJ','{transfm_code}',{step},'EPSG','{step_code}'); -- {source_crs_name} to {target_crs_name} (EPSG:{step_code}), {acc} m\n"
+                sql += f"INSERT INTO concatenated_operation_step VALUES('PROJ','{transfm_code}',{step},'EPSG','{step_code}','forward'); -- {source_crs_name} to {target_crs_name} (EPSG:{step_code}), {acc} m\n"
 
             sql += f"INSERT INTO usage VALUES('PROJ','{transfm_code}_USAGE','concatenated_operation','PROJ','{transfm_code}',\n"
             sql += f"    'EPSG','{extent_code}', -- extent: {short_area_of_use}\n"

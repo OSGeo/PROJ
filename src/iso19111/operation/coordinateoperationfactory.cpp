@@ -3023,34 +3023,8 @@ static bool hasIdentifiers(const CoordinateOperationNNPtr &op) {
 void CoordinateOperationFactory::Private::setCRSs(
     CoordinateOperation *co, const crs::CRSNNPtr &sourceCRS,
     const crs::CRSNNPtr &targetCRS) {
-    const auto &interpolationCRS = co->interpolationCRS();
-    co->setCRSs(sourceCRS, targetCRS, interpolationCRS);
 
-    auto invCO = dynamic_cast<InverseCoordinateOperation *>(co);
-    if (invCO) {
-        invCO->forwardOperation()->setCRSs(targetCRS, sourceCRS,
-                                           interpolationCRS);
-    }
-
-    auto transf = dynamic_cast<Transformation *>(co);
-    if (transf) {
-        transf->inverseAsTransformation()->setCRSs(targetCRS, sourceCRS,
-                                                   interpolationCRS);
-    }
-
-    auto concat = dynamic_cast<ConcatenatedOperation *>(co);
-    if (concat) {
-        auto first = concat->operations().front().get();
-        auto &firstTarget(first->targetCRS());
-        if (firstTarget) {
-            setCRSs(first, sourceCRS, NN_NO_CHECK(firstTarget));
-        }
-        auto last = concat->operations().back().get();
-        auto &lastSource(last->sourceCRS());
-        if (lastSource) {
-            setCRSs(last, NN_NO_CHECK(lastSource), targetCRS);
-        }
-    }
+    co->setCRSsUpdateInverse(sourceCRS, targetCRS, co->interpolationCRS());
 }
 
 // ---------------------------------------------------------------------------

@@ -1979,12 +1979,12 @@ class FactoryWithTmpDatabase : public ::testing::Test {
 
         ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
                             "VALUES('EPSG','DUMMY_CONCATENATED',1,"
-                            "'EPSG','DUMMY_OTHER_TRANSFORMATION');"))
+                            "'EPSG','DUMMY_OTHER_TRANSFORMATION',NULL);"))
             << last_error();
 
         ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
                             "VALUES('EPSG','DUMMY_CONCATENATED',2,"
-                            "'EPSG','DUMMY_OTHER_TRANSFORMATION');"))
+                            "'EPSG','DUMMY_OTHER_TRANSFORMATION',NULL);"))
             << last_error();
     }
 
@@ -2414,12 +2414,12 @@ TEST_F(FactoryWithTmpDatabase,
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
                         "VALUES('EPSG','DUMMY_CONCATENATED_2',1,"
-                        "'EPSG','OTHER_GEOG_CRS_TO_4326');"))
+                        "'EPSG','OTHER_GEOG_CRS_TO_4326',NULL);"))
         << last_error();
 
     ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
                         "VALUES('EPSG','DUMMY_CONCATENATED_2',2,"
-                        "'EPSG','4326_TO_OTHER_GEOG_CRS');"))
+                        "'EPSG','4326_TO_OTHER_GEOG_CRS',NULL);"))
         << last_error();
 
     auto factoryEPSG = AuthorityFactory::create(DatabaseContext::create(m_ctxt),
@@ -3549,43 +3549,43 @@ TEST_F(FactoryWithTmpDatabase,
     // Forward map projection
     ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
                         "VALUES('EPSG','TEST_CONCATENATED',1,"
-                        "'EPSG','16031');"))
+                        "'EPSG','16031',NULL);"))
         << last_error();
 
     // Noop projected
     ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
                         "VALUES('EPSG','TEST_CONCATENATED',2,"
-                        "'EPSG','NOOP_TRANSFORMATION_32631');"))
+                        "'EPSG','NOOP_TRANSFORMATION_32631',NULL);"))
         << last_error();
 
     // Inverse map projection
     ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
                         "VALUES('EPSG','TEST_CONCATENATED',3,"
-                        "'EPSG','16031');"))
+                        "'EPSG','16031',NULL);"))
         << last_error();
 
     // Noop geographic
     ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
                         "VALUES('EPSG','TEST_CONCATENATED',4,"
-                        "'EPSG','NOOP_TRANSFORMATION_4326');"))
+                        "'EPSG','NOOP_TRANSFORMATION_4326',NULL);"))
         << last_error();
 
     // Forward map projection
     ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
                         "VALUES('EPSG','TEST_CONCATENATED',5,"
-                        "'EPSG','16031');"))
+                        "'EPSG','16031',NULL);"))
         << last_error();
 
     // Noop projected
     ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
                         "VALUES('EPSG','TEST_CONCATENATED',6,"
-                        "'EPSG','NOOP_TRANSFORMATION_32631');"))
+                        "'EPSG','NOOP_TRANSFORMATION_32631',NULL);"))
         << last_error();
 
     // Inverse map projection
     ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
                         "VALUES('EPSG','TEST_CONCATENATED',7,"
-                        "'EPSG','16031');"))
+                        "'EPSG','16031',NULL);"))
         << last_error();
 
     auto dbContext = DatabaseContext::create(m_ctxt);

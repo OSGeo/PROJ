@@ -753,10 +753,10 @@ for node in root.iterfind('.//Transformation'):
                             sql = """INSERT INTO "usage" VALUES('IGNF', '%s_USAGE','concatenated_operation','IGNF','%s','%s','%s','%s','%s');""" % (id_concat, id_concat, extent_auth_and_code[0], extent_auth_and_code[1], scope_auth_and_code[0], scope_auth_and_code[1])
                             all_sql_concat.append(sql)
 
-                            sql = """INSERT INTO "concatenated_operation_step" VALUES('IGNF','%s',1,'IGNF','%s');""" % (id_concat, idFirstOp)
+                            sql = """INSERT INTO "concatenated_operation_step" VALUES('IGNF','%s',1,'IGNF','%s',NULL);""" % (id_concat, idFirstOp)
                             all_sql_concat.append(sql)
 
-                            sql = """INSERT INTO "concatenated_operation_step" VALUES('IGNF','%s',2,'IGNF','%s');""" % (id_concat, id_geog)
+                            sql = """INSERT INTO "concatenated_operation_step" VALUES('IGNF','%s',2,'IGNF','%s',NULL);""" % (id_concat, id_geog)
                             all_sql_concat.append(sql)
 
 
