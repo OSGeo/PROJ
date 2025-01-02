@@ -581,3 +581,51 @@ FROM grid_transformation gt
 JOIN usage u ON u.object_auth_name = gt.auth_name AND u.object_code = gt.code AND u.object_table_name = 'grid_transformation'
 WHERE method_auth_name = 'EPSG' AND method_name LIKE 'Geog3D to Geog2D+%'
 AND EXISTS (SELECT 1 FROM grid_transformation gt2 WHERE gt2.auth_name = 'PROJ' AND gt2.code = gt.auth_name || '_' || gt.code || '_RESTRICTED_TO_VERTCRS');
+
+-- Add records corresponding to EGM2008 grid for WGS 84 realizations
+
+INSERT INTO "grid_transformation"
+SELECT
+    'PROJ' AS auth_name,
+    replace(replace(replace(gcrs.name, ' ', '_'), '(', ''), ')', '') || '_TO_EGM2008',
+    gcrs.name || ' to EGM2008 height (from ' || gt.name || ')' AS name,
+    gt.description,
+    gt.method_auth_name,
+    gt.method_code,
+    gt.method_name,
+    gcrs.auth_name,
+    gcrs.code,
+    gt.target_crs_auth_name,
+    gt.target_crs_code,
+    gt.accuracy,
+    gt.grid_param_auth_name,
+    gt.grid_param_code,
+    gt.grid_param_name,
+    gt.grid_name,
+    gt.grid2_param_auth_name,
+    gt.grid2_param_code,
+    gt.grid2_param_name,
+    gt.grid2_name,
+    gt.interpolation_crs_auth_name,
+    gt.interpolation_crs_code,
+    gt.operation_version,
+    gt.deprecated
+FROM grid_transformation gt, geodetic_crs gcrs
+WHERE gt.name = 'WGS 84 to EGM2008 height (1)'
+AND gcrs.auth_name = 'EPSG' AND gcrs.name LIKE 'WGS 84 (G%' AND gcrs.type='geographic 3D' and gcrs.deprecated=0;
+
+INSERT INTO "usage"
+SELECT
+    'PROJ' AS auth_name,
+    'USAGE_' || replace(replace(replace(gcrs.name, ' ', '_'), '(', ''), ')', '') || '_TO_EGM2008' AS code,
+    'grid_transformation' AS object_table_name,
+    'PROJ' AS object_auth_name,
+    replace(replace(replace(gcrs.name, ' ', '_'), '(', ''), ')', '') || '_TO_EGM2008' AS object_code,
+    u.extent_auth_name,
+    u.extent_code,
+    u.scope_auth_name,
+    u.scope_code
+FROM grid_transformation gt, geodetic_crs gcrs
+JOIN usage u ON u.object_auth_name = gt.auth_name AND u.object_code = gt.code AND u.object_table_name = 'grid_transformation'
+WHERE gt.name = 'WGS 84 to EGM2008 height (1)'
+AND gcrs.auth_name = 'EPSG' AND gcrs.name LIKE 'WGS 84 (G%' AND gcrs.type='geographic 3D' and gcrs.deprecated=0;

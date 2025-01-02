@@ -1838,3 +1838,18 @@ tests:
     Test that "CGVD28 height" to "CGVD28(HTv2.0) height" is a no-op
   args: -s "CGVD28 height" -t "CGVD28(HTv2.0) height" -o PROJ -q
   out: +proj=noop
+- comment: >
+   Test custom records for WGS 84 realizations to EGM2008 (https://github.com/OSGeo/PROJ/issues/4362)
+  args: -s "WGS 84 (G1150) + EGM2008 height" -t "WGS 84 (G1674)" --3d -o PROJ -q
+  out: |
+    +proj=pipeline
+      +step +proj=axisswap +order=2,1
+      +step +proj=unitconvert +xy_in=deg +xy_out=rad
+      +step +proj=vgridshift +grids=us_nga_egm08_25.tif +multiplier=1
+      +step +proj=cart +ellps=WGS84
+      +step +proj=helmert +x=-0.0024 +y=0.0016 +z=0.0232 +rx=-0.00027 +ry=0.00027
+            +rz=-0.00038 +s=0.00208 +dx=-0.0001 +dy=-0.0001 +dz=0.0018 +drx=0 +dry=0
+            +drz=0 +ds=-8e-05 +t_epoch=2005 +convention=coordinate_frame
+      +step +inv +proj=cart +ellps=WGS84
+      +step +proj=unitconvert +xy_in=rad +xy_out=deg
+      +step +proj=axisswap +order=2,1
