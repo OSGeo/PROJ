@@ -1853,3 +1853,17 @@ tests:
       +step +inv +proj=cart +ellps=WGS84
       +step +proj=unitconvert +xy_in=rad +xy_out=deg
       +step +proj=axisswap +order=2,1
+- comment: >
+   Test 'WGS 84 (Gxxx) + EGM2008 height' to 'WGS 84 (Gyyy) + EGM2008 height'
+  args: -s "WGS 84 (G1150) + EGM2008 height" -t "WGS 84 (G1674) + EGM2008 height" -o PROJ -q
+  out: |
+    +proj=pipeline
+      +step +proj=axisswap +order=2,1
+      +step +proj=unitconvert +xy_in=deg +xy_out=rad
+      +step +proj=cart +ellps=WGS84
+      +step +proj=helmert +x=-0.0024 +y=0.0016 +z=0.0232 +rx=-0.00027 +ry=0.00027
+            +rz=-0.00038 +s=0.00208 +dx=-0.0001 +dy=-0.0001 +dz=0.0018 +drx=0 +dry=0
+            +drz=0 +ds=-8e-05 +t_epoch=2005 +convention=coordinate_frame
+      +step +inv +proj=cart +ellps=WGS84
+      +step +proj=unitconvert +xy_in=rad +xy_out=deg
+      +step +proj=axisswap +order=2,1
