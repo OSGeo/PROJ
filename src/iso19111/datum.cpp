@@ -818,13 +818,17 @@ EllipsoidNNPtr Ellipsoid::createSphere(const util::PropertyMap &properties,
 EllipsoidNNPtr Ellipsoid::createFlattenedSphere(
     const util::PropertyMap &properties, const common::Length &semiMajorAxisIn,
     const common::Scale &invFlattening, const std::string &celestialBody) {
-    auto ellipsoid(invFlattening.value() == 0
-                       ? Ellipsoid::nn_make_shared<Ellipsoid>(semiMajorAxisIn,
-                                                              celestialBody)
-                       : Ellipsoid::nn_make_shared<Ellipsoid>(
-                             semiMajorAxisIn, invFlattening, celestialBody));
-    ellipsoid->setProperties(properties);
-    return ellipsoid;
+    if (invFlattening.value() == 0) {
+        auto ellipsoid(Ellipsoid::nn_make_shared<Ellipsoid>(semiMajorAxisIn,
+                                                            celestialBody));
+        ellipsoid->setProperties(properties);
+        return ellipsoid;
+    } else {
+        auto ellipsoid(Ellipsoid::nn_make_shared<Ellipsoid>(
+            semiMajorAxisIn, invFlattening, celestialBody));
+        ellipsoid->setProperties(properties);
+        return ellipsoid;
+    }
 }
 
 // ---------------------------------------------------------------------------

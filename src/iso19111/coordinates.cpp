@@ -213,13 +213,18 @@ CoordinateMetadataNNPtr
 CoordinateMetadata::promoteTo3D(const std::string &newName,
                                 const io::DatabaseContextPtr &dbContext) const {
     auto crs = d->crs_->promoteTo3D(newName, dbContext);
-    auto coordinateMetadata(
-        d->coordinateEpoch_.has_value()
-            ? CoordinateMetadata::nn_make_shared<CoordinateMetadata>(
-                  crs, coordinateEpochAsDecimalYear())
-            : CoordinateMetadata::nn_make_shared<CoordinateMetadata>(crs));
-    coordinateMetadata->assignSelf(coordinateMetadata);
-    return coordinateMetadata;
+    if (d->coordinateEpoch_.has_value()) {
+        auto coordinateMetadata(
+            CoordinateMetadata::nn_make_shared<CoordinateMetadata>(
+                crs, coordinateEpochAsDecimalYear()));
+        coordinateMetadata->assignSelf(coordinateMetadata);
+        return coordinateMetadata;
+    } else {
+        auto coordinateMetadata(
+            CoordinateMetadata::nn_make_shared<CoordinateMetadata>(crs));
+        coordinateMetadata->assignSelf(coordinateMetadata);
+        return coordinateMetadata;
+    }
 }
 
 // ---------------------------------------------------------------------------

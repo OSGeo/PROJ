@@ -60,10 +60,12 @@ elseif(HAS_NETWORK)
     cmake_policy(SET CMP0135 NEW)  # for DOWNLOAD_EXTRACT_TIMESTAMP option
   endif()
 
+  set(GTEST_VERSION "1.15.2")
+
   include(FetchContent)
   FetchContent_Declare(
     googletest
-    URL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.zip
+    URL https://github.com/google/googletest/archive/refs/tags/v${GTEST_VERSION}.zip
     EXCLUDE_FROM_ALL  # ignored before CMake 3.28
   )
 
