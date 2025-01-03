@@ -2832,9 +2832,9 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                                          children[1]->GP()->value()));
         }
     } else {
-        const char *csTypeCStr = "";
+        const char *csTypeCStr = CartesianCS::WKT2_TYPE;
         if (ci_equal(parentNodeName, WKTConstants::GEOCCS)) {
-            csTypeCStr = CartesianCS::WKT2_TYPE;
+            // csTypeCStr = CartesianCS::WKT2_TYPE;
             isGeocentric = true;
             if (axisCount == 0) {
                 auto unit =

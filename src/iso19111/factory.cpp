@@ -3114,9 +3114,9 @@ std::string
 DatabaseContext::suggestsCodeFor(const common::IdentifiedObjectNNPtr &object,
                                  const std::string &authName,
                                  bool numericCode) {
-    const char *tableName = "";
+    const char *tableName = "prime_meridian";
     if (dynamic_cast<const datum::PrimeMeridian *>(object.get())) {
-        tableName = "prime_meridian";
+        // tableName = "prime_meridian";
     } else if (dynamic_cast<const datum::Ellipsoid *>(object.get())) {
         tableName = "ellipsoid";
     } else if (dynamic_cast<const datum::GeodeticReferenceFrame *>(

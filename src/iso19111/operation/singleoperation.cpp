@@ -45,6 +45,7 @@
 #include "operationmethod_private.hpp"
 #include "oputils.hpp"
 #include "parammappings.hpp"
+#include "vectorofvaluesparams.hpp"
 
 // PROJ include order is sensitive
 // clang-format off
@@ -2285,18 +2286,13 @@ createNTv1(const util::PropertyMap &properties,
            const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
            const std::string &filename,
            const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    const VectorOfParameters parameters{createOpParamNameEPSGCode(
+        EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE)};
+    const VectorOfValues values{ParameterValue::createFilename(filename)};
     return Transformation::create(
         properties, sourceCRSIn, targetCRSIn, nullptr,
-        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_NTV1),
-        {OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE))},
-        {ParameterValue::createFilename(filename)}, accuracies);
+        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_NTV1), parameters, values,
+        accuracies);
 }
 //! @endcond
 
@@ -2417,7 +2413,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
         auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
         const auto &l_accuracies = coordinateOperationAccuracies();
         if (projGridFormat == "GTiff") {
-            auto parameters = std::vector<OperationParameterNNPtr>{
+            const VectorOfParameters parameters{
                 methodEPSGCode == EPSG_CODE_METHOD_NADCON5_3D
                     ? OperationParameter::create(util::PropertyMap().set(
                           common::IdentifiedObject::NAME_KEY,
@@ -2430,7 +2426,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                  methodEPSGCode == EPSG_CODE_METHOD_NADCON5_3D)
                     ? PROJ_WKT2_NAME_METHOD_GENERAL_SHIFT_GTIFF
                     : PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF);
-            auto values = std::vector<ParameterValueNNPtr>{
+            const VectorOfValues values{
                 ParameterValue::createFilename(projFilename)};
             if (inverseDirection) {
                 return Transformation::create(
@@ -2471,13 +2467,12 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                     l_targetCRS, projFilename, l_accuracies);
             }
         } else if (projGridFormat == "CTable2") {
-            auto parameters =
-                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
-                    EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE)};
+            const VectorOfParameters parameters{createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE)};
             auto methodProperties =
                 util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
                                         PROJ_WKT2_NAME_METHOD_CTABLE2);
-            auto values = std::vector<ParameterValueNNPtr>{
+            const VectorOfValues values{
                 ParameterValue::createFilename(projFilename)};
             if (inverseDirection) {
                 return Transformation::create(
@@ -2528,9 +2523,10 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                 }
                 auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
                 auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-                auto parameters = std::vector<OperationParameterNNPtr>{
-                    createOpParamNameEPSGCode(
-                        EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME)};
+                const VectorOfParameters parameters{createOpParamNameEPSGCode(
+                    EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME)};
+                const VectorOfValues values{
+                    ParameterValue::createFilename(projFilename)};
 #ifdef disabled_for_now
                 if (inverseDirection) {
                     return Transformation::create(
@@ -2538,8 +2534,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                                    self.as_nullable().get(), true, false),
                                l_targetCRS, l_sourceCRS, l_interpolationCRS,
                                createSimilarPropertiesMethod(method()),
-                               parameters,
-                               {ParameterValue::createFilename(projFilename)},
+                               parameters, values,
                                coordinateOperationAccuracies())
                         ->inverseAsTransformation();
                 } else
@@ -2549,8 +2544,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                         createSimilarPropertiesOperation(self), l_sourceCRS,
                         l_targetCRS, l_interpolationCRS,
                         createSimilarPropertiesMethod(method()), parameters,
-                        {ParameterValue::createFilename(projFilename)},
-                        coordinateOperationAccuracies());
+                        values, coordinateOperationAccuracies());
                 }
             }
         }
@@ -2583,14 +2577,14 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
             }
             auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
             auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-            auto parameters =
-                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
-                    EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE)};
+            const VectorOfParameters parameters{createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE)};
+            const VectorOfValues values{
+                ParameterValue::createFilename(projFilename)};
             return Transformation::create(
                 createSimilarPropertiesOperation(self), l_sourceCRS,
                 l_targetCRS, l_interpolationCRS,
-                createSimilarPropertiesMethod(method()), parameters,
-                {ParameterValue::createFilename(projFilename)},
+                createSimilarPropertiesMethod(method()), parameters, values,
                 coordinateOperationAccuracies());
         }
     }
@@ -2622,14 +2616,14 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
             }
             auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
             auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-            auto parameters =
-                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
-                    EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+            const VectorOfParameters parameters{createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+            const VectorOfValues values{
+                ParameterValue::createFilename(projFilename)};
             return Transformation::create(
                 createSimilarPropertiesOperation(self), l_sourceCRS,
                 l_targetCRS, l_interpolationCRS,
-                createSimilarPropertiesMethod(method()), parameters,
-                {ParameterValue::createFilename(projFilename)},
+                createSimilarPropertiesMethod(method()), parameters, values,
                 coordinateOperationAccuracies());
         }
     }
@@ -2661,14 +2655,14 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
             }
             auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
             auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-            auto parameters =
-                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
-                    EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+            const VectorOfParameters parameters{createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+            const VectorOfValues values{
+                ParameterValue::createFilename(projFilename)};
             return Transformation::create(
                 createSimilarPropertiesOperation(self), l_sourceCRS,
                 l_targetCRS, l_interpolationCRS,
-                createSimilarPropertiesMethod(method()), parameters,
-                {ParameterValue::createFilename(projFilename)},
+                createSimilarPropertiesMethod(method()), parameters, values,
                 coordinateOperationAccuracies());
         }
     }
@@ -2712,16 +2706,17 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                 }
                 auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
                 auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-                auto parameters = std::vector<OperationParameterNNPtr>{
+                const VectorOfParameters parameters{
                     createOpParamNameEPSGCode(parameterCode)};
+                const VectorOfValues values{
+                    ParameterValue::createFilename(projFilename)};
                 if (inverseDirection) {
                     return Transformation::create(
                                createPropertiesForInverse(
                                    self.as_nullable().get(), true, false),
                                l_targetCRS, l_sourceCRS, l_interpolationCRS,
                                createSimilarPropertiesMethod(method()),
-                               parameters,
-                               {ParameterValue::createFilename(projFilename)},
+                               parameters, values,
                                coordinateOperationAccuracies())
                         ->inverseAsTransformation();
                 } else {
@@ -2729,8 +2724,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                         createSimilarPropertiesOperation(self), l_sourceCRS,
                         l_targetCRS, l_interpolationCRS,
                         createSimilarPropertiesMethod(method()), parameters,
-                        {ParameterValue::createFilename(projFilename)},
-                        coordinateOperationAccuracies());
+                        values, coordinateOperationAccuracies());
                 }
             }
         }
@@ -2786,18 +2780,18 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                     }
                     auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
                     auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-                    auto parameters = std::vector<OperationParameterNNPtr>{
+                    const VectorOfParameters parameters{
                         createOpParamNameEPSGCode(
                             gridTransf.gridFilenameParamEPSGCode)};
+                    const VectorOfValues values{
+                        ParameterValue::createFilename(projFilename)};
                     if (inverseDirection) {
                         return Transformation::create(
                                    createPropertiesForInverse(
                                        self.as_nullable().get(), true, false),
                                    l_targetCRS, l_sourceCRS, l_interpolationCRS,
                                    createSimilarPropertiesMethod(method()),
-                                   parameters,
-                                   {ParameterValue::createFilename(
-                                       projFilename)},
+                                   parameters, values,
                                    coordinateOperationAccuracies())
                             ->inverseAsTransformation();
                     } else {
@@ -2805,8 +2799,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                             createSimilarPropertiesOperation(self), l_sourceCRS,
                             l_targetCRS, l_interpolationCRS,
                             createSimilarPropertiesMethod(method()), parameters,
-                            {ParameterValue::createFilename(projFilename)},
-                            coordinateOperationAccuracies());
+                            values, coordinateOperationAccuracies());
                     }
                 }
             }
@@ -5162,13 +5155,13 @@ PointMotionOperation::substitutePROJAlternativeGridNames(
             return self;
         }
 
-        auto parameters =
-            std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
-                EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+        const VectorOfParameters parameters{createOpParamNameEPSGCode(
+            EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+        const VectorOfValues values{
+            ParameterValue::createFilename(projFilename)};
         return PointMotionOperation::create(
             createSimilarPropertiesOperation(self), sourceCRS(),
-            createSimilarPropertiesMethod(method()), parameters,
-            {ParameterValue::createFilename(projFilename)},
+            createSimilarPropertiesMethod(method()), parameters, values,
             coordinateOperationAccuracies());
     }
 
