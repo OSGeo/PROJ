@@ -236,7 +236,6 @@ static PJ_XY airocean_forward(PJ_LP lp, PJ *P) {
     } else {
         lat = lp.phi;
     }
-    lat = lp.phi;
 
     // Convert the lat/long to x,y,z on the unit sphere
     double x, y, z;
