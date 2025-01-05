@@ -58,6 +58,7 @@ list(APPEND SQL_FILES
   "${SQL_DIR}/grid_alternatives.sql"
   "${SQL_DIR}/grid_alternatives_generated_noaa.sql"
   "${SQL_DIR}/nadcon5_concatenated_operations.sql"
+  "${SQL_DIR}/wgs84_realizations_concatenated_operations.sql"
   "${SQL_DIR}/customizations.sql"
   "${SQL_DIR}/nkg_post_customizations.sql"
   "${SQL_DIR}/commit.sql"
