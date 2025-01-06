@@ -227,6 +227,8 @@ inv_orient_horizontal = np.linalg.inv(orient_horizontal)
 
 """
     Definition of icosahedron vertices, faces and centers.
+    Credit to Gray Fuller for the original values.
+    Original source: http://www.rwgrayprojects.com/rbfnotes/maps/docs/graypr.c
 """
 
 ico_faces = np.array(
