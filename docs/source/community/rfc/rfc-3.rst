@@ -31,8 +31,7 @@ With adoption of this RFC, versions used for
 2. software packages will always be at least two years old
    (patch releases are exempt)
 
-A change in programming language standard can only be introduced with a new
-major version release of PROJ. Changes for software package dependencies can be
+Changes for programming languages or software package dependencies can be
 introduced with minor version releases of PROJ. Changing the version
 requirements for a dependency needs to be approved by the PSC.
 
@@ -149,3 +148,6 @@ The RFC was adopted on 2018-01-19 with +1's from the following PSC members
 * Even Rouault
 * Thomas Knudsen
 * Howard Butler
+
+Amendment on January 2025 to allow updating programming language standard in
+minor versions.
