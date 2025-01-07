@@ -1278,6 +1278,109 @@ static void suggestCompletion(const std::vector<std::string> &args) {
                 break;
             }
         }
+
+        // If the input was ``projinfo "NAD83(HARN) / California Albers +``,
+        // then check if "NAD83(HARN) / California Albers" is a known horizontal
+        // CRS, and if so, suggest relevant potential vertical CRS.
+        const auto posSpacePlus = lastArg.find(" +");
+        if (first && posSpacePlus != std::string::npos) {
+            const std::string candidateHorizCRSName =
+                lastArg.substr(0, posSpacePlus);
+            auto factory = AuthorityFactory::create(dbContext, std::string());
+#ifdef DEBUG_COMPLETION
+            fprintf(stderr, "candidateHorizCRSName='%s'\n",
+                    candidateHorizCRSName.c_str());
+#endif
+            const auto candidateHorizCRS = factory->createObjectsFromName(
+                candidateHorizCRSName,
+                {AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS,
+                 AuthorityFactory::ObjectType::PROJECTED_CRS},
+                /* approximateMatch = */ true,
+                /* limitResultCount = */ 2);
+            if (!candidateHorizCRS.empty()) {
+                const auto &domains = dynamic_cast<const ObjectUsage *>(
+                                          candidateHorizCRS.front().get())
+                                          ->domains();
+                if (domains.size() == 1) {
+                    const auto &domain = domains[0]->domainOfValidity();
+                    if (domain && domain->geographicElements().size() == 1) {
+                        const auto bbox =
+                            dynamic_cast<const GeographicBoundingBox *>(
+                                domain->geographicElements()[0].get());
+                        if (bbox) {
+                            std::string vertCRSAuthName;
+                            const auto &codeSpace = candidateHorizCRS.front()
+                                                        ->identifiers()
+                                                        .front()
+                                                        ->codeSpace();
+                            if (codeSpace.has_value())
+                                vertCRSAuthName = *codeSpace;
+                            auto factoryVertCRS = AuthorityFactory::create(
+                                dbContext, vertCRSAuthName);
+                            const auto list = factoryVertCRS->getCRSInfoList();
+                            std::string horizAreaOfUse;
+                            if (domain->description().has_value()) {
+                                horizAreaOfUse = *(domain->description());
+                                const auto posDash = horizAreaOfUse.find(" -");
+                                if (posDash != std::string::npos)
+                                    horizAreaOfUse.resize(posDash);
+                            }
+                            for (size_t attempt = 0; first && attempt < 2;
+                                 ++attempt) {
+                                for (const auto &info : list) {
+                                    if (!info.deprecated && info.bbox_valid &&
+                                        info.type ==
+                                            AuthorityFactory::ObjectType::
+                                                VERTICAL_CRS &&
+                                        !starts_with(info.name,
+                                                     "EPSG example")) {
+                                        std::string vertAreaOfUse =
+                                            info.areaName;
+                                        const auto posDash =
+                                            vertAreaOfUse.find(" -");
+                                        if (posDash != std::string::npos)
+                                            vertAreaOfUse.resize(posDash);
+                                        bool ok = false;
+                                        if (attempt == 0 &&
+                                            !horizAreaOfUse.empty()) {
+                                            ok =
+                                                horizAreaOfUse == vertAreaOfUse;
+                                        } else if (attempt == 1 &&
+                                                   vertAreaOfUse == "World.") {
+                                            // auto vertCrsBbox =
+                                            // GeographicBoundingBox::create(info.west_lon_degree,
+                                            // info.south_lat_degree,
+                                            // info.east_lon_degree,
+                                            // info.north_lat_degree); if(
+                                            // bbox->intersects(vertCrsBbox))
+                                            { ok = true; }
+                                        }
+                                        if (ok) {
+                                            if (!first)
+                                                printf(" ");
+                                            first = false;
+#ifdef DEBUG_COMPLETION
+                                            fprintf(stderr, "'%s'\n",
+                                                    replaceAll(info.name, " ",
+                                                               "\\ ")
+                                                        .c_str());
+#endif
+                                            printf("%s", replaceAll(info.name,
+                                                                    " ", "\\ ")
+                                                             .c_str());
+                                        }
+                                    }
+                                }
+                                if (!first) {
+                                    printf("\n");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     } catch (const std::exception &) {
     }
 }
