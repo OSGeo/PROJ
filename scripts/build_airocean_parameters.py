@@ -848,7 +848,7 @@ def generate_20_faces_airocean_net(
 
 
 def generate_23_faces_airocean_net(
-    outfile: Path = Path("./23_faces_airocean_net.png"),
+    outfile: Path,
 ) -> None:
     """
     Save a picture of the complete 23 faces of the unfolded icosahedron net
