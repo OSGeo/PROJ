@@ -455,11 +455,11 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
     Default is OFF for shared library builds (BUILD_SHARED_LIBS=ON), and ON
     for static library builds (BUILD_SHARED_LIBS=OFF).
 
-.. option:: EMBED_GRIDS_DIRECTORY=<directory>
+.. option:: EMBED_RESOURCE_DIRECTORY=<directory>
 
     .. versionadded:: 9.6
 
-    Embed files from <directory> ending with .tif or .json in the PROJ library itself.
+    Embed files from <directory> ending with .tif, .json or .pol in the PROJ library itself.
 
     The pointed directory can potentially be the full PROJ-data package (uncompressed).
     In that case, about 6 GB of free disk and 16 GB of RAM are required to build PROJ.
