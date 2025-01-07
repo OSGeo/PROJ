@@ -7,7 +7,7 @@ PROJ RFC 3: Dependency management
 :Author: Kristian Evers
 :Contact: kreve@sdfe.dk
 :Status: Adopted
-:Last Updated: 2019-01-16
+:Last Updated: 2025-01-07
 
 Summary
 -------------------------------------------------------------------------------
@@ -33,7 +33,10 @@ With adoption of this RFC, versions used for
 
 Changes for programming languages or software package dependencies can be
 introduced with minor version releases of PROJ. Changing the version
-requirements for a dependency needs to be approved by the PSC.
+requirements for a dependency needs to be approved by the PSC. Following
+a change in dependency version the build requirements needs to be updated
+and the changes be clearly stated in the release notes for the affected PROJ
+version.
 
 Following the above rule set will ensure that all but the most conservative
 users of PROJ will be able to build and use the most recent version of the
@@ -98,8 +101,7 @@ change to C99 is possible, as long as the PROJ PSC acknowledges such a change.
 When a new standard for either C or C++ is released PROJ should consider
 changing its requirement to the next standard in the line. For C++ that means a
 change in standard roughly every three years, for C the periods between
-standard updates is expected to be longer. Adaptation of new programming
-language standards should be coordinated with a major version release of PROJ.
+standard updates is expected to be longer.
 
 
 Software dependencies
