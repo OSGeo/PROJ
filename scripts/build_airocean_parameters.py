@@ -217,7 +217,7 @@ airocean_23_centers[:, 2] = 1
 
 
 def translation(dx=0, dy=0):
-    res = np.eye(4, dtype=np.float32)
+    res = np.eye(4, dtype=np.float64)
     res[[0, 1], 3] = dx, dy
     return res
 
@@ -230,7 +230,7 @@ def rotation(angle):
                 [np.cos(angle), -np.sin(angle)],
                 [np.sin(angle), np.cos(angle)],
             ],
-            dtype=np.float32,
+            dtype=np.float64,
         )
     )
     return res
@@ -712,7 +712,7 @@ ico_faces = np.array(
             ],
         ],
     ],
-    dtype=np.float32,
+    dtype=np.float64,
 )
 ico_20_centers = np.array(
     [
@@ -737,7 +737,7 @@ ico_20_centers = np.array(
         [-0.5884910224298405, 0.5302967343924689, 0.06276480180379439],
         [-0.08682595643253764, 0.3823838837835094, -0.6911725899118975],
     ],
-    dtype=np.float32,
+    dtype=np.float64,
 )
 
 
@@ -774,7 +774,7 @@ air_ico_trans = zap_zero_or_one(
             a.T @ np.linalg.inv(b.T)
             for i, (a, b) in enumerate(zip(ico_basis, airocean_basis))
         ],
-        dtype=np.float32,
+        dtype=np.float64,
     )
 )
 ico_air_trans = zap_zero_or_one(
@@ -783,7 +783,7 @@ ico_air_trans = zap_zero_or_one(
             b.T @ np.linalg.inv(a.T)
             for i, (a, b) in enumerate(zip(ico_basis, airocean_basis))
         ],
-        dtype=np.float32,
+        dtype=np.float64,
     )
 )
 
