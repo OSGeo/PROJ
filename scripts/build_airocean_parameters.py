@@ -819,7 +819,7 @@ for i, (a, b, v1, v2) in enumerate(
 
 
 def generate_20_faces_airocean_net(
-    outfile: Path = Path("./20_faces_airocean_net.png"),
+    outfile: Path,
 ) -> None:
     """
     Save a picture of the "base" (non split) 20 faces of the unfolded icosahedron net
