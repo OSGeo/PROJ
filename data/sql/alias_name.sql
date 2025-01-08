@@ -8044,3 +8044,4 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10699','ETRS89 / UTM zon
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10702','ETRS-TM36','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10702','ETRS89 / UTM zone 36N','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10690','EUREF-FIN-GRS80','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10774','ETRS-TM35FIN/N2000','EPSG');
