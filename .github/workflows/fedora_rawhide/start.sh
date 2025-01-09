@@ -24,12 +24,12 @@ CC=clang CXX=clang++ cmake .. \
 make -j$(nproc)
 ctest -j$(nproc)
 
-# Try EMBED_GRIDS_DIRECTORY option
+# Try EMBED_RESOURCE_DIRECTORY option
 wget https://raw.githubusercontent.com/OSGeo/PROJ-data/refs/heads/master/us_nga/us_nga_egm96_15.tif
 mkdir grids
 mv us_nga_egm96_15.tif grids
-echo "Build with -DEMBED_RESOURCE_FILES=ON -DEMBED_GRIDS_DIRECTORY=$PWD/grids"
-CC=clang CXX=clang++ cmake .. -DEMBED_GRIDS_DIRECTORY=$PWD/grids
+echo "Build with -DEMBED_RESOURCE_FILES=ON -DEMBED_RESOURCE_DIRECTORY=$PWD/grids"
+CC=clang CXX=clang++ cmake .. -DEMBED_RESOURCE_DIRECTORY=$PWD/grids
 make -j$(nproc)
 rm -rf data
 echo 49 2 0 | bin/cs2cs "WGS84 + EGM96 height" EPSG:4979
@@ -37,8 +37,8 @@ echo 49 2 0 | bin/cs2cs "WGS84 + EGM96 height" EPSG:4979  | grep 44.643 >/dev/nu
 echo 0 0 0 | bin/cct +init=ITRF2000:ITRF96
 echo 0 0 0 | bin/cct +init=ITRF2000:ITRF96 | grep 0.0067 >/dev/null || (echo "Expected 0.0067 0.0061 -0.0185 as a result" && /bin/false)
 
-echo "Build with -DEMBED_RESOURCE_FILES=ON -DEMBED_GRIDS_DIRECTORY=$PWD/grids -DUSE_ONLY_EMBEDDED_RESOURCE_FILES=ON"
-CC=clang CXX=clang++ cmake .. -DEMBED_GRIDS_DIRECTORY=$PWD/grids -DUSE_ONLY_EMBEDDED_RESOURCE_FILES=ON
+echo "Build with -DEMBED_RESOURCE_FILES=ON -DEMBED_RESOURCE_DIRECTORY=$PWD/grids -DUSE_ONLY_EMBEDDED_RESOURCE_FILES=ON"
+CC=clang CXX=clang++ cmake .. -DEMBED_RESOURCE_DIRECTORY=$PWD/grids -DUSE_ONLY_EMBEDDED_RESOURCE_FILES=ON
 make -j$(nproc)
 rm -rf data
 echo 49 2 0 | bin/cs2cs "WGS84 + EGM96 height" EPSG:4979
