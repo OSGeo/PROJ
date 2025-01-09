@@ -1637,7 +1637,7 @@ CurlFileHandle::CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle)
     CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS, ssl_options));
 #else
 #if CURL_AT_LEAST_VERSION(7, 71, 0)
-    if (pj_context_get_native_ca(ctx)){
+    if (pj_context_get_native_ca(ctx)) {
         CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS,
                                         (long)CURLSSLOPT_NATIVE_CA));
     }
