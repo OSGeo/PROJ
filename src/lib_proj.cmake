@@ -187,6 +187,7 @@ set(SRC_LIBPROJ_ISO19111
   iso19111/operation/conversion.cpp
   iso19111/operation/esriparammappings.cpp
   iso19111/operation/oputils.cpp
+  iso19111/operation/parametervalue.cpp
   iso19111/operation/parammappings.cpp
   iso19111/operation/projbasedoperation.cpp
   iso19111/operation/singleoperation.cpp

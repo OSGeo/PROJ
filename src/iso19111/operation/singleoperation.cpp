@@ -45,6 +45,7 @@
 #include "operationmethod_private.hpp"
 #include "oputils.hpp"
 #include "parammappings.hpp"
+#include "vectorofvaluesparams.hpp"
 
 // PROJ include order is sensitive
 // clang-format off
@@ -2285,18 +2286,13 @@ createNTv1(const util::PropertyMap &properties,
            const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
            const std::string &filename,
            const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    const VectorOfParameters parameters{createOpParamNameEPSGCode(
+        EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE)};
+    const VectorOfValues values{ParameterValue::createFilename(filename)};
     return Transformation::create(
         properties, sourceCRSIn, targetCRSIn, nullptr,
-        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_NTV1),
-        {OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE))},
-        {ParameterValue::createFilename(filename)}, accuracies);
+        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_NTV1), parameters, values,
+        accuracies);
 }
 //! @endcond
 
@@ -2417,7 +2413,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
         auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
         const auto &l_accuracies = coordinateOperationAccuracies();
         if (projGridFormat == "GTiff") {
-            auto parameters = std::vector<OperationParameterNNPtr>{
+            const VectorOfParameters parameters{
                 methodEPSGCode == EPSG_CODE_METHOD_NADCON5_3D
                     ? OperationParameter::create(util::PropertyMap().set(
                           common::IdentifiedObject::NAME_KEY,
@@ -2430,7 +2426,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                  methodEPSGCode == EPSG_CODE_METHOD_NADCON5_3D)
                     ? PROJ_WKT2_NAME_METHOD_GENERAL_SHIFT_GTIFF
                     : PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF);
-            auto values = std::vector<ParameterValueNNPtr>{
+            const VectorOfValues values{
                 ParameterValue::createFilename(projFilename)};
             if (inverseDirection) {
                 return Transformation::create(
@@ -2471,13 +2467,12 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                     l_targetCRS, projFilename, l_accuracies);
             }
         } else if (projGridFormat == "CTable2") {
-            auto parameters =
-                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
-                    EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE)};
+            const VectorOfParameters parameters{createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE)};
             auto methodProperties =
                 util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
                                         PROJ_WKT2_NAME_METHOD_CTABLE2);
-            auto values = std::vector<ParameterValueNNPtr>{
+            const VectorOfValues values{
                 ParameterValue::createFilename(projFilename)};
             if (inverseDirection) {
                 return Transformation::create(
@@ -2528,9 +2523,10 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                 }
                 auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
                 auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-                auto parameters = std::vector<OperationParameterNNPtr>{
-                    createOpParamNameEPSGCode(
-                        EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME)};
+                const VectorOfParameters parameters{createOpParamNameEPSGCode(
+                    EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME)};
+                const VectorOfValues values{
+                    ParameterValue::createFilename(projFilename)};
 #ifdef disabled_for_now
                 if (inverseDirection) {
                     return Transformation::create(
@@ -2538,8 +2534,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                                    self.as_nullable().get(), true, false),
                                l_targetCRS, l_sourceCRS, l_interpolationCRS,
                                createSimilarPropertiesMethod(method()),
-                               parameters,
-                               {ParameterValue::createFilename(projFilename)},
+                               parameters, values,
                                coordinateOperationAccuracies())
                         ->inverseAsTransformation();
                 } else
@@ -2549,8 +2544,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                         createSimilarPropertiesOperation(self), l_sourceCRS,
                         l_targetCRS, l_interpolationCRS,
                         createSimilarPropertiesMethod(method()), parameters,
-                        {ParameterValue::createFilename(projFilename)},
-                        coordinateOperationAccuracies());
+                        values, coordinateOperationAccuracies());
                 }
             }
         }
@@ -2583,14 +2577,14 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
             }
             auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
             auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-            auto parameters =
-                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
-                    EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE)};
+            const VectorOfParameters parameters{createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE)};
+            const VectorOfValues values{
+                ParameterValue::createFilename(projFilename)};
             return Transformation::create(
                 createSimilarPropertiesOperation(self), l_sourceCRS,
                 l_targetCRS, l_interpolationCRS,
-                createSimilarPropertiesMethod(method()), parameters,
-                {ParameterValue::createFilename(projFilename)},
+                createSimilarPropertiesMethod(method()), parameters, values,
                 coordinateOperationAccuracies());
         }
     }
@@ -2622,14 +2616,14 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
             }
             auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
             auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-            auto parameters =
-                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
-                    EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+            const VectorOfParameters parameters{createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+            const VectorOfValues values{
+                ParameterValue::createFilename(projFilename)};
             return Transformation::create(
                 createSimilarPropertiesOperation(self), l_sourceCRS,
                 l_targetCRS, l_interpolationCRS,
-                createSimilarPropertiesMethod(method()), parameters,
-                {ParameterValue::createFilename(projFilename)},
+                createSimilarPropertiesMethod(method()), parameters, values,
                 coordinateOperationAccuracies());
         }
     }
@@ -2661,14 +2655,14 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
             }
             auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
             auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-            auto parameters =
-                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
-                    EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+            const VectorOfParameters parameters{createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+            const VectorOfValues values{
+                ParameterValue::createFilename(projFilename)};
             return Transformation::create(
                 createSimilarPropertiesOperation(self), l_sourceCRS,
                 l_targetCRS, l_interpolationCRS,
-                createSimilarPropertiesMethod(method()), parameters,
-                {ParameterValue::createFilename(projFilename)},
+                createSimilarPropertiesMethod(method()), parameters, values,
                 coordinateOperationAccuracies());
         }
     }
@@ -2712,16 +2706,17 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                 }
                 auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
                 auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-                auto parameters = std::vector<OperationParameterNNPtr>{
+                const VectorOfParameters parameters{
                     createOpParamNameEPSGCode(parameterCode)};
+                const VectorOfValues values{
+                    ParameterValue::createFilename(projFilename)};
                 if (inverseDirection) {
                     return Transformation::create(
                                createPropertiesForInverse(
                                    self.as_nullable().get(), true, false),
                                l_targetCRS, l_sourceCRS, l_interpolationCRS,
                                createSimilarPropertiesMethod(method()),
-                               parameters,
-                               {ParameterValue::createFilename(projFilename)},
+                               parameters, values,
                                coordinateOperationAccuracies())
                         ->inverseAsTransformation();
                 } else {
@@ -2729,8 +2724,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                         createSimilarPropertiesOperation(self), l_sourceCRS,
                         l_targetCRS, l_interpolationCRS,
                         createSimilarPropertiesMethod(method()), parameters,
-                        {ParameterValue::createFilename(projFilename)},
-                        coordinateOperationAccuracies());
+                        values, coordinateOperationAccuracies());
                 }
             }
         }
@@ -2786,18 +2780,18 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                     }
                     auto l_sourceCRS = NN_NO_CHECK(l_sourceCRSNull);
                     auto l_targetCRS = NN_NO_CHECK(l_targetCRSNull);
-                    auto parameters = std::vector<OperationParameterNNPtr>{
+                    const VectorOfParameters parameters{
                         createOpParamNameEPSGCode(
                             gridTransf.gridFilenameParamEPSGCode)};
+                    const VectorOfValues values{
+                        ParameterValue::createFilename(projFilename)};
                     if (inverseDirection) {
                         return Transformation::create(
                                    createPropertiesForInverse(
                                        self.as_nullable().get(), true, false),
                                    l_targetCRS, l_sourceCRS, l_interpolationCRS,
                                    createSimilarPropertiesMethod(method()),
-                                   parameters,
-                                   {ParameterValue::createFilename(
-                                       projFilename)},
+                                   parameters, values,
                                    coordinateOperationAccuracies())
                             ->inverseAsTransformation();
                     } else {
@@ -2805,8 +2799,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
                             createSimilarPropertiesOperation(self), l_sourceCRS,
                             l_targetCRS, l_interpolationCRS,
                             createSimilarPropertiesMethod(method()), parameters,
-                            {ParameterValue::createFilename(projFilename)},
-                            coordinateOperationAccuracies());
+                            values, coordinateOperationAccuracies());
                     }
                 }
             }
@@ -2816,284 +2809,6 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
 
     return self;
 }
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
-struct ParameterValue::Private {
-    ParameterValue::Type type_{ParameterValue::Type::STRING};
-    std::unique_ptr<common::Measure> measure_{};
-    std::unique_ptr<std::string> stringValue_{};
-    int integerValue_{};
-    bool booleanValue_{};
-
-    explicit Private(const common::Measure &valueIn)
-        : type_(ParameterValue::Type::MEASURE),
-          measure_(internal::make_unique<common::Measure>(valueIn)) {}
-
-    Private(const std::string &stringValueIn, ParameterValue::Type typeIn)
-        : type_(typeIn),
-          stringValue_(internal::make_unique<std::string>(stringValueIn)) {}
-
-    explicit Private(int integerValueIn)
-        : type_(ParameterValue::Type::INTEGER), integerValue_(integerValueIn) {}
-
-    explicit Private(bool booleanValueIn)
-        : type_(ParameterValue::Type::BOOLEAN), booleanValue_(booleanValueIn) {}
-};
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
-ParameterValue::~ParameterValue() = default;
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
-ParameterValue::ParameterValue(const common::Measure &measureIn)
-    : d(internal::make_unique<Private>(measureIn)) {}
-
-// ---------------------------------------------------------------------------
-
-ParameterValue::ParameterValue(const std::string &stringValueIn,
-                               ParameterValue::Type typeIn)
-    : d(internal::make_unique<Private>(stringValueIn, typeIn)) {}
-
-// ---------------------------------------------------------------------------
-
-ParameterValue::ParameterValue(int integerValueIn)
-    : d(internal::make_unique<Private>(integerValueIn)) {}
-
-// ---------------------------------------------------------------------------
-
-ParameterValue::ParameterValue(bool booleanValueIn)
-    : d(internal::make_unique<Private>(booleanValueIn)) {}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Instantiate a ParameterValue from a Measure (i.e. a value associated
- * with a
- * unit)
- *
- * @return a new ParameterValue.
- */
-ParameterValueNNPtr ParameterValue::create(const common::Measure &measureIn) {
-    return ParameterValue::nn_make_shared<ParameterValue>(measureIn);
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Instantiate a ParameterValue from a string value.
- *
- * @return a new ParameterValue.
- */
-ParameterValueNNPtr ParameterValue::create(const char *stringValueIn) {
-    return ParameterValue::nn_make_shared<ParameterValue>(
-        std::string(stringValueIn), ParameterValue::Type::STRING);
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Instantiate a ParameterValue from a string value.
- *
- * @return a new ParameterValue.
- */
-ParameterValueNNPtr ParameterValue::create(const std::string &stringValueIn) {
-    return ParameterValue::nn_make_shared<ParameterValue>(
-        stringValueIn, ParameterValue::Type::STRING);
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Instantiate a ParameterValue from a filename.
- *
- * @return a new ParameterValue.
- */
-ParameterValueNNPtr
-ParameterValue::createFilename(const std::string &stringValueIn) {
-    return ParameterValue::nn_make_shared<ParameterValue>(
-        stringValueIn, ParameterValue::Type::FILENAME);
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Instantiate a ParameterValue from a integer value.
- *
- * @return a new ParameterValue.
- */
-ParameterValueNNPtr ParameterValue::create(int integerValueIn) {
-    return ParameterValue::nn_make_shared<ParameterValue>(integerValueIn);
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Instantiate a ParameterValue from a boolean value.
- *
- * @return a new ParameterValue.
- */
-ParameterValueNNPtr ParameterValue::create(bool booleanValueIn) {
-    return ParameterValue::nn_make_shared<ParameterValue>(booleanValueIn);
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Returns the type of a parameter value.
- *
- * @return the type.
- */
-const ParameterValue::Type &ParameterValue::type() PROJ_PURE_DEFN {
-    return d->type_;
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Returns the value as a Measure (assumes type() == Type::MEASURE)
- * @return the value as a Measure.
- */
-const common::Measure &ParameterValue::value() PROJ_PURE_DEFN {
-    return *d->measure_;
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Returns the value as a string (assumes type() == Type::STRING)
- * @return the value as a string.
- */
-const std::string &ParameterValue::stringValue() PROJ_PURE_DEFN {
-    return *d->stringValue_;
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Returns the value as a filename (assumes type() == Type::FILENAME)
- * @return the value as a filename.
- */
-const std::string &ParameterValue::valueFile() PROJ_PURE_DEFN {
-    return *d->stringValue_;
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Returns the value as a integer (assumes type() == Type::INTEGER)
- * @return the value as a integer.
- */
-int ParameterValue::integerValue() PROJ_PURE_DEFN { return d->integerValue_; }
-
-// ---------------------------------------------------------------------------
-
-/** \brief Returns the value as a boolean (assumes type() == Type::BOOLEAN)
- * @return the value as a boolean.
- */
-bool ParameterValue::booleanValue() PROJ_PURE_DEFN { return d->booleanValue_; }
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
-void ParameterValue::_exportToWKT(io::WKTFormatter *formatter) const {
-    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-
-    const auto &l_type = type();
-    if (l_type == Type::MEASURE) {
-        const auto &l_value = value();
-        if (formatter->abridgedTransformation()) {
-            const auto &unit = l_value.unit();
-            const auto &unitType = unit.type();
-            if (unitType == common::UnitOfMeasure::Type::LINEAR) {
-                formatter->add(l_value.getSIValue());
-            } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
-                formatter->add(
-                    l_value.convertToUnit(common::UnitOfMeasure::ARC_SECOND));
-            } else if (unit == common::UnitOfMeasure::PARTS_PER_MILLION) {
-                formatter->add(1.0 + l_value.value() * 1e-6);
-            } else {
-                formatter->add(l_value.value());
-            }
-        } else {
-            const auto &unit = l_value.unit();
-            if (isWKT2) {
-                formatter->add(l_value.value());
-            } else {
-                // In WKT1, as we don't output the natural unit, output to the
-                // registered linear / angular unit.
-                const auto &unitType = unit.type();
-                if (unitType == common::UnitOfMeasure::Type::LINEAR) {
-                    const auto &targetUnit = *(formatter->axisLinearUnit());
-                    if (targetUnit.conversionToSI() == 0.0) {
-                        throw io::FormattingException(
-                            "cannot convert value to target linear unit");
-                    }
-                    formatter->add(l_value.convertToUnit(targetUnit));
-                } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
-                    const auto &targetUnit = *(formatter->axisAngularUnit());
-                    if (targetUnit.conversionToSI() == 0.0) {
-                        throw io::FormattingException(
-                            "cannot convert value to target angular unit");
-                    }
-                    formatter->add(l_value.convertToUnit(targetUnit));
-                } else {
-                    formatter->add(l_value.getSIValue());
-                }
-            }
-            if (isWKT2 && unit != common::UnitOfMeasure::NONE) {
-                if (!formatter
-                         ->primeMeridianOrParameterUnitOmittedIfSameAsAxis() ||
-                    (unit != common::UnitOfMeasure::SCALE_UNITY &&
-                     unit != *(formatter->axisLinearUnit()) &&
-                     unit != *(formatter->axisAngularUnit()))) {
-                    unit._exportToWKT(formatter);
-                }
-            }
-        }
-    } else if (l_type == Type::STRING || l_type == Type::FILENAME) {
-        formatter->addQuotedString(stringValue());
-    } else if (l_type == Type::INTEGER) {
-        formatter->add(integerValue());
-    } else {
-        throw io::FormattingException("boolean parameter value not handled");
-    }
-}
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
-bool ParameterValue::_isEquivalentTo(const util::IComparable *other,
-                                     util::IComparable::Criterion criterion,
-                                     const io::DatabaseContextPtr &) const {
-    auto otherPV = dynamic_cast<const ParameterValue *>(other);
-    if (otherPV == nullptr) {
-        return false;
-    }
-    if (type() != otherPV->type()) {
-        return false;
-    }
-    switch (type()) {
-    case Type::MEASURE: {
-        return value()._isEquivalentTo(otherPV->value(), criterion, 2e-10);
-    }
-
-    case Type::STRING:
-    case Type::FILENAME: {
-        return stringValue() == otherPV->stringValue();
-    }
-
-    case Type::INTEGER: {
-        return integerValue() == otherPV->integerValue();
-    }
-
-    case Type::BOOLEAN: {
-        return booleanValue() == otherPV->booleanValue();
-    }
-
-    default: {
-        assert(false);
-        break;
-    }
-    }
-    return true;
-}
-//! @endcond
 
 //! @cond Doxygen_Suppress
 // ---------------------------------------------------------------------------
@@ -5182,13 +4897,13 @@ PointMotionOperation::substitutePROJAlternativeGridNames(
             return self;
         }
 
-        auto parameters =
-            std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
-                EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+        const VectorOfParameters parameters{createOpParamNameEPSGCode(
+            EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+        const VectorOfValues values{
+            ParameterValue::createFilename(projFilename)};
         return PointMotionOperation::create(
             createSimilarPropertiesOperation(self), sourceCRS(),
-            createSimilarPropertiesMethod(method()), parameters,
-            {ParameterValue::createFilename(projFilename)},
+            createSimilarPropertiesMethod(method()), parameters, values,
             coordinateOperationAccuracies());
     }
 

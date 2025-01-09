@@ -71,12 +71,13 @@ jobs:
             cd %PROJ_BUILD%
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
             :: Not directly linked to BUILD_SHARED_LIBS, but a way to test different C++ standard versions
-            if "${{ env.BUILD_SHARED_LIBS }}"=="ON" (set EXTRA_CXX_FLAGS="/std:c++20")
+            if "${{ env.BUILD_SHARED_LIBS }}"=="ON" (set CMAKE_CXX_STANDARD="-DCMAKE_CXX_STANDARD=20")
             if "${{ env.BUILD_TYPE }}"=="Release" (set CMAKE_UNITY_BUILD_OPT="-DCMAKE_UNITY_BUILD=ON")
             cmake -D CMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" ^
               -D BUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" ^
               -D CMAKE_C_FLAGS="/WX" ^
-              -D CMAKE_CXX_FLAGS="/WX %EXTRA_CXX_FLAGS%" ^
+              -D CMAKE_CXX_FLAGS="/WX" ^
+              %CMAKE_CXX_STANDARD% ^
               -D CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
               -D CMAKE_INSTALL_PREFIX="%PROJ_DIR%" ^
               -D PROJ_DB_CACHE_DIR=%PROJ_DB_CACHE_DIR% ^
