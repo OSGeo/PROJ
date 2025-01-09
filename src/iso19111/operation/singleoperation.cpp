@@ -112,13 +112,12 @@ GridDescription::GridDescription(GridDescription &&other) noexcept
 
 // ---------------------------------------------------------------------------
 
-CoordinateOperation::CoordinateOperation()
-    : d(internal::make_unique<Private>()) {}
+CoordinateOperation::CoordinateOperation() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 CoordinateOperation::CoordinateOperation(const CoordinateOperation &other)
-    : ObjectUsage(other), d(internal::make_unique<Private>(*other.d)) {}
+    : ObjectUsage(other), d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -229,7 +228,7 @@ void CoordinateOperation::setCRSs(const crs::CRSNNPtr &sourceCRSIn,
                                   const crs::CRSNNPtr &targetCRSIn,
                                   const crs::CRSPtr &interpolationCRSIn) {
     d->strongRef_ =
-        internal::make_unique<Private::CRSStrongRef>(sourceCRSIn, targetCRSIn);
+        std::make_unique<Private::CRSStrongRef>(sourceCRSIn, targetCRSIn);
     d->sourceCRSWeak_ = sourceCRSIn.as_nullable();
     d->targetCRSWeak_ = targetCRSIn.as_nullable();
     d->interpolationCRS_ = interpolationCRSIn;
@@ -479,7 +478,7 @@ struct CoordinateTransformer::Private {
 // ---------------------------------------------------------------------------
 
 CoordinateTransformer::CoordinateTransformer()
-    : d(internal::make_unique<Private>()) {}
+    : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
@@ -559,12 +558,12 @@ PJ_COORD CoordinateTransformer::transform(PJ_COORD coord) {
 
 // ---------------------------------------------------------------------------
 
-OperationMethod::OperationMethod() : d(internal::make_unique<Private>()) {}
+OperationMethod::OperationMethod() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 OperationMethod::OperationMethod(const OperationMethod &other)
-    : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+    : IdentifiedObject(other), d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -821,8 +820,7 @@ struct OperationParameterValue::Private {
 
 OperationParameterValue::OperationParameterValue(
     const OperationParameterValue &other)
-    : GeneralParameterValue(other),
-      d(internal::make_unique<Private>(*other.d)) {}
+    : GeneralParameterValue(other), d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -830,7 +828,7 @@ OperationParameterValue::OperationParameterValue(
     const OperationParameterNNPtr &parameterIn,
     const ParameterValueNNPtr &valueIn)
     : GeneralParameterValue(),
-      d(internal::make_unique<Private>(parameterIn, valueIn)) {}
+      d(std::make_unique<Private>(parameterIn, valueIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1204,7 +1202,7 @@ struct SingleOperation::Private {
 // ---------------------------------------------------------------------------
 
 SingleOperation::SingleOperation(const OperationMethodNNPtr &methodIn)
-    : d(internal::make_unique<Private>(methodIn)) {
+    : d(std::make_unique<Private>(methodIn)) {
 
     const int methodEPSGCode = d->method_->getEPSGCode();
     const auto &methodName = d->method_->nameStr();
@@ -1231,7 +1229,7 @@ SingleOperation::SingleOperation(const SingleOperation &other)
 #if !defined(COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT)
       CoordinateOperation(other),
 #endif
-      d(internal::make_unique<Private>(*other.d)) {
+      d(std::make_unique<Private>(*other.d)) {
 }
 
 // ---------------------------------------------------------------------------

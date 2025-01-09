@@ -2751,7 +2751,7 @@ PJ_OBJ_LIST *proj_identify(PJ_CONTEXT *ctx, const PJ *obj,
                     ++i;
                 }
             }
-            auto ret = internal::make_unique<PJ_OBJ_LIST>(std::move(objects));
+            auto ret = std::make_unique<PJ_OBJ_LIST>(std::move(objects));
             if (out_confidence) {
                 *out_confidence = confidenceTemp;
                 confidenceTemp = nullptr;

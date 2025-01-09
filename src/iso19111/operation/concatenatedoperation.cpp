@@ -92,15 +92,14 @@ ConcatenatedOperation::~ConcatenatedOperation() = default;
 
 //! @cond Doxygen_Suppress
 ConcatenatedOperation::ConcatenatedOperation(const ConcatenatedOperation &other)
-    : CoordinateOperation(other),
-      d(internal::make_unique<Private>(*(other.d))) {}
+    : CoordinateOperation(other), d(std::make_unique<Private>(*(other.d))) {}
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
 ConcatenatedOperation::ConcatenatedOperation(
     const std::vector<CoordinateOperationNNPtr> &operationsIn)
-    : CoordinateOperation(), d(internal::make_unique<Private>(operationsIn)) {
+    : CoordinateOperation(), d(std::make_unique<Private>(operationsIn)) {
     for (const auto &op : operationsIn) {
         if (op->requiresPerCoordinateInputTime()) {
             setRequiresPerCoordinateInputTime(true);

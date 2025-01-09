@@ -76,9 +76,9 @@ struct CoordinateOperation::Private {
           hasBallparkTransformation_(other.hasBallparkTransformation_),
           requiresPerCoordinateInputTime_(
               other.requiresPerCoordinateInputTime_),
-          strongRef_(other.strongRef_ ? internal::make_unique<CRSStrongRef>(
-                                            *(other.strongRef_))
-                                      : nullptr) {}
+          strongRef_(other.strongRef_
+                         ? std::make_unique<CRSStrongRef>(*(other.strongRef_))
+                         : nullptr) {}
 
     Private &operator=(const Private &) = delete;
 };

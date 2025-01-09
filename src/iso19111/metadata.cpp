@@ -78,14 +78,14 @@ struct Citation::Private {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-Citation::Citation() : d(internal::make_unique<Private>()) {}
+Citation::Citation() : d(std::make_unique<Private>()) {}
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
 /** \brief Constructs a citation by its title. */
 Citation::Citation(const std::string &titleIn)
-    : d(internal::make_unique<Private>()) {
+    : d(std::make_unique<Private>()) {
     d->title = titleIn;
 }
 
@@ -93,7 +93,7 @@ Citation::Citation(const std::string &titleIn)
 
 //! @cond Doxygen_Suppress
 Citation::Citation(const Citation &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
+    : d(std::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
@@ -124,7 +124,7 @@ struct GeographicExtent::Private {};
 
 // ---------------------------------------------------------------------------
 
-GeographicExtent::GeographicExtent() : d(internal::make_unique<Private>()) {}
+GeographicExtent::GeographicExtent() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
@@ -155,7 +155,7 @@ struct GeographicBoundingBox::Private {
 GeographicBoundingBox::GeographicBoundingBox(double west, double south,
                                              double east, double north)
     : GeographicExtent(),
-      d(internal::make_unique<Private>(west, south, east, north)) {}
+      d(std::make_unique<Private>(west, south, east, north)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -438,15 +438,15 @@ GeographicBoundingBox::Private::intersection(const Private &otherExtent) const {
     // Check world coverage of this bbox, and other bbox overlapping
     // antimeridian (e.g. oW=175 and oE=-175)
     if (W == -180.0 && E == 180.0 && oW > oE) {
-        return internal::make_unique<Private>(oW, std::max(S, oS), oE,
-                                              std::min(N, oN));
+        return std::make_unique<Private>(oW, std::max(S, oS), oE,
+                                         std::min(N, oN));
     }
 
     // Check world coverage of other bbox, and this bbox overlapping
     // antimeridian (e.g. W=175 and E=-175)
     if (oW == -180.0 && oE == 180.0 && W > E) {
-        return internal::make_unique<Private>(W, std::max(S, oS), E,
-                                              std::min(N, oN));
+        return std::make_unique<Private>(W, std::max(S, oS), E,
+                                         std::min(N, oN));
     }
 
     // Normal bounding box ?
@@ -455,8 +455,8 @@ GeographicBoundingBox::Private::intersection(const Private &otherExtent) const {
             const double resW = std::max(W, oW);
             const double resE = std::min(E, oE);
             if (resW < resE) {
-                return internal::make_unique<Private>(resW, std::max(S, oS),
-                                                      resE, std::min(N, oN));
+                return std::make_unique<Private>(resW, std::max(S, oS), resE,
+                                                 std::min(N, oN));
             }
             return nullptr;
         }
@@ -487,8 +487,8 @@ GeographicBoundingBox::Private::intersection(const Private &otherExtent) const {
             return otherExtent.intersection(*this);
         }
 
-        return internal::make_unique<Private>(std::max(W, oW), std::max(S, oS),
-                                              std::min(E, oE), std::min(N, oN));
+        return std::make_unique<Private>(std::max(W, oW), std::max(S, oS),
+                                         std::min(E, oE), std::min(N, oN));
     }
 }
 //! @endcond
@@ -511,7 +511,7 @@ struct VerticalExtent::Private {
 
 VerticalExtent::VerticalExtent(double minimumIn, double maximumIn,
                                const common::UnitOfMeasureNNPtr &unitIn)
-    : d(internal::make_unique<Private>(minimumIn, maximumIn, unitIn)) {}
+    : d(std::make_unique<Private>(minimumIn, maximumIn, unitIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -608,7 +608,7 @@ struct TemporalExtent::Private {
 
 TemporalExtent::TemporalExtent(const std::string &startIn,
                                const std::string &stopIn)
-    : d(internal::make_unique<Private>(startIn, stopIn)) {}
+    : d(std::make_unique<Private>(startIn, stopIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -684,12 +684,11 @@ struct Extent::Private {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-Extent::Extent() : d(internal::make_unique<Private>()) {}
+Extent::Extent() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
-Extent::Extent(const Extent &other)
-    : d(internal::make_unique<Private>(*other.d)) {}
+Extent::Extent(const Extent &other) : d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -991,7 +990,7 @@ void Identifier::Private::setProperties(
 
 Identifier::Identifier(const std::string &codeIn,
                        const util::PropertyMap &properties)
-    : d(internal::make_unique<Private>(codeIn, properties)) {}
+    : d(std::make_unique<Private>(codeIn, properties)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -999,12 +998,12 @@ Identifier::Identifier(const std::string &codeIn,
 
 // ---------------------------------------------------------------------------
 
-Identifier::Identifier() : d(internal::make_unique<Private>()) {}
+Identifier::Identifier() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 Identifier::Identifier(const Identifier &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
+    : d(std::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1511,7 +1510,7 @@ struct PositionalAccuracy::Private {
 // ---------------------------------------------------------------------------
 
 PositionalAccuracy::PositionalAccuracy(const std::string &valueIn)
-    : d(internal::make_unique<Private>()) {
+    : d(std::make_unique<Private>()) {
     d->value_ = valueIn;
 }
 

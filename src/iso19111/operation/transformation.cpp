@@ -91,7 +91,7 @@ Transformation::Transformation(
     const crs::CRSPtr &interpolationCRSIn, const OperationMethodNNPtr &methodIn,
     const std::vector<GeneralParameterValueNNPtr> &values,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies)
-    : SingleOperation(methodIn), d(internal::make_unique<Private>()) {
+    : SingleOperation(methodIn), d(std::make_unique<Private>()) {
     setParameterValues(values);
     setCRSs(sourceCRSIn, targetCRSIn, interpolationCRSIn);
     setAccuracies(accuracies);
@@ -107,7 +107,7 @@ Transformation::~Transformation() = default;
 
 Transformation::Transformation(const Transformation &other)
     : CoordinateOperation(other), SingleOperation(other),
-      d(internal::make_unique<Private>(*other.d)) {}
+      d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
