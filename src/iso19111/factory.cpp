@@ -2942,7 +2942,7 @@ DatabaseContext::~DatabaseContext() {
 
 // ---------------------------------------------------------------------------
 
-DatabaseContext::DatabaseContext() : d(internal::make_unique<Private>()) {}
+DatabaseContext::DatabaseContext() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
@@ -4308,7 +4308,7 @@ AuthorityFactory::~AuthorityFactory() = default;
 
 AuthorityFactory::AuthorityFactory(const DatabaseContextNNPtr &context,
                                    const std::string &authorityName)
-    : d(internal::make_unique<Private>(context, authorityName)) {}
+    : d(std::make_unique<Private>(context, authorityName)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -10175,8 +10175,8 @@ struct NoSuchAuthorityCodeException::Private {
 NoSuchAuthorityCodeException::NoSuchAuthorityCodeException(
     const std::string &message, const std::string &authority,
     const std::string &code)
-    : FactoryException(message),
-      d(internal::make_unique<Private>(authority, code)) {}
+    : FactoryException(message), d(std::make_unique<Private>(authority, code)) {
+}
 
 // ---------------------------------------------------------------------------
 
@@ -10186,7 +10186,7 @@ NoSuchAuthorityCodeException::~NoSuchAuthorityCodeException() = default;
 
 NoSuchAuthorityCodeException::NoSuchAuthorityCodeException(
     const NoSuchAuthorityCodeException &other)
-    : FactoryException(other), d(internal::make_unique<Private>(*(other.d))) {}
+    : FactoryException(other), d(std::make_unique<Private>(*(other.d))) {}
 //! @endcond
 
 // ---------------------------------------------------------------------------

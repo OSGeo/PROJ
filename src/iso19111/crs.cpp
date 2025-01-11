@@ -142,12 +142,12 @@ struct CRS::Private {
 
 // ---------------------------------------------------------------------------
 
-CRS::CRS() : d(internal::make_unique<Private>()) {}
+CRS::CRS() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 CRS::CRS(const CRS &other)
-    : ObjectUsage(other), d(internal::make_unique<Private>(*(other.d))) {}
+    : ObjectUsage(other), d(std::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1574,12 +1574,12 @@ struct SingleCRS::Private {
 SingleCRS::SingleCRS(const datum::DatumPtr &datumIn,
                      const datum::DatumEnsemblePtr &datumEnsembleIn,
                      const cs::CoordinateSystemNNPtr &csIn)
-    : d(internal::make_unique<Private>(datumIn, datumEnsembleIn, csIn)) {}
+    : d(std::make_unique<Private>(datumIn, datumEnsembleIn, csIn)) {}
 
 // ---------------------------------------------------------------------------
 
 SingleCRS::SingleCRS(const SingleCRS &other)
-    : CRS(other), d(internal::make_unique<Private>(*other.d)) {}
+    : CRS(other), d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1768,7 +1768,7 @@ GeodeticCRS::GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
                          const cs::EllipsoidalCSNNPtr &csIn)
     : SingleCRS(datumIn, checkEnsembleForGeodeticCRS(datumIn, datumEnsembleIn),
                 csIn),
-      d(internal::make_unique<Private>(datumIn)) {}
+      d(std::make_unique<Private>(datumIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1777,7 +1777,7 @@ GeodeticCRS::GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
                          const cs::SphericalCSNNPtr &csIn)
     : SingleCRS(datumIn, checkEnsembleForGeodeticCRS(datumIn, datumEnsembleIn),
                 csIn),
-      d(internal::make_unique<Private>(datumIn)) {}
+      d(std::make_unique<Private>(datumIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1786,12 +1786,12 @@ GeodeticCRS::GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
                          const cs::CartesianCSNNPtr &csIn)
     : SingleCRS(datumIn, checkEnsembleForGeodeticCRS(datumIn, datumEnsembleIn),
                 csIn),
-      d(internal::make_unique<Private>(datumIn)) {}
+      d(std::make_unique<Private>(datumIn)) {}
 
 // ---------------------------------------------------------------------------
 
 GeodeticCRS::GeodeticCRS(const GeodeticCRS &other)
-    : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
+    : SingleCRS(other), d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -3027,13 +3027,13 @@ GeographicCRS::GeographicCRS(const datum::GeodeticReferenceFramePtr &datumIn,
     : SingleCRS(datumIn, datumEnsembleIn, csIn),
       GeodeticCRS(datumIn,
                   checkEnsembleForGeodeticCRS(datumIn, datumEnsembleIn), csIn),
-      d(internal::make_unique<Private>(csIn)) {}
+      d(std::make_unique<Private>(csIn)) {}
 
 // ---------------------------------------------------------------------------
 
 GeographicCRS::GeographicCRS(const GeographicCRS &other)
     : SingleCRS(other), GeodeticCRS(other),
-      d(internal::make_unique<Private>(*other.d)) {}
+      d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -3437,12 +3437,12 @@ VerticalCRS::VerticalCRS(const datum::VerticalReferenceFramePtr &datumIn,
                          const cs::VerticalCSNNPtr &csIn)
     : SingleCRS(datumIn, checkEnsembleForVerticalCRS(datumIn, datumEnsembleIn),
                 csIn),
-      d(internal::make_unique<Private>()) {}
+      d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 VerticalCRS::VerticalCRS(const VerticalCRS &other)
-    : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
+    : SingleCRS(other), d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -4024,7 +4024,7 @@ DerivedCRS::DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
 #if !defined(COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT)
       SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), cs),
 #endif
-      d(internal::make_unique<Private>(baseCRSIn, derivingConversionIn)) {
+      d(std::make_unique<Private>(baseCRSIn, derivingConversionIn)) {
 }
 
 // ---------------------------------------------------------------------------
@@ -4034,7 +4034,7 @@ DerivedCRS::DerivedCRS(const DerivedCRS &other)
 #if !defined(COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT)
       SingleCRS(other),
 #endif
-      d(internal::make_unique<Private>(*other.d)) {
+      d(std::make_unique<Private>(*other.d)) {
 }
 
 // ---------------------------------------------------------------------------
@@ -4182,14 +4182,13 @@ ProjectedCRS::ProjectedCRS(
     const cs::CartesianCSNNPtr &csIn)
     : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
       DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
-      d(internal::make_unique<Private>(baseCRSIn, csIn)) {}
+      d(std::make_unique<Private>(baseCRSIn, csIn)) {}
 
 // ---------------------------------------------------------------------------
 
 ProjectedCRS::ProjectedCRS(const ProjectedCRS &other)
     : SingleCRS(other), DerivedCRS(other),
-      d(internal::make_unique<Private>(other.baseCRS(),
-                                       other.coordinateSystem())) {}
+      d(std::make_unique<Private>(other.baseCRS(), other.coordinateSystem())) {}
 
 // ---------------------------------------------------------------------------
 
@@ -5154,14 +5153,14 @@ struct CompoundCRS::Private {
 // ---------------------------------------------------------------------------
 
 CompoundCRS::CompoundCRS(const std::vector<CRSNNPtr> &components)
-    : CRS(), d(internal::make_unique<Private>()) {
+    : CRS(), d(std::make_unique<Private>()) {
     d->components_ = components;
 }
 
 // ---------------------------------------------------------------------------
 
 CompoundCRS::CompoundCRS(const CompoundCRS &other)
-    : CRS(other), d(internal::make_unique<Private>(*other.d)) {}
+    : CRS(other), d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -5735,15 +5734,14 @@ BoundCRS::Private::Private(
 
 BoundCRS::BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
                    const operation::TransformationNNPtr &transformationIn)
-    : d(internal::make_unique<Private>(baseCRSIn, hubCRSIn, transformationIn)) {
-}
+    : d(std::make_unique<Private>(baseCRSIn, hubCRSIn, transformationIn)) {}
 
 // ---------------------------------------------------------------------------
 
 BoundCRS::BoundCRS(const BoundCRS &other)
     : CRS(other),
-      d(internal::make_unique<Private>(other.d->baseCRS(), other.d->hubCRS(),
-                                       other.d->transformation())) {}
+      d(std::make_unique<Private>(other.d->baseCRS(), other.d->hubCRS(),
+                                  other.d->transformation())) {}
 
 // ---------------------------------------------------------------------------
 
@@ -6977,12 +6975,12 @@ EngineeringCRS::~EngineeringCRS() = default;
 EngineeringCRS::EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
                                const cs::CoordinateSystemNNPtr &csIn)
     : SingleCRS(datumIn.as_nullable(), nullptr, csIn),
-      d(internal::make_unique<Private>()) {}
+      d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 EngineeringCRS::EngineeringCRS(const EngineeringCRS &other)
-    : SingleCRS(other), d(internal::make_unique<Private>(*(other.d))) {}
+    : SingleCRS(other), d(std::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 

@@ -67,7 +67,7 @@ struct BaseObject::Private {
 
 // ---------------------------------------------------------------------------
 
-BaseObject::BaseObject() : d(internal::make_unique<Private>()) {}
+BaseObject::BaseObject() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
@@ -133,14 +133,14 @@ struct BoxedValue::Private {
 
 // ---------------------------------------------------------------------------
 
-BoxedValue::BoxedValue() : d(internal::make_unique<Private>(std::string())) {}
+BoxedValue::BoxedValue() : d(std::make_unique<Private>(std::string())) {}
 
 // ---------------------------------------------------------------------------
 
 /** \brief Constructs a BoxedValue from a string.
  */
 BoxedValue::BoxedValue(const char *stringValueIn)
-    : d(internal::make_unique<Private>(
+    : d(std::make_unique<Private>(
           std::string(stringValueIn ? stringValueIn : ""))) {}
 
 // ---------------------------------------------------------------------------
@@ -148,27 +148,27 @@ BoxedValue::BoxedValue(const char *stringValueIn)
 /** \brief Constructs a BoxedValue from a string.
  */
 BoxedValue::BoxedValue(const std::string &stringValueIn)
-    : d(internal::make_unique<Private>(stringValueIn)) {}
+    : d(std::make_unique<Private>(stringValueIn)) {}
 
 // ---------------------------------------------------------------------------
 
 /** \brief Constructs a BoxedValue from an integer.
  */
 BoxedValue::BoxedValue(int integerValueIn)
-    : d(internal::make_unique<Private>(integerValueIn)) {}
+    : d(std::make_unique<Private>(integerValueIn)) {}
 
 // ---------------------------------------------------------------------------
 
 /** \brief Constructs a BoxedValue from a boolean.
  */
 BoxedValue::BoxedValue(bool booleanValueIn)
-    : d(internal::make_unique<Private>(booleanValueIn)) {}
+    : d(std::make_unique<Private>(booleanValueIn)) {}
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 BoxedValue::BoxedValue(const BoxedValue &other)
-    : d(internal::make_unique<Private>(*other.d)) {}
+    : d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -201,7 +201,7 @@ struct ArrayOfBaseObject::Private {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-ArrayOfBaseObject::ArrayOfBaseObject() : d(internal::make_unique<Private>()) {}
+ArrayOfBaseObject::ArrayOfBaseObject() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
@@ -267,13 +267,13 @@ struct PropertyMap::Private {
 
 // ---------------------------------------------------------------------------
 
-PropertyMap::PropertyMap() : d(internal::make_unique<Private>()) {}
+PropertyMap::PropertyMap() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 PropertyMap::PropertyMap(const PropertyMap &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
+    : d(std::make_unique<Private>(*(other.d))) {}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -418,12 +418,12 @@ struct GenericName::Private {};
 
 // ---------------------------------------------------------------------------
 
-GenericName::GenericName() : d(internal::make_unique<Private>()) {}
+GenericName::GenericName() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 GenericName::GenericName(const GenericName &other)
-    : d(internal::make_unique<Private>(*other.d)) {}
+    : d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -445,14 +445,14 @@ struct NameSpace::Private {
 // ---------------------------------------------------------------------------
 
 NameSpace::NameSpace(const GenericNamePtr &nameIn)
-    : d(internal::make_unique<Private>()) {
+    : d(std::make_unique<Private>()) {
     d->name = nameIn;
 }
 
 // ---------------------------------------------------------------------------
 
 NameSpace::NameSpace(const NameSpace &other)
-    : d(internal::make_unique<Private>(*other.d)) {}
+    : d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -503,15 +503,14 @@ struct LocalName::Private {
 
 // ---------------------------------------------------------------------------
 
-LocalName::LocalName(const std::string &name)
-    : d(internal::make_unique<Private>()) {
+LocalName::LocalName(const std::string &name) : d(std::make_unique<Private>()) {
     d->name = name;
 }
 
 // ---------------------------------------------------------------------------
 
 LocalName::LocalName(const NameSpacePtr &ns, const std::string &name)
-    : d(internal::make_unique<Private>()) {
+    : d(std::make_unique<Private>()) {
     d->scope = ns ? ns : static_cast<NameSpacePtr>(NameSpace::GLOBAL);
     d->name = name;
 }
@@ -519,7 +518,7 @@ LocalName::LocalName(const NameSpacePtr &ns, const std::string &name)
 // ---------------------------------------------------------------------------
 
 LocalName::LocalName(const LocalName &other)
-    : GenericName(other), d(internal::make_unique<Private>(*other.d)) {}
+    : GenericName(other), d(std::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 

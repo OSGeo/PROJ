@@ -61,11 +61,11 @@ struct ParameterValue::Private {
 
     explicit Private(const common::Measure &valueIn)
         : type_(ParameterValue::Type::MEASURE),
-          measure_(internal::make_unique<common::Measure>(valueIn)) {}
+          measure_(std::make_unique<common::Measure>(valueIn)) {}
 
     Private(const std::string &stringValueIn, ParameterValue::Type typeIn)
         : type_(typeIn),
-          stringValue_(internal::make_unique<std::string>(stringValueIn)) {}
+          stringValue_(std::make_unique<std::string>(stringValueIn)) {}
 
     explicit Private(int integerValueIn)
         : type_(ParameterValue::Type::INTEGER), integerValue_(integerValueIn) {}
@@ -84,23 +84,23 @@ ParameterValue::~ParameterValue() = default;
 // ---------------------------------------------------------------------------
 
 ParameterValue::ParameterValue(const common::Measure &measureIn)
-    : d(internal::make_unique<Private>(measureIn)) {}
+    : d(std::make_unique<Private>(measureIn)) {}
 
 // ---------------------------------------------------------------------------
 
 ParameterValue::ParameterValue(const std::string &stringValueIn,
                                ParameterValue::Type typeIn)
-    : d(internal::make_unique<Private>(stringValueIn, typeIn)) {}
+    : d(std::make_unique<Private>(stringValueIn, typeIn)) {}
 
 // ---------------------------------------------------------------------------
 
 ParameterValue::ParameterValue(int integerValueIn)
-    : d(internal::make_unique<Private>(integerValueIn)) {}
+    : d(std::make_unique<Private>(integerValueIn)) {}
 
 // ---------------------------------------------------------------------------
 
 ParameterValue::ParameterValue(bool booleanValueIn)
-    : d(internal::make_unique<Private>(booleanValueIn)) {}
+    : d(std::make_unique<Private>(booleanValueIn)) {}
 
 // ---------------------------------------------------------------------------
 

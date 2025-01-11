@@ -356,7 +356,7 @@ const std::string &WKTFormatter::toString() const {
 // ---------------------------------------------------------------------------
 
 WKTFormatter::WKTFormatter(Convention convention)
-    : d(internal::make_unique<Private>()) {
+    : d(std::make_unique<Private>()) {
     d->params_.convention_ = convention;
     switch (convention) {
     case Convention::WKT2_2019:
@@ -895,7 +895,7 @@ void WKTFormatter::ingestWKTNode(const WKTNodeNNPtr &node) {
 //! @cond Doxygen_Suppress
 
 static WKTNodeNNPtr
-    null_node(NN_NO_CHECK(internal::make_unique<WKTNode>(std::string())));
+    null_node(NN_NO_CHECK(std::make_unique<WKTNode>(std::string())));
 
 static inline bool isNull(const WKTNodeNNPtr &node) {
     return &node == &null_node;
@@ -1018,7 +1018,7 @@ const WKTNodeNNPtr &WKTNode::Private::lookForChild(
  * @param valueIn the name of the node.
  */
 WKTNode::WKTNode(const std::string &valueIn)
-    : d(internal::make_unique<Private>(valueIn)) {}
+    : d(std::make_unique<Private>(valueIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1168,7 +1168,7 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
         }
     }
 
-    auto node = NN_NO_CHECK(internal::make_unique<WKTNode>(value));
+    auto node = NN_NO_CHECK(std::make_unique<WKTNode>(value));
 
     if (indexStart > 0) {
         if (wkt[i] == ',') {
@@ -1470,7 +1470,7 @@ struct WKTParser::Private {
 
 // ---------------------------------------------------------------------------
 
-WKTParser::WKTParser() : d(internal::make_unique<Private>()) {}
+WKTParser::WKTParser() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1704,7 +1704,7 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
     if (properties_.size() >= MAX_PROPERTY_SIZE) {
         throw ParsingException("MAX_PROPERTY_SIZE reached");
     }
-    properties_.push_back(internal::make_unique<PropertyMap>());
+    properties_.push_back(std::make_unique<PropertyMap>());
     auto properties = properties_.back().get();
 
     std::string authNameFromAlias;
@@ -8579,7 +8579,7 @@ struct PROJStringFormatter::Private {
 //! @cond Doxygen_Suppress
 PROJStringFormatter::PROJStringFormatter(Convention conventionIn,
                                          const DatabaseContextPtr &dbContext)
-    : d(internal::make_unique<Private>()) {
+    : d(std::make_unique<Private>()) {
     d->convention_ = conventionIn;
     d->dbContext_ = dbContext;
 }
@@ -10537,7 +10537,7 @@ struct PROJStringParser::Private {
 
 // ---------------------------------------------------------------------------
 
-PROJStringParser::PROJStringParser() : d(internal::make_unique<Private>()) {}
+PROJStringParser::PROJStringParser() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
@@ -12774,7 +12774,7 @@ JSONFormatter &JSONFormatter::setSchema(const std::string &schema) noexcept {
 
 //! @cond Doxygen_Suppress
 
-JSONFormatter::JSONFormatter() : d(internal::make_unique<Private>()) {}
+JSONFormatter::JSONFormatter() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 

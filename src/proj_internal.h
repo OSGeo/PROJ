@@ -820,7 +820,7 @@ struct pj_ctx {
     std::string endpoint{};
     projNetworkCallbacksAndData networking{};
     std::string ca_bundle_path{};
-    bool native_ca=false;
+    bool native_ca = false;
     projGridChunkCache gridChunkCache{};
     TMercAlgo defaultTmercAlgo =
         TMercAlgo::PODER_ENGSAGER; // can be overridden by content of proj.ini

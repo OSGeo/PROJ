@@ -65,16 +65,15 @@ struct CoordinateMetadata::Private {
 // ---------------------------------------------------------------------------
 
 CoordinateMetadata::CoordinateMetadata(const crs::CRSNNPtr &crsIn)
-    : d(internal::make_unique<Private>(crsIn)) {}
+    : d(std::make_unique<Private>(crsIn)) {}
 
 // ---------------------------------------------------------------------------
 
 CoordinateMetadata::CoordinateMetadata(const crs::CRSNNPtr &crsIn,
                                        double coordinateEpochAsDecimalYearIn)
-    : d(internal::make_unique<Private>(
-          crsIn,
-          common::DataEpoch(common::Measure(coordinateEpochAsDecimalYearIn,
-                                            common::UnitOfMeasure::YEAR)))) {}
+    : d(std::make_unique<Private>(crsIn, common::DataEpoch(common::Measure(
+                                             coordinateEpochAsDecimalYearIn,
+                                             common::UnitOfMeasure::YEAR)))) {}
 
 // ---------------------------------------------------------------------------
 

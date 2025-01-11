@@ -84,13 +84,13 @@ struct Meridian::Private {
 // ---------------------------------------------------------------------------
 
 Meridian::Meridian(const common::Angle &longitudeIn)
-    : d(internal::make_unique<Private>(longitudeIn)) {}
+    : d(std::make_unique<Private>(longitudeIn)) {}
 
 // ---------------------------------------------------------------------------
 
 #ifdef notdef
 Meridian::Meridian(const Meridian &other)
-    : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+    : IdentifiedObject(other), d(std::make_unique<Private>(*other.d)) {}
 #endif
 
 // ---------------------------------------------------------------------------
@@ -182,14 +182,13 @@ struct CoordinateSystemAxis::Private {
 
 // ---------------------------------------------------------------------------
 
-CoordinateSystemAxis::CoordinateSystemAxis()
-    : d(internal::make_unique<Private>()) {}
+CoordinateSystemAxis::CoordinateSystemAxis() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 #ifdef notdef
 CoordinateSystemAxis::CoordinateSystemAxis(const CoordinateSystemAxis &other)
-    : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+    : IdentifiedObject(other), d(std::make_unique<Private>(*other.d)) {}
 #endif
 
 // ---------------------------------------------------------------------------
@@ -599,13 +598,13 @@ struct CoordinateSystem::Private {
 
 CoordinateSystem::CoordinateSystem(
     const std::vector<CoordinateSystemAxisNNPtr> &axisIn)
-    : d(internal::make_unique<Private>(axisIn)) {}
+    : d(std::make_unique<Private>(axisIn)) {}
 
 // ---------------------------------------------------------------------------
 
 #ifdef notdef
 CoordinateSystem::CoordinateSystem(const CoordinateSystem &other)
-    : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+    : IdentifiedObject(other), d(std::make_unique<Private>(*other.d)) {}
 #endif
 
 // ---------------------------------------------------------------------------

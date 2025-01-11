@@ -91,13 +91,13 @@ UnitOfMeasure::UnitOfMeasure(const std::string &nameIn, double toSIIn,
                              UnitOfMeasure::Type typeIn,
                              const std::string &codeSpaceIn,
                              const std::string &codeIn)
-    : d(internal::make_unique<Private>(nameIn, toSIIn, typeIn, codeSpaceIn,
-                                       codeIn)) {}
+    : d(std::make_unique<Private>(nameIn, toSIIn, typeIn, codeSpaceIn,
+                                  codeIn)) {}
 
 // ---------------------------------------------------------------------------
 
 UnitOfMeasure::UnitOfMeasure(const UnitOfMeasure &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
+    : d(std::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
@@ -376,12 +376,12 @@ struct Measure::Private {
 /** \brief Instantiate a Measure.
  */
 Measure::Measure(double valueIn, const UnitOfMeasure &unitIn)
-    : d(internal::make_unique<Private>(valueIn, unitIn)) {}
+    : d(std::make_unique<Private>(valueIn, unitIn)) {}
 
 // ---------------------------------------------------------------------------
 
 Measure::Measure(const Measure &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
+    : d(std::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
@@ -555,18 +555,18 @@ struct DateTime::Private {
 
 // ---------------------------------------------------------------------------
 
-DateTime::DateTime() : d(internal::make_unique<Private>(std::string())) {}
+DateTime::DateTime() : d(std::make_unique<Private>(std::string())) {}
 
 // ---------------------------------------------------------------------------
 
 DateTime::DateTime(const std::string &str)
-    : d(internal::make_unique<Private>(str)) {}
+    : d(std::make_unique<Private>(str)) {}
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 DateTime::DateTime(const DateTime &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
+    : d(std::make_unique<Private>(*(other.d))) {}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -626,12 +626,12 @@ struct IdentifiedObject::Private {
 
 // ---------------------------------------------------------------------------
 
-IdentifiedObject::IdentifiedObject() : d(internal::make_unique<Private>()) {}
+IdentifiedObject::IdentifiedObject() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 IdentifiedObject::IdentifiedObject(const IdentifiedObject &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
+    : d(std::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
@@ -975,13 +975,13 @@ struct ObjectDomain::Private {
 //! @cond Doxygen_Suppress
 ObjectDomain::ObjectDomain(const optional<std::string> &scopeIn,
                            const ExtentPtr &extent)
-    : d(internal::make_unique<Private>(scopeIn, extent)) {}
+    : d(std::make_unique<Private>(scopeIn, extent)) {}
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
 ObjectDomain::ObjectDomain(const ObjectDomain &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
+    : d(std::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1167,12 +1167,12 @@ struct ObjectUsage::Private {
 
 // ---------------------------------------------------------------------------
 
-ObjectUsage::ObjectUsage() : d(internal::make_unique<Private>()) {}
+ObjectUsage::ObjectUsage() : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 ObjectUsage::ObjectUsage(const ObjectUsage &other)
-    : IdentifiedObject(other), d(internal::make_unique<Private>(*(other.d))) {}
+    : IdentifiedObject(other), d(std::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1320,17 +1320,17 @@ struct DataEpoch::Private {
 
 // ---------------------------------------------------------------------------
 
-DataEpoch::DataEpoch() : d(internal::make_unique<Private>(Measure())) {}
+DataEpoch::DataEpoch() : d(std::make_unique<Private>(Measure())) {}
 
 // ---------------------------------------------------------------------------
 
 DataEpoch::DataEpoch(const Measure &coordinateEpochIn)
-    : d(internal::make_unique<Private>(coordinateEpochIn)) {}
+    : d(std::make_unique<Private>(coordinateEpochIn)) {}
 
 // ---------------------------------------------------------------------------
 
 DataEpoch::DataEpoch(const DataEpoch &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
+    : d(std::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 

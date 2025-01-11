@@ -306,7 +306,7 @@ GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx,
 
     // Cache up to 1 megapixel per GTX file
     const int maxLinesInCache = 1024 * 1024 / columns;
-    auto cache = internal::make_unique<FloatLineCache>(maxLinesInCache);
+    auto cache = std::make_unique<FloatLineCache>(maxLinesInCache);
     return new GTXVerticalShiftGrid(ctx, std::move(fp), name, columns, rows,
                                     extent, std::move(cache));
 }
@@ -1588,8 +1588,7 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
         const std::string &gridName = grid->metadataItem("grid_name");
         const std::string &parentName = grid->metadataItem("parent_grid_name");
 
-        auto vgrid =
-            internal::make_unique<GTiffVGrid>(std::move(grid), idxSample);
+        auto vgrid = std::make_unique<GTiffVGrid>(std::move(grid), idxSample);
 
         insertIntoHierarchy(ctx, std::move(vgrid), gridName, parentName,
                             set->m_grids, mapGrids);
@@ -2324,7 +2323,7 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
 
     // Cache up to 1 megapixel per NTv2 file
     const int maxLinesInCache = 1024 * 1024 / largestLine;
-    set->m_cache = internal::make_unique<FloatLineCache>(maxLinesInCache);
+    set->m_cache = std::make_unique<FloatLineCache>(maxLinesInCache);
     for (const auto &kv : mapGrids) {
         kv.second->setCache(set->m_cache.get());
     }
@@ -2633,7 +2632,7 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
         const std::string &gridName = grid->metadataItem("grid_name");
         const std::string &parentName = grid->metadataItem("parent_grid_name");
 
-        auto hgrid = internal::make_unique<GTiffHGrid>(
+        auto hgrid = std::make_unique<GTiffHGrid>(
             std::move(grid), idxLatShift, idxLongShift, convFactorToRadian,
             positiveEast);
 
@@ -3030,7 +3029,7 @@ GTiffGenericGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
         const std::string &gridName = grid->metadataItem("grid_name");
         const std::string &parentName = grid->metadataItem("parent_grid_name");
 
-        auto ggrid = internal::make_unique<GTiffGenericGrid>(std::move(grid));
+        auto ggrid = std::make_unique<GTiffGenericGrid>(std::move(grid));
         if (!set->m_grids.empty() && ggrid->metadataItem("TYPE").empty() &&
             !set->m_grids[0]->metadataItem("TYPE").empty()) {
             ggrid->setFirstGrid(set->m_grids[0].get());

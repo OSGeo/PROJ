@@ -199,13 +199,13 @@ CoordinateOperationContext::~CoordinateOperationContext() = default;
 // ---------------------------------------------------------------------------
 
 CoordinateOperationContext::CoordinateOperationContext()
-    : d(internal::make_unique<Private>()) {}
+    : d(std::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 CoordinateOperationContext::CoordinateOperationContext(
     const CoordinateOperationContext &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
+    : d(std::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
