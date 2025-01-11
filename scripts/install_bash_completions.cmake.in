@@ -1,0 +1,13 @@
+set(PROGRAMS
+    projinfo
+)
+
+set(INSTALL_DIR "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/@BASH_COMPLETIONS_DIR@")
+
+file(MAKE_DIRECTORY "${INSTALL_DIR}")
+
+foreach (program IN LISTS PROGRAMS)
+  message(STATUS "Installing ${INSTALL_DIR}/${program}")
+  configure_file("@CMAKE_CURRENT_SOURCE_DIR@/${program}-bash-completion.sh" "${INSTALL_DIR}/${program}" COPYONLY)
+  file(APPEND "@PROJECT_BINARY_DIR@/install_manifest_extra.txt" "${INSTALL_DIR}/${program}\n")
+endforeach ()
