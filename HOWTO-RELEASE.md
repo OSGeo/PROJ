@@ -200,7 +200,7 @@ The release should be announced on PROJ and MetaCRS mailing lists. Additionally
 the release announcement should be sent to <news_item@osgeo.org> which will add
 the announcement to osgeo.org and other OSGeo communication channels.
 
-Make some noise on Twitter and other relevant social media.
+Make some noise on relevant social media.
 
 ## 3 Post final release
 
