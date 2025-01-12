@@ -173,7 +173,7 @@ pj_ctx::pj_ctx(const pj_ctx &other)
       // BEGIN ini file settings
       iniFileLoaded(other.iniFileLoaded), endpoint(other.endpoint),
       networking(other.networking), ca_bundle_path(other.ca_bundle_path),
-      gridChunkCache(other.gridChunkCache),
+      native_ca(other.native_ca), gridChunkCache(other.gridChunkCache),
       defaultTmercAlgo(other.defaultTmercAlgo),
       // END ini file settings
       projStringParserCreateFromPROJStringRecursionCounter(0),
