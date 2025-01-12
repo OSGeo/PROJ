@@ -146,23 +146,26 @@ static double STtoUV(double s, S2ProjectionType s2_projection) {
 }
 
 static double UVtoST(double u, S2ProjectionType s2_projection) {
+    double ret = u;
     switch (s2_projection) {
     case Linear:
-        return 0.5 * (u + 1);
+        ret = 0.5 * (u + 1);
         break;
     case Quadratic:
         if (u >= 0)
-            return 0.5 * std::sqrt(1 + 3 * u);
+            ret = 0.5 * std::sqrt(1 + 3 * u);
         else
-            return 1 - 0.5 * std::sqrt(1 - 3 * u);
+            ret = 1 - 0.5 * std::sqrt(1 - 3 * u);
         break;
     case Tangent: {
         volatile double a = std::atan(u);
-        return (2 * M_1_PI) * (a + M_PI_4);
-    } break;
-    default:
-        return u;
+        ret = (2 * M_1_PI) * (a + M_PI_4);
+        break;
     }
+    case NoUVtoST:
+        break;
+    }
+    return ret;
 }
 
 inline PJ_XYZ FaceUVtoXYZ(int face, double u, double v) {
