@@ -59,6 +59,11 @@ grep -v "unmatchedSuppression" ${LOG_FILE} \
     | grep -v -e "molodensky.*unreadVariable,Variable 'point.*' is assigned a value that is never used" \
     | grep -v -e "vgridshift.*unreadVariable,Variable 'point.*' is assigned a value that is never used" \
     | grep -v -e "defines member function with name.*also defined in its parent" \
+    | grep -v "passedByValueCallback,Function parameter 'lpz' should be passed by const reference" \
+    | grep -v "passedByValueCallback,Function parameter 'xyz' should be passed by const reference" \
+    | grep -v "passedByValueCallback,Function parameter 'geod' should be passed by const reference" \
+    | grep -v "passedByValueCallback,Function parameter 'cart' should be passed by const reference" \
+    | grep -v "passedByValueCallback,Function parameter 'in' should be passed by const reference" \
     > ${LOG_FILE}.tmp
 mv ${LOG_FILE}.tmp ${LOG_FILE}
 
