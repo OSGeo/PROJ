@@ -7367,7 +7367,7 @@ static CRSNNPtr importFromWMSAUTO(const std::string &text) {
             throw ParsingException("invalid WMS AUTO CRS definition");
         }
 
-        const auto getConversion = [=]() {
+        const auto getConversion = [dfRefLong, dfRefLat, &parts]() {
             const int nProjId = std::stoi(parts[0]);
             switch (nProjId) {
             case 42001: // Auto UTM
@@ -7410,7 +7410,7 @@ static CRSNNPtr importFromWMSAUTO(const std::string &text) {
             }
         };
 
-        const auto getUnits = [=]() -> const UnitOfMeasure & {
+        const auto getUnits = [nUnitsId]() -> const UnitOfMeasure & {
             switch (nUnitsId) {
             case 9001:
                 return UnitOfMeasure::METRE;
@@ -9965,16 +9965,16 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                 title = word.substr(strlen("title="));
             } else if (word != "step") {
                 const auto pos = word.find('=');
-                auto key = word.substr(0, pos);
+                const auto key = word.substr(0, pos);
 
-                const Step::KeyValue pair(
+                Step::KeyValue pair(
                     (pos != std::string::npos)
                         ? Step::KeyValue(key, word.substr(pos + 1))
                         : Step::KeyValue(key));
                 if (steps.empty()) {
-                    globalParamValues.push_back(pair);
+                    globalParamValues.push_back(std::move(pair));
                 } else {
-                    steps.back().paramValues.push_back(pair);
+                    steps.back().paramValues.push_back(std::move(pair));
                 }
             }
         }
@@ -11227,7 +11227,7 @@ PROJStringParser::Private::processAxisSwap(Step &step,
             ? Meridian::create(Angle(0, UnitOfMeasure::DEGREE)).as_nullable()
             : nullMeridian);
 
-    const CoordinateSystemAxisNNPtr west =
+    CoordinateSystemAxisNNPtr west =
         createAxis(isSpherical    ? "Planetocentric longitude"
                    : isGeographic ? AxisName::Longitude
                                   : AxisName::Westing,
@@ -11236,7 +11236,7 @@ PROJStringParser::Private::processAxisSwap(Step &step,
                                   : std::string(),
                    AxisDirection::WEST, unit);
 
-    const CoordinateSystemAxisNNPtr south =
+    CoordinateSystemAxisNNPtr south =
         createAxis(isSpherical    ? "Planetocentric latitude"
                    : isGeographic ? AxisName::Latitude
                                   : AxisName::Southing,
@@ -11292,8 +11292,8 @@ PROJStringParser::Private::processAxisSwap(Step &step,
         }
     } else if ((step.name == "krovak" || step.name == "mod_krovak") &&
                hasParamValue(step, "czech")) {
-        axis[0] = west;
-        axis[1] = south;
+        axis[0] = std::move(west);
+        axis[1] = std::move(south);
     }
     return axis;
 }

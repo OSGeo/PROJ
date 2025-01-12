@@ -276,8 +276,7 @@ createConversion(const util::PropertyMap &properties,
                      metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY, param->epsg_code);
         }
-        auto parameter = OperationParameter::create(paramProperties);
-        parameters.push_back(parameter);
+        parameters.push_back(OperationParameter::create(paramProperties));
     }
 
     auto methodProperties = util::PropertyMap().set(
@@ -2713,9 +2712,11 @@ CoordinateOperationNNPtr Conversion::inverse() const {
         if (convFactor == 0) {
             throw InvalidOperation("Invalid conversion factor");
         }
+        // coverity[divide_by_zero]
+        const double invConvFactor = 1.0 / convFactor;
         auto conv = createChangeVerticalUnit(
             createPropertiesForInverse(this, false, false),
-            common::Scale(1.0 / convFactor));
+            common::Scale(invConvFactor));
         conv->setCRSs(this, true);
         return conv;
     }
@@ -2880,6 +2881,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN);
         if (!(k0 > 0 && k0 <= 1.0 + 1e-10))
             return nullptr;
+        // coverity[divide_by_zero]
         const double dfStdP1Lat =
             (k0 >= 1.0)
                 ? 0.0

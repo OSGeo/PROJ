@@ -1733,11 +1733,12 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
     if (methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
         const double convFactor = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
+        // coverity[divide_by_zero]
+        const double invConvFactor = convFactor == 0.0 ? 0.0 : 1.0 / convFactor;
         return Private::registerInv(
             this, createChangeVerticalUnit(
                       createPropertiesForInverse(this, false, false),
-                      l_targetCRS, l_sourceCRS,
-                      common::Scale(convFactor == 0.0 ? 0.0 : 1.0 / convFactor),
+                      l_targetCRS, l_sourceCRS, common::Scale(invConvFactor),
                       coordinateOperationAccuracies()));
     }
 

@@ -3609,7 +3609,7 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
                 std::list<std::string> l;
                 l.emplace_back(res2.front()[0]);
                 l.emplace_back((*(std::next(res2.begin())))[0]);
-                const auto uniqueEsriAlias = getUniqueEsriAlias(l);
+                std::string uniqueEsriAlias = getUniqueEsriAlias(l);
                 if (!uniqueEsriAlias.empty())
                     return uniqueEsriAlias;
             }
@@ -5691,14 +5691,14 @@ AuthorityFactory::Private::createProjectedCRSEnd(const std::string &code,
                 pj_add_type_crs_if_needed(text_definition), context());
             auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(obj.get());
             if (projCRS) {
-                const auto conv = projCRS->derivingConversion();
+                auto conv = projCRS->derivingConversion();
                 auto newConv =
                     (conv->nameStr() == "unnamed")
                         ? operation::Conversion::create(
                               util::PropertyMap().set(
                                   common::IdentifiedObject::NAME_KEY, name),
                               conv->method(), conv->parameterValues())
-                        : conv;
+                        : std::move(conv);
                 auto crsRet = crs::ProjectedCRS::create(
                     props, projCRS->baseCRS(), newConv,
                     projCRS->coordinateSystem());
@@ -6632,12 +6632,12 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                                                     std::string());
                 if (step_direction == "forward") {
                     ++countExplicitDirection;
-                    operations.push_back(stepOp);
+                    operations.push_back(std::move(stepOp));
                 } else if (step_direction == "reverse") {
                     ++countExplicitDirection;
                     operations.push_back(stepOp->inverse());
                 } else {
-                    operations.push_back(stepOp);
+                    operations.push_back(std::move(stepOp));
                 }
             }
 
@@ -7364,7 +7364,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
             "FROM coordinate_operation_view v1 "
             "JOIN coordinate_operation_view v2 ");
 
-    const std::string joinSupersession(
+    const char *joinSupersession =
         "LEFT JOIN supersession ss1 ON "
         "ss1.superseded_table_name = v1.table_name AND "
         "ss1.superseded_auth_name = v1.auth_name AND "
@@ -7376,23 +7376,23 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         "ss2.superseded_auth_name = v2.auth_name AND "
         "ss2.superseded_code = v2.code AND "
         "ss2.superseded_table_name = ss2.replacement_table_name AND "
-        "ss2.same_source_target_crs = 1 ");
+        "ss2.same_source_target_crs = 1 ";
     const std::string joinArea(
-        (discardSuperseded ? joinSupersession : std::string()) +
-        "JOIN usage u1 ON "
-        "u1.object_table_name = v1.table_name AND "
-        "u1.object_auth_name = v1.auth_name AND "
-        "u1.object_code = v1.code "
-        "JOIN extent a1 "
-        "ON a1.auth_name = u1.extent_auth_name AND "
-        "a1.code = u1.extent_code "
-        "JOIN usage u2 ON "
-        "u2.object_table_name = v2.table_name AND "
-        "u2.object_auth_name = v2.auth_name AND "
-        "u2.object_code = v2.code "
-        "JOIN extent a2 "
-        "ON a2.auth_name = u2.extent_auth_name AND "
-        "a2.code = u2.extent_code ");
+        (discardSuperseded ? std::string(joinSupersession) : std::string())
+            .append("JOIN usage u1 ON "
+                    "u1.object_table_name = v1.table_name AND "
+                    "u1.object_auth_name = v1.auth_name AND "
+                    "u1.object_code = v1.code "
+                    "JOIN extent a1 "
+                    "ON a1.auth_name = u1.extent_auth_name AND "
+                    "a1.code = u1.extent_code "
+                    "JOIN usage u2 ON "
+                    "u2.object_table_name = v2.table_name AND "
+                    "u2.object_auth_name = v2.auth_name AND "
+                    "u2.object_code = v2.code "
+                    "JOIN extent a2 "
+                    "ON a2.auth_name = u2.extent_auth_name AND "
+                    "a2.code = u2.extent_code "));
     const std::string orderBy(
         "ORDER BY (CASE WHEN accuracy1 is NULL THEN 1 ELSE 0 END) + "
         "(CASE WHEN accuracy2 is NULL THEN 1 ELSE 0 END), "
@@ -9247,12 +9247,12 @@ AuthorityFactory::createObjectsFromNameEx(
 
                     const auto &auth_name = row[1];
                     const auto &code = row[2];
-                    const auto key =
+                    auto key =
                         std::pair<std::string, std::string>(auth_name, code);
                     if (setIdentified.find(key) != setIdentified.end()) {
                         continue;
                     }
-                    setIdentified.insert(key);
+                    setIdentified.insert(std::move(key));
                     auto factory = d->createFactory(auth_name);
                     res.emplace_back(PairObjectName(
                         factory->createGeodeticDatum(code), name));

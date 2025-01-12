@@ -852,9 +852,6 @@ struct PrecomputedOpCharacteristics {
 // filterAndSort() is already huge.
 struct SortFunction {
 
-    const std::map<CoordinateOperation *, PrecomputedOpCharacteristics> &map;
-    const std::string BALLPARK_GEOGRAPHIC_OFFSET_FROM;
-
     explicit SortFunction(const std::map<CoordinateOperation *,
                                          PrecomputedOpCharacteristics> &mapIn)
         : map(mapIn), BALLPARK_GEOGRAPHIC_OFFSET_FROM(
@@ -1083,6 +1080,15 @@ struct SortFunction {
 #endif
         return ret;
     }
+
+    SortFunction(const SortFunction &) = default;
+    SortFunction &operator=(const SortFunction &) = delete;
+    SortFunction(SortFunction &&) = default;
+    SortFunction &operator=(SortFunction &&) = delete;
+
+  private:
+    const std::map<CoordinateOperation *, PrecomputedOpCharacteristics> &map;
+    const std::string BALLPARK_GEOGRAPHIC_OFFSET_FROM;
 };
 
 // ---------------------------------------------------------------------------
@@ -1467,8 +1473,7 @@ struct FilterResults {
         }
 
         // Sort !
-        SortFunction sortFunc(map);
-        std::sort(res.begin(), res.end(), sortFunc);
+        std::sort(res.begin(), res.end(), SortFunction(map));
 
 // Debug code to check consistency of the sort function
 #ifdef DEBUG_SORT
@@ -1478,6 +1483,7 @@ struct FilterResults {
 #endif
 #if defined(DEBUG_SORT) || !defined(NDEBUG)
         if (debugSort) {
+            SortFunction sortFunc(map);
             const bool assertIfIssue =
                 !(getenv("PROJ_DEBUG_SORT_FUNCT_ASSERT") != nullptr);
             for (size_t i = 0; i < res.size(); ++i) {
@@ -1538,7 +1544,7 @@ struct FilterResults {
         for (const auto &op : res) {
             const auto curAccuracy = getAccuracy(op);
             bool dummy = false;
-            const auto curExtent = getExtent(op, true, dummy);
+            auto curExtent = getExtent(op, true, dummy);
             // If a concatenated operation has an identifier, consider it as
             // a single step (to be opposed to synthesized concatenated
             // operations). Helps for example to get EPSG:8537,
@@ -1569,7 +1575,7 @@ struct FilterResults {
 
             lastOp = op.as_nullable();
             lastStepCount = curStepCount;
-            lastExtent = curExtent;
+            lastExtent = std::move(curExtent);
             lastAccuracy = curAccuracy;
         }
         res = std::move(resTemp);
@@ -1624,7 +1630,7 @@ struct FilterResults {
 
                 if (setPROJPlusExtent.find(key) == setPROJPlusExtent.end()) {
                     resTemp.emplace_back(op);
-                    setPROJPlusExtent.insert(key);
+                    setPROJPlusExtent.insert(std::move(key));
                 }
             } catch (const std::exception &) {
                 resTemp.emplace_back(op);
@@ -5869,27 +5875,25 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                                         "CGVD2013a(1997) height") ||
                          (is2002 && componentsSrc[1]->nameStr() ==
                                         "CGVD2013a(2002) height"))) {
-                        const auto newGeogCRS_2D(
+                        std::vector<crs::CRSNNPtr> intermComponents{
                             authFactoryEPSG->createCoordinateReferenceSystem(
                                 is1997 ? "8240" : // NAD83(CSRS)v3 2D
                                     "8246"        // NAD83(CSRS)v4 2D
-                                ));
-                        const auto newGeogCRS_3D(
-                            authFactoryEPSG->createCoordinateReferenceSystem(
-                                is1997 ? "8239" : // NAD83(CSRS)v3 3D
-                                    "8244"        // NAD83(CSRS)v4 3D
-                                ));
-                        std::vector<crs::CRSNNPtr> intermComponents{
-                            newGeogCRS_2D, componentsSrc[1]};
+                                ),
+                            componentsSrc[1]};
                         auto properties = util::PropertyMap().set(
                             common::IdentifiedObject::NAME_KEY,
                             intermComponents[0]->nameStr() + " + " +
                                 intermComponents[1]->nameStr());
                         auto newCompound = crs::CompoundCRS::create(
                             properties, intermComponents);
-                        auto ops = createOperations(newCompound, sourceEpoch,
-                                                    newGeogCRS_3D, sourceEpoch,
-                                                    context);
+                        auto ops = createOperations(
+                            newCompound, sourceEpoch,
+                            authFactoryEPSG->createCoordinateReferenceSystem(
+                                is1997 ? "8239" : // NAD83(CSRS)v3 3D
+                                    "8244"        // NAD83(CSRS)v4 3D
+                                ),
+                            sourceEpoch, context);
                         for (const auto &op : ops) {
                             auto opClone = op->shallowClone();
                             setCRSs(opClone.get(), sourceCRS, targetCRS);
@@ -6156,7 +6160,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
         }
 
         if (horizTransforms.empty() || verticalTransforms.empty()) {
-            res = horizTransforms;
+            res = std::move(horizTransforms);
             return;
         }
 
@@ -7371,7 +7375,7 @@ crs::CRSNNPtr CRS::getResolvedCRS(const crs::CRSNNPtr &crs,
                 auto matches = authFactory->createObjectsFromName(
                     name, {objectType}, false, 2);
                 if (matches.size() == 1) {
-                    const auto match =
+                    auto match =
                         util::nn_static_pointer_cast<crs::CRS>(matches.front());
                     if (approxExtent || !extentOut) {
                         extentOut = operation::getExtent(match);

@@ -1721,9 +1721,8 @@ std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
         ret.push_back(proj_context_get_user_writable_directory(ctx, false));
     }
 
-    const std::string envPROJ_DATA =
-        NS_PROJ::FileManager::getProjDataEnvVar(ctx);
-    const std::string relativeSharedProj = pj_get_relative_share_proj(ctx);
+    std::string envPROJ_DATA = NS_PROJ::FileManager::getProjDataEnvVar(ctx);
+    std::string relativeSharedProj = pj_get_relative_share_proj(ctx);
 
     if (gbPROJ_DATA_ENV_VAR_TRIED_LAST) {
 /* Situation where PROJ_DATA environment variable is tried in last */
@@ -1731,18 +1730,18 @@ std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
         ret.push_back(PROJ_DATA);
 #endif
         if (!relativeSharedProj.empty()) {
-            ret.push_back(relativeSharedProj);
+            ret.push_back(std::move(relativeSharedProj));
         }
         if (!envPROJ_DATA.empty()) {
-            ret.push_back(envPROJ_DATA);
+            ret.push_back(std::move(envPROJ_DATA));
         }
     } else {
         /* Situation where PROJ_DATA environment variable is used if defined */
         if (!envPROJ_DATA.empty()) {
-            ret.push_back(envPROJ_DATA);
+            ret.push_back(std::move(envPROJ_DATA));
         } else {
             if (!relativeSharedProj.empty()) {
-                ret.push_back(relativeSharedProj);
+                ret.push_back(std::move(relativeSharedProj));
             }
 #ifdef PROJ_DATA
             ret.push_back(PROJ_DATA);
@@ -1802,7 +1801,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
         auto dbContext = getDBcontext(ctx);
         if (dbContext) {
             try {
-                const auto filename = dbContext->getProjGridName(name);
+                auto filename = dbContext->getProjGridName(name);
                 if (!filename.empty()) {
                     file.reset(reinterpret_cast<NS_PROJ::File *>(
                         pj_open_lib_internal(ctx, filename.c_str(), "rb",
@@ -1814,7 +1813,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
                     } else {
                         // For final network access attempt, use the new
                         // name.
-                        tmpString = filename;
+                        tmpString = std::move(filename);
                         name = tmpString.c_str();
                     }
                 }
@@ -2020,10 +2019,9 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
         const auto equal = content.find('=', pos);
         if (equal < eol) {
             const auto key = trim(content.substr(pos, equal - pos));
-            const auto value =
-                trim(content.substr(equal + 1, eol - (equal + 1)));
+            auto value = trim(content.substr(equal + 1, eol - (equal + 1)));
             if (ctx->endpoint.empty() && key == "cdn_endpoint") {
-                ctx->endpoint = value;
+                ctx->endpoint = std::move(value);
             } else if (proj_network == nullptr && key == "network") {
                 ctx->networking.enabled = ci_equal(value, "ON") ||
                                           ci_equal(value, "YES") ||

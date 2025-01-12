@@ -90,10 +90,10 @@ static std::vector<double> get_bbox(const json &j) {
     } else {
         for (const auto &obj : j) {
             if (obj.is_array()) {
-                const auto subres = get_bbox(obj);
+                auto subres = get_bbox(obj);
                 if (subres.size() == 4) {
                     if (res.empty()) {
-                        res = subres;
+                        res = std::move(subres);
                     } else {
                         res[0] = std::min(res[0], subres[0]);
                         res[1] = std::min(res[1], subres[1]);
@@ -492,13 +492,13 @@ int main(int argc, char *argv[]) {
                         bool foundPlus180 = false;
                         for (const auto &obj : j_coordinates) {
                             if (obj.is_array()) {
-                                const auto tmp = get_bbox(obj);
+                                auto tmp = get_bbox(obj);
                                 if (tmp.size() == 4) {
                                     if (tmp[0] == -180)
                                         foundMinus180 = true;
                                     else if (tmp[2] == 180)
                                         foundPlus180 = true;
-                                    grid_bboxes.push_back(tmp);
+                                    grid_bboxes.push_back(std::move(tmp));
                                 }
                             }
                         }
@@ -565,11 +565,11 @@ int main(int argc, char *argv[]) {
                     continue;
                 }
 
-                const std::string resource_url(
+                std::string resource_url(
                     std::string(endpoint).append("/").append(name));
                 if (proj_is_download_needed(ctx, resource_url.c_str(), false)) {
                     total_size_to_download += file_size;
-                    to_download.push_back(resource_url);
+                    to_download.push_back(std::move(resource_url));
                 } else {
                     if (!quiet) {
                         std::cout << resource_url << " already downloaded."

@@ -314,7 +314,7 @@ PROJBasedOperation::gridsNeeded(const io::DatabaseContextPtr &databaseContext,
                     desc.fullName, desc.packageName, desc.url,
                     desc.directDownload, desc.openLicense, desc.available);
             }
-            res.insert(desc);
+            res.insert(std::move(desc));
         }
     } catch (const io::ParsingException &) {
     }

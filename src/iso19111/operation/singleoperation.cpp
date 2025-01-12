@@ -1725,7 +1725,7 @@ SingleOperation::gridsNeeded(const io::DatabaseContextPtr &databaseContext,
                             desc.directDownload, desc.openLicense,
                             desc.available);
                     }
-                    res.insert(desc);
+                    res.insert(std::move(desc));
                 }
             }
         }
