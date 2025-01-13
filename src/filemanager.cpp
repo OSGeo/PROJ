@@ -2049,7 +2049,7 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
                         "pj_load_ini(): Invalid value for tmerc_default_algo");
                 }
             } else if (ca_bundle_path == nullptr && key == "ca_bundle_path") {
-                ctx->ca_bundle_path = value;
+                ctx->ca_bundle_path = std::move(value);
             } else if (proj_only_best_default == nullptr &&
                        key == "only_best_default") {
                 ctx->warnIfBestTransformationNotAvailableDefault = false;
