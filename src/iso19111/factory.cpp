@@ -9292,12 +9292,11 @@ AuthorityFactory::createObjectsFromNameEx(
             const auto &table_name = row[0];
             const auto &auth_name = row[1];
             const auto &code = row[2];
-            const auto key =
-                std::pair<std::string, std::string>(auth_name, code);
+            auto key = std::pair<std::string, std::string>(auth_name, code);
             if (setIdentified.find(key) != setIdentified.end()) {
                 continue;
             }
-            setIdentified.insert(key);
+            setIdentified.insert(std::move(key));
             const auto &deprecatedStr = row[4];
             if (isFirst) {
                 firstIsDeprecated = deprecatedStr == "1";
