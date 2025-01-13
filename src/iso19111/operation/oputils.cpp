@@ -287,7 +287,7 @@ util::PropertyMap createPropertiesForInverse(const CoordinateOperation *op,
                 }
             }
             if (!curToken.empty()) {
-                tokens.push_back(curToken);
+                tokens.push_back(std::move(curToken));
             }
             for (size_t i = tokens.size(); i > 0;) {
                 i--;

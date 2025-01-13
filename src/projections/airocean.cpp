@@ -756,6 +756,14 @@ static PJ_XY airocean_forward(PJ_LP lp, PJ *P) {
     PJ_XYZ cartesianPoint{x, y, z};
 
     unsigned char face_id = get_ico_face_index(Q, &cartesianPoint);
+    if (face_id == 23) {
+        // not sure this can happen
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+        PJ_XY xy;
+        xy.x = HUGE_VAL;
+        xy.y = HUGE_VAL;
+        return xy;
+    }
 
     PJ_XYZ icoPoint = cartesian_to_ico(Q, &cartesianPoint, face_id);
 

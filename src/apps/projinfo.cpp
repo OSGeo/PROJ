@@ -488,7 +488,7 @@ static void outputObject(
         std::cout << std::endl;
     }
 
-    const auto projStringExportable =
+    auto projStringExportable =
         nn_dynamic_pointer_cast<IPROJStringExportable>(obj);
     bool alreadyOutputted = false;
     if (projStringExportable) {
@@ -511,7 +511,7 @@ static void outputObject(
                                 dbContext, allowUseIntermediateCRS));
                 }
                 if (!objToExport) {
-                    objToExport = projStringExportable;
+                    objToExport = std::move(projStringExportable);
                 }
 
                 auto formatter = PROJStringFormatter::create(
@@ -1103,7 +1103,7 @@ int main(int argc, char **argv) {
     bool listCRSSpecified = false;
 
     for (int i = 1; i < argc; i++) {
-        const std::string arg(argv[i]);
+        std::string arg(argv[i]);
         if (arg == "-o" && i + 1 < argc) {
             outputSwitchSpecified = true;
             i++;
@@ -1424,7 +1424,7 @@ int main(int argc, char **argv) {
             std::cerr << "Unrecognized option: " << arg << std::endl;
             usage();
         } else {
-            positional_args.push_back(arg);
+            positional_args.push_back(std::move(arg));
         }
     }
 

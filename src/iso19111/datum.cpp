@@ -743,6 +743,7 @@ double Ellipsoid::computedInverseFlattening() PROJ_PURE_DEFN {
  */
 double Ellipsoid::squaredEccentricity() PROJ_PURE_DEFN {
     const double rf = computedInverseFlattening();
+    // coverity[divide_by_zero]
     const double f = rf != 0.0 ? 1. / rf : 0.0;
     const double e2 = f * (2 - f);
     return e2;

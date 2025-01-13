@@ -2980,11 +2980,11 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
     int i = 0;
     try {
         auto dbContext = getDBcontext(ctx);
-        const std::string authName = auth_name ? auth_name : "";
+        std::string authName = auth_name ? auth_name : "";
         auto actualAuthNames =
             dbContext->getVersionedAuthoritiesFromName(authName);
         if (actualAuthNames.empty())
-            actualAuthNames.push_back(authName);
+            actualAuthNames.push_back(std::move(authName));
         std::list<AuthorityFactory::CRSInfo> concatList;
         for (const auto &actualAuthName : actualAuthNames) {
             auto factory = AuthorityFactory::create(dbContext, actualAuthName);
