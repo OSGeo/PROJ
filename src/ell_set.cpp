@@ -178,12 +178,12 @@ static int ellps_ellps(PJ *P) {
         PJ empty_PJ;
         pj_inherit_ellipsoid_def(&empty_PJ, P);
     }
-    if (ellps_size(P) || ellps_shape(P))
-        return proj_errno_set(P, PROJ_ERR_OTHER /*ENOMEM*/);
-
+    const bool errorOnSizeOrShape = (ellps_size(P) || ellps_shape(P));
     P->params = old_params;
     free(new_params->next);
     free(new_params);
+    if (errorOnSizeOrShape)
+        return proj_errno_set(P, PROJ_ERR_OTHER /*ENOMEM*/);
     if (proj_errno(P))
         return proj_errno(P);
 
