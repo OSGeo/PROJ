@@ -202,7 +202,8 @@ static PJ_XYZ pj_deformation_get_grid_shift(PJ *P, const PJ_XYZ &cartesian) {
 }
 
 /********************************************************************************/
-static PJ_XYZ pj_deformation_reverse_shift(PJ *P, PJ_XYZ input, double dt) {
+static PJ_XYZ pj_deformation_reverse_shift(PJ *P, const PJ_XYZ &input,
+                                           double dt) {
     /********************************************************************************
         Iteratively determine the reverse grid shift correction values.
     *********************************************************************************/
