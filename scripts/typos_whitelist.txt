@@ -1,6 +1,6 @@
 $EXE +units=us-ft +init=${INIT_FILE}:404 -E -f '%.3f' >>${OUT} <<EOF
   (`#404 <https://github.com/OSGeo/proj.4/issues/404>`_)
-{"CPM", 	"a=6375738.7",		"rf=334.29",		"Comm. des Poids et Mesures 1799"},
+    {"CPM", "a=6375738.7", "rf=334.29", "Comm. des Poids et Mesures 1799"},
    double lamtp, cl, sd, sp, sav, tanphi;
         sav = lampp;
             lamt = lp.lam + Q->p22 * sav;
@@ -39,10 +39,10 @@ static const ParamMapping paramLonCentreLonCenterLonc = {
     &paramLonCentreLonCenterLonc,
  * This implements the Space Oblique Mercator (SOM) projection, used by the
  * This code was originally developed for the Landsat SOM projection with the
- * For the MISR path based SOM projection, the code is identical to that of Landsat
- * SOM with the following parameter changes:
+ * For the MISR path based SOM projection, the code is identical to that of
+ *Landsat SOM with the following parameter changes:
  * For the generic SOM projection, the code is identical to the above for MISR
-PJ *PROJECTION(som) {
+PJ *PJ_PROJECTION(som) {
 operation +proj=som   +ellps=GRS80 +inc_angle=1.7157253262878522r +ps_rev=0.06866666666666667 +asc_lon=2.2298420007209447r
 operation +proj=som   +R=6400000 +inc_angle=1.7157253262878522r +ps_rev=0.06866666666666667 +asc_lon=2.2298420007209447r
 operation +proj=som   +ellps=GRS80 +inc_angle=98.30382 +ps_rev=0.06866666666666667 +asc_lon=127.7605356226
@@ -112,3 +112,6 @@ Space oblique for MISR is a specialization of :doc:`Space Oblique Mercator<som>`
 NOTE: This is Windows syntax - Unix users use $HEL, etc.
  * https://github.com/Unidata/netcdf-java/blob/3ce72c0cd167609ed8c69152bb4a004d1daa9273/cdm/core/src/main/java/ucar/unidata/geoloc/projection/RotatedLatLon.java
                 "  \"abbreviation\": \"lon\",\n"
+                .5 / Te * log((1. - con) / (1. + con)));
+  * C++ API function :cpp:func:`createTunisiaMapingGrid()`. Use :cpp:func:`createTunisiaMiningGrid()` instead (`#3559 <https://github.com/OSGeo/PROJ/issues/3559>`_)
+   (gives same results as: ``+proj=som +inc_angle=1.7157253262878522r +ps_rev=0.06866666666666667 +asc_lon=1.1242171183417042r``)

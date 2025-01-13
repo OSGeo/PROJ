@@ -30,7 +30,7 @@ struct pj_face {
     Robert W. Gray (1995) Exact Transformation Equations for
         Fuller's World Map, Vol. 32. Autumn, 1995, pp. 17-25.
 
-    To accomodate for land parts that would be interrupted by using a mere
+    To accommodate for land parts that would be interrupted by using a mere
    icosahedron, some faces are split in two (Australia) and 3 (Japan) subfaces.
 
     The parameters below were computed using the script located at:

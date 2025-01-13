@@ -3322,7 +3322,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     // by allowing directly all transformation. There is no strong reason for
     // that particular case, except that otherwise we'd get different results
     // for test/cli/test_cs2cs_ignf.yaml when transforming a point outside
-    // the area of validity... Not totally sure the behaviour we try to preserve
+    // the area of validity... Not totally sure the behavior we try to preserve
     // here with the particular case is fundamentally better than the general
     // case. The general case is needed typically for the RGNC91-93 -> RGNC15
     // transformation where we we need to actually use a transformation between

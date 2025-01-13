@@ -325,7 +325,7 @@ Bug fixes
 
 * CMake: avoid imbalanced cmake_policy push/pop if TIFF or CURL dependency cannot be found (`#3697 <https://github.com/OSGeo/PROJ/issues/3697>`_)
 
-* ``proj_create_crs_to_crs()``: restore transformation selection behaviour of PROJ 9.1 when grids are missing (`#3707 <https://github.com/OSGeo/PROJ/issues/3707>`_)
+* ``proj_create_crs_to_crs()``: restore transformation selection behavior of PROJ 9.1 when grids are missing (`#3707 <https://github.com/OSGeo/PROJ/issues/3707>`_)
 
 * ESRI WKT: improve roundtrip of name and definition for UPS WGS84 CRS (`#3720 <https://github.com/OSGeo/PROJ/issues/3720>`_)
 

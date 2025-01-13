@@ -7605,7 +7605,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     const auto checkPivotForETRFToETRF =
         [ETRFtoETRF, &sourceCRS,
          &targetCRS](const crs::CRSPtr &intermediateCRS) {
-            // Make sure that ETRF2000 to ETRF2014 doesn't go throught ITRF9x or
+            // Make sure that ETRF2000 to ETRF2014 doesn't go through ITRF9x or
             // ITRF>2014
             if (ETRFtoETRF && intermediateCRS &&
                 starts_with(intermediateCRS->nameStr(), "ITRF")) {
