@@ -4253,14 +4253,39 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
             std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
             const auto &modelAccuracies =
                 model->coordinateOperationAccuracies();
-            std::vector<CoordinateOperationNNPtr> transformationsForGrid;
+            std::vector<CoordinateOperationNNPtr> transformationsForGrid =
+                io::DatabaseContext::getTransformationsForGridName(
+                    authFactory->databaseContext(), projFilename);
+
+            // Only select transformations whose datum of the target vertical
+            // CRS match the one of the target vertical CRS of interest (when
+            // there's such match) Helps for example if specifying GEOID
+            // g2012bp0 whose has a record for Puerto Rico and another one for
+            // Virgin Islands.
+            {
+                std::vector<CoordinateOperationNNPtr>
+                    transformationsForGridMatchingDatum;
+                for (const auto &op : transformationsForGrid) {
+                    const auto opTargetCRS =
+                        dynamic_cast<const crs::VerticalCRS *>(
+                            op->targetCRS().get());
+                    if (opTargetCRS &&
+                        opTargetCRS->datum()->_isEquivalentTo(
+                            vertDst->datum().get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        transformationsForGridMatchingDatum.push_back(op);
+                    }
+                }
+                if (!transformationsForGridMatchingDatum.empty()) {
+                    transformationsForGrid =
+                        std::move(transformationsForGridMatchingDatum);
+                }
+            }
+
             double accuracy = -1;
             size_t idx = static_cast<size_t>(-1);
             if (modelAccuracies.empty()) {
                 if (authFactory) {
-                    transformationsForGrid =
-                        io::DatabaseContext::getTransformationsForGridName(
-                            authFactory->databaseContext(), projFilename);
                     for (size_t i = 0; i < transformationsForGrid.size(); ++i) {
                         const auto &transf = transformationsForGrid[i];
                         const double transfAcc = getAccuracy(transf);
@@ -4284,11 +4309,6 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
             // Otherwise fallback to the extent of a transformation using
             // the grid.
             if (extent == nullptr && authFactory != nullptr) {
-                if (transformationsForGrid.empty()) {
-                    transformationsForGrid =
-                        io::DatabaseContext::getTransformationsForGridName(
-                            authFactory->databaseContext(), projFilename);
-                }
                 if (idx != static_cast<size_t>(-1)) {
                     const auto &transf = transformationsForGrid[idx];
                     extent = getExtent(transf, true, dummy);
