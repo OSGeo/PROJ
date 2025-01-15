@@ -1320,6 +1320,15 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
     m_ifdIdx++;
     m_hasNextGrid = TIFFReadDirectory(m_hTIFF) != 0;
     m_nextDirOffset = TIFFCurrentDirOffset(m_hTIFF);
+
+    // If the TIFF file contains multiple grids, append the index of the grid
+    // in the grid name to help debugging.
+    if (m_ifdIdx >= 2 || m_hasNextGrid) {
+        ret->m_name += " (index ";
+        ret->m_name += std::to_string(m_ifdIdx); // 1-based
+        ret->m_name += ')';
+    }
+
     return ret;
 }
 
