@@ -415,6 +415,8 @@ if(BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
+add_subdirectory(scripts)
+
 set(docfiles COPYING NEWS.md AUTHORS.md)
 install(FILES ${docfiles}
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
@@ -459,7 +461,6 @@ set(CPACK_SOURCE_IGNORE_FILES
   /m4/libtool*
   /media/
   /schemas/
-  /scripts/
   /test/fuzzers/
   /test/gigs/.*gie\\.failing
   /test/postinstall/

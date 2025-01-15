@@ -1890,3 +1890,41 @@ tests:
   out: |
     Candidate operations found: 1
     unknown id, Conversion from WGS 84 (G1150) (geog2D) to WGS 84 (G1150) (geocentric) + WGS 84 (G1150) to WGS 84 (G1762) (1) + WGS 84 (G1762) to WGS 84 (G2139) (1) + WGS 84 (G2139) to WGS 84 (G2296) (1) + Conversion from WGS 84 (G2296) (geocentric) to WGS 84 (G2296) (geog2D), 0.04 m, World
+- args: completion projinfo -
+  out: |
+     -o -k --summary -q --area --bbox --spatial-test --crs-extent-use --grid-check --pivot-crs --show-superseded --hide-ballpark --accuracy --allow-ellipsoidal-height-as-vertical-crs --boundcrs-to-wgs84 --authority --main-db-path --aux-db-path --identify --3d --output-id --c-ify --single-line --searchpaths --remote-data --list-crs --dump-db-structure -s --s_epoch -t --t_epoch
+- args: completion projinfo -o
+  out: all PROJ WKT2:2019 WKT2:2015 WKT1:GDAL WKT1:ESRI PROJJSON SQL
+- args: completion projinfo -o "WKT2:"
+  out: 2019 2015
+- args: completion projinfo -o "WKT1:"
+  out: GDAL ESRI
+- args: completion projinfo --pivot-crs
+  out: |
+     always if_no_direct_transformation never EPSG: ESRI: IAU_2015: IGNF: NKG: NRCAN: OGC: PROJ:
+- args: completion projinfo
+  out: |
+     EPSG: ESRI: IAU_2015: IGNF: NKG: NRCAN: OGC: PROJ:
+- args: completion projinfo NKG
+  out: "NKG:"
+- args: completion projinfo "OGC:"
+  out: |
+     CRS27\ --\ NAD27\ (CRS27) CRS83\ --\ NAD83\ (CRS83) CRS84\ --\ WGS\ 84\ (CRS84) CRS84h\ --\ WGS\ 84\ longitude-latitude-height
+- args: completion projinfo EPSG:432
+  out: |
+     4322\ --\ WGS\ 72 4324\ --\ WGS\ 72BE 4326\ --\ WGS\ 84
+- args: completion projinfo EPSG:4326
+  out: |
+     4326
+- args: completion projinfo EGM
+  out: |
+     EGM2008\ height EGM96\ height EGM84\ height
+- args: completion projinfo "\"RGF93" v1 "/"
+  out: |
+     Lambert-93 CC42 CC43 CC44 CC45 CC46 CC47 CC48 CC49 CC50 Lambert-93\ +\ NGF-IGN69\ height Lambert-93\ +\ NGF-IGN78\ height
+- args: completion projinfo "\"NAD83(HARN) / California Albers" "+"
+  out: |
+    NGVD29\ height\ (ftUS) NAVD88\ depth\ (ftUS) NGVD29\ depth\ (ftUS) NAVD88\ height\ (ftUS) NGVD29\ height\ (m) MSL\ height\ (ftUS) MSL\ depth\ (ftUS) NAVD88\ height\ (ft)
+- args: completion projinfo "\"Mauritania 1999" "/" UTM zone 29N "+"
+  out: |
+    EGM2008\ height MSL\ height MSL\ depth EGM96\ height EGM84\ height Instantaneous\ Water\ Level\ height Instantaneous\ Water\ Level\ depth LAT\ depth LLWLT\ depth ISLW\ depth MLLWS\ depth MLWS\ depth MLLW\ depth MLW\ depth MHW\ height MHHW\ height MHWS\ height HHWLT\ height HAT\ height Low\ Water\ depth High\ Water\ height MSL\ height\ (ft) MSL\ depth\ (ft)
