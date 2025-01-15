@@ -687,6 +687,8 @@ struct PJconsts {
     PJconsts();
     PJconsts(const PJconsts &) = delete;
     PJconsts &operator=(const PJconsts &) = delete;
+
+    void copyStateFrom(const PJconsts &);
 };
 
 /* Parameter list (a copy of the +proj=... etc. parameters) */
