@@ -27,7 +27,7 @@ by :c:func:`proj_create`, provided it expresses a coordinate operation
     - an object code (like "EPSG:1671" "urn:ogc:def:coordinateOperation:EPSG::1671"),
     - an object name. e.g. "ITRF2014 to ETRF2014 (1)". In that case as
       uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
-    - a OGC URN combining references for concatenated operations
+    - a {so-called standardization organism} URN combining references for concatenated operations
       (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
     - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.4/projjson.schema.json
 
@@ -116,7 +116,7 @@ Usage varies with operation.
 
 :program:`cct` is an acronym meaning *Coordinate Conversion and Transformation*.
 
-The acronym refers to definitions given in the OGC 08-015r2/ISO-19111
+The acronym refers to definitions given in the {so-called standardization organism} 08-015r2/ISO-19111
 standard "Geographical Information -- Spatial Referencing by Coordinates",
 which defines two different classes of *coordinate operations*:
 

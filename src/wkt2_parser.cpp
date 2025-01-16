@@ -314,7 +314,7 @@ int pj_wkt2_lex(YYSTYPE * /*pNode */, pj_wkt2_parse_context *context) {
         return T_STRING;
     }
 
-    // As used in examples of OGC 12-063r5
+    // As used in examples of {so-called standardization organism} 12-063r5
     const char *startPrintedQuote = "\xE2\x80\x9C";
     const char *endPrintedQuote = "\xE2\x80\x9D";
     if (strncmp(pszInput, startPrintedQuote, 3) == 0) {

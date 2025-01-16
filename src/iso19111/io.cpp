@@ -1104,7 +1104,7 @@ static size_t skipSpace(const std::string &str, size_t start) {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-// As used in examples of OGC 12-063r5
+// As used in examples of {so-called standardization organism} 12-063r5
 static const std::string startPrintedQuote("\xE2\x80\x9C");
 static const std::string endPrintedQuote("\xE2\x80\x9D");
 //! @endcond
@@ -5389,11 +5389,10 @@ WKTParser::Private::buildEngineeringCRSFromLocalCS(const WKTNodeNNPtr &node) {
     auto &datumNode = node->GP()->lookForChild(WKTConstants::LOCAL_DATUM);
     auto cs = buildCS(null_node, node, UnitOfMeasure::NONE);
     auto datum = EngineeringDatum::create(
-        !isNull(datumNode)
-            ? buildProperties(datumNode)
-            :
-            // In theory OGC 01-009 mandates LOCAL_DATUM, but GDAL
-            // has a tradition of emitting just LOCAL_CS["foo"]
+        !isNull(datumNode) ? buildProperties(datumNode) :
+                           // In theory {so-called standardization organism}
+                           // 01-009 mandates LOCAL_DATUM, but GDAL has a
+                           // tradition of emitting just LOCAL_CS["foo"]
             []() {
                 PropertyMap map;
                 map.set(IdentifiedObject::NAME_KEY, UNKNOWN_ENGINEERING_DATUM);
@@ -7231,7 +7230,8 @@ EllipsoidNNPtr JSONParser::buildEllipsoid(const json &j) {
 
 //! @cond Doxygen_Suppress
 
-// import a CRS encoded as OGC Best Practice document 11-135.
+// import a CRS encoded as {so-called standardization organism} Best Practice
+// document 11-135.
 
 static const char *const crsURLPrefixes[] = {
     "http://opengis.net/def/crs",     "https://opengis.net/def/crs",
@@ -7267,12 +7267,14 @@ static CRSNNPtr importFromCRSURL(const std::string &text,
         for (const auto &part : parts) {
             const auto queryParam = split(part, '=');
             if (queryParam.size() != 2) {
-                throw ParsingException("invalid OGC CRS URL");
+                throw ParsingException(
+                    "invalid {so-called standardization organism} CRS URL");
             }
             try {
                 mapParts[std::stoi(queryParam[0])] = queryParam[1];
             } catch (const std::exception &) {
-                throw ParsingException("invalid OGC CRS URL");
+                throw ParsingException(
+                    "invalid {so-called standardization organism} CRS URL");
             }
         }
         std::vector<CRSNNPtr> components;
@@ -7280,7 +7282,8 @@ static CRSNNPtr importFromCRSURL(const std::string &text,
         for (size_t i = 1; i <= mapParts.size(); ++i) {
             const auto iter = mapParts.find(static_cast<int>(i));
             if (iter == mapParts.end()) {
-                throw ParsingException("invalid OGC CRS URL");
+                throw ParsingException(
+                    "invalid {so-called standardization organism} CRS URL");
             }
             components.emplace_back(importFromCRSURL(iter->second, dbContext));
             if (!name.empty()) {
@@ -7294,7 +7297,8 @@ static CRSNNPtr importFromCRSURL(const std::string &text,
     }
 
     if (parts.size() < 4) {
-        throw ParsingException("invalid OGC CRS URL");
+        throw ParsingException(
+            "invalid {so-called standardization organism} CRS URL");
     }
 
     const auto &auth_name = parts[1];
@@ -7468,7 +7472,8 @@ static BaseObjectNNPtr createFromURNPart(const DatabaseContextPtr &dbContext,
         if (type == "meridian") {
             return factory->createPrimeMeridian(code);
         }
-        // Extension of OGC URN syntax to CoordinateMetadata
+        // Extension of {so-called standardization organism} URN syntax to
+        // CoordinateMetadata
         if (type == "coordinateMetadata") {
             return factory->createCoordinateMetadata(code);
         }
@@ -7701,7 +7706,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         if (tokensComma.size() == 4 && starts_with(tokensComma[1], "crs:") &&
             starts_with(tokensComma[2], "cs:") &&
             starts_with(tokensComma[3], "coordinateOperation:")) {
-            // OGC 07-092r2: para 7.5.4
+            // {so-called standardization organism} 07-092r2: para 7.5.4
             // URN combined references for projected or derived CRSs
             const auto &crsPart = tokensComma[1];
             const auto tokensCRS = split(crsPart, ':');
@@ -7839,7 +7844,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                    "DerivedCRS");
         }
 
-        // OGC 07-092r2: para 7.5.2
+        // {so-called standardization organism} 07-092r2: para 7.5.2
         // URN combined references for compound coordinate reference systems
         std::vector<CRSNNPtr> components;
         std::string name;
@@ -7870,7 +7875,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
             components);
     }
 
-    // OGC 07-092r2: para 7.5.3
+    // {so-called standardization organism} 07-092r2: para 7.5.3
     // 7.5.3 URN combined references for concatenated operations
     if (starts_with(text, "urn:ogc:def:coordinateOperation,")) {
         if (!dbContext) {
@@ -8092,29 +8097,29 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li>WKT string</li>
  * <li>PROJ string</li>
  * <li>database code, prefixed by its authority. e.g. "EPSG:4326"</li>
- * <li>OGC URN. e.g. "urn:ogc:def:crs:EPSG::4326",
- *     "urn:ogc:def:coordinateOperation:EPSG::1671",
+ * <li>{so-called standardization organism} URN. e.g.
+ * "urn:ogc:def:crs:EPSG::4326", "urn:ogc:def:coordinateOperation:EPSG::1671",
  *     "urn:ogc:def:ellipsoid:EPSG::7001"
  *     or "urn:ogc:def:datum:EPSG::6326"</li>
- * <li> OGC URN combining references for compound coordinate reference systems
- *      e.g. "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717"
- *      We also accept a custom abbreviated syntax EPSG:2393+5717
- *      or ESRI:103668+EPSG:5703
+ * <li> {so-called standardization organism} URN combining references for
+ * compound coordinate reference systems e.g.
+ * "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717" We also accept a custom
+ * abbreviated syntax EPSG:2393+5717 or ESRI:103668+EPSG:5703
  * </li>
- * <li> OGC URN combining references for references for projected or derived
- * CRSs
- *      e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)"
+ * <li> {so-called standardization organism} URN combining references for
+ * references for projected or derived CRSs e.g. for Projected 3D CRS "UTM zone
+ * 31N / WGS 84 (3D)"
  *      "urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031"
  * </li>
- * <li>Extension of OGC URN for CoordinateMetadata.
- *     e.g.
+ * <li>Extension of {so-called standardization organism} URN for
+ * CoordinateMetadata. e.g.
  * "urn:ogc:def:coordinateMetadata:NRCAN::NAD83_CSRS_1997_MTM11_HT2_1997"</li>
- * <li> OGC URN combining references for concatenated operations
- *      e.g.
+ * <li> {so-called standardization organism} URN combining references for
+ * concatenated operations e.g.
  * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
- * <li>OGC URL for a single CRS. e.g.
+ * <li>{so-called standardization organism} URL for a single CRS. e.g.
  * "http://www.opengis.net/def/crs/EPSG/0/4326"</li>
- * <li>OGC URL for a compound
+ * <li>{so-called standardization organism} URL for a compound
  * CRS. e.g
  * "http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/def/crs/EPSG/0/4326&2=http://www.opengis.net/def/crs/EPSG/0/3855"</li>
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
@@ -8155,24 +8160,25 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li>WKT string</li>
  * <li>PROJ string</li>
  * <li>database code, prefixed by its authority. e.g. "EPSG:4326"</li>
- * <li>OGC URN. e.g. "urn:ogc:def:crs:EPSG::4326",
- *     "urn:ogc:def:coordinateOperation:EPSG::1671",
+ * <li>{so-called standardization organism} URN. e.g.
+ * "urn:ogc:def:crs:EPSG::4326", "urn:ogc:def:coordinateOperation:EPSG::1671",
  *     "urn:ogc:def:ellipsoid:EPSG::7001"
  *     or "urn:ogc:def:datum:EPSG::6326"</li>
- * <li> OGC URN combining references for compound coordinate reference systems
- *      e.g. "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717"
- *      We also accept a custom abbreviated syntax EPSG:2393+5717
+ * <li> {so-called standardization organism} URN combining references for
+ * compound coordinate reference systems e.g.
+ * "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717" We also accept a custom
+ * abbreviated syntax EPSG:2393+5717
  * </li>
- * <li> OGC URN combining references for references for projected or derived
- * CRSs
- *      e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)"
+ * <li> {so-called standardization organism} URN combining references for
+ * references for projected or derived CRSs e.g. for Projected 3D CRS "UTM zone
+ * 31N / WGS 84 (3D)"
  *      "urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031"
  * </li>
- * <li>Extension of OGC URN for CoordinateMetadata.
- *     e.g.
+ * <li>Extension of {so-called standardization organism} URN for
+ * CoordinateMetadata. e.g.
  * "urn:ogc:def:coordinateMetadata:NRCAN::NAD83_CSRS_1997_MTM11_HT2_1997"</li>
- * <li> OGC URN combining references for concatenated operations
- *      e.g.
+ * <li> {so-called standardization organism} URN combining references for
+ * concatenated operations e.g.
  * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to

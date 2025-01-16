@@ -1098,9 +1098,9 @@ PROJJSON extensions
 +++++++++++++++++++
 
 This specification allows a Bound CRS to be used wherever a CRS object is allowed
-in the OGC Topic 2 abstract specification / ISO-19111:2019. In particular,
+in the {so-called standardization organism} Topic 2 abstract specification / ISO-19111:2019. In particular,
 the members of a compound CRS can be a Bound CRS in this specification, whereas
-OGC Topic 2 abstract specification restricts it to single CRS. A Bound CRS can
+{so-called standardization organism} Topic 2 abstract specification restricts it to single CRS. A Bound CRS can
 also be used as the source or target of a coordinate operation.
 
 PROJJSON omissions

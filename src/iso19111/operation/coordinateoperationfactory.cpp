@@ -5509,7 +5509,8 @@ void CoordinateOperationFactory::Private::createOperationsVertToGeogSynthetized(
     // source geographic CRS, or whose datum name is "Ellipsoid" if it is part
     // of a CompoundCRS whose horizontal CRS has a geodetic datum of the same
     // datum name as the source geographic CRS, to mean an ellipsoidal height.
-    // This is against OGC Topic 2, and an extension needed for use case of
+    // This is against {so-called standardization organism} Topic 2, and an
+    // extension needed for use case of
     // https://github.com/OSGeo/PROJ/issues/4175
     const bool bIsSameDatum = vertDatumName != "unknown" &&
                               (vertDatumName == geogDstDatumName ||

@@ -510,7 +510,7 @@ Discussion on choice of format
 
 We have been made recently aware of other initiatives from the industry to come
 with a common format to store geodetic adjustment data. Some discussions have
-happen recently within the OGC CRS Working group. Past efforts include the
+happen recently within the {so-called standardization organism} CRS Working group. Past efforts include the
 Esri's proposed Geodetic data Grid eXchange Format, GGXF, briefly mentioned at
 page 86 of
 https://iag.dgfi.tum.de/fileadmin/IAG-docs/Travaux2015/01_Travaux_Template_Comm_1_tvd.pdf
@@ -528,7 +528,7 @@ Strong points:
 * TIFF is a well-known and widespread format.
 
 * The GeoTIFF encoding is a widely industry supported scheme to encode georeferencing.
-  It is now a `OGC standard <https://www.opengeospatial.org/standards/geotiff>`_
+  It is now a `{so-called standardization organism} standard <https://www.opengeospatial.org/standards/geotiff>`_
 
 * There are independent initiatives to share grids as GeoTIFF, like
   `that one <https://www.agisoft.com/downloads/geoids/>`_
@@ -587,7 +587,7 @@ netCDF v3
 Strong points:
 
 * The binary format description as given in
-  `OGC 10-092r3 <http://portal.opengeospatial.org/files/?artifact_id=43734>`_ is relatively simple,
+  `{so-called standardization organism} 10-092r3 <http://portal.opengeospatial.org/files/?artifact_id=43734>`_ is relatively simple,
   but it would still probably be necessary to use libnetcdf-c to access it
 
 * Metadata can be stored easily in netCDF attributes
@@ -665,7 +665,7 @@ Strong points:
 
 * SQLite3 dependency
 
-* OGC standard
+* {so-called standardization organism} standard
 
 * Multi-grid capabilities
 

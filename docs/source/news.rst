@@ -261,7 +261,7 @@ Updates
 
 * Add mapping of Equidistant Conic to new EPSG:1119 method (`#3812 <https://github.com/OSGeo/PROJ/issues/3812>`_)
 
-* Implement proposal001 from Planetary DWG from OGC (`#3816 <https://github.com/OSGeo/PROJ/issues/3816>`_)
+* Implement proposal001 from Planetary DWG from {so-called standardization organism} (`#3816 <https://github.com/OSGeo/PROJ/issues/3816>`_)
 
 * Add option in :program:`proj` CLI to use a CRS (`#3825 <https://github.com/OSGeo/PROJ/issues/3825>`_)
 
@@ -1981,7 +1981,7 @@ Updates
 -------
 
  * Introduced :ref:`PROJJSON`, a JSON encoding of WKT2 (`#1547 <https://github.com/OSGeo/PROJ/issues/1547>`_)
- * Support CRS instantiation of OGC URN's (`#1505 <https://github.com/OSGeo/PROJ/issues/1505>`_)
+ * Support CRS instantiation of {so-called standardization organism} URN's (`#1505 <https://github.com/OSGeo/PROJ/issues/1505>`_)
 
  * Expose scope and remarks of database objects (`#1537 <https://github.com/OSGeo/PROJ/issues/1537>`_)
 
@@ -2057,7 +2057,7 @@ Updates
 
 * Make cs2cs support 4D coordinates (`#1355 <https://github.com/OSGeo/proj.4/issues/1355>`_)
 
-* WKT2 parser: update to OGC 18-010r6 (`#1360 <https://github.com/OSGeo/proj.4/issues/1360>`_ `#1366 <https://github.com/OSGeo/proj.4/issues/1366>`_))
+* WKT2 parser: update to {so-called standardization organism} 18-010r6 (`#1360 <https://github.com/OSGeo/proj.4/issues/1360>`_ `#1366 <https://github.com/OSGeo/proj.4/issues/1366>`_))
 
 * Update internal version of googletest to v1.8.1 (`#1361 <https://github.com/OSGeo/proj.4/issues/1361>`_)
 
@@ -2121,7 +2121,7 @@ transformation capabilities to a more complete library supporting coordinate
 transformations and coordinate reference systems.
 
 As a foundation for other enhancements, PROJ now includes a C++ implementation
-of the modelisation proposed by the ISO-19111:2019 standard / OGC Abstract
+of the modelisation proposed by the ISO-19111:2019 standard / {so-called standardization organism} Abstract
 Specification Topic 2: "Referencing By Coordinates", for geodetic reference
 frames (datums), coordinate reference systems and coordinate operations.
 Construction and query of those geodetic objects is available through a new C++

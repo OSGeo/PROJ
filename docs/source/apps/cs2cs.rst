@@ -29,14 +29,14 @@ Synopsis
     - an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
       uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
     - a CRS name and a coordinate epoch, separated with '@'. For example "ITRF2014@2025.0". (*added in 9.2*)
-    - a OGC URN combining references for compound coordinate reference systems
+    - a {so-called standardization organism} URN combining references for compound coordinate reference systems
       (e.g "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717" or custom abbreviated
       syntax "EPSG:2393+5717"),
-    - a OGC URN combining references for references for projected or derived CRSs
+    - a {so-called standardization organism} URN combining references for references for projected or derived CRSs
       e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)":
       "urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031"
       (*added in 6.2*)
-    - a OGC URN combining references for concatenated operations
+    - a {so-called standardization organism} URN combining references for concatenated operations
       (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
     - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.4/projjson.schema.json (*added in 6.2*)
     - a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + EGM96 height" (*added in 7.1*)

@@ -16,7 +16,7 @@ Summary
 This RFC is the result of a first phase of the `GDAL Coordinate System Barn Raising`_
 efforts. In its current state, this work mostly consists of:
 
-  - a C++ implementation of the ISO-19111:2018 / OGC Topic 2 "Referencing by
+  - a C++ implementation of the ISO-19111:2018 / {so-called standardization organism} Topic 2 "Referencing by
     coordinates" classes to represent Datums, Coordinate systems, CRSs
     (Coordinate Reference Systems) and Coordinate Operations.
   - methods to convert between this C++ modeling and WKT1, WKT2 and PROJ string representations of those objects
@@ -42,7 +42,7 @@ Details
 Structure in packages / namespaces
 **********************************
 
-The C++ implementation of the (upcoming) ISO-19111:2018 / OGC Topic 2 "Referencing by
+The C++ implementation of the (upcoming) ISO-19111:2018 / {so-called standardization organism} Topic 2 "Referencing by
 coordinates" classes follows this abstract modeling as much as possible, using
 package names as C++ namespaces, abstract classes and method names. A new
 BoundCRS class has been added to cover the modeling of the WKT2 BoundCRS
@@ -130,7 +130,7 @@ Regarding WKT strings, three variants are handled in import and export:
     - WKT2_2015: variant corresponding to the current ISO-19162:2015 standard
 
     - WKT1_GDAL: variant corresponding to the way GDAL understands the OGC
-      01-099 and OGC 99-049 standards
+      01-099 and {so-called standardization organism} 99-049 standards
 
 Regarding PROJ strings, two variants are handled in import and export:
 

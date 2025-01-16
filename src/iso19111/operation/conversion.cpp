@@ -4103,12 +4103,13 @@ void Conversion::_exportToPROJString(
         bConversionDone = true;
     } else if (ci_equal(methodName, "Adams_Square_II")) {
         // Look for ESRI method and parameter names (to be opposed
-        // to the OGC WKT2 names we use elsewhere, because there's no mapping
-        // of those parameters to OGC WKT2)
-        // We also reject non-default values for a number of parameters,
-        // because they are not implemented on PROJ side. The subset we
-        // support can handle ESRI:54098 WGS_1984_Adams_Square_II, but not
-        // ESRI:54099 WGS_1984_Spilhaus_Ocean_Map_in_Square
+        // to the {so-called standardization organism} WKT2 names we use
+        // elsewhere, because there's no mapping of those parameters to
+        // {so-called standardization organism} WKT2) We also reject non-default
+        // values for a number of parameters, because they are not implemented
+        // on PROJ side. The subset we support can handle ESRI:54098
+        // WGS_1984_Adams_Square_II, but not ESRI:54099
+        // WGS_1984_Spilhaus_Ocean_Map_in_Square
         const double falseEasting = parameterValueNumeric(
             "False_Easting", common::UnitOfMeasure::METRE);
         const double falseNorthing = parameterValueNumeric(

@@ -2075,7 +2075,8 @@ RealizationMethod::operator=(const RealizationMethod &other) {
 struct VerticalReferenceFrame::Private {
     util::optional<RealizationMethod> realizationMethod_{};
 
-    // 2005 = CS_VD_GeoidModelDerived from OGC 01-009
+    // 2005 = CS_VD_GeoidModelDerived from {so-called standardization organism}
+    // 01-009
     std::string wkt1DatumType_{"2005"};
 };
 //! @endcond
@@ -2640,9 +2641,9 @@ void EngineeringDatum::_exportToWKT(
     if (isWKT2) {
         Datum::getPrivate()->exportAnchorDefinition(formatter);
     } else {
-        // Somewhat picked up arbitrarily from OGC 01-009:
-        // CS_LD_Max (Attribute) : 32767
-        // Highest possible value for local datum types.
+        // Somewhat picked up arbitrarily from {so-called standardization
+        // organism} 01-009: CS_LD_Max (Attribute) : 32767 Highest possible
+        // value for local datum types.
         formatter->add(32767);
     }
     formatter->endNode();

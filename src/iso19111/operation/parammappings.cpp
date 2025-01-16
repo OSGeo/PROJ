@@ -1716,7 +1716,8 @@ const MethodMapping *getMapping(const OperationMethod *method) noexcept {
 // ---------------------------------------------------------------------------
 
 const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) noexcept {
-    // Unusual for a WKT1 projection name, but mentioned in OGC 12-063r5 C.4.2
+    // Unusual for a WKT1 projection name, but mentioned in {so-called
+    // standardization organism} 12-063r5 C.4.2
     if (ci_starts_with(wkt1_name, "UTM zone")) {
         return getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR);
     }

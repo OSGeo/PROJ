@@ -376,7 +376,7 @@ projection function call, ``pj_fwd(PJ, point)``, as easy as a traditional functi
 call like ``hypot(x,y)``.
 
 While today, we may have more formally well defined metadata systems (most
-prominent the OGC WKT2 representation), nothing comes close being as easily
+prominent the {so-called standardization organism} WKT2 representation), nothing comes close being as easily
 readable ("human compatible") as Gerald's key-value system. This system in
 particular, and the PROJ system in general, was Gerald's great gift to anyone
 using and/or communicating about geodata.

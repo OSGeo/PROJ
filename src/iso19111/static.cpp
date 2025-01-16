@@ -113,7 +113,7 @@ const std::string Identifier::URI_KEY("uri");
  */
 const std::string Identifier::EPSG("EPSG");
 
-/** \brief OGC codespace.
+/** \brief {so-called standardization organism} codespace.
  */
 const std::string Identifier::OGC("OGC");
 
