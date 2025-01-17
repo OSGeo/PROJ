@@ -106,7 +106,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1114','Israeli Geodetic Datum 2005',
 INSERT INTO "usage" VALUES('EPSG','13166','geodetic_datum','EPSG','1114','EPSG','1126','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1115','Israeli Geodetic Datum 2005(2012)',NULL,'EPSG','7030','EPSG','8901','2012-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13167','geodetic_datum','EPSG','1115','EPSG','1126','EPSG','1027');
-INSERT INTO "geodetic_datum" VALUES('EPSG','1116','NAD83 (National Spatial Reference System 2011)',NULL,'EPSG','7019','EPSG','8901','2012-06-12',NULL,NULL,NULL,NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1116','NAD83 (National Spatial Reference System 2011)',NULL,'EPSG','7019','EPSG','8901','2012-06-12',NULL,NULL,NULL,2010.0,0);
 INSERT INTO "usage" VALUES('EPSG','13168','geodetic_datum','EPSG','1116','EPSG','1511','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1117','NAD83 (National Spatial Reference System PA11)',NULL,'EPSG','7019','EPSG','8901','2012-06-12',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13169','geodetic_datum','EPSG','1117','EPSG','4162','EPSG','1027');

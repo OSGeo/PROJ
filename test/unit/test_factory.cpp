@@ -1444,8 +1444,9 @@ TEST(factory,
         "        BBOX[41.67,-141.01,83.17,-52.54]],\n"
         "    ID[\"EPSG\",9483],\n"
         "    REMARK[\"File initially published with name cvg70.cvb, later "
-        "renamed to NAD83v70VG.gvb with no change of content. Replaces v6 "
-        "velocity grid.\"]]";
+        "renamed to NAD83v70VG.gvb with no change of content. Replaces Canada "
+        "velocity grid v6 (code 8676). Replaced by Canada velocity grid v8 "
+        "(code 10707).\"]]";
 
     EXPECT_EQ(
         pmo->exportToWKT(
