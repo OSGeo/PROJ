@@ -87,29 +87,23 @@ PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial,
             }
         }
 
-        if (xy.x != 0) {
-            // Limit the amplitude of correction to avoid overshoots due to
-            // bad initial guess
-            const double delta_lam = std::max(
-                std::min(deltaX * deriv_lam_X + deltaY * deriv_lam_Y, 0.3),
-                -0.3);
-            lp.lam -= delta_lam;
-            if (lp.lam < -M_PI)
-                lp.lam = -M_PI;
-            else if (lp.lam > M_PI)
-                lp.lam = M_PI;
-        }
+        // Limit the amplitude of correction to avoid overshoots due to
+        // bad initial guess
+        const double delta_lam = std::max(
+            std::min(deltaX * deriv_lam_X + deltaY * deriv_lam_Y, 0.3), -0.3);
+        lp.lam -= delta_lam;
+        if (lp.lam < -M_PI)
+            lp.lam = -M_PI;
+        else if (lp.lam > M_PI)
+            lp.lam = M_PI;
 
-        if (xy.y != 0) {
-            const double delta_phi = std::max(
-                std::min(deltaX * deriv_phi_X + deltaY * deriv_phi_Y, 0.3),
-                -0.3);
-            lp.phi -= delta_phi;
-            if (lp.phi < -M_HALFPI)
-                lp.phi = -M_HALFPI;
-            else if (lp.phi > M_HALFPI)
-                lp.phi = M_HALFPI;
-        }
+        const double delta_phi = std::max(
+            std::min(deltaX * deriv_phi_X + deltaY * deriv_phi_Y, 0.3), -0.3);
+        lp.phi -= delta_phi;
+        if (lp.phi < -M_HALFPI)
+            lp.phi = -M_HALFPI;
+        else if (lp.phi > M_HALFPI)
+            lp.phi = M_HALFPI;
     }
     proj_context_errno_set(P->ctx,
                            PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
