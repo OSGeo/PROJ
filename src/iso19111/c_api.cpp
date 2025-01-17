@@ -556,6 +556,7 @@ PJ *proj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
             if (newPj) {
                 newPj->descr = "Set of coordinate operations";
                 newPj->ctx = ctx;
+                newPj->copyStateFrom(*obj);
                 const int old_debug_level = ctx->debug_level;
                 ctx->debug_level = PJ_LOG_NONE;
                 for (const auto &altOp : obj->alternativeCoordinateOperations) {
@@ -569,7 +570,11 @@ PJ *proj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
         return nullptr;
     }
     try {
-        return pj_obj_create(ctx, NN_NO_CHECK(obj->iso_obj));
+        PJ *newPj = pj_obj_create(ctx, NN_NO_CHECK(obj->iso_obj));
+        if (newPj) {
+            newPj->copyStateFrom(*obj);
+        }
+        return newPj;
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -9190,7 +9195,7 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
             pjNew->descr = "Set of coordinate operations";
             pjNew->left = obj->left;
             pjNew->right = obj->right;
-            pjNew->over = obj->over;
+            pjNew->copyStateFrom(*obj);
 
             for (const auto &alt : obj->alternativeCoordinateOperations) {
                 auto co = dynamic_cast<const CoordinateOperation *>(
@@ -9226,8 +9231,10 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
                     ctx->forceOver = alt.pj->over != 0;
                     auto pjNormalized =
                         pj_obj_create(ctx, co->normalizeForVisualization());
-                    pjNormalized->over = alt.pj->over;
                     ctx->forceOver = false;
+
+                    pjNormalized->copyStateFrom(*(alt.pj));
+
                     pjNew->alternativeCoordinateOperations.emplace_back(
                         alt.idxInOriginalList, minxSrc, minySrc, maxxSrc,
                         maxySrc, minxDst, minyDst, maxxDst, maxyDst,

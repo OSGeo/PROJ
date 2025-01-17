@@ -115,6 +115,19 @@ PJconsts::PJconsts() : destructor(pj_default_destructor) {}
 /*****************************************************************************/
 
 /*****************************************************************************/
+/*              void PJconsts::copyStateFrom(const PJconsts& other)          */
+/*****************************************************************************/
+
+void PJconsts::copyStateFrom(const PJconsts &other) {
+    over = other.over;
+    errorIfBestTransformationNotAvailable =
+        other.errorIfBestTransformationNotAvailable;
+    warnIfBestTransformationNotAvailable =
+        other.warnIfBestTransformationNotAvailable;
+    skipNonInstantiable = other.skipNonInstantiable;
+}
+
+/*****************************************************************************/
 PJ *pj_new() {
     /*****************************************************************************/
     return new (std::nothrow) PJ();
