@@ -1221,9 +1221,10 @@ static void suggestCompletion(const std::vector<std::string> &args) {
         const auto columnPos = args.back().find(':');
         if (columnPos != std::string::npos) {
             const auto authName = args.back().substr(0, columnPos);
-            const auto codeStart = columnPos + 1 < args.back().size()
-                                       ? args.back().substr(columnPos + 1)
-                                       : std::string();
+            const std::string codeStart =
+                columnPos + 1 < args.back().size()
+                    ? args.back().substr(columnPos + 1)
+                    : std::string();
             auto factory = AuthorityFactory::create(dbContext, authName);
             const auto list = factory->getCRSInfoList();
 
@@ -1242,7 +1243,7 @@ static void suggestCompletion(const std::vector<std::string> &args) {
                 // If there is a single match, remove the name from the
                 // suggestion.
                 res.clear();
-                res.push_back(code);
+                res.push_back(std::move(code));
             }
             for (const auto &val : res) {
                 if (!first)

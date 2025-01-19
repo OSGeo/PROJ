@@ -4253,9 +4253,12 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
             std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
             const auto &modelAccuracies =
                 model->coordinateOperationAccuracies();
-            std::vector<CoordinateOperationNNPtr> transformationsForGrid =
-                io::DatabaseContext::getTransformationsForGridName(
-                    authFactory->databaseContext(), projFilename);
+            std::vector<CoordinateOperationNNPtr> transformationsForGrid;
+            if (authFactory) {
+                transformationsForGrid =
+                    io::DatabaseContext::getTransformationsForGridName(
+                        authFactory->databaseContext(), projFilename);
+            }
 
             // Only select transformations whose datum of the target vertical
             // CRS match the one of the target vertical CRS of interest (when
