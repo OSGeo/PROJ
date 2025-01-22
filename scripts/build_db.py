@@ -585,7 +585,7 @@ def fill_compound_crs(proj_db_cursor):
             raise
 
 def fill_helmert_transformation(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (1031, 1032, 1033, 1034, 1035, 1037, 1038, 1039, 1053, 1054, 1055, 1056, 1057, 1058, 1061, 1062, 1063, 1065, 1066, 1132, 1133, 9603, 9606, 9607, 9636) ")
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (1031, 1032, 1033, 1034, 1035, 1037, 1038, 1039, 1053, 1054, 1055, 1056, 1057, 1058, 1061, 1062, 1063, 1065, 1066, 1132, 1133, 1140, 9603, 9606, 9607, 9636) ")
     for (code, name, method_code, method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, deprecated, remarks) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 15
@@ -929,13 +929,6 @@ def fill_concatenated_operation(proj_db_cursor):
     for (code, name, method_code, method_name, source_crs_code, target_crs_code,  coord_op_accuracy, coord_tfm_version, deprecated, remarks) in proj_db_cursor.fetchall():
         expected_order = 1
         steps_code = []
-
-        # FIXME: https://epsg.org/concatenated-operation_10675/BES2020-to-Saba-height-1.html ill defined in EPSG 11.023
-        # due to first step referencing BES2020 Saba geographic 2D (EPSG:10639), but source CRS of concatenated
-        # operation referencing BES2020 Saba geographic 3D (EPSG:10638)
-        if code == 10675:
-            print("FIXME! Skipping EPSG:10675 'BES2020 to Saba height (1)' for now")
-            continue
 
         iterator = proj_db_cursor.execute("SELECT op_path_step, single_operation_code FROM epsg_coordoperationpath WHERE concat_operation_code = ? ORDER BY op_path_step", (code,))
         for (order, single_operation_code) in iterator:

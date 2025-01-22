@@ -7580,7 +7580,7 @@ INSERT INTO "projected_crs" VALUES('EPSG','10626','ECML14 Grid',NULL,'EPSG','440
 INSERT INTO "usage" VALUES('EPSG','21389','projected_crs','EPSG','10626','EPSG','4774','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','10632','WC05 Grid',NULL,'EPSG','4400','EPSG','10628','EPSG','10631',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','21392','projected_crs','EPSG','10632','EPSG','4775','EPSG','1141');
-INSERT INTO "projected_crs" VALUES('EPSG','10641','Saba DPnet',NULL,'EPSG','4499','EPSG','10636','EPSG','10640',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','10641','Saba DPnet',NULL,'EPSG','1054','EPSG','10636','EPSG','10640',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','21871','projected_crs','EPSG','10641','EPSG','4757','EPSG','1056');
 INSERT INTO "projected_crs" VALUES('EPSG','10665','SIRGAS 2000 / Porto Alegre TM',NULL,'EPSG','4400','EPSG','4674','EPSG','10664',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','21625','projected_crs','EPSG','10665','EPSG','4777','EPSG','1056');
@@ -7604,6 +7604,12 @@ INSERT INTO "projected_crs" VALUES('EPSG','10732','ETRS89/DREF91/2016 / UTM zone
 INSERT INTO "usage" VALUES('EPSG','20896','projected_crs','EPSG','10732','EPSG','2861','EPSG','1054');
 INSERT INTO "projected_crs" VALUES('EPSG','10733','ETRS89/DREF91/2016 / UTM zone 33N',NULL,'EPSG','4400','EPSG','10284','EPSG','16033',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','20594','projected_crs','EPSG','10733','EPSG','2862','EPSG','1054');
+INSERT INTO "projected_crs" VALUES('EPSG','10744','Sint Eustatius DPnet short',NULL,'EPSG','1054','EPSG','10736','EPSG','10743',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22317','projected_crs','EPSG','10744','EPSG','4788','EPSG','1056');
+INSERT INTO "projected_crs" VALUES('EPSG','10745','Sint Eustatius DPnet long',NULL,'EPSG','1054','EPSG','10736','EPSG','16020',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22316','projected_crs','EPSG','10745','EPSG','4788','EPSG','1056');
+INSERT INTO "projected_crs" VALUES('EPSG','10759','Bonaire DPnet',NULL,'EPSG','1054','EPSG','10758','EPSG','10757',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22169','projected_crs','EPSG','10759','EPSG','3822','EPSG','1056');
 INSERT INTO "projected_crs" VALUES('EPSG','11114','MAGNA-SIRGAS 2018 / Colombia Far West zone',NULL,'EPSG','4500','EPSG','20046','EPSG','18065',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18947','projected_crs','EPSG','11114','EPSG','3091','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','11115','MAGNA-SIRGAS 2018 / Colombia West zone',NULL,'EPSG','4500','EPSG','20046','EPSG','18066',NULL,0);

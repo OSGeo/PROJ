@@ -6164,3 +6164,18 @@ TEST(operation, CoordinateFrameRotationFullMatrixGeog2D) {
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     operation_Geog3D_to_Geog2D_GravityRelatedHeight_with_compoundCRS) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("10753", false);
+
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+
+    EXPECT_EQ(
+        op->inverse()->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=noop");
+}

@@ -755,7 +755,11 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1380','BES2020','EPSG')
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1389','RGM23','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1389','Repère de référence Géodésique de Mayotte 2023','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1381','Saba','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1398','Bonaire','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1392','UZGD2024','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1394','BES2020','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1395','Sint Eustatius','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1399','ITRF2020-u2023','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -8043,5 +8047,16 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10699','ETRS-TM34','EPSG
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10699','ETRS89 / UTM zone 34N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10702','ETRS-TM36','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10702','ETRS89 / UTM zone 36N','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10759','Bonaire / Bonaire TM','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','10763','Bonaire KADpeil','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10690','EUREF-FIN-GRS80','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10774','ETRS-TM35FIN/N2000','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10737','BES2020','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10738','BES2020','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10739','BES2020','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10746','Sint Eustatius / Sint Eustatius TM 2020 + Sint Eustatius height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10745','Sint Eustatius / UTM zone 20N','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10744','Sint Eustatius / Sint Eustatius TM 2020','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10747','Sint Eustatius / UTM 20N + Sint Eustatius height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10764','Bonaire DPnet + Bonaire KADpeil','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10764','Bonaire / Bonaire TM + Bonaire height','EPSG');

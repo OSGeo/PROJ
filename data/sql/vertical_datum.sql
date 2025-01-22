@@ -280,6 +280,10 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1388','Greenland Lowest Astronomic T
 INSERT INTO "usage" VALUES('EPSG','21470','vertical_datum','EPSG','1388','EPSG','4776','EPSG','1198');
 INSERT INTO "vertical_datum" VALUES('EPSG','1390','Baltic Sea Chart Datum 2000',NULL,'2023-11-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','21819','vertical_datum','EPSG','1390','EPSG','4779','EPSG','1291');
+INSERT INTO "vertical_datum" VALUES('EPSG','1395','Sint Eustatius Vertical Datum',NULL,'2023-04-05',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22281','vertical_datum','EPSG','1395','EPSG','4788','EPSG','1179');
+INSERT INTO "vertical_datum" VALUES('EPSG','1398','Bonaire Vertical Datum',NULL,NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22174','vertical_datum','EPSG','1398','EPSG','3822','EPSG','1179');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,NULL,NULL,0);
