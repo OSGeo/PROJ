@@ -3278,7 +3278,9 @@ bool SingleOperation::exportToPROJStringGeneric(
     if (methodEPSGCode ==
             EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOCENTRIC ||
         methodEPSGCode ==
-            EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_2D) {
+            EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_2D ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_3D) {
         positionVectorConvention = false;
         sevenParamsTransform = true;
         fullMatrix = true;
