@@ -1023,6 +1023,25 @@ TEST(factory,
               "+dz=0 +drx=0.00011 +dry=0.00057 +drz=-0.00071 +ds=0 "
               "+t_epoch=1989 +convention=position_vector");
 }
+// ---------------------------------------------------------------------------
+
+TEST(factory,
+     AuthorityFactory_createCoordinateOperation_CF_full_matrix_geog3D) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("10675", false);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +inv +proj=helmert +exact +x=1138.7432 +y=-2064.4761 "
+              "+z=110.7016 "
+              "+rx=-214.615206 +ry=479.360036 +rz=-164.703951 +s=-402.32073 "
+              "+convention=coordinate_frame "
+              "+step +inv +proj=cart +ellps=intl "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+}
 
 // ---------------------------------------------------------------------------
 

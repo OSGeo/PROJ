@@ -898,6 +898,18 @@ INSERT INTO "compound_crs" VALUES('EPSG','10691','EUREF-FIN + N60 height',NULL,'
 INSERT INTO "usage" VALUES('EPSG','21985','compound_crs','EPSG','10691','EPSG','3333','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','10692','EUREF-FIN + N2000 height',NULL,'EPSG','10690','EPSG','3900',0);
 INSERT INTO "usage" VALUES('EPSG','21986','compound_crs','EPSG','10692','EPSG','3333','EPSG','1270');
+INSERT INTO "compound_crs" VALUES('EPSG','10741','Sint Eustatius + Sint Eustatius height',NULL,'EPSG','10736','EPSG','10740',0);
+INSERT INTO "usage" VALUES('EPSG','22289','compound_crs','EPSG','10741','EPSG','4788','EPSG','1270');
+INSERT INTO "compound_crs" VALUES('EPSG','10742','BES2020 Sint Eustatius + Sint Eustatius height',NULL,'EPSG','10739','EPSG','10740',0);
+INSERT INTO "usage" VALUES('EPSG','22290','compound_crs','EPSG','10742','EPSG','4788','EPSG','1179');
+INSERT INTO "compound_crs" VALUES('EPSG','10746','Sint Eustatius DPnet short + Sint Eustatius height',NULL,'EPSG','10744','EPSG','10740',0);
+INSERT INTO "usage" VALUES('EPSG','22310','compound_crs','EPSG','10746','EPSG','4788','EPSG','1142');
+INSERT INTO "compound_crs" VALUES('EPSG','10747','Sint Eustatius DPnet long + Sint Eustatius height',NULL,'EPSG','10745','EPSG','10740',0);
+INSERT INTO "usage" VALUES('EPSG','22378','compound_crs','EPSG','10747','EPSG','4788','EPSG','1142');
+INSERT INTO "compound_crs" VALUES('EPSG','10764','Bonaire DPnet + Bonaire height',NULL,'EPSG','10759','EPSG','10763',0);
+INSERT INTO "usage" VALUES('EPSG','22379','compound_crs','EPSG','10764','EPSG','3822','EPSG','1181');
+INSERT INTO "compound_crs" VALUES('EPSG','10765','Bonaire 2004 + Bonaire height',NULL,'EPSG','10762','EPSG','10763',0);
+INSERT INTO "usage" VALUES('EPSG','22177','compound_crs','EPSG','10765','EPSG','3822','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','10774','EUREF-FIN / TM35FIN(E,N) + N2000 height',NULL,'EPSG','3067','EPSG','3900',0);
 INSERT INTO "usage" VALUES('EPSG','22245','compound_crs','EPSG','10774','EPSG','3333','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);

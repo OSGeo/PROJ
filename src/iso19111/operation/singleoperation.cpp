@@ -3278,7 +3278,9 @@ bool SingleOperation::exportToPROJStringGeneric(
     if (methodEPSGCode ==
             EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOCENTRIC ||
         methodEPSGCode ==
-            EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_2D) {
+            EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_2D ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOGRAPHIC_3D) {
         positionVectorConvention = false;
         sevenParamsTransform = true;
         fullMatrix = true;
@@ -3831,6 +3833,10 @@ bool SingleOperation::exportToPROJStringGeneric(
         methodEPSGCode ==
             EPSG_CODE_METHOD_GEOGRAPHIC3D_TO_GEOG2D_GRAVITYRELATEDHEIGHT) {
         const crs::CRS *tgtCRS = targetCRS().get();
+        if (const auto targetCRSCompound =
+                dynamic_cast<const crs::CompoundCRS *>(tgtCRS)) {
+            tgtCRS = targetCRSCompound->componentReferenceSystems()[1].get();
+        }
         auto targetCRSVert = dynamic_cast<const crs::VerticalCRS *>(tgtCRS);
         if (!targetCRSVert) {
             throw io::FormattingException(
@@ -3861,6 +3867,10 @@ bool SingleOperation::exportToPROJStringGeneric(
             INVERSE_OF +
                 EPSG_NAME_METHOD_GEOGRAPHIC3D_TO_GEOG2D_GRAVITYRELATEDHEIGHT)) {
         const crs::CRS *srcCRS = sourceCRS().get();
+        if (const auto sourceCRSCompound =
+                dynamic_cast<const crs::CompoundCRS *>(srcCRS)) {
+            srcCRS = sourceCRSCompound->componentReferenceSystems()[1].get();
+        }
         auto sourceCRSVert = dynamic_cast<const crs::VerticalCRS *>(srcCRS);
         if (!sourceCRSVert) {
             throw io::FormattingException(
