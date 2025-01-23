@@ -1023,7 +1023,8 @@ INSERT INTO "other_transformation" (
     operation_version,
     deprecated
 )
-VALUES(
+VALUES
+(
     'NKG', 'ETRF96_2000_TO_ETRF96_1997',-- object auth+code
     'ETRF96@2000.0 to ETRF96@1997.0 using nkgrf03vel_realigned',     -- name
     NULL,                               -- description
@@ -1034,40 +1035,85 @@ VALUES(
     0.005,          -- accuracy
     'NKG 2008',     -- operation_version
     0               -- deprecated
+),
+(
+    'NKG', 'ETRF96_2000_TO_ETRF96_1997_EUREF-FIN',-- object auth+code
+    'ETRF96@2000.0 to ETRF96@1997.0 (EUREF-FIN) using nkgrf03vel_realigned',     -- name
+    NULL,                               -- description
+    'PROJ', 'PROJString',               -- method auth+cod
+    '+proj=deformation +dt=-3.0 +grids=eur_nkg_nkgrf03vel_realigned.tif',
+    'EPSG','7926',  -- source_crs:  ETRF96@2000.0
+    'EPSG','10688', -- target_crs:  EUREF-FIN
+    0.005,          -- accuracy
+    'NKG 2008',     -- operation_version
+    0               -- deprecated
 );
 
-INSERT INTO "usage" VALUES (
+INSERT INTO "usage"
+VALUES
+(
     'NKG', '5018',          -- usage auth+code
     'other_transformation', -- object_table_name
     'NKG', 'ETRF96_2000_TO_ETRF96_1997', -- object auth+code
     'EPSG', '1095',         -- extent: Finland - onshore and offshore
     'NKG',  'SCOPE_GENERIC' -- scope
+),
+(
+    'NKG', '50181',          -- usage auth+code
+    'other_transformation', -- object_table_name
+    'NKG', 'ETRF96_2000_TO_ETRF96_1997_EUREF-FIN', -- object auth+code
+    'EPSG', '1095',         -- extent: Finland - onshore and offshore
+    'NKG',  'SCOPE_GENERIC' -- scope
 );
 
-INSERT INTO "concatenated_operation" VALUES(
+INSERT INTO "concatenated_operation"
+VALUES
+(
     'NKG', 'ETRF00_TO_FI', -- operation auth+code
-    'NKG_ETRF00 to ETRS89 (EUREF-FIN)', -- name
+    'NKG_ETRF00 to ETRS89 (FI)', -- name
     'Transformation from NKG_ETRF00@2000.0 to ETRF96@1997.0', -- description
     'NKG', 'ETRF00',-- source_crs:  NKG_ETRF00
     'EPSG','4936',  -- target_crs:  ETRS89 (FI)
     0.01,           -- accuracy
     'NKG 2008',     -- operation_version
     0               -- deprecated
-);
+),
+(
+    'NKG', 'ETRF00_TO_EUREF-FIN', -- operation auth+code
+    'NKG_ETRF00 to ETRS89 (EUREF-FIN)', -- name
+    'Transformation from NKG_ETRF00@2000.0 to ETRF96@1997.0 (EUREF-FIN)', -- description
+    'NKG', 'ETRF00',-- source_crs:  NKG_ETRF00
+    'EPSG','10688', -- target_crs:  EUREF-FIN
+    0.01,           -- accuracy
+    'NKG 2008',     -- operation_version
+    0               -- deprecated
+)
+;
 
 
 INSERT INTO "concatenated_operation_step" (
     operation_auth_name, operation_code, step_number, step_auth_name, step_code
 ) VALUES
     ('NKG', 'ETRF00_TO_FI', 1, 'NKG', 'P1_2008_FI'),
-    ('NKG', 'ETRF00_TO_FI', 2, 'NKG', 'ETRF96_2000_TO_ETRF96_1997')
+    ('NKG', 'ETRF00_TO_FI', 2, 'NKG', 'ETRF96_2000_TO_ETRF96_1997'),
+    ('NKG', 'ETRF00_TO_EUREF-FIN', 1, 'NKG', 'P1_2008_FI'),
+    ('NKG', 'ETRF00_TO_EUREF-FIN', 2, 'NKG', 'ETRF96_2000_TO_ETRF96_1997_EUREF-FIN')
 ;
 
 
-INSERT INTO "usage" VALUES (
+INSERT INTO "usage"
+VALUES
+(
     'NKG', '5019',              -- usage auth+code
     'concatenated_operation',   -- object_table_name
     'NKG', 'ETRF00_TO_FI',      -- object auth+code
+    'EPSG', '1095',             -- extent: Finland - onshore and offshore
+    'NKG', 'SCOPE_GENERIC'      -- scope auth+code
+),
+(
+    'NKG', '50191',              -- usage auth+code
+    'concatenated_operation',   -- object_table_name
+    'NKG', 'ETRF00_TO_EUREF-FIN',      -- object auth+code
     'EPSG', '1095',             -- extent: Finland - onshore and offshore
     'NKG', 'SCOPE_GENERIC'      -- scope auth+code
 );
@@ -1078,7 +1124,8 @@ INSERT INTO "usage" VALUES (
 -- Transformation: ITRF2000 -> ETRF96@1997.0 (FI)
 -------------------------------------------------------
 
-INSERT INTO "concatenated_operation"  VALUES (
+INSERT INTO "concatenated_operation" VALUES
+(
     'NKG', 'ITRF2000_TO_FI',  -- operation auth+code
     'ITRF2000 to ETRS89 (EUREF-FIN)', -- name
     'Time-dependent transformation from ITRF2014 to ETRS89 (EUREF-FIN)', -- description
@@ -1087,7 +1134,16 @@ INSERT INTO "concatenated_operation"  VALUES (
     0.01,           -- accuracy
     'NKG 2008',     -- operation_version
     0               -- deprecated
-
+),
+(
+    'NKG', 'ITRF2000_TO_FI_EUREF-FIN',  -- operation auth+code
+    'ITRF2000 to EUREF-FIN (ETRS89)', -- name
+    'Time-dependent transformation from ITRF2014 to EUREF-FIN (ETRS89)', -- description
+    'EPSG', '4919', -- source_crs:  ITRF2000
+    'EPSG', '10688',-- target_crs:  EUREF-FIN
+    0.01,           -- accuracy
+    'NKG 2008',     -- operation_version
+    0               -- deprecated
 );
 
 INSERT INTO "concatenated_operation_step" (
@@ -1096,17 +1152,30 @@ INSERT INTO "concatenated_operation_step" (
     ('NKG', 'ITRF2000_TO_FI', 1, 'EPSG', '7941'), -- ITRF2000 -> ETRF2000
     ('NKG', 'ITRF2000_TO_FI', 2, 'NKG', 'NKG_ETRF00_TO_ETRF2000'),
     ('NKG', 'ITRF2000_TO_FI', 3, 'NKG', 'P1_2008_FI'),
-    ('NKG', 'ITRF2000_TO_FI', 4, 'NKG', 'ETRF96_2000_TO_ETRF96_1997')
+    ('NKG', 'ITRF2000_TO_FI', 4, 'NKG', 'ETRF96_2000_TO_ETRF96_1997'),
+    ('NKG', 'ITRF2000_TO_FI_EUREF-FIN', 1, 'EPSG', '7941'), -- ITRF2000 -> ETRF2000
+    ('NKG', 'ITRF2000_TO_FI_EUREF-FIN', 2, 'NKG', 'NKG_ETRF00_TO_ETRF2000'),
+    ('NKG', 'ITRF2000_TO_FI_EUREF-FIN', 3, 'NKG', 'P1_2008_FI'),
+    ('NKG', 'ITRF2000_TO_FI_EUREF-FIN', 4, 'NKG', 'ETRF96_2000_TO_ETRF96_1997_EUREF-FIN')
 ;
 
 
-INSERT INTO "usage" VALUES (
+INSERT INTO "usage" VALUES
+(
     'NKG', '5020',              -- usage auth+code
     'concatenated_operation',   -- object_table_name
     'NKG', 'ITRF2000_TO_FI',    -- object auth+code
     'EPSG', '1095',             -- extent: Finland - onshore and offshore
     'NKG', 'SCOPE_GENERIC'      -- scope auth+code
+),
+(
+    'NKG', '50201',              -- usage auth+code
+    'concatenated_operation',   -- object_table_name
+    'NKG', 'ITRF2000_TO_FI_EUREF-FIN',    -- object auth+code
+    'EPSG', '1095',             -- extent: Finland - onshore and offshore
+    'NKG', 'SCOPE_GENERIC'      -- scope auth+code
 );
+
 
 
 
@@ -1798,6 +1867,18 @@ VALUES(
     0.005,          -- accuracy
     'NKG 2020',     -- operation_version
     0               -- deprecated
+),
+(
+    'NKG', 'FI_2020_INTRAPLATE_EUREF-FIN',-- object auth+code
+    'ETRF96@2000.0 to ETRF96@1997.0 using nkgrf17vel (EUREF-FIN)', -- name
+    NULL, -- description
+    'PROJ', 'PROJString',               -- method auth+cod
+    '+proj=deformation +dt=-3 +grids=eur_nkg_nkgrf17vel.tif',
+    'EPSG','7926',  -- source_crs:  ETRF96@2000.0
+    'EPSG','10688', -- target_crs:  EUREF-FIN
+    0.005,          -- accuracy
+    'NKG 2020',     -- operation_version
+    0               -- deprecated
 );
 
 INSERT INTO "usage" VALUES (
@@ -1806,14 +1887,31 @@ INSERT INTO "usage" VALUES (
     'NKG', 'FI_2020_INTRAPLATE', -- object auth+code
     'EPSG', '1095',         -- extent: Finland - onshore and offshore
     'NKG',  'SCOPE_GENERIC' -- scope
+),
+(
+    'NKG', '50491',          -- usage auth+code
+    'other_transformation', -- object_table_name
+    'NKG', 'FI_2020_INTRAPLATE_EUREF-FIN', -- object auth+code
+    'EPSG', '1095',         -- extent: Finland - onshore and offshore
+    'NKG',  'SCOPE_GENERIC' -- scope
 );
 
 INSERT INTO "concatenated_operation" VALUES(
     'NKG', 'ETRF14_TO_FI', -- operation auth+code
-    'NKG_ETRF14 to ETRS89 (EUREF-FIN)', -- name
+    'NKG_ETRF14 to ETRS89 (FI)', -- name
     'Transformation from NKG_ETRF14@2000.0 to ETRF96@1997.0', -- description
     'NKG', 'ETRF14',-- source_crs:  NKG_ETRF00
     'EPSG','4936',  -- target_crs:  ETRS89 (FI)
+    0.01,           -- accuracy
+    'NKG 2020',     -- operation_version
+    0               -- deprecated
+),
+(
+    'NKG', 'ETRF14_TO_FI_EUREF-FIN', -- operation auth+code
+    'NKG_ETRF14 to ETRS89 (EUREF-FIN)', -- name
+    'Transformation from NKG_ETRF14@2000.0 to ETRF96@1997.0 (EUREF-FIN)', -- description
+    'NKG', 'ETRF14',-- source_crs:  NKG_ETRF00
+    'EPSG','10688', -- target_crs:  EUREF-FIN
     0.01,           -- accuracy
     'NKG 2020',     -- operation_version
     0               -- deprecated
@@ -1824,7 +1922,9 @@ INSERT INTO "concatenated_operation_step" (
     operation_auth_name, operation_code, step_number, step_auth_name, step_code
 ) VALUES
     ('NKG', 'ETRF14_TO_FI', 1, 'NKG', 'PAR_2020_FI'),
-    ('NKG', 'ETRF14_TO_FI', 2, 'NKG', 'FI_2020_INTRAPLATE')
+    ('NKG', 'ETRF14_TO_FI', 2, 'NKG', 'FI_2020_INTRAPLATE'),
+    ('NKG', 'ETRF14_TO_FI_EUREF-FIN', 1, 'NKG', 'PAR_2020_FI'),
+    ('NKG', 'ETRF14_TO_FI_EUREF-FIN', 2, 'NKG', 'FI_2020_INTRAPLATE_EUREF-FIN')
 ;
 
 
@@ -1832,6 +1932,13 @@ INSERT INTO "usage" VALUES (
     'NKG', '5050',              -- usage auth+code
     'concatenated_operation',   -- object_table_name
     'NKG', 'ETRF14_TO_FI',      -- object auth+code
+    'EPSG', '1095',             -- extent: Finland - onshore and offshore
+    'NKG', 'SCOPE_GENERIC'      -- scope auth+code
+),
+(
+    'NKG', '50501',              -- usage auth+code
+    'concatenated_operation',   -- object_table_name
+    'NKG', 'ETRF14_TO_FI_EUREF-FIN',      -- object auth+code
     'EPSG', '1095',             -- extent: Finland - onshore and offshore
     'NKG', 'SCOPE_GENERIC'      -- scope auth+code
 );
@@ -1844,15 +1951,26 @@ INSERT INTO "usage" VALUES (
 
 INSERT INTO "concatenated_operation"  VALUES (
     'NKG', 'ITRF2014_TO_FI',  -- operation auth+code
-    'ITRF2014 to ETRS89 (EUREF-FIN)', -- name
-    'Time-dependent transformation from ITRF2014 to ETRS89 (EUREF-FIN)', -- description
+    'ITRF2014 to ETRS89(FI))', -- name
+    'Time-dependent transformation from ITRF2014 to ETRS89', -- description
     'EPSG', '7789', -- source_crs:  ITRF2014
     'EPSG', '4936', -- target_crs:  ETRS89(FI)
     0.01,           -- accuracy
     'NKG 2020',     -- operation_version
     0               -- deprecated
+),
+(
+    'NKG', 'ITRF2014_TO_FI_EUREF-FIN',  -- operation auth+code
+    'ITRF2014 to ETRS89 (EUREF-FIN)', -- name
+    'Time-dependent transformation from ITRF2014 to ETRS89 (EUREF-FIN)', -- description
+    'EPSG', '7789', -- source_crs:  ITRF2014
+    'EPSG', '10688',-- target_crs:  EUREF-FIN
+    0.01,           -- accuracy
+    'NKG 2020',     -- operation_version
+    0               -- deprecated
 
 );
+
 
 INSERT INTO "concatenated_operation_step" (
     operation_auth_name, operation_code, step_number, step_auth_name, step_code
@@ -1860,14 +1978,24 @@ INSERT INTO "concatenated_operation_step" (
     ('NKG', 'ITRF2014_TO_FI', 1, 'EPSG', '8366'), -- ITRF2014 -> ETRF2014
     ('NKG', 'ITRF2014_TO_FI', 2, 'NKG', 'NKG_ETRF14_TO_ETRF2014'),
     ('NKG', 'ITRF2014_TO_FI', 3, 'NKG', 'PAR_2020_FI'),
-    ('NKG', 'ITRF2014_TO_FI', 4, 'NKG', 'FI_2020_INTRAPLATE')
+    ('NKG', 'ITRF2014_TO_FI', 4, 'NKG', 'FI_2020_INTRAPLATE'),
+    ('NKG', 'ITRF2014_TO_FI_EUREF-FIN', 1, 'EPSG', '8366'), -- ITRF2014 -> ETRF2014
+    ('NKG', 'ITRF2014_TO_FI_EUREF-FIN', 2, 'NKG', 'NKG_ETRF14_TO_ETRF2014'),
+    ('NKG', 'ITRF2014_TO_FI_EUREF-FIN', 3, 'NKG', 'PAR_2020_FI'),
+    ('NKG', 'ITRF2014_TO_FI_EUREF-FIN', 4, 'NKG', 'FI_2020_INTRAPLATE_EUREF-FIN')
 ;
-
 
 INSERT INTO "usage" VALUES (
     'NKG', '5051',              -- usage auth+code
     'concatenated_operation',   -- object_table_name
     'NKG', 'ITRF2014_TO_FI',    -- object auth+code
+    'EPSG', '1095',             -- extent: Finland - onshore and offshore
+    'NKG', 'SCOPE_GENERIC'      -- scope auth+code
+),
+(
+    'NKG', '50511',             -- usage auth+code
+    'concatenated_operation',   -- object_table_name
+    'NKG', 'ITRF2014_TO_FI_EUREF-FIN',    -- object auth+code
     'EPSG', '1095',             -- extent: Finland - onshore and offshore
     'NKG', 'SCOPE_GENERIC'      -- scope auth+code
 );
@@ -1880,8 +2008,15 @@ INSERT INTO "supersession" VALUES (
     'NKG', 'ITRF2014_TO_FI',
     'NKG',
     0
+),
+(
+    'concatenated_operation',
+    'NKG', 'ITRF2000_TO_FI_EUREF-FIN',
+    'concatenated_operation',
+    'NKG', 'ITRF2014_TO_FI_EUREF-FIN',
+    'NKG',
+    0
 );
-
 
 -------------------------------------------------------
 -- Transformation: NKG_ETRF14 -> ETRF89@1992.75 (LV)
@@ -2339,5 +2474,3 @@ INSERT INTO "supersession" VALUES (
     'NKG',
     0
 );
-
-
