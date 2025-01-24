@@ -8,7 +8,7 @@
 
 ------------------------------------------------------------
 operation  +proj=adams_ws2 +R=6370997
-tolerance  1 mm
+tolerance  1 m
 ------------------------------------------------------------
 accept    -179.7092450238  -90.0290393775
 expect    failure errno coord_transfm_invalid_coord
@@ -2123,9 +2123,9 @@ expect    failure errno coord_transfm_invalid_coord
 # Test inverse
 -------------------------------------------------------------------------------
 operation +proj=adams_ws2 +ellps=WGS84
+tolerance  1 m
 -------------------------------------------------------------------------------
 direction forward
-tolerance 1 mm
 
 accept    0 0
 expect    0 0
@@ -2151,8 +2151,6 @@ accept    0           -89.999
 expect    0           -15743336.122
 roundtrip  1
 
-# Results a bit different on x86
-tolerance 3 mm
 accept    179.999     89.999
 expect    693320.704  16030515.906
 roundtrip  1

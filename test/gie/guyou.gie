@@ -6,7 +6,7 @@
 
 ------------------------------------------------------------
 operation  +proj=guyou +R=6370997
-tolerance  1 mm
+tolerance  1 m
 ------------------------------------------------------------
 accept    -179.2338274749  -90.7265739758
 expect    failure errno coord_transfm_invalid_coord

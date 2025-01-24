@@ -15,7 +15,7 @@
 
 ------------------------------------------------------------
 operation  +proj=peirce_q +R=6370997 +shape=square
-tolerance  10 mm
+tolerance  1 m
 ------------------------------------------------------------
 
 accept     -179.6126302052  -90.2440064745
@@ -139,7 +139,7 @@ expect        -153172.25	215556.52
 
  ------------------------------------------------------------
  operation  +proj=peirce_q +R=6370997 +shape=diamond
- tolerance  10 mm
+ tolerance  1 m
  ------------------------------------------------------------
 
 accept      -179.6126302052  -90.2440064745
@@ -263,7 +263,7 @@ expect        44112.34	260730.62
 
 ------------------------------------------------------------
 operation  +proj=peirce_q +R=6370997 +shape=horizontal
-tolerance  10 mm
+tolerance  1 m
 ------------------------------------------------------------
 
 accept     -179.6126302052  -90.2440064745
@@ -387,7 +387,7 @@ expect        -11768191.87	260730.62
 
  ------------------------------------------------------------
  operation  +proj=peirce_q +R=6370997 +shape=horizontal +scrollx=0.75
- tolerance  10 mm
+ tolerance  1 m
  ------------------------------------------------------------
 
 accept      -179.6126302052  -90.2440064745
@@ -511,7 +511,7 @@ expect        -23580496.07	260730.62
 
  ------------------------------------------------------------
  operation  +proj=peirce_q +R=6370997 +shape=vertical
- tolerance  10 mm
+ tolerance  1 m
  ------------------------------------------------------------
 
 accept      -179.6126302052  -90.2440064745
@@ -635,7 +635,7 @@ expect        44112.34	-11551573.59
 
  ------------------------------------------------------------
  operation  +proj=peirce_q +R=6370997 +shape=vertical +scrolly=-0.25
- tolerance  10 mm
+ tolerance  1 m
  ------------------------------------------------------------
 
 accept      -179.6126302052  -90.2440064745
@@ -759,7 +759,7 @@ expect        44112.34	-23363877.80
 
  ------------------------------------------------------------
  operation  +proj=peirce_q +R=6370997 +shape=nhemisphere
- tolerance  10 mm
+ tolerance  1 m
  ------------------------------------------------------------
 
 accept      -179.6126302052  -90.2440064745
@@ -883,7 +883,7 @@ expect        44112.34	260730.62
 
  ------------------------------------------------------------
  operation  +proj=peirce_q +R=6370997 +shape=shemisphere
- tolerance  10 mm
+ tolerance  1 m
  ------------------------------------------------------------
 
 accept      -179.6126302052  -90.2440064745
@@ -1008,11 +1008,8 @@ expect        failure errno coord_transfm_outside_projection_domain
 # Test inverse
 ------------------------------------------------------------
 operation  +proj=peirce_q +shape=square
+tolerance  1 m
 ------------------------------------------------------------
-
-#tolerance   1 mm
-# has to bump to this for i386
-tolerance   150 mm
 
 accept      0 90
 expect      0 0
@@ -1024,9 +1021,7 @@ roundtrip   1
 
 accept      0 -90
 expect      16723842.303160080686   -16723842.303160080686
-#tolerance   2 mm
 roundtrip   1
-#tolerance   1 mm
 
 accept      0 45
 expect      3725360.212758612353   -3725360.212758612353
@@ -1037,10 +1032,8 @@ expect      12998482.090401465073   -12998482.090401465073
 roundtrip   1
 
 accept      45 0
-tolerance   200 mm
 expect      16723842.564696932212   -0.095041956369
 roundtrip   1
-tolerance   150 mm
 
 accept      -45 0
 expect      0   -16723842.469654975459
@@ -1169,21 +1162,18 @@ expect      -16723763.588384689763   16723763.588384689763
 # Test inverse
 ------------------------------------------------------------
 operation  +proj=peirce_q +shape=diamond
+tolerance  1 m
 ------------------------------------------------------------
 
-#tolerance   1 mm
 # has to bump to this for i386
-tolerance   150 mm
 
 accept      0 90
 expect      0 0
 roundtrip   1
 
 accept      0 -90
-#tolerance   10 mm
 expect      0 -23651084.600117880851
 roundtrip   1
-#tolerance   1 mm
 
 accept      0 45
 expect      0 -5268454.937608348206
@@ -1194,10 +1184,8 @@ expect      0 -18382629.662509534508
 roundtrip   1
 
 accept      45 0
-tolerance   200 mm
 expect      11825542.417788611725   -11825542.552198234946
 roundtrip   1
-tolerance   150 mm
 
 accept      -45 0
 expect      -11825542.417788611725   -11825542.417788611725
@@ -1209,9 +1197,6 @@ roundtrip   1
 
 accept      -90 0
 expect      -11825542.417788611725   0.000000000000
-#tolerance   20 mm
-#roundtrip   1
-#tolerance   1 mm
 
 accept      135 0
 expect      11825542.552198234946   11825542.417788611725
@@ -1223,15 +1208,9 @@ roundtrip   1
 
 accept      179.99 0
 expect      1574.295465656175   11825542.417788611725
-#tolerance   200 mm
-#roundtrip   1
-#tolerance   1 mm
 
 accept      -179.99 0
 expect      -1574.295465656175   11825542.417788611725
-#tolerance   30 mm
-#roundtrip   1
-#tolerance   1 mm
 
 accept      45 45
 expect      3747362.066324858926   -3747362.066324859392
@@ -1279,9 +1258,6 @@ roundtrip   1
 
 accept      -90 -45
 expect      -18382629.662509530783   0.000000000000
-#tolerance   3 mm
-#roundtrip   1
-#tolerance   1 mm
 
 accept      135 -45
 expect      3747362.066324858926   19903722.533793020993

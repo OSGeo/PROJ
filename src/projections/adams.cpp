@@ -78,34 +78,7 @@ struct pj_adams_data {
 } // anonymous namespace
 
 #define TOL 1e-9
-#define RSQRT2 0.7071067811865475244008443620
-
-static double ell_int_5(double phi) {
-    /* Procedure to compute elliptic integral of the first kind
-     * where k^2=0.5.  Precision good to better than 1e-7
-     * The approximation is performed with an even Chebyshev
-     * series, thus the coefficients below are the even values
-     * and where series evaluation  must be multiplied by the argument. */
-    constexpr double C0 = 2.19174570831038;
-    static const double C[] = {
-        -8.58691003636495e-07, 2.02692115653689e-07, 3.12960480765314e-05,
-        5.30394739921063e-05,  -0.0012804644680613,  -0.00575574836830288,
-        0.0914203033408211,
-    };
-
-    double y = phi * M_2_PI;
-    y = 2. * y * y - 1.;
-    double y2 = 2. * y;
-    double d1 = 0.0;
-    double d2 = 0.0;
-    for (double c : C) {
-        double temp = d1;
-        d1 = y2 * d1 - d2 + c;
-        d2 = temp;
-    }
-
-    return phi * (y * d1 - d2 + 0.5 * C0);
-}
+#define RSQRT2 0.7071067811865475244008443621
 
 static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
     double a = 0., b = 0.;
@@ -198,14 +171,16 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
     if (sn)
         n = -n;
 
-    xy.x = ell_int_5(m);
-    xy.y = ell_int_5(n);
+    // Elliptic integral of the first kind with k^2 = 0.5
+    xy.x = std::ellint_1(RSQRT2, m);
+    xy.y = std::ellint_1(RSQRT2, n);
 
     if (Q->mode == PEIRCE_Q) {
         /* Constant complete elliptic integral of the first kind with m=0.5,
          * calculated using
          * https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipk.html
-         * . Used as basic as scaled shift distance */
+         * . Used as basic as scaled shift distance.
+         * Could replace 1.85407... by std::comp_ellint_1(RSQRT2) */
         constexpr double shd = 1.8540746773013719 * 2;
 
         /* For square and diamond Quincuncial projections, spin out southern

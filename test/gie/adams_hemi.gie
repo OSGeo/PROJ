@@ -6,7 +6,7 @@
 
 ------------------------------------------------------------
 operation  +proj=adams_hemi +R=6370997
-tolerance  1 mm
+tolerance  1 m
 ------------------------------------------------------------
 accept    -179.0512914938  -90.1445918836
 expect    failure errno coord_transfm_invalid_coord

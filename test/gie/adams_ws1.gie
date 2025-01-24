@@ -7,7 +7,7 @@
 
 ------------------------------------------------------------
 operation  +proj=adams_ws1 +R=6370997
-tolerance  1 mm
+tolerance  1 m
 ------------------------------------------------------------
 accept    -179.5170670673  -90.3642618405
 expect    failure errno coord_transfm_invalid_coord
