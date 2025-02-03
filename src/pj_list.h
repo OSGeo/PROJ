@@ -154,6 +154,7 @@ PROJ_HEAD(set, "Set coordinate value")
 PROJ_HEAD(sinu, "Sinusoidal (Sanson-Flamsteed)")
 PROJ_HEAD(som, "Space Oblique Mercator")
 PROJ_HEAD(somerc, "Swiss. Obl. Mercator")
+PROJ_HEAD(spilhaus, "Spilhaus")
 PROJ_HEAD(stere, "Stereographic")
 PROJ_HEAD(sterea, "Oblique Stereographic Alternative")
 PROJ_HEAD(gstmerc,
