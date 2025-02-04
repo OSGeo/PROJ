@@ -40,7 +40,7 @@ fi
 
 rm -rf docs/build/xml/
 
-(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src/iso19111 src/iso19111/operation include/proj src/proj.h src/filemanager.cpp src/networkfilemanager.cpp src/4D_api.cpp src/general_doc.dox") | doxygen -  > docs/build/docs_log.txt 2>&1
+(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src/iso19111 src/iso19111/operation include/proj src/proj.h src/filemanager.cpp src/networkfilemanager.cpp src/coordinates.cpp src/trans_bounds.cpp src/general_doc.dox") | doxygen -  > docs/build/docs_log.txt 2>&1
 if grep -i warning docs/build/docs_log.txt; then
     echo "Doxygen warnings found" && cat docs/build/docs_log.txt && /bin/false;
 else

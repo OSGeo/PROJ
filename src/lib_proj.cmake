@@ -196,22 +196,32 @@ set(SRC_LIBPROJ_ISO19111
 )
 
 set(SRC_LIBPROJ_CORE
-  4D_api.cpp
   aasincos.cpp
   adjlon.cpp
+  area.cpp
   auth.cpp
+  coord_operation.cpp
+  coordinates.cpp
+  create.cpp
+  crs_to_crs.cpp
   ctx.cpp
   datum_set.cpp
   datums.cpp
   deriv.cpp
+  dist.cpp
   dmstor.cpp
   ell_set.cpp
   ellps.cpp
   factors.cpp
+  filemanager.hpp
+  filemanager.cpp
   fwd.cpp
   gauss.cpp
   generic_inverse.cpp
   geodesic.c
+  grids.hpp
+  grids.cpp
+  info.cpp
   init.cpp
   initcache.cpp
   internal.cpp
@@ -222,18 +232,26 @@ set(SRC_LIBPROJ_CORE
   mlfn.cpp
   msfn.cpp
   mutex.cpp
+  networkfilemanager.cpp
   param.cpp
   phi2.cpp
   pipeline.cpp
   pj_list.h
   pr_list.cpp
   proj_internal.h
+  proj_json_streaming_writer.hpp
+  proj_json_streaming_writer.cpp
   proj_mdist.cpp
   qsfn.cpp
   release.cpp
   rtodms.cpp
   strerrno.cpp
   strtod.cpp
+  sqlite3_utils.hpp
+  sqlite3_utils.cpp
+  tracing.cpp
+  trans.cpp
+  trans_bounds.cpp
   tsfn.cpp
   units.cpp
   wkt1_generated_parser.c
@@ -247,16 +265,6 @@ set(SRC_LIBPROJ_CORE
   wkt_parser.cpp
   wkt_parser.hpp
   zpoly1.cpp
-  proj_json_streaming_writer.hpp
-  proj_json_streaming_writer.cpp
-  tracing.cpp
-  grids.hpp
-  grids.cpp
-  filemanager.hpp
-  filemanager.cpp
-  networkfilemanager.cpp
-  sqlite3_utils.hpp
-  sqlite3_utils.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 
