@@ -640,6 +640,16 @@ int PROJ_DLL proj_trans_bounds(PJ_CONTEXT *context, PJ *P,
                                double xmax, double ymax, double *out_xmin,
                                double *out_ymin, double *out_xmax,
                                double *out_ymax, int densify_pts);
+
+int PROJ_DLL proj_trans_bounds_3D(PJ_CONTEXT *context, PJ *P,
+                                  PJ_DIRECTION direction, const double xmin,
+                                  const double ymin, const double zmin,
+                                  const double xmax, const double ymax,
+                                  const double zmax, double *out_xmin,
+                                  double *out_ymin, double *out_zmin,
+                                  double *out_xmax, double *out_ymax,
+                                  double *out_zmax, const int densify_pts);
+
 /*! @cond Doxygen_Suppress */
 
 /* Initializers */

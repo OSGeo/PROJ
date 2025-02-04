@@ -33,6 +33,7 @@
 #include <math.h>
 
 #include <algorithm>
+#include <limits>
 
 // ---------------------------------------------------------------------------
 static double simple_min(const double *data, const int arr_len) {
@@ -254,17 +255,46 @@ static bool contains_south_pole(PJ *projobj, PJ_DIRECTION pj_direction,
 }
 
 // ---------------------------------------------------------------------------
+
+// Returns source_crs of pj if pj_direction == PJ_FWD, else target_crs
+// Return must be freed with proj_destroy()
+// May return nullptr is there is no CRS attached to the PJ* object
+static PJ *get_input_crs(PJ_CONTEXT *transformer_ctx, PJ *transformer_pj,
+                         PJ_DIRECTION pj_direction) {
+    if (pj_direction == PJ_FWD)
+        return proj_get_source_crs(transformer_ctx, transformer_pj);
+    else
+        return proj_get_target_crs(transformer_ctx, transformer_pj);
+}
+
+// ---------------------------------------------------------------------------
+
+// Returns target_crs of pj if pj_direction == PJ_FWD, else source_crs
+// Return must be freed with proj_destroy()
+// May return nullptr is there is no CRS attached to the PJ* object
+static PJ *get_output_crs(PJ_CONTEXT *transformer_ctx, PJ *transformer_pj,
+                          PJ_DIRECTION pj_direction) {
+    if (pj_direction == PJ_FWD)
+        return proj_get_target_crs(transformer_ctx, transformer_pj);
+    else
+        return proj_get_source_crs(transformer_ctx, transformer_pj);
+}
+
+// ---------------------------------------------------------------------------
+
+static bool is_geocentric(PJ *crs) {
+    return proj_get_type(crs) == PJ_TYPE_GEOCENTRIC_CRS;
+}
+
+// ---------------------------------------------------------------------------
 // Check if the target CRS of the transformation
 // has the longitude latitude axis order.
 // This assumes that the destination CRS is geographic.
 static int target_crs_lon_lat_order(PJ_CONTEXT *transformer_ctx,
                                     PJ *transformer_pj,
                                     PJ_DIRECTION pj_direction) {
-    PJ *target_crs = nullptr;
-    if (pj_direction == PJ_FWD)
-        target_crs = proj_get_target_crs(transformer_ctx, transformer_pj);
-    else if (pj_direction == PJ_INV)
-        target_crs = proj_get_source_crs(transformer_ctx, transformer_pj);
+    PJ *target_crs =
+        get_output_crs(transformer_ctx, transformer_pj, pj_direction);
     if (target_crs == nullptr) {
         proj_context_log_debug(transformer_ctx,
                                "Unable to retrieve target CRS");
@@ -317,6 +347,8 @@ static int target_crs_lon_lat_order(PJ_CONTEXT *transformer_ctx,
  * antimeridian. The first polygon should be constructed with (ymin, xmin, ymax,
  * 180) and the second with (ymin, -180, ymax, xmax).
  *
+ * For transformations involving a 3D CRS, consult proj_trans_bounds_3D().
+ *
  * @param context The PJ_CONTEXT object.
  * @param P The PJ object representing the transformation.
  * @param direction The direction of the transformation.
@@ -340,6 +372,7 @@ static int target_crs_lon_lat_order(PJ_CONTEXT *transformer_ctx,
  *     to use to densify the bounding polygon in the transformation.
  * @return an integer. 1 if successful. 0 if failures encountered.
  * @since 8.2
+ * @see proj_trans_bounds_3D()
  */
 int proj_trans_bounds(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                       const double xmin, const double ymin, const double xmax,
@@ -491,6 +524,364 @@ int proj_trans_bounds(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
         *out_xmax = simple_max(x_boundary_array.data(), boundary_len);
         *out_ymin = antimeridian_min(y_boundary_array.data(), boundary_len);
         *out_ymax = antimeridian_max(y_boundary_array.data(), boundary_len);
+    }
+
+    if (output_lon_lat_order) {
+        // Go back to CRS axis order
+        std::swap(*out_xmin, *out_ymin);
+        std::swap(*out_xmax, *out_ymax);
+    }
+
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+/** \brief Transform boundary, taking into account 3D coordinates.
+ *
+ * Transform boundary densifying the edges to account for nonlinear
+ * transformations along these edges and extracting the outermost bounds.
+ *
+ * Note that the current implementation is not "perfect" when the source CRS is
+ * geocentric, the target CRS is geographic, and the input bounding box
+ * includes the center of the Earth, a pole or the antimeridian. In those
+ * circumstances, exact values of the latitude of longitude of discontinuity
+ * will not be returned.
+ *
+ * If one of the source or target CRS of the transformation is not 3D, the
+ * values of *out_zmin / *out_zmax may not be significant.
+ *
+ * For 2D or "2.5D" transformation (that is planar component is
+ * geographic/coordinates and 3D axis is elevation), the documentation of
+ * proj_trans_bounds() applies.
+ *
+ * @param context The PJ_CONTEXT object.
+ * @param P The PJ object representing the transformation.
+ * @param direction The direction of the transformation.
+ * @param xmin Minimum bounding coordinate of the first axis in source CRS
+ *             (target CRS if direction is inverse).
+ * @param ymin Minimum bounding coordinate of the second axis in source CRS.
+ *             (target CRS if direction is inverse).
+ * @param zmin Minimum bounding coordinate of the third axis in source CRS.
+ *             (target CRS if direction is inverse).
+ * @param xmax Maximum bounding coordinate of the first axis in source CRS.
+ *             (target CRS if direction is inverse).
+ * @param ymax Maximum bounding coordinate of the second axis in source CRS.
+ *             (target CRS if direction is inverse).
+ * @param zmax Maximum bounding coordinate of the third axis in source CRS.
+ *             (target CRS if direction is inverse).
+ * @param out_xmin Minimum bounding coordinate of the first axis in target CRS
+ *             (source CRS if direction is inverse).
+ * @param out_ymin Minimum bounding coordinate of the second axis in target CRS.
+ *             (source CRS if direction is inverse).
+ * @param out_zmin Minimum bounding coordinate of the third axis in target CRS.
+ *             (source CRS if direction is inverse).
+ * @param out_xmax Maximum bounding coordinate of the first axis in target CRS.
+ *             (source CRS if direction is inverse).
+ * @param out_ymax Maximum bounding coordinate of the second axis in target CRS.
+ *             (source CRS if direction is inverse).
+ * @param out_zmax Maximum bounding coordinate of the third axis in target CRS.
+ *             (source CRS if direction is inverse).
+ * @param densify_pts Recommended to use 21. This is the number of points
+ *     to use to densify the bounding polygon in the transformation.
+ * @return an integer. 1 if successful. 0 if failures encountered.
+ * @since 9.6
+ */
+int proj_trans_bounds_3D(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
+                         const double xmin, const double ymin,
+                         const double zmin, const double xmax,
+                         const double ymax, const double zmax, double *out_xmin,
+                         double *out_ymin, double *out_zmin, double *out_xmax,
+                         double *out_ymax, double *out_zmax,
+                         const int densify_pts) {
+    *out_xmin = HUGE_VAL;
+    *out_ymin = HUGE_VAL;
+    *out_zmin = HUGE_VAL;
+    *out_xmax = HUGE_VAL;
+    *out_ymax = HUGE_VAL;
+    *out_zmax = HUGE_VAL;
+
+    if (P == nullptr) {
+        proj_log_error(P, _("NULL P object not allowed."));
+        proj_errno_set(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return false;
+    }
+    if (densify_pts < 0 || densify_pts > 10000) {
+        proj_log_error(P, _("densify_pts must be between 0-10000."));
+        proj_errno_set(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return false;
+    }
+
+    PJ_PROJ_INFO pj_info = proj_pj_info(P);
+    if (pj_info.id == nullptr) {
+        proj_log_error(P, _("NULL transformation not allowed,"));
+        proj_errno_set(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return false;
+    }
+    if (strcmp(pj_info.id, "noop") == 0 || direction == PJ_IDENT) {
+        *out_xmin = xmin;
+        *out_xmax = xmax;
+        *out_ymin = ymin;
+        *out_ymax = ymax;
+        *out_zmin = zmin;
+        *out_zmax = zmax;
+        return true;
+    }
+
+    bool degree_output = proj_degree_output(P, direction) != 0;
+    bool degree_input = proj_degree_input(P, direction) != 0;
+    if (degree_output && densify_pts < 2) {
+        proj_log_error(
+            P,
+            _("densify_pts must be at least 2 if the output is geographic."));
+        proj_errno_set(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return false;
+    }
+
+    int side_pts = densify_pts + 1; // add one because we are densifying
+    PJ *input_crs = get_input_crs(context, P, direction);
+    const bool input_is_geocentric = input_crs && is_geocentric(input_crs);
+    proj_destroy(input_crs);
+    const int boundary_len = input_is_geocentric ? side_pts * 12 : side_pts * 4;
+    std::vector<double> x_boundary_array;
+    std::vector<double> y_boundary_array;
+    std::vector<double> z_boundary_array;
+    try {
+        x_boundary_array.resize(boundary_len);
+        y_boundary_array.resize(boundary_len);
+        z_boundary_array.resize(boundary_len);
+    } catch (const std::exception &e) // memory allocation failure
+    {
+        proj_log_error(P, e.what());
+        proj_errno_set(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return false;
+    }
+    double delta_x = 0;
+    double delta_y = 0;
+    bool north_pole_in_bounds = false;
+    bool south_pole_in_bounds = false;
+    bool input_lon_lat_order = false;
+    bool output_lon_lat_order = false;
+    if (degree_input) {
+        int in_order_lon_lat = target_crs_lon_lat_order(
+            context, P, pj_opposite_direction(direction));
+        if (in_order_lon_lat == -1)
+            return false;
+        input_lon_lat_order = in_order_lon_lat != 0;
+    }
+    if (degree_output) {
+        int out_order_lon_lat = target_crs_lon_lat_order(context, P, direction);
+        if (out_order_lon_lat == -1)
+            return false;
+        output_lon_lat_order = out_order_lon_lat != 0;
+        north_pole_in_bounds = contains_north_pole(
+            P, direction, xmin, ymin, xmax, ymax, output_lon_lat_order);
+        south_pole_in_bounds = contains_south_pole(
+            P, direction, xmin, ymin, xmax, ymax, output_lon_lat_order);
+    }
+
+    if (degree_input && xmax < xmin) {
+        if (!input_lon_lat_order) {
+            proj_log_error(P, _("latitude max < latitude min."));
+            proj_errno_set(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            return false;
+        }
+        // handle antimeridian
+        delta_x = (xmax - xmin + 360.0) / side_pts;
+    } else {
+        delta_x = (xmax - xmin) / side_pts;
+    }
+    if (degree_input && ymax < ymin) {
+        if (input_lon_lat_order) {
+            proj_log_error(P, _("latitude max < latitude min."));
+            proj_errno_set(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            return false;
+        }
+        // handle antimeridian
+        delta_y = (ymax - ymin + 360.0) / side_pts;
+    } else {
+        delta_y = (ymax - ymin) / side_pts;
+    }
+
+    *out_xmin = std::numeric_limits<double>::max();
+    *out_ymin = std::numeric_limits<double>::max();
+    *out_zmin = std::numeric_limits<double>::max();
+    *out_xmax = std::numeric_limits<double>::lowest();
+    *out_ymax = std::numeric_limits<double>::lowest();
+    *out_zmax = std::numeric_limits<double>::lowest();
+
+    if (input_is_geocentric) {
+        int iii = 0;
+        for (int iter_z = 0; iter_z < 2; ++iter_z) {
+            const double z = iter_z == 0 ? zmin : zmax;
+
+            // xmin boundary
+            for (int i = 0; i < side_pts; i++) {
+                y_boundary_array[iii] = ymax - i * delta_y;
+                x_boundary_array[iii] = xmin;
+                z_boundary_array[iii] = z;
+                ++iii;
+            }
+
+            // ymin boundary
+            for (int i = 0; i < side_pts; i++) {
+                y_boundary_array[iii] = ymin;
+                x_boundary_array[iii] = xmin + i * delta_x;
+                z_boundary_array[iii] = z;
+                ++iii;
+            }
+
+            // xmax boundary
+            for (int i = 0; i < side_pts; i++) {
+                y_boundary_array[iii] = ymin + i * delta_y;
+                x_boundary_array[iii] = xmax;
+                z_boundary_array[iii] = z;
+                ++iii;
+            }
+
+            // ymax boundary
+            for (int i = 0; i < side_pts; i++) {
+                y_boundary_array[iii] = ymax;
+                x_boundary_array[iii] = xmax - i * delta_x;
+                z_boundary_array[iii] = z;
+                ++iii;
+            }
+        }
+
+        const double delta_z = (zmax - zmin) / side_pts;
+
+        // (xmin, ymin) edge
+        for (int i = 0; i < side_pts; i++) {
+            x_boundary_array[iii] = xmin;
+            y_boundary_array[iii] = ymin;
+            z_boundary_array[iii] = zmin + i * delta_z;
+            ++iii;
+        }
+
+        // (xmin, ymax) edge
+        for (int i = 0; i < side_pts; i++) {
+            x_boundary_array[iii] = xmin;
+            y_boundary_array[iii] = ymax;
+            z_boundary_array[iii] = zmin + i * delta_z;
+            ++iii;
+        }
+
+        // (xmax, ymin) edge
+        for (int i = 0; i < side_pts; i++) {
+            x_boundary_array[iii] = xmax;
+            y_boundary_array[iii] = ymin;
+            z_boundary_array[iii] = zmin + i * delta_z;
+            ++iii;
+        }
+
+        // (xmax, ymax) edge
+        for (int i = 0; i < side_pts; i++) {
+            x_boundary_array[iii] = xmax;
+            y_boundary_array[iii] = ymax;
+            z_boundary_array[iii] = zmin + i * delta_z;
+            ++iii;
+        }
+
+        proj_trans_generic(P, direction, x_boundary_array.data(),
+                           sizeof(double), boundary_len,
+                           y_boundary_array.data(), sizeof(double),
+                           boundary_len, z_boundary_array.data(),
+                           sizeof(double), boundary_len, nullptr, 0, 0);
+
+        *out_xmin = std::min(*out_xmin,
+                             simple_min(x_boundary_array.data(), boundary_len));
+        *out_ymin = std::min(*out_ymin,
+                             simple_min(y_boundary_array.data(), boundary_len));
+        *out_zmin = std::min(*out_zmin,
+                             simple_min(z_boundary_array.data(), boundary_len));
+        *out_xmax = std::max(*out_xmax,
+                             simple_max(x_boundary_array.data(), boundary_len));
+        *out_ymax = std::max(*out_ymax,
+                             simple_max(y_boundary_array.data(), boundary_len));
+        *out_zmax = std::max(*out_zmax,
+                             simple_max(z_boundary_array.data(), boundary_len));
+    } else {
+        for (int iter_z = 0; iter_z < 2; ++iter_z) {
+            const double z = iter_z == 0 ? zmin : zmax;
+
+            // build densified bounding box
+            // Note: must be a linear ring for antimeridian logic
+            for (int iii = 0; iii < side_pts; iii++) {
+                // xmin boundary
+                y_boundary_array[iii] = ymax - iii * delta_y;
+                x_boundary_array[iii] = xmin;
+                z_boundary_array[iii] = z;
+                // ymin boundary
+                y_boundary_array[iii + side_pts] = ymin;
+                x_boundary_array[iii + side_pts] = xmin + iii * delta_x;
+                z_boundary_array[iii + side_pts] = z;
+                // xmax boundary
+                y_boundary_array[iii + side_pts * 2] = ymin + iii * delta_y;
+                x_boundary_array[iii + side_pts * 2] = xmax;
+                z_boundary_array[iii + side_pts * 2] = z;
+                // ymax boundary
+                y_boundary_array[iii + side_pts * 3] = ymax;
+                x_boundary_array[iii + side_pts * 3] = xmax - iii * delta_x;
+                z_boundary_array[iii + side_pts * 3] = z;
+            }
+
+            proj_trans_generic(P, direction, x_boundary_array.data(),
+                               sizeof(double), boundary_len,
+                               y_boundary_array.data(), sizeof(double),
+                               boundary_len, z_boundary_array.data(),
+                               sizeof(double), boundary_len, nullptr, 0, 0);
+
+            if (output_lon_lat_order) {
+                // Use GIS frienly order
+                std::swap(x_boundary_array, y_boundary_array);
+            }
+
+            if (!degree_output) {
+                *out_xmin =
+                    std::min(*out_xmin,
+                             simple_min(x_boundary_array.data(), boundary_len));
+                *out_xmax =
+                    std::max(*out_xmax,
+                             simple_max(x_boundary_array.data(), boundary_len));
+                *out_ymin =
+                    std::min(*out_ymin,
+                             simple_min(y_boundary_array.data(), boundary_len));
+                *out_ymax =
+                    std::max(*out_ymax,
+                             simple_max(y_boundary_array.data(), boundary_len));
+            } else if (north_pole_in_bounds) {
+                *out_xmin =
+                    std::min(*out_xmin,
+                             simple_min(x_boundary_array.data(), boundary_len));
+                *out_ymin = -180;
+                *out_xmax = 90;
+                *out_ymax = 180;
+            } else if (south_pole_in_bounds) {
+                *out_xmin = -90;
+                *out_ymin = -180;
+                *out_xmax =
+                    std::max(*out_xmax,
+                             simple_max(x_boundary_array.data(), boundary_len));
+                *out_ymax = 180;
+            } else {
+                *out_xmin =
+                    std::min(*out_xmin,
+                             simple_min(x_boundary_array.data(), boundary_len));
+                *out_xmax =
+                    std::max(*out_xmax,
+                             simple_max(x_boundary_array.data(), boundary_len));
+                *out_ymin = std::min(
+                    *out_ymin,
+                    antimeridian_min(y_boundary_array.data(), boundary_len));
+                *out_ymax = std::max(
+                    *out_ymax,
+                    antimeridian_max(y_boundary_array.data(), boundary_len));
+            }
+
+            *out_zmin = std::min(
+                *out_zmin, simple_min(z_boundary_array.data(), boundary_len));
+            *out_zmax = std::max(
+                *out_zmax, simple_max(z_boundary_array.data(), boundary_len));
+        }
     }
 
     if (output_lon_lat_order) {

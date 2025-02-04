@@ -1120,6 +1120,7 @@ proj_torad
 proj_trans
 proj_trans_array
 proj_trans_bounds
+proj_trans_bounds_3D
 proj_trans_generic
 proj_trans_get_last_used_operation
 proj_unit_list_destroy
