@@ -8060,3 +8060,4 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10744','Sint Eustatius /
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10747','Sint Eustatius / UTM 20N + Sint Eustatius height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10764','Bonaire DPnet + Bonaire KADpeil','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10764','Bonaire / Bonaire TM + Bonaire height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10773','SIRGAS 2000 / RPTM','EPSG');
