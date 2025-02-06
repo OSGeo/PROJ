@@ -76,6 +76,7 @@
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
 
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -984,6 +985,10 @@ PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial,
                             double deltaXYTolerance);
 
 PJ *pj_obj_create(PJ_CONTEXT *ctx, const NS_PROJ::util::BaseObjectNNPtr &objIn);
+
+PJ_DIRECTION pj_opposite_direction(PJ_DIRECTION dir);
+
+void pj_warn_about_missing_grid(PJ *P);
 
 /*****************************************************************************/
 /*                                                                           */
