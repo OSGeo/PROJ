@@ -3,11 +3,11 @@ Acknowledgements
 adams
 aea
 aeqd
-airocean
-Airocean
 affine
 Affine
 Agri
+airocean
+Airocean
 aitoff
 Aitoff
 Albers
@@ -106,8 +106,8 @@ Boucher
 boundcrs
 boundCRS
 Bregler
-Buckminster
 brussels
+Buckminster
 cadastral
 cadastre
 Cadastre
@@ -1037,5 +1037,7 @@ yyyymmdd
 Zajaç
 zenodo
 zlib
+zmax
+zmin
 zur
 Zusätze

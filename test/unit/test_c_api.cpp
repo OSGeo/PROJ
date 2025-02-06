@@ -6536,6 +6536,130 @@ TEST_F(CApi, proj_trans_bounds_to_compound_crs) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_trans_bounds_3d_densify_0_geog3D_to_proj2D) {
+    auto P =
+        proj_create_crs_to_crs(m_ctxt, "EPSG:4979",
+                               "+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 "
+                               "+a=6370997 +b=6370997 +units=m +no_defs",
+                               nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    double zmin;
+    double zmax;
+    int success = proj_trans_bounds_3D(m_ctxt, P, PJ_FWD, 40, -120, 0, 64, -80,
+                                       100, &out_left, &out_bottom, &zmin,
+                                       &out_right, &out_top, &zmax, 0);
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, -1684649.41338, 1);
+    EXPECT_NEAR(out_bottom, -350356.81377, 1);
+    EXPECT_NEAR(out_right, 1684649.41338, 1);
+    EXPECT_NEAR(out_top, 2234551.18559, 1);
+    EXPECT_EQ(zmin, 0);
+    EXPECT_EQ(zmax, 100);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_3d_noop) {
+    auto P = proj_create_crs_to_crs(m_ctxt, "EPSG:4979", "EPSG:4979", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    double zmin;
+    double zmax;
+    int success = proj_trans_bounds_3D(m_ctxt, P, PJ_FWD, 40, -120, 0, 64, -80,
+                                       100, &out_left, &out_bottom, &zmin,
+                                       &out_right, &out_top, &zmax, 0);
+    EXPECT_TRUE(success == 1);
+    EXPECT_EQ(out_left, 40);
+    EXPECT_EQ(out_bottom, -120);
+    EXPECT_EQ(out_right, 64);
+    EXPECT_EQ(out_top, -80);
+    EXPECT_EQ(zmin, 0);
+    EXPECT_EQ(zmax, 100);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_3d_geog3D_to_geocentric) {
+    auto P = proj_create_crs_to_crs(m_ctxt, "EPSG:4979", "EPSG:4978", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double xmin;
+    double ymin;
+    double xmax;
+    double ymax;
+    double zmin;
+    double zmax;
+    int success =
+        proj_trans_bounds_3D(m_ctxt, P, PJ_FWD, 49, 2, 0, 50, 3, 100, &xmin,
+                             &ymin, &zmin, &xmax, &ymax, &zmax, 0);
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(xmin, 4102234.41, 1);
+    EXPECT_NEAR(ymin, 143362.39, 1);
+    EXPECT_NEAR(xmax, 4189946.59, 1);
+    EXPECT_NEAR(ymax, 219418.53, 1);
+    EXPECT_NEAR(zmin, 4790558.75, 1);
+    EXPECT_NEAR(zmax, 4862865.64, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_3d_inverse_of_geog3D_to_geocentric) {
+    auto P = proj_create_crs_to_crs(m_ctxt, "EPSG:4978", "EPSG:4979", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double xmin;
+    double ymin;
+    double xmax;
+    double ymax;
+    double zmin;
+    double zmax;
+    int success =
+        proj_trans_bounds_3D(m_ctxt, P, PJ_INV, 49, 2, 0, 50, 3, 100, &xmin,
+                             &ymin, &zmin, &xmax, &ymax, &zmax, 0);
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(xmin, 4102234.41, 1);
+    EXPECT_NEAR(xmax, 4189946.59, 1);
+    EXPECT_NEAR(ymin, 143362.39, 1);
+    EXPECT_NEAR(ymax, 219418.53, 1);
+    EXPECT_NEAR(zmin, 4790558.75, 1);
+    EXPECT_NEAR(zmax, 4862865.64, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_3d_geocentric_to_geog3D) {
+    auto P = proj_create_crs_to_crs(m_ctxt, "EPSG:4978", "EPSG:4979", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double xmin;
+    double ymin;
+    double xmax;
+    double ymax;
+    double zmin;
+    double zmax;
+    int success = proj_trans_bounds_3D(
+        m_ctxt, P, PJ_FWD, 4102234.41, 143362.39, 4790558.75, 4189946.59,
+        219418.53, 4862865.64, &xmin, &ymin, &zmin, &xmax, &ymax, &zmax, 2);
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(xmin, 49., .15);
+    EXPECT_NEAR(ymin, 2, .15);
+    EXPECT_NEAR(xmax, 50, .15);
+    EXPECT_NEAR(ymax, 3., .15);
+    EXPECT_NEAR(zmin, -57187, 1);
+    EXPECT_NEAR(zmax, 56862.2, 1);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_crs_has_point_motion_operation) {
     auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
     ASSERT_NE(ctxt, nullptr);

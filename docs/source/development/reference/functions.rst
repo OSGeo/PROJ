@@ -448,6 +448,9 @@ Coordinate transformation
 .. doxygenfunction:: proj_trans_bounds
    :project: doxygen_api
 
+.. doxygenfunction:: proj_trans_bounds_3D
+   :project: doxygen_api
+
 
 Error reporting
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
