@@ -90,6 +90,10 @@ using GeodeticReferenceFrameNNPtr = util::nn<GeodeticReferenceFramePtr>;
 class VerticalReferenceFrame;
 using VerticalReferenceFramePtr = std::shared_ptr<VerticalReferenceFrame>;
 using VerticalReferenceFrameNNPtr = util::nn<VerticalReferenceFramePtr>;
+
+class EngineeringDatum;
+using EngineeringDatumPtr = std::shared_ptr<EngineeringDatum>;
+using EngineeringDatumNNPtr = util::nn<EngineeringDatumPtr>;
 } // namespace datum
 
 namespace crs {
@@ -116,6 +120,10 @@ using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
 class CompoundCRS;
 using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
 using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
+
+class EngineeringCRS;
+using EngineeringCRSPtr = std::shared_ptr<EngineeringCRS>;
+using EngineeringCRSNNPtr = util::nn<EngineeringCRSPtr>;
 } // namespace crs
 
 namespace coordinates {
@@ -1032,6 +1040,9 @@ class PROJ_GCC_DLL AuthorityFactory {
     PROJ_DLL datum::VerticalReferenceFrameNNPtr
     createVerticalDatum(const std::string &code) const;
 
+    PROJ_DLL datum::EngineeringDatumNNPtr
+    createEngineeringDatum(const std::string &code) const;
+
     PROJ_DLL cs::CoordinateSystemNNPtr
     createCoordinateSystem(const std::string &code) const;
 
@@ -1043,6 +1054,9 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_DLL crs::VerticalCRSNNPtr
     createVerticalCRS(const std::string &code) const;
+
+    PROJ_DLL crs::EngineeringCRSNNPtr
+    createEngineeringCRS(const std::string &code) const;
 
     PROJ_DLL operation::ConversionNNPtr
     createConversion(const std::string &code) const;
@@ -1087,6 +1101,8 @@ class PROJ_GCC_DLL AuthorityFactory {
         /** Object of type datum::VerticalReferenceFrame (and derived
            classes) */
         VERTICAL_REFERENCE_FRAME,
+        /** Object of type datum::EngineeringDatum */
+        ENGINEERING_DATUM,
         /** Object of type crs::CRS (and derived classes) */
         CRS,
         /** Object of type crs::GeodeticCRS (and derived classes) */
@@ -1104,6 +1120,8 @@ class PROJ_GCC_DLL AuthorityFactory {
         /** Object of type crs::VerticalCRS (and derived classes) */
         VERTICAL_CRS,
         /** Object of type crs::CompoundCRS (and derived classes) */
+        ENGINEERING_CRS,
+        /** Object of type crs::EngineeringCRS */
         COMPOUND_CRS,
         /** Object of type operation::CoordinateOperation (and derived
            classes) */
