@@ -1014,6 +1014,14 @@ TEST_F(CApi, proj_create_from_database) {
         EXPECT_EQ(proj_get_type(crs), PJ_TYPE_COMPOUND_CRS);
     }
     {
+        auto crs = proj_create_from_database(m_ctxt, "EPSG", "6715",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper(crs);
+        EXPECT_TRUE(proj_is_crs(crs));
+        EXPECT_EQ(proj_get_type(crs), PJ_TYPE_ENGINEERING_CRS);
+    }
+    {
         auto ellipsoid = proj_create_from_database(
             m_ctxt, "EPSG", "7030", PJ_CATEGORY_ELLIPSOID, false, nullptr);
         ASSERT_NE(ellipsoid, nullptr);
@@ -1520,45 +1528,44 @@ TEST_F(CApi, proj_get_authorities_from_database) {
 
 TEST_F(CApi, proj_get_codes_from_database) {
 
-    auto listTypes =
-        std::vector<PJ_TYPE>{PJ_TYPE_ELLIPSOID,
+    const PJ_TYPE listTypes[] = {PJ_TYPE_ELLIPSOID,
 
-                             PJ_TYPE_PRIME_MERIDIAN,
+                                 PJ_TYPE_PRIME_MERIDIAN,
 
-                             PJ_TYPE_GEODETIC_REFERENCE_FRAME,
-                             PJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME,
-                             PJ_TYPE_VERTICAL_REFERENCE_FRAME,
-                             PJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME,
-                             PJ_TYPE_DATUM_ENSEMBLE,
-                             PJ_TYPE_TEMPORAL_DATUM,
-                             PJ_TYPE_ENGINEERING_DATUM,
-                             PJ_TYPE_PARAMETRIC_DATUM,
+                                 PJ_TYPE_GEODETIC_REFERENCE_FRAME,
+                                 PJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME,
+                                 PJ_TYPE_VERTICAL_REFERENCE_FRAME,
+                                 PJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME,
+                                 PJ_TYPE_DATUM_ENSEMBLE,
+                                 PJ_TYPE_TEMPORAL_DATUM,
+                                 PJ_TYPE_ENGINEERING_DATUM,
+                                 PJ_TYPE_PARAMETRIC_DATUM,
 
-                             PJ_TYPE_CRS,
-                             PJ_TYPE_GEODETIC_CRS,
-                             PJ_TYPE_GEOCENTRIC_CRS,
-                             PJ_TYPE_GEOGRAPHIC_CRS,
-                             PJ_TYPE_GEOGRAPHIC_2D_CRS,
-                             PJ_TYPE_GEOGRAPHIC_3D_CRS,
-                             PJ_TYPE_VERTICAL_CRS,
-                             PJ_TYPE_PROJECTED_CRS,
-                             PJ_TYPE_COMPOUND_CRS,
-                             PJ_TYPE_TEMPORAL_CRS,
-                             PJ_TYPE_BOUND_CRS,
-                             PJ_TYPE_OTHER_CRS,
+                                 PJ_TYPE_CRS,
+                                 PJ_TYPE_GEODETIC_CRS,
+                                 PJ_TYPE_GEOCENTRIC_CRS,
+                                 PJ_TYPE_GEOGRAPHIC_CRS,
+                                 PJ_TYPE_GEOGRAPHIC_2D_CRS,
+                                 PJ_TYPE_GEOGRAPHIC_3D_CRS,
+                                 PJ_TYPE_VERTICAL_CRS,
+                                 PJ_TYPE_PROJECTED_CRS,
+                                 PJ_TYPE_COMPOUND_CRS,
+                                 PJ_TYPE_ENGINEERING_CRS,
+                                 PJ_TYPE_TEMPORAL_CRS,
+                                 PJ_TYPE_BOUND_CRS,
+                                 PJ_TYPE_OTHER_CRS,
 
-                             PJ_TYPE_CONVERSION,
-                             PJ_TYPE_TRANSFORMATION,
-                             PJ_TYPE_CONCATENATED_OPERATION,
-                             PJ_TYPE_OTHER_COORDINATE_OPERATION,
+                                 PJ_TYPE_CONVERSION,
+                                 PJ_TYPE_TRANSFORMATION,
+                                 PJ_TYPE_CONCATENATED_OPERATION,
+                                 PJ_TYPE_OTHER_COORDINATE_OPERATION,
 
-                             PJ_TYPE_UNKNOWN};
+                                 PJ_TYPE_UNKNOWN};
     for (const auto &type : listTypes) {
         auto list = proj_get_codes_from_database(m_ctxt, "EPSG", type, true);
         ListFreer feer(list);
         if (type == PJ_TYPE_TEMPORAL_CRS || type == PJ_TYPE_BOUND_CRS ||
             type == PJ_TYPE_UNKNOWN || type == PJ_TYPE_TEMPORAL_DATUM ||
-            type == PJ_TYPE_ENGINEERING_DATUM ||
             type == PJ_TYPE_PARAMETRIC_DATUM) {
             EXPECT_EQ(list, nullptr) << type;
         } else {

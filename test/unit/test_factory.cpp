@@ -329,6 +329,26 @@ TEST(factory, AuthorityFactory_createDynamicVerticalDatum) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_createEngineeringDatum) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createEngineeringDatum("-1"),
+                 NoSuchAuthorityCodeException);
+    auto datum = factory->createEngineeringDatum("1134");
+    ASSERT_EQ(datum->identifiers().size(), 1U);
+    EXPECT_EQ(datum->identifiers()[0]->code(), "1134");
+    EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
+    EXPECT_EQ(*(datum->name()->description()), "Christmas Island Datum 1985");
+    auto domain = datum->domains()[0];
+    auto extent = domain->domainOfValidity();
+    ASSERT_TRUE(extent != nullptr);
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("4169").get()));
+    EXPECT_TRUE(datum->publicationDate().has_value());
+    EXPECT_EQ(datum->publicationDate()->toString(), "1985-01-01");
+    EXPECT_TRUE(!datum->anchorEpoch().has_value());
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createDatum) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createDatum("-1"), NoSuchAuthorityCodeException);
@@ -653,6 +673,29 @@ TEST(factory, AuthorityFactory_createVerticalCRS_with_datum_ensemble) {
     ASSERT_TRUE(crs->datumEnsemble() != nullptr);
     EXPECT_TRUE(crs->datumEnsemble()->isEquivalentTo(
         factory->createDatumEnsemble("1288").get()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createEngineeringCRS) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createEngineeringCRS("-1"),
+                 NoSuchAuthorityCodeException);
+
+    auto crs = factory->createEngineeringCRS("6715");
+    ASSERT_EQ(crs->identifiers().size(), 1U);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "6715");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
+    EXPECT_EQ(*(crs->name()->description()), "Christmas Island Grid 1985");
+    EXPECT_TRUE(
+        crs->datum()->isEquivalentTo(factory->createDatum("1134").get()));
+    EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
+        factory->createCoordinateSystem("4400").get()));
+
+    auto domain = crs->domains()[0];
+    auto extent = domain->domainOfValidity();
+    ASSERT_TRUE(extent != nullptr);
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("4169").get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -1523,11 +1566,19 @@ TEST(factory, AuthorityFactory_getAuthorityCodes) {
                     nullptr);
         EXPECT_LT(setDynamicVerticalDatum.size(), setVerticalDatum.size());
 
+        auto setEngineeringDatum = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::ENGINEERING_DATUM);
+        ASSERT_TRUE(!setEngineeringDatum.empty());
+        factory->createEngineeringDatum(*(setEngineeringDatum.begin()));
+
         std::set<std::string> setMerged;
         for (const auto &v : setGeodeticDatum) {
             setMerged.insert(v);
         }
         for (const auto &v : setVerticalDatum) {
+            setMerged.insert(v);
+        }
+        for (const auto &v : setEngineeringDatum) {
             setMerged.insert(v);
         }
         EXPECT_EQ(setDatum, setMerged);
@@ -1589,6 +1640,11 @@ TEST(factory, AuthorityFactory_getAuthorityCodes) {
         ASSERT_TRUE(!setCompoundCRS.empty());
         factory->createCompoundCRS(*(setCompoundCRS.begin()));
 
+        auto setEngineeringCRS = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::ENGINEERING_CRS);
+        ASSERT_TRUE(!setEngineeringCRS.empty());
+        factory->createEngineeringCRS(*(setEngineeringCRS.begin()));
+
         std::set<std::string> setMerged;
         for (const auto &v : setGeodeticCRS) {
             setMerged.insert(v);
@@ -1600,6 +1656,9 @@ TEST(factory, AuthorityFactory_getAuthorityCodes) {
             setMerged.insert(v);
         }
         for (const auto &v : setCompoundCRS) {
+            setMerged.insert(v);
+        }
+        for (const auto &v : setEngineeringCRS) {
             setMerged.insert(v);
         }
         EXPECT_EQ(setCRS, setMerged);
@@ -3685,6 +3744,13 @@ TEST(factory, createObjectsFromName) {
     EXPECT_EQ(factoryEPSG->createObjectsFromName("EGM2008 geoid", {}, false, 2)
                   .size(),
               1U);
+    // Engineering datum
+    EXPECT_EQ(
+        factoryEPSG
+            ->createObjectsFromName("Christmas Island Datum 1985", {}, false, 2)
+            .size(),
+        1U);
+
     // Geodetic CRS
     EXPECT_EQ(factoryEPSG
                   ->createObjectsFromName(
@@ -3709,6 +3775,12 @@ TEST(factory, createObjectsFromName) {
                       {}, false, 2)
                   .size(),
               1U);
+    // Engineering CRS
+    EXPECT_EQ(
+        factoryEPSG
+            ->createObjectsFromName("Christmas Island Grid 1985", {}, false, 2)
+            .size(),
+        1U);
     // Conversion
     EXPECT_EQ(
         factoryEPSG->createObjectsFromName("Belgian Lambert 2008", {}, false, 2)
@@ -3803,6 +3875,7 @@ TEST(factory, createObjectsFromName) {
         AuthorityFactory::ObjectType::DYNAMIC_GEODETIC_REFERENCE_FRAME,
         AuthorityFactory::ObjectType::VERTICAL_REFERENCE_FRAME,
         AuthorityFactory::ObjectType::DYNAMIC_VERTICAL_REFERENCE_FRAME,
+        AuthorityFactory::ObjectType::ENGINEERING_DATUM,
         AuthorityFactory::ObjectType::CRS,
         AuthorityFactory::ObjectType::GEODETIC_CRS,
         AuthorityFactory::ObjectType::GEOCENTRIC_CRS,
@@ -3812,6 +3885,7 @@ TEST(factory, createObjectsFromName) {
         AuthorityFactory::ObjectType::PROJECTED_CRS,
         AuthorityFactory::ObjectType::VERTICAL_CRS,
         AuthorityFactory::ObjectType::COMPOUND_CRS,
+        AuthorityFactory::ObjectType::ENGINEERING_CRS,
         AuthorityFactory::ObjectType::COORDINATE_OPERATION,
         AuthorityFactory::ObjectType::CONVERSION,
         AuthorityFactory::ObjectType::TRANSFORMATION,

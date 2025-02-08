@@ -144,7 +144,7 @@ def fill_usage(proj_db_cursor):
             if proj_table_name is None:
                 continue
         elif object_table_name == 'epsg_datum':
-            proj_db_cursor.execute("SELECT 'geodetic_datum' FROM geodetic_datum WHERE auth_name = ? AND code = ? UNION ALL SELECT 'vertical_datum' FROM vertical_datum WHERE auth_name = ? AND code = ?", (EPSG_AUTHORITY, object_code, EPSG_AUTHORITY, object_code))
+            proj_db_cursor.execute("SELECT 'geodetic_datum' FROM geodetic_datum WHERE auth_name = ? AND code = ? UNION ALL SELECT 'vertical_datum' FROM vertical_datum WHERE auth_name = ? AND code = ? UNION ALL SELECT 'engineering_datum' FROM engineering_datum WHERE auth_name = ? AND code = ?", (EPSG_AUTHORITY, object_code, EPSG_AUTHORITY, object_code, EPSG_AUTHORITY, object_code))
             proj_table_name = proj_db_cursor.fetchone()
             if proj_table_name is None:
                 continue
@@ -212,6 +212,16 @@ def fill_vertical_datum(proj_db_cursor):
         publication_date = compute_publication_date(datum_code, datum_name, frame_reference_epoch, publication_date)
         proj_db_cursor.execute(
         "INSERT INTO vertical_datum VALUES (?, ?, ?, NULL, ?, ?, NULL, NULL, ?, ?)", (EPSG_AUTHORITY, datum_code, datum_name, publication_date, frame_reference_epoch, anchor_epoch, deprecated))
+
+
+def fill_engineering_datum(proj_db_cursor):
+
+    proj_db_cursor.execute("SELECT datum_code, datum_name, publication_date, frame_reference_epoch, anchor_epoch, deprecated FROM epsg.epsg_datum WHERE datum_type IN ('engineering') AND datum_name NOT LIKE 'EPSG example%'")
+    res = proj_db_cursor.fetchall()
+    for (datum_code, datum_name, publication_date, frame_reference_epoch, anchor_epoch, deprecated) in res:
+        publication_date = compute_publication_date(datum_code, datum_name, frame_reference_epoch, publication_date)
+        proj_db_cursor.execute(
+        "INSERT INTO engineering_datum VALUES (?, ?, ?, ?, NULL, ?, ?)", (EPSG_AUTHORITY, datum_code, datum_name, publication_date, anchor_epoch, deprecated))
 
 
 def fill_datumensemble(proj_db_cursor):
@@ -447,6 +457,18 @@ def fill_vertical_crs(proj_db_cursor):
     proj_db_cursor.execute("INSERT INTO vertical_crs SELECT ?, crs1.coord_ref_sys_code, crs1.coord_ref_sys_name, NULL, ?, crs1.coord_sys_code, ?, crs3.datum_code, crs1.deprecated FROM epsg.epsg_coordinatereferencesystem crs1 JOIN epsg.epsg_coordinatereferencesystem crs2 ON crs1.base_crs_code = crs2.coord_ref_sys_code JOIN epsg.epsg_coordinatereferencesystem crs3 ON crs2.base_crs_code = crs3.coord_ref_sys_code WHERE crs1.coord_ref_sys_kind IN ('vertical') AND crs1.datum_code IS NULL AND crs2.datum_code IS NULL", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
 
 
+def fill_engineering_crs(proj_db_cursor):
+    proj_db_cursor.execute("SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, ?, coord_sys_code, ?, datum_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('engineering') AND datum_code IS NOT NULL AND coord_ref_sys_name NOT LIKE 'EPSG%example%' AND coord_ref_sys_name NOT LIKE 'enter here name%'", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+    res = proj_db_cursor.fetchall()
+    for row in res:
+        proj_db_cursor.execute("INSERT INTO engineering_crs VALUES (?,?,?,?,?,?,?,?,?)", (row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8]))
+
+    proj_db_cursor.execute("SELECT * FROM epsg.epsg_coordinatereferencesystem crs1 WHERE crs1.coord_ref_sys_kind IN ('engineering') AND crs1.datum_code IS NULL AND NOT EXISTS (SELECT 1 FROM epsg.epsg_coordinatereferencesystem crs2 WHERE crs2.coord_ref_sys_code = crs1.base_crs_code AND crs2.coord_ref_sys_kind IN ('engineering'))")
+    res = proj_db_cursor.fetchall()
+    for row in res:
+        assert False, row
+
+
 def fill_conversion(proj_db_cursor):
 
     # TODO? current we deal with point motion operation as transformation in grid_transformation table
@@ -575,7 +597,7 @@ def fill_compound_crs(proj_db_cursor):
     #proj_db_cursor.execute(
     #    "INSERT INTO crs SELECT ?, coord_ref_sys_code, coord_ref_sys_kind FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('compound')", (EPSG_AUTHORITY,))
 
-    proj_db_cursor.execute("SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, ?, cmpd_horizcrs_code, ?, cmpd_vertcrs_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('compound') AND cmpd_horizcrs_code NOT IN (SELECT coord_ref_sys_code FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind = 'engineering')", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+    proj_db_cursor.execute("SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, ?, cmpd_horizcrs_code, ?, cmpd_vertcrs_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('compound') AND coord_ref_sys_name NOT LIKE 'EPSG%example%'", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
     for auth_name, code, name, description, horiz_auth_name, horiz_code, vert_auth_name, vert_code, deprecated in proj_db_cursor.fetchall():
         try:
             proj_db_cursor.execute("INSERT INTO compound_crs VALUES (?,?,?,?,?,?,?,?,?)", (auth_name, code, name, description, horiz_auth_name, horiz_code, vert_auth_name, vert_code, deprecated))
@@ -858,11 +880,6 @@ def fill_other_transformation(proj_db_cursor):
 
             source_crs_code = source_codes[0][0]
             target_crs_code = target_codes[0][0]
-
-        # Engineering CRS
-        if source_crs_code in (5800, 5817, 6715):
-            print("Skipping transformation %s as source CRS (%d) is not handled" % (name, source_crs_code))
-            continue
 
         expected_order = 1
         max_n_params = 7
@@ -1243,11 +1260,13 @@ fill_scope(proj_db_cursor)
 fill_prime_meridian(proj_db_cursor)
 fill_geodetic_datum(proj_db_cursor)
 fill_vertical_datum(proj_db_cursor)
+fill_engineering_datum(proj_db_cursor)
 fill_datumensemble(proj_db_cursor)
 fill_coordinate_system(proj_db_cursor)
 fill_axis(proj_db_cursor)
 fill_geodetic_crs(proj_db_cursor)
 fill_vertical_crs(proj_db_cursor)
+fill_engineering_crs(proj_db_cursor)
 create_datumensemble_transformations(proj_db_cursor)
 fill_conversion(proj_db_cursor)
 fill_projected_crs(proj_db_cursor)
@@ -1272,7 +1291,7 @@ files = {}
 # Dump the generated database and split it one .sql file per table
 # except for usage, that we append just after the record that the usage is for
 
-tables_with_usage = ('geodetic_datum', 'vertical_datum', 'geodetic_crs', 'vertical_crs', 'projected_crs', 'compound_crs', 'helmert_transformation', 'grid_transformation', 'other_transformation', 'conversion', 'concatenated_operation')
+tables_with_usage = ('geodetic_datum', 'vertical_datum', 'engineering_datum', 'geodetic_crs', 'vertical_crs', 'projected_crs', 'compound_crs', 'engineering_crs', 'helmert_transformation', 'grid_transformation', 'other_transformation', 'conversion', 'concatenated_operation')
 usages_map = {}
 # INSERT INTO "usage" VALUES('EPSG','13089','geodetic_datum','EPSG','1037','EPSG','3340','EPSG','1028');
 for line in proj_db_conn.iterdump():
