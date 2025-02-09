@@ -1068,7 +1068,7 @@ convertPJObjectTypeToObjectType(PJ_TYPE type, bool &valid) {
         break;
 
     case PJ_TYPE_ENGINEERING_DATUM:
-        valid = false;
+        cppType = AuthorityFactory::ObjectType::ENGINEERING_DATUM;
         break;
 
     case PJ_TYPE_PARAMETRIC_DATUM:
@@ -1116,7 +1116,7 @@ convertPJObjectTypeToObjectType(PJ_TYPE type, bool &valid) {
         break;
 
     case PJ_TYPE_ENGINEERING_CRS:
-        valid = false;
+        cppType = AuthorityFactory::ObjectType::ENGINEERING_CRS;
         break;
 
     case PJ_TYPE_TEMPORAL_CRS:

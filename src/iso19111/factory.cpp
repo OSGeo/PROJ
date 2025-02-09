@@ -112,6 +112,7 @@ namespace io {
 #define GEOCENTRIC "geocentric"
 #define OTHER "other"
 #define PROJECTED "projected"
+#define ENGINEERING "engineering"
 #define VERTICAL "vertical"
 #define COMPOUND "compound"
 
@@ -4437,6 +4438,10 @@ AuthorityFactory::createObject(const std::string &code) const {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createVerticalDatum(code));
     }
+    if (table_name == "engineering_datum") {
+        return util::nn_static_pointer_cast<util::BaseObject>(
+            createEngineeringDatum(code));
+    }
     if (table_name == "geodetic_crs") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createGeodeticCRS(code));
@@ -4452,6 +4457,10 @@ AuthorityFactory::createObject(const std::string &code) const {
     if (table_name == "compound_crs") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createCompoundCRS(code));
+    }
+    if (table_name == "engineering_crs") {
+        return util::nn_static_pointer_cast<util::BaseObject>(
+            createEngineeringCRS(code));
     }
     if (table_name == "conversion") {
         return util::nn_static_pointer_cast<util::BaseObject>(
@@ -5027,6 +5036,54 @@ void AuthorityFactory::createVerticalDatumOrEnsemble(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns a datum::EngineeringDatum from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
+ * @since 9.6
+ */
+
+datum::EngineeringDatumNNPtr
+AuthorityFactory::createEngineeringDatum(const std::string &code) const {
+    auto res = d->runWithCodeParam(
+        "SELECT name, publication_date, "
+        "anchor, anchor_epoch, deprecated FROM "
+        "engineering_datum WHERE auth_name = ? AND code = ?",
+        code);
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("engineering datum not found",
+                                           d->authority(), code);
+    }
+    try {
+        const auto &row = res.front();
+        const auto &name = row[0];
+        const auto &publication_date = row[1];
+        const auto &anchor = row[2];
+        const auto &anchor_epoch = row[3];
+        const bool deprecated = row[4] == "1";
+        auto props = d->createPropertiesSearchUsages("engineering_datum", code,
+                                                     name, deprecated);
+
+        if (!publication_date.empty()) {
+            props.set("PUBLICATION_DATE", publication_date);
+        }
+        if (!anchor_epoch.empty()) {
+            props.set("ANCHOR_EPOCH", anchor_epoch);
+        }
+        auto anchorOpt = util::optional<std::string>();
+        if (!anchor.empty())
+            anchorOpt = anchor;
+        return datum::EngineeringDatum::create(props, anchorOpt);
+    } catch (const std::exception &ex) {
+        throw buildFactoryException("engineering datum", d->authority(), code,
+                                    ex);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Returns a datum::DatumEnsemble from the specified code.
  *
  * @param code Object code allocated by authority.
@@ -5092,20 +5149,27 @@ AuthorityFactory::createDatumEnsemble(const std::string &code,
  */
 
 datum::DatumNNPtr AuthorityFactory::createDatum(const std::string &code) const {
-    auto res =
-        d->run("SELECT 'geodetic_datum' FROM geodetic_datum WHERE "
-               "auth_name = ? AND code = ? "
-               "UNION ALL SELECT 'vertical_datum' FROM vertical_datum WHERE "
-               "auth_name = ? AND code = ?",
-               {d->authority(), code, d->authority(), code});
+    auto res = d->run(
+        "SELECT 'geodetic_datum' FROM geodetic_datum WHERE "
+        "auth_name = ? AND code = ? "
+        "UNION ALL SELECT 'vertical_datum' FROM vertical_datum WHERE "
+        "auth_name = ? AND code = ? "
+        "UNION ALL SELECT 'engineering_datum' FROM engineering_datum "
+        "WHERE "
+        "auth_name = ? AND code = ?",
+        {d->authority(), code, d->authority(), code, d->authority(), code});
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("datum not found", d->authority(),
                                            code);
     }
-    if (res.front()[0] == "geodetic_datum") {
+    const auto &type = res.front()[0];
+    if (type == "geodetic_datum") {
         return createGeodeticDatum(code);
     }
-    return createVerticalDatum(code);
+    if (type == "vertical_datum") {
+        return createVerticalDatum(code);
+    }
+    return createEngineeringDatum(code);
 }
 
 // ---------------------------------------------------------------------------
@@ -5496,6 +5560,61 @@ AuthorityFactory::createVerticalCRS(const std::string &code) const {
                                cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
         throw buildFactoryException("verticalCRS", d->authority(), code, ex);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a crs::EngineeringCRS from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
+ * @since 9.6
+ */
+
+crs::EngineeringCRSNNPtr
+AuthorityFactory::createEngineeringCRS(const std::string &code) const {
+    const auto cacheKey(d->authority() + code);
+    auto crs = d->context()->d->getCRSFromCache(cacheKey);
+    if (crs) {
+        auto engCRS = std::dynamic_pointer_cast<crs::EngineeringCRS>(crs);
+        if (engCRS) {
+            return NN_NO_CHECK(engCRS);
+        }
+        throw NoSuchAuthorityCodeException("engineeringCRS not found",
+                                           d->authority(), code);
+    }
+    auto res = d->runWithCodeParam(
+        "SELECT name, coordinate_system_auth_name, "
+        "coordinate_system_code, datum_auth_name, datum_code, "
+        "deprecated FROM "
+        "engineering_crs WHERE auth_name = ? AND code = ?",
+        code);
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("engineeringCRS not found",
+                                           d->authority(), code);
+    }
+    try {
+        const auto &row = res.front();
+        const auto &name = row[0];
+        const auto &cs_auth_name = row[1];
+        const auto &cs_code = row[2];
+        const auto &datum_auth_name = row[3];
+        const auto &datum_code = row[4];
+        const bool deprecated = row[5] == "1";
+        auto cs =
+            d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
+        auto datum = d->createFactory(datum_auth_name)
+                         ->createEngineeringDatum(datum_code);
+        auto props = d->createPropertiesSearchUsages("engineering_crs", code,
+                                                     name, deprecated);
+        auto crsRet = crs::EngineeringCRS::create(props, datum, cs);
+        d->context()->d->cache(cacheKey, crsRet);
+        return crsRet;
+    } catch (const std::exception &ex) {
+        throw buildFactoryException("engineeringCRS", d->authority(), code, ex);
     }
 }
 
@@ -5915,6 +6034,9 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
     }
     if (type == PROJECTED) {
         return createProjectedCRS(code);
+    }
+    if (type == ENGINEERING) {
+        return createEngineeringCRS(code);
     }
     if (allowCompound && type == COMPOUND) {
         return createCompoundCRS(code);
@@ -8445,7 +8567,7 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
         break;
     case ObjectType::DATUM:
         sql = "SELECT code FROM object_view WHERE table_name IN "
-              "('geodetic_datum', 'vertical_datum') AND ";
+              "('geodetic_datum', 'vertical_datum', 'engineering_datum') AND ";
         break;
     case ObjectType::GEODETIC_REFERENCE_FRAME:
         sql = "SELECT code FROM geodetic_datum WHERE ";
@@ -8460,6 +8582,9 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
     case ObjectType::DYNAMIC_VERTICAL_REFERENCE_FRAME:
         sql = "SELECT code FROM vertical_datum WHERE "
               "frame_reference_epoch IS NOT NULL AND ";
+        break;
+    case ObjectType::ENGINEERING_DATUM:
+        sql = "SELECT code FROM engineering_datum WHERE ";
         break;
     case ObjectType::CRS:
         sql = "SELECT code FROM crs_view WHERE ";
@@ -8493,6 +8618,9 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
         break;
     case ObjectType::COMPOUND_CRS:
         sql = "SELECT code FROM compound_crs WHERE ";
+        break;
+    case ObjectType::ENGINEERING_CRS:
+        sql = "SELECT code FROM engineering_crs WHERE ";
         break;
     case ObjectType::COORDINATE_OPERATION:
         sql =
@@ -8554,7 +8682,8 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
     for (const auto &row : sqlRes) {
         const auto &tableName = row[1];
         if (tableName == "geodetic_crs" || tableName == "projected_crs" ||
-            tableName == "vertical_crs" || tableName == "compound_crs") {
+            tableName == "vertical_crs" || tableName == "compound_crs" ||
+            tableName == "engineering_crs") {
             return row[0];
         } else if (text.empty()) {
             text = row[0];
@@ -8654,6 +8783,16 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
         sql += "WHERE c.auth_name = ? ";
         params.emplace_back(d->authority());
     }
+    // FIXME: we can't handle non-EARTH compound CRS for now
+    sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'engineering', "
+           "c.deprecated, "
+           "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
+           "a.description, NULL, 'Earth' FROM engineering_crs c ";
+    sql += getSqlArea("engineering_crs");
+    if (d->hasAuthorityRestriction()) {
+        sql += "WHERE c.auth_name = ? ";
+        params.emplace_back(d->authority());
+    }
     sql += ") r ORDER BY auth_name, code";
     auto sqlRes = d->run(sql, params);
     std::list<AuthorityFactory::CRSInfo> res;
@@ -8677,6 +8816,8 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
             info.type = AuthorityFactory::ObjectType::VERTICAL_CRS;
         } else if (type == COMPOUND) {
             info.type = AuthorityFactory::ObjectType::COMPOUND_CRS;
+        } else if (type == ENGINEERING) {
+            info.type = AuthorityFactory::ObjectType::ENGINEERING_CRS;
         }
         info.deprecated = row[4] == "1";
         if (row[5].empty()) {
@@ -8980,10 +9121,11 @@ AuthorityFactory::createObjectsFromNameEx(
         if (allowedObjectTypes.empty()) {
             for (const auto &tableName :
                  {"prime_meridian", "ellipsoid", "geodetic_datum",
-                  "vertical_datum", "geodetic_crs", "projected_crs",
-                  "vertical_crs", "compound_crs", "conversion",
-                  "helmert_transformation", "grid_transformation",
-                  "other_transformation", "concatenated_operation"}) {
+                  "vertical_datum", "engineering_datum", "geodetic_crs",
+                  "projected_crs", "vertical_crs", "compound_crs",
+                  "engineering_crs", "conversion", "helmert_transformation",
+                  "grid_transformation", "other_transformation",
+                  "concatenated_operation"}) {
                 if (!(startsWithDUnderscore &&
                       strcmp(tableName, "vertical_datum") == 0)) {
                     res.emplace_back(TableType(tableName, std::string()));
@@ -9005,6 +9147,8 @@ AuthorityFactory::createObjectsFromNameEx(
                     if (!startsWithDUnderscore) {
                         res.emplace_back(
                             TableType("vertical_datum", std::string()));
+                        res.emplace_back(
+                            TableType("engineering_datum", std::string()));
                     }
                     break;
                 case ObjectType::GEODETIC_REFERENCE_FRAME:
@@ -9023,11 +9167,17 @@ AuthorityFactory::createObjectsFromNameEx(
                     res.emplace_back(
                         TableType("vertical_datum", "frame_reference_epoch"));
                     break;
+                case ObjectType::ENGINEERING_DATUM:
+                    res.emplace_back(
+                        TableType("engineering_datum", std::string()));
+                    break;
                 case ObjectType::CRS:
                     res.emplace_back(TableType("geodetic_crs", std::string()));
                     res.emplace_back(TableType("projected_crs", std::string()));
                     res.emplace_back(TableType("vertical_crs", std::string()));
                     res.emplace_back(TableType("compound_crs", std::string()));
+                    res.emplace_back(
+                        TableType("engineering_crs", std::string()));
                     break;
                 case ObjectType::GEODETIC_CRS:
                     res.emplace_back(TableType("geodetic_crs", std::string()));
@@ -9053,6 +9203,10 @@ AuthorityFactory::createObjectsFromNameEx(
                     break;
                 case ObjectType::COMPOUND_CRS:
                     res.emplace_back(TableType("compound_crs", std::string()));
+                    break;
+                case ObjectType::ENGINEERING_CRS:
+                    res.emplace_back(
+                        TableType("engineering_crs", std::string()));
                     break;
                 case ObjectType::COORDINATE_OPERATION:
                     res.emplace_back(TableType("conversion", std::string()));
@@ -9342,6 +9496,8 @@ AuthorityFactory::createObjectsFromNameEx(
                         return NN_NO_CHECK(datumEnsemble);
                     }
                     return factory->createVerticalDatum(l_code);
+                } else if (l_table_name == "engineering_datum") {
+                    return factory->createEngineeringDatum(l_code);
                 } else if (l_table_name == "geodetic_crs") {
                     return factory->createGeodeticCRS(l_code);
                 } else if (l_table_name == "projected_crs") {
@@ -9350,6 +9506,8 @@ AuthorityFactory::createObjectsFromNameEx(
                     return factory->createVerticalCRS(l_code);
                 } else if (l_table_name == "compound_crs") {
                     return factory->createCompoundCRS(l_code);
+                } else if (l_table_name == "engineering_crs") {
+                    return factory->createEngineeringCRS(l_code);
                 } else if (l_table_name == "conversion") {
                     return factory->createConversion(l_code);
                 } else if (l_table_name == "grid_transformation" ||
