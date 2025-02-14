@@ -106,6 +106,12 @@ tolerance   1 mm
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
 expect      3541657.9522 948983.7911 5201383.2230 2020.5
 
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_FI_EUREF-FIN
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.9522 948983.7911 5201383.2230 2020.5
+
 
 operation   urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_FI
 tolerance   1 mm
@@ -117,6 +123,13 @@ expect      3541657.3989 948984.2274 5201383.5235 2020.5
 # 2020 Transformations
 
 operation   urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_FI
+tolerance   0.1 mm
+
+# DEGE
+accept      2994012.0569   1112559.9272   5502272.0863 2015.0
+expect      2994012.5170   1112559.5902   5502271.7683 2015.0
+
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_FI_EUREF-FIN
 tolerance   0.1 mm
 
 # DEGE
