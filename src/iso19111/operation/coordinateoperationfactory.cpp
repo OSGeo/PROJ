@@ -46,6 +46,7 @@
 #include "coordinateoperation_internal.hpp"
 #include "coordinateoperation_private.hpp"
 #include "oputils.hpp"
+#include "vectorofvaluesparams.hpp"
 
 // PROJ include order is sensitive
 // clang-format off
@@ -3708,6 +3709,31 @@ CoordinateOperationFactory::Private::createOperations(
     if (boundDst && compoundSrc) {
         return applyInverse(createOperations(targetCRS, targetEpoch, sourceCRS,
                                              sourceEpoch, context));
+    }
+
+    if (dynamic_cast<const crs::EngineeringCRS *>(sourceCRS.get()) &&
+        sourceCRS->_isEquivalentTo(targetCRS.get())) {
+        std::string name("Identity transformation from ");
+        name += sourceCRS->nameStr();
+        name += " to ";
+        name += targetCRS->nameStr();
+        res.push_back(Transformation::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY, name)
+                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                     metadata::Extent::WORLD),
+            sourceCRS, targetCRS, nullptr,
+            createMethodMapNameEPSGCode(
+                EPSG_CODE_METHOD_CARTESIAN_GRID_OFFSETS),
+            VectorOfParameters{
+                createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_EASTING_OFFSET),
+                createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_NORTHING_OFFSET),
+            },
+            VectorOfValues{
+                common::Length(0),
+                common::Length(0),
+            },
+            {metadata::PositionalAccuracy::create("0")}));
     }
 
     return res;

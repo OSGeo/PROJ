@@ -1294,8 +1294,11 @@ static void suggestCompletion(const std::vector<std::string> &args) {
 #endif
             const auto candidateHorizCRS = factory->createObjectsFromName(
                 candidateHorizCRSName,
-                {AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS,
-                 AuthorityFactory::ObjectType::PROJECTED_CRS},
+                {
+                    AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS,
+                    AuthorityFactory::ObjectType::PROJECTED_CRS,
+                    AuthorityFactory::ObjectType::ENGINEERING_CRS,
+                },
                 /* approximateMatch = */ true,
                 /* limitResultCount = */ 2);
             if (!candidateHorizCRS.empty()) {
@@ -1853,6 +1856,8 @@ int main(int argc, char **argv) {
                 types.insert(AuthorityFactory::ObjectType::PROJECTED_CRS);
             } else if (ci_equal(token, "compound")) {
                 types.insert(AuthorityFactory::ObjectType::COMPOUND_CRS);
+            } else if (ci_equal(token, "engineering")) {
+                types.insert(AuthorityFactory::ObjectType::ENGINEERING_CRS);
             } else {
                 std::cerr << "Unrecognized value for option --list-crs: "
                           << token << std::endl;

@@ -1928,3 +1928,9 @@ tests:
 - args: completion projinfo "\"Mauritania 1999" "/" UTM zone 29N "+"
   out: |
     EGM2008\ height MSL\ height MSL\ depth EGM96\ height EGM84\ height Instantaneous\ Water\ Level\ height Instantaneous\ Water\ Level\ depth LAT\ depth LLWLT\ depth ISLW\ depth MLLWS\ depth MLWS\ depth MLLW\ depth MLW\ depth MHW\ height MHHW\ height MHWS\ height HHWLT\ height HAT\ height Low\ Water\ depth High\ Water\ height MSL\ height\ (ft) MSL\ depth\ (ft)
+- args: -s "Christmas Island Grid 1985" -t "GDA94 / MGA zone 48" -o PROJ -q
+  out: |
+    +proj=affine +xoff=550015 +yoff=8780001
+- args: -s "Christmas Island Grid 1985" -t "Christmas Island Grid 1985" -o PROJ -q
+  out: |
+    +proj=noop
