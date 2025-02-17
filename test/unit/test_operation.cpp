@@ -4360,19 +4360,21 @@ TEST(operation, adams_ws2_export) {
     auto crs = AuthorityFactory::create(dbContext, "ESRI")
                    ->createProjectedCRS("54098");
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=adams_ws2 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m "
-              "+no_defs +type=crs");
+              "+proj=spilhaus +lat_0=0 +lon_0=0 +azi=0 +k_0=1.4142135623731 "
+              "+rot=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, adams_ws2_export_failure) {
+TEST(operation, spilhaus_esri_export) {
     auto dbContext = DatabaseContext::create();
     // ESRI:54099 WGS_1984_Spilhaus_Ocean_Map_in_Square
     auto crs = AuthorityFactory::create(dbContext, "ESRI")
                    ->createProjectedCRS("54099");
-    EXPECT_THROW(crs->exportToPROJString(PROJStringFormatter::create().get()),
-                 FormattingException);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=spilhaus +lat_0=-49.56371678 +lon_0=66.94970198 "
+              "+azi=40.17823482 +k_0=1.4142135623731 +rot=45 "
+              "+x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
