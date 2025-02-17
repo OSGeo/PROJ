@@ -4366,11 +4366,51 @@ TEST(operation, adams_ws2_export) {
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, adams_ws2_export_failure) {
+TEST(operation, spilhaus_esri_export_failure) {
     auto dbContext = DatabaseContext::create();
     // ESRI:54099 WGS_1984_Spilhaus_Ocean_Map_in_Square
     auto crs = AuthorityFactory::create(dbContext, "ESRI")
                    ->createProjectedCRS("54099");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=spilhaus +k_0=1.4142135623731 +datum=WGS84 +units=m "
+              "+no_defs +type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, adams_ws2_export_failure) {
+    auto wkt = "PROJCRS[\"test\",\n"
+               "    BASEGEOGCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"Degree\",0.0174532925199433]]],\n"
+               "    CONVERSION[\"test\",\n"
+               "        METHOD[\"Adams_Square_II\"],\n"
+               "        PARAMETER[\"False_Easting\",0,\n"
+               "            LENGTHUNIT[\"metre\",1]],\n"
+               "        PARAMETER[\"False_Northing\",0,\n"
+               "            LENGTHUNIT[\"metre\",1]],\n"
+               "        PARAMETER[\"Scale_Factor\",1,\n"
+               "            SCALEUNIT[\"unity\",1]],\n"
+               "        PARAMETER[\"Azimuth\",40.17823482,\n"
+               "            ANGLEUNIT[\"Degree\",0.0174532925199433]],\n"
+               "        PARAMETER[\"Longitude_Of_Center\",66.94970198,\n"
+               "            ANGLEUNIT[\"Degree\",0.0174532925199433]],\n"
+               "        PARAMETER[\"Latitude_Of_Center\",-49.56371678,\n"
+               "            ANGLEUNIT[\"Degree\",0.0174532925199433]],\n"
+               "        PARAMETER[\"XY_Plane_Rotation\",0,\n" // Spilhaus is 45
+               "            ANGLEUNIT[\"Degree\",0.0174532925199433]]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"(E)\",east,\n"
+               "            ORDER[1],\n"
+               "            LENGTHUNIT[\"metre\",1]],\n"
+               "        AXIS[\"(N)\",north,\n"
+               "            ORDER[2],\n"
+               "            LENGTHUNIT[\"metre\",1]]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     EXPECT_THROW(crs->exportToPROJString(PROJStringFormatter::create().get()),
                  FormattingException);
 }

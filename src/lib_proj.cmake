@@ -141,6 +141,7 @@ set(SRC_LIBPROJ_PROJECTIONS
   projections/calcofi.cpp
   projections/eqearth.cpp
   projections/col_urban.cpp
+  projections/spilhaus.cpp
 )
 
 set(SRC_LIBPROJ_CONVERSIONS
@@ -226,6 +227,7 @@ set(SRC_LIBPROJ_CORE
   initcache.cpp
   internal.cpp
   inv.cpp
+  latitudes.cpp
   list.cpp
   log.cpp
   malloc.cpp

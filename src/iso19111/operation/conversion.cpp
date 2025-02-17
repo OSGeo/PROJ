@@ -4126,17 +4126,29 @@ void Conversion::_exportToPROJString(
             "Latitude_Of_Center", common::UnitOfMeasure::DEGREE);
         const double XYPlaneRotation = parameterValueNumeric(
             "XY_Plane_Rotation", common::UnitOfMeasure::DEGREE);
-        if (scaleFactor != 1.0 || azimuth != 0.0 || latitudeOfCenter != 0.0 ||
-            XYPlaneRotation != 0.0) {
+        if (scaleFactor == 1.0 && std::fabs(azimuth - 40.17823482) <= 1e-8 &&
+            std::fabs(longitudeOfCenter - 66.94970198) <= 1e-8 &&
+            std::fabs(latitudeOfCenter - -49.56371678) <= 1e-8 &&
+            std::fabs(XYPlaneRotation - 45) <= 1e-8) {
+            // ESRI:54099 WGS_1984_Spilhaus_Ocean_Map_in_Square
+            formatter->addStep("spilhaus");
+            // ESRI implementation differs from PROJ one by a sqrt(2) factor
+            // Cf
+            // https://github.com/OSGeo/PROJ/issues/1851#issuecomment-2638222300
+            formatter->addParam("k_0", M_SQRT2);
+            bConversionDone = true;
+        } else if (scaleFactor == 1.0 && azimuth == 0.0 &&
+                   latitudeOfCenter == 0.0 && XYPlaneRotation == 0.0) {
+            formatter->addStep("adams_ws2");
+            formatter->addParam("lon_0", longitudeOfCenter);
+            formatter->addParam("x_0", falseEasting);
+            formatter->addParam("y_0", falseNorthing);
+            bConversionDone = true;
+        } else {
             throw io::FormattingException("Unsupported value for one or "
                                           "several parameters of "
                                           "Adams_Square_II");
         }
-        formatter->addStep("adams_ws2");
-        formatter->addParam("lon_0", longitudeOfCenter);
-        formatter->addParam("x_0", falseEasting);
-        formatter->addParam("y_0", falseNorthing);
-        bConversionDone = true;
     } else if (ci_equal(methodName,
                         PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_SQUARE) ||
                ci_equal(methodName,
