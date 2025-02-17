@@ -875,10 +875,13 @@ specializations
 specialized
 Spectroradiometer
 spherification
+spilhaus
+Spilhaus
 splitted
 spx
 sql
 sqlite
+sqrt
 src
 srs
 standardised
