@@ -135,25 +135,30 @@ PJ *PJ_PROJECTION(spilhaus) {
                    ? pj_param(P->ctx, P->params, ("r" + name).c_str()).f
                    : def * DEG_TO_RAD;
     };
+
     // Values from https://github.com/OSGeo/PROJ/issues/1851
-    const double lat_center = param_rad("lat_c", -49.56371678);
-    const double lon_center = param_rad("lon_c", 66.94970198);
+    if (!pj_param(P->ctx, P->params, "tlon_0").i) {
+        P->lam0 = 66.94970198 * DEG_TO_RAD;
+    }
+    if (!pj_param(P->ctx, P->params, "tlat_0").i) {
+        P->phi0 = -49.56371678 * DEG_TO_RAD;
+    }
     const double azimuth = param_rad("azi", 40.17823482);
 
     const double rotation = param_rad("rot", 45);
     Q->cosrot = cos(rotation);
     Q->sinrot = sin(rotation);
 
-    const double conformal_lat_center = pj_conformal_lat(lat_center, P->e);
+    const double conformal_lat_center = pj_conformal_lat(P->phi0, P->e);
 
     Q->sinalpha = -cos(conformal_lat_center) * cos(azimuth);
     Q->cosalpha = sqrt(1 - Q->sinalpha * Q->sinalpha);
-    Q->lambda_0 = lon_center + atan2(tan(azimuth), -sin(conformal_lat_center));
+    Q->lambda_0 = atan2(tan(azimuth), -sin(conformal_lat_center));
     Q->beta = M_PI + atan2(-sin(azimuth), -tan(conformal_lat_center));
 
-    Q->conformal_distortion =
-        cos(lat_center) / sqrt(1 - P->es * sin(lat_center) * sin(lat_center)) /
-        cos(conformal_lat_center);
+    Q->conformal_distortion = cos(P->phi0) /
+                              sqrt(1 - P->es * sin(P->phi0) * sin(P->phi0)) /
+                              cos(conformal_lat_center);
 
     P->fwd = spilhaus_forward;
     P->inv = spilhaus_inverse;

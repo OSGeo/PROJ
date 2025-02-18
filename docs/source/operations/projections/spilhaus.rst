@@ -35,7 +35,7 @@ Parameters
 
 .. note:: All parameters are optional.
 
-.. option:: +lon_c=<value>
+.. option:: +lon_0=<value>
 
     Longitude of projection centre.
 
@@ -49,7 +49,7 @@ Parameters
 
         See :ref:`Projection Units <projection_units>` for more information.
 
-.. option:: +lat_c=<value>
+.. option:: +lat_0=<value>
 
     Latitude of projection centre.
 
