@@ -760,6 +760,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1392','UZGD2024','EPSG'
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1394','BES2020','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1395','Sint Eustatius','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1399','ITRF2020-u2023','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1402','LibRef21','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -8061,3 +8062,4 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10747','Sint Eustatius / 
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10764','Bonaire DPnet + Bonaire KADpeil','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10764','Bonaire / Bonaire TM + Bonaire height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10773','SIRGAS 2000 / RPTM','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10765','Bonaire 2004 + Bonaire KADpeil','EPSG');

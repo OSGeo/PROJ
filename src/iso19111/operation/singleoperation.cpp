@@ -4884,7 +4884,9 @@ PointMotionOperation::substitutePROJAlternativeGridNames(
 
     std::string filename;
     if (methodEPSGCode ==
-        EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL) {
+            EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NEU_DOMAIN_NTV2_VEL) {
         const auto &fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
                            EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
@@ -5055,7 +5057,9 @@ void PointMotionOperation::_exportToPROJString(
 
     const int methodEPSGCode = method()->getEPSGCode();
     if (methodEPSGCode ==
-        EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL) {
+            EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NEU_DOMAIN_NTV2_VEL) {
         if (!sourceCoordinateEpoch().has_value()) {
             throw io::FormattingException(
                 "CoordinateOperationNNPtr::_exportToPROJString() unimplemented "

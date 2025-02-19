@@ -1051,6 +1051,7 @@ const struct MethodNameCode methodNameCodesList[] = {
     METHOD_NAME_CODE(VERTICALGRID_PL_TXT),
     // PointMotionOperation
     METHOD_NAME_CODE(POINT_MOTION_BY_GRID_CANADA_NTV2_VEL),
+    METHOD_NAME_CODE(POINT_MOTION_BY_GRID_CANADA_NEU_DOMAIN_NTV2_VEL),
 };
 
 const MethodNameCode *getMethodNameCodes(size_t &nElts) {
@@ -1684,6 +1685,10 @@ static const MethodMapping gOtherMethodMappings[] = {
     {EPSG_NAME_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL,
      EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL, nullptr, nullptr,
      nullptr, paramsPointMotionOperationByVelocityGrid},
+
+    {EPSG_NAME_METHOD_POINT_MOTION_BY_GRID_CANADA_NEU_DOMAIN_NTV2_VEL,
+     EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NEU_DOMAIN_NTV2_VEL, nullptr,
+     nullptr, nullptr, paramsPointMotionOperationByVelocityGrid},
 };
 
 const MethodMapping *getOtherMethodMappings(size_t &nElts) {
