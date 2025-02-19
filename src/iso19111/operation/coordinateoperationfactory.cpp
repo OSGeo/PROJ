@@ -4301,8 +4301,8 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
                         dynamic_cast<const crs::VerticalCRS *>(
                             op->targetCRS().get());
                     if (opTargetCRS &&
-                        opTargetCRS->datum()->_isEquivalentTo(
-                            vertDst->datum().get(),
+                        opTargetCRS->datumNonNull(dbContext)->_isEquivalentTo(
+                            vertDst->datumNonNull(dbContext).get(),
                             util::IComparable::Criterion::EQUIVALENT)) {
                         transformationsForGridMatchingDatum.push_back(op);
                     }

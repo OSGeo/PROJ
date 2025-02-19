@@ -8389,6 +8389,93 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
+TEST(operation,
+     compoundCRS_of_vertCRS_with_geoid_model_by_name_and_datum_ensemble) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto wkt =
+        "COMPOUNDCRS[\"Compound CRS OSGB36 / British National Grid + ODN "
+        "height + PROJ uk_os_OSGM15_GB.tif\",\n"
+        "    PROJCRS[\"OSGB36 / British National Grid\",\n"
+        "        BASEGEOGCRS[\"OSGB36\",\n"
+        "            DATUM[\"Ordnance Survey of Great Britain 1936\",\n"
+        "                ELLIPSOID[\"Airy 1830\",6377563.396,299.3249646,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",4277]],\n"
+        "        CONVERSION[\"British National Grid\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural origin\",49,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",-2,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural "
+        "origin\",0.9996012717,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",400000,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",-100000,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8807]]],\n"
+        "        CS[Cartesian,2],\n"
+        "            AXIS[\"(E)\",east,\n"
+        "                ORDER[1],\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            AXIS[\"(N)\",north,\n"
+        "                ORDER[2],\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "        USAGE[\n"
+        "            SCOPE[\"Engineering survey, topographic mapping.\"],\n"
+        "            AREA[\"United Kingdom (UK) - offshore to boundary of UKCS "
+        "within 49°45'N to 61°N and 9°W to 2°E; onshore Great Britain "
+        "(England, Wales and Scotland). Isle of Man onshore.\"],\n"
+        "            BBOX[49.75,-9.01,61.01,2.01]],\n"
+        "        ID[\"EPSG\",27700]],\n"
+        "    VERTCRS[\"ODN height + PROJ uk_os_OSGM15_GB.tif\",\n"
+        "        VDATUM[\"Ordnance Datum Newlyn\",\n"
+        "            ID[\"EPSG\",5101]],\n"
+        "        CS[vertical,1],\n"
+        "            AXIS[\"gravity-related height (H)\",up,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "        GEOIDMODEL[\"PROJ uk_os_OSGM15_GB.tif\"]]]";
+    auto srcObj =
+        createFromUserInput(wkt, authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("4936")->promoteTo3D(
+            std::string(), authFactory->databaseContext()); // ETRS89 geocentric
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), dst, ctxt);
+    ASSERT_TRUE(!list.empty());
+    auto op_proj =
+        list[0]->exportToPROJString(PROJStringFormatter::create().get());
+    EXPECT_STREQ(op_proj.c_str(),
+                 "+proj=pipeline "
+                 "+step +inv +proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 "
+                 "+x_0=400000 +y_0=-100000 +ellps=airy "
+                 "+step +proj=hgridshift "
+                 "+grids=uk_os_OSTN15_NTv2_OSGBtoETRS.tif "
+                 "+step +proj=vgridshift "
+                 "+grids=uk_os_OSGM15_GB.tif +multiplier=1 "
+                 "+step +proj=cart +ellps=GRS80");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_of_bound_horizCRS_and_bound_vertCRS_to_geogCRS) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
