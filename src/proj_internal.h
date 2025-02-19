@@ -922,6 +922,9 @@ double pj_sinhpsi2tanphi(PJ_CONTEXT *, const double, const double);
 double *pj_authset(double);
 double pj_authlat(double, double *);
 
+double pj_conformal_lat(double phi, double e);
+double pj_conformal_lat_inverse(double chi, double e, double threshold);
+
 COMPLEX pj_zpoly1(COMPLEX, const COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, const COMPLEX *, int, COMPLEX *);
 

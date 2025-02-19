@@ -1346,6 +1346,18 @@
         "delta_cut": 1e7
     },
     {
+        "filename": "spilhaus.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "spilhaus",
+        "projstring": "+proj=spilhaus",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
         "filename": "stere.png",
         "latmax": 90.0,
         "latmin": 50.0,
