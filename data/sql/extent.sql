@@ -3766,3 +3766,5 @@ INSERT INTO "extent" VALUES('EPSG','4786','Uzbekistan - 66°E to 72°E','Uzbekis
 INSERT INTO "extent" VALUES('EPSG','4787','Uzbekistan - east of 72°E','Uzbekistan - east of 72°E.',40.26,41.21,72.0,73.17,0);
 INSERT INTO "extent" VALUES('EPSG','4788','BES Islands - Sint Eustatius - onshore','Bonaire, Sint Eustatius and Saba (BES Islands or Caribbean Netherlands) - Sint Eustatius - onshore.',17.41,17.58,-63.05,-62.88,0);
 INSERT INTO "extent" VALUES('EPSG','4789','Brazil - Ribeirao Preto municipality','Brazil - Ribeirao Preto municipality, Sao Paulo state.',-21.37,-21.06,-47.99,-47.64,0);
+INSERT INTO "extent" VALUES('EPSG','4793','Liberia - east of 12°W','Liberia - onshore, and offshore east of 12°W.',1.02,8.52,-12.0,-7.36,0);
+INSERT INTO "extent" VALUES('EPSG','4794','Liberia - west of 12°W','Liberia - offshore west of 12°W.',3.12,6.4,-13.59,-12.0,0);

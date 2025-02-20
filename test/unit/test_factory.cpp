@@ -1491,8 +1491,8 @@ TEST(factory,
         "                    ORDER[3],\n"
         "                    LENGTHUNIT[\"metre\",1]],\n"
         "            ID[\"EPSG\",8254]]],\n"
-        "    METHOD[\"Point motion by grid (NTv2_Vel)\",\n"
-        "        ID[\"EPSG\",1070]],\n"
+        "    METHOD[\"Point motion by grid (NEU domain) (NTv2_Vel)\",\n"
+        "        ID[\"EPSG\",1141]],\n"
         "    PARAMETERFILE[\"Point motion velocity grid "
         "file\",\"NAD83v70VG.gvb\"],\n"
         "    OPERATIONACCURACY[0.01],\n"
@@ -1508,7 +1508,10 @@ TEST(factory,
         "    REMARK[\"File initially published with name cvg70.cvb, later "
         "renamed to NAD83v70VG.gvb with no change of content. Replaces Canada "
         "velocity grid v6 (code 8676). Replaced by Canada velocity grid v8 "
-        "(code 10707).\"]]";
+        "(code 10707). Although the interpolation CRS is given as "
+        "NAD83(CSRS)v7 (also known as NAD83(CSRS) 2010), any version of "
+        "NAD83(CSRS) may be used for grid interpolation without significant "
+        "error.\"]]";
 
     EXPECT_EQ(
         pmo->exportToWKT(

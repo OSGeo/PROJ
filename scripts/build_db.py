@@ -807,9 +807,10 @@ def fill_grid_transformation(proj_db_cursor):
         # 1135: Geog3D to Geog2D+GravityRelatedHeight (NGS bin)
         # 1137: Vertical Offset by TIN Interpolation (JSON)
         # 1138: Cartesian Grid Offsets by TIN Interpolation (JSON)
+        # 1141: Point motion by grid (NEU domain) (NTv2_Vel)
         # WARNING: update Transformation::isGeographic3DToGravityRelatedHeight()
         # in src/iso19111/operation/singleoperation.cpp if adding new methods
-        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1100, 1101, 1103, 1105, 1110, 1112, 1113, 1114, 1115, 1118, 1122, 1124, 1126, 1128, 1129, 1135, 1137, 1138) and n_params == 2:
+        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1100, 1101, 1103, 1105, 1110, 1112, 1113, 1114, 1115, 1118, 1122, 1124, 1126, 1128, 1129, 1135, 1137, 1138, 1141) and n_params == 2:
             assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0

@@ -7612,6 +7612,12 @@ INSERT INTO "projected_crs" VALUES('EPSG','10759','Bonaire DPnet',NULL,'EPSG','1
 INSERT INTO "usage" VALUES('EPSG','22169','projected_crs','EPSG','10759','EPSG','3822','EPSG','1056');
 INSERT INTO "projected_crs" VALUES('EPSG','10773','SIRGAS 2000 / Ribeirao Preto Local TM',NULL,'EPSG','4400','EPSG','4674','EPSG','10772',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','22381','projected_crs','EPSG','10773','EPSG','4789','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','10788','WGS 84 / Agriculture Canada Albers',NULL,'EPSG','4400','EPSG','4326','EPSG','10751',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22473','projected_crs','EPSG','10788','EPSG','4752','EPSG','1292');
+INSERT INTO "projected_crs" VALUES('EPSG','10801','LibRef21 / UTM zone 28N',NULL,'EPSG','4400','EPSG','10800','EPSG','16028',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22447','projected_crs','EPSG','10801','EPSG','4794','EPSG','1029');
+INSERT INTO "projected_crs" VALUES('EPSG','10802','LibRef21 / UTM zone 29N',NULL,'EPSG','4400','EPSG','10800','EPSG','16029',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22448','projected_crs','EPSG','10802','EPSG','4793','EPSG','1056');
 INSERT INTO "projected_crs" VALUES('EPSG','11114','MAGNA-SIRGAS 2018 / Colombia Far West zone',NULL,'EPSG','4500','EPSG','20046','EPSG','18065',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18947','projected_crs','EPSG','11114','EPSG','3091','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','11115','MAGNA-SIRGAS 2018 / Colombia West zone',NULL,'EPSG','4500','EPSG','20046','EPSG','18066',NULL,0);
