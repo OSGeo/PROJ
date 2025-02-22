@@ -7,7 +7,7 @@
 
 <ITRF2000> +proj=helmert +x=0.0007 +y=0.0012 +z=-0.0261 +s=0.00212 +dx=0.0001 +dy=0.0001 +dz=-0.0019 +ds=0.00011 +t_epoch=2010.0 +convention=position_vector
 
-<ITRF97> +proj=helmert +x=0.0074 +y=-0.0005 +z=-0.0628 +d=0.0038 +rz=0.00026 +dx0.0001	+dy=-0.0005 +dz=-0.0033	+ds=0.00012 +drz=0.00002 +t_epoch=2010.0 +convention=position_vector
+<ITRF97> +proj=helmert +x=0.0074 +y=-0.0005 +z=-0.0628 +s=0.0038 +rz=0.00026 +dx0.0001	+dy=-0.0005 +dz=-0.0033	+ds=0.00012 +drz=0.00002 +t_epoch=2010.0 +convention=position_vector
 
 <ITRF96> +proj=helmert +x=0.0074 +y=-0.0005 +z=-0.0628 +s=0.0038 +rz=0.00026 +dx=0.0001 +dy=-0.0005 +dz=-0.0033 +ds=0.00012 +drz=0.00002 +t_epoch=2010.0 +convention=position_vector
 
