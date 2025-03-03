@@ -8063,3 +8063,15 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10764','Bonaire DPnet + B
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10764','Bonaire / Bonaire TM + Bonaire height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10773','SIRGAS 2000 / RPTM','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10765','Bonaire 2004 + Bonaire KADpeil','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10604','1255','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10604','WGS 84 (G2296) - XYZ','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10605','1256','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10605','WGS 84 (G2296) - LatLonEHt','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10606','1257','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10606','WGS 84 (G2296) - LatLon','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10569','1240','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10569','ETRF2020 - XYZ','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10570','1239','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10570','ETRF2020 - LatLonEHt','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10571','1238','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10571','ETRF2020 - LatLonEHt','EPSG');
