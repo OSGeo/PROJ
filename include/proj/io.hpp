@@ -926,6 +926,8 @@ class PROJ_GCC_DLL DatabaseContext {
     PROJ_INTERNAL std::string
     getProjGridName(const std::string &oldProjGridName);
 
+    PROJ_INTERNAL void invalidateGridInfo(const std::string &projFilename);
+
     PROJ_INTERNAL std::string getOldProjGridName(const std::string &gridName);
 
     PROJ_INTERNAL std::string

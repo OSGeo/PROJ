@@ -35,6 +35,12 @@
 #include "proj_internal.h"
 #include <proj.h>
 
+#ifndef FROM_PROJ_CPP
+#define FROM_PROJ_CPP
+#endif
+
+#include "proj/internal/io_internal.hpp"
+
 #include <sqlite3.h>
 #include <time.h>
 
@@ -1869,12 +1875,41 @@ TEST(networking, download_whole_files) {
     proj_context_set_enable_network(nullptr, false);
 
     auto ctx = proj_context_create();
+
+    auto dbContext = ctx->get_cpp_context()->getDatabaseContext();
+    std::string fullFilename;
+    std::string packageName;
+    std::string url;
+    bool directDownload;
+    bool openLicense;
+    bool gridAvailable = false;
+    EXPECT_FALSE(dbContext->lookForGridInfo(
+        "dk_sdfe_dvr90.tif", false, fullFilename, packageName, url,
+        directDownload, openLicense, gridAvailable));
+    EXPECT_FALSE(gridAvailable);
+
     proj_context_set_enable_network(ctx, true);
 
     ASSERT_TRUE(proj_is_download_needed(ctx, "dk_sdfe_dvr90.tif", false));
 
+    char out_full_filename[1024];
+    EXPECT_FALSE(pj_find_file(ctx, "dk_sdfe_dvr90.tif", out_full_filename,
+                              sizeof(out_full_filename)));
+    EXPECT_STREQ(out_full_filename, "");
+
     ASSERT_TRUE(
         proj_download_file(ctx, "dk_sdfe_dvr90.tif", false, nullptr, nullptr));
+
+    EXPECT_TRUE(pj_find_file(ctx, "dk_sdfe_dvr90.tif", out_full_filename,
+                             sizeof(out_full_filename)));
+    EXPECT_NE(out_full_filename[0], 0);
+
+    // lookForGridInfo() returns false because the grid is not known in the DB,
+    // but it returns gridAvailable as it is found on the system.
+    EXPECT_FALSE(dbContext->lookForGridInfo(
+        "dk_sdfe_dvr90.tif", false, fullFilename, packageName, url,
+        directDownload, openLicense, gridAvailable));
+    EXPECT_TRUE(gridAvailable);
 
     FILE *f = fopen("proj_test_tmp/dk_sdfe_dvr90.tif", "rb");
     ASSERT_NE(f, nullptr);

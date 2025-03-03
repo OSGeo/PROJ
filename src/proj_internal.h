@@ -784,7 +784,7 @@ struct projFileApiCallbackAndData {
 };
 
 /* proj thread context */
-struct pj_ctx {
+struct PROJ_GCC_DLL pj_ctx {
     std::string lastFullErrorMessage{}; // used by proj_context_errno_string
     int last_errno = 0;
     int debug_level = PJ_LOG_ERROR;
@@ -841,7 +841,7 @@ struct pj_ctx {
 
     pj_ctx &operator=(const pj_ctx &) = delete;
 
-    projCppContext *get_cpp_context();
+    projCppContext PROJ_FOR_TEST *get_cpp_context();
     void set_search_paths(const std::vector<std::string> &search_paths_in);
     void set_ca_bundle_path(const std::string &ca_bundle_path_in);
 
@@ -1035,8 +1035,10 @@ bool pj_log_active(PJ_CONTEXT *ctx, int level);
 void pj_log(PJ_CONTEXT *ctx, int level, const char *fmt, ...);
 void pj_stderr_logger(void *, int, const char *);
 
-int pj_find_file(PJ_CONTEXT *ctx, const char *short_filename,
-                 char *out_full_filename, size_t out_full_filename_size);
+// PROJ_DLL for tests
+int PROJ_DLL pj_find_file(PJ_CONTEXT *ctx, const char *short_filename,
+                          char *out_full_filename,
+                          size_t out_full_filename_size);
 
 // To remove when PROJ_LIB definitely goes away
 void PROJ_DLL pj_stderr_proj_lib_deprecation_warning();

@@ -45,6 +45,7 @@
 #include "filemanager.hpp"
 #include "proj.h"
 #include "proj/internal/internal.hpp"
+#include "proj/internal/io_internal.hpp"
 #include "proj/internal/lru_cache.hpp"
 #include "proj_internal.h"
 #include "sqlite3_utils.hpp"
@@ -2335,6 +2336,17 @@ int proj_is_download_needed(PJ_CONTEXT *ctx, const char *url_or_filename,
 
 // ---------------------------------------------------------------------------
 
+static NS_PROJ::io::DatabaseContextPtr nfm_getDBcontext(PJ_CONTEXT *ctx) {
+    try {
+        return ctx->get_cpp_context()->getDatabaseContext().as_nullable();
+    } catch (const std::exception &e) {
+        pj_log(ctx, PJ_LOG_DEBUG, "%s", e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** Download a file in the PROJ user-writable directory.
  *
  * The file will only be downloaded if it does not exist yet in the
@@ -2383,12 +2395,28 @@ int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
     }
 
     const auto url(build_url(ctx, url_or_filename));
-    const char *filename = strrchr(url.c_str(), '/');
-    if (filename == nullptr)
+    const char *lastSlash = strrchr(url.c_str(), '/');
+    if (lastSlash == nullptr)
         return false;
     const auto localFilename(
         std::string(proj_context_get_user_writable_directory(ctx, true)) +
-        filename);
+        lastSlash);
+
+    // Evict potential existing (empty) entry from ctx->lookupedFiles if we
+    // have tried previously from accessing the non-existing local file.
+    // Cf https://github.com/OSGeo/PROJ/issues/4397
+    {
+        const char *short_filename = lastSlash + 1;
+        auto iter = ctx->lookupedFiles.find(short_filename);
+        if (iter != ctx->lookupedFiles.end()) {
+            ctx->lookupedFiles.erase(iter);
+        }
+
+        auto dbContext = nfm_getDBcontext(ctx);
+        if (dbContext) {
+            dbContext->invalidateGridInfo(short_filename);
+        }
+    }
 
 #ifdef _WIN32
     const int nPID = GetCurrentProcessId();
