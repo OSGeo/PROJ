@@ -828,6 +828,8 @@ struct DatabaseContext::Private {
     // cppcheck-suppress functionStatic
     bool getGridInfoFromCache(const std::string &code, GridInfoCache &info);
     // cppcheck-suppress functionStatic
+    void evictGridInfoFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
     void cache(const std::string &code, const GridInfoCache &info);
 
     struct VersionedAuthName {
@@ -1227,6 +1229,12 @@ void DatabaseContext::Private::cache(const std::string &code,
 bool DatabaseContext::Private::getGridInfoFromCache(const std::string &code,
                                                     GridInfoCache &info) {
     return cacheGridInfo_.tryGet(code, info);
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::evictGridInfoFromCache(const std::string &code) {
+    cacheGridInfo_.remove(code);
 }
 
 // ---------------------------------------------------------------------------
@@ -3351,6 +3359,31 @@ bool DatabaseContext::lookForGridAlternative(const std::string &officialName,
 
 // ---------------------------------------------------------------------------
 
+static std::string makeCachedGridKey(const std::string &projFilename,
+                                     bool networkEnabled,
+                                     bool considerKnownGridsAsAvailable) {
+    std::string key(projFilename);
+    key += networkEnabled ? "true" : "false";
+    key += considerKnownGridsAsAvailable ? "true" : "false";
+    return key;
+}
+
+// ---------------------------------------------------------------------------
+
+/** Invalidates information related to projFilename that might have been
+ * previously cached by lookForGridInfo().
+ *
+ * This is useful when downloading a new grid during a session.
+ */
+void DatabaseContext::invalidateGridInfo(const std::string &projFilename) {
+    d->evictGridInfoFromCache(makeCachedGridKey(projFilename, false, false));
+    d->evictGridInfoFromCache(makeCachedGridKey(projFilename, false, true));
+    d->evictGridInfoFromCache(makeCachedGridKey(projFilename, true, false));
+    d->evictGridInfoFromCache(makeCachedGridKey(projFilename, true, true));
+}
+
+// ---------------------------------------------------------------------------
+
 bool DatabaseContext::lookForGridInfo(
     const std::string &projFilename, bool considerKnownGridsAsAvailable,
     std::string &fullFilename, std::string &packageName, std::string &url,
@@ -3374,9 +3407,9 @@ bool DatabaseContext::lookForGridInfo(
         d->setPjCtxt(ctxt);
     }
 
-    std::string key(projFilename);
-    key += proj_context_is_network_enabled(ctxt) ? "true" : "false";
-    key += considerKnownGridsAsAvailable ? "true" : "false";
+    const std::string key(makeCachedGridKey(
+        projFilename, proj_context_is_network_enabled(ctxt) != false,
+        considerKnownGridsAsAvailable));
     if (d->getGridInfoFromCache(key, info)) {
         fullFilename = info.fullFilename;
         packageName = info.packageName;

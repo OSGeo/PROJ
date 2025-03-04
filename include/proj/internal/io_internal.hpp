@@ -175,7 +175,7 @@ NS_PROJ_END
 // ---------------------------------------------------------------------------
 
 /** Auxiliary structure to PJ_CONTEXT storing C++ context stuff. */
-struct projCppContext {
+struct PROJ_GCC_DLL projCppContext {
   private:
     NS_PROJ::io::DatabaseContextPtr databaseContext_{};
     PJ_CONTEXT *ctx_ = nullptr;
@@ -208,7 +208,7 @@ struct projCppContext {
         return auxDbPaths_;
     }
 
-    NS_PROJ::io::DatabaseContextNNPtr getDatabaseContext();
+    NS_PROJ::io::DatabaseContextNNPtr PROJ_FOR_TEST getDatabaseContext();
 
     void closeDb() { databaseContext_ = nullptr; }
 };
