@@ -55,15 +55,8 @@ Update `NEWS.md` with descriptions of the changes since the last release.
 Hopefully issues and pull requests that go into the new release have been
 properly tagged with the milestone for the current release.
 
-End the section by thanking the authors that contributed to the release. Get a
-sorted list of contributors in descending order of activity:
-
-```sh
-git shortlog -sn x.y.z..HEAD | tac | awk '{$1=""; print $0}'
-```
-
-where `x.y.z` is the tag of the previous release. You may need to edit the list
-slightly since not all authors has properly configured their names in git.
+`scripts/releasenotes.py` can be used to create a first draft of the release
+notes.
 
 *Commit the changes to master.*
 
