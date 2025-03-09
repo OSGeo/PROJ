@@ -557,6 +557,18 @@
         "type": "poly"
     },
     {
+        "filename": "healpix.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "healpix",
+        "projstring": "+proj=healpix",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
         "filename": "igh.png",
         "latmax": 90,
         "latmin": -90,
@@ -1277,6 +1289,18 @@
         "projstring": "+proj=qsc",
         "res": "low",
         "type": "poly"
+    },
+    {
+        "filename": "rhealpix.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "rhealpix",
+        "projstring": "+proj=rhealpix",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "robin.png",
