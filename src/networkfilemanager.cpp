@@ -1696,7 +1696,8 @@ static double GetNewRetryDelay(int response_code, double dfOldDelay,
         (response_code == 400 && pszErrBuf &&
          strstr(pszErrBuf, "RequestTimeout")) ||
         (pszCurlError && strstr(pszCurlError, "Connection reset by peer")) ||
-        (pszCurlError && strstr(pszCurlError, "Connection timed out"))) {
+        (pszCurlError && strstr(pszCurlError, "Connection timed out")) ||
+        (pszCurlError && strstr(pszCurlError, "SSL connection timeout"))) {
         // Use an exponential backoff factor of 2 plus some random jitter
         // We don't care about cryptographic quality randomness, hence:
         // coverity[dont_call]
