@@ -75,6 +75,8 @@
 
 * Fix typo in parameter for ITRF97 in ITRF2014 file (#4408)
 
+* Retry on "SSL connection timeout" (#4419)
+
 
 ## 9.5.1
 
