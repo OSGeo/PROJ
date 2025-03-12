@@ -156,6 +156,13 @@ include(ProjConfig)
 include(ProjMac)
 include(policies)
 
+##############################################
+### SWITCH BETWEEN STATIC OR SHARED LIBRARY###
+##############################################
+
+# default config is shared
+option(BUILD_SHARED_LIBS "Build PROJ library shared." ON)
+
 ################################################################################
 # Check for nlohmann_json
 ################################################################################
@@ -368,6 +375,9 @@ function (is_sharp_embed_available res)
 endfunction()
 
 is_sharp_embed_available(IS_SHARP_EMBED_AVAILABLE_RES)
+if (NOT DEFINED BUILD_SHARED_LIBS)
+    message(FATAL_ERROR "BUILD_SHARED_LIBS should be set")
+endif()
 if (NOT BUILD_SHARED_LIBS)
     set(DEFAULT_EMBED_RESOURCE_FILES ON)
 else()
