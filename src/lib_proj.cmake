@@ -1,13 +1,5 @@
 message(STATUS "Configuring proj library:")
 
-##############################################
-### SWITCH BETWEEN STATIC OR SHARED LIBRARY###
-##############################################
-
-# default config is shared
-option(BUILD_SHARED_LIBS
-  "Build PROJ library shared." ON)
-
 find_package(Threads QUIET)
 if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
   add_definitions(-DPROJ_HAS_PTHREADS)
