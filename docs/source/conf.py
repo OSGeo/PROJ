@@ -31,7 +31,8 @@ release = "9.6.0"
 # PROJ-data version
 data_version = "1.21"
 
-today_date = date.today() # or use a specific date
+#today_date = date.today()
+today_date = date(2025, 3, 15)  # or use a specific date
 today_fmt = "%d %b %Y"
 
 copyright = "1983-{}, PROJ contributors".format(today_date.year)
@@ -135,7 +136,7 @@ html_context = {
     "theme_vcs_pageview_mode": "edit",
     "github_user": "OSGeo",
     "github_repo": "PROJ",
-    "github_version": "master",
+    "github_version": "9.6",
     "conf_py_path": "/docs/source/",
 }
 
