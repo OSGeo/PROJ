@@ -26,8 +26,8 @@ Download
 Current Release
 --------------------------------------------------------------------------------
 
-* **2024-12-01** `proj-9.5.1.tar.gz`_ (`md5`_)
-* **2024-12-01** `proj-data-1.20.tar.gz`_
+* **2025-03-15** `proj-9.6.0.tar.gz`_ (`md5`_)
+* **2025-03-15** `proj-data-1.21.tar.gz`_
 
 .. note::
 
@@ -40,6 +40,7 @@ Current Release
 Past Releases
 --------------------------------------------------------------------------------
 
+* **2024-12-01** `proj-9.5.1.tar.gz`_
 * **2024-09-15** `proj-9.5.0.tar.gz`_
 * **2024-06-01** `proj-9.4.1.tar.gz`_
 * **2024-03-01** `proj-9.4.0.tar.gz`_
@@ -79,6 +80,7 @@ Past Releases
 * **2015-09-13** `proj-4.9.2.tar.gz`_
 * **2015-03-04** `proj-4.9.1.tar.gz`_
 
+* **2024-12-01** `proj-data-1.20.tar.gz`_
 * **2024-09-15** `proj-data-1.19.tar.gz`_
 * **2024-06-01** `proj-data-1.18.tar.gz`_
 * **2024-06-01** `proj-data-1.17.tar.gz`_
@@ -120,7 +122,8 @@ Past Releases
 * **2018-03-01** `proj-datumgrid-oceania-1.1.zip`_
 * **2018-03-01** `proj-datumgrid-oceania-1.0.zip`_
 
-.. _`md5`: https://download.osgeo.org/proj/proj-9.5.1.tar.gz.md5
+.. _`md5`: https://download.osgeo.org/proj/proj-9.6.0.tar.gz.md5
+.. _`proj-9.6.0.tar.gz`: https://download.osgeo.org/proj/proj-9.6.0.tar.gz
 .. _`proj-9.5.1.tar.gz`: https://download.osgeo.org/proj/proj-9.5.1.tar.gz
 .. _`proj-9.5.0.tar.gz`: https://download.osgeo.org/proj/proj-9.5.0.tar.gz
 .. _`proj-9.4.1.tar.gz`: https://download.osgeo.org/proj/proj-9.4.1.tar.gz
@@ -162,6 +165,7 @@ Past Releases
 .. _`proj-4.9.2.tar.gz`: https://download.osgeo.org/proj/proj-4.9.2.tar.gz
 .. _`proj-4.9.3.tar.gz`: https://download.osgeo.org/proj/proj-4.9.3.tar.gz
 
+.. _`proj-data-1.21.tar.gz`: https://download.osgeo.org/proj/proj-data-1.21.tar.gz
 .. _`proj-data-1.20.tar.gz`: https://download.osgeo.org/proj/proj-data-1.20.tar.gz
 .. _`proj-data-1.19.tar.gz`: https://download.osgeo.org/proj/proj-data-1.19.tar.gz
 .. _`proj-data-1.18.tar.gz`: https://download.osgeo.org/proj/proj-data-1.18.tar.gz
