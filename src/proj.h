@@ -174,7 +174,7 @@ extern "C" {
 
 /* The version numbers should be updated with every release! **/
 #define PROJ_VERSION_MAJOR 9
-#define PROJ_VERSION_MINOR 6
+#define PROJ_VERSION_MINOR 7
 #define PROJ_VERSION_PATCH 0
 
 /* Note: the following 3 defines have been introduced in PROJ 8.0.1 */

@@ -26,7 +26,7 @@ author = "PROJ contributors"
 version = "9.6"
 
 # The full project version, used as the replacement for |release|
-release = "9.6.0"
+release = "9.7.0-dev"
 
 # PROJ-data version
 data_version = "1.21"
