@@ -3,6 +3,85 @@
 News
 ###############################################################################
 
+9.6.0
+++++++++++++++++++++
+*March 15th 2025*
+
+Updates
+-------
+
+* :program:`projinfo`: display whether an operation is time-dependent (`#4255 <https://github.com/OSGeo/PROJ/issues/4255>`_)
+
+* Add CMake options ``EMBED_RESOURCE_FILES`` and ``USE_ONLY_EMBEDDED_RESOURCE_FILES`` for ``proj.db`` and ``proj.ini`` embedding (`#4265 <https://github.com/OSGeo/PROJ/issues/4265>`_, `#4274 <https://github.com/OSGeo/PROJ/issues/4274>`_)
+
+* Database: ingest deprecated ESRI names to be able to better import old WKT ESRI (`#4282 <https://github.com/OSGeo/PROJ/issues/4282>`_)
+
+* :c:func:`proj_factors()`: enhance speed when called repeatedly on same compound or projected CRS (`#4289 <https://github.com/OSGeo/PROJ/issues/4289>`_)
+
+* Add Airocean projection (formerly Dymaxion) (`#4303 <https://github.com/OSGeo/PROJ/issues/4303>`_)
+
+* :cpp:func:`createOperations()`: Optimization by avoiding database lookups for CRS (typically PROJ strings) using unknown datums (`#4320 <https://github.com/OSGeo/PROJ/issues/4320>`_)
+
+* PROJJSON export: for a Projected CRS, add an explicit type=GeographicCRS/GeodeticCRS members to the base_crs member (`#4331 <https://github.com/OSGeo/PROJ/issues/4331>`_)
+
+* :c:func:`proj_trans_bounds()`: make it work when target CRS is a CompoundCRS (`#4333 <https://github.com/OSGeo/PROJ/issues/4333>`_)
+
+* :cpp:func:`createOperations()`: do Helmert transformation in 2D when one of source or target CRS is compound (`#4337 <https://github.com/OSGeo/PROJ/issues/4337>`_)
+
+* Map EPSG method 'Vertical Offset by Grid Interpolation (asc)' to ``+proj=vgridshift`` (`#4344 <https://github.com/OSGeo/PROJ/issues/4344>`_)
+
+* Add support for 'Coordinate Frame rotation full matrix (geocen)' and Coordinate Frame rotation full matrix (geog2D)' methods (`#4348 <https://github.com/OSGeo/PROJ/issues/4348>`_)
+
+* Add a CMake ``EMBED_RESOURCE_DIRECTORY`` option to embed .tif/.json files in to libproj (`#4349 <https://github.com/OSGeo/PROJ/issues/4349>`_, `#4373 <https://github.com/OSGeo/PROJ/issues/4373>`_)
+
+* Take into account new EPSG methods 'Cartesian Grid Offsets by TIN Interpolation (JSON)' and 'Vertical Offset by TIN Interpolation (JSON)' (`#4353 <https://github.com/OSGeo/PROJ/issues/4353>`_)
+
+* Added an option ``native_ca`` to ``proj.ini`` and an environment variable :envvar:`PROJ_NATIVE_CA` to be able to configure curl to use the operating system CA store. (`#4356 <https://github.com/OSGeo/PROJ/issues/4356>`_)
+
+* Database: add an optional ``step_direction`` column to the ``concatenated_operation_step`` table (`#4357 <https://github.com/OSGeo/PROJ/issues/4357>`_)
+
+* Database: replicate EGM2008 grid transformation record to WGS 84 realizations (`#4363 <https://github.com/OSGeo/PROJ/issues/4363>`_)
+
+* Improve ETRFxxx to ETRFyyy, and WGS 84 (xxx) to WGS 84 (yyy) (`#4364 <https://github.com/OSGeo/PROJ/issues/4364>`_)
+
+* Build: Update to C++17 version (`#4366 <https://github.com/OSGeo/PROJ/issues/4366>`_, `#4369 <https://github.com/OSGeo/PROJ/issues/4369>`_)
+
+* Add bash completion script for projinfo (`#4371 <https://github.com/OSGeo/PROJ/issues/4371>`_)
+
+* Dispatch content of ``4D_api.cpp`` into multiple .cpp files (`#4393 <https://github.com/OSGeo/PROJ/issues/4393>`_)
+
+* Add :c:func:`proj_trans_bounds_3D()` (`#4394 <https://github.com/OSGeo/PROJ/issues/4394>`_)
+
+* Database: add a ``engineering_datum`` and ``engineering_crs`` tables; import few related EPSG records (`#4396 <https://github.com/OSGeo/PROJ/issues/4396>`_)
+
+* NKG transformations: Add support for EUREF-FIN in Finish transformations (`#4399 <https://github.com/OSGeo/PROJ/issues/4399>`_)
+
+* Add Spilhaus projection (`#4401 <https://github.com/OSGeo/PROJ/issues/4401>`_)
+
+* Export ESRI:54099 `WGS_1984_Spilhaus_Ocean_Map_in_Square` as PROJ string (`#4402 <https://github.com/OSGeo/PROJ/issues/4402>`_)
+
+* Database: update to EPSG v12.004 (`#4413 <https://github.com/OSGeo/PROJ/issues/4413>`_)
+
+* :c:func:`proj_download_file()`: invalidate in-memory caches related to downloaded file (for the current context) (`#4414 <https://github.com/OSGeo/PROJ/issues/4414>`_)
+
+
+Bug Fixes
+---------
+
+* :cpp:func:`createObjectsFromName()`: be more tolerant about N/S vs North/South, absence of zone or height (`#4318 <https://github.com/OSGeo/PROJ/issues/4318>`_)
+
+* :cpp:func:`createFromPROJString`: avoid repeated openings of proj.db and proj.ini and lookup of 'epsg' (`#4334 <https://github.com/OSGeo/PROJ/issues/4334>`_)
+
+* Debugging/internals: append sub-grid index to grid name when opening a multi-grid TIFF file (`#4381 <https://github.com/OSGeo/PROJ/issues/4381>`_)
+
+* :cpp:func:`createOperations()`: use more appropriate operation when using a 'PROJ {grid_name}' geoid model, based on matching the vertical datum (`#4379 <https://github.com/OSGeo/PROJ/issues/4379>`_)
+
+* :c:func:`proj_clone()`: properly propagate ``errorIfBestTransformationNotAvailable`` and other flags from source object (`#4382 <https://github.com/OSGeo/PROJ/issues/4382>`_)
+
+* Inverse ``+proj=cass``: fix non-convergence on inputs where easting=false_easting or northing=false_northing (`#4386 <https://github.com/OSGeo/PROJ/issues/4386>`_)
+
+* Fix typo in parameter for ITRF97 in ITRF2014 file (`#4408 <https://github.com/OSGeo/PROJ/issues/4408>`_)
+
 9.5.1. Release Notes
 ++++++++++++++++++++
 *December 1st 2024*
