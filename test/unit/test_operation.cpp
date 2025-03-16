@@ -1416,6 +1416,30 @@ TEST(operation, tmerc_south_oriented_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, tmerc_south_oriented_export_esri_102470) {
+
+    // South Orientated TMerc presented as regular TMerc but with
+    // Scale_Factor=-1
+    auto wkt = "PROJCS[\"Cape_Lo15\",GEOGCS[\"GCS_Cape\",DATUM[\"D_Cape\","
+               "SPHEROID[\"Clarke_1880_Arc\",6378249.145,293.4663077]],"
+               "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Transverse_Mercator\"],"
+               "PARAMETER[\"False_Easting\",0.0],"
+               "PARAMETER[\"False_Northing\",0.0],"
+               "PARAMETER[\"Central_Meridian\",15.0],"
+               "PARAMETER[\"Scale_Factor\",-1.0],"
+               "PARAMETER[\"Latitude_Of_Origin\",0.0],"
+               "UNIT[\"Meter\",1.0]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=tmerc +axis=wsu +lat_0=0 +lon_0=15 +k=1 +x_0=0 +y_0=0 "
+              "+a=6378249.145 +rf=293.4663077 +units=m +no_defs +type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, tped_export) {
     auto conv = Conversion::createTwoPointEquidistant(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
