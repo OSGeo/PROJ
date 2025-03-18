@@ -273,6 +273,7 @@ doxygentypedef
 duplicateBreak
 d'utilisation
 dx
+Dymaxion
 dy
 eastBoundLongitude
 easting
@@ -365,6 +366,7 @@ generalization
 generalized
 geobotanical
 geoc
+geocen
 geocent
 geocentriques
 geod
@@ -373,10 +375,12 @@ Geodesie
 Geodesique
 geodesist
 geodesists
+GeodeticCRS
 geodeticCRS
 geodtest
 GEOGCRS
 geogoffset
+GeographicCRS
 geographicCRS
 Geographique
 geographiques
@@ -1030,12 +1034,14 @@ xmin
 xml
 xoff
 xxxNNPtr
+xxx
 xxxx
 XXXX
 xyzgridshift
 ymax
 ymin
 yoff
+yyy
 yyyymmdd
 Zajaç
 zenodo
