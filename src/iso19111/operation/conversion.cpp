@@ -3891,6 +3891,8 @@ void Conversion::_exportToPROJString(
     bool bConversionDone = false;
     bool bEllipsoidParametersDone = false;
     bool useApprox = false;
+    bool insertAxisWSU = false;
+    bool negateScaleFactor = false;
     if (methodEPSGCode == EPSG_CODE_METHOD_TRANSVERSE_MERCATOR) {
         // Check for UTM
         int zone = 0;
@@ -3909,7 +3911,29 @@ void Conversion::_exportToPROJString(
             if (!north) {
                 formatter->addParam("south");
             }
+        } else if (l_targetCRS &&
+                   parameterValueNumeric(
+                       EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+                       common::UnitOfMeasure::SCALE_UNITY) < 0 &&
+                   parameterValueNumeric(EPSG_CODE_PARAMETER_FALSE_EASTING,
+                                         common::UnitOfMeasure::METRE) == 0 &&
+                   parameterValueNumeric(EPSG_NAME_PARAMETER_FALSE_NORTHING,
+                                         common::UnitOfMeasure::METRE) == 0) {
+            // Deal with ESRI:102470 that use Transverse Mercator with k=-1
+            // to indicate a westing-southing coordinate system, by inserting a
+            // +axis=wsu and changing k to 1.
+            auto projCRS =
+                dynamic_cast<const crs::ProjectedCRS *>(l_targetCRS.get());
+            if (projCRS) {
+                const auto &axisList = projCRS->coordinateSystem()->axisList();
+                if (axisList[0]->direction() == cs::AxisDirection::EAST &&
+                    axisList[1]->direction() == cs::AxisDirection::NORTH) {
+                    insertAxisWSU = true;
+                    negateScaleFactor = true;
+                }
+            }
         }
+
     } else if (methodEPSGCode ==
                EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A) {
         const double azimuth =
@@ -4289,6 +4313,10 @@ void Conversion::_exportToPROJString(
                 }
             }
 
+            if (insertAxisWSU) {
+                formatter->addParam("axis", "wsu");
+            }
+
             if (mapping->epsg_code ==
                 EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B) {
                 double latitudeStdParallel = parameterValueNumeric(
@@ -4336,6 +4364,11 @@ void Conversion::_exportToPROJString(
                     strcmp(param->proj_name, "lat_1") == 0) {
                     formatter->addParam(param->proj_name, valueConverted);
                     formatter->addParam("lat_0", valueConverted);
+                } else if (
+                    negateScaleFactor &&
+                    param->epsg_code ==
+                        EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN) {
+                    formatter->addParam(param->proj_name, -valueConverted);
                 } else {
                     formatter->addParam(param->proj_name, valueConverted);
                 }
