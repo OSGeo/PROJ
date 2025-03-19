@@ -8075,3 +8075,4 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10570','1239','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10570','ETRF2020 - LatLonEHt','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10571','1238','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10571','ETRF2020 - LatLonEHt','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10826','ETRS89 + LAS-2000 height','EPSG');
