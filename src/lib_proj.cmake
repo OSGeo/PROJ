@@ -192,7 +192,6 @@ set(SRC_LIBPROJ_CORE
   aasincos.cpp
   adjlon.cpp
   area.cpp
-  auth.cpp
   coord_operation.cpp
   coordinates.cpp
   create.cpp
@@ -236,7 +235,6 @@ set(SRC_LIBPROJ_CORE
   proj_json_streaming_writer.hpp
   proj_json_streaming_writer.cpp
   proj_mdist.cpp
-  qsfn.cpp
   release.cpp
   rtodms.cpp
   strerrno.cpp

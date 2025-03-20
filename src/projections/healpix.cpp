@@ -224,26 +224,18 @@ static int in_image(double x, double y, int proj, int north_square,
 
 /**
  * Return the authalic latitude of latitude alpha (if inverse=0) or
- * return the approximate latitude of authalic latitude alpha (if inverse=1).
+ * return the latitude of authalic latitude alpha (if inverse=1).
  * P contains the relevant ellipsoid parameters.
  **/
 static double auth_lat(PJ *P, double alpha, int inverse) {
-    struct pj_healpix_data *Q =
-        static_cast<struct pj_healpix_data *>(P->opaque);
+    const struct pj_healpix_data *Q =
+        static_cast<const struct pj_healpix_data *>(P->opaque);
     if (inverse == 0) {
-        /* Authalic latitude. */
-        double q = pj_qsfn(sin(alpha), P->e, 1.0 - P->es);
-        double qp = Q->qp;
-        double ratio = q / qp;
-
-        if (fabs(ratio) > 1) {
-            /* Rounding error. */
-            ratio = sign(ratio);
-        }
-        return asin(ratio);
+        /* Authalic latitude from geographic latitude. */
+        return pj_authalic_lat(sin(alpha), P->e, P->one_es, Q->qp);
     } else {
-        /* Approximation to inverse authalic latitude. */
-        return pj_authlat(alpha, Q->apa);
+        /* Geographic latitude from authalic latitude. */
+        return pj_authalic_lat_inverse_exact(alpha, Q->apa, P, Q->qp);
     }
 }
 
@@ -624,10 +616,12 @@ PJ *PJ_PROJECTION(healpix) {
     Q->rot_xy = PJ_TORAD(angle);
 
     if (P->es != 0.0) {
-        Q->apa = pj_authset(P->es); /* For auth_lat(). */
+        Q->apa = pj_authalic_lat_compute_coeff_for_inverse(
+            P->es); /* For auth_lat(). */
         if (nullptr == Q->apa)
             return pj_healpix_data_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
-        Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
+        Q->qp =
+            pj_authalic_lat_q_coeff(1.0, P->e, P->one_es); /* For auth_lat(). */
         P->a = P->a * sqrt(0.5 * Q->qp); /* Set P->a to authalic radius. */
         pj_calc_ellipsoid_params(
             P, P->a, P->es); /* Ensure we have a consistent parameter set */
@@ -668,10 +662,12 @@ PJ *PJ_PROJECTION(rhealpix) {
             P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     if (P->es != 0.0) {
-        Q->apa = pj_authset(P->es); /* For auth_lat(). */
+        Q->apa = pj_authalic_lat_compute_coeff_for_inverse(
+            P->es); /* For auth_lat(). */
         if (nullptr == Q->apa)
             return pj_healpix_data_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
-        Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
+        Q->qp =
+            pj_authalic_lat_q_coeff(1.0, P->e, P->one_es); /* For auth_lat(). */
         P->a = P->a * sqrt(0.5 * Q->qp); /* Set P->a to authalic radius. */
         P->ra = 1.0 / P->a;
         P->fwd = e_rhealpix_forward;
