@@ -59,6 +59,13 @@ is more complex, involving initial steps projecting from the ellipsoid to anothe
 curved surface, the "aposphere", then projection from the aposphere to the skew
 uv-plane, before finally rectifying the skew uv-plane onto the map XY plane.
 
+.. note::
+    In certain special circumstances of the ellipsoidal form of the Oblique
+    Mercator it is possible for two different input coordinates to project to the
+    same output coordinate. This can happen when the input coordinates are far away
+    from the projection center. A work around is to use the spherical version of the
+    projection instead. See an example in the Usage section below.
+
 
 Usage
 ########
@@ -91,7 +98,7 @@ projections are limiting forms of the Oblique Mercator
 
     $ echo 12 55 | proj +proj=tmerc +R=6400000
     766869.97 6209742.96
-    
+
 Example: Second case - indirectly given azimuth
 
 ::
@@ -115,6 +122,31 @@ The input coordinate represents the System 34 datum point "Agri Bavnehoj", with 
 (200000, 200000) by definition. So at the datum point, the approximation is off by about 17 cm.
 This use case represents a datum shift from a cylinder projection on an old, slightly
 misaligned datum, to a similar projection on a modern datum.
+
+Example: Non-unique results of the ellipsoidal form
+
+::
+
+    proj +proj=omerc +lat_0=0.377041113875403 +lonc=33.8250934444081 +alpha=8.16321575614333 +gamma=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 << EOF
+    -146.23 -78.19112222222222
+    -145.02309217 -78.19112222
+    EOF
+    875464.92       -11348616.86
+    875464.92       -11348616.86
+
+Here we see that two coordinates with roughly a difference in latitude of about
+a degree results in the same projected coordinate. As mention above, a work around
+is to use the spherical form instead:
+
+::
+
+    proj +proj=omerc +lat_0=0.377041113875403 +lonc=33.8250934444081 +alpha=8.16321575614333 +gamma=0 +k=1 +x_0=0 +y_0=0 +ellps=sphere << EOF
+    -146.23 -78.19112222222222
+    -145.02309217 -78.19112222
+    EOF
+    891266.38       -11376037.53
+    863563.62       -11374939.17
+
 
 
 Parameters
@@ -178,7 +210,7 @@ Optional
     No rectification (not "no rotation" as one may well assume).
     Do not take the last step from the skew uv-plane to the map
     XY plane.
-    
+
     .. note:: This option is probably only marginally useful, but remains for (mostly) historical reasons.
 
 .. option:: +no_off
