@@ -73,19 +73,19 @@ double pj_conformal_lat_inverse(double chi, double e, double threshold) {
 // where qp is q at phi=90deg, i.e. qp = pj_authalic_lat_q_coeff(1, e, one_es)
 // Cf  Snyder (3-11) and (3-12)
 double pj_authalic_lat_q_coeff(double sinphi, double e, double one_es) {
-    double con, div1, div2;
-
     constexpr double EPSILON = 1e-7;
     if (e >= EPSILON) {
-        con = e * sinphi;
-        div1 = 1.0 - con * con;
-        div2 = 1.0 + con;
+        const double e_sinphi = e * sinphi;
+        const double one_minus_e_sinphi_sq = 1.0 - e_sinphi * e_sinphi;
 
         /* avoid zero division, fail gracefully */
-        if (div1 == 0.0 || div2 == 0.0)
+        if (one_minus_e_sinphi_sq == 0.0)
             return HUGE_VAL;
 
-        return (one_es * (sinphi / div1 - (.5 / e) * log((1. - con) / div2)));
+        // Snyder uses 0.5 * ln((1-e*sinphi)/(1+e*sinphi) which is
+        // -atanh(e*sinphi)
+        return (one_es *
+                (sinphi / one_minus_e_sinphi_sq + atanh(e_sinphi) / e));
     } else
         return (sinphi + sinphi);
 }
@@ -175,6 +175,13 @@ double pj_authalic_lat_inverse_exact(double beta, const double *APA,
 // This is an improvement over pj_authalic_latitude_inverse_approx() using
 // a Newton iteration to achieve better precision.
 // Cf Snyder (3-16)
+// Given beta, solve
+//   f(phi) = qp*sin(beta)/(1-e^2) - q(phi)/(1-e^2)
+// for phi, where
+//   q(phi)/(1-e^2) = sin(phi)/(1 - e^2*sin(phi)^2) + atanh(e*sin(phi))/e
+// and
+//   df(phi)/dphi = - dq(phi)/dphi / (1-e^2)
+//                = - 2 * (1-e^2) * cos(phi) / (1 - e^2*sinphi^2)^2
 double pj_authalic_lat_inverse_exact(double beta, const double *APA,
                                      const PJ *P, double qp) {
     const double phi_init = pj_authalic_lat_inverse_approx(beta, APA);
@@ -192,8 +199,8 @@ double pj_authalic_lat_inverse_exact(double beta, const double *APA,
             (q_div_one_minus_es - sinphi / one_minus_es_sin2phi -
              atanh(P->e * sinphi) / P->e);
         if (!(fabs(dphi) >= 1e-15))
-            return phi;
+            break;
         phi += dphi;
     }
-    return phi_init;
+    return phi;
 }
