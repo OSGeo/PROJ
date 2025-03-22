@@ -65,6 +65,15 @@ jobs:
           # Do not fail the job. This is just used as a tool to monitor how we are regarding recent cppcheck
           ./scripts/cppcheck.sh || /bin/true
 
+  code_quality_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect missing includes
+        run: ./scripts/detect_missing_include.sh
+
   other_checks:
     runs-on: ubuntu-24.04
     steps:
