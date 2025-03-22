@@ -51,7 +51,7 @@ static PJ_XY eqearth_e_forward(PJ_LP lp,
 
     /* In the ellipsoidal case, we convert sbeta to sine of authalic latitude */
     if (P->es != 0.0) {
-        sbeta = pj_qsfn(sbeta, P->e, 1.0 - P->es) / Q->qp;
+        sbeta = pj_authalic_lat_q_coeff(sbeta, P->e, P->one_es) / Q->qp;
 
         /* Rounding error. */
         if (fabs(sbeta) > 1)
@@ -128,7 +128,7 @@ static PJ_LP eqearth_e_inverse(PJ_XY xy,
 
     /* Ellipsoidal case, converting auth. latitude */
     if (P->es != 0.0)
-        lp.phi = pj_authlat(lp.phi, Q->apa);
+        lp.phi = pj_authalic_lat_inverse_exact(lp.phi, Q->apa, P, Q->qp);
 
     return lp;
 }
@@ -157,10 +157,12 @@ PJ *PJ_PROJECTION(eqearth) {
 
     /* Ellipsoidal case */
     if (P->es != 0.0) {
-        Q->apa = pj_authset(P->es); /* For auth_lat(). */
+        Q->apa = pj_authalic_lat_compute_coeff_for_inverse(
+            P->es); /* For auth_lat(). */
         if (nullptr == Q->apa)
             return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
-        Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
+        Q->qp =
+            pj_authalic_lat_q_coeff(1.0, P->e, P->one_es); /* For auth_lat(). */
         Q->rqda = sqrt(0.5 * Q->qp); /* Authalic radius divided by major axis */
     }
 

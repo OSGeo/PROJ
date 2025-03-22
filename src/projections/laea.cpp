@@ -35,7 +35,7 @@ static PJ_XY laea_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     coslam = cos(lp.lam);
     sinlam = sin(lp.lam);
     sinphi = sin(lp.phi);
-    q = pj_qsfn(sinphi, P->e, P->one_es);
+    q = pj_authalic_lat_q_coeff(sinphi, P->e, P->one_es);
 
     if (Q->mode == pj_laea_ns::OBLIQ || Q->mode == pj_laea_ns::EQUIT) {
         sinb = q / Q->qp;
@@ -181,7 +181,7 @@ static PJ_LP laea_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
         break;
     }
     lp.lam = atan2(xy.x, xy.y);
-    lp.phi = pj_authlat(asin(ab), Q->apa);
+    lp.phi = pj_authalic_lat_inverse_exact(asin(ab), Q->apa, P, Q->qp);
     return lp;
 }
 
@@ -265,9 +265,9 @@ PJ *PJ_PROJECTION(laea) {
         double sinphi;
 
         P->e = sqrt(P->es);
-        Q->qp = pj_qsfn(1., P->e, P->one_es);
+        Q->qp = pj_authalic_lat_q_coeff(1., P->e, P->one_es);
         Q->mmf = .5 / (1. - P->es);
-        Q->apa = pj_authset(P->es);
+        Q->apa = pj_authalic_lat_compute_coeff_for_inverse(P->es);
         if (nullptr == Q->apa)
             return pj_laea_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         switch (Q->mode) {
@@ -283,7 +283,7 @@ PJ *PJ_PROJECTION(laea) {
         case pj_laea_ns::OBLIQ:
             Q->rq = sqrt(.5 * Q->qp);
             sinphi = sin(P->phi0);
-            Q->sinb1 = pj_qsfn(sinphi, P->e, P->one_es) / Q->qp;
+            Q->sinb1 = pj_authalic_lat_q_coeff(sinphi, P->e, P->one_es) / Q->qp;
             Q->cosb1 = sqrt(1. - Q->sinb1 * Q->sinb1);
             Q->dd = cos(P->phi0) /
                     (sqrt(1. - P->es * sinphi * sinphi) * Q->rq * Q->cosb1);
