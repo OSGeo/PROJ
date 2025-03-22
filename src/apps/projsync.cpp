@@ -29,6 +29,7 @@
 
 #define FROM_PROJ_CPP
 
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <limits>

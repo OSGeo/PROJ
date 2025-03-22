@@ -29,6 +29,9 @@
 #error "Should be included only by defmodel.hpp"
 #endif
 
+#include <algorithm>
+#include <limits>
+
 namespace DEFORMATON_MODEL_NAMESPACE {
 
 // ---------------------------------------------------------------------------

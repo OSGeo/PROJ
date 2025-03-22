@@ -28,6 +28,8 @@
 
 #include "gtest_include.h"
 
+#include <limits>
+
 #include "proj/io.hpp"
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
