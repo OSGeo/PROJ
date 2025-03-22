@@ -29,6 +29,8 @@
 #error "Should be included only by tinshift.hpp"
 #endif
 
+#include <algorithm>
+#include <cmath>
 #include <limits>
 
 namespace TINSHIFT_NAMESPACE {

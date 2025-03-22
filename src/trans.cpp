@@ -33,6 +33,9 @@
 #include "proj_internal.h"
 #include <math.h>
 
+#include <cmath>
+#include <limits>
+
 #include "proj/internal/io_internal.hpp"
 
 inline bool pj_coord_has_nans(PJ_COORD coo) {
