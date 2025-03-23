@@ -44,7 +44,7 @@ static PJ_XY spilhaus_forward(PJ_LP lp, PJ *P) {
     struct pj_spilhaus_data *Q =
         static_cast<struct pj_spilhaus_data *>(P->opaque);
 
-    const double phi_c = pj_conformal_lat(lp.phi, P->e);
+    const double phi_c = pj_conformal_lat(lp.phi, P);
     const double cosphi_c = cos(phi_c);
     const double sinphi_c = sin(phi_c);
 
@@ -98,8 +98,7 @@ static PJ_LP spilhaus_inverse(PJ_XY xy, PJ *P) {
              aatan2(cosphi_s * sinlam_s,
                     Q->sinalpha * cosphi_s * coslam_s - Q->cosalpha * sinphi_s);
 
-    const double THRESHOLD = 1e-10;
-    lp.phi = pj_conformal_lat_inverse(lp.phi, P->e, THRESHOLD);
+    lp.phi = pj_conformal_lat_inverse(lp.phi, P);
 
     return lp;
 }
@@ -149,7 +148,7 @@ PJ *PJ_PROJECTION(spilhaus) {
     Q->cosrot = cos(rotation);
     Q->sinrot = sin(rotation);
 
-    const double conformal_lat_center = pj_conformal_lat(P->phi0, P->e);
+    const double conformal_lat_center = pj_conformal_lat(P->phi0, P);
 
     Q->sinalpha = -cos(conformal_lat_center) * cos(azimuth);
     Q->cosalpha = sqrt(1 - Q->sinalpha * Q->sinalpha);
