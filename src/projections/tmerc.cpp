@@ -433,7 +433,7 @@ static PJ_LP exact_e_inv(PJ_XY xy, PJ *P) {
 
         /* Gaussian LAT, LNG -> ell. LAT, LNG */
         lp.phi = pj_auxlat_convert(Cn, sin_Cn/rr, modulus_Ce/rr,
-                                Q->cgb, PROJ_ETMERC_ORDER);
+                                   Q->cgb, PROJ_ETMERC_ORDER);
         lp.lam = Ce;
     } else {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
@@ -446,18 +446,22 @@ static PJ *setup_exact(PJ *P) {
     auto *Q = &(static_cast<struct tmerc_data *>(P->opaque)->exact);
 
     assert(P->es > 0);
-    static_assert( PROJ_ETMERC_ORDER == int(AuxLat::AUXORDER),
+    static_assert( PROJ_ETMERC_ORDER == int(AuxLat::ORDER),
                    "Inconsistent orders etmerc vs auxorder" );
     /* third flattening */
     const double n = P->n;
+
+    // N.B., Engsager and Poder terminology (simplifying a little here...)
+    //   geodetic coordinates = geographic latitude
+    //   Soldner sphere + complex gaussian coordinates = conformal latitude
+    //   transverse Mercator coordinates = rectifying latitude
 
     /* COEF. OF TRIG SERIES GEO <-> GAUSS */
     /* cgb := Gaussian -> Geodetic, KW p190 - 191 (61) - (62) */
     /* cbg := Geodetic -> Gaussian, KW p186 - 187 (51) - (52) */
     /* PROJ_ETMERC_ORDER = 6th degree : Engsager and Poder: ICC2007 */
-
-    pj_auxlat_coeffs(n, AuxLat::CHI, AuxLat::PHI, Q->cgb);
-    pj_auxlat_coeffs(n, AuxLat::PHI, AuxLat::CHI, Q->cbg);
+    pj_auxlat_coeffs(n, AuxLat::CONFORMAL, AuxLat::GEOGRAPHIC, Q->cgb);
+    pj_auxlat_coeffs(n, AuxLat::GEOGRAPHIC, AuxLat::CONFORMAL, Q->cbg);
     /* Constants of the projections */
     /* Transverse Mercator (UTM, ITM, etc) */
     /* Norm. mer. quad, K&W p.50 (96), p.19 (38b), p.5 (2) */
@@ -465,8 +469,8 @@ static PJ *setup_exact(PJ *P) {
     /* coef of trig series */
     /* utg := ell. N, E -> sph. N, E,  KW p194 (65) */
     /* gtu := sph. N, E -> ell. N, E,  KW p196 (69) */
-    pj_auxlat_coeffs(n, AuxLat::MU, AuxLat::CHI, Q->utg);
-    pj_auxlat_coeffs(n, AuxLat::CHI, AuxLat::MU, Q->gtu);
+    pj_auxlat_coeffs(n, AuxLat::RECTIFYING, AuxLat::CONFORMAL, Q->utg);
+    pj_auxlat_coeffs(n, AuxLat::CONFORMAL, AuxLat::RECTIFYING, Q->gtu);
     /* Gaussian latitude value of the origin latitude */
     const double Z = pj_auxlat_convert(P->phi0, Q->cbg, PROJ_ETMERC_ORDER);
 

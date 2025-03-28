@@ -8,7 +8,7 @@
 #include "proj_internal.h"
 
 double pj_sinhpsi2tanphi(PJ_CONTEXT *ctx, const double taup, const double e) {
-    /****************************************************************************
+    /***************************************************************************
      * Convert tau' = sinh(psi) = tan(chi) to tau = tan(phi).  The code is taken
      * from GeographicLib::Math::tauf(taup, e).
      *
@@ -20,9 +20,9 @@ double pj_sinhpsi2tanphi(PJ_CONTEXT *ctx, const double taup, const double e) {
      * chi is the conformal latitude
      *
      * The representation of latitudes via their tangents, tan(phi) and
-     *tan(chi), maintains full *relative* accuracy close to latitude = 0 and +/-
-     *pi/2. This is sometimes important, e.g., to compute the scale of the
-     *transverse Mercator projection which involves cos(phi)/cos(chi) tan(phi)
+     * tan(chi), maintains full *relative* accuracy close to latitude = 0 and
+     * +/- pi/2. This is sometimes important, e.g., to compute the scale of the
+     * transverse Mercator projection which involves cos(phi)/cos(chi) tan(phi)
      *
      * From Karney (2011), Eq. 7,
      *
@@ -76,8 +76,20 @@ double pj_sinhpsi2tanphi(PJ_CONTEXT *ctx, const double taup, const double e) {
      * |chi| < 3.35 deg.  In addition, only 1 iteration is needed for |chi| >
      * 89.18 deg (tau' > 70), if tau = exp(e * atanh(e)) * tau' is used as the
      * starting guess.
-     ****************************************************************************/
-
+     *
+     * For small flattening, |f| <= 1/50, the series expansion in n can be
+     * used:
+     *
+     * Assuming n = e^2 / (1 + sqrt(1 - e^2))^2 is passed as an argument
+     *
+     *   double F[int(AuxLat::AUXORDER)];
+     *   pj_auxlat_coeffs(n, AuxLat::CONFORMAL, AuxLat::GEOGRAPHIC, F);
+     *   double sphi, cphi;
+     *   //                schi                   cchi
+     *   pj_auxlat_convert(taup/hypot(1.0, taup), 1/hypot(1.0, taup),
+     *                     sphi, cphi, F);
+     *   return sphi/cphi;
+     **************************************************************************/
     constexpr int numit = 5;
     // min iterations = 1, max iterations = 2; mean = 1.954
     static const double rooteps = sqrt(std::numeric_limits<double>::epsilon());

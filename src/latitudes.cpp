@@ -81,13 +81,14 @@ double pj_authalic_lat_q(double sinphi, const PJ *P) {
 #define PROJ_AUTHALIC_SERIES_VALID(n) (fabs(n) < 0.01)
 double *pj_authalic_lat_compute_coeffs(double n) {
     double *APA;
-    constexpr int Lmax = int(AuxLat::AUXORDER);
+    constexpr int Lmax = int(AuxLat::ORDER);
     const int APA_SIZE = Lmax * (PROJ_AUTHALIC_SERIES_VALID(n) ? 2 : 1);
     if ((APA = (double *)malloc(APA_SIZE * sizeof(double)))
         != nullptr) {
-        pj_auxlat_coeffs(n, AuxLat::XI, AuxLat::PHI, APA);
+        pj_auxlat_coeffs(n, AuxLat::AUTHALIC, AuxLat::GEOGRAPHIC, APA);
         if (PROJ_AUTHALIC_SERIES_VALID(n))
-            pj_auxlat_coeffs(n, AuxLat::PHI, AuxLat::XI, APA + Lmax);
+            pj_auxlat_coeffs(n, AuxLat::GEOGRAPHIC, AuxLat::AUTHALIC,
+                             APA + Lmax);
     }
     return APA;
 }
@@ -99,8 +100,8 @@ double *pj_authalic_lat_compute_coeffs(double n) {
 double pj_authalic_lat(double phi, double sinphi, double cosphi,
                        const double *APA, const PJ *P, double qp) {
     if (PROJ_AUTHALIC_SERIES_VALID(P->n)) {
-        constexpr int Lmax = int(AuxLat::AUXORDER);
-        return pj_auxlat_convert(phi, sinphi, cosphi, APA + Lmax, Lmax);
+        constexpr int Lmax = int(AuxLat::ORDER);
+        return pj_auxlat_convert(phi, sinphi, cosphi, APA + Lmax);
     } else {
         // This result is ill-conditioned near the poles.  So don't use this if
         // the series are accurate.
@@ -122,7 +123,7 @@ double pj_authalic_lat(double phi, double sinphi, double cosphi,
 // qp = pj_authalic_lat_q(1, P->e, P->one_es)
 double pj_authalic_lat_inverse(double beta, const double *APA,
                                const PJ *P, double qp) {
-    double phi = pj_auxlat_convert(beta, APA, int(AuxLat::AUXORDER));
+    double phi = pj_auxlat_convert(beta, APA);
     if (PROJ_AUTHALIC_SERIES_VALID(P->n))
       return phi;
     // If the flattening is large, solve
@@ -154,37 +155,92 @@ double pj_authalic_lat_inverse(double beta, const double *APA,
 }
 #undef PROJ_AUTHALIC_SERIES_VALID
 
-// Compute the coefficients of the trigonometric series for conversions between
-// auxiliary latitudes.  The coefficients are produced by the Maxima code
-// auxlat.mac bundled with GeographicLib.  Load this file into Maxima and run
-// writecppproj()$ -- this produces the 'static const' declarations below.
-// Only a subset of conversions is provided.  To add others, include them in
-// the list "required" in writecppproj().
+// The following routines pj_auxlat_coeffs, pj_polyvol, pj_clenshaw,
+// pj_auxlat_convert (3 signatures) provide a uniform interface for converting
+// between any pair of auxiliary latitudes using series expansions in the third
+// flattening, n.  There are 6 (= AuxLat::NUMBER) auxiliary latitudes
+// supported labeled by
 //
-// auxin and auxout are one of
+//   AuxLat::GEOGRAPHIC for geographic latitude, phi
+//   AuxLat::PARAMETRIC for parametric latitude, beta
+//   AuxLat::GEOCENTRIC for geocentric latitude, theta
+//   AuxLat::RECTIFYING for rectifying latitude, mu
+//   AuxLat::CONFORMAL for conformal latitude, chi
+//   AuxLat::AUTHALIC for authlatic latitude, xi
 //
-//   AuxLat::GEOGRAPHIC or AuxLat::PHI for geographic latitude
-//   AuxLat::PARAMETRIC or AuxLat::BETA for parametric latitude
-//   AuxLat::GEOCENTRIC or AuxLat::THETA for geocentric latitude
-//   AuxLat::RECTIFYING or AuxLat::MU for rectifying latitude
-//   AuxLat::CONFORMAL or AuxLat::CHI for conformal latitude
-//   AuxLat::AUTHALIC or AuxLat::MU for authlatic latitude
+// This is adapted from
 //
-// The conversions currently supported are
-//   PHI <-> MU for meridian distance
-//   PHI <-> CHI for tmerc
-//   PHI <-> XI for authalic latitude conversions
-//   CHI <-> MU for tmerc
+//   C. F. F. Karney, On auxiliary latitudes,
+//   Survey Review 56, 165-180 (2024)
+//   https://doi.org/10.1080/00396265.2023.2217604
+//   Preprint: https://arxiv.org/abs/2212.05818
 //
-// See C. F. F. Karney, On auxiliary latitudes,
-// Survey Review 56, 165-180 (2024)
-// https://doi.org/10.1080/00396265.2023.2217604
-// Preprint: https://arxiv.org/abs/2212.05818
-void pj_auxlat_coeffs(double n, AuxLat auxin, AuxLat auxout, double c[]) {
+// The typical calling sequence is
+//
+//   constexpr int L = int(AuxLat::ORDER);
+//   // Managing the memory for the coefficent array is the
+//   // responibility of the calling routine.
+//   double F[L];
+//   // Fill F[] with coefficients to convert conformal to geographic
+//   pj_auxlat_coeffs(P->n, AuxLat::CONFORMAL, AuxLat::GEOGRAPHIC, F);
+//   ...
+//   double chi = 1;                 // known conformal latitude
+//   // compute corresponding geographic latitude
+//   double phi = pj_auxlat_convert(chi, F);
+//
+// The conversions are Fourier series in the auxiliary latitude where each
+// coefficient is given as a Taylor series in n truncated at order 6 (=
+// AuxLat::ORDER).  This suffices to give full double precision accuracy for
+// |f| <= 1/150 and probably provide satisfactory results for |f| <= 1/50.  The
+// coefficients for these Taylor series are given by matrics listed in
+// Eqs. (A1-A28) of this paper.
+//
+// These coefficients are bundled up into a single array coeffs in
+// pj_auxlat_coeffs.  Only the upper triangular portion of the matrices are
+// included.  Furthermore, half the coefficients for the conversions between
+// any of phi, bete, theta, and mu are zero (the Taylor series are expansions
+// in n^2), these zero elements are excluded.
+//
+// The coefficent array, coeffs, is machine-generated by the Maxima code
+// auxlat.mac bundled with GeographicLib.  To use
+//
+// * Ensure that Lmax (set near the top of the file) is set to 6 (=
+//   AuxLat::ORDER).
+// * run
+//     $ maxima
+//     Maxima 5.47.0 https://maxima.sourceforge.io
+//     (%i1) load("auxlat.mac")$
+//     (%i2) writecppproj()$
+//     ....
+//     #<CLOSED OUTPUT BUFFERED FILE-STREAM CHARACTER auxvalsproj6.cpp>
+// * The results are in the file auxvalsproj6.cpp
+//
+// Only a subset of the conversion matrices are written out.  To add others,
+// include them in the list "required" in writecppproj().  The conversions
+// currently supported are
+//
+//   phi <-> mu for meridian distance
+//   phi <-> chi for tmerc
+//   phi <-> xi for authalic latitude conversions
+//   chi <-> mu for tmerc
+//
+// Because all the matrices are concatenated together into a single array,
+// coeff, an auxiliary array, ptrs, or length 37 = AUXNUMBER^2 + 1, is written
+// out to give the starting point of any particular matrix.
+//
+// Input:
+//   n -- the third flattening (a-b)/(a+b)
+//   auxin, auxout -- compute the coefficients for converting auxin (zeta) to
+//     auxout (eta).
+// Output:
+//   F -- F[eta,zeta] = C[eta,zeta] . P(n), where C is a matrix of constants
+//     and P(n) = [n, n^2, n^3, ...]^T; the first AuxLat::ORDER elements of F
+//     are filled.
+void pj_auxlat_coeffs(double n, AuxLat auxin, AuxLat auxout, double F[]) {
     // Generated by Maxima on 2025-03-23 19:13:00-04:00
     constexpr int Lmax = 6;
-    static_assert(Lmax == int(AuxLat::AUXORDER),
-                  "Mismatch between maxima and AuxLat::AUXORDER");
+    static_assert(Lmax == int(AuxLat::ORDER),
+                  "Mismatch between maxima and AuxLat::ORDER");
     static const double coeffs[] = {
         // C[phi,phi] skipped
         // C[phi,beta] skipped
@@ -277,15 +333,21 @@ void pj_auxlat_coeffs(double n, AuxLat auxin, AuxLat auxout, double c[]) {
         // C[xi,chi] skipped
         // C[xi,xi] skipped
     };
-    static const int ptrs[] = {
+    static constexpr int ptrs[] = {
         0, 0, 0, 0, 12, 33, 54, 54, 54, 54, 54, 54, 54, 54, 54, 54, 54, 54, 54,
         66, 66, 66, 66, 87, 87, 108, 108, 108, 129, 129, 129, 150, 150, 150,
         150, 150, 150,
     };
-    if (!( auxin >= AuxLat::START && auxin < AuxLat::AUXNUMBER &&
-           auxout >= AuxLat::START && auxout < AuxLat::AUXNUMBER ))
+    static_assert(sizeof(ptrs) / sizeof(int) ==
+                  int(AuxLat::NUMBER) * int(AuxLat::NUMBER) + 1,
+                  "Mismatch in size of ptrs array");
+    static_assert(sizeof(coeffs) / sizeof(double) ==
+                  ptrs[int(AuxLat::NUMBER) * int(AuxLat::NUMBER)],
+                  "Mismatch in size of coeffs array");
+    if (!( auxin >= AuxLat(0) && auxin < AuxLat::NUMBER &&
+           auxout >= AuxLat(0) && auxout < AuxLat::NUMBER ))
         throw std::out_of_range("Bad specification for auxiliary latitude");
-    int k = int(AuxLat::AUXNUMBER) * int(auxout) + int(auxin), o = ptrs[k];
+    int k = int(AuxLat::NUMBER) * int(auxout) + int(auxin), o = ptrs[k];
     if (o == ptrs[k+1])
         throw std::out_of_range
             ("Unsupported conversion between auxiliary latitudes");
@@ -293,14 +355,14 @@ void pj_auxlat_coeffs(double n, AuxLat auxin, AuxLat auxout, double c[]) {
     if (auxin <= AuxLat::RECTIFYING && auxout <= AuxLat::RECTIFYING) {
         for (int l = 0; l < Lmax; ++l) {
             int m = (Lmax - l - 1) / 2; // order of polynomial in n^2
-            c[l] = d * pj_polyval(n2, coeffs + o, m);
+            F[l] = d * pj_polyval(n2, coeffs + o, m);
             o += m + 1;
             d *= n;
         }
     } else {
         for (int l = 0; l < Lmax; ++l) {
             int m = (Lmax - l - 1); // order of polynomial in n
-            c[l] = d * pj_polyval(n, coeffs + o, m);
+            F[l] = d * pj_polyval(n, coeffs + o, m);
             o += m + 1;
             d *= n;
         }
@@ -317,43 +379,51 @@ double pj_polyval(double x, const double p[], int N) {
     return y;
 }
 
-// Evaluate y = sum(c[k] * sin((2*k+2) * zeta), k, 0, K-1) by Clenshaw
-// summation.
-double pj_clenshaw(double szeta, double czeta, const double c[], int K) {
+// Evaluate y = sum(F[k] * sin((2*k+2) * zeta), k, 0, K-1) by Clenshaw
+// summation.  zeta is specify by its sine and cosine, szeta and czeta.
+double pj_clenshaw(double szeta, double czeta, const double F[], int K) {
     // Approx operation count = (K + 5) mult and (2 * K + 2) add
     double u0 = 0, u1 = 0,                         // accumulators for sum
         X = 2 * (czeta - szeta) * (czeta + szeta); // 2 * cos(2*zeta)
     for (; K > 0;) {
-        double t = X * u0 - u1 + c[--K];
+        double t = X * u0 - u1 + F[--K];
         u1 = u0;
         u0 = t;
     }
     return 2 * szeta * czeta * u0; // sin(2*zeta) * u0
 }
 
-// Convert auxiliary latitude zeto to eta, given C[eta, zeta].
+// Convert auxiliary latitude zeta to eta, given coefficients F produced by
+// pj_auxlats_coeffs(n, zeta, eta, F).  K is the size of F (defaults to
+// AuxLat::ORDER).
+double pj_auxlat_convert(double zeta, const double F[], int K) {
+    return pj_auxlat_convert(zeta, sin(zeta), cos(zeta), F, K);
+}
+
+// Convert auxiliary latitude zeta to eta, given coefficients F produced by
+// pj_auxlats_coeffs(n, zeta, eta, F).  In this signature, szeta and czeta (the
+// sine and cosine of zeta) are given as inputs.  K is the size of F (defaults
+// to AuxLat::ORDER).
 double pj_auxlat_convert(double zeta, double szeta, double czeta,
-                         const double c[], int K) {
-    return zeta + pj_clenshaw(szeta, czeta, c, K);
+                         const double F[], int K) {
+    return zeta + pj_clenshaw(szeta, czeta, F, K);
 }
 
-// Convert auxiliary latitude zeto to eta, given C[eta, zeta].
-double pj_auxlat_convert(double zeta, const double c[], int K) {
-    return pj_auxlat_convert(zeta, sin(zeta), cos(zeta), c, K);
-}
-
-// Convert auxiliary latitude zeto to eta, given C[eta, zeta].  In this form
-// the sine and cosine of eta are returned.  This provided high relative
-// accuracy near the poles.
-void pj_auxlat_convert(double szeta, double czeta, const double c[], int K,
-                       double& seta, double& ceta) {
-    double delta = pj_clenshaw(szeta, czeta, c, K),
+// Convert auxiliary latitude zeta to eta, given coefficients F produced by
+// pj_auxlats_coeffs(n, zeta, eta, F).  K is the size of F (defaults to
+// AuxLat::ORDER).  In this signature, the sine and cosine of eta are returned.
+// This provides high relative accuracy near the poles.
+void pj_auxlat_convert(double szeta, double czeta, double& seta, double& ceta,
+                       const double F[], int K) {
+    double delta = pj_clenshaw(szeta, czeta, F, K),
         sdelta = sin(delta), cdelta = cos(delta);
     seta = szeta * cdelta + czeta * sdelta;
     ceta = czeta * cdelta - szeta * sdelta;
 }
 
-// Compute the rectifying radius = quarter meridian / (pi/2 * a)
+// Compute the rectifying radius = quarter meridian / (pi/2 * a).  The accuracy
+// of this series is the same as those used for the computation of the
+// auxiliary latitudes.
 double pj_rectifying_radius(double n) {
     // Expansion of (quarter meridian) / ((a+b)/2 * pi/2) as series in n^2;
     // these coefficients are ( (2*k - 3)!! / (2*k)!! )^2 for k = 0..3

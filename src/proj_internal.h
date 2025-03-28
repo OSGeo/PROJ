@@ -454,24 +454,15 @@ enum class TMercAlgo {
 };
 
 enum class AuxLat {
-  START = 0,
-  GEOGRAPHIC = 0,
-  PARAMETRIC = 1,
-  GEOCENTRIC = 2,
-  RECTIFYING = 3,
-  CONFORMAL  = 4,
-  AUTHALIC   = 5,
-  AUXNUMBER  = 6,
-  PHI = GEOGRAPHIC,
-  BETA = PARAMETRIC,
-  THETA = GEOCENTRIC,
-  MU = RECTIFYING,
-  CHI = CONFORMAL,
-  XI = AUTHALIC,
-  COMMON = GEOGRAPHIC,
-  GEODETIC = GEOGRAPHIC,
-  REDUCED = PARAMETRIC,
-  AUXORDER   = 6,
+  GEOGRAPHIC,                   // 0
+  PARAMETRIC,
+  GEOCENTRIC,
+  RECTIFYING,
+  CONFORMAL,
+  AUTHALIC,
+  NUMBER,  // The number of auxiliary latitudes = 6
+  // The order of the expansion in n (ACCIDENTALLY equal to AUXNUMBER)
+  ORDER = 6,
 };
 
 /* base projection data structure */
@@ -950,14 +941,15 @@ double pj_authalic_lat(double phi, double sinphi, double cosphi,
                        const double *APA, const PJ *P, double qp);
 double pj_authalic_lat_inverse(double beta, const double *APA,
                                const PJ *P, double qp);
-void pj_auxlat_coeffs(double n, AuxLat auxin, AuxLat auxout, double c[]);
+void pj_auxlat_coeffs(double n, AuxLat auxin, AuxLat auxout, double F[]);
 double pj_polyval(double x, const double p[], int N);
-double pj_clenshaw(double szeta, double czeta, const double c[], int K);
+double pj_clenshaw(double szeta, double czeta, const double F[], int K);
 double pj_auxlat_convert(double phi, double sphi, double cphi,
-                      const double c[], int K);
-double pj_auxlat_convert(double phi, const double c[], int K);
-void pj_auxlat_convert(double sphi, double cphi, const double c[], int K,
-                    double& saux, double& caux);
+                         const double F[], int K  = int(AuxLat::ORDER));
+double pj_auxlat_convert(double phi,
+                         const double F[], int K  = int(AuxLat::ORDER));
+void pj_auxlat_convert(double sphi, double cphi, double& saux, double& caux,
+                       const double F[], int K  = int(AuxLat::ORDER));
 double pj_rectifying_radius(double n);
 
 COMPLEX pj_zpoly1(COMPLEX, const COMPLEX *, int);
