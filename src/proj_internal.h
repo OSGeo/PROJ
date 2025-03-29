@@ -453,6 +453,18 @@ enum class TMercAlgo {
     PODER_ENGSAGER,
 };
 
+enum class AuxLat {
+  GEOGRAPHIC,                   // 0
+  PARAMETRIC,
+  GEOCENTRIC,
+  RECTIFYING,
+  CONFORMAL,
+  AUTHALIC,
+  NUMBER,  // The number of auxiliary latitudes = 6
+  // The order of the expansion in n (ACCIDENTALLY equal to AUXNUMBER)
+  ORDER = 6,
+};
+
 /* base projection data structure */
 struct PJconsts {
 
@@ -920,15 +932,25 @@ double PROJ_DLL pj_phi2(PJ_CONTEXT *, const double, const double);
 double pj_sinhpsi2tanphi(PJ_CONTEXT *, const double, const double);
 
 // From latitudes.cpp
-double pj_conformal_lat(double phi, double e);
-double pj_conformal_lat_inverse(double chi, double e, double threshold);
+double pj_conformal_lat(double phi, const PJ *P);
+double pj_conformal_lat_inverse(double chi, const PJ *P);
 
-double *pj_authalic_lat_compute_coeff_for_inverse(double es);
-double pj_authalic_lat_q_coeff(double sinphi, double e, double one_es);
-double pj_authalic_lat(double sinphi, double e, double one_es, double qp);
-double pj_authalic_lat_inverse_approx(double beta, const double *APA);
-double pj_authalic_lat_inverse_exact(double beta, const double *APA,
-                                     const PJ *P, double qp);
+double *pj_authalic_lat_compute_coeffs(double n);
+double pj_authalic_lat_q(double sinphi, const PJ *P);
+double pj_authalic_lat(double phi, double sinphi, double cosphi,
+                       const double *APA, const PJ *P, double qp);
+double pj_authalic_lat_inverse(double beta, const double *APA,
+                               const PJ *P, double qp);
+void pj_auxlat_coeffs(double n, AuxLat auxin, AuxLat auxout, double F[]);
+double pj_polyval(double x, const double p[], int N);
+double pj_clenshaw(double szeta, double czeta, const double F[], int K);
+double pj_auxlat_convert(double phi, double sphi, double cphi,
+                         const double F[], int K  = int(AuxLat::ORDER));
+double pj_auxlat_convert(double phi,
+                         const double F[], int K  = int(AuxLat::ORDER));
+void pj_auxlat_convert(double sphi, double cphi, double& saux, double& caux,
+                       const double F[], int K  = int(AuxLat::ORDER));
+double pj_rectifying_radius(double n);
 
 COMPLEX pj_zpoly1(COMPLEX, const COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, const COMPLEX *, int, COMPLEX *);

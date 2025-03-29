@@ -71,8 +71,7 @@ static PJ *pj_aea_destructor(PJ *P, int errlev) { /* Destructor */
 static PJ_XY aea_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoid/spheroid, forward */
     PJ_XY xy = {0.0, 0.0};
     struct pj_aea *Q = static_cast<struct pj_aea *>(P->opaque);
-    Q->rho = Q->c - (Q->ellips ? Q->n * pj_authalic_lat_q_coeff(sin(lp.phi),
-                                                                P->e, P->one_es)
+    Q->rho = Q->c - (Q->ellips ? Q->n * pj_authalic_lat_q(sin(lp.phi), P)
                                : Q->n2 * sin(lp.phi));
     if (Q->rho < 0.) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
@@ -105,8 +104,8 @@ static PJ_LP aea_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoid/spheroid, inverse */
                         P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                     return lp;
                 }
-                lp.phi = pj_authalic_lat_inverse_exact(asin(qs / Q->qp), Q->apa,
-                                                       P, Q->qp);
+                lp.phi = pj_authalic_lat_inverse(asin(qs / Q->qp), Q->apa,
+                                                 P, Q->qp);
                 if (lp.phi == HUGE_VAL) {
                     proj_errno_set(
                         P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
@@ -158,19 +157,19 @@ static PJ *setup(PJ *P) {
     if (Q->ellips) {
         double ml1, m1;
 
-        Q->apa = pj_authalic_lat_compute_coeff_for_inverse(P->es);
+        Q->apa = pj_authalic_lat_compute_coeffs(P->n);
         if (Q->apa == nullptr)
             return pj_aea_destructor(P, 0);
-        Q->qp = pj_authalic_lat_q_coeff(1., P->e, P->one_es);
+        Q->qp = pj_authalic_lat_q(1.0, P);
         m1 = pj_msfn(sinphi, cosphi, P->es);
-        ml1 = pj_authalic_lat_q_coeff(sinphi, P->e, P->one_es);
+        ml1 = pj_authalic_lat_q(sinphi, P);
         if (secant) { /* secant cone */
             double ml2, m2;
 
             sinphi = sin(Q->phi2);
             cosphi = cos(Q->phi2);
             m2 = pj_msfn(sinphi, cosphi, P->es);
-            ml2 = pj_authalic_lat_q_coeff(sinphi, P->e, P->one_es);
+            ml2 = pj_authalic_lat_q(sinphi, P);
             if (ml2 == ml1)
                 return pj_aea_destructor(P, 0);
 
@@ -186,8 +185,7 @@ static PJ *setup(PJ *P) {
         Q->c = m1 * m1 + Q->n * ml1;
         Q->dd = 1. / Q->n;
         Q->rho0 = Q->dd *
-                  sqrt(Q->c - Q->n * pj_authalic_lat_q_coeff(sin(P->phi0), P->e,
-                                                             P->one_es));
+                  sqrt(Q->c - Q->n * pj_authalic_lat_q(sin(P->phi0), P));
     } else {
         if (secant)
             Q->n = .5 * (Q->n + sin(Q->phi2));

@@ -232,10 +232,10 @@ static double auth_lat(PJ *P, double alpha, int inverse) {
         static_cast<const struct pj_healpix_data *>(P->opaque);
     if (inverse == 0) {
         /* Authalic latitude from geographic latitude. */
-        return pj_authalic_lat(sin(alpha), P->e, P->one_es, Q->qp);
+        return pj_authalic_lat(alpha, sin(alpha), cos(alpha), Q->apa, P, Q->qp);
     } else {
         /* Geographic latitude from authalic latitude. */
-        return pj_authalic_lat_inverse_exact(alpha, Q->apa, P, Q->qp);
+        return pj_authalic_lat_inverse(alpha, Q->apa, P, Q->qp);
     }
 }
 
@@ -616,12 +616,11 @@ PJ *PJ_PROJECTION(healpix) {
     Q->rot_xy = PJ_TORAD(angle);
 
     if (P->es != 0.0) {
-        Q->apa = pj_authalic_lat_compute_coeff_for_inverse(
-            P->es); /* For auth_lat(). */
+        Q->apa = pj_authalic_lat_compute_coeffs(P->n); /* For auth_lat(). */
         if (nullptr == Q->apa)
             return pj_healpix_data_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->qp =
-            pj_authalic_lat_q_coeff(1.0, P->e, P->one_es); /* For auth_lat(). */
+            pj_authalic_lat_q(1.0, P); /* For auth_lat(). */
         P->a = P->a * sqrt(0.5 * Q->qp); /* Set P->a to authalic radius. */
         pj_calc_ellipsoid_params(
             P, P->a, P->es); /* Ensure we have a consistent parameter set */
@@ -662,12 +661,11 @@ PJ *PJ_PROJECTION(rhealpix) {
             P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     if (P->es != 0.0) {
-        Q->apa = pj_authalic_lat_compute_coeff_for_inverse(
-            P->es); /* For auth_lat(). */
+        Q->apa = pj_authalic_lat_compute_coeffs(P->n); /* For auth_lat(). */
         if (nullptr == Q->apa)
             return pj_healpix_data_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->qp =
-            pj_authalic_lat_q_coeff(1.0, P->e, P->one_es); /* For auth_lat(). */
+            pj_authalic_lat_q(1.0, P); /* For auth_lat(). */
         P->a = P->a * sqrt(0.5 * Q->qp); /* Set P->a to authalic radius. */
         P->ra = 1.0 / P->a;
         P->fwd = e_rhealpix_forward;

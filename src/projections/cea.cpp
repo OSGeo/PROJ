@@ -1,5 +1,3 @@
-
-
 #include <errno.h>
 #include <math.h>
 
@@ -19,7 +17,7 @@ PROJ_HEAD(cea, "Equal Area Cylindrical") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 static PJ_XY cea_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     PJ_XY xy = {0.0, 0.0};
     xy.x = P->k0 * lp.lam;
-    xy.y = 0.5 * pj_authalic_lat_q_coeff(sin(lp.phi), P->e, P->one_es) / P->k0;
+    xy.y = 0.5 * pj_authalic_lat_q(sin(lp.phi), P) / P->k0;
     return xy;
 }
 
@@ -34,7 +32,7 @@ static PJ_LP cea_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
     const struct pj_cea_data *Q =
         static_cast<const struct pj_cea_data *>(P->opaque);
-    lp.phi = pj_authalic_lat_inverse_exact(asin(2. * xy.y * P->k0 / Q->qp),
+    lp.phi = pj_authalic_lat_inverse(asin(2. * xy.y * P->k0 / Q->qp),
                                            Q->apa, P, Q->qp);
     lp.lam = xy.x / P->k0;
     return lp;
@@ -92,11 +90,11 @@ PJ *PJ_PROJECTION(cea) {
         t = sin(t);
         P->k0 /= sqrt(1. - P->es * t * t);
         P->e = sqrt(P->es);
-        Q->apa = pj_authalic_lat_compute_coeff_for_inverse(P->es);
+        Q->apa = pj_authalic_lat_compute_coeffs(P->n);
         if (!(Q->apa))
             return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
-        Q->qp = pj_authalic_lat_q_coeff(1., P->e, P->one_es);
+        Q->qp = pj_authalic_lat_q(1.0, P);
         P->inv = cea_e_inverse;
         P->fwd = cea_e_forward;
     } else {
