@@ -87,8 +87,8 @@ PJ *PJ_PROJECTION(wag6) {
         return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    Q->C_x = 0.94745;
-    Q->C_y = 0.94745;
+    Q->C_x = 1.0;
+    Q->C_y = 1.0;
     Q->A = 0.0;
     Q->B = 0.30396355092701331433;
 
