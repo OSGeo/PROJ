@@ -336,16 +336,18 @@ static int target_crs_lon_lat_order(PJ_CONTEXT *transformer_ctx,
  * transformations along these edges and extracting the outermost bounds.
  *
  * If the destination CRS is geographic, the first axis is longitude,
- * and xmax < xmin then the bounds crossed the antimeridian.
+ * and *out_xmax < *out_xmin then the bounds crossed the antimeridian.
  * In this scenario there are two polygons, one on each side of the
- * antimeridian. The first polygon should be constructed with (xmin, ymin, 180,
- * ymax) and the second with (-180, ymin, xmax, ymax).
+ * antimeridian. The first polygon should be constructed with
+ * (*out_xmin, *out_ymin, 180, ymax) and the second with
+ * (-180, *out_ymin, *out_xmax, *out_ymax).
  *
  * If the destination CRS is geographic, the first axis is latitude,
- * and ymax < ymin then the bounds crossed the antimeridian.
+ * and *out_ymax < *out_ymin then the bounds crossed the antimeridian.
  * In this scenario there are two polygons, one on each side of the
- * antimeridian. The first polygon should be constructed with (ymin, xmin, ymax,
- * 180) and the second with (ymin, -180, ymax, xmax).
+ * antimeridian. The first polygon should be constructed with
+ * (*out_ymin, *out_xmin, *out_ymax, 180) and the second with
+ * (*out_ymin, -180, *out_ymax, *out_xmax).
  *
  * For transformations involving a 3D CRS, consult proj_trans_bounds_3D().
  *
