@@ -454,6 +454,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1399','International Terrestrial Ref
 INSERT INTO "usage" VALUES('EPSG','22373','geodetic_datum','EPSG','1399','EPSG','1262','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1400','IGb20',NULL,'EPSG','7019','EPSG','8901','2015-01-01',2015.0,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','22362','geodetic_datum','EPSG','1400','EPSG','1262','EPSG','1027');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1401','Uganda Geodetic Reference Frame',NULL,'EPSG','7019','EPSG','8901','March 2011',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22456','geodetic_datum','EPSG','1401','EPSG','1241','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1402','Liberia Reference Frame 2021',NULL,'EPSG','7019','EPSG','8901','2022-10-31',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','22451','geodetic_datum','EPSG','1402','EPSG','1142','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,'EPSG','7001','EPSG','8901',NULL,NULL,NULL,NULL,NULL,1);
