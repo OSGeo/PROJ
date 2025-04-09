@@ -8321,6 +8321,10 @@ WKTParser::attachDatabaseContext(const DatabaseContextPtr &dbContext) {
  */
 WKTParser::WKTGuessedDialect
 WKTParser::guessDialect(const std::string &inputWkt) noexcept {
+
+    // cppcheck complains (rightly) that the method could be static
+    (void)this;
+
     std::string wkt = inputWkt;
     std::size_t idxFirstCharNotSpace = wkt.find_first_not_of(" \t\r\n");
     if (idxFirstCharNotSpace > 0 && idxFirstCharNotSpace != std::string::npos) {
