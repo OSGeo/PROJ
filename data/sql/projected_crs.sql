@@ -7614,6 +7614,14 @@ INSERT INTO "projected_crs" VALUES('EPSG','10773','SIRGAS 2000 / Ribeirao Preto 
 INSERT INTO "usage" VALUES('EPSG','22381','projected_crs','EPSG','10773','EPSG','4789','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','10788','WGS 84 / Agriculture Canada Albers',NULL,'EPSG','4400','EPSG','4326','EPSG','10751',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','22473','projected_crs','EPSG','10788','EPSG','4752','EPSG','1292');
+INSERT INTO "projected_crs" VALUES('EPSG','10792','UGRF / UTM zone 35N',NULL,'EPSG','4400','EPSG','10791','EPSG','16035',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22460','projected_crs','EPSG','10792','EPSG','1578','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','10793','UGRF / UTM zone 36N',NULL,'EPSG','4400','EPSG','10791','EPSG','16036',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22461','projected_crs','EPSG','10793','EPSG','4790','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','10794','UGRF / UTM zone 36S',NULL,'EPSG','4400','EPSG','10791','EPSG','16136',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22462','projected_crs','EPSG','10794','EPSG','4791','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','10795','UGRF / UTM zone 35S',NULL,'EPSG','4400','EPSG','10791','EPSG','16135',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22463','projected_crs','EPSG','10795','EPSG','4792','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','10801','LibRef21 / UTM zone 28N',NULL,'EPSG','4400','EPSG','10800','EPSG','16028',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','22447','projected_crs','EPSG','10801','EPSG','4794','EPSG','1029');
 INSERT INTO "projected_crs" VALUES('EPSG','10802','LibRef21 / UTM zone 29N',NULL,'EPSG','4400','EPSG','10800','EPSG','16029',NULL,0);
