@@ -761,6 +761,8 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1394','BES2020','EPSG')
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1395','Sint Eustatius','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1399','ITRF2020-u2023','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1402','LibRef21','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1401','UGRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1401','Uganda 2010','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -8063,6 +8065,13 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10764','Bonaire DPnet + B
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10764','Bonaire / Bonaire TM + Bonaire height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10773','SIRGAS 2000 / RPTM','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10765','Bonaire 2004 + Bonaire KADpeil','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10789','Uganda 2010','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10790','Uganda 2010','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10791','Uganda 2010','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10792','Uganda 2010 / UTM zone 35N','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10793','Uganda 2010 / UTM zone 36N','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10794','Uganda 2010 / UTM zone 36S','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10795','Uganda 2010 / UTM zone 35S','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10604','1255','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10604','WGS 84 (G2296) - XYZ','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10605','1256','EPSG');
