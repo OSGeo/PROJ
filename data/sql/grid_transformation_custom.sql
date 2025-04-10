@@ -88,6 +88,27 @@ INSERT INTO "usage" VALUES(
     'EPSG','1024'  -- unknown
 );
 
+INSERT INTO "grid_transformation" VALUES(
+    'PROJ','EPSG_6667_TO_EPSG_6695_2024','JDG2011 to JGD2011 height (JPGEO2024)',
+    NULL,
+    'EPSG','9665','Geographic3D to GravityRelatedHeight (gtx)',
+    'EPSG','6667', -- source CRS (JDG2011)
+    'EPSG','6695', -- target CRS (JDG2011 (vertical) height)
+    0.03, -- accuracy. Documentation mentions 3cm. GSIGEO2011 geoid model has NULL.
+    'EPSG','8666','Geoid (height correction) model file','JPGEO2024.isg',
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'EPSG_6667_TO_EPSG_6695_2024_USAGE',
+    'grid_transformation',
+    'PROJ',
+    'EPSG_6667_TO_EPSG_6695_2024',
+    'EPSG','1129', -- area of use: Japan
+    'EPSG','1024'  -- unknown
+);
+
+
 -- Switzerland
 
 INSERT INTO "grid_transformation" VALUES(
