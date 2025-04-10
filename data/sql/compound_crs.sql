@@ -914,6 +914,8 @@ INSERT INTO "compound_crs" VALUES('EPSG','10774','EUREF-FIN / TM35FIN(E,N) + N20
 INSERT INTO "usage" VALUES('EPSG','22245','compound_crs','EPSG','10774','EPSG','3333','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','10826','LKS-92 + Latvia 2000 height',NULL,'EPSG','4661','EPSG','7700',0);
 INSERT INTO "usage" VALUES('EPSG','22632','compound_crs','EPSG','10826','EPSG','3268','EPSG','1270');
+INSERT INTO "compound_crs" VALUES('EPSG','10839','LKS-2020 + Latvia 2000 height',NULL,'EPSG','10305','EPSG','7700',0);
+INSERT INTO "usage" VALUES('EPSG','22700','compound_crs','EPSG','10839','EPSG','3268','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);
