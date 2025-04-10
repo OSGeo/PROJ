@@ -245,6 +245,7 @@ VALUES
 
 -- jp_gsi - Geospatial Information Authority of Japan
 ('jp_gsi_gsigeo2011.tif','jp_gsi_gsigeo2011.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/jp_gsi_gsigeo2011.tif',1,1,NULL),
+('JPGEO2024.isg','jp_gsi_jpgeo2024.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/jp_gsi_jpgeo2024.tif',1,1,NULL),
 
 -- lv_lgia - Latvian Geospatial Information Agency
 ('LV''14.gri','lv_lgia_lv14.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/lv_lgia_lv14.tif',1,1,NULL),
