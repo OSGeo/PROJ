@@ -1815,7 +1815,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3026','RT38 5 gon V 0:-1
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3025','RT38 2.5 gon V 0:-15','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','7793','RDN2008 / TM34 (E-N)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4615','Base SE','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25884','LKS92 / TM Baltic93','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25884','LKS-92 / TM Baltic93','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25884','LKS94 / TM Baltic93','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25884','EST97 / TM Baltic93','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3300','EST92','EPSG');
@@ -8085,3 +8085,5 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10570','ETRF2020 - LatLon
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10571','1238','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10571','ETRF2020 - LatLonEHt','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10826','ETRS89 + LAS-2000 height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25884','LKS-2020 / TM Baltic93','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10839','ETRS89 + LAS-2000 height','EPSG');
