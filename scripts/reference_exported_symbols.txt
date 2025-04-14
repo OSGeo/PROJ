@@ -1083,6 +1083,7 @@ proj_grid_cache_set_ttl
 proj_grid_get_info_from_database
 proj_grid_info
 proj_identify
+projinfo
 proj_info
 proj_init_info
 proj_insert_object_session_create
