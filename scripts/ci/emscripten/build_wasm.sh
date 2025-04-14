@@ -248,10 +248,10 @@ else
 fi
 
 # --- 6.5 Create C Wrappers ---
-# Helper functions to extract some info from PROJ in C
+# Helper functions to extract some info from PROJ in C and C++
 log_step "6.5 Creating C Wrapper Functions"
 
-WRAPPER_FILE="${TEMP_BUILD_DIR}/proj_wrappers.c"
+WRAPPER_FILE="${TEMP_BUILD_DIR}/proj_wrappers.cpp"
 WRAPPER_OBJ_FILE="${TEMP_BUILD_DIR}/proj_wrappers.o"
 
 DDD=`date +"%Y-%m-%dT%H:%M:%S%z" -u`
@@ -259,12 +259,55 @@ cat << EOF > ${WRAPPER_FILE}
 #include "proj.h"
 #include "math.h"
 
+#include "projapps_lib.h"
+
+#include <emscripten/bind.h>
+#include <emscripten/val.h>
+#include <vector>
+#include <string>
+
+void trampoline(PJ_PROJINFO_LOG_LEVEL level, const char *msg, void *user_data) {
+    if (!user_data) return;
+    const emscripten::val* js_callback = reinterpret_cast<const emscripten::val*>(user_data);
+    (*js_callback)(level, std::string(msg));
+}
+
+int projinfo_wrapper(uintptr_t ctx_ptr, emscripten::val jsArgs, emscripten::val jsCallback) {
+    std::vector<std::string> args = emscripten::vecFromJSArray<std::string>(jsArgs);
+    std::vector<char*> argv;
+    for (auto& s : args) {
+        argv.push_back(&s[0]);
+    }
+    PJ_CONTEXT *ctx = reinterpret_cast<PJ_CONTEXT *>(ctx_ptr);
+    return projinfo(ctx, args.size(), argv.data(), &trampoline, &jsCallback);
+}
+
+EMSCRIPTEN_BINDINGS(proj_module) {
+    emscripten::value_object<PJ_INFO>("PJ_INFO")
+        .field("major", &PJ_INFO::major)
+        .field("minor", &PJ_INFO::minor)
+        .field("patch", &PJ_INFO::patch)
+        .field("release", std::function<std::string(const PJ_INFO&)>([](const PJ_INFO& i) {
+                return std::string(i.release); }),
+            std::function<void(PJ_INFO&, std::string)>([](PJ_INFO& i, std::string v) {}))
+        .field("version", std::function<std::string(const PJ_INFO&)>([](const PJ_INFO& i) {
+                return std::string(i.version); }),
+            std::function<void(PJ_INFO&, std::string)>([](PJ_INFO& i, std::string v) {}));
+    emscripten::function("proj_info_ems", &proj_info);
+
+    emscripten::enum_<PJ_PROJINFO_LOG_LEVEL>("PJ_PROJINFO_LOG_LEVEL")
+        .value("INFO", PJ_PROJINFO_LOG_LEVEL_INFO)
+        .value("WARN", PJ_PROJINFO_LOG_LEVEL_WARN)
+        .value("ERR", PJ_PROJINFO_LOG_LEVEL_ERR);
+
+    emscripten::function("projinfo_ems", &projinfo_wrapper, emscripten::allow_raw_pointers());
+}
+
+extern "C" {
+
 const char* get_compilation_date() {
     return "$DDD" ;
 }
-
-int get_proj_info_sizeof() {
-    return sizeof(PJ_INFO);
 }
 EOF
 
@@ -290,6 +333,7 @@ FINAL_LIBS="${INSTALL_DIR}/lib/libproj.a \
 emcc -v ${FINAL_LIBS} \
     -o ${INSTALL_DIR}/projModule.js \
     -O3 \
+    -lembind \
     -s STACK_OVERFLOW_CHECK=1 \
     -s STACK_SIZE=5MB \
     -s NO_DISABLE_EXCEPTION_CATCHING \
@@ -303,7 +347,6 @@ emcc -v ${FINAL_LIBS} \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s EXPORTED_RUNTIME_METHODS="[ccall, cwrap, FS, HEAPF64, stringToNewUTF8, UTF8ToString, getValue]" \
     -s EXPORTED_FUNCTIONS="[
-     _get_proj_info_sizeof,
      _get_compilation_date,
      _proj_info,
      _proj_context_errno_string,
