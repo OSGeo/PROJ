@@ -1934,3 +1934,9 @@ tests:
 - args: -s "Christmas Island Grid 1985" -t "Christmas Island Grid 1985" -o PROJ -q
   out: |
     +proj=noop
+- comment: Test bugfix of https://github.com/OSGeo/PROJ/issues/4464 (NAD83(CSRS) to NAD83(CSRS)v2 should not go through NAD83)
+  args: -s "NAD83(CSRS)" -t "NAD83(CSRS)v2" --spatial-test intersects --summary
+  out: |
+    Candidate operations found: 1
+    unknown id, Ballpark geographic offset from NAD83(CSRS) to NAD83(CSRS)v2, unknown accuracy, Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon., has ballpark transformation
+
