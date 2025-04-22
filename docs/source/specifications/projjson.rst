@@ -169,12 +169,15 @@ of a "object usage" class. An object usage has the following optional members:
 - ``area``: (optional) value of type string which describes a geographic area
   over which a CRS or coordinate operation is applicable. e.g. "World"
 - ``bbox``: (optional) value of type object, with 4 required members:
+
   * ``east_longitude``: (required) number expressing the longitude in degrees of the eastern most part of the extent, within [-180,180] range.
   * ``west_longitude``: (required) number expressing the longitude in degrees of the western most part of the extent, within [-180,180] range.. For an extent crossing the anti-meridian, west_longitude is lower than east_longitude.
   * ``south_latitude``: (required) number expressing the latitude in degrees of the southern most part of the extent, within [-90,90] range.
   * ``north_latitude``: (required) number expressing the latitude in degrees of the northern most part of the extent, within [-90,90] range.
+
   The coordinates are expressed in a unspecified datum, with the longitudes
   relative to the international reference meridian.
+
 - ``remarks``: (optional) value of type string with an informative text that does
   not modify the defining parameters of the object. e.g "Use NTv2 file for better accuracy"
 - ``id`` (mutually exclusive with ``ids``): (optional) Identifier of the object, as defined in :ref:`identifiers`
