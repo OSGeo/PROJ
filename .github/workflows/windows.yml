@@ -176,6 +176,7 @@ jobs:
               -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
               -D CMAKE_UNITY_BUILD=ON \
               -D Python_ROOT_DIR=/mingw64 \
+              -D CMAKE_CXX_STANDARD=20 \
               ..
             make -j 2
             make install
