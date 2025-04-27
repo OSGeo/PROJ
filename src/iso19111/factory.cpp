@@ -1322,18 +1322,30 @@ void DatabaseContext::Private::attachExtraDatabases(
     auto l_handle = handle();
     assert(l_handle);
 
-    auto tables =
-        run("SELECT name FROM sqlite_master WHERE type IN ('table', 'view') "
-            "AND name NOT LIKE 'sqlite_stat%'");
-    std::map<std::string, std::vector<std::string>> tableStructure;
+    auto tables = run("SELECT name, type, sql FROM sqlite_master WHERE type IN "
+                      "('table', 'view') "
+                      "AND name NOT LIKE 'sqlite_stat%'");
+
+    struct TableStructure {
+        std::string name{};
+        bool isTable = false;
+        std::string sql{};
+        std::vector<std::string> columns{};
+    };
+    std::vector<TableStructure> tablesStructure;
     for (const auto &rowTable : tables) {
-        const auto &tableName = rowTable[0];
-        auto tableInfo = run("PRAGMA table_info(\"" +
-                             replaceAll(tableName, "\"", "\"\"") + "\")");
+        TableStructure tableStructure;
+        tableStructure.name = rowTable[0];
+        tableStructure.isTable = rowTable[1] == "table";
+        tableStructure.sql = rowTable[2];
+        auto tableInfo =
+            run("PRAGMA table_info(\"" +
+                replaceAll(tableStructure.name, "\"", "\"\"") + "\")");
         for (const auto &rowCol : tableInfo) {
             const auto &colName = rowCol[1];
-            tableStructure[tableName].push_back(colName);
+            tableStructure.columns.push_back(colName);
         }
+        tablesStructure.push_back(std::move(tableStructure));
     }
 
     const int nLayoutVersionMajor = l_handle->getLayoutVersionMajor();
@@ -1370,38 +1382,46 @@ void DatabaseContext::Private::attachExtraDatabases(
                                       attachedDbName + '.');
     }
 
-    for (const auto &pair : tableStructure) {
-        std::string sql("CREATE TEMP VIEW ");
-        sql += pair.first;
-        sql += " AS ";
-        for (size_t i = 0; i <= auxiliaryDatabasePaths.size(); ++i) {
-            std::string selectFromAux("SELECT ");
-            bool firstCol = true;
-            for (const auto &colName : pair.second) {
-                if (!firstCol) {
-                    selectFromAux += ", ";
+    for (const auto &tableStructure : tablesStructure) {
+        if (tableStructure.isTable) {
+            std::string sql("CREATE TEMP VIEW ");
+            sql += tableStructure.name;
+            sql += " AS ";
+            for (size_t i = 0; i <= auxiliaryDatabasePaths.size(); ++i) {
+                std::string selectFromAux("SELECT ");
+                bool firstCol = true;
+                for (const auto &colName : tableStructure.columns) {
+                    if (!firstCol) {
+                        selectFromAux += ", ";
+                    }
+                    firstCol = false;
+                    selectFromAux += colName;
                 }
-                firstCol = false;
-                selectFromAux += colName;
-            }
-            selectFromAux += " FROM db_";
-            selectFromAux += toString(static_cast<int>(i));
-            selectFromAux += ".";
-            selectFromAux += pair.first;
+                selectFromAux += " FROM db_";
+                selectFromAux += toString(static_cast<int>(i));
+                selectFromAux += ".";
+                selectFromAux += tableStructure.name;
 
-            try {
-                // Check that the request will succeed. In case of 'sparse'
-                // databases...
-                run(selectFromAux + " LIMIT 0");
+                try {
+                    // Check that the request will succeed. In case of 'sparse'
+                    // databases...
+                    run(selectFromAux + " LIMIT 0");
 
-                if (i > 0) {
-                    sql += " UNION ALL ";
+                    if (i > 0) {
+                        if (tableStructure.name == "conversion_method")
+                            sql += " UNION ";
+                        else
+                            sql += " UNION ALL ";
+                    }
+                    sql += selectFromAux;
+                } catch (const std::exception &) {
                 }
-                sql += selectFromAux;
-            } catch (const std::exception &) {
             }
+            run(sql);
+        } else {
+            run(replaceAll(tableStructure.sql, "CREATE VIEW",
+                           "CREATE TEMP VIEW"));
         }
-        run(sql);
     }
 }
 
