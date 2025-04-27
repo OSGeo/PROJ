@@ -1855,12 +1855,52 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
         !is_rel_or_absolute_filename(name) && !starts_with(name, "http://") &&
         !starts_with(name, "https://") &&
         proj_context_is_network_enabled(ctx)) {
-        std::string remote_file(proj_context_get_url_endpoint(ctx));
-        if (!remote_file.empty()) {
-            if (remote_file.back() != '/') {
-                remote_file += '/';
+
+        std::string remote_file;
+        auto dbContext = getDBcontext(ctx);
+        if (dbContext) {
+            try {
+                std::string fullFilename, packageName, url;
+                bool directDownload = false;
+                bool openLicense = false;
+                bool gridAvailable = false;
+                proj_context_set_enable_network(ctx,
+                                                false); // prevent recursion
+                const bool found = dbContext->lookForGridInfo(
+                    name, /* considerKnownGridsAsAvailable = */ true,
+                    fullFilename, packageName, url, directDownload, openLicense,
+                    gridAvailable);
+                proj_context_set_enable_network(ctx, true);
+                if (found && !url.empty() && directDownload) {
+                    remote_file = url;
+                    if (starts_with(url, "https://cdn.proj.org/")) {
+                        const std::string endpoint =
+                            proj_context_get_url_endpoint(ctx);
+                        if (!endpoint.empty()) {
+                            remote_file = endpoint;
+                            if (remote_file.back() != '/') {
+                                remote_file += '/';
+                            }
+                            remote_file += name;
+                        }
+                    }
+                }
+            } catch (const std::exception &e) {
+                proj_context_set_enable_network(ctx, true);
+                pj_log(ctx, PJ_LOG_DEBUG, "%s", e.what());
+                return nullptr;
             }
-            remote_file += name;
+        }
+        if (remote_file.empty()) {
+            remote_file = proj_context_get_url_endpoint(ctx);
+            if (!remote_file.empty()) {
+                if (remote_file.back() != '/') {
+                    remote_file += '/';
+                }
+                remote_file += name;
+            }
+        }
+        if (!remote_file.empty()) {
             file =
                 open(ctx, remote_file.c_str(), NS_PROJ::FileAccess::READ_ONLY);
             if (file) {
