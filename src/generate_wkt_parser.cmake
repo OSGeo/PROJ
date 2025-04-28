@@ -1,6 +1,6 @@
 message("Generating ${OUT_FILE}")
 
-execute_process(COMMAND "bison" "--no-lines" "-d" "-p" "${PREFIX}" "-o${OUT_FILE}" "${IN_FILE}"
+execute_process(COMMAND "bison" "-v" "--no-lines" "-d" "-p" "${PREFIX}" "-o${OUT_FILE}" "${IN_FILE}"
                 RESULT_VARIABLE STATUS)
 
 if(STATUS AND NOT STATUS EQUAL 0)
