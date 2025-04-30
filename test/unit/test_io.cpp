@@ -1214,6 +1214,49 @@ TEST(wkt_parse, wkt1_geocentric_with_z_OTHER) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt2_geocentric_DEFININGTRANSFORMATION) {
+    auto obj = WKTParser().createFromWKT(
+        "GEODCRS[\"ETRF2000\","
+        "DATUM[\"European Terrestrial Reference Frame 2000\","
+        "ELLIPSOID[\"GRS 1980\",6378137,298.257222101]],"
+        "CS[Cartesian,3],"
+        "AXIS[\"(X)\",geocentricX],"
+        "AXIS[\"(Y)\",geocentricY],"
+        "AXIS[\"(Z)\",geocentricZ],"
+        "LENGTHUNIT[\"metre\",1.0],"
+        "DEFININGTRANSFORMATION[\"ITRF2000 to ETRF2000 (EUREF)\","
+        "ID[\"EPSG\",7940]],"
+        "ID[\"EPSG\",7930]"
+        "]");
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    // For now we ignore the DEFININGTRANSFORMATION
+    const char *expected_wkt =
+        "GEODCRS[\"ETRF2000\",\n"
+        "    DATUM[\"European Terrestrial Reference Frame 2000\",\n"
+        "        ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "            LENGTHUNIT[\"metre\",1]]],\n"
+        "    PRIMEM[\"Greenwich\",0,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "    CS[Cartesian,3],\n"
+        "        AXIS[\"(X)\",geocentricX,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"(Y)\",geocentricY,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"(Z)\",geocentricZ,\n"
+        "            ORDER[3],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    ID[\"EPSG\",7930]]";
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        expected_wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
     EXPECT_EQ(crs->nameStr(), "WGS 84 / UTM zone 31N");
     ASSERT_EQ(crs->identifiers().size(), 1U);

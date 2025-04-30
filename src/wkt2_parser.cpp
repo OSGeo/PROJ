@@ -177,6 +177,7 @@ static const wkt2_tokens tokens[] = {
     PAIR(RANGEMEANING),
     PAIR(exact),
     PAIR(wraparound),
+    PAIR(DEFININGTRANSFORMATION),
 
     // CS types
     PAIR(AFFINE),
