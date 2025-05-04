@@ -1874,10 +1874,10 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
                 if (found && !url.empty() && directDownload) {
                     remote_file = url;
                     if (starts_with(url, "https://cdn.proj.org/")) {
-                        const std::string endpoint =
+                        std::string endpoint =
                             proj_context_get_url_endpoint(ctx);
                         if (!endpoint.empty()) {
-                            remote_file = endpoint;
+                            remote_file = std::move(endpoint);
                             if (remote_file.back() != '/') {
                                 remote_file += '/';
                             }

@@ -9407,12 +9407,11 @@ AuthorityFactory::createObjectsFromNameEx(
             for (const auto &row : listOfRow) {
                 const auto &auth_name = row[1];
                 const auto &code = row[2];
-                const auto key =
-                    std::pair<std::string, std::string>(auth_name, code);
+                auto key = std::pair<std::string, std::string>(auth_name, code);
                 if (setIdentified.find(key) != setIdentified.end()) {
                     continue;
                 }
-                setIdentified.insert(key);
+                setIdentified.insert(std::move(key));
                 auto factory = d->createFactory(auth_name);
                 const auto &name = row[3];
                 res.emplace_back(
