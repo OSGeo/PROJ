@@ -617,6 +617,17 @@
         "delta_cut": 1e6
     },
     {
+        "filename": "hourglass.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "hourglass",
+        "projstring": "+proj=hourglass",
+        "res": "low",
+        "type": "poly"
+    },
+    {
         "filename": "igh.png",
         "latmax": 90,
         "latmin": -90,
