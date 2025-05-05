@@ -58,7 +58,7 @@ double pj_conformal_lat_inverse(double chi, double e, double threshold) {
             2 * atan(taninit *
                      std::pow(((1 + esinphi) / (1 - esinphi)), (e / 2))) -
             0.5 * M_PI;
-        if (abs(new_phi - phi) < threshold) {
+        if (std::abs(new_phi - phi) < threshold) {
             phi = new_phi;
             break;
         }
