@@ -3771,3 +3771,5 @@ INSERT INTO "extent" VALUES('EPSG','4791','Uganda - south of equator and east of
 INSERT INTO "extent" VALUES('EPSG','4792','Uganda - south of equator and west of 30°E','Uganda - south of equator and west of 30°E.',-1.48,0.0,29.57,30.0,0);
 INSERT INTO "extent" VALUES('EPSG','4793','Liberia - east of 12°W','Liberia - onshore, and offshore east of 12°W.',1.02,8.52,-12.0,-7.36,0);
 INSERT INTO "extent" VALUES('EPSG','4794','Liberia - west of 12°W','Liberia - offshore west of 12°W.',3.12,6.4,-13.59,-12.0,0);
+INSERT INTO "extent" VALUES('EPSG','4799','UK - Oxford to Cambridge','United Kingdom (UK) - on or related to the East West Rail (Phases 2 and 3) route from Oxford to Cambridge via Bicester, Bletchley and Bedford, including the route from Claydon Junction to Aylesbury and Princes Risborough.',51.7,52.33,-1.43,0.27,0);
+INSERT INTO "extent" VALUES('EPSG','4800','Papua New Guinea - onshore and offshore - Western, Gulf and Central provinces','Papua New Guinea - onshore and offshore - Western Province, Gulf Province, Central Province, National Capital District and maritime zones offshore of these provinces.',-12.0,-4.98,139.2,149.67,0);
