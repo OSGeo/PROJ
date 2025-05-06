@@ -763,6 +763,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1399','ITRF2020-u2023',
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1402','LibRef21','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1401','UGRF','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1401','Uganda 2010','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1405','EWR3-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -8087,3 +8088,5 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10571','ETRF2020 - LatLon
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10826','ETRS89 + LAS-2000 height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25884','LKS-2020 / TM Baltic93','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10839','ETRS89 + LAS-2000 height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10851','ETRS89 / EWR3 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10852','ETRS89 / EWR3 SnakeGrid + Newlyn height','EPSG');
