@@ -12,6 +12,7 @@ dependencies:
   - ccache
   - autoconf
   - automake
+  - m4
   - jsonschema
   - ruamel.yaml
   - pytest
