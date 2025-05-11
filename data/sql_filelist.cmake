@@ -48,6 +48,7 @@ list(APPEND SQL_FILES
   "${SQL_DIR}/concatenated_operation.sql"
   "${SQL_DIR}/concatenated_operation_step.sql"
   "${SQL_DIR}/alias_name.sql"
+  "${SQL_DIR}/alias_name_old_epsg.sql"
   "${SQL_DIR}/supersession.sql"
   "${SQL_DIR}/deprecation.sql"
   "${SQL_DIR}/esri.sql"
@@ -63,8 +64,14 @@ list(APPEND SQL_FILES
   "${SQL_DIR}/wgs84_realizations_concatenated_operations.sql"
   "${SQL_DIR}/customizations.sql"
   "${SQL_DIR}/nkg_post_customizations.sql"
-  "${SQL_DIR}/commit.sql"
 )
+
+if (PROJ_DB_EXTRA_VALIDATION)
+  list(APPEND SQL_FILES "${SQL_DIR}/show_useless_aliases.sql")
+endif()
+
+list(APPEND SQL_FILES "${SQL_DIR}/commit.sql")
+
 if (NOT PROJ_DB_EXTRA_VALIDATION)
   list(APPEND SQL_FILES ${SQL_FILES_CONSISTENCY_CHECKS_TRIGGERS})
 else()
