@@ -101,18 +101,16 @@ VALUES
 ('portugal/DLX_ETRS89_geo','pt_dgt_DLx_ETRS89_geo.tif','DLX_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_DLx_ETRS89_geo.tif',1,1,NULL),
 ('portugal/D73_ETRS89_geo','pt_dgt_D73_ETRS89_geo.tif','D73_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_D73_ETRS89_geo.tif',1,1,NULL),
 ('netherlands/rdtrans2008','','rdtrans2008.gsb','NTv2','hgridshift',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/rdtrans2008.gsb',1,0,NULL),
-('uk/OSTN15_NTv2','uk_os_OSTN15_NTv2_OSGBtoETRS.tif','OSTN15_NTv2_OSGBtoETRS.gsb','GTiff','hgridshift',1  -- reverse direction
-    ,NULL,'https://cdn.proj.org/uk_os_OSTN15_NTv2_OSGBtoETRS.tif',1,1,NULL),
 ('canada/GS7783','ca_nrc_GS7783.tif','GS7783.GSB','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_GS7783.tif',1,1,NULL),
 ('spain/100800401','es_cat_icgc_100800401.tif','100800401.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_cat_icgc_100800401.tif',1,1,NULL),
 ('australia/QLD_0900','au_icsm_National_84_02_07_01.tif','National_84_02_07_01.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/au_icsm_National_84_02_07_01.tif',1,1,NULL), -- From https://www.dnrme.qld.gov.au/__data/assets/pdf_file/0006/105765/gday-21-user-guide.pdf: "Note that the Queensland grid QLD_0900.gsb produces identical results to the National AGD84 grid for the equivalent coverage."
 ('spain/PENR2009','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
 ('spain/BALR2009','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
-('spain/peninsula','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL);
+('spain/peninsula','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
+('spain/baleares','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL);
 -- 'france/RGNC1991_IGN72GrandeTerre' : we have a 3D geocentric corresponding one: no need for mapping
 -- 'france/RGNC1991_NEA74Noumea' : we have a 3D geocentric corresponding one: no need for mapping
 """
-
 
 def escape_literal(x):
     return x.replace("'", "''")
@@ -2109,6 +2107,8 @@ def import_geogtran():
         idx_accuracy = header.index('accuracy')
         assert idx_accuracy >= 0
 
+        set_names = set()
+
         while True:
             try:
                 row = next(reader)
@@ -2153,6 +2153,11 @@ def import_geogtran():
                 if deprecated:
                     # print('Skipping deprecated GEOGTRAN %s' % esri_name)
                     continue
+
+                if esri_name in set_names:
+                    print(f'Skipping ESRI:{wkid} since transformation with same name {esri_name} already found!')
+                    continue
+                set_names.add(esri_name)
 
                 parsed_wkt2 = parse_wkt_array(wkt2)
                 assert 'COORDINATEOPERATION' in parsed_wkt2
@@ -2599,11 +2604,77 @@ import_geogtran()  # transformations between GeogCRS
 script_dir_name = os.path.dirname(os.path.realpath(__file__))
 sql_dir_name = os.path.join(os.path.dirname(script_dir_name), 'data', 'sql')
 
+
+old_aliases = """-------------------
+-- ESRI old aliases
+-------------------
+-- Changed in ArcGIS Pro 3.0
+INSERT INTO alias_name VALUES('geodetic_datum','EPSG','6181','D_Luxembourg_1930','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','4181','GCS_Luxembourg_1930','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','2169','Luxembourg_1930_Gauss','ESRI_OLD');
+INSERT INTO alias_name VALUES('vertical_crs','EPSG','5774','NG_L','ESRI_OLD');
+-- Changed in ArcGIS Pro 3.2
+INSERT INTO alias_name VALUES('geodetic_datum','EPSG','1064','D_SIRGAS-Chile','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_datum','EPSG','1254','D_SIRGAS-Chile','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_datum','EPSG','6737','D_Korea_2000','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','4737','GCS_Korea_2000','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','4927','Korea_2000_3D','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','5342','POSGAR_3D','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','5360','GCS_SIRGAS-Chile','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','9183','SIRGAS-Chile_3D','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','9184','GCS_SIRGAS-Chile','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','9308','ATRF2014_(3D)','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','9332','KSA-GRF17_(3D)','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','9379','IGb14_(3D)','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','9469','SRGI2013_(3D)','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','9546','LTF2004(G)_(3D)','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','9695','REDGEOMIN_(3D)','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','9701','ETRF2000-PL_(3D)','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','9754','WGS_84_(G2139)_(3D)','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','9893','LUREF_(3D)','ESRI_OLD');
+INSERT INTO alias_name VALUES('geodetic_crs','EPSG','20040','SIRGAS-Chile_2021_(3D)','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','2176','ETRS_1989_Poland_CS2000_Zone_5','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','2177','ETRS_1989_Poland_CS2000_Zone_6','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','2178','ETRS_1989_Poland_CS2000_Zone_7','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','2179','ETRS_1989_Poland_CS2000_Zone_8','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','2180','ETRS_1989_Poland_CS92','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5179','Korea_2000_Korea_Unified_Coordinate_System','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5180','Korea_2000_Korea_West_Belt','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5181','Korea_2000_Korea_Central_Belt','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5182','Korea_2000_Korea_Central_Belt_Jeju','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5183','Korea_2000_Korea_East_Belt','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5184','Korea_2000_Korea_East_Sea_Belt','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5185','Korea_2000_Korea_West_Belt_2010','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5186','Korea_2000_Korea_Central_Belt_2010','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5187','Korea_2000_Korea_East_Belt_2010','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5188','Korea_2000_Korea_East_Sea_Belt_2010','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5361','SIRGAS-Chile_UTM_Zone_19S','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','5362','SIRGAS-Chile_UTM_Zone_18S','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','6622','NAD_1983_CSRS_Quebec_Lambert','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','6624','NAD_1983_CSRS_Quebec_Albers','ESRI_OLD');
+INSERT INTO alias_name VALUES('projected_crs','EPSG','9377','MAGNA-SIRGAS_Origen-Nacional','ESRI_OLD');
+INSERT INTO alias_name VALUES('vertical_crs','EPSG','5193','Incheon_height','ESRI_OLD');
+INSERT INTO alias_name VALUES('compound_crs','EPSG','9462','GDA2020_+_AVWS_height','ESRI_OLD');
+INSERT INTO alias_name VALUES('compound_crs','EPSG','9463','GDA2020_+_AHD_height','ESRI_OLD');
+INSERT INTO alias_name VALUES('compound_crs','EPSG','9464','GDA94_+_AHD_height','ESRI_OLD');
+-- Changed in ArcGIS Pro 3.3
+INSERT INTO alias_name VALUES('vertical_datum','EPSG','5181','Deutches_Haupthoehennetz_1992','ESRI_OLD');
+INSERT INTO alias_name VALUES('vertical_datum','EPSG','5182','Deutches_Haupthoehennetz_1985','ESRI_OLD');
+-- Changed in ArcGIS Pro 3.4
+INSERT INTO alias_name VALUES('projected_crs','EPSG','9895','LUREF_Luxembourg_TM_(3D)','ESRI_OLD');
+-- Changed in ArcGIS Pro 3.5
+INSERT INTO alias_name VALUES('vertical_crs','EPSG','3855','EGM2008_Geoid','ESRI_OLD');
+INSERT INTO alias_name VALUES('vertical_crs','EPSG','5773','EGM96_Geoid','ESRI_OLD');
+INSERT INTO alias_name VALUES('vertical_crs','EPSG','5798','EGM84_Geoid','ESRI_OLD');
+"""
+
+
 f = open(os.path.join(sql_dir_name, 'esri') + '.sql', 'wb')
 f.write("--- This file has been generated by scripts/build_db_from_esri.py. DO NOT EDIT !\n\n".encode('UTF-8'))
 for sql in all_sql:
     f.write((sql + '\n').encode('UTF-8'))
 f.write(manual_grids.encode('UTF-8'))
+f.write(old_aliases.encode('UTF-8'))
 f.close()
 
 print('')
