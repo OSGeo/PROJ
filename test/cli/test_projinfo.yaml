@@ -1939,4 +1939,8 @@ tests:
   out: |
     Candidate operations found: 1
     unknown id, Ballpark geographic offset from NAD83(CSRS) to NAD83(CSRS)v2, unknown accuracy, Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon., has ballpark transformation
-
+- comment: Test that EPSG:4979 to EPSG:10645 does not include a non-sensical 'Inverse of Inverse of BES2020 Saba to Saba height (1) + Inverse of Saba to WGS 84 (1) + Saba Transverse Mercator 2020'
+  args: -s EPSG:4979 -t EPSG:10645 --hide-ballpark --summary
+  out: |
+    Candidate operations found: 1
+    unknown id, Inverse of Saba to WGS 84 (1) + Saba to Saba height (1) + Saba Transverse Mercator 2020, 1.2 m, Bonaire, Sint Eustatius and Saba (BES Islands or Caribbean Netherlands) - Saba - onshore.

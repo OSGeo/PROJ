@@ -6221,6 +6221,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
         std::map<std::string, PairOfTransforms>
             cacheHorizToInterpAndInterpToTarget;
 
+        bool hasVerticalTransformWithInterpGeogCRS = false;
         for (const auto &verticalTransform : verticalTransforms) {
 #ifdef TRACE_CREATE_OPERATIONS
             ENTER_BLOCK("Considering vertical transform " +
@@ -6414,11 +6415,20 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                                 verticalTransform, interpToTarget,
                                 interpolationGeogCRS, true);
                             res.emplace_back(op);
+                            hasVerticalTransformWithInterpGeogCRS = true;
                         } catch (const std::exception &) {
                         }
                     }
                 }
-            } else {
+            }
+        }
+
+        for (const auto &verticalTransform : verticalTransforms) {
+            crs::GeographicCRSPtr interpolationGeogCRS =
+                getInterpolationGeogCRS(verticalTransform, dbContext);
+            if (!interpolationGeogCRS &&
+                (!hasVerticalTransformWithInterpGeogCRS ||
+                 verticalTransform->hasBallparkTransformation())) {
                 // This case is probably only correct if
                 // verticalTransform and horizTransform are independent
                 // and in particular that verticalTransform does not
