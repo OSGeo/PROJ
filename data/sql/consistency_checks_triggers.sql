@@ -36,7 +36,7 @@ CREATE TRIGGER geodetic_datum_insert_trigger
 BEFORE INSERT ON geodetic_datum
 FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on geodetic_datum violates constraint: ellipsoid must not be deprecated when geodetic_datum is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM ellipsoid WHERE ellipsoid.auth_name = NEW.ellipsoid_auth_name AND ellipsoid.code = NEW.ellipsoid_code AND ellipsoid.deprecated != 0) AND NEW.deprecated = 0;
+        WHERE EXISTS(SELECT 1 FROM ellipsoid WHERE ellipsoid.auth_name = NEW.ellipsoid_auth_name AND ellipsoid.code = NEW.ellipsoid_code AND ellipsoid.deprecated != 0) AND NEW.deprecated = 0 AND NEW.auth_name != 'ESRI';
     SELECT RAISE(ABORT, 'insert on geodetic_datum violates constraint: prime_meridian must not be deprecated when geodetic_datum is not deprecated')
         WHERE EXISTS(SELECT 1 FROM prime_meridian WHERE prime_meridian.auth_name = NEW.prime_meridian_auth_name AND prime_meridian.code = NEW.prime_meridian_code AND prime_meridian.deprecated != 0) AND NEW.deprecated = 0;
     SELECT RAISE(ABORT, 'frame_reference_epoch and ensemble_accuracy are mutually exclusive')
@@ -204,7 +204,7 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) crs_view')
         WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.name = NEW.name AND crs_view.deprecated = 0 AND NEW.deprecated = 0
-        AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name != 'IGNF')
+        AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name NOT IN ('IGNF', 'ESRI'))
     );
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must not be deprecated when projected_crs is not deprecated')

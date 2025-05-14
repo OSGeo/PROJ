@@ -9042,8 +9042,12 @@ std::string AuthorityFactory::getOfficialNameFromAlias(
             params.push_back(tableName);
         }
         if (!source.empty()) {
-            sql += " AND source = ?";
-            params.push_back(source);
+            if (source == "ESRI") {
+                sql += " AND source IN ('ESRI', 'ESRI_OLD')";
+            } else {
+                sql += " AND source = ?";
+                params.push_back(source);
+            }
         }
         auto res = d->run(sql, params);
         if (res.empty()) {

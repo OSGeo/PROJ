@@ -3147,8 +3147,7 @@ TEST(crs, projectedCRS_identify_db) {
             "PARAMETER[\"Latitude_Of_Origin\",33],UNIT[\"Meter\",1.0]]");
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
-        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
-        auto res = crs->identify(factoryAll);
+        auto res = crs->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 6670);
         EXPECT_EQ(res.front().second, 90);
@@ -3521,7 +3520,7 @@ TEST(crs, projectedCRS_identify_db) {
         ASSERT_GE(res.size(), 1U);
         EXPECT_EQ(res.front().first->identifiers()[0]->code(), "102082");
         EXPECT_EQ(*(res.front().first->identifiers()[0]->codeSpace()), "ESRI");
-        EXPECT_EQ(res.front().second, 90);
+        EXPECT_EQ(res.front().second, 100);
     }
 }
 
