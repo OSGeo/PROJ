@@ -167,8 +167,6 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6659','ISN93','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6300','TM75','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6300','1975 Mapping Adjustment','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5153','NGG1977','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5154','Martinique 1987','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5156','Reunion 1989','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5156','IGN89','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5155','IGN 1988','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5154','IGN87','EPSG');
@@ -613,7 +611,6 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1300','BGS2005','EPSG')
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1302','Pago Pago 2020','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1303','NVD 1992','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1301','CD Norway','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1199','Greenland Vertical Reference 2000','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1304','REDGEOMIN','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1297','EVRF2007-PL','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1305','ETRF2000-PL','EPSG');
@@ -2128,7 +2125,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3049','ETRS - TM37','EPS
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3050','ETRS - TM38','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3051','ETRS - TM39','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4936','ETRS89 / (X, Y, Z)','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4937','ETRS89','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4937','ETRS89-LatLonh','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5730','EVRF_AMST / NH','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6884','NAD83(CORS96) / Oregon North (m)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2462','AL_ALB87 / TM_6','EPSG');
@@ -3982,9 +3979,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3455','NAD83 / S Dakota 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3460','Fiji 1986 / Map Grid','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3461','Dabola 1981 / UTM 28N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3462','Dabola 1981 / UTM 29N','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3560','NAD83 / Utah North (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3566','NAD83 / Utah Cen (ftUS)','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3567','NAD83 / Utah South (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3571','WGS 84 / LAEA Bering Sea','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3572','WGS 84 / LAEA Alaska','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3573','WGS 84 / LAEA Canada','EPSG');
@@ -4449,7 +4444,7 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','5488','RGAF09 (lat-lon)',
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','7069','NAD83(2011) / IaRCS zone 13 Fairfield','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','7073','RGTAAF07 (lat-lon)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','7070','NAD83(2011) / IaRCS zone 14 Burlington','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','7072','RGTAAF07','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','7072','RGTAAF07 (lat-lon)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','7109','NAD83(2011) / St Mary (m)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','7114','NAD83(2011) / Ft Peck Sx (m)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','7110','NAD83(2011) / Blackfeet (m)','EPSG');
@@ -4987,15 +4982,11 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8042','Stable Cadastre','
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8043','Stable cadastre','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8043','S-SC','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8050','Mean Sea Level height (ft)','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8050','MSL height (ft)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8051','Mean Sea Level depth (ft)','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8051','MSL depth (ft)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8065','NAD83(2011) / PCCS east zone(ft)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8052','Mean Sea Level height (ftUS)','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8052','MSL height (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8066','NAD83(2011) / PCCS central zone(ft)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8053','Mean Sea Level depth (ftUS)','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8053','MSL depth (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8067','NAD83(2011) / PCCS west zone(ft)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8068','NAD83(2011) / PCCS Mt. Lemmon zone(ft)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8090','WISCRS Florence (m)','EPSG');
@@ -6691,8 +6682,6 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','30791','Nord Sahara 1959
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','30792','Nord Sahara 1959 / Voirol Unifie Sud','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5659','Monte Mario / UTMRER','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5844','RGRDC 2005 / Congo TM 30','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5715','MSL depth','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5714','MSL height','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5868','Mean High Water height','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5869','Mean Higher High Water height','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5870','Mean High Water Spring Tides height','EPSG');
@@ -7259,7 +7248,6 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6630','NAD83(PA11) / Haw
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6630','NAD83(PA11) / HI 3 (m)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6631','NAD83(PA11) / Hawaii zone 4 (m)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6631','NAD83(PA11) / HI 4 (m)','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6633','NAD83(PA11) / Hawaii zone 3 (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6633','NAD83(PA11) / HI 3 (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6634','NAD83(PA11) / UTM 4N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6632','NAD83(PA11) / Hawaii zone 5 (m)','EPSG');
@@ -7361,9 +7349,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9678','Gulshan / Banglad
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9680','WGS 84 / Bangladesh Universal Transverse Mercator','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9680','WGS 84 / BUTM 2010','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9549','LTF2004(G) / LTF2004(C)','EPSG');
-INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6893','WGS 84 / World Mercator + EGM2008 height','EPSG');
-INSERT INTO "alias_name" VALUES('compound_crs','EPSG','7955','St. Helena Tritan / UTM zone 30S + Tritan 2011 height','EPSG');
-INSERT INTO "alias_name" VALUES('compound_crs','EPSG','7956','SHMG2015 + SHVD2015 height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','7956','St. Helena Map Grid 2015 + SHVD2015 height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2176','ETRS89 / Poland CS2000 zone 5','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2177','ETRS89 / Poland CS2000 zone 6','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2178','ETRS89 / Poland CS2000 zone 7','EPSG');
