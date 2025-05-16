@@ -408,7 +408,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1353','ETRS89/DREF91 Realization 201
 INSERT INTO "usage" VALUES('EPSG','19242','geodetic_datum','EPSG','1353','EPSG','1103','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1355','Sonatrach Reference Frame 2020',NULL,'EPSG','7019','EPSG','8901','2012-11-15',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','19535','geodetic_datum','EPSG','1355','EPSG','1026','EPSG','1136');
-INSERT INTO "geodetic_datum" VALUES('EPSG','1356','Latvian coordinate system 2020',NULL,'EPSG','7019','EPSG','8901','2023-01-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1356','Latvian coordinate system 2020',NULL,'EPSG','7019','EPSG','8901','2023-01-01',NULL,NULL,NULL,2020.28,0);
 INSERT INTO "usage" VALUES('EPSG','19558','geodetic_datum','EPSG','1356','EPSG','1139','EPSG','1026');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1357','Reseau Geodesique de Nouvelle Caledonie 2015',NULL,'EPSG','7019','EPSG','8901','2016-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','19600','geodetic_datum','EPSG','1357','EPSG','1174','EPSG','1181');
