@@ -249,6 +249,7 @@ VALUES
 
 -- lv_lgia - Latvian Geospatial Information Agency
 ('LV''14.gri','lv_lgia_lv14.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/lv_lgia_lv14.tif',1,1,NULL),
+('LKS92to2020NTv2.gsb','lv_lgia_lks92to2020.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/lv_lgia_lks92to2020.tif',1,1,NULL),
 
 -- mx_inegi - Instituto Nacional de Estadística, Geografía e Informática (INEGI) Mexico
 ('GGM10.txt','mx_inegi_ggm10.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/mx_inegi_ggm10.tif',1,1,NULL),
