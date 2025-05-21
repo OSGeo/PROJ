@@ -7630,6 +7630,8 @@ INSERT INTO "projected_crs" VALUES('EPSG','10820','WGS 84 / Agriculture Canada A
 INSERT INTO "usage" VALUES('EPSG','22545','projected_crs','EPSG','10820','EPSG','4752','EPSG','1292');
 INSERT INTO "projected_crs" VALUES('EPSG','10851','EWR3 Grid',NULL,'EPSG','4400','EPSG','10849','EPSG','9765',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','22761','projected_crs','EPSG','10851','EPSG','4799','EPSG','1141');
+INSERT INTO "projected_crs" VALUES('EPSG','10857','SIRGAS 2000 / Brazil Albers',NULL,'EPSG','4400','EPSG','4674','EPSG','10856',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22838','projected_crs','EPSG','10857','EPSG','3223','EPSG','1162');
 INSERT INTO "projected_crs" VALUES('EPSG','11114','MAGNA-SIRGAS 2018 / Colombia Far West zone',NULL,'EPSG','4500','EPSG','20046','EPSG','18065',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18947','projected_crs','EPSG','11114','EPSG','3091','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','11115','MAGNA-SIRGAS 2018 / Colombia West zone',NULL,'EPSG','4500','EPSG','20046','EPSG','18066',NULL,0);

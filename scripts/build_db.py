@@ -28,6 +28,25 @@
 #  DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
+"""
+Steps for updating proj.db with the latest EPSG data:
+
+1. Download the latest version of the EPSG registry from epsg.org. Choose the PostgreSQL
+   scripts. You may need to register a user on the site.
+2. Unzip the downloaded file into scripts/
+3. Run this script:
+
+    > python build_db.py
+
+4. Verify output of the script and fix any errors it may report
+5. Update version number in `data/sql/metadata.sql`
+6. Update the `PROJ_DB_SQL_EXPECTED_MD5` in `data/CmakeLists.txt`:
+
+    Build PROJ with CMake to get the new hash. Update the hash and
+    build again to verify that the hash is correct.
+7. Run the test suite. Fix errors, if any.
+"""
+
 import os
 import re
 import sqlite3
