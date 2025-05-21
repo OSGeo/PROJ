@@ -433,6 +433,29 @@ install(FILES ${docfiles}
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
 ################################################################################
+# Build debug symbols
+################################################################################
+option(EXPORT_PDB "Export PDB file" OFF)
+
+if (WIN32 AND EXPORT_PDB)
+  target_compile_options(proj PRIVATE /Zi /Zf)
+  target_link_options(proj PRIVATE /DEBUG /OPT:REF /OPT:ICF)
+
+  if(BUILD_SHARED_LIBS)
+    set(pdbFile $<TARGET_PDB_FILE:proj>)
+  else()
+    set(pdbDirFullPath ${CMAKE_BINARY_DIR}/lib)
+    set_target_properties(proj
+        PROPERTIES
+            COMPILE_PDB_OUTPUT_DIRECTORY ${pdbDirFullPath}
+            COMPILE_PDB_NAME proj)
+    set(pdbFile ${pdbDirFullPath}/proj.pdb)
+  endif()
+
+  install(FILES ${pdbFile} DESTINATION lib)
+endif()
+
+################################################################################
 # pkg-config support
 ################################################################################
 configure_proj_pc()
