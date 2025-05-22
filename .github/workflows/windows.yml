@@ -75,6 +75,7 @@ jobs:
             if "${{ env.BUILD_TYPE }}"=="Release" (set CMAKE_UNITY_BUILD_OPT="-DCMAKE_UNITY_BUILD=ON")
             cmake -D CMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" ^
               -D BUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" ^
+              -D EXPORT_PDB="ON" ^
               -D CMAKE_C_FLAGS="/WX" ^
               -D CMAKE_CXX_FLAGS="/WX" ^
               %CMAKE_CXX_STANDARD% ^
