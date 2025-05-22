@@ -156,6 +156,11 @@ VALUES
 ('gllat_2023.tif','dk_sdfi_gllat_2023.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/dk_sdfi_gllat_2023.tif',1,1,NULL),
 ('glmsl_2023.tif','dk_sdfi_glmsl_2023.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/dk_sdfi_glmsl_2023.tif',1,1,NULL),
 
+-- dk_kds - Danish Agency for Climate Data
+-- Denmark
+('dvr90_evrf2019.tif','dk_kds_dvr90_evrf2019.tif',NULL,'GTiff','vgridshift',0,NULL,'https://cdn.proj.org/dk_kds_dvr90_evrf2019.tif',1,1,NULL),
+('dvr90_evrf2019_mean_tide.tif','dk_kds_dvr90_evrf2019_mean_tide.tif',NULL,'GTiff','vgridshift',0,NULL,'https://cdn.proj.org/dk_kds_dvr90_evrf2019_mean_tide.tif',1,1,NULL),
+
 -- es_cat_icgc - Institut Cartogràfic i Geològic de Catalunya (ICGC)
 ('100800401.gsb','es_cat_icgc_100800401.tif','100800401.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_cat_icgc_100800401.tif',1,1,NULL),
 
