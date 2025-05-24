@@ -73,9 +73,12 @@ jobs:
             :: Not directly linked to BUILD_SHARED_LIBS, but a way to test different C++ standard versions
             if "${{ env.BUILD_SHARED_LIBS }}"=="ON" (set CMAKE_CXX_STANDARD="-DCMAKE_CXX_STANDARD=20")
             if "${{ env.BUILD_TYPE }}"=="Release" (set CMAKE_UNITY_BUILD_OPT="-DCMAKE_UNITY_BUILD=ON")
+            set USE_ONLY_EMBEDDED_RESOURCE_FILES="OFF"
+            if "${{ env.BUILD_TYPE }}"=="Debug" (set USE_ONLY_EMBEDDED_RESOURCE_FILES="ON")
             cmake -D CMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" ^
               -D BUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" ^
               -D EXPORT_PDB="ON" ^
+              -D USE_ONLY_EMBEDDED_RESOURCE_FILES="%USE_ONLY_EMBEDDED_RESOURCE_FILES%" ^
               -D CMAKE_C_FLAGS="/WX" ^
               -D CMAKE_CXX_FLAGS="/WX" ^
               %CMAKE_CXX_STANDARD% ^
