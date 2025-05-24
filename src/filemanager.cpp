@@ -144,8 +144,6 @@ std::string File::read_line(size_t maxLen, bool &maxLenReached,
 
 // ---------------------------------------------------------------------------
 
-#if !USE_ONLY_EMBEDDED_RESOURCE_FILES
-
 #ifdef _WIN32
 
 /* The bulk of utf8towc()/utf8fromwc() is derived from the utf.c module from
@@ -590,6 +588,12 @@ static std::string Win32Recode(const char *src, unsigned src_code_page,
     return out;
 }
 
+#endif // _defined(_WIN32)
+
+#if !(EMBED_RESOURCE_FILES && USE_ONLY_EMBEDDED_RESOURCE_FILES)
+
+#ifdef _WIN32
+
 // ---------------------------------------------------------------------------
 
 class FileWin32 : public File {
@@ -729,7 +733,8 @@ std::unique_ptr<File> FileWin32::open(PJ_CONTEXT *ctx, const char *filename,
         return nullptr;
     }
 }
-#else
+
+#else // if !defined(_WIN32)
 
 // ---------------------------------------------------------------------------
 
@@ -799,7 +804,7 @@ unsigned long long FileStdio::tell() {
 
 std::unique_ptr<File> FileStdio::open(PJ_CONTEXT *ctx, const char *filename,
                                       FileAccess access) {
-    auto fp = fopen(filename, access == FileAccess::READ_ONLY     ? "rb"
+    auto fp = fopen(filename, access == FileAccess::READ_ONLY ? "rb"
                               : access == FileAccess::READ_UPDATE ? "r+b"
                                                                   : "w+b");
     return std::unique_ptr<File>(fp ? new FileStdio(filename, ctx, fp)
@@ -808,7 +813,7 @@ std::unique_ptr<File> FileStdio::open(PJ_CONTEXT *ctx, const char *filename,
 
 #endif // _WIN32
 
-#endif // !USE_ONLY_EMBEDDED_RESOURCE_FILES
+#endif // !(EMBED_RESOURCE_FILES && USE_ONLY_EMBEDDED_RESOURCE_FILES)
 
 // ---------------------------------------------------------------------------
 
