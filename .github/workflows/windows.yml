@@ -159,7 +159,7 @@ jobs:
             mingw-w64-x86_64-python-yaml
             mingw-w64-x86_64-sqlite3
 
-      - name: Build
+      - name: First build with EMBED_RESOURCE_FILES=ON and USE_ONLY_EMBEDDED_RESOURCE_FILES=ON
         run: |
             mkdir -p $HOME/.ccache
             ccache -M 500M
@@ -167,6 +167,27 @@ jobs:
             PROJ_BUILD=${GITHUB_WORKSPACE}/build
             PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
             mkdir ${PROJ_BUILD}
+            cd ${PROJ_BUILD}
+
+            cmake -D CMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+              -D BUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} \
+              -D CMAKE_INSTALL_PREFIX="${PROJ_DIR}" \
+              -D CMAKE_C_FLAGS="-Werror" \
+              -D CMAKE_CXX_FLAGS="-Werror" \
+              -D USE_CCACHE=ON \
+              -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
+              -D CMAKE_UNITY_BUILD=ON \
+              -D Python_ROOT_DIR=/mingw64 \
+              -D CMAKE_CXX_STANDARD=20 \
+              -D EMBED_RESOURCE_FILES=ON \
+              -D USE_ONLY_EMBEDDED_RESOURCE_FILES=ON \
+              ..
+            make -j 2
+
+      - name: Seond build with EMBED_RESOURCE_FILES=OFF and USE_ONLY_EMBEDDED_RESOURCE_FILES=OFF
+        run: |
+            PROJ_BUILD=${GITHUB_WORKSPACE}/build
+            PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
             cd ${PROJ_BUILD}
             cmake -D CMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
               -D BUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} \
@@ -178,6 +199,8 @@ jobs:
               -D CMAKE_UNITY_BUILD=ON \
               -D Python_ROOT_DIR=/mingw64 \
               -D CMAKE_CXX_STANDARD=20 \
+              -D EMBED_RESOURCE_FILES=OFF \
+              -D USE_ONLY_EMBEDDED_RESOURCE_FILES=OFF \
               ..
             make -j 2
             make install
