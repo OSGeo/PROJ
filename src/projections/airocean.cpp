@@ -594,10 +594,8 @@ struct pj_airocean_data {
     double air_ico_trans[23][4][4] = {};
 
     void initialize() {
-        memcpy((char *)this->ico_faces, (char *)base_ico_faces,
-               sizeof(pj_face[23]));
-        memcpy((char *)this->airocean_faces, (char *)base_airocean_faces,
-               sizeof(pj_face[23]));
+        memcpy(this->ico_faces, base_ico_faces, sizeof(pj_face[23]));
+        memcpy(this->airocean_faces, base_airocean_faces, sizeof(pj_face[23]));
         memcpy(this->ico_centers, base_ico_centers, sizeof(PJ_XYZ[23]));
         memcpy(this->ico_normals, base_ico_normals, sizeof(PJ_XYZ[23]));
         memcpy(this->ico_air_trans, base_ico_air_trans,

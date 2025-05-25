@@ -552,19 +552,19 @@ size_t proj_trans_generic(PJ *P, PJ_DIRECTION direction, double *x, size_t sx,
         /* they tell compilers and static analyzers that we know what we do   */
         if (nx > 1) {
             *x = coord.xyzt.x;
-            x = (double *)((void *)(((char *)x) + sx));
+            x = reinterpret_cast<double *>((reinterpret_cast<char *>(x) + sx));
         }
         if (ny > 1) {
             *y = coord.xyzt.y;
-            y = (double *)((void *)(((char *)y) + sy));
+            y = reinterpret_cast<double *>((reinterpret_cast<char *>(y) + sy));
         }
         if (nz > 1) {
             *z = coord.xyzt.z;
-            z = (double *)((void *)(((char *)z) + sz));
+            z = reinterpret_cast<double *>((reinterpret_cast<char *>(z) + sz));
         }
         if (nt > 1) {
             *t = coord.xyzt.t;
-            t = (double *)((void *)(((char *)t) + st));
+            t = reinterpret_cast<double *>((reinterpret_cast<char *>(t) + st));
         }
     }
 

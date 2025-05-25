@@ -640,12 +640,11 @@ PJ *PJ_PROJECTION(horner) {
         }
     }
 
-    if (0 == parse_coefs(P, (double *)(Q->fwd_origin), "fwd_origin", 2)) {
+    if (0 == parse_coefs(P, &(Q->fwd_origin->u), "fwd_origin", 2)) {
         proj_log_error(P, _("missing fwd_origin"));
         return horner_freeup(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
-    if (has_inv &&
-        0 == parse_coefs(P, (double *)(Q->inv_origin), "inv_origin", 2)) {
+    if (has_inv && 0 == parse_coefs(P, &(Q->inv_origin->u), "inv_origin", 2)) {
         proj_log_error(P, _("missing inv_origin"));
         return horner_freeup(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
