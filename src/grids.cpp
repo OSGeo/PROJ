@@ -58,7 +58,8 @@ using namespace internal;
 /************************************************************************/
 
 static const int byte_order_test = 1;
-#define IS_LSB (1 == ((const unsigned char *)(&byte_order_test))[0])
+#define IS_LSB                                                                 \
+    (1 == (reinterpret_cast<const unsigned char *>(&byte_order_test))[0])
 
 static void swap_words(void *dataIn, size_t word_size, size_t word_count)
 
