@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "PROJINFO" "1" "15 Mar 2025" "9.6" "PROJ"
+.TH "PROJINFO" "1" "02 Jun 2025" "9.6" "PROJ"
 .SH NAME
 projinfo \- Geodetic object and coordinate operation queries
 .SH SYNOPSIS
@@ -70,39 +70,39 @@ a proj\-string,
 .IP \(bu 2
 a WKT string,
 .IP \(bu 2
-an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
-"urn:ogc:def:coordinateOperation:EPSG::1671"),
+an object code (like \(dqEPSG:4326\(dq, \(dqurn:ogc:def:crs:EPSG::4326\(dq,
+\(dqurn:ogc:def:coordinateOperation:EPSG::1671\(dq),
 .IP \(bu 2
-an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
+an Object name. e.g \(dqWGS 84\(dq, \(dqWGS 84 / UTM zone 31N\(dq. In that case as
 uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
 .IP \(bu 2
-a CRS name and a coordinate epoch, separated with \(aq@\(aq. For example "\fI\%ITRF2014@2025.0\fP". (\fIadded in 9.2\fP)
+a CRS name and a coordinate epoch, separated with \(aq@\(aq. For example \(dq\X'tty: link mailto:ITRF2014@2025.0'\fI\%ITRF2014@2025.0\fP\X'tty: link'\(dq. (\fIadded in 9.2\fP)
 .IP \(bu 2
 a OGC URN combining references for compound coordinate reference systems
-(e.g "\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP" or custom abbreviated
-syntax "EPSG:2393+5717"),
+(e.g \(dq\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP\(dq or custom abbreviated
+syntax \(dqEPSG:2393+5717\(dq),
 .IP \(bu 2
 a OGC URN combining references for references for projected or derived CRSs
-e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)":
-"\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP"
+e.g. for Projected 3D CRS \(dqUTM zone 31N / WGS 84 (3D)\(dq:
+\(dq\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP\(dq
 (\fIadded in 6.2\fP)
 .IP \(bu 2
 Extension of OGC URN for CoordinateMetadata.
-e.g. "\fI\%urn:ogc:def:CoordinateMetadata:NRCAN::NAD83_CSRS_1997_MTM11_HT2_1997\fP"
+e.g. \(dq\fI\%urn:ogc:def:CoordinateMetadata:NRCAN::NAD83_CSRS_1997_MTM11_HT2_1997\fP\(dq
 .IP \(bu 2
 a OGC URN combining references for concatenated operations
-(e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
+(e.g. \(dq\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP\(dq)
 .IP \(bu 2
-a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.4/projjson.schema.json\fP (\fIadded in 6.2\fP)
+a PROJJSON string. The jsonschema is at \X'tty: link https://proj.org/schemas/v0.4/projjson.schema.json'\fI\%https://proj.org/schemas/v0.4/projjson.schema.json\fP\X'tty: link' (\fIadded in 6.2\fP)
 .IP \(bu 2
-a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + EGM96 height" (\fIadded in 7.1\fP)
+a compound CRS made from two object names separated with \(dq + \(dq. e.g. \(dqWGS 84 + EGM96 height\(dq (\fIadded in 7.1\fP)
 .UNINDENT
 .sp
 {object_reference} is a filename preceded by the \(aq@\(aq character.  The
 file referenced by the {object_reference} must contain a valid
 {object_definition}.
 .sp
-The usage of "{srs_def} {srs_def}" is equivalent to "\-s {srs_def} \-t {srs_def}" (\fIadded in 9.5\fP).
+The usage of \(dq{srs_def} {srs_def}\(dq is equivalent to \(dq\-s {srs_def} \-t {srs_def}\(dq (\fIadded in 9.5\fP).
 .UNINDENT
 .UNINDENT
 .SH DESCRIPTION
@@ -114,7 +114,7 @@ or PROJJSON string).
 .sp
 It can also be used to query coordinate operations available between two CRS.
 .sp
-The program is named with some reference to the GDAL \fI\%gdalsrsinfo\fP utility that offers
+The program is named with some reference to the GDAL \X'tty: link https://gdal.org/programs/gdalsrsinfo.html'\fI\%gdalsrsinfo\fP\X'tty: link' utility that offers
 partly similar services.
 .sp
 The following control parameters can appear in any order:
@@ -182,7 +182,7 @@ potentially compatible of being piped in other utilities.
 .B \-\-area name_or_code
 Specify an area of interest to restrict the results when researching
 coordinate operations between 2 CRS. The area of interest can be specified either
-as a name (e.g "Denmark \- onshore") or a AUTHORITY:CODE (EPSG:3237)
+as a name (e.g \(dqDenmark \- onshore\(dq) or a AUTHORITY:CODE (EPSG:3237)
 This option is exclusive of \fI\%\-\-bbox\fP\&.
 .sp
 \fBNOTE:\fP
@@ -318,7 +318,7 @@ only used for coordinate operation computation
 .INDENT 0.0
 .TP
 .B \-\-hide\-ballpark
-New in version 7.1.
+Added in version 7.1.
 
 .sp
 Hides any coordinate operation that is, or contains, a
@@ -334,7 +334,7 @@ only used for coordinate operation computation
 .INDENT 0.0
 .TP
 .B \-\-accuracy {accuracy}
-New in version 8.0.
+Added in version 8.0.
 
 .sp
 Sets the minimum desired accuracy for returned coordinate operations.
@@ -349,7 +349,7 @@ only used for coordinate operation computation
 .INDENT 0.0
 .TP
 .B \-\-allow\-ellipsoidal\-height\-as\-vertical\-crs
-New in version 8.0.
+Added in version 8.0.
 
 .sp
 Allows exporting a geographic or projected 3D CRS as a compound CRS whose
@@ -410,7 +410,7 @@ with a likelihood of 70% to EPSG:32631
 .INDENT 0.0
 .TP
 .B \-\-dump\-db\-structure
-New in version 8.1.
+Added in version 8.1.
 
 .sp
 Outputs the sequence of SQL statements to create a new empty valid auxiliary
@@ -421,7 +421,7 @@ definition of the object as SQL statements will be appended.
 .INDENT 0.0
 .TP
 .B \-\-list\-crs [list\-crs\-filter]
-New in version 8.1.
+Added in version 8.1.
 
 .sp
 Outputs a list (authority name:code and CRS name) of the filtered CRSs from the database.
@@ -431,15 +431,15 @@ geographic,geographic_2d,geographic_3d,vertical,projected,compound.
 Affected by options \fI\%\-\-authority\fP, \fI\%\-\-area\fP, \fI\%\-\-bbox\fP and \fI\%\-\-spatial\-test\fP
 .sp
 A visual alternative is the webpage
-\fI\%CRS Explorer\fP .
+\X'tty: link https://crs-explorer.proj.org/?all=true'\fI\%CRS Explorer\fP\X'tty: link' .
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-\-3d
-New in version 6.3.
+Added in version 6.3.
 
 .sp
-"Promote" 2D CRS(s) to their 3D version, where the vertical axis is the
+\(dqPromote\(dq 2D CRS(s) to their 3D version, where the vertical axis is the
 ellipsoidal height in metres, using the ellipsoid of the base geodetic CRS.
 Depending on PROJ versions and the exact nature of the CRS involved,
 especially before PROJ 9.1, a mix of 2D and 3D CRS could lead to 2D or 3D
@@ -449,7 +449,7 @@ transformation to possibly happen.
 .INDENT 0.0
 .TP
 .B \-\-output\-id=AUTH:NAME
-New in version 8.1.
+Added in version 8.1.
 
 .sp
 Identifier to assign to the object (for SQL output).
@@ -458,7 +458,7 @@ It is strongly recommended that new objects should not be added in common
 registries, such as \fBEPSG\fP, \fBESRI\fP, \fBIAU\fP, etc.
 Users should use a custom authority name instead. If a new object should be
 added to the official EPSG registry, users are invited to follow the
-procedure explained at \fI\%https://epsg.org/dataset\-change\-requests.html\fP\&.
+procedure explained at \X'tty: link https://epsg.org/dataset-change-requests.html'\fI\%https://epsg.org/dataset\-change\-requests.html\fP\X'tty: link'\&.
 .sp
 Combined with \fI\%\-\-dump\-db\-structure\fP, users can create
 auxiliary databases, instead of directly modifying the main \fBproj.db\fP database.
@@ -483,7 +483,7 @@ indented lines by default.
 .INDENT 0.0
 .TP
 .B \-\-searchpaths
-New in version 7.0.
+Added in version 7.0.
 
 .sp
 Output the directories into which PROJ resources will be looked for
@@ -493,7 +493,7 @@ that will override them.
 .INDENT 0.0
 .TP
 .B \-\-remote\-data
-New in version 7.0.
+Added in version 7.0.
 
 .sp
 Display information regarding if \fI\%Network capabilities\fP is enabled, and the
@@ -502,7 +502,7 @@ related URL.
 .INDENT 0.0
 .TP
 .B \-\-s_epoch
-New in version 9.4.
+Added in version 9.4.
 
 .sp
 Epoch of coordinates in the source CRS, as decimal year.
@@ -511,7 +511,7 @@ Only applies to a dynamic CRS.
 .INDENT 0.0
 .TP
 .B \-\-t_epoch
-New in version 9.4.
+Added in version 9.4.
 
 .sp
 Epoch of coordinates in the target CRS, as decimal year.
@@ -525,11 +525,9 @@ Query the CRS object corresponding to EPSG:4326
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 projinfo EPSG:4326
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -537,32 +535,30 @@ Output:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 PROJ.4 string:
 +proj=longlat +datum=WGS84 +no_defs +type=crs
 
 WKT2:2019 string:
-GEOGCRS["WGS 84",
-    DATUM["World Geodetic System 1984",
-        ELLIPSOID["WGS 84",6378137,298.257223563,
-            LENGTHUNIT["metre",1]]],
-    PRIMEM["Greenwich",0,
-        ANGLEUNIT["degree",0.0174532925199433]],
+GEOGCRS[\(dqWGS 84\(dq,
+    DATUM[\(dqWorld Geodetic System 1984\(dq,
+        ELLIPSOID[\(dqWGS 84\(dq,6378137,298.257223563,
+            LENGTHUNIT[\(dqmetre\(dq,1]]],
+    PRIMEM[\(dqGreenwich\(dq,0,
+        ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433]],
     CS[ellipsoidal,2],
-        AXIS["geodetic latitude (Lat)",north,
+        AXIS[\(dqgeodetic latitude (Lat)\(dq,north,
             ORDER[1],
-            ANGLEUNIT["degree",0.0174532925199433]],
-        AXIS["geodetic longitude (Lon)",east,
+            ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433]],
+        AXIS[\(dqgeodetic longitude (Lon)\(dq,east,
             ORDER[2],
-            ANGLEUNIT["degree",0.0174532925199433]],
+            ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433]],
     USAGE[
-        SCOPE["unknown"],
-        AREA["World"],
+        SCOPE[\(dqunknown\(dq],
+        AREA[\(dqWorld\(dq],
         BBOX[\-90,\-180,90,180]],
-    ID["EPSG",4326]]
-.ft P
-.fi
+    ID[\(dqEPSG\(dq,4326]]
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -573,11 +569,9 @@ and NAD83 (designed with its EPSG code 4269) within an area of interest
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
-projinfo \-s NAD27 \-t EPSG:4269 \-\-area "USA \- Missouri"
-.ft P
-.fi
+.EX
+projinfo \-s NAD27 \-t EPSG:4269 \-\-area \(dqUSA \- Missouri\(dq
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -585,8 +579,7 @@ Output:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, USA \- CONUS including EEZ
 
 PROJ string:
@@ -595,45 +588,44 @@ PROJ string:
 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
-COORDINATEOPERATION["NAD27 to NAD83 (1)",
+COORDINATEOPERATION[\(dqNAD27 to NAD83 (1)\(dq,
     SOURCECRS[
-        GEOGCRS["NAD27",
-            DATUM["North American Datum 1927",
-                ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
+        GEOGCRS[\(dqNAD27\(dq,
+            DATUM[\(dqNorth American Datum 1927\(dq,
+                ELLIPSOID[\(dqClarke 1866\(dq,6378206.4,294.978698213898,
+                    LENGTHUNIT[\(dqmetre\(dq,1]]],
+            PRIMEM[\(dqGreenwich\(dq,0,
+                ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433]],
             CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
+                AXIS[\(dqgeodetic latitude (Lat)\(dq,north,
                     ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
+                    ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433]],
+                AXIS[\(dqgeodetic longitude (Lon)\(dq,east,
                     ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]]]],
+                    ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433]]]],
     TARGETCRS[
-        GEOGCRS["NAD83",
-            DATUM["North American Datum 1983",
-                ELLIPSOID["GRS 1980",6378137,298.257222101,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
+        GEOGCRS[\(dqNAD83\(dq,
+            DATUM[\(dqNorth American Datum 1983\(dq,
+                ELLIPSOID[\(dqGRS 1980\(dq,6378137,298.257222101,
+                    LENGTHUNIT[\(dqmetre\(dq,1]]],
+            PRIMEM[\(dqGreenwich\(dq,0,
+                ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433]],
             CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
+                AXIS[\(dqgeodetic latitude (Lat)\(dq,north,
                     ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
+                    ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433]],
+                AXIS[\(dqgeodetic longitude (Lon)\(dq,east,
                     ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]]]],
-    METHOD["CTABLE2"],
-    PARAMETERFILE["Latitude and longitude difference file","conus"],
+                    ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433]]]],
+    METHOD[\(dqCTABLE2\(dq],
+    PARAMETERFILE[\(dqLatitude and longitude difference file\(dq,\(dqconus\(dq],
     OPERATIONACCURACY[0.15],
     USAGE[
-        SCOPE["unknown"],
-        AREA["USA \- CONUS including EEZ"],
+        SCOPE[\(dqunknown\(dq],
+        AREA[\(dqUSA \- CONUS including EEZ\(dq],
         BBOX[23.81,\-129.17,49.38,\-65.69]],
-    ID["DERIVED_FROM(EPSG)",1241]]
-.ft P
-.fi
+    ID[\(dqDERIVED_FROM(EPSG)\(dq,1241]]
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -643,11 +635,9 @@ Export an object as a PROJJSON string
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 projinfo GDA94 \-o PROJJSON \-q
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -655,51 +645,49 @@ Output:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 {
-    "type": "GeographicCRS",
-    "name": "GDA94",
-    "datum": {
-        "type": "GeodeticReferenceFrame",
-        "name": "Geocentric Datum of Australia 1994",
-        "ellipsoid": {
-            "name": "GRS 1980",
-            "semi_major_axis": 6378137,
-            "inverse_flattening": 298.257222101
+    \(dqtype\(dq: \(dqGeographicCRS\(dq,
+    \(dqname\(dq: \(dqGDA94\(dq,
+    \(dqdatum\(dq: {
+        \(dqtype\(dq: \(dqGeodeticReferenceFrame\(dq,
+        \(dqname\(dq: \(dqGeocentric Datum of Australia 1994\(dq,
+        \(dqellipsoid\(dq: {
+            \(dqname\(dq: \(dqGRS 1980\(dq,
+            \(dqsemi_major_axis\(dq: 6378137,
+            \(dqinverse_flattening\(dq: 298.257222101
         }
     },
-    "coordinate_system": {
-        "subtype": "ellipsoidal",
-        "axis": [
+    \(dqcoordinate_system\(dq: {
+        \(dqsubtype\(dq: \(dqellipsoidal\(dq,
+        \(dqaxis\(dq: [
         {
-            "name": "Geodetic latitude",
-            "abbreviation": "Lat",
-            "direction": "north",
-            "unit": "degree"
+            \(dqname\(dq: \(dqGeodetic latitude\(dq,
+            \(dqabbreviation\(dq: \(dqLat\(dq,
+            \(dqdirection\(dq: \(dqnorth\(dq,
+            \(dqunit\(dq: \(dqdegree\(dq
         },
         {
-            "name": "Geodetic longitude",
-            "abbreviation": "Lon",
-            "direction": "east",
-            "unit": "degree"
+            \(dqname\(dq: \(dqGeodetic longitude\(dq,
+            \(dqabbreviation\(dq: \(dqLon\(dq,
+            \(dqdirection\(dq: \(dqeast\(dq,
+            \(dqunit\(dq: \(dqdegree\(dq
         }
         ]
     },
-    "area": "Australia \- GDA",
-    "bbox": {
-        "south_latitude": \-60.56,
-        "west_longitude": 93.41,
-        "north_latitude": \-8.47,
-        "east_longitude": 173.35
+    \(dqarea\(dq: \(dqAustralia \- GDA\(dq,
+    \(dqbbox\(dq: {
+        \(dqsouth_latitude\(dq: \-60.56,
+        \(dqwest_longitude\(dq: 93.41,
+        \(dqnorth_latitude\(dq: \-8.47,
+        \(dqeast_longitude\(dq: 173.35
     },
-    "id": {
-        "authority": "EPSG",
-        "code": 4283
+    \(dqid\(dq: {
+        \(dqauthority\(dq: \(dqEPSG\(dq,
+        \(dqcode\(dq: 4283
     }
 }
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -709,22 +697,20 @@ Exporting the SQL statements to insert a new CRS in an auxiliary database.
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 # Get the SQL statements for a custom CRS
-projinfo "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs +title=my_crs" \-\-output\-id HOBU:MY_CRS \-o SQL \-q > my_crs.sql
+projinfo \(dq+proj=merc +lat_ts=5 +datum=WGS84 +type=crs +title=my_crs\(dq \-\-output\-id HOBU:MY_CRS \-o SQL \-q > my_crs.sql
 cat my_crs.sql
 
 # Initialize an auxiliary database with the schema of the reference database
-echo ".schema" | sqlite3 /path/to/proj.db | sqlite3 aux.db
+echo \(dq.schema\(dq | sqlite3 /path/to/proj.db | sqlite3 aux.db
 
 # Append the content of the definition of HOBU:MY_CRS
 sqlite3 aux.db < my_crs.db
 
 # Check that everything works OK
 projinfo \-\-aux\-db\-path aux.db HOBU:MY_CRS
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -732,15 +718,13 @@ or more simply:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 # Create an auxiliary database with the definition of a custom CRS.
-projinfo "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs +title=my_crs" \-\-output\-id HOBU:MY_CRS \-\-dump\-db\-structure | sqlite3 aux.db
+projinfo \(dq+proj=merc +lat_ts=5 +datum=WGS84 +type=crs +title=my_crs\(dq \-\-output\-id HOBU:MY_CRS \-\-dump\-db\-structure | sqlite3 aux.db
 
 # Check that everything works OK
 projinfo \-\-aux\-db\-path aux.db HOBU:MY_CRS
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -748,67 +732,63 @@ Output:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 INSERT INTO geodetic_crs VALUES(\(aqHOBU\(aq,\(aqGEODETIC_CRS_MY_CRS\(aq,\(aqunknown\(aq,\(aq\(aq,\(aqgeographic 2D\(aq,\(aqEPSG\(aq,\(aq6424\(aq,\(aqEPSG\(aq,\(aq6326\(aq,NULL,0);
 INSERT INTO usage VALUES(\(aqHOBU\(aq,\(aqUSAGE_GEODETIC_CRS_MY_CRS\(aq,\(aqgeodetic_crs\(aq,\(aqHOBU\(aq,\(aqGEODETIC_CRS_MY_CRS\(aq,\(aqPROJ\(aq,\(aqEXTENT_UNKNOWN\(aq,\(aqPROJ\(aq,\(aqSCOPE_UNKNOWN\(aq);
 INSERT INTO conversion VALUES(\(aqHOBU\(aq,\(aqCONVERSION_MY_CRS\(aq,\(aqunknown\(aq,\(aq\(aq,\(aqEPSG\(aq,\(aq9805\(aq,\(aqMercator (variant B)\(aq,\(aqEPSG\(aq,\(aq8823\(aq,\(aqLatitude of 1st standard parallel\(aq,5,\(aqEPSG\(aq,\(aq9122\(aq,\(aqEPSG\(aq,\(aq8802\(aq,\(aqLongitude of natural origin\(aq,0,\(aqEPSG\(aq,\(aq9122\(aq,\(aqEPSG\(aq,\(aq8806\(aq,\(aqFalse easting\(aq,0,\(aqEPSG\(aq,\(aq9001\(aq,\(aqEPSG\(aq,\(aq8807\(aq,\(aqFalse northing\(aq,0,\(aqEPSG\(aq,\(aq9001\(aq,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO usage VALUES(\(aqHOBU\(aq,\(aqUSAGE_CONVERSION_MY_CRS\(aq,\(aqconversion\(aq,\(aqHOBU\(aq,\(aqCONVERSION_MY_CRS\(aq,\(aqPROJ\(aq,\(aqEXTENT_UNKNOWN\(aq,\(aqPROJ\(aq,\(aqSCOPE_UNKNOWN\(aq);
 INSERT INTO projected_crs VALUES(\(aqHOBU\(aq,\(aqMY_CRS\(aq,\(aqmy_crs\(aq,\(aq\(aq,\(aqEPSG\(aq,\(aq4400\(aq,\(aqHOBU\(aq,\(aqGEODETIC_CRS_MY_CRS\(aq,\(aqHOBU\(aq,\(aqCONVERSION_MY_CRS\(aq,NULL,0);
 INSERT INTO usage VALUES(\(aqHOBU\(aq,\(aqUSAGE_PROJECTED_CRS_MY_CRS\(aq,\(aqprojected_crs\(aq,\(aqHOBU\(aq,\(aqMY_CRS\(aq,\(aqPROJ\(aq,\(aqEXTENT_UNKNOWN\(aq,\(aqPROJ\(aq,\(aqSCOPE_UNKNOWN\(aq);
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 PROJ.4 string:
 +proj=merc +lat_ts=5 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs
 
 WKT2:2019 string:
-PROJCRS["my_crs",
-    BASEGEOGCRS["unknown",
-        ENSEMBLE["World Geodetic System 1984 ensemble",
-            MEMBER["World Geodetic System 1984 (Transit)"],
-            MEMBER["World Geodetic System 1984 (G730)"],
-            MEMBER["World Geodetic System 1984 (G873)"],
-            MEMBER["World Geodetic System 1984 (G1150)"],
-            MEMBER["World Geodetic System 1984 (G1674)"],
-            MEMBER["World Geodetic System 1984 (G1762)"],
-            ELLIPSOID["WGS 84",6378137,298.257223563,
-                LENGTHUNIT["metre",1]],
+PROJCRS[\(dqmy_crs\(dq,
+    BASEGEOGCRS[\(dqunknown\(dq,
+        ENSEMBLE[\(dqWorld Geodetic System 1984 ensemble\(dq,
+            MEMBER[\(dqWorld Geodetic System 1984 (Transit)\(dq],
+            MEMBER[\(dqWorld Geodetic System 1984 (G730)\(dq],
+            MEMBER[\(dqWorld Geodetic System 1984 (G873)\(dq],
+            MEMBER[\(dqWorld Geodetic System 1984 (G1150)\(dq],
+            MEMBER[\(dqWorld Geodetic System 1984 (G1674)\(dq],
+            MEMBER[\(dqWorld Geodetic System 1984 (G1762)\(dq],
+            ELLIPSOID[\(dqWGS 84\(dq,6378137,298.257223563,
+                LENGTHUNIT[\(dqmetre\(dq,1]],
             ENSEMBLEACCURACY[2.0]],
-        PRIMEM["Greenwich",0,
-            ANGLEUNIT["degree",0.0174532925199433]],
-        ID["HOBU","GEODETIC_CRS_MY_CRS"]],
-    CONVERSION["unknown",
-        METHOD["Mercator (variant B)",
-            ID["EPSG",9805]],
-        PARAMETER["Latitude of 1st standard parallel",5,
-            ANGLEUNIT["degree",0.0174532925199433],
-            ID["EPSG",8823]],
-        PARAMETER["Longitude of natural origin",0,
-            ANGLEUNIT["degree",0.0174532925199433],
-            ID["EPSG",8802]],
-        PARAMETER["False easting",0,
-            LENGTHUNIT["metre",1],
-            ID["EPSG",8806]],
-        PARAMETER["False northing",0,
-            LENGTHUNIT["metre",1],
-            ID["EPSG",8807]]],
+        PRIMEM[\(dqGreenwich\(dq,0,
+            ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433]],
+        ID[\(dqHOBU\(dq,\(dqGEODETIC_CRS_MY_CRS\(dq]],
+    CONVERSION[\(dqunknown\(dq,
+        METHOD[\(dqMercator (variant B)\(dq,
+            ID[\(dqEPSG\(dq,9805]],
+        PARAMETER[\(dqLatitude of 1st standard parallel\(dq,5,
+            ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433],
+            ID[\(dqEPSG\(dq,8823]],
+        PARAMETER[\(dqLongitude of natural origin\(dq,0,
+            ANGLEUNIT[\(dqdegree\(dq,0.0174532925199433],
+            ID[\(dqEPSG\(dq,8802]],
+        PARAMETER[\(dqFalse easting\(dq,0,
+            LENGTHUNIT[\(dqmetre\(dq,1],
+            ID[\(dqEPSG\(dq,8806]],
+        PARAMETER[\(dqFalse northing\(dq,0,
+            LENGTHUNIT[\(dqmetre\(dq,1],
+            ID[\(dqEPSG\(dq,8807]]],
     CS[Cartesian,2],
-        AXIS["(E)",east,
+        AXIS[\(dq(E)\(dq,east,
             ORDER[1],
-            LENGTHUNIT["metre",1]],
-        AXIS["(N)",north,
+            LENGTHUNIT[\(dqmetre\(dq,1]],
+        AXIS[\(dq(N)\(dq,north,
             ORDER[2],
-            LENGTHUNIT["metre",1]],
-    ID["HOBU","MY_CRS"]]
-.ft P
-.fi
+            LENGTHUNIT[\(dqmetre\(dq,1]],
+    ID[\(dqHOBU\(dq,\(dqMY_CRS\(dq]]
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -818,11 +798,9 @@ Get the WKT representation of EPSG:25832 in the WKT1:GDAL output format and on a
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 projinfo \-o WKT1:GDAL \-\-single\-line EPSG:25832
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -830,12 +808,10 @@ Output:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 WKT1:GDAL string:
-PROJCS["ETRS89 / UTM zone 32N",GEOGCS["ETRS89",DATUM["European_Terrestrial_Reference_System_1989",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6258"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4258"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",9],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","25832"]]
-.ft P
-.fi
+PROJCS[\(dqETRS89 / UTM zone 32N\(dq,GEOGCS[\(dqETRS89\(dq,DATUM[\(dqEuropean_Terrestrial_Reference_System_1989\(dq,SPHEROID[\(dqGRS 1980\(dq,6378137,298.257222101,AUTHORITY[\(dqEPSG\(dq,\(dq7019\(dq]],AUTHORITY[\(dqEPSG\(dq,\(dq6258\(dq]],PRIMEM[\(dqGreenwich\(dq,0,AUTHORITY[\(dqEPSG\(dq,\(dq8901\(dq]],UNIT[\(dqdegree\(dq,0.0174532925199433,AUTHORITY[\(dqEPSG\(dq,\(dq9122\(dq]],AUTHORITY[\(dqEPSG\(dq,\(dq4258\(dq]],PROJECTION[\(dqTransverse_Mercator\(dq],PARAMETER[\(dqlatitude_of_origin\(dq,0],PARAMETER[\(dqcentral_meridian\(dq,9],PARAMETER[\(dqscale_factor\(dq,0.9996],PARAMETER[\(dqfalse_easting\(dq,500000],PARAMETER[\(dqfalse_northing\(dq,0],UNIT[\(dqmetre\(dq,1,AUTHORITY[\(dqEPSG\(dq,\(dq9001\(dq]],AXIS[\(dqEasting\(dq,EAST],AXIS[\(dqNorthing\(dq,NORTH],AUTHORITY[\(dqEPSG\(dq,\(dq25832\(dq]]
+.EE
 .UNINDENT
 .UNINDENT
 .SH SEE ALSO
@@ -843,11 +819,11 @@ PROJCS["ETRS89 / UTM zone 32N",GEOGCS["ETRS89",DATUM["European_Terrestrial_Refer
 \fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBproj(1)\fP, \fBprojsync(1)\fP
 .SH BUGS
 .sp
-A list of known bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
+A list of known bugs can be found at \X'tty: link https://github.com/OSGeo/PROJ/issues'\fI\%https://github.com/OSGeo/PROJ/issues\fP\X'tty: link'
 where new bug reports can be submitted to.
 .SH HOME PAGE
 .sp
-\fI\%https://proj.org/\fP
+\X'tty: link https://proj.org/'\fI\%https://proj.org/\fP\X'tty: link'
 .SH AUTHOR
 Even Rouault
 .SH COPYRIGHT

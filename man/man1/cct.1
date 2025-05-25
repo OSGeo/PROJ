@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "CCT" "1" "15 Mar 2025" "9.6" "PROJ"
+.TH "CCT" "1" "02 Jun 2025" "9.6" "PROJ"
 .SH NAME
 cct \- Coordinate Conversion and Transformation
 .SH SYNOPSIS
@@ -54,18 +54,18 @@ a proj\-string,
 .IP \(bu 2
 a WKT string,
 .IP \(bu 2
-an object code (like "EPSG:1671" "urn:ogc:def:coordinateOperation:EPSG::1671"),
+an object code (like \(dqEPSG:1671\(dq \(dqurn:ogc:def:coordinateOperation:EPSG::1671\(dq),
 .IP \(bu 2
-an object name. e.g. "ITRF2014 to ETRF2014 (1)". In that case as
+an object name. e.g. \(dqITRF2014 to ETRF2014 (1)\(dq. In that case as
 uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
 .IP \(bu 2
 a OGC URN combining references for concatenated operations
-(e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
+(e.g. \(dq\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP\(dq)
 .IP \(bu 2
-a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.4/projjson.schema.json\fP
+a PROJJSON string. The jsonschema is at \X'tty: link https://proj.org/schemas/v0.4/projjson.schema.json'\fI\%https://proj.org/schemas/v0.4/projjson.schema.json\fP\X'tty: link'
 .UNINDENT
 .sp
-New in version 8.0.0.
+Added in version 8.0.0.
 
 .sp
 \fBNOTE:\fP
@@ -90,7 +90,7 @@ file referenced by the {object_reference} must contain a valid
 {object_definition}.
 .INDENT 0.0
 .INDENT 3.5
-New in version 8.0.0.
+Added in version 8.0.0.
 
 .UNINDENT
 .UNINDENT
@@ -113,7 +113,7 @@ Specify input columns for (up to) 4 input parameters. Defaults to 1,2,3,4.
 .INDENT 0.0
 .TP
 .B \-d <n>
-New in version 5.2.0.
+Added in version 5.2.0.
 
 .sp
 Specify the number of decimals to round to in the output.
@@ -141,7 +141,7 @@ Specify a fixed observation \fIheight\fP to be used for all input data.
 .INDENT 0.0
 .TP
 .B \-s <n>, \-\-skip\-lines=<n>
-New in version 5.1.0.
+Added in version 5.1.0.
 
 .sp
 Skip the first \fIn\fP lines of input. This applies to any kind of input, whether
@@ -165,7 +165,7 @@ Usage varies with operation.
 \fI\%cct\fP is an acronym meaning \fICoordinate Conversion and Transformation\fP\&.
 .sp
 The acronym refers to definitions given in the OGC 08\-015r2/ISO\-19111
-standard "Geographical Information \-\- Spatial Referencing by Coordinates",
+standard \(dqGeographical Information \-\- Spatial Referencing by Coordinates\(dq,
 which defines two different classes of \fIcoordinate operations\fP:
 .sp
 \fICoordinate Conversions\fP, which are coordinate operations where input
@@ -176,7 +176,7 @@ cartesian coordinates) and
 input and output datums differ (e.g. change of reference frame).
 .SH USE OF REMOTE GRIDS
 .sp
-New in version 7.0.0.
+Added in version 7.0.0.
 
 .sp
 If the \fI\%PROJ_NETWORK\fP environment variable is set to \fBON\fP,
@@ -193,11 +193,9 @@ the following script
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 echo 12 55 0 0 | cct +proj=utm +zone=32 +ellps=GRS80
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -206,11 +204,9 @@ Hence, the command
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 echo 12 55 | cct \-z0 \-t0 +proj=utm +zone=32 +ellps=GRS80
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -218,11 +214,9 @@ Should give results comparable to the classic \fI\%proj\fP command
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 echo 12 55 | proj +proj=utm +zone=32 +ellps=GRS80
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -232,11 +226,9 @@ Convert geographical input to UTM zone 32 on the GRS80 ellipsoid:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 cct +proj=utm +ellps=GRS80 +zone=32
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -246,11 +238,9 @@ Roundtrip accuracy check for the case above:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 cct +proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm +step +proj=utm +inv
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -260,11 +250,9 @@ As (2) but specify input columns for longitude, latitude, height and time:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 cct \-c 5,2,1,4 +proj=utm +ellps=GRS80 +zone=32
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -275,11 +263,9 @@ input:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 cct \-t 0 \-z 0 +proj=utm +ellps=GRS80 +zone=32
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -290,12 +276,10 @@ stream:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 $ echo 12 56 100 2018.0 auxiliary data | cct +proj=merc
 1335833.8895   7522963.2411      100.0000     2018.0000 auxiliary data
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -305,12 +289,10 @@ Coordinate operation referenced through its code
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 $ echo 3541657.3778 948984.2343 5201383.5231 2020.5 | cct EPSG:8366
 3541657.9112    948983.7503  5201383.2482     2020.5000
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -320,12 +302,10 @@ Coordinate operation referenced through its name
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
-$ echo 3541657.3778 948984.2343 5201383.5231 2020.5 | cct "ITRF2014 to ETRF2014 (1)"
+.EX
+$ echo 3541657.3778 948984.2343 5201383.5231 2020.5 | cct \(dqITRF2014 to ETRF2014 (1)\(dq
 3541657.9112    948983.7503  5201383.2482     2020.5000
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .SH BACKGROUND
@@ -357,11 +337,11 @@ Hence, in honour of \fIcct\fP (the geodesist) this is \fI\%cct\fP (the program).
 \fBproj(1)\fP, \fBcs2cs(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBprojinfo(1)\fP, \fBprojsync(1)\fP
 .SH BUGS
 .sp
-A list of known bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
+A list of known bugs can be found at \X'tty: link https://github.com/OSGeo/PROJ/issues'\fI\%https://github.com/OSGeo/PROJ/issues\fP\X'tty: link'
 where new bug reports can be submitted to.
 .SH HOME PAGE
 .sp
-\fI\%https://proj.org/\fP
+\X'tty: link https://proj.org/'\fI\%https://proj.org/\fP\X'tty: link'
 .SH AUTHOR
 Thomas Knudsen
 .SH COPYRIGHT

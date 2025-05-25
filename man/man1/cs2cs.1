@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "CS2CS" "1" "15 Mar 2025" "9.6" "PROJ"
+.TH "CS2CS" "1" "02 Jun 2025" "9.6" "PROJ"
 .SH NAME
 cs2cs \- Cartographic coordinate system filter
 .SH SYNOPSIS
@@ -54,32 +54,32 @@ a proj\-string,
 .IP \(bu 2
 a WKT string,
 .IP \(bu 2
-an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
-"urn:ogc:def:coordinateOperation:EPSG::1671"),
+an object code (like \(dqEPSG:4326\(dq, \(dqurn:ogc:def:crs:EPSG::4326\(dq,
+\(dqurn:ogc:def:coordinateOperation:EPSG::1671\(dq),
 .IP \(bu 2
-an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
+an Object name. e.g \(dqWGS 84\(dq, \(dqWGS 84 / UTM zone 31N\(dq. In that case as
 uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
 .IP \(bu 2
-a CRS name and a coordinate epoch, separated with \(aq@\(aq. For example "\fI\%ITRF2014@2025.0\fP". (\fIadded in 9.2\fP)
+a CRS name and a coordinate epoch, separated with \(aq@\(aq. For example \(dq\X'tty: link mailto:ITRF2014@2025.0'\fI\%ITRF2014@2025.0\fP\X'tty: link'\(dq. (\fIadded in 9.2\fP)
 .IP \(bu 2
 a OGC URN combining references for compound coordinate reference systems
-(e.g "\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP" or custom abbreviated
-syntax "EPSG:2393+5717"),
+(e.g \(dq\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP\(dq or custom abbreviated
+syntax \(dqEPSG:2393+5717\(dq),
 .IP \(bu 2
 a OGC URN combining references for references for projected or derived CRSs
-e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)":
-"\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP"
+e.g. for Projected 3D CRS \(dqUTM zone 31N / WGS 84 (3D)\(dq:
+\(dq\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP\(dq
 (\fIadded in 6.2\fP)
 .IP \(bu 2
 a OGC URN combining references for concatenated operations
-(e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
+(e.g. \(dq\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP\(dq)
 .IP \(bu 2
-a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.4/projjson.schema.json\fP (\fIadded in 6.2\fP)
+a PROJJSON string. The jsonschema is at \X'tty: link https://proj.org/schemas/v0.4/projjson.schema.json'\fI\%https://proj.org/schemas/v0.4/projjson.schema.json\fP\X'tty: link' (\fIadded in 6.2\fP)
 .IP \(bu 2
-a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + EGM96 height" (\fIadded in 7.1\fP)
+a compound CRS made from two object names separated with \(dq + \(dq. e.g. \(dqWGS 84 + EGM96 height\(dq (\fIadded in 7.1\fP)
 .UNINDENT
 .sp
-New in version 6.0.0.
+Added in version 6.0.0.
 
 .sp
 \fBNOTE:\fP
@@ -115,7 +115,7 @@ ASCII input only. (# is the default value).
 .INDENT 0.0
 .TP
 .B \-d <n>
-New in version 5.2.0.
+Added in version 5.2.0.
 
 .sp
 Specify the number of decimals to round to in the output.
@@ -189,7 +189,7 @@ third.
 Where \fIformat\fP is a printf format string to control the form of the output values.
 For inverse projections, the output will be in degrees when this option is
 employed. If a format is specified for inverse projection the output data
-will be in decimal degrees. The default format is \fB"%.2f"\fP for forward
+will be in decimal degrees. The default format is \fB\(dq%.2f\(dq\fP for forward
 projection and DMS for inverse.
 .UNINDENT
 .INDENT 0.0
@@ -214,19 +214,19 @@ the program to be printed prior to input data.
 .INDENT 0.0
 .TP
 .B \-\-area <name_or_code>
-New in version 8.0.0.
+Added in version 8.0.0.
 
 .sp
 Specify an area of interest to restrict the results when researching
 coordinate operations between 2 CRS. The area of interest can be specified either
-as a name (e.g "Denmark \- onshore") or a AUTHORITY:CODE (EPSG:3237)
+as a name (e.g \(dqDenmark \- onshore\(dq) or a AUTHORITY:CODE (EPSG:3237)
 .sp
 This option is mutually exclusive with \fI\%\-\-bbox\fP\&.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-\-bbox <west_long,south_lat,east_long,north_lat>
-New in version 8.0.0.
+Added in version 8.0.0.
 
 .sp
 Specify an area of interest to restrict the results when researching
@@ -240,7 +240,7 @@ unspecified geographic CRS.
 .INDENT 0.0
 .TP
 .B \-\-only\-best[=yes|=no]
-New in version 9.2.0.
+Added in version 9.2.0.
 
 .sp
 Force \fIcs2cs\fP to only use the best transformation known by PROJ.
@@ -259,7 +259,7 @@ when specified overrides such default value).
 .INDENT 0.0
 .TP
 .B \-\-no\-ballpark
-New in version 8.0.0.
+Added in version 8.0.0.
 
 .sp
 Disallow any coordinate operation that is, or contains, a
@@ -268,7 +268,7 @@ Disallow any coordinate operation that is, or contains, a
 .INDENT 0.0
 .TP
 .B \-\-accuracy <accuracy>
-New in version 8.0.0.
+Added in version 8.0.0.
 
 .sp
 Sets the minimum desired accuracy for candidate coordinate operations.
@@ -276,7 +276,7 @@ Sets the minimum desired accuracy for candidate coordinate operations.
 .INDENT 0.0
 .TP
 .B \-\-authority <name>
-New in version 8.0.0.
+Added in version 8.0.0.
 
 .sp
 This option can be used to restrict the authority of coordinate operations
@@ -293,10 +293,10 @@ This option is mutually exclusive with \fI\%\-\-bbox\fP\&.
 .INDENT 0.0
 .TP
 .B \-\-3d
-New in version 9.1.
+Added in version 9.1.
 
 .sp
-"Promote" 2D CRS(s) to their 3D version, where the vertical axis is the
+\(dqPromote\(dq 2D CRS(s) to their 3D version, where the vertical axis is the
 ellipsoidal height in metres, using the ellipsoid of the base geodetic CRS.
 Depending on PROJ versions and the exact nature of the CRS involved,
 especially before PROJ 9.1, a mix of 2D and 3D CRS could lead to 2D or 3D
@@ -306,7 +306,7 @@ transformation to possibly happen.
 .INDENT 0.0
 .TP
 .B \-\-s_epoch
-New in version 9.4.
+Added in version 9.4.
 
 .sp
 Epoch of coordinates in the source CRS, as decimal year.
@@ -315,7 +315,7 @@ Only applies to a dynamic CRS.
 .INDENT 0.0
 .TP
 .B \-\-t_epoch
-New in version 9.4.
+Added in version 9.4.
 
 .sp
 Epoch of coordinates in the target CRS, as decimal year.
@@ -360,7 +360,7 @@ places), while projected (cartesian) coordinates will be in linear
 (meter, feet) units.
 .SS Use of remote grids
 .sp
-New in version 7.0.0.
+Added in version 7.0.0.
 
 .sp
 If the \fI\%PROJ_NETWORK\fP environment variable is set to \fBON\fP,
@@ -375,15 +375,13 @@ The following script
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 cs2cs +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27 \-r <<EOF
-45°15\(aq33.1" 111.5W
+45°15\(aq33.1\(dq 111.5W
 45d15.551666667N \-111d30
 +45.25919444444 111d30\(aq000w
 EOF
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -394,11 +392,9 @@ The x\-y output data will appear as three lines of:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 1402285.93  5076292.58 0.00
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -411,11 +407,9 @@ Assuming the above mentioned grid is \fInot\fP available,
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 echo \-111.5 45.25919444444 | cs2cs \-\-only\-best +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -423,12 +417,10 @@ would return:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 Attempt to use coordinate operation axis order change (2D) + Inverse of NAD27 to NAD83 (7) + axis order change (2D) + UTM zone 10N failed. Grid us_noaa_nadcon5_nad27_nad83_1986_conus.tif is not available. Consult https://proj.org/resource_files.html for guidance.
 *   * inf
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -436,11 +428,9 @@ Otherwise, if you don\(aqt have the grid available and you don\(aqt specify \fI\
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 echo \-111.5 45.25919444444 | cs2cs \-\-only\-best +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -448,11 +438,9 @@ would return:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 1402224.57  5076275.42 0.00
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -464,13 +452,11 @@ Transforming from WGS 84 latitude/longitude (in that order) to UTM Zone 31N/WGS 
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 cs2cs EPSG:4326 EPSG:32631 <<EOF
 45N 2E
 EOF
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -478,11 +464,9 @@ outputs
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 421184.70   4983436.77 0.00
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .SS Using EPSG CRS names
@@ -492,11 +476,9 @@ UTM Zone 31N/WGS 84 with WGS84 ellipsoidal height
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
-echo 45 2 0 | cs2cs "WGS 84 + EGM96 height" "WGS 84 / UTM zone 31N" \-\-3d
-.ft P
-.fi
+.EX
+echo 45 2 0 | cs2cs \(dqWGS 84 + EGM96 height\(dq \(dqWGS 84 / UTM zone 31N\(dq \-\-3d
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -504,11 +486,9 @@ outputs
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.nf
-.ft C
+.EX
 421184.70   4983436.77 50.69
-.ft P
-.fi
+.EE
 .UNINDENT
 .UNINDENT
 .sp
@@ -524,11 +504,11 @@ locally or use networking capabilities mentioned above.
 \fBproj(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBprojinfo(1)\fP, \fBprojsync(1)\fP
 .SH BUGS
 .sp
-A list of known bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
+A list of known bugs can be found at \X'tty: link https://github.com/OSGeo/PROJ/issues'\fI\%https://github.com/OSGeo/PROJ/issues\fP\X'tty: link'
 where new bug reports can be submitted to.
 .SH HOME PAGE
 .sp
-\fI\%https://proj.org/\fP
+\X'tty: link https://proj.org/'\fI\%https://proj.org/\fP\X'tty: link'
 .SH AUTHOR
 Frank Warmerdam
 .SH COPYRIGHT
