@@ -1,5 +1,44 @@
 # PROJ Release Notes
 
+## 9.6.1
+
+### Updates
+
+* Update EPSG to 12.012 (#4498)
+
+* Add an option to ship PDB files (#4505)
+
+### Bug Fixes
+
+* Deal with South Orientated TMerc presented as regular TMerc but with Scale_Factor=-1 (#4427)
+
+* Add missing 'limits' and 'algorithm' includes (#4444)
+
+* CMake: avoid detection of C23 `#embed` on too old compilers (#4463)
+
+* `createOperations()`: for NAD83(CSRS)[x] to NAD83(CSRS)[y], do not go through NAD83 (#4467)
+
+* Add missing include for `uint32_t` on Windows with gcc 15.1 (#4478)
+
+* `getGeoidModels`: use vertical_crs.datum_code to get vcrss that uses different units (#4480)
+
+* `FileManager::open_resource_file()`: honour known URLs from grid_alternatives that don't point to cdn.proj.org (#4481)
+
+* Database: update ESRI to ArcGIS Pro 3.5 (#4493)
+
+* `createOperationsCompoundToGeog()`: avoid bringing non-sensical transformations (#4494)
+
+* Bug correction in Wagner VI projection parameters (#4453)
+
+* C++: Fix bare `isnan()` to `std::isnan()` (#4472)
+
+* Database: fix duplicated entries with auxiliary database (#4482)
+
+* Use `std::abs` instead of `abs` for NetBSD (#4486)
+
+* Fix Windows build when both `EMBED_RESOURCE_FILES` and `USE_ONLY_EMBEDDED_RESOURCE_FILES` are set (#4508)
+
+
 ## 9.6.0
 
 ### Updates
