@@ -29,11 +29,14 @@
 #define FROM_PROJ_CPP
 
 #include "proj.h"
+#include "proj/internal/internal.hpp"
 #include "proj_internal.h"
 #include <math.h>
 
 #include <algorithm>
 #include <limits>
+
+using namespace NS_PROJ::internal;
 
 // ---------------------------------------------------------------------------
 static double simple_min(const double *data, const int arr_len) {
@@ -296,6 +299,31 @@ static int target_crs_lon_lat_order(PJ_CONTEXT *transformer_ctx,
     PJ *target_crs =
         get_output_crs(transformer_ctx, transformer_pj, pj_direction);
     if (target_crs == nullptr) {
+        const char *proj_string = proj_as_proj_string(
+            transformer_ctx, transformer_pj, PJ_PROJ_5, nullptr);
+        if (pj_direction == PJ_FWD) {
+            if (ends_with(proj_string,
+                          "+step +proj=unitconvert +xy_in=rad +xy_out=deg")) {
+                return true;
+            }
+            if (ends_with(proj_string,
+                          "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                          "+step +proj=axisswap +order=2,1")) {
+                return false;
+            }
+        } else {
+            if (starts_with(proj_string,
+                            "+proj=pipeline +step +proj=unitconvert +xy_in=deg "
+                            "+xy_out=rad")) {
+                return true;
+            }
+            if (starts_with(proj_string,
+                            "+proj=pipeline +step +proj=axisswap +order=2,1 "
+                            "+step +proj=unitconvert +xy_in=deg +xy_out=rad")) {
+                return false;
+            }
+        }
+
         proj_context_log_debug(transformer_ctx,
                                "Unable to retrieve target CRS");
         return -1;
