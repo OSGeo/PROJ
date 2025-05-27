@@ -529,7 +529,7 @@ int proj_trans_bounds(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                        boundary_len, y_boundary_array.data(), sizeof(double),
                        boundary_len, nullptr, 0, 0, nullptr, 0, 0);
 
-    if (output_lon_lat_order) {
+    if (degree_output && !output_lon_lat_order) {
         // Use GIS frienly order
         std::swap(x_boundary_array, y_boundary_array);
     }
@@ -540,23 +540,23 @@ int proj_trans_bounds(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
         *out_ymin = simple_min(y_boundary_array.data(), boundary_len);
         *out_ymax = simple_max(y_boundary_array.data(), boundary_len);
     } else if (north_pole_in_bounds) {
-        *out_xmin = simple_min(x_boundary_array.data(), boundary_len);
-        *out_ymin = -180;
-        *out_xmax = 90;
-        *out_ymax = 180;
+        *out_xmin = -180;
+        *out_xmax = 180;
+        *out_ymin = simple_min(y_boundary_array.data(), boundary_len);
+        *out_ymax = 90;
     } else if (south_pole_in_bounds) {
-        *out_xmin = -90;
-        *out_ymin = -180;
-        *out_xmax = simple_max(x_boundary_array.data(), boundary_len);
-        *out_ymax = 180;
+        *out_xmin = -180;
+        *out_xmax = 180;
+        *out_ymin = -90;
+        *out_ymax = simple_max(y_boundary_array.data(), boundary_len);
     } else {
-        *out_xmin = simple_min(x_boundary_array.data(), boundary_len);
-        *out_xmax = simple_max(x_boundary_array.data(), boundary_len);
-        *out_ymin = antimeridian_min(y_boundary_array.data(), boundary_len);
-        *out_ymax = antimeridian_max(y_boundary_array.data(), boundary_len);
+        *out_xmin = antimeridian_min(x_boundary_array.data(), boundary_len);
+        *out_xmax = antimeridian_max(x_boundary_array.data(), boundary_len);
+        *out_ymin = simple_min(y_boundary_array.data(), boundary_len);
+        *out_ymax = simple_max(y_boundary_array.data(), boundary_len);
     }
 
-    if (output_lon_lat_order) {
+    if (degree_output && !output_lon_lat_order) {
         // Go back to CRS axis order
         std::swap(*out_xmin, *out_ymin);
         std::swap(*out_xmax, *out_ymax);
@@ -860,7 +860,7 @@ int proj_trans_bounds_3D(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                                boundary_len, z_boundary_array.data(),
                                sizeof(double), boundary_len, nullptr, 0, 0);
 
-            if (output_lon_lat_order) {
+            if (degree_output && !output_lon_lat_order) {
                 // Use GIS frienly order
                 std::swap(x_boundary_array, y_boundary_array);
             }
@@ -879,45 +879,45 @@ int proj_trans_bounds_3D(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                     std::max(*out_ymax,
                              simple_max(y_boundary_array.data(), boundary_len));
             } else if (north_pole_in_bounds) {
-                *out_xmin =
-                    std::min(*out_xmin,
-                             simple_min(x_boundary_array.data(), boundary_len));
-                *out_ymin = -180;
-                *out_xmax = 90;
-                *out_ymax = 180;
+                *out_xmin = -180;
+                *out_xmax = 180;
+                *out_ymin =
+                    std::min(*out_ymin,
+                             simple_min(y_boundary_array.data(), boundary_len));
+                *out_ymax = 90;
             } else if (south_pole_in_bounds) {
-                *out_xmin = -90;
-                *out_ymin = -180;
-                *out_xmax =
-                    std::max(*out_xmax,
-                             simple_max(x_boundary_array.data(), boundary_len));
-                *out_ymax = 180;
+                *out_xmin = -180;
+                *out_xmax = 180;
+                *out_ymin = -90;
+                *out_ymax =
+                    std::max(*out_ymax,
+                             simple_max(y_boundary_array.data(), boundary_len));
             } else {
-                *out_xmin =
-                    std::min(*out_xmin,
-                             simple_min(x_boundary_array.data(), boundary_len));
-                *out_xmax =
-                    std::max(*out_xmax,
-                             simple_max(x_boundary_array.data(), boundary_len));
-                *out_ymin = std::min(
-                    *out_ymin,
-                    antimeridian_min(y_boundary_array.data(), boundary_len));
-                *out_ymax = std::max(
-                    *out_ymax,
-                    antimeridian_max(y_boundary_array.data(), boundary_len));
+                *out_xmin = std::min(
+                    *out_xmin,
+                    antimeridian_min(x_boundary_array.data(), boundary_len));
+                *out_xmax = std::max(
+                    *out_xmax,
+                    antimeridian_max(x_boundary_array.data(), boundary_len));
+                *out_ymin =
+                    std::min(*out_ymin,
+                             simple_min(y_boundary_array.data(), boundary_len));
+                *out_ymax =
+                    std::max(*out_ymax,
+                             simple_max(y_boundary_array.data(), boundary_len));
             }
 
             *out_zmin = std::min(
                 *out_zmin, simple_min(z_boundary_array.data(), boundary_len));
             *out_zmax = std::max(
                 *out_zmax, simple_max(z_boundary_array.data(), boundary_len));
-        }
-    }
 
-    if (output_lon_lat_order) {
-        // Go back to CRS axis order
-        std::swap(*out_xmin, *out_ymin);
-        std::swap(*out_xmax, *out_ymax);
+            if (degree_output && !output_lon_lat_order) {
+                // Go back to CRS axis order
+                std::swap(*out_xmin, *out_ymin);
+                std::swap(*out_xmax, *out_ymax);
+            }
+        }
     }
 
     return true;
