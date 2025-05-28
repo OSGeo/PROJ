@@ -34,6 +34,7 @@
 #include <math.h>
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 using namespace NS_PROJ::internal;
@@ -534,6 +535,7 @@ int proj_trans_bounds(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
         std::swap(x_boundary_array, y_boundary_array);
     }
 
+    bool crossed_antimeridian = false;
     if (!degree_output) {
         *out_xmin = simple_min(x_boundary_array.data(), boundary_len);
         *out_xmax = simple_max(x_boundary_array.data(), boundary_len);
@@ -552,6 +554,7 @@ int proj_trans_bounds(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
     } else {
         *out_xmin = antimeridian_min(x_boundary_array.data(), boundary_len);
         *out_xmax = antimeridian_max(x_boundary_array.data(), boundary_len);
+        crossed_antimeridian = *out_xmin > *out_xmax;
         *out_ymin = simple_min(y_boundary_array.data(), boundary_len);
         *out_ymax = simple_max(y_boundary_array.data(), boundary_len);
     }
@@ -560,6 +563,29 @@ int proj_trans_bounds(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
         // Go back to CRS axis order
         std::swap(*out_xmin, *out_ymin);
         std::swap(*out_xmax, *out_ymax);
+    }
+
+    if (!crossed_antimeridian) {
+        // Sample points within the source grid
+        for (int j = 1; j < side_pts - 1; ++j) {
+            for (int i = 0; i < side_pts; ++i) {
+                x_boundary_array[i] = std::min(xmin, xmax) + i * delta_x;
+                y_boundary_array[i] = std::min(ymin, ymax) + j * delta_y;
+            }
+            proj_trans_generic(P, direction, x_boundary_array.data(),
+                               sizeof(double), side_pts,
+                               y_boundary_array.data(), sizeof(double),
+                               side_pts, nullptr, 0, 0, nullptr, 0, 0);
+            for (int i = 0; i < side_pts; ++i) {
+                if (std::isfinite(x_boundary_array[i]) &&
+                    std::isfinite(y_boundary_array[i])) {
+                    *out_xmin = std::min(*out_xmin, x_boundary_array[i]);
+                    *out_xmax = std::max(*out_xmax, x_boundary_array[i]);
+                    *out_ymin = std::min(*out_ymin, y_boundary_array[i]);
+                    *out_ymax = std::max(*out_ymax, y_boundary_array[i]);
+                }
+            }
+        }
     }
 
     return true;
@@ -865,6 +891,8 @@ int proj_trans_bounds_3D(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                 std::swap(x_boundary_array, y_boundary_array);
             }
 
+            bool crossed_antimeridian = false;
+
             if (!degree_output) {
                 *out_xmin =
                     std::min(*out_xmin,
@@ -899,6 +927,7 @@ int proj_trans_bounds_3D(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                 *out_xmax = std::max(
                     *out_xmax,
                     antimeridian_max(x_boundary_array.data(), boundary_len));
+                crossed_antimeridian = *out_xmin > *out_xmax;
                 *out_ymin =
                     std::min(*out_ymin,
                              simple_min(y_boundary_array.data(), boundary_len));
@@ -916,6 +945,40 @@ int proj_trans_bounds_3D(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                 // Go back to CRS axis order
                 std::swap(*out_xmin, *out_ymin);
                 std::swap(*out_xmax, *out_ymax);
+            }
+
+            if (!crossed_antimeridian) {
+                // Sample points within the source grid
+                for (int j = 1; j < side_pts - 1; ++j) {
+                    for (int i = 0; i < side_pts; ++i) {
+                        x_boundary_array[i] = xmin + i * delta_x;
+                        y_boundary_array[i] = ymin + j * delta_y;
+                        z_boundary_array[i] = z;
+                    }
+                    proj_trans_generic(P, direction, x_boundary_array.data(),
+                                       sizeof(double), side_pts,
+                                       y_boundary_array.data(), sizeof(double),
+                                       side_pts, z_boundary_array.data(),
+                                       sizeof(double), side_pts, nullptr, 0, 0);
+                    for (int i = 0; i < side_pts; ++i) {
+                        if (std::isfinite(x_boundary_array[i]) &&
+                            std::isfinite(y_boundary_array[i])) {
+                            *out_xmin =
+                                std::min(*out_xmin, x_boundary_array[i]);
+                            *out_xmax =
+                                std::max(*out_xmax, x_boundary_array[i]);
+                            *out_ymin =
+                                std::min(*out_ymin, y_boundary_array[i]);
+                            *out_ymax =
+                                std::max(*out_ymax, y_boundary_array[i]);
+
+                            *out_zmin =
+                                std::min(*out_zmin, z_boundary_array[i]);
+                            *out_zmax =
+                                std::max(*out_zmax, z_boundary_array[i]);
+                        }
+                    }
+                }
             }
         }
     }
