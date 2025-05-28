@@ -531,7 +531,7 @@ int proj_trans_bounds(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                        boundary_len, nullptr, 0, 0, nullptr, 0, 0);
 
     if (degree_output && !output_lon_lat_order) {
-        // Use GIS frienly order
+        // Use GIS friendly order
         std::swap(x_boundary_array, y_boundary_array);
     }
 
@@ -887,7 +887,7 @@ int proj_trans_bounds_3D(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                                sizeof(double), boundary_len, nullptr, 0, 0);
 
             if (degree_output && !output_lon_lat_order) {
-                // Use GIS frienly order
+                // Use GIS friendly order
                 std::swap(x_boundary_array, y_boundary_array);
             }
 
