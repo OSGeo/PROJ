@@ -6223,8 +6223,8 @@ TEST_F(CApi, proj_trans_bounds_antimeridian_xy) {
                                     &out_right, &out_top, 21);
     EXPECT_TRUE(success == 1);
     EXPECT_NEAR(out_left, 1722483.900174921, 1);
-    EXPECT_NEAR(out_bottom, 5228058.6143420935, 1);
-    EXPECT_NEAR(out_right, 4624385.494808555, 1);
+    EXPECT_NEAR(out_bottom, 4795714.1718160734, 1);
+    EXPECT_NEAR(out_right, 7095599.9757999768, 1);
     EXPECT_NEAR(out_top, 8692574.544944234, 1);
     double out_left_inv;
     double out_bottom_inv;
@@ -6255,10 +6255,10 @@ TEST_F(CApi, proj_trans_bounds_antimeridian) {
         proj_trans_bounds(m_ctxt, P, PJ_FWD, -55.95, 160.6, -25.88, -171.2,
                           &out_left, &out_bottom, &out_right, &out_top, 21);
     EXPECT_TRUE(success == 1);
-    EXPECT_NEAR(out_left, 5228058.6143420935, 1);
+    EXPECT_NEAR(out_left, 4695514.1225397848, 1);
     EXPECT_NEAR(out_bottom, 1722483.900174921, 1);
     EXPECT_NEAR(out_right, 8692574.544944234, 1);
-    EXPECT_NEAR(out_top, 4624385.494808555, 1);
+    EXPECT_NEAR(out_top, 7053083.9457852989, 1);
     double out_left_inv;
     double out_bottom_inv;
     double out_right_inv;
@@ -6327,10 +6327,10 @@ TEST_F(CApi, proj_trans_bounds_ignore_inf) {
         proj_trans_bounds(m_ctxt, P, PJ_FWD, -180.0, -90.0, 180.0, 1.3,
                           &out_left, &out_bottom, &out_right, &out_top, 21);
     EXPECT_TRUE(success == 1);
-    EXPECT_NEAR(out_left, 0, 1);
+    EXPECT_NEAR(out_left, -49621755.4, 1);
     EXPECT_NEAR(out_bottom, -116576598.5, 1);
-    EXPECT_NEAR(out_right, 0, 1);
-    EXPECT_NEAR(out_top, 0, 1);
+    EXPECT_NEAR(out_right, 49621755.4, 1);
+    EXPECT_NEAR(out_top, 50132027.2, 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -6721,6 +6721,26 @@ TEST_F(CApi, proj_trans_bounds_from_pipeline_x_y_to_lat_lon) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_trans_bounds_world_geodetic_to_spilhaus) {
+    auto P = proj_create_crs_to_crs(m_ctxt, "OGC:CRS84", "ESRI:54099", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success =
+        proj_trans_bounds(m_ctxt, P, PJ_FWD, -180.0, -90.0, 180.0, 90.0,
+                          &out_left, &out_bottom, &out_right, &out_top, 21);
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, -16336432.4, 1);
+    EXPECT_NEAR(out_bottom, -16605405.9, 1);
+    EXPECT_NEAR(out_right, 16574104.3, 1);
+    EXPECT_NEAR(out_top, 16640152.9, 1);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_trans_bounds_3d_densify_0_geog3D_to_proj2D) {
     auto P =
         proj_create_crs_to_crs(m_ctxt, "EPSG:4979",
@@ -6841,6 +6861,57 @@ TEST_F(CApi, proj_trans_bounds_3d_geocentric_to_geog3D) {
     EXPECT_NEAR(ymax, 3., .15);
     EXPECT_NEAR(zmin, -57187, 1);
     EXPECT_NEAR(zmax, 56862.2, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_3d_geocentric_to_geog2D_lon_lat_ordered) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt, "EPSG:4978", "+proj=longlat +datum=WGS84 +type=crs", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double xmin;
+    double ymin;
+    double xmax;
+    double ymax;
+    double zmin;
+    double zmax;
+    int success = proj_trans_bounds_3D(
+        m_ctxt, P, PJ_FWD, 4102234.41, 143362.39, 4790558.75, 4189946.59,
+        219418.53, 4862865.64, &xmin, &ymin, &zmin, &xmax, &ymax, &zmax, 2);
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(xmin, 2, .15);
+    EXPECT_NEAR(ymin, 49., .15);
+    EXPECT_NEAR(xmax, 3., .15);
+    EXPECT_NEAR(ymax, 50, .15);
+    EXPECT_NEAR(zmin, -57187, 1);
+    EXPECT_NEAR(zmax, 56862.2, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_3D_ignore_inf) {
+    // cf proj_trans_bounds_ignore_inf
+    auto P =
+        proj_create_crs_to_crs(m_ctxt, "OGC:CRS84", "ESRI:102036", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    double z_min;
+    double z_max;
+    int success = proj_trans_bounds_3D(
+        m_ctxt, P, PJ_FWD, -180.0, -90.0, 0, 180.0, 1.3, 0, &out_left,
+        &out_bottom, &z_min, &out_right, &out_top, &z_max, 21);
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, -49621755.4, 1);
+    EXPECT_NEAR(out_bottom, -116576598.5, 1);
+    EXPECT_NEAR(out_right, 49621755.4, 1);
+    EXPECT_NEAR(out_top, 50132027.2, 1);
+    EXPECT_NEAR(z_min, 0, 1);
+    EXPECT_NEAR(z_max, 0, 1);
 }
 
 // ---------------------------------------------------------------------------
