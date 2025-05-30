@@ -317,6 +317,39 @@ TEST(datum, unknown_datum) {
 
 // ---------------------------------------------------------------------------
 
+TEST(datum, compare_with_D_prefixing) {
+    auto my_datum = GeodeticReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "my_datum"),
+        Ellipsoid::GRS1980, optional<std::string>(), optional<Measure>(),
+        PrimeMeridian::GREENWICH);
+    auto d_my_datum = GeodeticReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "D_my_datum"),
+        Ellipsoid::GRS1980, optional<std::string>(), optional<Measure>(),
+        PrimeMeridian::GREENWICH);
+
+    EXPECT_FALSE(my_datum->isEquivalentTo(d_my_datum.get(),
+                                          IComparable::Criterion::STRICT));
+    EXPECT_TRUE(my_datum->isEquivalentTo(d_my_datum.get(),
+                                         IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(d_my_datum->isEquivalentTo(my_datum.get(),
+                                            IComparable::Criterion::STRICT));
+    EXPECT_TRUE(d_my_datum->isEquivalentTo(my_datum.get(),
+                                           IComparable::Criterion::EQUIVALENT));
+
+    auto d_other_datum = GeodeticReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "D_other_datum"),
+        Ellipsoid::GRS1980, optional<std::string>(), optional<Measure>(),
+        PrimeMeridian::GREENWICH);
+    EXPECT_FALSE(my_datum->isEquivalentTo(d_other_datum.get(),
+                                          IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(d_my_datum->isEquivalentTo(
+        d_other_datum.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(d_other_datum->isEquivalentTo(
+        my_datum.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(datum, dynamic_geodetic_reference_frame) {
     auto drf = DynamicGeodeticReferenceFrame::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "test"), Ellipsoid::WGS84,

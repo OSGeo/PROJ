@@ -1560,63 +1560,92 @@ bool GeodeticReferenceFrame::_isEquivalentTo(
 bool GeodeticReferenceFrame::hasEquivalentNameToUsingAlias(
     const IdentifiedObject *other,
     const io::DatabaseContextPtr &dbContext) const {
-    if (nameStr() == other->nameStr() || nameStr() == "unknown" ||
-        other->nameStr() == "unknown") {
-        return true;
-    }
-    if (ci_starts_with(nameStr(), UNKNOWN_BASED_ON) ||
-        ci_starts_with(other->nameStr(), UNKNOWN_BASED_ON)) {
-        return false;
-    }
-    if (dbContext) {
-        if (!identifiers().empty()) {
-            const auto &id = identifiers().front();
 
-            const std::string officialNameFromId = dbContext->getName(
-                "geodetic_datum", *(id->codeSpace()), id->code());
-            const auto aliasesResult =
-                dbContext->getAliases(*(id->codeSpace()), id->code(), nameStr(),
-                                      "geodetic_datum", std::string());
+    const auto compare = [this, other,
+                          &dbContext](const std::string &thisName,
+                                      const std::string &otherName) {
+        if (thisName == otherName || thisName == "unknown" ||
+            otherName == "unknown") {
+            return true;
+        }
 
-            const auto isNameMatching =
-                [&aliasesResult, &officialNameFromId](const std::string &name) {
-                    const char *nameCstr = name.c_str();
-                    if (metadata::Identifier::isEquivalentName(
-                            nameCstr, officialNameFromId.c_str())) {
-                        return true;
-                    } else {
-                        for (const auto &aliasResult : aliasesResult) {
-                            if (metadata::Identifier::isEquivalentName(
-                                    nameCstr, aliasResult.c_str())) {
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                };
-
-            return isNameMatching(nameStr()) &&
-                   isNameMatching(other->nameStr());
-        } else if (!other->identifiers().empty()) {
-            auto otherGRF = dynamic_cast<const GeodeticReferenceFrame *>(other);
-            if (otherGRF) {
-                return otherGRF->hasEquivalentNameToUsingAlias(this, dbContext);
-            }
+        if (ci_starts_with(thisName, UNKNOWN_BASED_ON) ||
+            ci_starts_with(otherName, UNKNOWN_BASED_ON)) {
+            // Note: they cannot be equal based on initial test.
             return false;
         }
 
-        auto aliasesResult =
-            dbContext->getAliases(std::string(), std::string(), nameStr(),
-                                  "geodetic_datum", std::string());
-        const char *otherName = other->nameStr().c_str();
-        for (const auto &aliasResult : aliasesResult) {
-            if (metadata::Identifier::isEquivalentName(otherName,
-                                                       aliasResult.c_str())) {
-                return true;
+        if (dbContext) {
+            if (!identifiers().empty()) {
+                const auto &id = identifiers().front();
+
+                const std::string officialNameFromId = dbContext->getName(
+                    "geodetic_datum", *(id->codeSpace()), id->code());
+                const auto aliasesResult = dbContext->getAliases(
+                    *(id->codeSpace()), id->code(), thisName, "geodetic_datum",
+                    std::string());
+
+                const auto isNameMatching =
+                    [&aliasesResult,
+                     &officialNameFromId](const std::string &name) {
+                        const char *nameCstr = name.c_str();
+                        if (metadata::Identifier::isEquivalentName(
+                                nameCstr, officialNameFromId.c_str())) {
+                            return true;
+                        } else {
+                            for (const auto &aliasResult : aliasesResult) {
+                                if (metadata::Identifier::isEquivalentName(
+                                        nameCstr, aliasResult.c_str())) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    };
+
+                return isNameMatching(thisName) && isNameMatching(otherName);
+            } else if (!other->identifiers().empty()) {
+                auto otherGRF =
+                    dynamic_cast<const GeodeticReferenceFrame *>(other);
+                if (otherGRF) {
+                    return otherGRF->hasEquivalentNameToUsingAlias(this,
+                                                                   dbContext);
+                }
+                return false;
+            }
+
+            auto aliasesResult =
+                dbContext->getAliases(std::string(), std::string(), thisName,
+                                      "geodetic_datum", std::string());
+            const char *otherNamePtr = otherName.c_str();
+            for (const auto &aliasResult : aliasesResult) {
+                if (metadata::Identifier::isEquivalentName(
+                        otherNamePtr, aliasResult.c_str())) {
+                    return true;
+                }
             }
         }
+        return false;
+    };
+
+    // Try to work around issues with Esri style "D_" name prefixing
+    // Cf https://github.com/OSGeo/PROJ/issues/4514
+    const bool thisStartsWithDUnderscore = ci_starts_with(nameStr(), "D_");
+    const bool otherStartsWithDUnderscore =
+        ci_starts_with(other->nameStr(), "D_");
+    if (thisStartsWithDUnderscore && !otherStartsWithDUnderscore) {
+        const std::string thisNameMod = nameStr().substr(2);
+        return metadata::Identifier::isEquivalentName(
+                   thisNameMod.c_str(), other->nameStr().c_str()) ||
+               compare(thisNameMod, other->nameStr());
+    } else if (!thisStartsWithDUnderscore && otherStartsWithDUnderscore) {
+        const std::string otherNameMod = other->nameStr().substr(2);
+        return metadata::Identifier::isEquivalentName(nameStr().c_str(),
+                                                      otherNameMod.c_str()) ||
+               compare(nameStr(), otherNameMod);
+    } else {
+        return compare(nameStr(), other->nameStr());
     }
-    return false;
 }
 
 // ---------------------------------------------------------------------------

@@ -2412,6 +2412,8 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             codeFromAlias = "6258";
         } else if (name == "D_unknown") {
             name = "unknown";
+        } else if (name == "D_Unknown_based_on_WGS_84_ellipsoid") {
+            name = "Unknown based on WGS 84 ellipsoid";
         } else {
             tableNameForAlias = "geodetic_datum";
         }
