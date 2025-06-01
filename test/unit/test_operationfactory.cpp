@@ -9929,6 +9929,9 @@ TEST(operation, createOperation_ossfuzz_18587) {
 
 class derivedGeographicCRS_with_to_wgs84_to_geographicCRS
     : public ::testing::Test {
+  public:
+    ~derivedGeographicCRS_with_to_wgs84_to_geographicCRS() override;
+
   protected:
     void run(const CRSNNPtr &src) {
         auto objDst = PROJStringParser().createFromPROJString(
@@ -9991,6 +9994,9 @@ class derivedGeographicCRS_with_to_wgs84_to_geographicCRS
         }
     }
 };
+
+derivedGeographicCRS_with_to_wgs84_to_geographicCRS::
+    ~derivedGeographicCRS_with_to_wgs84_to_geographicCRS() = default;
 
 // ---------------------------------------------------------------------------
 

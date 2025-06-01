@@ -96,7 +96,7 @@ static PJ_XY aitoff_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
  * Inverse for Aitoff projection in poles is undefined, longitude value of 0 is
  *assumed.
  *
- * Contact : dtutic@geof.hr
+ * Contact : dtutic at geof.hr
  * Date: 2015-02-16
  *
  ************************************************************************************/
