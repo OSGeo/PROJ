@@ -43,7 +43,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.jquery",
-    #"sphinxcontrib.spelling",
+    "sphinxcontrib.spelling",
     "breathe",
     "redirects",
     "replacements",
