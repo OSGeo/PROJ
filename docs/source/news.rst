@@ -3,6 +3,49 @@
 News
 ###############################################################################
 
+9.6.1
+++++++++++++++++++++
+*June 2nd 2025*
+
+Updates
+-------
+
+* Update EPSG to 12.012 (`#4498 <https://github.com/OSGeo/PROJ/issues/4498>`_)
+
+* Update ESRI CRS DB to ArcGIS Pro 3.5 (`#4493 <https://github.com/OSGeo/PROJ/issues/4493>`_)
+
+* Add an option to ship PDB files (`#4505 <https://github.com/OSGeo/PROJ/issues/4505>`_)
+
+
+Bug Fixes
+---------
+
+* Deal with South Orientated TMerc presented as regular TMerc but with Scale_Factor=-1 (`#4427 <https://github.com/OSGeo/PROJ/issues/4427>`_)
+
+* Add missing 'limits' and 'algorithm' includes (`#4444 <https://github.com/OSGeo/PROJ/issues/4444>`_)
+
+* CMake: avoid detection of C23 ``#embed`` on too old compilers (`#4463 <https://github.com/OSGeo/PROJ/issues/4463>`_)
+
+* :cpp:func:`createOperations()`: for NAD83(CSRS)[x] to NAD83(CSRS)[y], do not go through NAD83 (`#4467 <https://github.com/OSGeo/PROJ/issues/4467>`_)
+
+* Add missing include for ``uint32_t`` on Windows with gcc 15.1 (`#4478 <https://github.com/OSGeo/PROJ/issues/4478>`_)
+
+* :cpp:func:`getGeoidModels`: use ``vertical_crs.datum_code`` to get vcrss that uses different units (`#4480 <https://github.com/OSGeo/PROJ/issues/4480>`_)
+
+* :cpp:func:`FileManager::open_resource_file()`: honour known URLs from ``grid_alternatives`` that don't point to cdn.proj.org (`#4481 <https://github.com/OSGeo/PROJ/issues/4481>`_)
+
+* :cpp:func:`createOperationsCompoundToGeog()`: avoid bringing non-sensical transformations (`#4494 <https://github.com/OSGeo/PROJ/issues/4494>`_)
+
+* Bug correction in Wagner VI projection parameters (`#4453 <https://github.com/OSGeo/PROJ/issues/4453>`_)
+
+* C++: Fix bare ``isnan()`` to ``std::isnan()`` (`#4472 <https://github.com/OSGeo/PROJ/issues/4472>`_)
+
+* Database: fix duplicated entries with auxiliary database (`#4482 <https://github.com/OSGeo/PROJ/issues/4482>`_)
+
+* Use ``std::abs`` instead of ``abs`` for NetBSD (`#4486 <https://github.com/OSGeo/PROJ/issues/4486>`_)
+
+* Fix Windows build when both :envvar:`EMBED_RESOURCE_FILES` and :envvar:`USE_ONLY_EMBEDDED_RESOURCE_FILES` are set (`#4508 <https://github.com/OSGeo/PROJ/issues/4508>`_)
+
 9.6.0
 ++++++++++++++++++++
 *March 15th 2025*

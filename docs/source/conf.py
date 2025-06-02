@@ -29,7 +29,7 @@ version = "9.6"
 release = "9.7.0-dev"
 
 # PROJ-data version
-data_version = "1.21"
+data_version = "1.22"
 
 today_date = date.today() # or use a specific date
 today_fmt = "%d %b %Y"
@@ -43,7 +43,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.jquery",
-    "sphinxcontrib.spelling",
+    #"sphinxcontrib.spelling",
     "breathe",
     "redirects",
     "replacements",
