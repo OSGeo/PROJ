@@ -1352,6 +1352,13 @@ std::string Identifier::canonicalizeName(const std::string &str,
                 continue;
             }
         }
+
+        if (matchesLowerCase(c_str + i, "_IntlFeet") &&
+            c_str[i + strlen("_IntlFeet")] == 0) {
+            res += "feet";
+            break;
+        }
+
         if (!isIgnoredChar(ch)) {
             res.push_back(ch);
         }
@@ -1390,6 +1397,18 @@ bool Identifier::isEquivalentName(const char *a, const char *b,
             j += 3;
             continue;
         }
+
+        if (matchesLowerCase(a + i, "_IntlFeet") &&
+            a[i + strlen("_IntlFeet")] == 0 &&
+            matchesLowerCase(b + j, "_Feet") && b[j + strlen("_Feet")] == 0) {
+            return true;
+        } else if (matchesLowerCase(a + i, "_Feet") &&
+                   a[i + strlen("_Feet")] == 0 &&
+                   matchesLowerCase(b + j, "_IntlFeet") &&
+                   b[j + strlen("_IntlFeet")] == 0) {
+            return true;
+        }
+
         if (isIgnoredChar(aCh)) {
             ++i;
             continue;
@@ -1475,6 +1494,7 @@ bool Identifier::isEquivalentName(const char *a, const char *b,
                 j += strlen(replacement->utf8) - 1;
             }
         }
+
         if (aCh != bCh) {
             return false;
         }

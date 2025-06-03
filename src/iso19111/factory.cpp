@@ -9942,12 +9942,12 @@ AuthorityFactory::createProjectedCRSFromExisting(
         }
     }
 
-    std::string sql(
-        "SELECT projected_crs.auth_name, projected_crs.code FROM projected_crs "
-        "JOIN conversion_table conv ON "
-        "projected_crs.conversion_auth_name = conv.auth_name AND "
-        "projected_crs.conversion_code = conv.code WHERE "
-        "projected_crs.deprecated = 0 AND ");
+    std::string sql("SELECT projected_crs.auth_name, projected_crs.code, "
+                    "projected_crs.name FROM projected_crs "
+                    "JOIN conversion_table conv ON "
+                    "projected_crs.conversion_auth_name = conv.auth_name AND "
+                    "projected_crs.conversion_code = conv.code WHERE "
+                    "projected_crs.deprecated = 0 AND ");
     ListOfParams params;
     if (!candidatesGeodCRS.empty()) {
         sql += buildSqlLookForAuthNameCode(candidatesGeodCRS, params,
@@ -10059,6 +10059,20 @@ AuthorityFactory::createProjectedCRSFromExisting(
         sql += "))";
     }
     auto sqlRes = d->run(sql, params);
+
+    for (const auto &row : sqlRes) {
+        const auto &name = row[2];
+        if (metadata::Identifier::isEquivalentName(crs->nameStr().c_str(),
+                                                   name.c_str())) {
+            const auto &auth_name = row[0];
+            const auto &code = row[1];
+            res.emplace_back(
+                d->createFactory(auth_name)->createProjectedCRS(code));
+        }
+    }
+    if (!res.empty()) {
+        return res;
+    }
 
     params.clear();
 
