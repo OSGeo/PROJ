@@ -3518,8 +3518,8 @@ TEST(crs, projectedCRS_identify_db) {
         auto allFactory = AuthorityFactory::create(dbContext, std::string());
         auto res = crs->identify(allFactory);
         ASSERT_GE(res.size(), 1U);
-        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "102082");
-        EXPECT_EQ(*(res.front().first->identifiers()[0]->codeSpace()), "ESRI");
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "5186");
+        EXPECT_EQ(*(res.front().first->identifiers()[0]->codeSpace()), "EPSG");
         EXPECT_EQ(res.front().second, 100);
     }
     {
