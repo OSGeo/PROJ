@@ -273,8 +273,8 @@ doxygentypedef
 duplicateBreak
 d'utilisation
 dx
-Dymaxion
 dy
+Dymaxion
 eastBoundLongitude
 easting
 eastings
@@ -375,13 +375,13 @@ Geodesie
 Geodesique
 geodesist
 geodesists
-GeodeticCRS
 geodeticCRS
+GeodeticCRS
 geodtest
 GEOGCRS
 geogoffset
-GeographicCRS
 geographicCRS
+GeographicCRS
 Geographique
 geographiques
 geoid
@@ -845,6 +845,7 @@ Selftest
 selftests
 semimajor
 semiminor
+sensical
 serialization
 serialized
 serverless
@@ -934,6 +935,7 @@ timespan
 tinshift
 Tissot
 tmerc
+TMerc
 Tobler
 tobmerc
 toFullyQualifiedName
@@ -985,6 +987,7 @@ vandg
 Vanua
 vcpkg
 Vcpkg
+vcrss
 VDatum
 vendored
 Vening
@@ -1033,8 +1036,8 @@ xmax
 xmin
 xml
 xoff
-xxxNNPtr
 xxx
+xxxNNPtr
 xxxx
 XXXX
 xyzgridshift
