@@ -59,6 +59,7 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     -Wduplicated-cond
     -Wduplicated-branches
     -Wlogical-op
+    -Wimplicit-fallthrough
   )
   set(PROJ_C_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Wmissing-prototypes
@@ -71,6 +72,7 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     # -Wold-style-cast
     -Woverloaded-virtual
     -Wzero-as-null-pointer-constant
+    -Wdeprecated-copy-dtor
   )
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   set(PROJ_common_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
@@ -79,8 +81,14 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
     -Wdocumentation -Wno-documentation-deprecated-sync
     -Wfloat-conversion
     -Wlogical-op-parentheses
-    # -Wweak-vtables
+    -Wimplicit-fallthrough
   )
+
+  # Not sure about the minimum version, but clang 12 complains about \file, @cond Doxygen_Suppress, etc.
+  if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER_EQUAL 18.0.0)
+      set(PROJ_common_WARN_FLAGS ${PROJ_common_WARN_FLAGS} -Wdocumentation-unknown-command)
+  endif()
+
   set(PROJ_C_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Wmissing-prototypes
     -Wc11-extensions
@@ -93,6 +101,8 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
     -Wshorten-64-to-32
     -Wunused-private-field
     -Wzero-as-null-pointer-constant
+    -Wdeprecated-copy-dtor
+    -Wweak-vtables
   )
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   add_definitions(/D_CRT_SECURE_NO_WARNINGS) # Eliminate deprecation warnings

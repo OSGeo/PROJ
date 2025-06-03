@@ -236,10 +236,12 @@ std::unique_ptr<SQLite3VFS> SQLite3VFS::create(bool fakeSync, bool fakeLock,
 #ifdef EMBED_RESOURCE_FILES
 
 struct pj_sqlite3_memvfs : public pj_sqlite3_vfs {
-    ~pj_sqlite3_memvfs() override {
-        pj_sqlite3_memvfs_deallocate_user_data(&base);
-    }
+    ~pj_sqlite3_memvfs() override;
 };
+
+pj_sqlite3_memvfs::~pj_sqlite3_memvfs() {
+    pj_sqlite3_memvfs_deallocate_user_data(&base);
+}
 
 /* static */
 std::unique_ptr<SQLite3VFS> SQLite3VFS::createMem(const void *membuffer,
