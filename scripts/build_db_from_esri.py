@@ -303,7 +303,8 @@ def import_spheroid():
                 assert unit_size == 1, 'Unhandled spheroid unit size: {}'.format(unit_size)
 
                 description = row[idx_description]
-                deprecated = 1 if row[idx_deprecated] == 'yes' else 0
+                assert row[idx_deprecated] in ('yes', 'codechange', 'no')
+                deprecated = 1 if row[idx_deprecated] in ('yes', 'codechange') else 0
 
                 if esri_name not in map_spheroid_esri_name_to_auth_code:
                     map_spheroid_esri_name_to_auth_code[esri_name] = [
@@ -404,7 +405,8 @@ def import_prime_meridian():
                 assert angle_unit == 'Degree', 'Unhandled prime meridian unit: {}'.format(angle_unit)
                 assert unit_size == 0.0174532925199433, 'Unhandled prime meridian unit size: {}'.format(unit_size)
 
-                deprecated = 1 if row[idx_deprecated] == 'yes' else 0
+                assert row[idx_deprecated] in ('yes', 'codechange', 'no')
+                deprecated = 1 if row[idx_deprecated] in ('yes', 'codechange') else 0
 
                 if esri_name not in map_pm_esri_name_to_auth_code:
                     map_pm_esri_name_to_auth_code[esri_name] = ['ESRI', code]
@@ -501,7 +503,8 @@ def import_datum():
                     all_sql.append(sql)
 
                 description = row[idx_description]
-                deprecated = 1 if row[idx_deprecated] == 'yes' else 0
+                assert row[idx_deprecated] in ('yes', 'codechange', 'no')
+                deprecated = 1 if row[idx_deprecated] in ('yes', 'codechange') else 0
 
                 map_datum_esri_to_parameters[code] = {
                     'esri_name': esri_name,
@@ -526,7 +529,8 @@ def import_datum():
                 ellps_auth_name, ellps_code = map_spheroid_esri_name_to_auth_code[ellps_name]
 
                 description = row[idx_description]
-                deprecated = 1 if row[idx_deprecated] == 'yes' else 0
+                assert row[idx_deprecated] in ('yes', 'codechange', 'no')
+                deprecated = 1 if row[idx_deprecated] in ('yes', 'codechange') else 0
 
                 map_datum_esri_to_parameters[code] = {
                     'esri_name': esri_name,
@@ -690,7 +694,8 @@ def import_geogcs():
                 else:
                     geodetic_crs_type = "geographic 2D"
 
-                deprecated = 1 if row[idx_deprecated] == 'yes' else 0
+                assert row[idx_deprecated] in ('yes', 'codechange', 'no')
+                deprecated = 1 if row[idx_deprecated] in ('yes', 'codechange') else 0
 
                 extent_auth_name, extent_code = find_extent(
                     row[idx_areaname], row[idx_slat], row[idx_nlat], row[idx_llon], row[idx_rlon])
@@ -1446,7 +1451,8 @@ def import_projcs():
 
                 map_projcs_esri_name_to_auth_code[esri_name] = ['ESRI', code]
 
-                deprecated = 1 if row[idx_deprecated] == 'yes' else 0
+                assert row[idx_deprecated] in ('yes', 'codechange', 'no')
+                deprecated = 1 if row[idx_deprecated] in ('yes', 'codechange') else 0
 
                 method = parsed_conv_wkt2['CONVERSION'][0]
 
@@ -1680,7 +1686,8 @@ def import_vdatum():
                 map_vdatum_esri_name_to_auth_code[esri_name] = ['ESRI', wkid]
 
                 description = row[idx_description]
-                deprecated = 1 if row[idx_deprecated] == 'yes' else 0
+                assert row[idx_deprecated] in ('yes', 'codechange', 'no')
+                deprecated = 1 if row[idx_deprecated] in ('yes', 'codechange') else 0
 
                 map_vdatum_esri_to_parameters[wkid] = {
                     'esri_name': esri_name,
@@ -1839,7 +1846,8 @@ def import_vertcs():
                         continue
                     datum_auth_name, datum_code = map_datum_esri_name_to_auth_code[datum_name]
 
-                deprecated = 1 if row[idx_deprecated] == 'yes' else 0
+                assert row[idx_deprecated] in ('yes', 'codechange', 'no')
+                deprecated = 1 if row[idx_deprecated] in ('yes', 'codechange') else 0
 
                 extent_auth_name, extent_code = find_extent(
                     row[idx_areaname], row[idx_slat], row[idx_nlat], row[idx_llon], row[idx_rlon])
@@ -2120,7 +2128,8 @@ def import_geogtran():
             authority = row[idx_authority]
             esri_name = row[idx_name]
             wkt2 = row[idx_wkt2]
-            deprecated = 1 if row[idx_deprecated] == 'yes' else 0
+            assert row[idx_deprecated] in ('yes', 'codechange', 'no')
+            deprecated = 1 if row[idx_deprecated] in ('yes', 'codechange') else 0
 
             if authority == 'EPSG':
 
