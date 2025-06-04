@@ -3518,9 +3518,33 @@ TEST(crs, projectedCRS_identify_db) {
         auto allFactory = AuthorityFactory::create(dbContext, std::string());
         auto res = crs->identify(allFactory);
         ASSERT_GE(res.size(), 1U);
-        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "102082");
-        EXPECT_EQ(*(res.front().first->identifiers()[0]->codeSpace()), "ESRI");
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "5186");
+        EXPECT_EQ(*(res.front().first->identifiers()[0]->codeSpace()), "EPSG");
         EXPECT_EQ(res.front().second, 100);
+    }
+    {
+        // Identify a WKT ESRI using deprecated ESRI names
+        // Cf https://github.com/OSGeo/gdal/issues/12511
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"NAD_1983_StatePlane_Arizona_Central_FIPS_0202_IntlFeet\","
+            "GEOGCS[\"GCS_North_American_1983\","
+            "DATUM[\"D_North_American_1983\","
+            "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+            "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+            "PROJECTION[\"Transverse_Mercator\"],"
+            "PARAMETER[\"False_Easting\",700000.0],"
+            "PARAMETER[\"False_Northing\",0.0],"
+            "PARAMETER[\"Central_Meridian\",-111.9166666666667],"
+            "PARAMETER[\"Scale_Factor\",0.9999],"
+            "PARAMETER[\"Latitude_Of_Origin\",31.0],UNIT[\"Foot\",0.3048]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_GE(res.size(), 1U);
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "2223");
+        EXPECT_EQ(*(res.front().first->identifiers()[0]->codeSpace()), "EPSG");
+        EXPECT_EQ(res.front().second, 70);
     }
 }
 

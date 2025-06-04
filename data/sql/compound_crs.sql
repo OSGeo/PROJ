@@ -918,6 +918,8 @@ INSERT INTO "compound_crs" VALUES('EPSG','10839','LKS-2020 + Latvia 2000 height'
 INSERT INTO "usage" VALUES('EPSG','22700','compound_crs','EPSG','10839','EPSG','3268','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','10852','EWR3 Grid + ODN height',NULL,'EPSG','10851','EPSG','5701',0);
 INSERT INTO "usage" VALUES('EPSG','22762','compound_crs','EPSG','10852','EPSG','4799','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','10865','CGRS93 + Famagusta 1960 height',NULL,'EPSG','6311','EPSG','7446',0);
+INSERT INTO "usage" VALUES('EPSG','22850','compound_crs','EPSG','10865','EPSG','3236','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);

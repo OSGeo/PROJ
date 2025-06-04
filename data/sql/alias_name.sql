@@ -8059,6 +8059,9 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10792','Uganda 2010 / UT
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10793','Uganda 2010 / UTM zone 36N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10794','Uganda 2010 / UTM zone 36S','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10795','Uganda 2010 / UTM zone 35S','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10688','ETRS89','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10689','ETRS89','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10690','ETRS89','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10604','1255','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10604','WGS 84 (G2296) - XYZ','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10605','1256','EPSG');
@@ -8076,3 +8079,5 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25884','LKS-2020 / TM Ba
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10839','ETRS89 + LAS-2000 height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10851','ETRS89 / EWR3 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10852','ETRS89 / EWR3 SnakeGrid + Newlyn height','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','10588','1265','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','10588','CGVD28(HTv2.0) - OHt','EPSG');

@@ -514,4 +514,11 @@ TEST(metadata, Identifier_isEquivalentName) {
     EXPECT_TRUE(Identifier::isEquivalentName("foo + ", "foo + "));
     EXPECT_TRUE(Identifier::isEquivalentName("foo + bar", "foo + bar"));
     EXPECT_TRUE(Identifier::isEquivalentName("foo + bar", "foobar"));
+
+    EXPECT_TRUE(Identifier::isEquivalentName("foo_IntlFeet", "foo_Feet"));
+    EXPECT_TRUE(Identifier::isEquivalentName("foo_Feet", "foo_IntlFeet"));
+    EXPECT_FALSE(
+        Identifier::isEquivalentName("foo_IntlFeet_bar", "foo_Feet_bar"));
+    EXPECT_FALSE(
+        Identifier::isEquivalentName("foo_Feet_bar", "foo_IntlFeet_bar"));
 }

@@ -29,11 +29,15 @@
 #define FROM_PROJ_CPP
 
 #include "proj.h"
+#include "proj/internal/internal.hpp"
 #include "proj_internal.h"
 #include <math.h>
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
+
+using namespace NS_PROJ::internal;
 
 // ---------------------------------------------------------------------------
 static double simple_min(const double *data, const int arr_len) {
@@ -296,6 +300,31 @@ static int target_crs_lon_lat_order(PJ_CONTEXT *transformer_ctx,
     PJ *target_crs =
         get_output_crs(transformer_ctx, transformer_pj, pj_direction);
     if (target_crs == nullptr) {
+        const char *proj_string = proj_as_proj_string(
+            transformer_ctx, transformer_pj, PJ_PROJ_5, nullptr);
+        if (pj_direction == PJ_FWD) {
+            if (ends_with(proj_string,
+                          "+step +proj=unitconvert +xy_in=rad +xy_out=deg")) {
+                return true;
+            }
+            if (ends_with(proj_string,
+                          "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                          "+step +proj=axisswap +order=2,1")) {
+                return false;
+            }
+        } else {
+            if (starts_with(proj_string,
+                            "+proj=pipeline +step +proj=unitconvert +xy_in=deg "
+                            "+xy_out=rad")) {
+                return true;
+            }
+            if (starts_with(proj_string,
+                            "+proj=pipeline +step +proj=axisswap +order=2,1 "
+                            "+step +proj=unitconvert +xy_in=deg +xy_out=rad")) {
+                return false;
+            }
+        }
+
         proj_context_log_debug(transformer_ctx,
                                "Unable to retrieve target CRS");
         return -1;
@@ -501,37 +530,62 @@ int proj_trans_bounds(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                        boundary_len, y_boundary_array.data(), sizeof(double),
                        boundary_len, nullptr, 0, 0, nullptr, 0, 0);
 
-    if (output_lon_lat_order) {
-        // Use GIS frienly order
+    if (degree_output && !output_lon_lat_order) {
+        // Use GIS friendly order
         std::swap(x_boundary_array, y_boundary_array);
     }
 
+    bool crossed_antimeridian = false;
     if (!degree_output) {
         *out_xmin = simple_min(x_boundary_array.data(), boundary_len);
         *out_xmax = simple_max(x_boundary_array.data(), boundary_len);
         *out_ymin = simple_min(y_boundary_array.data(), boundary_len);
         *out_ymax = simple_max(y_boundary_array.data(), boundary_len);
     } else if (north_pole_in_bounds) {
-        *out_xmin = simple_min(x_boundary_array.data(), boundary_len);
-        *out_ymin = -180;
-        *out_xmax = 90;
-        *out_ymax = 180;
+        *out_xmin = -180;
+        *out_xmax = 180;
+        *out_ymin = simple_min(y_boundary_array.data(), boundary_len);
+        *out_ymax = 90;
     } else if (south_pole_in_bounds) {
-        *out_xmin = -90;
-        *out_ymin = -180;
-        *out_xmax = simple_max(x_boundary_array.data(), boundary_len);
-        *out_ymax = 180;
+        *out_xmin = -180;
+        *out_xmax = 180;
+        *out_ymin = -90;
+        *out_ymax = simple_max(y_boundary_array.data(), boundary_len);
     } else {
-        *out_xmin = simple_min(x_boundary_array.data(), boundary_len);
-        *out_xmax = simple_max(x_boundary_array.data(), boundary_len);
-        *out_ymin = antimeridian_min(y_boundary_array.data(), boundary_len);
-        *out_ymax = antimeridian_max(y_boundary_array.data(), boundary_len);
+        *out_xmin = antimeridian_min(x_boundary_array.data(), boundary_len);
+        *out_xmax = antimeridian_max(x_boundary_array.data(), boundary_len);
+        crossed_antimeridian = *out_xmin > *out_xmax;
+        *out_ymin = simple_min(y_boundary_array.data(), boundary_len);
+        *out_ymax = simple_max(y_boundary_array.data(), boundary_len);
     }
 
-    if (output_lon_lat_order) {
+    if (degree_output && !output_lon_lat_order) {
         // Go back to CRS axis order
         std::swap(*out_xmin, *out_ymin);
         std::swap(*out_xmax, *out_ymax);
+    }
+
+    if (!crossed_antimeridian) {
+        // Sample points within the source grid
+        for (int j = 1; j < side_pts - 1; ++j) {
+            for (int i = 0; i < side_pts; ++i) {
+                x_boundary_array[i] = std::min(xmin, xmax) + i * delta_x;
+                y_boundary_array[i] = std::min(ymin, ymax) + j * delta_y;
+            }
+            proj_trans_generic(P, direction, x_boundary_array.data(),
+                               sizeof(double), side_pts,
+                               y_boundary_array.data(), sizeof(double),
+                               side_pts, nullptr, 0, 0, nullptr, 0, 0);
+            for (int i = 0; i < side_pts; ++i) {
+                if (std::isfinite(x_boundary_array[i]) &&
+                    std::isfinite(y_boundary_array[i])) {
+                    *out_xmin = std::min(*out_xmin, x_boundary_array[i]);
+                    *out_xmax = std::max(*out_xmax, x_boundary_array[i]);
+                    *out_ymin = std::min(*out_ymin, y_boundary_array[i]);
+                    *out_ymax = std::max(*out_ymax, y_boundary_array[i]);
+                }
+            }
+        }
     }
 
     return true;
@@ -832,10 +886,12 @@ int proj_trans_bounds_3D(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                                boundary_len, z_boundary_array.data(),
                                sizeof(double), boundary_len, nullptr, 0, 0);
 
-            if (output_lon_lat_order) {
-                // Use GIS frienly order
+            if (degree_output && !output_lon_lat_order) {
+                // Use GIS friendly order
                 std::swap(x_boundary_array, y_boundary_array);
             }
+
+            bool crossed_antimeridian = false;
 
             if (!degree_output) {
                 *out_xmin =
@@ -851,45 +907,80 @@ int proj_trans_bounds_3D(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
                     std::max(*out_ymax,
                              simple_max(y_boundary_array.data(), boundary_len));
             } else if (north_pole_in_bounds) {
-                *out_xmin =
-                    std::min(*out_xmin,
-                             simple_min(x_boundary_array.data(), boundary_len));
-                *out_ymin = -180;
-                *out_xmax = 90;
-                *out_ymax = 180;
+                *out_xmin = -180;
+                *out_xmax = 180;
+                *out_ymin =
+                    std::min(*out_ymin,
+                             simple_min(y_boundary_array.data(), boundary_len));
+                *out_ymax = 90;
             } else if (south_pole_in_bounds) {
-                *out_xmin = -90;
-                *out_ymin = -180;
-                *out_xmax =
-                    std::max(*out_xmax,
-                             simple_max(x_boundary_array.data(), boundary_len));
-                *out_ymax = 180;
+                *out_xmin = -180;
+                *out_xmax = 180;
+                *out_ymin = -90;
+                *out_ymax =
+                    std::max(*out_ymax,
+                             simple_max(y_boundary_array.data(), boundary_len));
             } else {
-                *out_xmin =
-                    std::min(*out_xmin,
-                             simple_min(x_boundary_array.data(), boundary_len));
-                *out_xmax =
-                    std::max(*out_xmax,
-                             simple_max(x_boundary_array.data(), boundary_len));
-                *out_ymin = std::min(
-                    *out_ymin,
-                    antimeridian_min(y_boundary_array.data(), boundary_len));
-                *out_ymax = std::max(
-                    *out_ymax,
-                    antimeridian_max(y_boundary_array.data(), boundary_len));
+                *out_xmin = std::min(
+                    *out_xmin,
+                    antimeridian_min(x_boundary_array.data(), boundary_len));
+                *out_xmax = std::max(
+                    *out_xmax,
+                    antimeridian_max(x_boundary_array.data(), boundary_len));
+                crossed_antimeridian = *out_xmin > *out_xmax;
+                *out_ymin =
+                    std::min(*out_ymin,
+                             simple_min(y_boundary_array.data(), boundary_len));
+                *out_ymax =
+                    std::max(*out_ymax,
+                             simple_max(y_boundary_array.data(), boundary_len));
             }
 
             *out_zmin = std::min(
                 *out_zmin, simple_min(z_boundary_array.data(), boundary_len));
             *out_zmax = std::max(
                 *out_zmax, simple_max(z_boundary_array.data(), boundary_len));
-        }
-    }
 
-    if (output_lon_lat_order) {
-        // Go back to CRS axis order
-        std::swap(*out_xmin, *out_ymin);
-        std::swap(*out_xmax, *out_ymax);
+            if (degree_output && !output_lon_lat_order) {
+                // Go back to CRS axis order
+                std::swap(*out_xmin, *out_ymin);
+                std::swap(*out_xmax, *out_ymax);
+            }
+
+            if (!crossed_antimeridian) {
+                // Sample points within the source grid
+                for (int j = 1; j < side_pts - 1; ++j) {
+                    for (int i = 0; i < side_pts; ++i) {
+                        x_boundary_array[i] = xmin + i * delta_x;
+                        y_boundary_array[i] = ymin + j * delta_y;
+                        z_boundary_array[i] = z;
+                    }
+                    proj_trans_generic(P, direction, x_boundary_array.data(),
+                                       sizeof(double), side_pts,
+                                       y_boundary_array.data(), sizeof(double),
+                                       side_pts, z_boundary_array.data(),
+                                       sizeof(double), side_pts, nullptr, 0, 0);
+                    for (int i = 0; i < side_pts; ++i) {
+                        if (std::isfinite(x_boundary_array[i]) &&
+                            std::isfinite(y_boundary_array[i])) {
+                            *out_xmin =
+                                std::min(*out_xmin, x_boundary_array[i]);
+                            *out_xmax =
+                                std::max(*out_xmax, x_boundary_array[i]);
+                            *out_ymin =
+                                std::min(*out_ymin, y_boundary_array[i]);
+                            *out_ymax =
+                                std::max(*out_ymax, y_boundary_array[i]);
+
+                            *out_zmin =
+                                std::min(*out_zmin, z_boundary_array[i]);
+                            *out_zmax =
+                                std::max(*out_zmax, z_boundary_array[i]);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     return true;
