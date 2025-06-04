@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "GEOD" "1" "02 Jun 2025" "9.6" "PROJ"
+.TH "GEOD" "1" "02 juin 2025" "9.6" "PROJ"
 .SH NAME
 geod \- Geodesic computations
 .SH SYNOPSIS
@@ -173,11 +173,13 @@ statute miles from Boston, MA, to Portland, OR:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 geod +ellps=clrk66 \-I +units=us\-mi <<EOF
 42d15\(aqN 71d07\(aqW 45d31\(aqN 123d41\(aqW
 EOF
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -185,9 +187,11 @@ which gives the results:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 \-66d31\(aq50.141\(dq 75d39\(aq13.083\(dq 2587.504
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -199,11 +203,13 @@ and determine Portland\(aqs location by azimuth and distance:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 geod +ellps=clrk66 +units=us\-mi <<EOF
 42d15\(aqN 71d07\(aqW \-66d31\(aq50.141\(dq 2587.504
 EOF
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -211,9 +217,11 @@ which gives:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 45d31\(aq0.003\(dqN 123d40\(aq59.985\(dqW 75d39\(aq13.094\(dq
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -230,23 +238,23 @@ precision of the Portland location.
 .SH FURTHER READING
 .INDENT 0.0
 .IP 1. 3
-\X'tty: link https://geographiclib.sourceforge.io'\fI\%GeographicLib\fP\X'tty: link'\&.
+\fI\%GeographicLib\fP\&.
 .IP 2. 3
-C. F. F. Karney, \X'tty: link https://doi.org/10.1007/s00190-012-0578-z'\fI\%Algorithms for Geodesics\fP\X'tty: link', J. Geodesy \fB87\fP(1), 43–55 (2013);
-\X'tty: link https://geographiclib.sourceforge.io/geod-addenda.html'\fI\%addenda\fP\X'tty: link'\&.
+C. F. F. Karney, \fI\%Algorithms for Geodesics\fP, J. Geodesy \fB87\fP(1), 43–55 (2013);
+\fI\%addenda\fP\&.
 .IP 3. 3
-\X'tty: link https://geographiclib.sourceforge.io/geodesic-papers/biblio.html'\fI\%A geodesic bibliography\fP\X'tty: link'\&.
+\fI\%A geodesic bibliography\fP\&.
 .UNINDENT
 .SH SEE ALSO
 .sp
 \fBproj(1)\fP, \fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgie(1)\fP, \fBprojinfo(1)\fP, \fBprojsync(1)\fP
 .SH BUGS
 .sp
-A list of known bugs can be found at \X'tty: link https://github.com/OSGeo/PROJ/issues'\fI\%https://github.com/OSGeo/PROJ/issues\fP\X'tty: link'
+A list of known bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
 where new bug reports can be submitted to.
 .SH HOME PAGE
 .sp
-\X'tty: link https://proj.org/'\fI\%https://proj.org/\fP\X'tty: link'
+\fI\%https://proj.org/\fP
 .SH AUTHOR
 Charles Karney
 .SH COPYRIGHT
