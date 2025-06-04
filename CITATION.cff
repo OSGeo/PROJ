@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: Please cite this software using these metadata or in the CITATION file.
 type: software
 title: PROJ
-version: 9.6.1
-date-released: 2025-06-02
+version: 9.6.2
+date-released: 2025-06-04
 doi: 10.5281/zenodo.5884394
 abstract: PROJ is a generic coordinate transformation software that transforms
   geospatial coordinates from one coordinate reference system (CRS) to another.
