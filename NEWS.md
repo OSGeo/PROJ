@@ -1,5 +1,23 @@
 # PROJ Release Notes
 
+## 9.6.2
+
+### Updates
+
+* Update EPSG to 12.013
+
+### Bug Fixes
+
+* Database: change ESRI deprecated records back to their deprecated state (#4519)
+
+* ProjectedCRS::identify(): more robust identification of old ESRI names using _IntlFeet (#4518)
+
+* Fix issue related to D_Unknown_based_on_WGS_84_ellipsoid datum name (#4514)
+
+* proj_trans_bounds(): sample points within the source grid to avoid missing extent such as world-wide coverage from EPSG:4326 to ESRI:54099 (Spilhaus) (#4513)
+
+* proj_trans_bounds(): avoid erroring out, in some cases, when PJ* object is directly constructed from a PROJ pipeline (#4512)
+
 ## 9.6.1
 
 ### Updates
