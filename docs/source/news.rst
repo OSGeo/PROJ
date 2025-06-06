@@ -3,6 +3,28 @@
 News
 ###############################################################################
 
+9.6.2
+++++++++++++++++++++
+*June 6th 2025*
+
+Updates
+-------
+
+* Update EPSG to 12.013
+
+Bug Fixes
+---------
+
+* Database: change ESRI deprecated records back to their deprecated state (`#4519 <https://github.com/OSGeo/PROJ/pull/4519>`_)
+
+* ProjectedCRS::identify(): more robust identification of old ESRI names using _IntlFeet (`#4518 <https://github.com/OSGeo/PROJ/pull/4518>`_)
+
+* Fix issue related to D_Unknown_based_on_WGS_84_ellipsoid datum name (`#4514 <https://github.com/OSGeo/PROJ/issues/4514>`_)
+
+* proj_trans_bounds(): sample points within the source grid to avoid missing extent such as world-wide coverage from EPSG:4326 to ESRI:54099 (Spilhaus) (`#4513 <https://github.com/OSGeo/PROJ/pull/4513>`_)
+
+* proj_trans_bounds(): avoid erroring out, in some cases, when PJ* object is directly constructed from a PROJ pipeline (`#4512 <https://github.com/OSGeo/PROJ/pull/4512>`_)
+
 9.6.1
 ++++++++++++++++++++
 *June 2nd 2025*
