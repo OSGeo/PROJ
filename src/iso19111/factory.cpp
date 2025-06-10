@@ -4005,8 +4005,8 @@ bool DatabaseContext::toWGS84AutocorrectWrongValues(
     double &scale_difference) const {
     if (rx == 0 && ry == 0 && rz == 0)
         return false;
-    // 9606: Coordinate Frame rotation (geog2D domain)
-    // 9607: Position Vector transformation (geog2D domain)
+    // 9606: Position Vector transformation (geog2D domain)
+    // 9607: Coordinate Frame rotation (geog2D domain)
     std::string sql(
         "SELECT DISTINCT method_code "
         "FROM helmert_transformation_table WHERE "
