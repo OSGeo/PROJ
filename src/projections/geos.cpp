@@ -145,7 +145,10 @@ static PJ_LP geos_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
 
     /* Calculation of longitude and latitude.*/
     lp.lam = atan2(Vy, Vx);
-    lp.phi = atan(Vz * cos(lp.lam) / Vx);
+    // Initial formula:
+    // lp.phi = atan(Vz * cos(lp.lam) / Vx);
+    // Given that cos(atan2(y,x) = x / hypot(x,y)
+    lp.phi = atan(Vz / hypot(Vx, Vy));
 
     return lp;
 }
