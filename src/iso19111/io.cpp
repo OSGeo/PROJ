@@ -1895,18 +1895,26 @@ WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
             if (!isNull(bboxNode)) {
                 const auto &bboxChildren = bboxNode->GP()->children();
                 if (bboxChildren.size() == 4) {
+                    double south, west, north, east;
                     try {
-                        double south = asDouble(bboxChildren[0]);
-                        double west = asDouble(bboxChildren[1]);
-                        double north = asDouble(bboxChildren[2]);
-                        double east = asDouble(bboxChildren[3]);
-                        auto bbox = GeographicBoundingBox::create(west, south,
-                                                                  east, north);
-                        geogExtent.emplace_back(bbox);
+                        south = asDouble(bboxChildren[0]);
+                        west = asDouble(bboxChildren[1]);
+                        north = asDouble(bboxChildren[2]);
+                        east = asDouble(bboxChildren[3]);
                     } catch (const std::exception &) {
                         throw ParsingException(concat("not 4 double values in ",
                                                       bboxNode->GP()->value(),
                                                       " node"));
+                    }
+                    try {
+                        auto bbox = GeographicBoundingBox::create(west, south,
+                                                                  east, north);
+                        geogExtent.emplace_back(bbox);
+                    } catch (const std::exception &e) {
+                        throw ParsingException(concat("Invalid ",
+                                                      bboxNode->GP()->value(),
+                                                      " node: ") +
+                                               e.what());
                     }
                 } else {
                     ThrowNotRequiredNumberOfChildren(bboxNode->GP()->value());
@@ -6116,8 +6124,13 @@ ObjectDomainPtr JSONParser::buildObjectDomain(const json &j) {
         double west = getNumber(bbox, "west_longitude");
         double north = getNumber(bbox, "north_latitude");
         double east = getNumber(bbox, "east_longitude");
-        geogExtent.emplace_back(
-            GeographicBoundingBox::create(west, south, east, north));
+        try {
+            geogExtent.emplace_back(
+                GeographicBoundingBox::create(west, south, east, north));
+        } catch (const std::exception &e) {
+            throw ParsingException(
+                std::string("Invalid bbox node: ").append(e.what()));
+        }
     }
 
     std::vector<VerticalExtentNNPtr> verticalExtent;

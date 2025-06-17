@@ -8539,6 +8539,53 @@ TEST(wkt_parse, invalid_ENSEMBLE) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, invalid_BBOX) {
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        "GEOGCRS[\"x\",DATUM[\"x\",ELLIPSOID[\"x\",1,0.5,"
+        "LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],"
+        "PRIMEM[\"x\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],"
+        "ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "AXIS[\"latitude\",north,ORDER[2],"
+        "ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "USAGE[SCOPE[\"unknown\"],BBOX[1,2,3,4]]]"));
+
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "GEOGCRS[\"x\",DATUM[\"x\",ELLIPSOID[\"x\",1,0.5,"
+                     "LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],"
+                     "PRIMEM[\"x\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "AXIS[\"latitude\",north,ORDER[2],"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "USAGE[SCOPE[\"unknown\"],BBOX[1,2,3]]]"),
+                 ParsingException);
+
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "GEOGCRS[\"x\",DATUM[\"x\",ELLIPSOID[\"x\",1,0.5,"
+                     "LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],"
+                     "PRIMEM[\"x\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "AXIS[\"latitude\",north,ORDER[2],"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "USAGE[SCOPE[\"unknown\"],BBOX[1,2,3,a]]]"),
+                 ParsingException);
+
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "GEOGCRS[\"x\",DATUM[\"x\",ELLIPSOID[\"x\",1,0.5,"
+                     "LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],"
+                     "PRIMEM[\"x\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "AXIS[\"latitude\",north,ORDER[2],"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "USAGE[SCOPE[\"unknown\"],BBOX[1,2,-1,4]]]"),
+                 ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid_GEOGCS) {
     EXPECT_NO_THROW(WKTParser().createFromWKT(
         "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM[\"x\",0],UNIT["
@@ -14580,6 +14627,49 @@ TEST(json_import, geodetic_reference_frame_with_implicit_prime_meridian) {
     ASSERT_TRUE(grf != nullptr);
     EXPECT_EQ(grf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, invalid_bbox) {
+    {
+        auto json = "{\n"
+                    "  \"$schema\": \"foo\",\n"
+                    "  \"type\": \"GeodeticReferenceFrame\",\n"
+                    "  \"name\": \"World Geodetic System 1984\",\n"
+                    "  \"ellipsoid\": {\n"
+                    "    \"name\": \"WGS 84\",\n"
+                    "    \"semi_major_axis\": 6378137,\n"
+                    "    \"inverse_flattening\": 298.257223563\n"
+                    "  },\n"
+                    "  \"bbox\": {\n"
+                    "    \"south_latitude\": -90,\n"
+                    "    \"west_longitude\": -180,\n"
+                    "    \"north_latitude\": 90,\n"
+                    "    \"east_longitude\": 180\n"
+                    "  }\n"
+                    "}";
+        EXPECT_NO_THROW(createFromUserInput(json, nullptr));
+    }
+    {
+        auto json = "{\n"
+                    "  \"$schema\": \"foo\",\n"
+                    "  \"type\": \"GeodeticReferenceFrame\",\n"
+                    "  \"name\": \"World Geodetic System 1984\",\n"
+                    "  \"ellipsoid\": {\n"
+                    "    \"name\": \"WGS 84\",\n"
+                    "    \"semi_major_axis\": 6378137,\n"
+                    "    \"inverse_flattening\": 298.257223563\n"
+                    "  },\n"
+                    "  \"bbox\": {\n"
+                    "    \"south_latitude\": 90,\n"
+                    "    \"west_longitude\": -180,\n"
+                    "    \"north_latitude\": -90,\n"
+                    "    \"east_longitude\": 180\n"
+                    "  }\n"
+                    "}";
+        EXPECT_THROW(createFromUserInput(json, nullptr), ParsingException);
+    }
 }
 
 // ---------------------------------------------------------------------------
