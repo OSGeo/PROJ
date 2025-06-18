@@ -6223,8 +6223,8 @@ TEST_F(CApi, proj_trans_bounds_antimeridian_xy) {
                                     &out_right, &out_top, 21);
     EXPECT_TRUE(success == 1);
     EXPECT_NEAR(out_left, 1722483.900174921, 1);
-    EXPECT_NEAR(out_bottom, 4795714.1718160734, 1);
-    EXPECT_NEAR(out_right, 7095599.9757999768, 1);
+    EXPECT_NEAR(out_bottom, 5228058.6143420935, 1);
+    EXPECT_NEAR(out_right, 4624385.4948085546, 1);
     EXPECT_NEAR(out_top, 8692574.544944234, 1);
     double out_left_inv;
     double out_bottom_inv;
@@ -6255,10 +6255,10 @@ TEST_F(CApi, proj_trans_bounds_antimeridian) {
         proj_trans_bounds(m_ctxt, P, PJ_FWD, -55.95, 160.6, -25.88, -171.2,
                           &out_left, &out_bottom, &out_right, &out_top, 21);
     EXPECT_TRUE(success == 1);
-    EXPECT_NEAR(out_left, 4695514.1225397848, 1);
+    EXPECT_NEAR(out_left, 5228058.6143420935, 1);
     EXPECT_NEAR(out_bottom, 1722483.900174921, 1);
     EXPECT_NEAR(out_right, 8692574.544944234, 1);
-    EXPECT_NEAR(out_top, 7053083.9457852989, 1);
+    EXPECT_NEAR(out_top, 4624385.4948085546, 1);
     double out_left_inv;
     double out_bottom_inv;
     double out_right_inv;

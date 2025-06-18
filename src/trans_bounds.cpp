@@ -569,8 +569,8 @@ int proj_trans_bounds(PJ_CONTEXT *context, PJ *P, PJ_DIRECTION direction,
         // Sample points within the source grid
         for (int j = 1; j < side_pts - 1; ++j) {
             for (int i = 0; i < side_pts; ++i) {
-                x_boundary_array[i] = std::min(xmin, xmax) + i * delta_x;
-                y_boundary_array[i] = std::min(ymin, ymax) + j * delta_y;
+                x_boundary_array[i] = xmin + i * delta_x;
+                y_boundary_array[i] = ymin + j * delta_y;
             }
             proj_trans_generic(P, direction, x_boundary_array.data(),
                                sizeof(double), side_pts,
