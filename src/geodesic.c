@@ -460,7 +460,7 @@ double geod_genposition(const struct geod_geodesicline* l,
     (pS12 ? GEOD_AREA : GEOD_NONE);
 
   outmask &= l->caps & OUT_ALL;
-  if (!( (flags & GEOD_ARCMODE || (l->caps & (GEOD_DISTANCE_IN & OUT_ALL))) ))
+  if (!( (flags & GEOD_ARCMODE || ((unsigned)l->caps & ((unsigned)GEOD_DISTANCE_IN & (unsigned)OUT_ALL))) ))
     /* Impossible distance calculation requested */
     return NaN;
 
@@ -1072,7 +1072,7 @@ void geod_inverseline(struct geod_geodesicline* l,
     azi1 = atan2dx(salp1, calp1);
   caps = caps ? caps : GEOD_DISTANCE_IN | GEOD_LONGITUDE;
   /* Ensure that a12 can be converted to a distance */
-  if (caps & (OUT_ALL & GEOD_DISTANCE_IN)) caps |= GEOD_DISTANCE;
+  if (caps & ((unsigned)OUT_ALL & (unsigned)GEOD_DISTANCE_IN)) caps |= GEOD_DISTANCE;
   geod_lineinit_int(l, g, lat1, lon1, azi1, salp1, calp1, caps);
   geod_setarc(l, a12);
 }
