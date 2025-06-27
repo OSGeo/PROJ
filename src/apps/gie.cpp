@@ -335,8 +335,9 @@ int main(int argc, char **argv) {
     for (i = 0; i < o->fargc; i++) {
         FILE *f = fopen(o->fargv[i], "rt");
         if (f == nullptr) {
-            fprintf(T.fout, "%sCannot open specified input file '%s' - bye!\n",
+            fprintf(stderr, "%sCannot open specified input file '%s' - bye!\n",
                     delim, o->fargv[i]);
+            free(o);
             return 1;
         }
         fclose(f);
