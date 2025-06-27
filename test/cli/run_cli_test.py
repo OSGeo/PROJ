@@ -531,11 +531,11 @@ class Test:
                 return []
             if os.linesep != "\n":  # Handle Windows EOL
                 return (
-                    bytes.decode("utf-8")
+                    bytes.decode("utf-8", errors='ignore')
                     .replace(os.linesep, "\n")
                     .splitlines(keepends=True)
                 )
-            return bytes.decode("utf-8").splitlines(keepends=True)
+            return bytes.decode("utf-8", errors='ignore').splitlines(keepends=True)
 
         stdout_is_text = isinstance(self.stdout, list) or isinstance(self.out, list)
         stdout = bytes2listofstr(proc.stdout) if stdout_is_text else proc.stdout
