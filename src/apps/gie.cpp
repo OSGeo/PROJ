@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
     /* coverity[tainted_data] */
     o = opt_parse(argc, argv, "hlvq", "o", longflags, longkeys);
     if (nullptr == o)
-        return 0;
+        return 1;
 
     if (opt_given(o, "h") || argc == 1) {
         printf(usage, o->progname);

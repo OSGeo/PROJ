@@ -155,3 +155,9 @@ tests:
   args: +proj=noop i_do_not_exist.txt
   stderr: "Cannot open file i_do_not_exist.txt"
   exitcode: 1
+- comment: Test robustness to non-ASCII characters (cf https://github.com/OSGeo/PROJ/issues/4528 case 1)
+  args: "-\uFF56"
+  exitcode: 1
+- comment: Test robustness to non-ASCII characters (cf https://github.com/OSGeo/PROJ/issues/4528 case 2)
+  args: "--\xF3"
+  exitcode: 1

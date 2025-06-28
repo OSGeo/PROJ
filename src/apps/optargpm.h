@@ -184,6 +184,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-09-10
 * DEALINGS IN THE SOFTWARE.
 
 ***********************************************************************/
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <math.h>
@@ -215,6 +216,8 @@ OPTARGS *opt_parse(int argc, char **argv, const char *flags, const char *keys,
 
 /**************************************************************************************************/
 
+#define OPTARG_SIZE 256
+
 struct OPTARGS {
     int argc, margc, pargc, fargc;
     char **argv, **margv, **pargv, **fargv;
@@ -224,8 +227,8 @@ struct OPTARGS {
     const char *progname; /* argv[0], stripped from /path/to, if present */
     char flaglevel[21];   /* if flag -f is specified n times, its optarg pointer
                              is   set to flaglevel + n */
-    char *optarg[256]; /* optarg[(int) 'f'] holds a pointer to the argument of
-                          option "-f" */
+    char *optarg[OPTARG_SIZE]; /* optarg[(unsigned char) 'f'] holds a pointer to
+                                  the argument of option "-f" */
     char *flags; /* a list of flag style options supported, e.g. "hv" (help and
                     verbose) */
     char *keys;  /* a list of key/value style options supported, e.g. "o"
@@ -310,6 +313,7 @@ int opt_input_loop(OPTARGS *opt, int binary, bool *gotError) {
 /* return true if option with given ordinal is a flag, false if undefined or
  * key=value */
 static int opt_is_flag(OPTARGS *opt, int ordinal) {
+    assert(ordinal >= 0 && ordinal < OPTARG_SIZE);
     if (opt->optarg[ordinal] < opt->flaglevel)
         return 0;
     if (opt->optarg[ordinal] > opt->flaglevel + 20)
@@ -318,6 +322,7 @@ static int opt_is_flag(OPTARGS *opt, int ordinal) {
 }
 
 static int opt_raise_flag(OPTARGS *opt, int ordinal) {
+    assert(ordinal >= 0 && ordinal < OPTARG_SIZE);
     if (opt->optarg[ordinal] < opt->flaglevel)
         return 1;
     if (opt->optarg[ordinal] > opt->flaglevel + 20)
@@ -342,9 +347,9 @@ static int opt_ordinal(OPTARGS *opt, const char *option) {
     /* An ordinary -o style short option */
     if (strlen(option) == 1) {
         /* Undefined option? */
-        if (nullptr == opt->optarg[(int)option[0]])
+        if (nullptr == opt->optarg[(unsigned char)option[0]])
             return 0;
-        return (int)option[0];
+        return (unsigned char)option[0];
     }
 
     /* --longname style long options are slightly harder */
@@ -363,9 +368,9 @@ static int opt_ordinal(OPTARGS *opt, const char *option) {
         if ((strlen(f[i]) > 2) && (f[i][1] == '=') &&
             (0 == strcmp(f[i] + 2, option))) {
             /* Undefined option? */
-            if (nullptr == opt->optarg[(int)f[i][0]])
+            if (nullptr == opt->optarg[(unsigned char)f[i][0]])
                 return 0;
-            return (int)f[i][0];
+            return (unsigned char)f[i][0];
         }
     }
 
@@ -384,9 +389,9 @@ static int opt_ordinal(OPTARGS *opt, const char *option) {
         if ((strlen(v[i]) > 2) && (v[i][1] == '=') &&
             (0 == strcmp(v[i] + 2, option))) {
             /* Undefined option? */
-            if (nullptr == opt->optarg[(int)v[i][0]])
+            if (nullptr == opt->optarg[(unsigned char)v[i][0]])
                 return 0;
-            return (int)v[i][0];
+            return (unsigned char)v[i][0];
         }
     }
     /* kill some potential compiler warnings about unused functions */
@@ -448,11 +453,11 @@ OPTARGS *opt_parse(int argc, char **argv, const char *flags, const char *keys,
 
     /* Reset all flags */
     for (i = 0; i < (int)strlen(flags); i++)
-        o->optarg[(int)flags[i]] = o->flaglevel;
+        o->optarg[(unsigned char)flags[i]] = o->flaglevel;
 
     /* Flag args for all argument taking options as "unset" */
     for (i = 0; i < (int)strlen(keys); i++)
-        o->optarg[(int)keys[i]] = argv[0];
+        o->optarg[(unsigned char)keys[i]] = argv[0];
 
     /* Hence, undefined/illegal options have an argument of 0 */
 
@@ -534,9 +539,9 @@ OPTARGS *opt_parse(int argc, char **argv, const char *flags, const char *keys,
         o->margc++;
 
         for (j = 1; j < arg_group_size; j++) {
-            int c = argv[i][j];
+            int c = (unsigned char)(argv[i][j]);
             char cstring[2], *crepr = cstring;
-            cstring[0] = (char)c;
+            cstring[0] = argv[i][j];
             cstring[1] = 0;
 
             /* Long style flags and options (--long_opt_name, --long_opt_namr
@@ -630,7 +635,7 @@ OPTARGS *opt_parse(int argc, char **argv, const char *flags, const char *keys,
                     free(o);
                     return nullptr;
                 }
-                o->optarg[(int)c] = argv[i + 1];
+                o->optarg[c] = argv[i + 1];
                 i++;
                 break;
             }
