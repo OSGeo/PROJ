@@ -1048,6 +1048,7 @@ proj_errno_set
 proj_errno_string
 proj_factors
 proj_geod
+proj_geod_direct
 proj_get_area_of_use
 proj_get_area_of_use_ex
 proj_get_authorities_from_database
