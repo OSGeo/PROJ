@@ -1,0 +1,24 @@
+exe: gie
+tests:
+- comment: Test invalid argument
+  args: --invalid
+  stderr: "Invalid option \"invalid\""
+  exitcode: 1
+
+- comment: Test version argument
+  args: --version
+  sub: ["gie(_d)?(\\.exe)?: Rel.*", "gie: Rel"]
+  stdout: "gie: Rel"
+  exitcode: 0
+
+- comment: Test help argument
+  args: -h
+  grep: "Usage: "
+  sub: ["gie(_d)?(\\.exe)?", "gie"]
+  stdout: "Usage: gie [-options]... infile..."
+  exitcode: 0
+
+- comment: Test gie with non existing input file
+  args: i_do_not_exist.txt
+  stderr: "-------------------------------------------------------------------------------\nCannot open specified input file 'i_do_not_exist.txt' - bye!\n"
+  exitcode: 1

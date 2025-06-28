@@ -244,6 +244,7 @@ int main(int argc, char **argv) {
 
     if (opt_given(o, "h") || argc == 1) {
         printf(usage, o->progname);
+        free(o);
         return 0;
     }
 
@@ -258,6 +259,7 @@ int main(int argc, char **argv) {
 
     if (opt_given(o, "version")) {
         print(PJ_LOG_NONE, "%s: %s", o->progname, pj_get_release());
+        free(o);
         return 0;
     }
 
@@ -419,6 +421,7 @@ int main(int argc, char **argv) {
         /* fail if an inverse operation is not available */
         if (!info.has_inverse) {
             print(PJ_LOG_ERROR, "Inverse operation not available");
+            free(o);
             if (stdout != fout)
                 fclose(fout);
             return 1;
