@@ -751,7 +751,29 @@ Distances
               and the third value is the reverse azimuth. The fourth coordinate
               value is unused.
 
+.. c:function:: PJ_COORD proj_geod_direct(const PJ *P, PJ_COORD a, double azimuth, double distance)
 
+    .. versionadded:: 9.7.0
+
+    Solves the direct geodesic problem for given projection ellipsoid
+
+    The coordinates in :c:data:`a` needs to be given as longitude and latitude in 
+    radians. Note that the axis order of the :c:data:`P` object is not taken into 
+    account in this function, so even though a CRS object comes with axis ordering
+    latitude/longitude coordinates used in this function should be reordered as 
+    longitude/latitude. The azimuth  :c:data:`azimuth` should be provided in radians,
+    and :c:data:`distance` should be provided in meters
+
+    :param P: Transformation or CRS object
+    :type P: const :c:type:`PJ` *
+    :param PJ_COORD a: Coordinate of first point
+    :param double azimuth: Initial azimuth from first point to second point in radians,
+                           measured clockwise from true north
+    :param double distance: Geodesic distance from the first point to the second point
+                            in meters
+    :returns: `PJ_COORD` where the first value is the longitude in radians, second
+               value is latitude in radians and third value is forward azimuth at 
+               second point in radians. The fourth coordinate value is unused.
 
 Various
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

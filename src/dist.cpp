@@ -52,6 +52,17 @@ PJ_COORD proj_geod(const PJ *P, PJ_COORD a, PJ_COORD b) {
     return c;
 }
 
+PJ_COORD proj_geod_direct(const PJ *P, PJ_COORD a, double azimuth, double distance) {
+    if (!P->geod) {
+        return proj_coord_error();
+    }
+    
+    double lat = 0, lon = 0, azi = 0;
+    geod_direct(P->geod, PJ_TODEG(a.lpz.phi), PJ_TODEG(a.lpz.lam), PJ_TODEG(azimuth), distance, &lat, &lon, &azi);
+    
+    return proj_coord(PJ_TORAD(lon), PJ_TORAD(lat), PJ_TORAD(azi), 0);
+}
+
 /* Geodesic distance (in meter) between two points with angular 2D coordinates
  */
 double proj_lp_dist(const PJ *P, PJ_COORD a, PJ_COORD b) {
