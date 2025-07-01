@@ -275,6 +275,9 @@ VALUES
 ('NOT-YET-IN-GRID-TRANSFORMATION-rdcorr2018.gsb','nl_nsgi_rdcorr2018.tif','rdcorr2018.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/nl_nsgi_rdcorr2018.tif',1,1,NULL),
 ('naptrans2008.gtx','','naptrans2008.gtx','GTX','geoid_like',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/naptrans2008.gtx',1,0,NULL),
 ('rdtrans2008.gsb','','rdtrans2008.gsb','NTv2','hgridshift',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/rdtrans2008.gsb',1,0,NULL),
+('nllat2018.gtx','nl_nsgi_nllat2018.tif','nllat2018.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nl_nsgi_nllat2018.tif',1,1,NULL),
+-- Bonaire
+('bongeo2004.gtx','nl_nsgi_bongeo2004.tif','bongeo2004.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nl_nsgi_bongeo2004.tif',1,1,NULL),
 
 -- no_kv - Kartverket
 -- Norwegian grids
