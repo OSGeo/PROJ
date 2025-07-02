@@ -6384,6 +6384,10 @@ void DerivedGeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         l_datumEnsemble->_exportToWKT(formatter);
     }
     l_baseCRS->primeMeridian()->_exportToWKT(formatter);
+    if (formatter->use2019Keywords() &&
+        !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
+        l_baseCRS->formatID(formatter);
+    }
     formatter->endNode();
 
     formatter->setUseDerivingConversion(true);
@@ -6522,6 +6526,10 @@ void DerivedGeographicCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     formatter->addQuotedString(l_baseCRS->nameStr());
     l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
     l_baseCRS->primeMeridian()->_exportToWKT(formatter);
+    if (formatter->use2019Keywords() &&
+        !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
+        l_baseCRS->formatID(formatter);
+    }
     formatter->endNode();
 
     formatter->setUseDerivingConversion(true);
