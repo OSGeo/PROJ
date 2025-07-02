@@ -217,7 +217,16 @@ TEST_F(CApi, proj_create) {
                   std::numeric_limits<double>::infinity());
 
         // and those ones actually work just fine
-        EXPECT_NEAR(proj_geod(obj, coord1, coord2).xyzt.x, 111219.409, 1e-3);
+        PJ_XYZT geod = proj_geod(obj, coord1, coord2).xyzt;
+        EXPECT_NEAR(geod.x, 111219.409, 1e-3);
+        EXPECT_NEAR(geod.y, 0, 1e-3);
+
+        // also test that direct geodesic problem returns original results
+        PJ_XYZT coord3 = proj_geod_direct(obj, coord1, geod.y, geod.x).xyzt;
+        EXPECT_NEAR(coord3.x, coord2.xyzt.x, 1e-3);
+        EXPECT_NEAR(coord3.y, coord2.xyzt.y, 1e-3);
+
+        // Test distance
         EXPECT_NEAR(proj_lp_dist(obj, coord1, coord2), 111219.409, 1e-3);
 
         auto info = proj_pj_info(obj);
