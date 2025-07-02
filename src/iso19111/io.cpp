@@ -1345,7 +1345,8 @@ struct WKTParser::Private {
                                   const WKTNodeNNPtr &parentNode,
                                   const UnitOfMeasure &defaultAngularUnit);
 
-    GeodeticCRSNNPtr buildGeodeticCRS(const WKTNodeNNPtr &node);
+    GeodeticCRSNNPtr buildGeodeticCRS(const WKTNodeNNPtr &node,
+                                      bool forceGeocentricIfNoCs = false);
 
     CRSNNPtr buildDerivedGeodeticCRS(const WKTNodeNNPtr &node);
 
@@ -3155,7 +3156,8 @@ void WKTParser::Private::addExtensionProj4ToProp(const WKTNode::Private *nodeP,
 // ---------------------------------------------------------------------------
 
 GeodeticCRSNNPtr
-WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
+WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node,
+                                     bool forceGeocentricIfNoCs) {
     const auto *nodeP = node->GP();
     auto &datumNode = nodeP->lookForChild(
         WKTConstants::DATUM, WKTConstants::GEODETICDATUM, WKTConstants::TRF);
@@ -3261,6 +3263,10 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
                 }
             }
         }
+    }
+    if (forceGeocentricIfNoCs && isNull(csNode) &&
+        ci_equal(nodeName, WKTConstants::BASEGEODCRS)) {
+        cs = cs::CartesianCS::createGeocentric(UnitOfMeasure::METRE);
     }
 
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
@@ -3378,8 +3384,6 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
     // given the constraints enforced on calling code path
     assert(!isNull(baseGeodCRSNode));
 
-    auto baseGeodCRS = buildGeodeticCRS(baseGeodCRSNode);
-
     auto &derivingConversionNode =
         nodeP->lookForChild(WKTConstants::DERIVINGCONVERSION);
     if (isNull(derivingConversionNode)) {
@@ -3393,6 +3397,29 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
         ThrowMissing(WKTConstants::CS_);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
+
+    bool forceGeocentricIfNoCs = false;
+    auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
+    if (cartesianCS) {
+        if (cartesianCS->axisList().size() != 3) {
+            throw ParsingException(
+                "Cartesian CS for a GeodeticCRS should have 3 axis");
+        }
+        const int methodCode = derivingConversion->method()->getEPSGCode();
+        if ((methodCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
+             methodCode ==
+                 EPSG_CODE_METHOD_COORDINATE_FRAME_FULL_MATRIX_GEOCENTRIC ||
+             methodCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC ||
+             methodCode == EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC ||
+             methodCode ==
+                 EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC ||
+             methodCode ==
+                 EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC) &&
+            nodeP->lookForChild(WKTConstants::BASEGEODCRS) != nullptr) {
+            forceGeocentricIfNoCs = true;
+        }
+    }
+    auto baseGeodCRS = buildGeodeticCRS(baseGeodCRSNode, forceGeocentricIfNoCs);
 
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
@@ -3413,12 +3440,7 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
                                       cs->getWKT2Type(true)));
     }
 
-    auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
     if (cartesianCS) {
-        if (cartesianCS->axisList().size() != 3) {
-            throw ParsingException(
-                "Cartesian CS for a GeodeticCRS should have 3 axis");
-        }
         return DerivedGeodeticCRS::create(buildProperties(node), baseGeodCRS,
                                           derivingConversion,
                                           NN_NO_CHECK(cartesianCS));
