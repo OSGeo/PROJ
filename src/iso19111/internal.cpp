@@ -129,8 +129,9 @@ std::string tolower(const std::string &str)
 
 {
     std::string ret(str);
-    for (size_t i = 0; i < ret.size(); i++)
-        ret[i] = static_cast<char>(::tolower(ret[i]));
+    for (char &ch : ret)
+        ch =
+            (ch >= 'A' && ch <= 'Z') ? static_cast<char>(ch + ('a' - 'A')) : ch;
     return ret;
 }
 
@@ -144,8 +145,9 @@ std::string toupper(const std::string &str)
 
 {
     std::string ret(str);
-    for (size_t i = 0; i < ret.size(); i++)
-        ret[i] = static_cast<char>(::toupper(ret[i]));
+    for (char &ch : ret)
+        ch =
+            (ch >= 'a' && ch <= 'z') ? static_cast<char>(ch - ('a' - 'A')) : ch;
     return ret;
 }
 

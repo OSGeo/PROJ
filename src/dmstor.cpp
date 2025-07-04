@@ -46,7 +46,9 @@ double dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
      * It is possible that a really odd input (like lots of leading zeros)
      * could be truncated in copying into work.  But ...
      */
-    while ((isgraph(*p) || *p == DEG_SIGN1 || *p == DEG_SIGN2) && --n)
+    while ((isgraph(static_cast<unsigned char>(*p)) || *p == DEG_SIGN1 ||
+            *p == DEG_SIGN2) &&
+           --n)
         *s++ = *p++;
     *s = '\0';
     int sign = *(s = work);
