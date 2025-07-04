@@ -5683,6 +5683,75 @@ TEST(wkt_parse, DerivedGeodeticCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, DerivedGeodeticCRS_where_base_is_geocentric) {
+    auto wkt = "GEODCRS[\"Local CRS derived from WGS-84\",\n"
+               "    BASEGEODCRS[\"WGS 84\",\n"
+               "        ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n"
+               "            MEMBER[\"World Geodetic System 1984 (Transit)\"],\n"
+               "            MEMBER[\"World Geodetic System 1984 (G730)\"],\n"
+               "            MEMBER[\"World Geodetic System 1984 (G873)\"],\n"
+               "            MEMBER[\"World Geodetic System 1984 (G1150)\"],\n"
+               "            MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
+               "            MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
+               "            MEMBER[\"World Geodetic System 1984 (G2139)\"],\n"
+               "            MEMBER[\"World Geodetic System 1984 (G2296)\"],\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1]],\n"
+               "            ENSEMBLEACCURACY[2.0]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+               "    DERIVINGCONVERSION[\"Local origin shift\",\n"
+               "        METHOD[\"Position Vector transformation (geocentric "
+               "domain)\",\n"
+               "            ID[\"EPSG\",1033]],\n"
+               "        PARAMETER[\"X-axis translation\",10,\n"
+               "            LENGTHUNIT[\"metre\",1],\n"
+               "            ID[\"EPSG\",8605]],\n"
+               "        PARAMETER[\"Y-axis translation\",20,\n"
+               "            LENGTHUNIT[\"metre\",1],\n"
+               "            ID[\"EPSG\",8606]],\n"
+               "        PARAMETER[\"Z-axis translation\",1,\n"
+               "            LENGTHUNIT[\"metre\",1],\n"
+               "            ID[\"EPSG\",8607]],\n"
+               "        PARAMETER[\"X-axis rotation\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8608]],\n"
+               "        PARAMETER[\"Y-axis rotation\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8609]],\n"
+               "        PARAMETER[\"Z-axis rotation\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8610]]],\n"
+               "    CS[Cartesian,3],\n"
+               "        AXIS[\"(X)\",geocentricX,\n"
+               "            ORDER[1],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]],\n"
+               "        AXIS[\"(Y)\",geocentricY,\n"
+               "            ORDER[2],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]],\n"
+               "        AXIS[\"(Z)\",geocentricZ,\n"
+               "            ORDER[3],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedGeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto baseCRS = nn_dynamic_pointer_cast<GeodeticCRS>(crs->baseCRS());
+    ASSERT_TRUE(baseCRS != nullptr);
+
+    EXPECT_TRUE(baseCRS->isGeocentric());
+
+    auto exportedWKT = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
+    EXPECT_STREQ(exportedWKT.c_str(), wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, DerivedGeographicCRS_GDAL_PROJ4_EXSTENSION_hack) {
     // Note the lack of UNIT[] node
     auto wkt =
