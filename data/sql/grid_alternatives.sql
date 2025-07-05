@@ -365,6 +365,7 @@ VALUES
 
 -- us_nga - US National Geospatial Intelligence Agency (NGA)
 ('WW15MGH.GRD','us_nga_egm96_15.tif','egm96_15.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/us_nga_egm96_15.tif',1,1,NULL),
+('Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree','us_nga_egm08_25.tif','egm08_25.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/us_nga_egm08_25.tif',1,1,NULL),
 ('Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree.gz','us_nga_egm08_25.tif','egm08_25.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/us_nga_egm08_25.tif',1,1,NULL),
 
 -- us_noaa - United States
