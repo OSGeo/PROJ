@@ -1369,8 +1369,8 @@ tests:
 - args: -s EPSG:32631 -t EPSG:4326+3855 --3d --summary
   out: |
     Candidate operations found: 3
-    unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (1), 1 m, World.
-    unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (2), 0.5 m, World.
+    unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (1), 0.113 m, World.
+    unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (2), 0.11 m, World.
     unknown id, Inverse of UTM zone 31N + Inverse of Transformation from EGM2008 height to WGS 84 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World., has ballpark transformation
 - args: -s EPSG:4326 -t EPSG:32661 --normalize-axis-order -o PROJ -q --single-line
   comment: "Undocumented option: --normalize-axis-order"

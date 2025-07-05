@@ -2501,7 +2501,7 @@ INSERT INTO "extent" VALUES('EPSG','3521','Indonesia - 129°E to 132°E onshore'
 INSERT INTO "extent" VALUES('EPSG','3522','Indonesia - 132°E to 135°E onshore','Indonesia - onshore between 132°E and 135°E.',-7.3,-0.29,132.0,135.0,0);
 INSERT INTO "extent" VALUES('EPSG','3523','Indonesia - 135°E to 138°E onshore','Indonesia - onshore between 135°E and 138°E.',-8.49,-0.58,135.0,138.0,0);
 INSERT INTO "extent" VALUES('EPSG','3524','Canada - 72°W to 66°W','Canada between 72°W and 66°W onshore and offshore - New Brunswick, Labrador, Nova Scotia, Nunavut, Quebec.',40.8,84.0,-72.0,-66.0,0);
-INSERT INTO "extent" VALUES('EPSG','3525','Canada - 66°W to 60°W','Canada between 66°W and 60°W onshore and offshore - New Brunswick, Labrador, Nova Scotia, Nunavut, Prince Edward Island, Quebec.',40.04,84.0,-66.0,-60.0,0);
+INSERT INTO "extent" VALUES('EPSG','3525','Canada - 66°W to 60°W','Canada between 66°W and 60°W onshore and offshore - New Brunswick, Labrador, Nova Scotia, Nunavut, Prince Edward Island, Quebec.',38.21,84.0,-66.0,-59.99,0);
 INSERT INTO "extent" VALUES('EPSG','3526','Canada - 108°W to 102°W','Canada between 108°W and 102°W onshore and offshore - Northwest Territories, Nunavut, Saskatchewan.',48.99,84.0,-108.0,-102.0,0);
 INSERT INTO "extent" VALUES('EPSG','3527','Canada - 114°W to 108°W','Canada between 114°W and 108°W onshore and offshore - Alberta, Northwest Territories, Nunavut, Saskatchewan.',48.99,84.0,-114.0,-108.0,0);
 INSERT INTO "extent" VALUES('EPSG','3528','Canada - 120°W to 114°W','Canada between 120°W and 114°W onshore and offshore - Alberta, British Columbia, Northwest Territories, Nunavut.',48.99,83.5,-120.0,-114.0,0);
