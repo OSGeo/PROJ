@@ -526,6 +526,8 @@ INSERT INTO "vertical_crs" VALUES('EPSG','10740','Sint Eustatius height',NULL,'E
 INSERT INTO "usage" VALUES('EPSG','22288','vertical_crs','EPSG','10740','EPSG','4788','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','10763','Bonaire height',NULL,'EPSG','6499','EPSG','1398',0);
 INSERT INTO "usage" VALUES('EPSG','22175','vertical_crs','EPSG','10763','EPSG','3822','EPSG','1178');
+INSERT INTO "vertical_crs" VALUES('EPSG','10900','Asse 2025 height',NULL,'EPSG','6499','EPSG','1415',0);
+INSERT INTO "usage" VALUES('EPSG','23352','vertical_crs','EPSG','10900','EPSG','4805','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','20000','SVD2006 height',NULL,'EPSG','6499','EPSG','1323',0);
 INSERT INTO "usage" VALUES('EPSG','17962','vertical_crs','EPSG','20000','EPSG','4058','EPSG','1180');
 INSERT INTO "vertical_crs" VALUES('EPSG','20034','CGVD2013a(2002) height',NULL,'EPSG','6499','EPSG','1325',0);

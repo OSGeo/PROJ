@@ -107,7 +107,7 @@ INSERT INTO "extent" VALUES('EPSG','1127','Italy','Italy - onshore and offshore.
 INSERT INTO "extent" VALUES('EPSG','1128','Jamaica','Jamaica - onshore and offshore. Includes Morant Cays and Pedro Cays.',14.08,19.36,-80.6,-74.51,0);
 INSERT INTO "extent" VALUES('EPSG','1129','Japan','Japan - onshore and offshore.',17.09,46.05,122.38,157.65,0);
 INSERT INTO "extent" VALUES('EPSG','1130','Jordan','Jordan.',29.18,33.38,34.88,39.31,0);
-INSERT INTO "extent" VALUES('EPSG','1131','Kazakhstan','Kazakhstan - onshore including Caspian Sea.',40.59,55.45,46.49,87.35,0);
+INSERT INTO "extent" VALUES('EPSG','1131','Kazakhstan','Kazakhstan - onshore and offshore, including Caspian Sea.',40.59,55.45,46.49,87.35,0);
 INSERT INTO "extent" VALUES('EPSG','1132','Kenya','Kenya - onshore and offshore.',-4.9,4.63,33.9,44.28,0);
 INSERT INTO "extent" VALUES('EPSG','1133','Kiribati','Kiribati - onshore and offshore. Includes Fanning Island, Washington Island and Christmas in the Line Islands, Ocean Islands, Phoenix Islands.',-13.84,7.92,167.81,-146.82,0);
 INSERT INTO "extent" VALUES('EPSG','1134','North Korea','Democratic People''s Republic of Korea (North Korea) - onshore and offshore.',37.1,43.01,123.54,132.82,0);
@@ -3773,3 +3773,14 @@ INSERT INTO "extent" VALUES('EPSG','4793','Liberia - east of 12°W','Liberia - o
 INSERT INTO "extent" VALUES('EPSG','4794','Liberia - west of 12°W','Liberia - offshore west of 12°W.',3.12,6.4,-13.59,-12.0,0);
 INSERT INTO "extent" VALUES('EPSG','4799','UK - Oxford to Cambridge','United Kingdom (UK) - on or related to the East West Rail (Phases 2 and 3) route from Oxford to Cambridge via Bicester, Bletchley and Bedford, including the route from Claydon Junction to Aylesbury and Princes Risborough.',51.7,52.33,-1.43,0.27,0);
 INSERT INTO "extent" VALUES('EPSG','4800','Papua New Guinea - onshore and offshore - Western, Gulf and Central provinces','Papua New Guinea - onshore and offshore - Western Province, Gulf Province, Central Province, National Capital District and maritime zones offshore of these provinces.',-12.0,-4.98,139.2,149.67,0);
+INSERT INTO "extent" VALUES('EPSG','4801','UK - Sneatonthorpe to Redcar','United Kingdom (UK) - covering the surface level works associated with the Woodsmith mining project between Sneatonthorpe and Wilton works, Redcar.',54.35,54.7,-1.25,-0.45,0);
+INSERT INTO "extent" VALUES('EPSG','4805','Germany - Lower Saxony - Asse','Germany - Lower Saxony - Asse mining area.',52.11,52.16,10.6,10.7,0);
+INSERT INTO "extent" VALUES('EPSG','4813','Kazakhstan - west of 48°E','Kazakhstan - west of 48°E including Caspian Sea.',47.69,50.47,46.49,48.0,0);
+INSERT INTO "extent" VALUES('EPSG','4814','Kazakhstan - 48°E to 54°E','Kazakhstan - 48°E to 54°E including Caspian Sea.',41.15,51.79,48.0,54.0,0);
+INSERT INTO "extent" VALUES('EPSG','4815','Kazakhstan - 54°E to 60°E','Kazakhstan - 54°E to 60°E including Caspian Sea.',41.26,51.18,54.0,60.0,0);
+INSERT INTO "extent" VALUES('EPSG','4816','Kazakhstan - 60°E to 66°E','Kazakhstan - 60°E to 66°E.',42.87,54.71,60.0,66.0,0);
+INSERT INTO "extent" VALUES('EPSG','4817','Kazakhstan - 66°E to 72°E','Kazakhstan - 66°E to 72°E.',40.59,55.45,66.0,72.0,0);
+INSERT INTO "extent" VALUES('EPSG','4818','Kazakhstan - 72°E to 78°E','Kazakhstan - 72°E to 78°E.',42.4,54.45,72.0,78.0,0);
+INSERT INTO "extent" VALUES('EPSG','4819','Kazakhstan - 78°E to 84°E','Kazakhstan - 78°E to 84°E.',42.19,53.18,78.0,84.0,0);
+INSERT INTO "extent" VALUES('EPSG','4820','Kazakhstan - east of 84°E','Kazakhstan - east of 84°E.',46.82,50.7,84.0,87.35,0);
+INSERT INTO "extent" VALUES('EPSG','4821','USA - Gulf central planning area deep water','United States (USA) - central Gulf of Mexico outer continental shelf (GoM OCS) planning area, deep water portion.',25.58,29.35,-93.38,-86.53,0);

@@ -680,7 +680,8 @@ CREATE TABLE helmert_transformation_table(
 
     CONSTRAINT pk_helmert_transformation PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_helmert_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES geodetic_crs(auth_name, code) ON DELETE CASCADE,
-    CONSTRAINT fk_helmert_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES geodetic_crs(auth_name, code) ON DELETE CASCADE,
+    -- below not true for EPSG:10905 ("ETRS89/DREF91/2016 to Asse 2025 + Asse 2025 height (1)") whose target CRS is a compound CRS
+    -- CONSTRAINT fk_helmert_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES geodetic_crs(auth_name, code) ON DELETE CASCADE,
     CONSTRAINT fk_helmert_transformation_method FOREIGN KEY (method_auth_name, method_code) REFERENCES coordinate_operation_method(auth_name, code) ON DELETE CASCADE,
     --CONSTRAINT fk_helmert_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code) ON DELETE CASCADE,
     CONSTRAINT fk_helmert_translation_uom FOREIGN KEY (translation_uom_auth_name, translation_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,

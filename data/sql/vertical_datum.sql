@@ -284,6 +284,8 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1395','Sint Eustatius Vertical Datum
 INSERT INTO "usage" VALUES('EPSG','22281','vertical_datum','EPSG','1395','EPSG','4788','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','1398','Bonaire Vertical Datum',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','22174','vertical_datum','EPSG','1398','EPSG','3822','EPSG','1178');
+INSERT INTO "vertical_datum" VALUES('EPSG','1415','Asse vertical datum 2025',NULL,'2025-01-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','23488','vertical_datum','EPSG','1415','EPSG','4805','EPSG','1144');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,NULL,NULL,0);

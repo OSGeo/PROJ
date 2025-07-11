@@ -3344,15 +3344,27 @@ bool SingleOperation::exportToPROJStringGeneric(
             dynamic_cast<const crs::GeographicCRS *>(l_sourceCRS.get());
         auto targetCRSGeog =
             dynamic_cast<const crs::GeographicCRS *>(l_targetCRS.get());
+        const bool sourceIsCompound =
+            !sourceCRSGeog &&
+            dynamic_cast<const crs::CompoundCRS *>(l_sourceCRS.get());
+        const bool targetIsCompound =
+            !targetCRSGeog &&
+            dynamic_cast<const crs::CompoundCRS *>(l_targetCRS.get());
         const bool addPushPopV3 =
-            ((sourceCRSGeog &&
-              sourceCRSGeog->coordinateSystem()->axisList().size() == 2) ||
-             (targetCRSGeog &&
-              targetCRSGeog->coordinateSystem()->axisList().size() == 2)) ||
-            (!sourceCRSGeog &&
-             dynamic_cast<const crs::CompoundCRS *>(l_sourceCRS.get())) ||
-            (!targetCRSGeog &&
-             dynamic_cast<const crs::CompoundCRS *>(l_targetCRS.get()));
+            (((sourceCRSGeog &&
+               sourceCRSGeog->coordinateSystem()->axisList().size() == 2) ||
+              (targetCRSGeog &&
+               targetCRSGeog->coordinateSystem()->axisList().size() == 2)) ||
+             sourceIsCompound || targetIsCompound) &&
+            // Below check is for example for
+            // EPSG:10905 ("ETRS89/DREF91/2016 to Asse 2025 + Asse 2025 height
+            // (1)") whose target CRS is a compound CRS
+            !(sourceCRSGeog &&
+              sourceCRSGeog->coordinateSystem()->axisList().size() == 3 &&
+              targetIsCompound) &&
+            !(targetCRSGeog &&
+              targetCRSGeog->coordinateSystem()->axisList().size() == 3 &&
+              sourceIsCompound);
 
         if (l_sourceCRS) {
             setupPROJGeodeticSourceCRS(formatter, NN_NO_CHECK(l_sourceCRS),

@@ -460,6 +460,12 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1402','Liberia Reference Frame 2021'
 INSERT INTO "usage" VALUES('EPSG','22451','geodetic_datum','EPSG','1402','EPSG','1142','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1405','EWR3 Intermediate Reference Frame',NULL,'EPSG','7019','EPSG','8901','2024-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','22755','geodetic_datum','EPSG','1405','EPSG','4799','EPSG','1141');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1406','WSPG Intermediate Reference Frame',NULL,'EPSG','7019','EPSG','8901','2025-01-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','22831','geodetic_datum','EPSG','1406','EPSG','4801','EPSG','1293');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1413','Asse geodetic datum 2025',NULL,'EPSG','7004','EPSG','8901',NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','23487','geodetic_datum','EPSG','1413','EPSG','4805','EPSG','1144');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1417','Kazakhstan Terrestrial Reference Frame 2023',NULL,'EPSG','7019','EPSG','8901','2025-01-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','23414','geodetic_datum','EPSG','1417','EPSG','1131','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,'EPSG','7001','EPSG','8901',NULL,NULL,NULL,NULL,NULL,1);
 INSERT INTO "usage" VALUES('EPSG','13422','geodetic_datum','EPSG','6001','EPSG','1263','EPSG','1213');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,'EPSG','7002','EPSG','8901',NULL,NULL,NULL,NULL,NULL,1);
