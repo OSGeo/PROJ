@@ -164,7 +164,12 @@ def generate_projected_crs(geod_crs_code, geod_crs_name, is_west):
             cs_code = 'PROJECTED_WEST_NORTH'
         else:
             cs_auth = 'EPSG'
-            cs_code = '4400'
+            if conv_name == "North Polar":
+                cs_code = '4469'
+            elif conv_name == "South Polar":
+                cs_code = '4490'
+            else:
+                cs_code = '4400'
 
         all_sql.append("INSERT INTO projected_crs VALUES('%s',%d,'%s',NULL,'%s','%s','%s',%d,'%s',%d,NULL,0);" % (AUTH_IAU2015, pcrs_code, pcrs_name, cs_auth, cs_code, AUTH_IAU2015, geod_crs_code, AUTH_IAU2015, conv_code))
         add_usage('projected_crs', pcrs_code)
