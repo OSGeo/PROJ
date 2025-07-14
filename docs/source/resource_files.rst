@@ -39,7 +39,7 @@ The following paths are checked in order:
 
   The PROJ user writable directory, which is :
 
-    * on Windows, ``${LOCALAPPDATA}/proj``
+    * on Windows, ``%LOCALAPPDATA%\proj``
     * on macOS, ``${HOME}/Library/Application Support/proj``
     * on other platforms (Linux), ``${XDG_DATA_HOME}/proj`` if
       :envvar:`XDG_DATA_HOME` is defined. Else ``${HOME}/.local/share/proj``
