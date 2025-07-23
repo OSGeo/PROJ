@@ -217,5 +217,6 @@ jobs:
             BUILD_MODE=shared
             if [ ${{ env.BUILD_SHARED_LIBS }} == "OFF" ]; then BUILD_MODE=static; fi
             ../test/postinstall/test_cmake.sh ${PROJ_DIR} ${BUILD_MODE}
-            ../test/postinstall/test_pkg-config.sh ${PROJ_DIR} ${BUILD_MODE}
+            # Disabled because of issue with (likely sqlite3.pc) that includes a unexisting -ldl
+            # ../test/postinstall/test_pkg-config.sh ${PROJ_DIR} ${BUILD_MODE}
             proj
