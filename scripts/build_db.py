@@ -651,6 +651,11 @@ def fill_helmert_transformation(proj_db_cursor):
         if param_value[0] is None and deprecated:
             continue # silently discard non sense deprecated transforms (like EPSG:1076)
 
+        # FIXME: Issue in EPSG 12.017. To be removed once EPSG fixes it
+        if code == 10953 and method_name == "Time-dependent Coordinate Frame rotation (geocen)":
+            print(f"Skipping Helmert transformation {code} {name} as it is a {method_name} between 2 static CRS")
+            continue
+
         assert param_code[0] == 8605
         assert param_code[1] == 8606
         assert param_code[2] == 8607

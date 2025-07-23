@@ -1923,7 +1923,7 @@ tests:
      Lambert-93 CC42 CC43 CC44 CC45 CC46 CC47 CC48 CC49 CC50 Lambert-93\ +\ NGF-IGN69\ height Lambert-93\ +\ NGF-IGN78\ height
 - args: completion projinfo "\"NAD83(HARN) / California Albers" "+"
   out: |
-    NGVD29\ height\ (ftUS) NAVD88\ depth\ (ftUS) NGVD29\ depth\ (ftUS) NAVD88\ height\ (ftUS) NGVD29\ height\ (m) MSL\ height\ (ftUS) MSL\ depth\ (ftUS) NAVD88\ height\ (ft)
+    NGVD29\ height\ (ftUS) NAVD88\ depth\ (ftUS) NGVD29\ depth\ (ftUS) NAVD88\ height\ (ftUS) NGVD29\ height\ (m) MSL\ height\ (ftUS) MSL\ depth\ (ftUS) NAVD88\ height\ (ft) COH88\ 2025\ (NAVD88)\ height COH88\ 2025\ (NAVD88)\ height\ (ftUS)
 - args: completion projinfo "\"Mauritania 1999" "/" UTM zone 29N "+"
   out: |
     EGM2008\ height MSL\ height MSL\ depth EGM96\ height EGM84\ height Instantaneous\ Water\ Level\ height Instantaneous\ Water\ Level\ depth LAT\ depth LLWLT\ depth ISLW\ depth MLLWS\ depth MLWS\ depth MLLW\ depth MLW\ depth MHW\ height MHHW\ height MHWS\ height HHWLT\ height HAT\ height Low\ Water\ depth High\ Water\ height MSL\ height\ (ft) MSL\ depth\ (ft)
