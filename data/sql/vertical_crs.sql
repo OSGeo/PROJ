@@ -528,6 +528,8 @@ INSERT INTO "vertical_crs" VALUES('EPSG','10763','Bonaire height',NULL,'EPSG','6
 INSERT INTO "usage" VALUES('EPSG','22175','vertical_crs','EPSG','10763','EPSG','3822','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','10900','Asse 2025 height',NULL,'EPSG','6499','EPSG','1415',0);
 INSERT INTO "usage" VALUES('EPSG','23352','vertical_crs','EPSG','10900','EPSG','4805','EPSG','1178');
+INSERT INTO "vertical_crs" VALUES('EPSG','10918','COH88 2025 (NAVD88) height',NULL,'EPSG','6499','EPSG','1416',0);
+INSERT INTO "usage" VALUES('EPSG','23576','vertical_crs','EPSG','10918','EPSG','1375','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','20000','SVD2006 height',NULL,'EPSG','6499','EPSG','1323',0);
 INSERT INTO "usage" VALUES('EPSG','17962','vertical_crs','EPSG','20000','EPSG','4058','EPSG','1180');
 INSERT INTO "vertical_crs" VALUES('EPSG','20034','CGVD2013a(2002) height',NULL,'EPSG','6499','EPSG','1325',0);
@@ -586,6 +588,8 @@ INSERT INTO "vertical_crs" VALUES('EPSG','10378','Ponta Delgada depth',NULL,'EPS
 INSERT INTO "usage" VALUES('EPSG','19987','vertical_crs','EPSG','10378','EPSG','2871','EPSG','1203');
 INSERT INTO "vertical_crs" VALUES('EPSG','10379','Cais da Vila do Porto depth',NULL,'EPSG','6498','EPSG','1109',0);
 INSERT INTO "usage" VALUES('EPSG','19988','vertical_crs','EPSG','10379','EPSG','4126','EPSG','1203');
+INSERT INTO "vertical_crs" VALUES('EPSG','10919','COH88 2025 (NAVD88) height (ftUS)',NULL,'EPSG','6497','EPSG','1416',0);
+INSERT INTO "usage" VALUES('EPSG','23575','vertical_crs','EPSG','10919','EPSG','1375','EPSG','1179');
 INSERT INTO "vertical_crs" VALUES('EPSG','5614','KOC WD depth (ft)',NULL,'EPSG','6495','EPSG','5187',0);
 INSERT INTO "usage" VALUES('EPSG','4083','vertical_crs','EPSG','5614','EPSG','3267','EPSG','1205');
 INSERT INTO "vertical_crs" VALUES('EPSG','6358','NAVD88 depth (ftUS)',NULL,'EPSG','1043','EPSG','5103',0);

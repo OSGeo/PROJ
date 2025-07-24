@@ -926,6 +926,8 @@ INSERT INTO "compound_crs" VALUES('EPSG','10904','Asse 2025 + Asse 2025 height',
 INSERT INTO "usage" VALUES('EPSG','23351','compound_crs','EPSG','10904','EPSG','4805','EPSG','1144');
 INSERT INTO "compound_crs" VALUES('EPSG','10906','Asse 2025 / Gauss-Kruger zone 4 (E-N) + Asse 2025 height',NULL,'EPSG','10899','EPSG','10900',0);
 INSERT INTO "usage" VALUES('EPSG','23114','compound_crs','EPSG','10906','EPSG','4805','EPSG','1144');
+INSERT INTO "compound_crs" VALUES('EPSG','10920','CSRN2025 (NAD83 2011) + COH88 2025 (NAVD88) height',NULL,'EPSG','10910','EPSG','10918',0);
+INSERT INTO "usage" VALUES('EPSG','23574','compound_crs','EPSG','10920','EPSG','1375','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);
