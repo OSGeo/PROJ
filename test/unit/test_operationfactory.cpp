@@ -6543,6 +6543,66 @@ TEST(operation,
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_compoundCRS_issue_4550) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto wkt =
+        "COMPD_CS["
+        "\"NAD83(HARN) / Washington South (ftUS) + "
+        "NAVD88 height (ftUS) - Geoid18 (ftUS)\","
+        "PROJCS[\"NAD83(HARN) / Washington South (ftUS)\","
+        "GEOGCS[\"NAD83(HARN)\","
+        "DATUM[\"NAD83 (High Accuracy Reference Network)\","
+        "SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+        "AUTHORITY[\"EPSG\",\"7019\"]],TOWGS84[0,0,0,0,0,0,0],"
+        "AUTHORITY[\"EPSG\",\"6152\"]],"
+        "PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],"
+        "UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],"
+        "AUTHORITY[\"EPSG\",\"4152\"]],"
+        "PROJECTION[\"Lambert_Conformal_Conic_2SP\"],"
+        "PARAMETER[\"standard_parallel_1\",47.33333333333334],"
+        "PARAMETER[\"standard_parallel_2\",45.83333333333334],"
+        "PARAMETER[\"latitude_of_origin\",45.33333333333334],"
+        "PARAMETER[\"central_meridian\",-120.5],"
+        "PARAMETER[\"false_easting\",1640416.667],"
+        "PARAMETER[\"false_northing\",0],"
+        "UNIT[\"US survey foot\",0.3048006096012192,"
+        "AUTHORITY[\"EPSG\",\"9003\"]],"
+        "AXIS[\"X\",EAST],AXIS[\"Y\",NORTH],"
+        "AUTHORITY[\"EPSG\",\"2927\"]],"
+        "VERT_CS[\"NAVD88 height (ftUS) - Geoid18 (ftUS)\","
+        "VERT_DATUM[\"North American Vertical Datum 1988\",2005,"
+        "AUTHORITY[\"EPSG\",\"5103\"]],"
+        "UNIT[\"US survey foot\",0.3048006096012192,"
+        "AUTHORITY[\"EPSG\",\"9003\"]],AXIS[\"Up\",UP],"
+        "AUTHORITY[\"EPSG\",\"6360\"]]]";
+    auto srcObj = createFromUserInput(wkt, dbContext, false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    // "UTM Zone 10N / WGS 84 + NAVD88 height"
+    auto dstObj = createFromUserInput("EPSG:32610+5703", dbContext, false);
+    auto dst = nn_dynamic_pointer_cast<CRS>(dstObj);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=us-ft +xy_out=m "
+              "+step +inv +proj=lcc +lat_0=45.3333333333333 +lon_0=-120.5 "
+              "+lat_1=47.3333333333333 +lat_2=45.8333333333333 "
+              "+x_0=500000.0001016 +y_0=0 +ellps=GRS80 "
+              "+step +proj=unitconvert +z_in=us-ft +z_out=m "
+              "+step +proj=utm +zone=10 +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation,
      compoundCRS_to_compoundCRS_with_derivedVerticalCRS_ellipsoidal_height) {
     // Test scenario of https://github.com/OSGeo/PROJ/issues/4175
