@@ -6599,6 +6599,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
     }
 
     std::vector<CoordinateOperationNNPtr> verticalTransforms;
+    bool bHasTriedVerticalTransforms = false;
     bool bTryThroughIntermediateGeogCRS = false;
     if (componentsSrc.size() >= 2) {
         const auto vertSrc = componentsSrc[1]->extractVerticalCRS();
@@ -6642,6 +6643,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 // If we have a geoid model, force using through it
                 bTryThroughIntermediateGeogCRS = true;
             } else {
+                bHasTriedVerticalTransforms = true;
                 verticalTransforms =
                     createOperations(componentsSrc[1], sourceEpoch,
                                      componentsDst[1], targetEpoch, context);
@@ -6911,6 +6913,12 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
 
         if (!res.empty()) {
             return;
+        }
+
+        if (!bHasTriedVerticalTransforms) {
+            verticalTransforms =
+                createOperations(componentsSrc[1], sourceEpoch,
+                                 componentsDst[1], targetEpoch, context);
         }
     }
 
