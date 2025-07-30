@@ -494,12 +494,13 @@ SQLResultSet SQLiteHandle::run(sqlite3_stmt *stmt, const std::string &sql,
         } else if (ret == SQLITE_DONE) {
             break;
         } else {
-            throw FactoryException(std::string("SQLite error on ")
-                                       .append(sql)
-                                       .append(": code = ")
+            throw FactoryException(std::string("SQLite error [ ")
+                                       .append("code = ")
                                        .append(internal::toString(ret))
                                        .append(", msg = ")
-                                       .append(sqlite3_errmsg(sqlite_handle_)));
+                                       .append(sqlite3_errmsg(sqlite_handle_))
+                                       .append(" ] on ")
+                                       .append(sql));
         }
     }
     return result;
@@ -515,8 +516,10 @@ SQLResultSet SQLiteHandle::run(const std::string &sql,
         if (sqlite3_prepare_v2(sqlite_handle_, sql.c_str(),
                                static_cast<int>(sql.size()), &stmt,
                                nullptr) != SQLITE_OK) {
-            throw FactoryException("SQLite error on " + sql + ": " +
-                                   sqlite3_errmsg(sqlite_handle_));
+            throw FactoryException(std::string("SQLite error [ ")
+                                       .append(sqlite3_errmsg(sqlite_handle_))
+                                       .append(" ] on ")
+                                       .append(sql));
         }
         auto ret = run(stmt, sql, parameters, useMaxFloatPrecision);
         sqlite3_finalize(stmt);
@@ -1443,8 +1446,11 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
         if (sqlite3_prepare_v2(l_handle->handle(), sql.c_str(),
                                static_cast<int>(sql.size()), &stmt,
                                nullptr) != SQLITE_OK) {
-            throw FactoryException("SQLite error on " + sql + ": " +
-                                   sqlite3_errmsg(l_handle->handle()));
+            throw FactoryException(
+                std::string("SQLite error [ ")
+                    .append(sqlite3_errmsg(l_handle->handle()))
+                    .append(" ] on ")
+                    .append(sql));
         }
         mapSqlToStatement_.insert(
             std::pair<std::string, sqlite3_stmt *>(sql, stmt));
