@@ -283,6 +283,16 @@ if(ENABLE_CURL)
 endif()
 
 ################################################################################
+# Check for Emscripten fetch
+################################################################################
+
+option(ENABLE_EMSCRIPTEN_FETCH "Enable Emscripten fetch support" OFF)
+set(EMSCRIPTEN_FETCH_ENABLED FALSE)
+if(ENABLE_EMSCRIPTEN_FETCH)
+  set(EMSCRIPTEN_FETCH_ENABLED TRUE)
+endif()
+
+################################################################################
 
 option(EMBED_PROJ_DATA_PATH "Whether the PROJ_DATA_PATH should be embedded" ON)
 
