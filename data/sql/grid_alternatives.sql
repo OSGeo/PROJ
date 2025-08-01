@@ -348,6 +348,7 @@ VALUES
 
 -- si_gurs - Slovenia
 ('https://isgeoid.polimi.it/Geoid/Europe/Slovenia/public/Slovenia_2016_SLO_VRP2016_Koper_hybrQ_20221122.isg','si_gurs_SLO-VRP2016-Koper.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/si_gurs_SLO-VRP2016-Koper.tif',1,1,NULL),
+('SLO-VTP2024.xyz','si_gurs_SLO-VTP2024.tif',NULL,'GTiff','vgridshift',0,NULL,'https://cdn.proj.org/si_gurs_SLO-VTP2024.tif',1,1,NULL),
 
 -- sk_gku - Geodetický a kartografický ústav Bratislava (GKU)
 ('Slovakia_JTSK03_to_JTSK.LAS','sk_gku_JTSK03_to_JTSK.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/sk_gku_JTSK03_to_JTSK.tif',1,1,NULL),
