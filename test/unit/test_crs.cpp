@@ -1305,6 +1305,111 @@ TEST(crs, EPSG_5482_projected_south_pole_south_west) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, spherical_mercator_on_sphere_to_WKT1) {
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+        "PROJCRS[\"Moon (2015) - Sphere / Ocentric / Mercator\",\n"
+        "    BASEGEOGCRS[\"Moon (2015) - Sphere / Ocentric\",\n"
+        "        DATUM[\"Moon (2015) - Sphere\",\n"
+        "            ELLIPSOID[\"Moon (2015) - Sphere\",1737400,0,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Reference Meridian\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"IAU\",30100,2015]],\n"
+        "    CONVERSION[\"Mercator\",\n"
+        "        METHOD[\"Mercator (Spherical)\",\n"
+        "            ID[\"EPSG\",1026]],\n"
+        "        PARAMETER[\"Latitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8801]],\n"
+        "        PARAMETER[\"Longitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8802]],\n"
+        "        PARAMETER[\"False easting\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"(N)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    ID[\"IAU\",30190,2015]]");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto wkt1 = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
+            .get());
+    EXPECT_EQ(wkt1,
+              "PROJCS[\"Moon (2015) - Sphere / Ocentric / Mercator\",\n"
+              "    GEOGCS[\"Moon (2015) - Sphere / Ocentric\",\n"
+              "        DATUM[\"Moon (2015) - Sphere\",\n"
+              "            SPHEROID[\"Moon (2015) - Sphere\",1737400,0]],\n"
+              "        PRIMEM[\"Reference Meridian\",0],\n"
+              "        UNIT[\"degree\",0.0174532925199433,\n"
+              "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+              "        AUTHORITY[\"IAU\",\"30100\"]],\n"
+              "    PROJECTION[\"Mercator_1SP\"],\n"
+              "    PARAMETER[\"central_meridian\",0],\n"
+              "    PARAMETER[\"false_easting\",0],\n"
+              "    PARAMETER[\"false_northing\",0],\n"
+              "    UNIT[\"metre\",1],\n"
+              "    AXIS[\"Easting\",EAST],\n"
+              "    AXIS[\"Northing\",NORTH],\n"
+              "    AUTHORITY[\"IAU\",\"30190\"]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, mercator_variant_A_lat0_non_zero_to_WKT1) {
+    auto obj = WKTParser().createFromWKT(
+        "PROJCRS[\"test\",\n"
+        "    BASEGEOGCRS[\"Moon (2015) - Sphere / Ocentric\",\n"
+        "        DATUM[\"Moon (2015) - Sphere\",\n"
+        "            ELLIPSOID[\"Moon (2015) - Sphere\",1737400,0,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Reference Meridian\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"IAU\",30100,2015]],\n"
+        "    CONVERSION[\"Mercator\",\n"
+        "        METHOD[\"Mercator (Spherical)\",\n"
+        "            ID[\"EPSG\",1026]],\n"
+        "        PARAMETER[\"Latitude of natural origin\",10,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8801]],\n"
+        "        PARAMETER[\"Longitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8802]],\n"
+        "        PARAMETER[\"False easting\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"(N)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    ID[\"IAU\",30190,2015]]");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_THROW(crs->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL,
+                                          DatabaseContext::create())
+                         .get()),
+                 FormattingException);
+}
+// ---------------------------------------------------------------------------
+
 TEST(crs, geodetic_crs_both_datum_datum_ensemble_null) {
     EXPECT_THROW(GeodeticCRS::create(
                      PropertyMap(), nullptr, nullptr,
