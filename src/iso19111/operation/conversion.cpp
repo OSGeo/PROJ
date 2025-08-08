@@ -3259,8 +3259,8 @@ const char *Conversion::getWKT1GDALMethodName() const {
 
 void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
     const auto &l_method = method();
-    const auto &methodName = l_method->nameStr();
-    const auto methodEPSGCode = l_method->getEPSGCode();
+    std::string methodName = l_method->nameStr();
+    auto methodEPSGCode = l_method->getEPSGCode();
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
     if (!isWKT2 && formatter->useESRIDialect()) {
@@ -3298,6 +3298,29 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
 #endif
 
     bool bAlreadyWritten = false;
+
+    bool methodWritten = false;
+
+    const MethodMapping *mapping = !isWKT2 && !formatter->useESRIDialect()
+                                       ? getMapping(l_method.get())
+                                       : nullptr;
+
+    if (!isWKT2 && methodEPSGCode == EPSG_CODE_METHOD_MERCATOR_SPHERICAL) {
+        auto projCRS =
+            dynamic_cast<const crs::ProjectedCRS *>(targetCRS().get());
+        if (projCRS && projCRS->baseCRS()->ellipsoid()->isSphere()) {
+            methodName = EPSG_NAME_METHOD_MERCATOR_VARIANT_A;
+            methodEPSGCode = EPSG_CODE_METHOD_MERCATOR_VARIANT_A;
+            if (!formatter->useESRIDialect()) {
+                methodWritten = true;
+                formatter->startNode(io::WKTConstants::PROJECTION, false);
+                formatter->addQuotedString("Mercator_1SP");
+                formatter->endNode();
+                mapping = getMapping(methodEPSGCode);
+            }
+        }
+    }
+
     if (!isWKT2 && formatter->useESRIDialect()) {
         const ESRIParamMapping *esriParams = nullptr;
         const char *esriMethodName = nullptr;
@@ -3404,10 +3427,18 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
     }
 
     if (!bAlreadyWritten) {
-        l_method->_exportToWKT(formatter);
+        if (!methodWritten) {
+            l_method->_exportToWKT(formatter);
+        }
 
-        const MethodMapping *mapping =
-            !isWKT2 ? getMapping(l_method.get()) : nullptr;
+        if (!isWKT2 && methodEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_A &&
+            parameterValueNumericAsSI(
+                EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN) != 0.0) {
+            throw io::FormattingException(
+                std::string("Unsupported value for ") +
+                EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
+        }
+
         bool hasInterpolationCRSParameter = false;
         for (const auto &genOpParamvalue : parameterValues()) {
             const auto opParamvalue =
