@@ -626,7 +626,7 @@ def fill_compound_crs(proj_db_cursor):
             raise
 
 def fill_helmert_transformation(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (1031, 1032, 1033, 1034, 1035, 1037, 1038, 1039, 1053, 1054, 1055, 1056, 1057, 1058, 1061, 1062, 1063, 1065, 1066, 1132, 1133, 1140, 9603, 9606, 9607, 9636) ")
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (1031, 1032, 1033, 1034, 1035, 1037, 1038, 1039, 1053, 1054, 1055, 1056, 1057, 1058, 1061, 1062, 1063, 1065, 1066, 1132, 1133, 1140, 1149, 9603, 9606, 9607, 9636) ")
     for (code, name, method_code, method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, deprecated, remarks) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 15
@@ -650,11 +650,6 @@ def fill_helmert_transformation(proj_db_cursor):
 
         if param_value[0] is None and deprecated:
             continue # silently discard non sense deprecated transforms (like EPSG:1076)
-
-        # FIXME: Issue in EPSG 12.017. To be removed once EPSG fixes it
-        if code == 10953 and method_name == "Time-dependent Coordinate Frame rotation (geocen)":
-            print(f"Skipping Helmert transformation {code} {name} as it is a {method_name} between 2 static CRS")
-            continue
 
         assert param_code[0] == 8605
         assert param_code[1] == 8606

@@ -430,6 +430,10 @@
     "Coordinate Frame rotation (geog3D domain)"
 #define EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D 1038
 
+#define EPSG_NAME_METHOD_COORDINATE_FRAME_GEOG3D_TO_COMPOUND                   \
+    "Coordinate Frame rotation (geog3D to compound)"
+#define EPSG_CODE_METHOD_COORDINATE_FRAME_GEOG3D_TO_COMPOUND 1149
+
 #define EPSG_NAME_METHOD_POSITION_VECTOR_GEOCENTRIC                            \
     "Position Vector transformation (geocentric domain)"
 #define EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC 1033

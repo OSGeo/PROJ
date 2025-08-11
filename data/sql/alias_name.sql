@@ -775,6 +775,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1418','CSRN2025 (ITRF20
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1416','COH88 2025 (NAVD88)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1414','CSRN2025 (NAD83 2011)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1420','GR96(1996)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1422','NATRF2022','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');

@@ -270,3 +270,4 @@ INSERT INTO "scope" VALUES('EPSG','1290','Pan-European conformal mapping at scal
 INSERT INTO "scope" VALUES('EPSG','1291','Reference surface for depths in BSHC offshore products for the Baltic Sea (including nautical maps, bathymetry data, water level corrections, etc.).',0);
 INSERT INTO "scope" VALUES('EPSG','1292','Crop inventory mapping.',0);
 INSERT INTO "scope" VALUES('EPSG','1293','Engineering survey and topographic mapping related to the Woodsmith mine project.',0);
+INSERT INTO "scope" VALUES('EPSG','1294','Emulation of SPCS27.',0);
