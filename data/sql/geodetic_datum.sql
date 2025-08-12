@@ -476,6 +476,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1419','Greenland Reference 1996 (202
 INSERT INTO "usage" VALUES('EPSG','23455','geodetic_datum','EPSG','1419','EPSG','1107','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1420','Greenland Reference 1996 (1996)',NULL,'EPSG','7019','EPSG','8901','1996-08-14',NULL,NULL,NULL,1996.62,0);
 INSERT INTO "usage" VALUES('EPSG','23616','geodetic_datum','EPSG','1420','EPSG','1107','EPSG','1027');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1422','North American Terrestrial Reference Frame of 2022',NULL,'EPSG','7019','EPSG','8901','2025-06-16',NULL,NULL,NULL,2020.0,0);
+INSERT INTO "usage" VALUES('EPSG','23622','geodetic_datum','EPSG','1422','EPSG','4803','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,'EPSG','7001','EPSG','8901',NULL,NULL,NULL,NULL,NULL,1);
 INSERT INTO "usage" VALUES('EPSG','13422','geodetic_datum','EPSG','6001','EPSG','1263','EPSG','1213');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,'EPSG','7002','EPSG','8901',NULL,NULL,NULL,NULL,NULL,1);

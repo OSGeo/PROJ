@@ -1511,7 +1511,10 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
                        code ==
                            EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D ||
                        code == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D ||
-                       code == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D;
+                       code ==
+                           EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D ||
+                       code ==
+                           EPSG_CODE_METHOD_COORDINATE_FRAME_GEOG3D_TO_COMPOUND;
             };
 
             // Translation vs (PV or CF)
@@ -3289,7 +3292,9 @@ bool SingleOperation::exportToPROJStringGeneric(
                methodEPSGCode ==
                    EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
                methodEPSGCode ==
-                   EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D) {
+                   EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D ||
+               methodEPSGCode ==
+                   EPSG_CODE_METHOD_COORDINATE_FRAME_GEOG3D_TO_COMPOUND) {
         positionVectorConvention = false;
         sevenParamsTransform = true;
     } else if (

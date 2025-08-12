@@ -315,13 +315,15 @@ FOR EACH ROW BEGIN
           crs1.auth_name = NEW.source_crs_auth_name AND crs1.code = NEW.source_crs_code
           AND crs2.auth_name = NEW.target_crs_auth_name AND crs2.code = NEW.target_crs_code
           AND NEW.deprecated = 0 AND (
-             NOT (crs1.type = crs2.type OR
-                  (crs1.type = 'geographic 3D' and crs2.type = 'compound'))));
+             NOT ((crs1.type = crs2.type AND crs1.type IN ('geographic 2D', 'geographic 3D', 'geocentric') AND
+                  NOT(NEW.method_auth_name = 'EPSG' AND NEW.method_code = 1149)) OR
+                  (crs1.type = 'geographic 3D' and crs2.type = 'compound' AND
+                   NEW.method_auth_name = 'EPSG' AND NEW.method_code = 1149))));
 
     -- check that the method used by a Helmert transformation is consistent with the dimensionality of the CRS
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: the domain of the method of helmert_transformation should be consistent with the dimensionality of the CRS')
         WHERE NEW.deprecated = 0 AND
-             (EXISTS (SELECT 1 FROM geodetic_crs crs
+             (NOT(NEW.method_auth_name = 'EPSG' AND NEW.method_code = 1149) AND EXISTS (SELECT 1 FROM geodetic_crs crs
                       LEFT JOIN coordinate_operation_method m ON
                           NEW.method_auth_name = m.auth_name AND NEW.method_code = m.code
                       WHERE
@@ -329,7 +331,7 @@ FOR EACH ROW BEGIN
                           ((m.name LIKE '%geog2D domain%' AND crs.type != 'geographic 2D') OR
                            (m.name LIKE '%geog3D domain%' AND crs.type != 'geographic 3D') OR
                            (m.name LIKE '%geocentric domain%' AND crs.type != 'geocentric')))
-          OR (EXISTS (SELECT 1 FROM compound_crs crs
+          OR (NEW.method_auth_name = 'EPSG' AND NEW.method_code = 1149 AND EXISTS (SELECT 1 FROM compound_crs crs
                       LEFT JOIN coordinate_operation_method m ON
                           NEW.method_auth_name = m.auth_name AND NEW.method_code = m.code
                       WHERE
