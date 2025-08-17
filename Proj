@@ -1,0 +1,6 @@
+git init
+git add .
+git commit -m "Erster Upload meines Shops"
+git branch -M main
+git remote add origin <Hier kommt dein GitHub Link hin>
+git push -u origin main
