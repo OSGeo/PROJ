@@ -13,7 +13,7 @@ RUN apt-get update \
         software-properties-common build-essential ca-certificates \
         cmake wget unzip \
         zlib1g-dev libsqlite3-dev sqlite3 libcurl4-gnutls-dev \
-        libtiff5-dev \
+        libtiff-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY . /PROJ
