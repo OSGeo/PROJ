@@ -4,7 +4,7 @@
  *
  * Run these tests by configuring with cmake and running "make test".
  *
- * Copyright (c) Charles Karney (2015-2022) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2015-2025) <karney@alum.mit.edu> and licensed
  * under the MIT/X11 License.  For more information, see
  * https://geographiclib.sourceforge.io/
  **********************************************************************/
@@ -122,7 +122,7 @@ static const double testcases[20][12] = {
    13487015.8381145492, 121.294026715742277, 5481428.9945736388,
    -0.51527225545373252, -0.51556587964721788, 104679964020340.318}};
 
-static int testinverse() {
+static int testinverse(void) {
   double lat1, lon1, azi1, lat2, lon2, azi2, s12, a12, m12, M12, M21, S12;
   double azi1a, azi2a, s12a, a12a, m12a, M12a, M21a, S12a;
   struct geod_geodesic g;
@@ -147,7 +147,7 @@ static int testinverse() {
   return result;
 }
 
-static int testdirect() {
+static int testdirect(void) {
   double lat1, lon1, azi1, lat2, lon2, azi2, s12, a12, m12, M12, M21, S12;
   double lat2a, lon2a, azi2a, s12a, a12a, m12a, M12a, M21a, S12a;
   struct geod_geodesic g;
@@ -174,7 +174,7 @@ static int testdirect() {
   return result;
 }
 
-static int testarcdirect() {
+static int testarcdirect(void) {
   double lat1, lon1, azi1, lat2, lon2, azi2, s12, a12, m12, M12, M21, S12;
   double lat2a, lon2a, azi2a, s12a, a12a, m12a, M12a, M21a, S12a;
   struct geod_geodesic g;
@@ -202,7 +202,7 @@ static int testarcdirect() {
   return result;
 }
 
-static int GeodSolve0() {
+static int GeodSolve0(void) {
   double azi1, azi2, s12;
   struct geod_geodesic g;
   int result = 0;
@@ -214,7 +214,7 @@ static int GeodSolve0() {
   return result;
 }
 
-static int GeodSolve1() {
+static int GeodSolve1(void) {
   double lat2, lon2, azi2;
   struct geod_geodesic g;
   int result = 0;
@@ -227,7 +227,7 @@ static int GeodSolve1() {
   return result;
 }
 
-static int GeodSolve2() {
+static int GeodSolve2(void) {
   /* Check fix for antipodal prolate bug found 2010-09-04 */
   double azi1, azi2, s12;
   struct geod_geodesic g;
@@ -244,7 +244,7 @@ static int GeodSolve2() {
   return result;
 }
 
-static int GeodSolve4() {
+static int GeodSolve4(void) {
   /* Check fix for short line bug found 2010-05-21 */
   double s12;
   struct geod_geodesic g;
@@ -256,7 +256,7 @@ static int GeodSolve4() {
   return result;
 }
 
-static int GeodSolve5() {
+static int GeodSolve5(void) {
   /* Check fix for point2=pole bug found 2010-05-03 */
   double lat2, lon2, azi2;
   struct geod_geodesic g;
@@ -274,7 +274,7 @@ static int GeodSolve5() {
   return result;
 }
 
-static int GeodSolve6() {
+static int GeodSolve6(void) {
   /* Check fix for volatile sbet12a bug found 2011-06-25 (gcc 4.4.4
    * x86 -O3).  Found again on 2012-03-27 with tdm-mingw32 (g++ 4.6.1). */
   double s12;
@@ -296,7 +296,7 @@ static int GeodSolve6() {
   return result;
 }
 
-static int GeodSolve9() {
+static int GeodSolve9(void) {
   /* Check fix for volatile x bug found 2011-06-25 (gcc 4.4.4 x86 -O3) */
   double s12;
   struct geod_geodesic g;
@@ -309,7 +309,7 @@ static int GeodSolve9() {
   return result;
 }
 
-static int GeodSolve10() {
+static int GeodSolve10(void) {
   /* Check fix for adjust tol1_ bug found 2011-06-25 (Visual Studio
    * 10 rel + debug) */
   double s12;
@@ -323,7 +323,7 @@ static int GeodSolve10() {
   return result;
 }
 
-static int GeodSolve11() {
+static int GeodSolve11(void) {
   /* Check fix for bet2 = -bet1 bug found 2011-06-25 (Visual Studio
    * 10 rel + debug) */
   double s12;
@@ -337,7 +337,7 @@ static int GeodSolve11() {
   return result;
 }
 
-static int GeodSolve12() {
+static int GeodSolve12(void) {
   /* Check fix for inverse geodesics on extreme prolate/oblate
    * ellipsoids Reported 2012-08-29 Stefan Guenther
    * <stefan.gunther@embl.de>; fixed 2012-10-07 */
@@ -352,7 +352,7 @@ static int GeodSolve12() {
   return result;
 }
 
-static int GeodSolve14() {
+static int GeodSolve14(void) {
   /* Check fix for inverse ignoring lon12 = nan */
   double azi1, azi2, s12;
   struct geod_geodesic g;
@@ -365,7 +365,7 @@ static int GeodSolve14() {
   return result;
 }
 
-static int GeodSolve15() {
+static int GeodSolve15(void) {
   /* Initial implementation of Math::eatanhe was wrong for e^2 < 0.  This
    * checks that this is fixed. */
   double S12;
@@ -378,7 +378,7 @@ static int GeodSolve15() {
   return result;
 }
 
-static int GeodSolve17() {
+static int GeodSolve17(void) {
   /* Check fix for LONG_UNROLL bug found on 2015-05-07 */
   double lat2, lon2, azi2;
   struct geod_geodesic g;
@@ -408,7 +408,7 @@ static int GeodSolve17() {
   return result;
 }
 
-static int GeodSolve26() {
+static int GeodSolve26(void) {
   /* Check 0/0 problem with area calculation on sphere 2015-09-08 */
   double S12;
   struct geod_geodesic g;
@@ -420,7 +420,7 @@ static int GeodSolve26() {
   return result;
 }
 
-static int GeodSolve28() {
+static int GeodSolve28(void) {
   /* Check for bad placement of assignment of r.a12 with |f| > 0.01 (bug in
    * Java implementation fixed on 2015-05-19). */
   double a12;
@@ -433,7 +433,7 @@ static int GeodSolve28() {
   return result;
 }
 
-static int GeodSolve33() {
+static int GeodSolve33(void) {
   /* Check max(-0.0,+0.0) issues 2015-08-22 (triggered by bugs in Octave --
    * sind(-0.0) = +0.0 -- and in some version of Visual Studio --
    * fmod(-0.0, 360.0) = +0.0. */
@@ -491,7 +491,7 @@ static int GeodSolve33() {
   return result;
 }
 
-static int GeodSolve55() {
+static int GeodSolve55(void) {
   /* Check fix for nan + point on equator or pole not returning all nans in
    * Geodesic::Inverse, found 2015-09-23. */
   double azi1, azi2, s12;
@@ -509,7 +509,7 @@ static int GeodSolve55() {
   return result;
 }
 
-static int GeodSolve59() {
+static int GeodSolve59(void) {
   /* Check for points close with longitudes close to 180 deg apart. */
   double azi1, azi2, s12;
   struct geod_geodesic g;
@@ -522,7 +522,7 @@ static int GeodSolve59() {
   return result;
 }
 
-static int GeodSolve61() {
+static int GeodSolve61(void) {
   /* Make sure small negative azimuths are west-going */
   double lat2, lon2, azi2;
   struct geod_geodesic g;
@@ -545,7 +545,7 @@ static int GeodSolve61() {
   return result;
 }
 
-static int GeodSolve65() {
+static int GeodSolve65(void) {
   /* Check for bug in east-going check in GeodesicLine (needed to check for
    * sign of 0) and sign error in area calculation due to a bogus override of
    * the code for alp12.  Found/fixed on 2015-12-19. */
@@ -581,7 +581,7 @@ static int GeodSolve65() {
   return result;
 }
 
-static int GeodSolve67() {
+static int GeodSolve67(void) {
   /* Check for InverseLine if line is slightly west of S and that s13 is
    * correctly set. */
   double lat2, lon2, azi2;
@@ -604,7 +604,7 @@ static int GeodSolve67() {
   return result;
 }
 
-static int GeodSolve71() {
+static int GeodSolve71(void) {
   /* Check that DirectLine sets s13. */
   double lat2, lon2, azi2;
   struct geod_geodesic g;
@@ -619,7 +619,7 @@ static int GeodSolve71() {
   return result;
 }
 
-static int GeodSolve73() {
+static int GeodSolve73(void) {
   /* Check for backwards from the pole bug reported by Anon on 2016-02-13.
    * This only affected the Java implementation.  It was introduced in Java
    * version 1.44 and fixed in 1.46-SNAPSHOT on 2016-01-17.
@@ -660,7 +660,7 @@ static void polylength(const struct geod_geodesic* g,
   geod_polygon_compute(g, &p, 0, 1, nullptr, perimeter);
 }
 
-static int GeodSolve74() {
+static int GeodSolve74(void) {
   /* Check fix for inaccurate areas, bug introduced in v1.46, fixed
    * 2015-10-16. */
   double a12, s12, azi1, azi2, m12, M12, M21, S12;
@@ -680,7 +680,7 @@ static int GeodSolve74() {
   return result;
 }
 
-static int GeodSolve76() {
+static int GeodSolve76(void) {
   /* The distance from Wellington and Salamanca (a classic failure of
    * Vincenty) */
   double azi1, azi2, s12;
@@ -695,7 +695,7 @@ static int GeodSolve76() {
   return result;
 }
 
-static int GeodSolve78() {
+static int GeodSolve78(void) {
   /* An example where the NGS calculator fails to converge */
   double azi1, azi2, s12;
   struct geod_geodesic g;
@@ -708,7 +708,7 @@ static int GeodSolve78() {
   return result;
 }
 
-static int GeodSolve80() {
+static int GeodSolve80(void) {
   /* Some tests to add code coverage: computing scale in special cases + zero
    * length geodesic (includes GeodSolve80 - GeodSolve83) + using an incapable
    * line. */
@@ -761,7 +761,7 @@ static int GeodSolve80() {
   return result;
 }
 
-static int GeodSolve84() {
+static int GeodSolve84(void) {
   /* Tests for python implementation to check fix for range errors with
    * {fmod,sin,cos}(inf) (includes GeodSolve84 - GeodSolve86). */
 
@@ -810,7 +810,7 @@ static int GeodSolve84() {
   return result;
 }
 
-static int GeodSolve92() {
+static int GeodSolve92(void) {
   /* Check fix for inaccurate hypot with python 3.[89].  Problem reported
    * by agdhruv https://github.com/geopy/geopy/issues/466 ; see
    * https://bugs.python.org/issue43088 */
@@ -828,7 +828,7 @@ static int GeodSolve92() {
   return result;
 }
 
-static int GeodSolve94() {
+static int GeodSolve94(void) {
   /* Check fix for lat2 = nan being treated as lat2 = 0 (bug found
    * 2021-07-26) */
   double azi1, azi2, s12;
@@ -842,7 +842,7 @@ static int GeodSolve94() {
   return result;
 }
 
-static int GeodSolve96() {
+static int GeodSolve96(void) {
   /* Failure with long doubles found with test case from Nowak + Nowak Da
    * Costa (2022).  Problem was using somg12 > 1 as a test that it needed
    * to be set when roundoff could result in somg12 slightly bigger that 1.
@@ -858,7 +858,43 @@ static int GeodSolve96() {
   return result;
 }
 
-static int Planimeter0() {
+static int GeodSolve99(void) {
+  /* Test case https://github.com/geographiclib/geographiclib-js/issues/3
+   * Problem was that output of sincosd(+/-45) was inconsistent because of
+   * directed rounding by Javascript's Math.round.  C implementation was OK. */
+  double azi1, azi2, s12;
+  struct geod_geodesic g;
+  int result = 0;
+  geod_init(&g, wgs84_a, wgs84_f);
+  geod_inverse(&g, 45.0, 0.0, -45.0, 179.572719,
+               &s12, &azi1, &azi2);
+  result += checkEquals(azi1,  90.00000028, 1e-8  );
+  result += checkEquals(azi2,  90.00000028, 1e-8  );
+  result += checkEquals(s12,  19987083.007, 0.5e-3);
+  return result;
+}
+
+static int GeodSolve100(void) {
+  /* Check fix for meridional failure for a strongly prolate ellipsoid.
+   * This was caused by assuming that sig12 < 1 guarantees the meridional
+   * geodesic is shortest (even though m12 < 0).  Counter example is tested
+   * here.  Bug is not present for f >= -2, b < 3*a.  For f = -2.1 the
+   * inverse calculation for 30.61 0 30.61 180 exhibits the bug. */
+  double azi1, azi2, s12;
+  struct geod_geodesic g;
+  int result = 0;
+  geod_init(&g, 1e6, -3);
+  geod_inverse(&g, 30.0, 0.0, 30.0, 180.0,
+               &s12, &azi1, &azi2);
+  /* Sloppy bounds checking because series solution is inaccurate for
+   * ellipsoids this eccentric. */
+  result += checkEquals(azi1,  22.368806, 1.0 );
+  result += checkEquals(azi2, 157.631194, 1.0 );
+  result += checkEquals(s12,   1074081.6, 1e3 );
+  return result;
+}
+
+static int Planimeter0(void) {
   /* Check fix for pole-encircling bug found 2011-03-16 */
   double pa[4][2] = {{89, 0}, {89, 90}, {89, 180}, {89, 270}};
   double pb[4][2] = {{-89, 0}, {-89, 90}, {-89, 180}, {-89, 270}};
@@ -891,7 +927,7 @@ static int Planimeter0() {
   return result;
 }
 
-static int Planimeter5() {
+static int Planimeter5(void) {
   /* Check fix for Planimeter pole crossing bug found 2011-06-24 */
   double points[3][2] = {{89, 0.1}, {89, 90.1}, {89, -179.9}};
   struct geod_geodesic g;
@@ -904,7 +940,7 @@ static int Planimeter5() {
   return result;
 }
 
-static int Planimeter6() {
+static int Planimeter6(void) {
   /* Check fix for Planimeter lon12 rounding bug found 2012-12-03 */
   double pa[3][2] = {{9, -0.00000000000001}, {9, 180}, {9, 0}};
   double pb[3][2] = {{9, 0.00000000000001}, {9, 0}, {9, 180}};
@@ -930,7 +966,7 @@ static int Planimeter6() {
   return result;
 }
 
-static int Planimeter12() {
+static int Planimeter12(void) {
   /* Area of arctic circle (not really -- adjunct to rhumb-area test) */
   double points[3][2] = {{66.562222222, 0},
                          {66.562222222, 180},
@@ -945,7 +981,7 @@ static int Planimeter12() {
   return result;
 }
 
-static int Planimeter12r() {
+static int Planimeter12r(void) {
   /* Area of arctic circle (not really -- adjunct to rhumb-area test) */
   double points[3][2] = {{66.562222222, -0},
                          {66.562222222, -180},
@@ -960,7 +996,7 @@ static int Planimeter12r() {
   return result;
 }
 
-static int Planimeter13() {
+static int Planimeter13(void) {
   /* Check encircling pole twice */
   double points[6][2] = {{89,-360}, {89,-240}, {89,-120},
                          {89,0}, {89,120}, {89,240}};
@@ -974,7 +1010,7 @@ static int Planimeter13() {
   return result;
 }
 
-static int Planimeter15() {
+static int Planimeter15(void) {
   /* Coverage tests, includes Planimeter15 - Planimeter18 (combinations of
    * reverse and sign) + calls to testpoint, testedge, geod_polygonarea. */
   struct geod_geodesic g;
@@ -1019,7 +1055,7 @@ static int Planimeter15() {
   return result;
 }
 
-static int Planimeter19() {
+static int Planimeter19(void) {
   /* Coverage tests, includes Planimeter19 - Planimeter20 (degenerate
    * polygons) + extra cases.  */
   struct geod_geodesic g;
@@ -1059,7 +1095,7 @@ static int Planimeter19() {
   return result;
 }
 
-static int Planimeter21() {
+static int Planimeter21(void) {
   /* Some tests to add code coverage: multiple circlings of pole (includes
    * Planimeter21 - Planimeter28) + invocations via testpoint and testedge. */
   struct geod_geodesic g;
@@ -1109,7 +1145,7 @@ static int Planimeter21() {
   return result;
 }
 
-static int Planimeter29() {
+static int Planimeter29(void) {
   /* Check fix to transitdirect vs transit zero handling inconsistency */
   struct geod_geodesic g;
   struct geod_polygon p;
@@ -1128,7 +1164,7 @@ static int Planimeter29() {
   return result;
 }
 
-int main() {
+int main(void) {
   int n = 0, i;
   if ((i = testinverse())) {++n; printf("testinverse fail: %d\n", i);}
   if ((i = testdirect())) {++n; printf("testdirect fail: %d\n", i);}
@@ -1164,6 +1200,8 @@ int main() {
   if ((i = GeodSolve92())) {++n; printf("GeodSolve92 fail: %d\n", i);}
   if ((i = GeodSolve94())) {++n; printf("GeodSolve94 fail: %d\n", i);}
   if ((i = GeodSolve96())) {++n; printf("GeodSolve96 fail: %d\n", i);}
+  if ((i = GeodSolve99())) {++n; printf("GeodSolve99 fail: %d\n", i);}
+  if ((i = GeodSolve100())) {++n; printf("GeodSolve100 fail: %d\n", i);}
   if ((i = Planimeter0())) {++n; printf("Planimeter0 fail: %d\n", i);}
   if ((i = Planimeter5())) {++n; printf("Planimeter5 fail: %d\n", i);}
   if ((i = Planimeter6())) {++n; printf("Planimeter6 fail: %d\n", i);}
