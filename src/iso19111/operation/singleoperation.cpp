@@ -2057,12 +2057,12 @@ _getGeocentricTranslationFilename(const SingleOperation *op,
     const auto &l_method = op->method();
     const auto &methodName = l_method->nameStr();
     if (l_method->getEPSGCode() ==
-            EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN ||
+            EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATIONS_GEOG2D_DOMAIN_BY_GRID_IGN ||
         (allowInverse &&
          ci_equal(
              methodName,
              INVERSE_OF +
-                 EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN))) {
+                 EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATIONS_GEOG2D_DOMAIN_BY_GRID_IGN))) {
         const auto &fileParameter =
             op->parameterValue(EPSG_NAME_PARAMETER_GEOCENTRIC_TRANSLATION_FILE,
                                EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE);
@@ -2113,7 +2113,7 @@ _getVerticalOffsetByVelocityGridFilename(const SingleOperation *op,
     const auto &l_method = op->method();
     const auto &methodName = l_method->nameStr();
     if (l_method->getEPSGCode() ==
-            EPSG_CODE_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN ||
+            EPSG_CODE_METHOD_VERTICAL_OFFSET_USING_NEU_VELOCITY_GRID_NTV2_VEL ||
         (allowInverse &&
          ci_equal(
              methodName,
@@ -4070,7 +4070,7 @@ bool SingleOperation::exportToPROJStringGeneric(
             throw io::FormattingException(
                 "InterpolationCRS required "
                 "for"
-                " " EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN);
+                " " EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATIONS_GEOG2D_DOMAIN_BY_GRID_IGN);
         }
         const bool interpIsSrc = interpCRS->_isEquivalentTo(
             sourceCRS().get(),
@@ -4081,7 +4081,7 @@ bool SingleOperation::exportToPROJStringGeneric(
         if (!interpIsSrc && !interpIsTarget) {
             throw io::FormattingException(
                 "For"
-                " " EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN
+                " " EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATIONS_GEOG2D_DOMAIN_BY_GRID_IGN
                 ", interpolation CRS should be the source or target CRS");
         }
 
@@ -4244,7 +4244,7 @@ bool SingleOperation::exportToPROJStringGeneric(
             throw io::FormattingException(
                 "InterpolationCRS required "
                 "for"
-                " " EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN);
+                " " EPSG_NAME_METHOD_VERTICAL_OFFSET_USING_NEU_VELOCITY_GRID_NTV2_VEL);
         }
 
         auto interpCRSGeog =
@@ -4267,7 +4267,7 @@ bool SingleOperation::exportToPROJStringGeneric(
         if (!srcEpoch.has_value()) {
             throw io::FormattingException(
                 "For"
-                " " EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN
+                " " EPSG_NAME_METHOD_VERTICAL_OFFSET_USING_NEU_VELOCITY_GRID_NTV2_VEL
                 ", missing epoch for source CRS");
         }
 
@@ -4283,7 +4283,7 @@ bool SingleOperation::exportToPROJStringGeneric(
         if (!dstEpoch.has_value()) {
             throw io::FormattingException(
                 "For"
-                " " EPSG_NAME_METHOD_VERTICAL_OFFSET_BY_VELOCITY_GRID_NRCAN
+                " " EPSG_NAME_METHOD_VERTICAL_OFFSET_USING_NEU_VELOCITY_GRID_NTV2_VEL
                 ", missing epoch for target CRS");
         }
 
@@ -4903,7 +4903,7 @@ PointMotionOperation::substitutePROJAlternativeGridNames(
     if (methodEPSGCode ==
             EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL ||
         methodEPSGCode ==
-            EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NEU_DOMAIN_NTV2_VEL) {
+            EPSG_CODE_METHOD_POINT_MOTION_GEOG3D_DOMAIN_USING_NEU_VELOCITY_GRID_NTV2_VEL) {
         const auto &fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
                            EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
@@ -5076,7 +5076,7 @@ void PointMotionOperation::_exportToPROJString(
     if (methodEPSGCode ==
             EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL ||
         methodEPSGCode ==
-            EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NEU_DOMAIN_NTV2_VEL) {
+            EPSG_CODE_METHOD_POINT_MOTION_GEOG3D_DOMAIN_USING_NEU_VELOCITY_GRID_NTV2_VEL) {
         if (!sourceCoordinateEpoch().has_value()) {
             throw io::FormattingException(
                 "CoordinateOperationNNPtr::_exportToPROJString() unimplemented "
