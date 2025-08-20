@@ -427,13 +427,13 @@ static PJ_LP exact_e_inv(PJ_XY xy, PJ *P) {
         const double sinhCe = sinh(Ce);
         Ce = atan2(sinhCe, cos_Cn);
         const double modulus_Ce = hypot(sinhCe, cos_Cn),
-          rr = hypot(sin_Cn, modulus_Ce);
+                     rr = hypot(sin_Cn, modulus_Ce);
         Cn = atan2(sin_Cn, modulus_Ce);
 #endif
 
         /* Gaussian LAT, LNG -> ell. LAT, LNG */
-        lp.phi = pj_auxlat_convert(Cn, sin_Cn/rr, modulus_Ce/rr,
-                                   Q->cgb, PROJ_ETMERC_ORDER);
+        lp.phi = pj_auxlat_convert(Cn, sin_Cn / rr, modulus_Ce / rr, Q->cgb,
+                                   PROJ_ETMERC_ORDER);
         lp.lam = Ce;
     } else {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
@@ -446,8 +446,8 @@ static PJ *setup_exact(PJ *P) {
     auto *Q = &(static_cast<struct tmerc_data *>(P->opaque)->exact);
 
     assert(P->es > 0);
-    static_assert( PROJ_ETMERC_ORDER == int(AuxLat::ORDER),
-                   "Inconsistent orders etmerc vs auxorder" );
+    static_assert(PROJ_ETMERC_ORDER == int(AuxLat::ORDER),
+                  "Inconsistent orders etmerc vs auxorder");
     /* third flattening */
     const double n = P->n;
 

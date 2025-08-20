@@ -160,8 +160,7 @@ PJ *PJ_PROJECTION(eqearth) {
         Q->apa = pj_authalic_lat_compute_coeffs(P->n); /* For auth_lat(). */
         if (nullptr == Q->apa)
             return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
-        Q->qp =
-            pj_authalic_lat_q(1.0, P); /* For auth_lat(). */
+        Q->qp = pj_authalic_lat_q(1.0, P); /* For auth_lat(). */
         Q->rqda = sqrt(0.5 * Q->qp); /* Authalic radius divided by major axis */
     }
 
