@@ -2745,6 +2745,9 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
         {EPSG_CODE_METHOD_VERTICAL_OFFSET_BY_TIN_INTERPOLATION_JSON,
          EPSG_CODE_PARAMETER_TIN_OFFSET_FILE,
          EPSG_NAME_PARAMETER_TIN_OFFSET_FILE},
+        {EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS_BY_TIN_INTERPOLATION_JSON,
+         EPSG_CODE_PARAMETER_TIN_OFFSET_FILE,
+         EPSG_NAME_PARAMETER_TIN_OFFSET_FILE},
     };
 
     for (const auto &gridTransf : gridTransformations) {
@@ -4620,6 +4623,66 @@ bool SingleOperation::exportToPROJStringGeneric(
             }
 
             targetCRSProj->addUnitConvertAndAxisSwap(formatter, false);
+
+            return true;
+        }
+    }
+
+    if (methodEPSGCode ==
+        EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS_BY_TIN_INTERPOLATION_JSON) {
+        auto sourceCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
+        if (!sourceCRSGeog) {
+            throw io::FormattingException(concat(
+                "Can apply ", methodName, " only to source GeographicCRS"));
+        }
+
+        const auto hasDegreeUnit = [](const crs::GeographicCRS *crs) {
+            const auto &axisList = crs->coordinateSystem()->axisList();
+            return axisList[0]->unit() == common::UnitOfMeasure::DEGREE;
+        };
+
+        if (!hasDegreeUnit(sourceCRSGeog)) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName,
+                       " only to source GeographicCRS with degree axis unit"));
+        }
+
+        auto targetCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
+        if (!targetCRSGeog) {
+            throw io::FormattingException(concat(
+                "Can apply ", methodName, " only to target GeographicCRS"));
+        }
+
+        if (!hasDegreeUnit(targetCRSGeog)) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName,
+                       " only to target GeographicCRS with degree axis unit"));
+        }
+
+        auto fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_TIN_OFFSET_FILE,
+                           EPSG_CODE_PARAMETER_TIN_OFFSET_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+
+            formatter->startInversion();
+            sourceCRSGeog->addAxisSwap(formatter);
+            formatter->stopInversion();
+
+            if (isMethodInverseOf) {
+                formatter->startInversion();
+            }
+
+            formatter->addStep("tinshift");
+            formatter->addParam("file", fileParameter->valueFile());
+
+            if (isMethodInverseOf) {
+                formatter->stopInversion();
+            }
+
+            targetCRSGeog->addAxisSwap(formatter);
 
             return true;
         }

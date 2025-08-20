@@ -318,6 +318,8 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
     PROJ_INTERNAL void addGeocentricUnitConversionIntoPROJString(
         io::PROJStringFormatter *formatter) const;
 
+    PROJ_INTERNAL void addAxisSwap(io::PROJStringFormatter *formatter) const;
+
     PROJ_INTERNAL void
     addAngularUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter) const;
 
