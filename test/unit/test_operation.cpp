@@ -6314,3 +6314,23 @@ TEST(operation, helmert_between_geog3D_and_compound) {
               "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
               "+step +proj=axisswap +order=2,1");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, operation_Geographic2D_Offsets_by_TIN_Interpolation_JSON) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("10854", false);
+
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=tinshift +file=no_kv_ETRS89NO_NGO48_TIN.json "
+              "+step +proj=axisswap +order=2,1");
+
+    EXPECT_EQ(
+        op->inverse()->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +inv +proj=tinshift +file=no_kv_ETRS89NO_NGO48_TIN.json "
+        "+step +proj=axisswap +order=2,1");
+}

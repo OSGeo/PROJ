@@ -32,8 +32,8 @@ static PJ_LP cea_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0, 0.0};
     const struct pj_cea_data *Q =
         static_cast<const struct pj_cea_data *>(P->opaque);
-    lp.phi = pj_authalic_lat_inverse(asin(2. * xy.y * P->k0 / Q->qp),
-                                           Q->apa, P, Q->qp);
+    lp.phi = pj_authalic_lat_inverse(asin(2. * xy.y * P->k0 / Q->qp), Q->apa, P,
+                                     Q->qp);
     lp.lam = xy.x / P->k0;
     return lp;
 }

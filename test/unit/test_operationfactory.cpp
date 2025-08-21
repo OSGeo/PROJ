@@ -1193,7 +1193,7 @@ TEST(operation, geogCRS_to_geogCRS_context_lonlat_vs_latlon_crs) {
         authFactory->createCoordinateReferenceSystem("4749"),  // RGNC91-93
         authFactory->createCoordinateReferenceSystem("10310"), // RGNC15
         ctxt);
-    ASSERT_EQ(list.size(), 3U);
+    ASSERT_EQ(list.size(), 5U);
     EXPECT_EQ(list[0]->nameStr(),
               "RGNC91-93 to WGS 84 (1) + Inverse of RGNC15 to WGS 84 (1)");
     // Check that we get direct transformation, and not only through WGS 84

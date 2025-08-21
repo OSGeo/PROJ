@@ -104,8 +104,8 @@ static PJ_LP aea_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoid/spheroid, inverse */
                         P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                     return lp;
                 }
-                lp.phi = pj_authalic_lat_inverse(asin(qs / Q->qp), Q->apa,
-                                                 P, Q->qp);
+                lp.phi =
+                    pj_authalic_lat_inverse(asin(qs / Q->qp), Q->apa, P, Q->qp);
                 if (lp.phi == HUGE_VAL) {
                     proj_errno_set(
                         P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
@@ -184,8 +184,8 @@ static PJ *setup(PJ *P) {
         Q->ec = 1. - .5 * P->one_es * log((1. - P->e) / (1. + P->e)) / P->e;
         Q->c = m1 * m1 + Q->n * ml1;
         Q->dd = 1. / Q->n;
-        Q->rho0 = Q->dd *
-                  sqrt(Q->c - Q->n * pj_authalic_lat_q(sin(P->phi0), P));
+        Q->rho0 =
+            Q->dd * sqrt(Q->c - Q->n * pj_authalic_lat_q(sin(P->phi0), P));
     } else {
         if (secant)
             Q->n = .5 * (Q->n + sin(Q->phi2));

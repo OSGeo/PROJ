@@ -619,9 +619,8 @@ PJ *PJ_PROJECTION(healpix) {
         Q->apa = pj_authalic_lat_compute_coeffs(P->n); /* For auth_lat(). */
         if (nullptr == Q->apa)
             return pj_healpix_data_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
-        Q->qp =
-            pj_authalic_lat_q(1.0, P); /* For auth_lat(). */
-        P->a = P->a * sqrt(0.5 * Q->qp); /* Set P->a to authalic radius. */
+        Q->qp = pj_authalic_lat_q(1.0, P); /* For auth_lat(). */
+        P->a = P->a * sqrt(0.5 * Q->qp);   /* Set P->a to authalic radius. */
         pj_calc_ellipsoid_params(
             P, P->a, P->es); /* Ensure we have a consistent parameter set */
         P->fwd = e_healpix_forward;
@@ -664,9 +663,8 @@ PJ *PJ_PROJECTION(rhealpix) {
         Q->apa = pj_authalic_lat_compute_coeffs(P->n); /* For auth_lat(). */
         if (nullptr == Q->apa)
             return pj_healpix_data_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
-        Q->qp =
-            pj_authalic_lat_q(1.0, P); /* For auth_lat(). */
-        P->a = P->a * sqrt(0.5 * Q->qp); /* Set P->a to authalic radius. */
+        Q->qp = pj_authalic_lat_q(1.0, P); /* For auth_lat(). */
+        P->a = P->a * sqrt(0.5 * Q->qp);   /* Set P->a to authalic radius. */
         P->ra = 1.0 / P->a;
         P->fwd = e_rhealpix_forward;
         P->inv = e_rhealpix_inverse;

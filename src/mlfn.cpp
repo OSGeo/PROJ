@@ -22,10 +22,10 @@ double *pj_enfn(double n) {
 }
 
 double pj_mlfn(double phi, double sphi, double cphi, const double *en) {
-  return en[0] * pj_auxlat_convert(phi, sphi, cphi, en + 1);
+    return en[0] * pj_auxlat_convert(phi, sphi, cphi, en + 1);
 }
 
 double pj_inv_mlfn(double mu, const double *en) {
-  int Lmax = int(AuxLat::ORDER);
-  return pj_auxlat_convert(mu / en[0], en + 1 + Lmax);
+    int Lmax = int(AuxLat::ORDER);
+    return pj_auxlat_convert(mu / en[0], en + 1 + Lmax);
 }

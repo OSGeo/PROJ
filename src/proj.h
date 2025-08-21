@@ -678,31 +678,32 @@ PJ_COORD PROJ_DLL proj_geod(const PJ *P, PJ_COORD a, PJ_COORD b);
 /**
  * @brief Solves the direct geodesic problem for given projection ellipsoid
  *
- * @param P 
+ * @param P
  *      Transformation or CRS object
- * 
- * @param a 
- *      Coordinate of first point. The coordinates needs to be given as longitude
- *      and latitude in radians. Note that the axis order of the `P` object is not
- *      taken into account in this function, so even though a CRS object comes with
- *      axis ordering latitude/longitude coordinates used in this function should 
- *      be reordered as longitude latitude.
- * 
- * @param azimuth 
- *      Initial azimuth from first point to second point in radians, measured 
+ *
+ * @param a
+ *      Coordinate of first point. The coordinates needs to be given as
+ * longitude and latitude in radians. Note that the axis order of the `P` object
+ * is not taken into account in this function, so even though a CRS object comes
+ * with axis ordering latitude/longitude coordinates used in this function
+ * should be reordered as longitude latitude.
+ *
+ * @param azimuth
+ *      Initial azimuth from first point to second point in radians, measured
  *      clockwise from true north
- * 
+ *
  * @param distance
  *      Geodesic distance from the starting point to the destination, in meters
- * 
- * @return 
- *      `PJ_COORD` where the first value is the longitude in radians, second value
- *      is latitude in radians and third value is forward azimuth at second point 
- *      in radians. The fourth coordinate value is unused.
+ *
+ * @return
+ *      `PJ_COORD` where the first value is the longitude in radians, second
+ * value is latitude in radians and third value is forward azimuth at second
+ * point in radians. The fourth coordinate value is unused.
  *
  * @see proj_geod() for solving the inverse geodesic problem.
  */
-PJ_COORD PROJ_DLL proj_geod_direct(const PJ *P, PJ_COORD a, double azimuth, double distance);
+PJ_COORD PROJ_DLL proj_geod_direct(const PJ *P, PJ_COORD a, double azimuth,
+                                   double distance);
 
 /* PROJ error codes */
 

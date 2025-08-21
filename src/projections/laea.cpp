@@ -35,12 +35,12 @@ static PJ_XY laea_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     sinlam = sin(lp.lam);
     sinphi = sin(lp.phi);
     cosphi = cos(lp.phi);
-    const double xi = pj_authalic_lat(lp.phi, sinphi, cosphi,
-                                      Q->apa, P, Q->qp);
+    const double xi = pj_authalic_lat(lp.phi, sinphi, cosphi, Q->apa, P, Q->qp);
     q = sin(xi) * Q->qp;
 
     if (Q->mode == pj_laea_ns::OBLIQ || Q->mode == pj_laea_ns::EQUIT) {
-        sinb = sin(xi); cosb = cos(xi);
+        sinb = sin(xi);
+        cosb = cos(xi);
     }
 
     switch (Q->mode) {
@@ -282,9 +282,10 @@ PJ *PJ_PROJECTION(laea) {
             break;
         case pj_laea_ns::OBLIQ:
             Q->rq = sqrt(.5 * Q->qp);
-            sinphi = sin(P->phi0); cosphi = cos(P->phi0);
-            const double b1 = pj_authalic_lat(P->phi0, sinphi, cosphi,
-                                              Q->apa, P, Q->qp);
+            sinphi = sin(P->phi0);
+            cosphi = cos(P->phi0);
+            const double b1 =
+                pj_authalic_lat(P->phi0, sinphi, cosphi, Q->apa, P, Q->qp);
             Q->sinb1 = sin(b1);
             Q->cosb1 = cos(b1);
             Q->dd = cos(P->phi0) /
