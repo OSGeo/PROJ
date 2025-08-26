@@ -4962,14 +4962,25 @@ PointMotionOperation::substitutePROJAlternativeGridNames(
     const auto &l_method = method();
     const int methodEPSGCode = l_method->getEPSGCode();
 
+    const char *const paramName =
+        methodEPSGCode ==
+                EPSG_CODE_METHOD_POINT_MOTION_GEOCEN_DOMAIN_USING_NEU_VELOCITY_GRID_GRAVSOFT
+            ? EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_NORTH_GRID_FILE
+            : EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE;
+    const int paramCode =
+        methodEPSGCode ==
+                EPSG_CODE_METHOD_POINT_MOTION_GEOCEN_DOMAIN_USING_NEU_VELOCITY_GRID_GRAVSOFT
+            ? EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_NORTH_GRID_FILE
+            : EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE;
+
     std::string filename;
     if (methodEPSGCode ==
             EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL ||
         methodEPSGCode ==
-            EPSG_CODE_METHOD_POINT_MOTION_GEOG3D_DOMAIN_USING_NEU_VELOCITY_GRID_NTV2_VEL) {
-        const auto &fileParameter =
-            parameterValue(EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
-                           EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
+            EPSG_CODE_METHOD_POINT_MOTION_GEOG3D_DOMAIN_USING_NEU_VELOCITY_GRID_NTV2_VEL ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_POINT_MOTION_GEOCEN_DOMAIN_USING_NEU_VELOCITY_GRID_GRAVSOFT) {
+        const auto &fileParameter = parameterValue(paramName, paramCode);
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
             filename = fileParameter->valueFile();
@@ -4987,8 +4998,8 @@ PointMotionOperation::substitutePROJAlternativeGridNames(
             return self;
         }
 
-        const VectorOfParameters parameters{createOpParamNameEPSGCode(
-            EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE)};
+        const VectorOfParameters parameters{
+            createOpParamNameEPSGCode(paramCode)};
         const VectorOfValues values{
             ParameterValue::createFilename(projFilename)};
         return PointMotionOperation::create(
@@ -5139,7 +5150,9 @@ void PointMotionOperation::_exportToPROJString(
     if (methodEPSGCode ==
             EPSG_CODE_METHOD_POINT_MOTION_BY_GRID_CANADA_NTV2_VEL ||
         methodEPSGCode ==
-            EPSG_CODE_METHOD_POINT_MOTION_GEOG3D_DOMAIN_USING_NEU_VELOCITY_GRID_NTV2_VEL) {
+            EPSG_CODE_METHOD_POINT_MOTION_GEOG3D_DOMAIN_USING_NEU_VELOCITY_GRID_NTV2_VEL ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_POINT_MOTION_GEOCEN_DOMAIN_USING_NEU_VELOCITY_GRID_GRAVSOFT) {
         if (!sourceCoordinateEpoch().has_value()) {
             throw io::FormattingException(
                 "CoordinateOperationNNPtr::_exportToPROJString() unimplemented "
@@ -5184,9 +5197,18 @@ void PointMotionOperation::_exportToPROJString(
 
         formatter->addStep("deformation");
         formatter->addParam("dt", targetYear - sourceYear);
-        const auto &fileParameter =
-            parameterValue(EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE,
-                           EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE);
+
+        const char *const paramName =
+            methodEPSGCode ==
+                    EPSG_CODE_METHOD_POINT_MOTION_GEOCEN_DOMAIN_USING_NEU_VELOCITY_GRID_GRAVSOFT
+                ? EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_NORTH_GRID_FILE
+                : EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE;
+        const int paramCode =
+            methodEPSGCode ==
+                    EPSG_CODE_METHOD_POINT_MOTION_GEOCEN_DOMAIN_USING_NEU_VELOCITY_GRID_GRAVSOFT
+                ? EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_NORTH_GRID_FILE
+                : EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE;
+        const auto &fileParameter = parameterValue(paramName, paramCode);
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
             formatter->addParam("grids", fileParameter->valueFile());

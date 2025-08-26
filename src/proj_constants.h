@@ -647,6 +647,15 @@
 #define EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE                    \
     "Point motion velocity grid file"
 
+#define EPSG_CODE_METHOD_POINT_MOTION_GEOCEN_DOMAIN_USING_NEU_VELOCITY_GRID_GRAVSOFT \
+    1139
+#define EPSG_NAME_METHOD_POINT_MOTION_GEOCEN_DOMAIN_USING_NEU_VELOCITY_GRID_GRAVSOFT \
+    "Point motion (geocen domain) using NEU velocity grid (Gravsoft)"
+
+#define EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_NORTH_GRID_FILE 1072
+#define EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_NORTH_GRID_FILE              \
+    "Point motion velocity north grid file"
+
 /* ------------------------------------------------------------------------ */
 
 #define EPSG_NAME_METHOD_NEW_ZEALAND_DEFORMATION_MODEL                         \

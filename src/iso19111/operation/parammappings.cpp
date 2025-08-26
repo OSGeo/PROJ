@@ -1065,6 +1065,8 @@ const struct MethodNameCode methodNameCodesList[] = {
     // Before EPSG 12.019
     METHOD_NAME_CODE(
         POINT_MOTION_GEOG3D_DOMAIN_USING_NEU_VELOCITY_GRID_NTV2_VEL),
+    METHOD_NAME_CODE(
+        POINT_MOTION_GEOCEN_DOMAIN_USING_NEU_VELOCITY_GRID_GRAVSOFT),
 };
 
 const MethodNameCode *getMethodNameCodes(size_t &nElts) {
@@ -1154,6 +1156,7 @@ const struct ParamNameCode gParamNameCodes[] = {
     PARAM_NAME_CODE(EPSG_CODE_FOR_INTERPOLATION_CRS),
     // Parameters of point motion operations
     PARAM_NAME_CODE(POINT_MOTION_VELOCITY_GRID_FILE),
+    PARAM_NAME_CODE(POINT_MOTION_VELOCITY_NORTH_GRID_FILE),
 };
 
 const ParamNameCode *getParamNameCodes(size_t &nElts) {
