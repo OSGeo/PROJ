@@ -6334,3 +6334,90 @@ TEST(operation, operation_Geographic2D_Offsets_by_TIN_Interpolation_JSON) {
         "+step +inv +proj=tinshift +file=no_kv_ETRS89NO_NGO48_TIN.json "
         "+step +proj=axisswap +order=2,1");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    operation_Position_Vector_geocen_and_geocen_translations_NEU_velocities_gtg_with_source_epoch) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto op = factory->createCoordinateOperation("10814", false);
+
+    EXPECT_EQ(op->exportToPROJString(
+                  PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5, dbContext)
+                      .get()),
+              "+proj=pipeline "
+              "+step +proj=helmert +x=-0.05027 +y=-0.11595 +z=0.03012 "
+              "+rx=-0.00310814 +ry=0.00457237 +rz=0.00472406 +s=0.003191 "
+              "+convention=position_vector "
+              "+step +proj=deformation +dt=-2.44 +grids=eur_nkg_nkgrf17vel.tif "
+              "+ellps=GRS80");
+
+    EXPECT_EQ(
+        op->inverse()->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        dbContext)
+                .get()),
+        "+proj=pipeline "
+        "+step +inv +proj=deformation +dt=-2.44 +grids=eur_nkg_nkgrf17vel.tif "
+        "+ellps=GRS80 "
+        "+step +inv +proj=helmert +x=-0.05027 +y=-0.11595 +z=0.03012 "
+        "+rx=-0.00310814 +ry=0.00457237 +rz=0.00472406 +s=0.003191 "
+        "+convention=position_vector");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    operation_geocen_translations_by_grid_and_geocen_translations_NEU_velocities_gtg) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto op = factory->createCoordinateOperation("10811", false);
+
+    EXPECT_EQ(op->exportToPROJString(
+                  PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5, dbContext)
+                      .get()),
+              "+proj=pipeline "
+              "+step +proj=xyzgridshift "
+              "+grids=no_kv_NKGETRF14_EPSG7922_2000.tif "
+              "+step +proj=deformation +dt=-5 +grids=eur_nkg_nkgrf17vel.tif "
+              "+ellps=GRS80");
+
+    EXPECT_EQ(
+        op->inverse()->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        dbContext)
+                .get()),
+        "+proj=pipeline "
+        "+step +inv +proj=deformation +dt=-5 +grids=eur_nkg_nkgrf17vel.tif "
+        "+ellps=GRS80 "
+        "+step +inv +proj=xyzgridshift "
+        "+grids=no_kv_NKGETRF14_EPSG7922_2000.tif");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, operation_geocen_translations_NEU_velocities_gtg) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto op = factory->createCoordinateOperation("10809", false);
+
+    EXPECT_EQ(op->exportToPROJString(
+                  PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5, dbContext)
+                      .get()),
+              "+proj=pipeline "
+              "+step +inv +proj=deformation +t_epoch=2000 "
+              "+grids=eur_nkg_nkgrf17vel.tif +ellps=GRS80");
+
+    EXPECT_EQ(op->inverse()->exportToPROJString(
+                  PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5, dbContext)
+                      .get()),
+              "+proj=deformation +t_epoch=2000 +grids=eur_nkg_nkgrf17vel.tif "
+              "+ellps=GRS80");
+}

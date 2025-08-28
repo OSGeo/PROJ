@@ -1018,7 +1018,7 @@ INSERT INTO "usage" VALUES('IGNF', 'TSG684_ATIGG_TO_WGS84G_USAGE','helmert_trans
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG684_ATIGG_TO_4326','ANCIENNE TRIANGULATION DES INGENIEURS GEOGRAPHES (ATIG) vers WGS 84',NULL,'EPSG','9603','Geocentric translations (geog2D domain)','IGNF','ATIGG','EPSG','4326',NULL,1127,22,57,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG684_ATIGG_TO_4326_USAGE','helmert_transformation','IGNF','TSG684_ATIGG_TO_4326','IGNF','85','IGNF','6');
 INSERT INTO "extent" VALUES('IGNF','88','ILE DE BORA-BORA','ILE DE BORA-BORA',-16.75,-16.25,-152.0,-151.5,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1149','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers BORA_SAU 2001',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','BORA01',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Bora.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1149','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers BORA_SAU 2001',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','BORA01',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Bora.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1149_USAGE','grid_transformation','IGNF','TSG1149','IGNF','88','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','89','MAYOTTE','MAYOTTE',-13.05,-12.5,44.95,45.4,0);
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG786','CADASTRE 1997 vers RGM04 (RESEAU GEODESIQUE DE MAYOTTE 2004)',NULL,'EPSG','1031','Geocentric translations (geocentric domain)','IGNF','CAD97','IGNF','RGM04',NULL,-381.788,-57.501,-256.673,'EPSG','9001',NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
@@ -1084,7 +1084,7 @@ INSERT INTO "helmert_transformation" VALUES('IGNF','TSG417_C67IG95G_TO_RGFG95GDD
 INSERT INTO "usage" VALUES('IGNF', 'TSG417_C67IG95G_TO_RGFG95GDD_USAGE','helmert_transformation','IGNF','TSG417_C67IG95G_TO_RGFG95GDD','IGNF','90','IGNF','5');
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG417_C67IG95G_TO_RGFG95G','CSG 1967 (IGN 1995) vers RGFG95 (RESEAU GEODESIQUE FRANCAIS DE GUYANE 1995)',NULL,'EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','C67IG95G','IGNF','RGFG95G',NULL,-193.066,236.993,105.447,'EPSG','9001',0.4814,-0.8074,0.1276,'EPSG','9104',1.5649,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG417_C67IG95G_TO_RGFG95G_USAGE','helmert_transformation','IGNF','TSG417_C67IG95G_TO_RGFG95G','IGNF','90','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1156','RGSPM06 (RESEAU GEODESIQUE DE SAINT-PIERRE-ET-MIQUELON 2006) vers DANGER 1950 (SAINT-PIERRE-ET-MIQUELON)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGSPM06GEO','IGNF','STPM50_V',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggspm06v1.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1156','RGSPM06 (RESEAU GEODESIQUE DE SAINT-PIERRE-ET-MIQUELON 2006) vers DANGER 1950 (SAINT-PIERRE-ET-MIQUELON)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGSPM06GEO','IGNF','STPM50_V',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggspm06v1.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1156_USAGE','grid_transformation','IGNF','TSG1156','IGNF','60','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','91','FRANCE','FRANCE',41,52,-5.5,10,0);
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG348','DOD WORLD GEODETIC SYSTEM 1972 (WGS 72) vers WGS 84',NULL,'EPSG','1031','Geocentric translations (geocentric domain)','IGNF','WGS72','IGNF','WGS84',NULL,0,12,6,'EPSG','9001',NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
@@ -1259,10 +1259,10 @@ INSERT INTO "usage" VALUES('IGNF', 'TSG465_GUAD48GEO_TO_RRAFGEO_USAGE','helmert_
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG465_GUAD48GEO_TO_WGS84GUADGEO','GUADELOUPE - STE ANNE vers WGS 84 (RRAF)',NULL,'EPSG','1037','Geocentric translations (geog3D domain)','IGNF','GUAD48GEO','IGNF','WGS84GUADGEO',NULL,-472.29,-5.63,-304.12,'EPSG','9001',0.4362,-0.8374,0.2563,'EPSG','9104',1.8984,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG465_GUAD48GEO_TO_WGS84GUADGEO_USAGE','helmert_transformation','IGNF','TSG465_GUAD48GEO_TO_WGS84GUADGEO','IGNF','95','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','96','ILE DE HUAHINE','ILE DE HUAHINE',-17.0,-16.5,-151.5,-150.75,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1150','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers HUAHINE_SAU 2001',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','HUAH01',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Huahine.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1150','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers HUAHINE_SAU 2001',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','HUAH01',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Huahine.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1150_USAGE','grid_transformation','IGNF','TSG1150','IGNF','96','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','97','GRANDE TERRE DES ILES KERGUELEN','GRANDE TERRE DES ILES KERGUELEN',-50.5,-48.0,67.0,71.0,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1148','RGTAAF07 (RESEAU GEODESIQUE DES TAAF 2007) vers IGN 1962 (KERGUELEN)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGTAAFGEO','IGNF','KERG62',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggker08v2.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1148','RGTAAF07 (RESEAU GEODESIQUE DES TAAF 2007) vers IGN 1962 (KERGUELEN)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGTAAFGEO','IGNF','KERG62',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggker08v2.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1148_USAGE','grid_transformation','IGNF','TSG1148','IGNF','97','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','98','HIVA OA, TAHUATA, MOHOTANI','HIVA OA, TAHUATA, MOHOTANI',-9.88,-9.65,-139.2,-138.75,0);
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG1006','IGN 1963 (HIVA OA - TAHUATA - MOHOTANI) vers RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE)',NULL,'EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','ATUO63','IGNF','RGPF',NULL,410.721,55.049,80.746,'EPSG','9001',-2.5779,-2.3514,-0.6664,'EPSG','9104', 17.3311,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
@@ -1295,10 +1295,10 @@ INSERT INTO "usage" VALUES('IGNF', 'TSG1008_IGN63G_TO_RGPFG_USAGE','helmert_tran
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG1008_IGN63GEO_TO_RGPFGEO','IGN 1963 (HIVA OA - TAHUATA - MOHOTANI) vers RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE)',NULL,'EPSG','1037','Geocentric translations (geog3D domain)','IGNF','IGN63GEO','IGNF','RGPFGEO',NULL,374.715,-58.407,-0.957,'EPSG','9001',-16.2111,-11.4626,-5.5357,'EPSG','9104',-0.5409,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1008_IGN63GEO_TO_RGPFGEO_USAGE','helmert_transformation','IGNF','TSG1008_IGN63GEO_TO_RGPFGEO','IGNF','99','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','100','ILE DE FAKARAVA','ILE DE FAKARAVA',-16.65,-15.95,-145.9,-145.3,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1185','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers IGN 1966 (TAHITI)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','TAHITI66',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf08-Fakarava.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1185','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers IGN 1966 (TAHITI)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','TAHITI66',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf08-Fakarava.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1185_USAGE','grid_transformation','IGNF','TSG1185','IGNF','100','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','101','ILE DE TAHITI','ILE DE TAHITI',-18.0,-17.0,-149.69,-149.0,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1195','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers IGN 1966 (TAHITI)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','TAHITI66',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Tahiti.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1195','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers IGN 1966 (TAHITI)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','TAHITI66',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Tahiti.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1195_USAGE','grid_transformation','IGNF','TSG1195','IGNF','101','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','102','NUKU HIVA','NUKU HIVA',-9,-8.7,-140.3,-140,0);
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG1007','IGN 1972 (NUKU HIVA - UA HUKA - UA POU) vers RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE)',NULL,'EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','NUKU72','IGNF','RGPF',NULL,165.732,216.720,180.505,'EPSG','9001',-0.6434,-0.4512,-0.0791,'EPSG','9104', 7.4204,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
@@ -1365,59 +1365,59 @@ INSERT INTO "helmert_transformation" VALUES('IGNF','TSG751_NUKU72G_TO_WGS84G','I
 INSERT INTO "usage" VALUES('IGNF', 'TSG751_NUKU72G_TO_WGS84G_USAGE','helmert_transformation','IGNF','TSG751_NUKU72G_TO_WGS84G','IGNF','106','IGNF','5');
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG751_NUKU72G_TO_4326','IGN 1972 (NUKU HIVA - UA HUKA - UA POU) vers WGS 84',NULL,'EPSG','9603','Geocentric translations (geog2D domain)','IGNF','NUKU72G','EPSG','4326',NULL,130.85,185.17,174.72,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG751_NUKU72G_TO_4326_USAGE','helmert_transformation','IGNF','TSG751_NUKU72G_TO_4326','IGNF','106','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1176','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1987 (MARTINIQUE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','MART87',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMART2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1176','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1987 (MARTINIQUE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','MART87',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMART2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1176_USAGE','grid_transformation','IGNF','TSG1176','IGNF','39','IGNF','6');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1241','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1987 (MARTINIQUE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','MART87',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMART2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1241','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1987 (MARTINIQUE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','MART87',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMART2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1241_USAGE','grid_transformation','IGNF','TSG1241','IGNF','39','IGNF','6');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1155','WGS 84 (RRAF) vers IGN 1987 (MARTINIQUE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','MART87',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggm00v2.txt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1155','WGS 84 (RRAF) vers IGN 1987 (MARTINIQUE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','MART87',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggm00v2.txt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1155_USAGE','grid_transformation','IGNF','TSG1155','IGNF','39','IGNF','6');
 INSERT INTO "extent" VALUES('IGNF','107','GUADELOUPE GRANDE-TERRE + BASSE-TERRE','GUADELOUPE GRANDE-TERRE + BASSE-TERRE',15.875,16.625,-61.9,-61.075,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1177','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 (GUADELOUPE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAGTBT2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1177','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 (GUADELOUPE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAGTBT2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1177_USAGE','grid_transformation','IGNF','TSG1177','IGNF','107','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','108','GUADELOUPE (GRANDE-TERRE ET BASSE-TERRE)','GUADELOUPE (GRANDE-TERRE ET BASSE-TERRE)',15.875,16.589,-61.9,-61.072,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1242','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 (GUADELOUPE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAGTBT2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1242','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 (GUADELOUPE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAGTBT2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1242_USAGE','grid_transformation','IGNF','TSG1242','IGNF','108','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1165','WGS 84 (RRAF) vers IGN 1988 (GUADELOUPE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD88',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00v2.txt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1165','WGS 84 (RRAF) vers IGN 1988 (GUADELOUPE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD88',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00v2.txt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1165_USAGE','grid_transformation','IGNF','TSG1165','IGNF','107','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','109','ARCHIPEL DES SAINTES (GUADELOUPE)','ARCHIPEL DES SAINTES (GUADELOUPE)',15.8,15.925,-61.7,-61.475,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1180','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 LS (GUADELOUPE / LES SAINTES)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88LS',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALS2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1180','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 LS (GUADELOUPE / LES SAINTES)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88LS',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALS2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1180_USAGE','grid_transformation','IGNF','TSG1180','IGNF','109','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1245','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 LS (GUADELOUPE / LES SAINTES)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88LS',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALS2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1245','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 LS (GUADELOUPE / LES SAINTES)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88LS',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALS2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1245_USAGE','grid_transformation','IGNF','TSG1245','IGNF','109','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1167','WGS 84 (RRAF) vers IGN 1988 LS (GUADELOUPE / LES SAINTES)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD88LS',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1167','WGS 84 (RRAF) vers IGN 1988 LS (GUADELOUPE / LES SAINTES)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD88LS',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1167_USAGE','grid_transformation','IGNF','TSG1167','IGNF','109','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1247','WGS 84 (RRAF) vers IGN 1988 LS (GUADELOUPE / LES SAINTES)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD88LS',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',NULL,NULL,NULL,NULL,NULL,NULL,'2.1.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1247','WGS 84 (RRAF) vers IGN 1988 LS (GUADELOUPE / LES SAINTES)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD88LS',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2.1.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1247_USAGE','grid_transformation','IGNF','TSG1247','IGNF','109','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','110','ILE DE MARIE-GALANTE','ILE DE MARIE-GALANTE',15.8,16.125,-61.4,-61.075,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1178','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 MG (GUADELOUPE / MARIE-GALANTE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88MG',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMG2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1178','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 MG (GUADELOUPE / MARIE-GALANTE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88MG',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMG2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1178_USAGE','grid_transformation','IGNF','TSG1178','IGNF','110','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1244','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 MG (GUADELOUPE / MARIE-GALANTE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88MG',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMG2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1244','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 MG (GUADELOUPE / MARIE-GALANTE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88MG',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMG2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1244_USAGE','grid_transformation','IGNF','TSG1244','IGNF','110','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','111','SAINT BARTHELEMY','SAINT BARTHELEMY',17.8,18.025,-63.0,-62.725,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1181','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 SB (GUADELOUPE / SAINT-BARTHELEMY)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88SB',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_sbv2.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1181','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 SB (GUADELOUPE / SAINT-BARTHELEMY)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88SB',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_sbv2.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1181_USAGE','grid_transformation','IGNF','TSG1181','IGNF','111','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','112','SAINT-BARTHELEMY','SAINT-BARTHELEMY',17.8,18.025,-63.0,-62.725,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1249','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 SB (GUADELOUPE / SAINT-BARTHELEMY)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88SB',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_sbv2.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'2.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1249','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 SB (GUADELOUPE / SAINT-BARTHELEMY)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88SB',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_sbv2.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1249_USAGE','grid_transformation','IGNF','TSG1249','IGNF','112','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1169','WGS 84 (RRAF) vers IGN 1988 SB (GUADELOUPE / SAINT-BARTHELEMY)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD88SB',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_sbv2.txt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1169','WGS 84 (RRAF) vers IGN 1988 SB (GUADELOUPE / SAINT-BARTHELEMY)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD88SB',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_sbv2.txt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1169_USAGE','grid_transformation','IGNF','TSG1169','IGNF','112','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','113','SAINT-MARTIN (PARTIE FRANCAISE)','SAINT-MARTIN (PARTIE FRANCAISE)',18.0,18.2,-63.2,-62.9,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1182','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 SM (GUADELOUPE / SAINT-MARTIN)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88SM',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_smv2.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1182','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 SM (GUADELOUPE / SAINT-MARTIN)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88SM',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_sbv2.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1182_USAGE','grid_transformation','IGNF','TSG1182','IGNF','113','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1248','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 SM (GUADELOUPE / SAINT-MARTIN)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88SM',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_smv2.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'2.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1248','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1988 SM (GUADELOUPE / SAINT-MARTIN)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD88SM',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_smv2.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1248_USAGE','grid_transformation','IGNF','TSG1248','IGNF','113','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1154','WGS 84 (RRAF) vers IGN 1988 SM (GUADELOUPE / SAINT-MARTIN)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD88SM',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_smv2.txt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1154','WGS 84 (RRAF) vers IGN 1988 SM (GUADELOUPE / SAINT-MARTIN)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD88SM',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_smv2.txt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1154_USAGE','grid_transformation','IGNF','TSG1154','IGNF','113','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1160','RGR92 (RESEAU GEODESIQUE DE LA REUNION 1992) vers IGN 1989 (REUNION)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGR92GEO','IGNF','REUN89',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAR07_bl.gra',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1160','RGR92 (RESEAU GEODESIQUE DE LA REUNION 1992) vers IGN 1989 (REUNION)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGR92GEO','IGNF','REUN89',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAR07_bl.gra',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1160_USAGE','grid_transformation','IGNF','TSG1160','IGNF','56','IGNF','6');
 INSERT INTO "extent" VALUES('IGNF','114','ILE DE LA DESIRADE','ILE DE LA DESIRADE',16.25,16.4,-61.2,-60.75,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1179','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1992 LD (GUADELOUPE / LA DESIRADE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD92LD',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALD2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1179','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 1992 LD (GUADELOUPE / LA DESIRADE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD92LD',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALD2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1179_USAGE','grid_transformation','IGNF','TSG1179','IGNF','114','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1166','WGS 84 (RRAF) vers IGN 1992 LD (GUADELOUPE / LA DESIRADE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD92LD',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALDW842016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1166','WGS 84 (RRAF) vers IGN 1992 LD (GUADELOUPE / LA DESIRADE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD92LD',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALDW842016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1166_USAGE','grid_transformation','IGNF','TSG1166','IGNF','114','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1243','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 2008 LD (GUADELOUPE / LA DESIRADE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD2008LD',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALD2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1243','RGAF09 (RESEAU GEODESIQUE DES ANTILLES FRANCAISES 2009) vers IGN 2008 LD (GUADELOUPE / LA DESIRADE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGAF09GEODD','IGNF','GUAD2008LD',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALD2016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1243_USAGE','grid_transformation','IGNF','TSG1243','IGNF','114','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1246','WGS 84 (RRAF) vers IGN 2008 LD (GUADELOUPE / LA DESIRADE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD2008LD',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALDW842016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1246','WGS 84 (RRAF) vers IGN 2008 LD (GUADELOUPE / LA DESIRADE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RRAFGEO','IGNF','GUAD2008LD',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALDW842016.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1246_USAGE','grid_transformation','IGNF','TSG1246','IGNF','114','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','115','RAIATEA','RAIATEA',-16.94,-16.54,-151.59,-151.32,0);
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG779','IGN53 (IGN RAIATEA-TAHAA) RAIATEA-TAHAA-BORA BORA-HUAHINE vers RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE)',NULL,'EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','TAHAA53','IGNF','RGPF',NULL,72.438,345.918,79.486,'EPSG','9001',-1.6045,-0.8823,-0.5565,'EPSG','9104', 1.3746,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
@@ -1648,7 +1648,7 @@ INSERT INTO "usage" VALUES('IGNF', 'TSG591_MART38GEO_TO_RRAFGEO_USAGE','helmert_
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG591_MART38GEO_TO_WGS84GUADGEO','MARTINIQUE - FORT DESAIX vers WGS 84 (RRAF)',NULL,'EPSG','1035','Geocentric translations (geog3D domain)','IGNF','MART38GEO','IGNF','WGS84GUADGEO',NULL,186,482,151,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG591_MART38GEO_TO_WGS84GUADGEO_USAGE','helmert_transformation','IGNF','TSG591_MART38GEO_TO_WGS84GUADGEO','IGNF','39','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','127','ILE DE MAUPITI','ILE DE MAUPITI',-16.75,-16.25,-152.5,-152,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1138','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers MAUPITI_SAU 2001',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','MAUPITI01',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Maupiti.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1138','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers MAUPITI_SAU 2001',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','MAUPITI01',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Maupiti.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1138_USAGE','grid_transformation','IGNF','TSG1138','IGNF','127','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','128','FATU HIVA','FATU HIVA',-10.6,-10.4,-138.7,138.6,0);
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG1005','MHEFO 1955 (FATU HUKU) vers RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE)',NULL,'EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','FATU55','IGNF','RGPF',NULL,347.103,1078.125,2623.922,'EPSG','9001',33.8875,-70.6773,9.3943,'EPSG','9104', 186.074,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
@@ -1710,7 +1710,7 @@ INSERT INTO "usage" VALUES('IGNF', 'TSG754_KAUE70G_TO_WGS84G_USAGE','helmert_tra
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG754_KAUE70G_TO_4326','MHPF70 (KAUEHI) TUAMOTU vers WGS 84',NULL,'EPSG','9603','Geocentric translations (geog2D domain)','IGNF','KAUE70G','EPSG','4326',NULL,126.74,300.10,-75.49,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG754_KAUE70G_TO_4326_USAGE','helmert_transformation','IGNF','TSG754_KAUE70G_TO_4326','IGNF','132','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','133','ILE DE MOOREA','ILE DE MOOREA',-17.7000000000,-17.3500000000,-150.0500000000,-149.6500000000,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1189','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers MOOREA 1981 (MOOREA_SAU 2001)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','MOOREA81',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Moorea.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1189','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers MOOREA 1981 (MOOREA_SAU 2001)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','MOOREA81',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Moorea.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1189_USAGE','grid_transformation','IGNF','TSG1189','IGNF','133','IGNF','5');
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG1011','MOOREA 1987 vers RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE)',NULL,'EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','MOOREA87','IGNF','RGPF',NULL,218.697,151.257,176.995,'EPSG','9001',3.5048,2.0040,1.2810,'EPSG','9104', 10.9910,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1011_USAGE','helmert_transformation','IGNF','TSG1011','IGNF','133','IGNF','5');
@@ -1871,19 +1871,19 @@ INSERT INTO "usage" VALUES('IGNF', 'TSG759_ANAA92G_TO_WGS84G_USAGE','helmert_tra
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG759_ANAA92G_TO_4326','MOP92 (ANAA) TUAMOTU vers WGS 84',NULL,'EPSG','9603','Geocentric translations (geog2D domain)','IGNF','ANAA92G','EPSG','4326',NULL,1.50,3.84,4.81,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG759_ANAA92G_TO_4326_USAGE','helmert_transformation','IGNF','TSG759_ANAA92G_TO_4326','IGNF','139','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','140','EUROPE (EVRF2000)','EUROPE (EVRF2000)',36,71.2,-10,32,0);
-INSERT INTO "other_transformation" VALUES('IGNF','TSG1250','NGF-IGN 1969 vers EVRF2000 (UELN-95/98)(EUROPEAN VERTICAL REFERENCE FRAME)',NULL,'EPSG','9616','Vertical Offset','IGNF','IGN69','IGNF','EVRF2000',NULL,'EPSG','8603','Vertical Offset',-0.486,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0',0);
+INSERT INTO "other_transformation" VALUES('IGNF','TSG1250','NGF-IGN 1969 vers EVRF2000 (UELN-95/98)(EUROPEAN VERTICAL REFERENCE FRAME)',NULL,'EPSG','9616','Vertical Offset','IGNF','IGN69','IGNF','EVRF2000',NULL,'EPSG','8603','Vertical Offset',-0.486,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1250_USAGE','other_transformation','IGNF','TSG1250','IGNF','140','IGNF','11');
 INSERT INTO "extent" VALUES('IGNF','141','EUROPE (EVRF2007)','EUROPE (EVRF2007)',36,71.2,-10,32,0);
-INSERT INTO "other_transformation" VALUES('IGNF','TSG1251','NGF-IGN 1969 vers EVRF2007 (EUROPEAN VERTICAL REFERENCE FRAME 2007)',NULL,'EPSG','9616','Vertical Offset','IGNF','IGN69','IGNF','EVRF2007',NULL,'EPSG','8603','Vertical Offset',-0.47,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0',0);
+INSERT INTO "other_transformation" VALUES('IGNF','TSG1251','NGF-IGN 1969 vers EVRF2007 (EUROPEAN VERTICAL REFERENCE FRAME 2007)',NULL,'EPSG','9616','Vertical Offset','IGNF','IGN69','IGNF','EVRF2007',NULL,'EPSG','8603','Vertical Offset',-0.47,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1251_USAGE','other_transformation','IGNF','TSG1251','IGNF','141','IGNF','3');
 INSERT INTO "extent" VALUES('IGNF','142','FRANCE CONTINENTALE','FRANCE CONTINENTALE',42.00,51.50,-5.50,8.50,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1164','RGF93 (ETRS89) vers NGF-IGN 1969',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGF93GEODD','IGNF','IGN69',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF09.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1164','RGF93 (ETRS89) vers NGF-IGN 1969',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGF93GEODD','IGNF','IGN69',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF09.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1164_USAGE','grid_transformation','IGNF','TSG1164','IGNF','142','IGNF','9');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1252','RGF93 (ETRS89) vers NGF-IGN 1969',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGF93GEODD','IGNF','IGN69',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF18.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1252','RGF93 (ETRS89) vers NGF-IGN 1969',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGF93GEODD','IGNF','IGN69',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF18.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1252_USAGE','grid_transformation','IGNF','TSG1252','IGNF','142','IGNF','6');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1163','RGF93 (ETRS89) vers NGF-IGN 1978',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGF93GEODD','IGNF','IGN78C',NULL,'EPSG','8666','Geoid (height correction) model file','https://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAC09.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1163','RGF93 (ETRS89) vers NGF-IGN 1978',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGF93GEODD','IGNF','IGN78C',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAC09.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1163_USAGE','grid_transformation','IGNF','TSG1163','IGNF','86','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1161','RGFG95 (RESEAU GEODESIQUE FRANCAIS DE GUYANE 1995) vers NIVELLEMENT GENERAL DE GUYANE (NGG) 1977',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGFG95GEO','IGNF','GUYA77',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggguy15.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1161','RGFG95 (RESEAU GEODESIQUE FRANCAIS DE GUYANE 1995) vers NIVELLEMENT GENERAL DE GUYANE (NGG) 1977',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGFG95GEO','IGNF','GUYA77',NULL,'EPSG','8666','Geoid (height correction) model file','http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggguy15.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1161_USAGE','grid_transformation','IGNF','TSG1161','IGNF','10','IGNF','5');
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG62','NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers EUROPE 1950 (ED50)',NULL,'EPSG','1031','Geocentric translations (geocentric domain)','IGNF','NTF','IGNF','ED50',NULL,-84,37,437,'EPSG','9001',NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG62_USAGE','helmert_transformation','IGNF','TSG62','IGNF','91','IGNF','6');
@@ -1892,9 +1892,9 @@ INSERT INTO "usage" VALUES('IGNF', 'TSG62_NTFG_TO_ED50G_USAGE','helmert_transfor
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG62_NTFG_TO_ED50GEO','NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers EUROPE 1950 (ED50)',NULL,'EPSG','9603','Geocentric translations (geog2D domain)','IGNF','NTFG','IGNF','ED50GEO',NULL,-84,37,437,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG62_NTFG_TO_ED50GEO_USAGE','helmert_transformation','IGNF','TSG62_NTFG_TO_ED50GEO','IGNF','91','IGNF','6');
 INSERT INTO "extent" VALUES('IGNF','143','FRANCE METROPOLITAINE','FRANCE METROPOLITAINE',41.0,52.0,-5.5,10.0,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','NTFG_TO_RGF93G','NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers RGF93 (ETRS89)',NULL,'EPSG','9615','NTv2','IGNF','NTFG','IGNF','RGF93G',NULL,'EPSG','8656','Latitude and longitude difference file','ntf_r93.gsb',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','NTFG_TO_RGF93G','NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers RGF93 (ETRS89)',NULL,'EPSG','9615','NTv2','IGNF','NTFG','IGNF','RGF93G',NULL,'EPSG','8656','Latitude and longitude difference file','ntf_r93.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'NTFG_TO_RGF93G_USAGE','grid_transformation','IGNF','NTFG_TO_RGF93G','IGNF','143','IGNF','6');
-INSERT INTO "grid_transformation" VALUES('IGNF','IGNF_NTFG_TO_EPSG_4326','NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers RGF93 (ETRS89)',NULL,'EPSG','9615','NTv2','IGNF','NTFG','EPSG','4326',NULL,'EPSG','8656','Latitude and longitude difference file','ntf_r93.gsb',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','IGNF_NTFG_TO_EPSG_4326','NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers RGF93 (ETRS89)',NULL,'EPSG','9615','NTv2','IGNF','NTFG','EPSG','4326',NULL,'EPSG','8656','Latitude and longitude difference file','ntf_r93.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'IGNF_NTFG_TO_EPSG_4326_USAGE','grid_transformation','IGNF','IGNF_NTFG_TO_EPSG_4326','IGNF','143','IGNF','6');
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG399','NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers WGS 84',NULL,'EPSG','1031','Geocentric translations (geocentric domain)','IGNF','NTF','IGNF','WGS84',NULL,-168,-60,320,'EPSG','9001',NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG399_USAGE','helmert_transformation','IGNF','TSG399','IGNF','91','IGNF','6');
@@ -1933,9 +1933,9 @@ INSERT INTO "helmert_transformation" VALUES('IGNF','TSG802_LUXGEO_TO_WGS84G','NO
 INSERT INTO "usage" VALUES('IGNF', 'TSG802_LUXGEO_TO_WGS84G_USAGE','helmert_transformation','IGNF','TSG802_LUXGEO_TO_WGS84G','IGNF','144','IGNF','6');
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG802_LUXGEO_TO_4326','NOUVELLE TRIANGULATION DU GRAND DUCHE DE LUXEMBOURG (LURES) vers WGS 84',NULL,'EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','LUXGEO','EPSG','4326',NULL,-192.986,13.673,-39.309,'EPSG','9001',-0.409900,-2.933200,2.688100,'EPSG','9104',0.43,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG802_LUXGEO_TO_4326_USAGE','helmert_transformation','IGNF','TSG802_LUXGEO_TO_4326','IGNF','144','IGNF','6');
-INSERT INTO "other_transformation" VALUES('IGNF','TSG1240','NTF geographiques Paris (gr) vers NTF GEOGRAPHIQUES GREENWICH (DMS)',NULL,'EPSG','9601','Longitude rotation','IGNF','NTFPGRAD','IGNF','NTFG',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0',0);
+INSERT INTO "other_transformation" VALUES('IGNF','TSG1240','NTF geographiques Paris (gr) vers NTF GEOGRAPHIQUES GREENWICH (DMS)',NULL,'EPSG','9601','Longitude rotation','IGNF','NTFPGRAD','IGNF','NTFG',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1240_USAGE','other_transformation','IGNF','TSG1240','IGNF','143','IGNF','6');
-INSERT INTO "other_transformation" VALUES('IGNF','TSG1240_IGNF_NTFP_TO_IGNF_NTFG','NTF geographiques Paris (gr) vers NTF GEOGRAPHIQUES GREENWICH (DMS)',NULL,'EPSG','9601','Longitude rotation','IGNF','NTFP','IGNF','NTFG',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0',0);
+INSERT INTO "other_transformation" VALUES('IGNF','TSG1240_IGNF_NTFP_TO_IGNF_NTFG','NTF geographiques Paris (gr) vers NTF GEOGRAPHIQUES GREENWICH (DMS)',NULL,'EPSG','9601','Longitude rotation','IGNF','NTFP','IGNF','NTFG',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1240_IGNF_NTFP_TO_IGNF_NTFG_USAGE','other_transformation','IGNF','TSG1240_IGNF_NTFP_TO_IGNF_NTFG','IGNF','143','IGNF','6');
 INSERT INTO "extent" VALUES('IGNF','145','TERRE ADELIE - ILE DES PETRELS','TERRE ADELIE - ILE DES PETRELS',-68,-66.17,139.67,140.17,0);
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG608','PETRELS-IGN 1972 vers WGS 84',NULL,'EPSG','1031','Geocentric translations (geocentric domain)','IGNF','PETRELS72','IGNF','WGS84',NULL,365,194,166,'EPSG','9001',NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
@@ -1998,7 +1998,7 @@ INSERT INTO "usage" VALUES('IGNF', 'TSG586_TERA50G_TO_WGS84G_USAGE','helmert_tra
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG586_TERA50G_TO_4326','POINTE GEOLOGIE-PERROUD 1950 vers WGS 84',NULL,'EPSG','9603','Geocentric translations (geog2D domain)','IGNF','TERA50G','EPSG','4326',NULL,324.8,153.6,172.1,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG586_TERA50G_TO_4326_USAGE','helmert_transformation','IGNF','TSG586_TERA50G_TO_4326','IGNF','146','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','147','ILE DE RAIATEA','ILE DE RAIATEA',-17.0,-16.5,-151.75,-151.25,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1140','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers RAIATEA_SAU 2001',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','RAIA01',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Raiatea.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1140','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers RAIATEA_SAU 2001',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','RAIA01',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Raiatea.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1140_USAGE','grid_transformation','IGNF','TSG1140','IGNF','147','IGNF','5');
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG1212','RESEAU GEODESIQUE DE NOUVELLE-CALEDONIE (RGNC 1991) vers WGS 84',NULL,'EPSG','1031','Geocentric translations (geocentric domain)','IGNF','RGNC','IGNF','WGS84',NULL,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1212_USAGE','helmert_transformation','IGNF','TSG1212','IGNF','58','IGNF','12');
@@ -2317,7 +2317,7 @@ INSERT INTO "helmert_transformation" VALUES('IGNF','TSG752_SAT84G_TO_WGS84G','SA
 INSERT INTO "usage" VALUES('IGNF', 'TSG752_SAT84G_TO_WGS84G_USAGE','helmert_transformation','IGNF','TSG752_SAT84G_TO_WGS84G','IGNF','150','IGNF','5');
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG752_SAT84G_TO_4326','SAT84 (RURUTU) ILES AUSTRALES vers WGS 84',NULL,'EPSG','9603','Geocentric translations (geog2D domain)','IGNF','SAT84G','EPSG','4326',NULL,202.13,174.60,-15.74,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG752_SAT84G_TO_4326_USAGE','helmert_transformation','IGNF','TSG752_SAT84G_TO_4326','IGNF','150','IGNF','5');
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1159','RGM04 (RESEAU GEODESIQUE DE MAYOTTE 2004) vers SHOM 1953 (MAYOTTE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGM04GEODD','IGNF','MAYO53',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggm04v1.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1159','RGM04 (RESEAU GEODESIQUE DE MAYOTTE 2004) vers SHOM 1953 (MAYOTTE)',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGM04GEODD','IGNF','MAYO53',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggm04v1.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1159_USAGE','grid_transformation','IGNF','TSG1159','IGNF','89','IGNF','5');
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG795','ST-PIERRE-ET-MIQUELON 1950 vers RGSPM06 (RESEAU GEODESIQUE DE SAINT-PIERRE-ET-MIQUELON 2006)',NULL,'EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','STPM50','IGNF','RGSPM06',NULL,-95.593,573.763,173.442,'EPSG','9001',-0.9602,1.2510,-1.3918,'EPSG','9104', 42.6265,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG795_USAGE','helmert_transformation','IGNF','TSG795','IGNF','60','IGNF','5');
@@ -2377,7 +2377,7 @@ INSERT INTO "usage" VALUES('IGNF', 'TSG595_TAHAAGEO_TO_WGS84GEO_USAGE','helmert_
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG595_TAHAAGEO_TO_WGS84RRAFGEO','TAHAA vers WGS 84',NULL,'EPSG','1035','Geocentric translations (geog3D domain)','IGNF','TAHAAGEO','IGNF','WGS84RRAFGEO',NULL,65,342,77,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG595_TAHAAGEO_TO_WGS84RRAFGEO_USAGE','helmert_transformation','IGNF','TSG595_TAHAAGEO_TO_WGS84RRAFGEO','IGNF','153','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','154','ILE DE TAHAA','ILE DE TAHAA',-16.75,-16.5,-151.75,-151.25,0);
-INSERT INTO "grid_transformation" VALUES('IGNF','TSG1141','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers TAHAA_SAU 2001',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','TAHAA01',NULL,'EPSG','8666','Geoid (height correction) model file','http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Tahaa.mnt',NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
+INSERT INTO "grid_transformation" VALUES('IGNF','TSG1141','RGPF (RESEAU GEODESIQUE DE POLYNESIE FRANCAISE) vers TAHAA_SAU 2001',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','IGNF','RGPFGEO','IGNF','TAHAA01',NULL,'EPSG','8666','Geoid (height correction) model file','https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Tahaa.mnt',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
 INSERT INTO "usage" VALUES('IGNF', 'TSG1141_USAGE','grid_transformation','IGNF','TSG1141','IGNF','154','IGNF','5');
 INSERT INTO "extent" VALUES('IGNF','155','TAHITI','TAHITI',-18,-17,-150,-149,0);
 INSERT INTO "helmert_transformation" VALUES('IGNF','TSG594','TAHITI-TERME NORD vers WGS 84',NULL,'EPSG','1031','Geocentric translations (geocentric domain)','IGNF','TAHI51','IGNF','WGS84',NULL,162,117,154,'EPSG','9001',NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1.0.0',0);
@@ -3866,7 +3866,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF09.mnt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF09.mnt',    -- as referenced by the IGNF registry
                             'fr_ign_RAF09.tif',
                             'RAF09.gtx',
                             'GTiff',
@@ -3882,7 +3882,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF18.mnt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF18.mnt',    -- as referenced by the IGNF registry
                             'fr_ign_RAF18.tif',
                             'RAF18.gtx',
                             'GTiff',
@@ -3898,7 +3898,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',    -- as referenced by the IGNF registry
                             'fr_ign_ggg00_lsv2.tif',
                             'ggg00_lsv2.gtx',
                             'GTiff',
@@ -3914,7 +3914,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_sbv2.txt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_sbv2.txt',    -- as referenced by the IGNF registry
                             'fr_ign_ggg00_sbv2.tif',
                             'ggg00_sbv2.gtx',
                             'GTiff',
@@ -3930,7 +3930,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_smv2.txt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_smv2.txt',    -- as referenced by the IGNF registry
                             'fr_ign_ggg00_smv2.tif',
                             'ggg00_smv2.gtx',
                             'GTiff',
@@ -3946,7 +3946,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00v2.txt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00v2.txt',    -- as referenced by the IGNF registry
                             'fr_ign_ggg00v2.tif',
                             'ggg00v2.gtx',
                             'GTiff',
@@ -3962,7 +3962,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggm00v2.txt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggm00v2.txt',    -- as referenced by the IGNF registry
                             'fr_ign_ggm00v2.tif',
                             'ggm00v2.gtx',
                             'GTiff',
@@ -3978,7 +3978,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAGTBT2016.mnt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAGTBT2016.mnt',    -- as referenced by the IGNF registry
                             'fr_ign_RAGTBT2016.tif',
                             'RAGTBT2016.gtx',
                             'GTiff',
@@ -3994,7 +3994,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALD2016.mnt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALD2016.mnt',    -- as referenced by the IGNF registry
                             'fr_ign_RALD2016.tif',
                             'RALD2016.gtx',
                             'GTiff',
@@ -4010,23 +4010,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALDW842016.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_RALDW842016.tif',
-                            'RALDW842016.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_RALDW842016.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALS2016.mnt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALS2016.mnt',    -- as referenced by the IGNF registry
                             'fr_ign_RALS2016.tif',
                             'RALS2016.gtx',
                             'GTiff',
@@ -4042,7 +4026,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMART2016.mnt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMART2016.mnt',    -- as referenced by the IGNF registry
                             'fr_ign_RAMART2016.tif',
                             'RAMART2016.gtx',
                             'GTiff',
@@ -4058,7 +4042,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMG2016.mnt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMG2016.mnt',    -- as referenced by the IGNF registry
                             'fr_ign_RAMG2016.tif',
                             'RAMG2016.gtx',
                             'GTiff',
@@ -4074,55 +4058,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAR07_bl.gra',    -- as referenced by the IGNF registry
-                            'fr_ign_RAR07_bl.tif',
-                            'RAR07_bl.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_RAR07_bl.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_sbv2.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_gg10_sbv2.tif',
-                            'gg10_sbv2.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_gg10_sbv2.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_smv2.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_gg10_smv2.tif',
-                            'gg10_smv2.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_gg10_smv2.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggguy15.mnt',    -- as referenced by the IGNF registry
+                    VALUES ('http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggguy15.mnt',    -- as referenced by the IGNF registry
                             'fr_ign_ggguy15.tif',
                             'ggguy15.gtx',
                             'GTiff',
@@ -4130,166 +4066,6 @@ INSERT INTO grid_alternatives(original_grid_name,
                             0,
                             NULL,
                             'https://cdn.proj.org/fr_ign_ggguy15.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggker08v2.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_ggker08v2.tif',
-                            'ggker08v2.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_ggker08v2.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggm04v1.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_ggm04v1.tif',
-                            'ggm04v1.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_ggm04v1.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Bora.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_ggpf02-Bora.tif',
-                            'ggpf02-Bora.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_ggpf02-Bora.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Huahine.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_ggpf02-Huahine.tif',
-                            'ggpf02-Huahine.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_ggpf02-Huahine.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Maupiti.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_ggpf02-Maupiti.tif',
-                            'ggpf02-Maupiti.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_ggpf02-Maupiti.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Raiatea.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_ggpf02-Raiatea.tif',
-                            'ggpf02-Raiatea.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_ggpf02-Raiatea.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Tahaa.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_ggpf02-Tahaa.tif',
-                            'ggpf02-Tahaa.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_ggpf02-Tahaa.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf08-Fakarava.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_ggpf08-Fakarava.tif',
-                            'ggpf08-Fakarava.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_ggpf08-Fakarava.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Moorea.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_ggpf10-Moorea.tif',
-                            'ggpf10-Moorea.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_ggpf10-Moorea.tif', 1, 1, NULL);
-INSERT INTO grid_alternatives(original_grid_name,
-                            proj_grid_name,
-                            old_proj_grid_name,
-                            proj_grid_format,
-                            proj_method,
-                            inverse_direction,
-                            package_name,
-                            url, direct_download, open_license, directory)
-                    VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Tahiti.mnt',    -- as referenced by the IGNF registry
-                            'fr_ign_ggpf10-Tahiti.tif',
-                            'ggpf10-Tahiti.gtx',
-                            'GTiff',
-                            'geoid_like',
-                            0,
-                            NULL,
-                            'https://cdn.proj.org/fr_ign_ggpf10-Tahiti.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
                             old_proj_grid_name,
@@ -4314,7 +4090,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
-                    VALUES ('https://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAC09.mnt',    -- as referenced by the IGNF registry
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAC09.mnt',    -- as referenced by the IGNF registry
                             'fr_ign_RAC09.tif',
                             'RAC09.gtx',
                             'GTiff',
@@ -4322,6 +4098,230 @@ INSERT INTO grid_alternatives(original_grid_name,
                             0,
                             NULL,
                             'https://cdn.proj.org/fr_ign_RAC09.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_sbv2.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_gg10_sbv2.tif',
+                            'gg10_sbv2.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_gg10_sbv2.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_smv2.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_gg10_smv2.tif',
+                            'gg10_smv2.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_gg10_smv2.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALDW842016.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_RALDW842016.tif',
+                            'RALDW842016.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RALDW842016.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAR07_bl.gra',    -- as referenced by the IGNF registry
+                            'fr_ign_RAR07_bl.tif',
+                            'RAR07_bl.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RAR07_bl.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggker08v2.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggker08v2.tif',
+                            'ggker08v2.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggker08v2.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggm04v1.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggm04v1.tif',
+                            'ggm04v1.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggm04v1.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Bora.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf02-Bora.tif',
+                            'ggpf02-Bora.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf02-Bora.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Huahine.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf02-Huahine.tif',
+                            'ggpf02-Huahine.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf02-Huahine.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Maupiti.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf02-Maupiti.tif',
+                            'ggpf02-Maupiti.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf02-Maupiti.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Raiatea.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf02-Raiatea.tif',
+                            'ggpf02-Raiatea.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf02-Raiatea.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Tahaa.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf02-Tahaa.tif',
+                            'ggpf02-Tahaa.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf02-Tahaa.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf08-Fakarava.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf08-Fakarava.tif',
+                            'ggpf08-Fakarava.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf08-Fakarava.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Moorea.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf10-Moorea.tif',
+                            'ggpf10-Moorea.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf10-Moorea.tif', 1, 1, NULL);
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            old_proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Tahiti.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf10-Tahiti.tif',
+                            'ggpf10-Tahiti.gtx',
+                            'GTiff',
+                            'geoid_like',
+                            0,
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf10-Tahiti.tif', 1, 1, NULL);
 
 --- Null transformations between RRAF and WGS84 adapted from EPSG
 

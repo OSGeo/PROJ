@@ -2012,6 +2012,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             ",'NTv2','EPSG','4326','EPSG','4326',1.0,'EPSG','"
             "8656','Latitude and longitude difference "
             "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+            "NULL,NULL,NULL,NULL,NULL,NULL,"
+            "NULL,NULL,NULL,NULL,NULL,NULL,"
             "0);"))
             << last_error();
         ASSERT_TRUE(
@@ -2037,7 +2039,9 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "offset',-17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+            "NULL,0);"))
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO usage VALUES('EPSG',"
@@ -2465,29 +2469,31 @@ TEST_F(FactoryWithTmpDatabase,
                 "'OTHER_GEOG_CRS',NULL,'geographic 2D','EPSG','6422',"
                 "'EPSG','OTHER_DATUM',NULL,0);"))
         << last_error();
-    ASSERT_TRUE(
-        execute("INSERT INTO other_transformation "
-                "VALUES('EPSG','4326_TO_OTHER_GEOG_CRS',"
-                "'4326_to_other_geog_crs',NULL,"
-                "'EPSG','9601','Longitude rotation',"
-                "'EPSG','4326','EPSG','OTHER_GEOG_CRS',0.0,'EPSG'"
-                ",'8602','Longitude "
-                "offset',-17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+    ASSERT_TRUE(execute(
+        "INSERT INTO other_transformation "
+        "VALUES('EPSG','4326_TO_OTHER_GEOG_CRS',"
+        "'4326_to_other_geog_crs',NULL,"
+        "'EPSG','9601','Longitude rotation',"
+        "'EPSG','4326','EPSG','OTHER_GEOG_CRS',0.0,'EPSG'"
+        ",'8602','Longitude "
+        "offset',-17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
-    ASSERT_TRUE(
-        execute("INSERT INTO other_transformation "
-                "VALUES('EPSG','OTHER_GEOG_CRS_TO_4326',"
-                "'other_geog_crs_to_4326',NULL,"
-                "'EPSG','9601','Longitude rotation',"
-                "'EPSG','OTHER_GEOG_CRS','EPSG','4326',0.0,'EPSG'"
-                ",'8602','Longitude "
-                "offset',17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+    ASSERT_TRUE(execute(
+        "INSERT INTO other_transformation "
+        "VALUES('EPSG','OTHER_GEOG_CRS_TO_4326',"
+        "'other_geog_crs_to_4326',NULL,"
+        "'EPSG','9601','Longitude rotation',"
+        "'EPSG','OTHER_GEOG_CRS','EPSG','4326',0.0,'EPSG'"
+        ",'8602','Longitude "
+        "offset',17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO concatenated_operation "
                         "VALUES('EPSG','DUMMY_CONCATENATED_2',"
@@ -2572,7 +2578,8 @@ TEST_F(FactoryWithTmpDatabase,
         "'EPSG','9615'"
         ",'NTv2','EPSG','4326','OTHER','OTHER_4326',1.0,'EPSG','"
         "8656','Latitude and longitude difference "
-        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute(
         "INSERT INTO usage VALUES('OTHER',"
@@ -2611,7 +2618,8 @@ TEST_F(FactoryWithTmpDatabase,
         "'EPSG','9615'"
         ",'NTv2','EPSG','4326','EPSG','4326',10.0,'EPSG','"
         "8656','Latitude and longitude difference "
-        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(
         execute("INSERT INTO usage VALUES('OTHER',"
@@ -2626,7 +2634,8 @@ TEST_F(FactoryWithTmpDatabase,
                 "TRANSFORMATION_1M_SMALL_EXTENT',NULL,'EPSG','9615'"
                 ",'NTv2','EPSG','4326','EPSG','4326',1.0,'EPSG','"
                 "8656','Latitude and longitude difference "
-                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,"
+                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,0);"))
         << last_error();
     ASSERT_TRUE(
@@ -2643,7 +2652,8 @@ TEST_F(FactoryWithTmpDatabase,
         "'EPSG','9615'"
         ",'NTv2','EPSG','4326','EPSG','4326',1.0,'EPSG','"
         "8656','Latitude and longitude difference "
-        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(
         execute("INSERT INTO usage VALUES('OTHER',"
@@ -2652,14 +2662,14 @@ TEST_F(FactoryWithTmpDatabase,
                 "'OTHER','TRANSFORMATION_1M','EPSG','1262','EPSG','1024');"))
         << last_error();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO grid_transformation "
-                "VALUES('OTHER','TRANSFORMATION_0.5M_DEPRECATED','"
-                "TRANSFORMATION_0.5M_DEPRECATED',NULL,'EPSG','9615'"
-                ",'NTv2','EPSG','4326','EPSG','4326',1.0,'EPSG','"
-                "8656','Latitude and longitude difference "
-                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,1);"))
+    ASSERT_TRUE(execute(
+        "INSERT INTO grid_transformation "
+        "VALUES('OTHER','TRANSFORMATION_0.5M_DEPRECATED','"
+        "TRANSFORMATION_0.5M_DEPRECATED',NULL,'EPSG','9615'"
+        ",'NTv2','EPSG','4326','EPSG','4326',1.0,'EPSG','"
+        "8656','Latitude and longitude difference "
+        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1);"))
         << last_error();
     ASSERT_TRUE(
         execute("INSERT INTO usage VALUES('OTHER',"
@@ -2769,7 +2779,8 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_proj_based_transformation) {
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER',"
                         "'other_transformation_FOO_usage',"
@@ -2826,17 +2837,18 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_wkt_based_transformation) {
                "    PARAMETER[\"Y-axis translation\",2,UNIT[\"metre\",1]],\n"
                "    PARAMETER[\"Z-axis translation\",3,UNIT[\"metre\",1]]]";
 
-    ASSERT_TRUE(
-        execute("INSERT INTO other_transformation "
-                "VALUES('OTHER','FOO','My WKT string based op',NULL,"
-                "'PROJ','WKT','" +
-                std::string(wkt) +
-                "',"
-                "'EPSG','4326','EPSG','4326',0.0,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+    ASSERT_TRUE(execute(
+        "INSERT INTO other_transformation "
+        "VALUES('OTHER','FOO','My WKT string based op',NULL,"
+        "'PROJ','WKT','" +
+        std::string(wkt) +
+        "',"
+        "'EPSG','4326','EPSG','4326',0.0,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER',"
                         "'other_transformation_FOO_usage',"
@@ -2867,17 +2879,18 @@ TEST_F(FactoryWithTmpDatabase,
     createStructure();
     populateWithFakeEPSG();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO other_transformation "
-                "VALUES('OTHER','FOO','My WKT string based op',NULL,"
-                "'PROJ','WKT','" +
-                std::string("invalid_wkt") +
-                "',"
-                "'EPSG','4326','EPSG','4326',0.0,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+    ASSERT_TRUE(execute(
+        "INSERT INTO other_transformation "
+        "VALUES('OTHER','FOO','My WKT string based op',NULL,"
+        "'PROJ','WKT','" +
+        std::string("invalid_wkt") +
+        "',"
+        "'EPSG','4326','EPSG','4326',0.0,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER',"
                         "'other_transformation_FOO_usage',"
@@ -2901,17 +2914,18 @@ TEST_F(FactoryWithTmpDatabase,
     createStructure();
     populateWithFakeEPSG();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO other_transformation "
-                "VALUES('OTHER','FOO','My WKT string based op',NULL,"
-                "'PROJ','WKT','" +
-                std::string("LOCAL_CS[\"foo\"]") +
-                "',"
-                "'EPSG','4326','EPSG','4326',0.0,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+    ASSERT_TRUE(execute(
+        "INSERT INTO other_transformation "
+        "VALUES('OTHER','FOO','My WKT string based op',NULL,"
+        "'PROJ','WKT','" +
+        std::string("LOCAL_CS[\"foo\"]") +
+        "',"
+        "'EPSG','4326','EPSG','4326',0.0,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER',"
                         "'other_transformation_FOO_usage',"
@@ -3519,32 +3533,34 @@ TEST_F(FactoryWithTmpDatabase,
     createStructure();
     populateWithFakeEPSG();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO other_transformation "
-                "VALUES('OTHER','PARTIAL_AREA_PERFECT_ACCURACY',"
-                "'PARTIAL_AREA_PERFECT_ACCURACY',NULL,'PROJ',"
-                "'PROJString','+proj=helmert +x=1',"
-                "'EPSG','4326','EPSG','4326',0.0,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+    ASSERT_TRUE(execute(
+        "INSERT INTO other_transformation "
+        "VALUES('OTHER','PARTIAL_AREA_PERFECT_ACCURACY',"
+        "'PARTIAL_AREA_PERFECT_ACCURACY',NULL,'PROJ',"
+        "'PROJString','+proj=helmert +x=1',"
+        "'EPSG','4326','EPSG','4326',0.0,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER', "
                         "'1','other_transformation','OTHER','PARTIAL_AREA_"
                         "PERFECT_ACCURACY','EPSG','1933','EPSG','1024')"))
         << last_error();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO other_transformation "
-                "VALUES('OTHER','WHOLE_AREA_APPROX_ACCURACY',"
-                "'WHOLE_AREA_APPROX_ACCURACY',NULL,'PROJ',"
-                "'PROJString','+proj=helmert +x=2',"
-                "'EPSG','4326','EPSG','4326',1.0,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+    ASSERT_TRUE(execute(
+        "INSERT INTO other_transformation "
+        "VALUES('OTHER','WHOLE_AREA_APPROX_ACCURACY',"
+        "'WHOLE_AREA_APPROX_ACCURACY',NULL,'PROJ',"
+        "'PROJString','+proj=helmert +x=2',"
+        "'EPSG','4326','EPSG','4326',1.0,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER', "
                         "'2','other_transformation','OTHER','WHOLE_AREA_APPROX_"
@@ -3587,7 +3603,8 @@ TEST_F(FactoryWithTmpDatabase,
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-        "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     ASSERT_TRUE(
@@ -3607,7 +3624,8 @@ TEST_F(FactoryWithTmpDatabase,
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-        "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('EPSG',"

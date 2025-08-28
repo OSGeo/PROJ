@@ -465,6 +465,12 @@ FOR EACH ROW BEGIN
                           NEW.target_crs_auth_name = crs.auth_name AND
                           NEW.target_crs_code = crs.code);
 
+    -- check that grids with 'Geocentric translations using NEU velocity grid (gtg)' method are properly registered
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: source_crs(auth_name, code) must be Geocentric')
+        WHERE NEW.method_name IN ('Geocentric translations using NEU velocity grid (gtg)') AND NOT EXISTS (SELECT 1 FROM geodetic_crs gcrs WHERE gcrs.auth_name = NEW.source_crs_auth_name AND gcrs.code = NEW.source_crs_code AND type = 'geocentric');
+
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: target_crs(auth_name, code) must be Geocentric')
+        WHERE NEW.method_name IN ('Geocentric translations using NEU velocity grid (gtg)') AND NOT EXISTS (SELECT 1 FROM geodetic_crs gcrs WHERE gcrs.auth_name = NEW.target_crs_auth_name AND gcrs.code = NEW.target_crs_code AND type = 'geocentric');
 END;
 
 CREATE TRIGGER grid_packages_insert_trigger
@@ -485,8 +491,8 @@ FOR EACH ROW BEGIN
                 SELECT 1 FROM grid_transformation WHERE grid_name = NEW.original_grid_name
                 UNION ALL
                 SELECT 1 FROM other_transformation WHERE
-                    method_auth_name = 'PROJ' AND
-                    method_name LIKE '%' || NEW.original_grid_name || '%');
+                    (method_auth_name = 'PROJ' AND
+                    method_name LIKE '%' || NEW.original_grid_name || '%') OR grid_name = NEW.original_grid_name);
 END;
 
 CREATE TRIGGER other_transformation_insert_trigger
@@ -541,6 +547,14 @@ FOR EACH ROW BEGIN
               NOT EXISTS (SELECT 1 FROM geodetic_crs gcrs WHERE
                           gcrs.auth_name = NEW.target_crs_auth_name AND gcrs.code = NEW.target_crs_code
                           AND gcrs.type = 'geographic 3D');
+
+    -- check that operations with 'Geocen translations by grid (gtg) & Geocen translations NEU velocities (gtg)' and 'Position Vector (geocen) & Geocen translations NEU velocities (gtg)' methods are properly registered
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: source_crs(auth_name, code) must be Geocentric')
+        WHERE NEW.method_name IN ('Geocen translations by grid (gtg) & Geocen translations NEU velocities (gtg)', 'Position Vector (geocen) & Geocen translations NEU velocities (gtg)') AND NOT EXISTS (SELECT 1 FROM geodetic_crs gcrs WHERE gcrs.auth_name = NEW.source_crs_auth_name AND gcrs.code = NEW.source_crs_code AND type = 'geocentric');
+
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: target_crs(auth_name, code) must be Geocentric')
+        WHERE NEW.method_name IN ('Geocen translations by grid (gtg) & Geocen translations NEU velocities (gtg)', 'Position Vector (geocen) & Geocen translations NEU velocities (gtg)') AND NOT EXISTS (SELECT 1 FROM geodetic_crs gcrs WHERE gcrs.auth_name = NEW.target_crs_auth_name AND gcrs.code = NEW.target_crs_code AND type = 'geocentric');
+
 END;
 
 CREATE TRIGGER concatenated_operation_insert_trigger
