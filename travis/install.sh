@@ -68,6 +68,10 @@ cmake \
   ..
 make
 
+# Test adding non-official file to DB
+cp data/proj.db /tmp
+cat ../data/sql/transformations_czechia_extra.sql | sqlite3 /tmp/proj.db
+
 if [ "$(uname)" == "Linux" -a -f lib/libproj.so ]; then
 if objdump -TC "lib/libproj.so" | grep "elf64-x86-64">/dev/null; then
     echo "Checking exported symbols..."
