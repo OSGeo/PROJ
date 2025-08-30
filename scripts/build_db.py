@@ -1022,21 +1022,6 @@ def fill_other_transformation(proj_db_cursor):
             assert order <= max_n_params, (code, name, order, max_n_params)
             assert order == expected_order, (code, name, order, expected_order)
 
-            # FIXME. REMOVE_ME when EPSG has fixed their stuff
-            if code == 10893:
-                if parameter_code == 8607 and uom_code is None:
-                    print("FIXME/REMOVE_ME: Transformation 10893. Setting value and UoM for parameter 8607")
-                    parameter_value = -0.45049
-                    uom_code = 9001
-                elif parameter_code == 8609 and uom_code is None:
-                    print("FIXME/REMOVE_ME: Transformation 10893. Setting value andUoM for parameter 8609")
-                    parameter_value = -23.73423
-                    uom_code = 9104
-                elif parameter_code == 8611 and uom_code is None:
-                    print("FIXME/REMOVE_ME: Transformation 10893. Setting value andUoM for parameter 8611")
-                    parameter_value = -3.136
-                    uom_code = 9202
-
             param_auth_name[order - 1] = EPSG_AUTHORITY
             param_code[order - 1] = parameter_code
             param_name[order - 1] = parameter_name

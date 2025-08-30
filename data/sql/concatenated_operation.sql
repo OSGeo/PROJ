@@ -531,3 +531,5 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','10894','ITRF2014 to ETRS89-D
 INSERT INTO "usage" VALUES('EPSG','24010','concatenated_operation','EPSG','10894','EPSG','1080','EPSG','1027');
 INSERT INTO "concatenated_operation" VALUES('EPSG','10895','ITRF2020 to ETRS89-DNK (1)','The coordinate epoch (in years) of the coordinates referenced to the source CRS (ITRF2020) is user-defined input and is used as the source epoch in step 2.','EPSG','9988','EPSG','10890',0.006,'NKG2020',0);
 INSERT INTO "usage" VALUES('EPSG','24011','concatenated_operation','EPSG','10895','EPSG','1080','EPSG','1027');
+INSERT INTO "concatenated_operation" VALUES('EPSG','11005','SVD2006 height to SVD2024 height (1)','Accuracy is RMS of the accuracies of the two concatenated operation steps.','EPSG','20000','EPSG','10999',1.4,'NMA-Sjm SV',0);
+INSERT INTO "usage" VALUES('EPSG','24141','concatenated_operation','EPSG','11005','EPSG','4831','EPSG','1059');

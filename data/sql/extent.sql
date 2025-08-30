@@ -3797,3 +3797,4 @@ INSERT INTO "extent" VALUES('EPSG','4818','Kazakhstan - 72°E to 78°E','Kazakhs
 INSERT INTO "extent" VALUES('EPSG','4819','Kazakhstan - 78°E to 84°E','Kazakhstan - 78°E to 84°E.',42.19,53.18,78.0,84.0,0);
 INSERT INTO "extent" VALUES('EPSG','4820','Kazakhstan - east of 84°E','Kazakhstan - east of 84°E.',46.82,50.7,84.0,87.35,0);
 INSERT INTO "extent" VALUES('EPSG','4821','USA - Gulf central planning area deep water','United States (USA) - central Gulf of Mexico outer continental shelf (GoM OCS) planning area, deep water portion.',25.58,29.35,-93.38,-86.53,0);
+INSERT INTO "extent" VALUES('EPSG','4831','Svalbard','Svalbard including Bear Island.',74.3208,81.8504,6.49005,33.50985,0);
