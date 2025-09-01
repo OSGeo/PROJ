@@ -6808,9 +6808,13 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     return op;
                 }
             }
-            return operation::Transformation::create(
+            auto transf = operation::Transformation::create(
                 props, sourceCRS, targetCRS, interpolationCRS, propsMethod,
                 parameters, values, accuracies);
+            if (usePROJAlternativeGridNames) {
+                return transf->substitutePROJAlternativeGridNames(d->context());
+            }
+            return transf;
 
         } catch (const std::exception &ex) {
             throw buildFactoryException("transformation", d->authority(), code,

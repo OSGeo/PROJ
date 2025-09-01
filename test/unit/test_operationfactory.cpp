@@ -11387,3 +11387,37 @@ TEST(operation, createOperation_ITRF2000_to_ETRS89) {
     EXPECT_TRUE(foundNonGridBasedOp);
     EXPECT_TRUE(foundGridBaseOp);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_ITRF2014_to_ETRS89_DNK) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // ITRF2014
+        authFactoryEPSG->createCoordinateReferenceSystem("7789"),
+        // ETRS89-DNK
+        authFactoryEPSG->createCoordinateReferenceSystem("10890"), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=helmert +x=0 +y=0 +z=0 +rx=0.001785 "
+              "+ry=0.011151 +rz=-0.01617 +s=0 +dx=0 +dy=0 +dz=0 +drx=8.5e-05 "
+              "+dry=0.000531 +drz=-0.00077 +ds=0 +t_epoch=2010 "
+              "+convention=position_vector "
+              "+step +inv +proj=deformation +t_epoch=2000 "
+              "+grids=eur_nkg_nkgrf17vel.tif +ellps=GRS80 "
+              "+step +proj=helmert +x=0.66818 +y=0.04453 +z=-0.45049 "
+              "+rx=0.00312883 +ry=-0.02373423 +rz=0.00442969 +s=-0.003136 "
+              "+convention=position_vector "
+              "+step +proj=deformation +dt=15.829 "
+              "+grids=eur_nkg_nkgrf17vel.tif +ellps=GRS80");
+}
