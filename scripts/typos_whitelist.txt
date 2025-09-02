@@ -115,3 +115,5 @@ NOTE: This is Windows syntax - Unix users use $HEL, etc.
                 .5 / Te * log((1. - con) / (1. + con)));
   * C++ API function :cpp:func:`createTunisiaMapingGrid()`. Use :cpp:func:`createTunisiaMiningGrid()` instead (`#3559 <https://github.com/OSGeo/PROJ/issues/3559>`_)
    (gives same results as: ``+proj=som +inc_angle=1.7157253262878522r +ps_rev=0.06866666666666667 +asc_lon=1.1242171183417042r``)
+:ref:`som`
+   :alt:   som
