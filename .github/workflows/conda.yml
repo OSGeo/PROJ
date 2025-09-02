@@ -30,7 +30,7 @@ jobs:
       GHA_CI_PLATFORM: ${{ matrix.platform }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - uses: conda-incubator/setup-miniconda@v3
       with:
