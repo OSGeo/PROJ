@@ -393,107 +393,145 @@ for node in root.iterfind('.//VerticalCRS'):
 mapGridURLs = {
      # France metropole
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/RAF09.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF09.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF09.mnt',
 
      # France metropole
     'https://geodesie.ign.fr/contenu/fichiers/documentation/grilles/metropole/RAF18.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF18.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF18.mnt',
 
     # Corse
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/RAC09.mnt':
-        'https://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAC09.mnt',
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAC09.mnt',
 
 
 
     # Guadeloupe RGAF09
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_gtbt.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAGTBT2016.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAGTBT2016.mnt',
 
     'RAGTBT2016.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAGTBT2016.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAGTBT2016.mnt',
 
     # Les Saintes RGAF09
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_ls.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALS2016.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALS2016.mnt',
 
     'RALS2016.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALS2016.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALS2016.mnt',
 
     # Martinique RGAF09
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_mart.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMART2016.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMART2016.mnt',
 
     'RAMART2016.MNT':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMART2016.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMART2016.mnt',
 
     # Marie Galante RGAF09
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_mg.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMG2016.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMG2016.mnt',
 
     'RAMG2016.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMG2016.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMG2016.mnt',
 
     # Saint Barthelemy RGAF09
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_sb.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_sbv2.mnt',
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_sbv2.mnt',
 
     'gg10_sbv2.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_sbv2.mnt',
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_sbv2.mnt',
+
+    'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_sbv2.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_sbv2.mnt',
 
     # Saint Martin RGAF09
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_sm.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_smv2.mnt',
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_sbv2.mnt',
 
     'gg10_smv2.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_smv2.mnt',
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_smv2.mnt',
 
+    'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_smv2.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/gg10_smv2.mnt',
     # La Desirade RGAF09
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_ld.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALD2016.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALD2016.mnt',
 
     'RALD2016.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALD2016.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALD2016.mnt',
 
 
     # Guadeloupe WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00v2.txt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00v2.txt',
 
     # Les Saintes WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_ls.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',
 
     'ggg00_lsv2.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',
 
     # Martinique WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggm00.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggm00v2.txt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggm00v2.txt',
+
+    'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggm04v1.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggm04v1.mnt',
 
     # Saint Barthelemy WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_sb.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_sbv2.txt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_sbv2.txt',
 
     # Saint Martin WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_sm.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_smv2.txt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_smv2.txt',
 
     # La Desirade WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_ld.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALDW842016.mnt',
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALDW842016.mnt',
 
     'RALDW842016.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALDW842016.mnt',
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALDW842016.mnt',
 
 
     # Guyane RGF95
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggguy00.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggguy15.mnt',
+        'http://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggguy15.mnt',
 
 
     # Reunion grille RAR
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/RAR07_bl.gra':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAR07_bl.gra',
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAR07_bl.gra',
+
+    'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Bora.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Bora.mnt',
+
+    'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Huahine.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Huahine.mnt',
+
+    'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Maiao.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Maiao.mnt',
+
+    'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Maupiti.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Maupiti.mnt',
+
+    'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Raiatea.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Raiatea.mnt',
+
+    'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Tahaa.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Tahaa.mnt',
+
+    'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggker08v2.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggker08v2.mnt',
+
+    'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf08-Fakarava.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf08-Fakarava.mnt',
+
+    'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Moorea.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Moorea.mnt',
+
+    'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Tahiti.mnt':
+        'https://fiches-geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Tahiti.mnt',
 }
 
 setVerticalGrids = set()
@@ -551,7 +589,7 @@ for node in root.iterfind('.//Transformation'):
         name_components = name.split(' vers ')
         name_inverted = name_components[1] + ' vers ' + name_components[0]
 
-        sql = """INSERT INTO "grid_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','%s','%s','%s','%s',NULL,'EPSG','8666','Geoid (height correction) model file','%s',NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);""" % (id, name_inverted, mapCrsId[targetCRS][0], mapCrsId[targetCRS][1], mapCrsId[sourceCRS][0], mapCrsId[sourceCRS][1], filename, operation_version)
+        sql = """INSERT INTO "grid_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9664','Geographic3D to GravityRelatedHeight (IGN1997)','%s','%s','%s','%s',NULL,'EPSG','8666','Geoid (height correction) model file','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);""" % (id, name_inverted, mapCrsId[targetCRS][0], mapCrsId[targetCRS][1], mapCrsId[sourceCRS][0], mapCrsId[sourceCRS][1], filename, operation_version)
         all_sql.append(sql)
         sql = """INSERT INTO "usage" VALUES('IGNF', '%s_USAGE','grid_transformation','IGNF','%s','%s','%s','%s','%s');""" % (id, id, extent_auth_and_code[0], extent_auth_and_code[1], scope_auth_and_code[0], scope_auth_and_code[1])
         all_sql.append(sql)
@@ -580,7 +618,7 @@ for node in root.iterfind('.//Transformation'):
                 #sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','%s','other_transformation');""" % custom_id
                 #all_sql.append(sql)
 
-                sql = """INSERT INTO "other_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9601','Longitude rotation','%s','%s','%s','%s',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);"""% (custom_id, name, src[0], src[1], target[0], target[1], operation_version)
+                sql = """INSERT INTO "other_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9601','Longitude rotation','%s','%s','%s','%s',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);"""% (custom_id, name, src[0], src[1], target[0], target[1], operation_version)
                 all_sql.append(sql)
                 sql = """INSERT INTO "usage" VALUES('IGNF', '%s_USAGE','other_transformation','IGNF','%s','%s','%s','%s','%s');""" % (custom_id, custom_id, extent_auth_and_code[0], extent_auth_and_code[1], scope_auth_and_code[0], scope_auth_and_code[1])
                 all_sql.append(sql)
@@ -610,7 +648,7 @@ for node in root.iterfind('.//Transformation'):
                 #sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','%s','grid_transformation');""" % (custom_id)
                 #all_sql.append(sql)
 
-                sql = """INSERT INTO "grid_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9615','NTv2','%s','%s','%s','%s',NULL,'EPSG','8656','Latitude and longitude difference file','ntf_r93.gsb',NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);""" % (custom_id, name, src[0], src[1], target[0], target[1], operation_version)
+                sql = """INSERT INTO "grid_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9615','NTv2','%s','%s','%s','%s',NULL,'EPSG','8656','Latitude and longitude difference file','ntf_r93.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);""" % (custom_id, name, src[0], src[1], target[0], target[1], operation_version)
                 all_sql.append(sql)
                 sql = """INSERT INTO "usage" VALUES('IGNF', '%s_USAGE','grid_transformation','IGNF','%s','%s','%s','%s','%s');""" % (custom_id, custom_id, extent_auth_and_code[0], extent_auth_and_code[1], scope_auth_and_code[0], scope_auth_and_code[1])
                 all_sql.append(sql)
@@ -628,7 +666,7 @@ for node in root.iterfind('.//Transformation'):
         uom = paramValue.find('value').attrib['uom']
         assert uom == 'm'
 
-        sql = """INSERT INTO "other_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9616','Vertical Offset','%s','%s','%s','%s',NULL,'EPSG','8603','Vertical Offset',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);"""% (id, name, mapCrsId[sourceCRS][0], mapCrsId[sourceCRS][1], mapCrsId[targetCRS][0], mapCrsId[targetCRS][1], value, operation_version)
+        sql = """INSERT INTO "other_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9616','Vertical Offset','%s','%s','%s','%s',NULL,'EPSG','8603','Vertical Offset',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);"""% (id, name, mapCrsId[sourceCRS][0], mapCrsId[sourceCRS][1], mapCrsId[targetCRS][0], mapCrsId[targetCRS][1], value, operation_version)
         all_sql.append(sql)
         sql = """INSERT INTO "usage" VALUES('IGNF', '%s_USAGE','other_transformation','IGNF','%s','%s','%s','%s','%s');""" % (id, id, extent_auth_and_code[0], extent_auth_and_code[1], scope_auth_and_code[0], scope_auth_and_code[1])
         all_sql.append(sql)

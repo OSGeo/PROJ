@@ -1571,7 +1571,8 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
 
     // For geocentric translation, the inverse is exactly the negation of
     // the parameters.
-    if (ci_find(methodName, "Geocentric translations") != std::string::npos ||
+    if ((ci_find(methodName, "Geocentric translations") != std::string::npos &&
+         ci_find(methodName, "grid") == std::string::npos) ||
         methodEPSGCode == EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC ||
         methodEPSGCode ==
             EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D ||

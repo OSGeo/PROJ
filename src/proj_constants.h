@@ -647,6 +647,37 @@
 #define EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_GRID_FILE                    \
     "Point motion velocity grid file"
 
+#define EPSG_CODE_METHOD_POINT_MOTION_GEOCEN_DOMAIN_USING_NEU_VELOCITY_GRID_GRAVSOFT \
+    1139
+#define EPSG_NAME_METHOD_POINT_MOTION_GEOCEN_DOMAIN_USING_NEU_VELOCITY_GRID_GRAVSOFT \
+    "Point motion (geocen domain) using NEU velocity grid (Gravsoft)"
+
+#define EPSG_CODE_PARAMETER_POINT_MOTION_VELOCITY_NORTH_GRID_FILE 1072
+#define EPSG_NAME_PARAMETER_POINT_MOTION_VELOCITY_NORTH_GRID_FILE              \
+    "Point motion velocity north grid file"
+
+#define EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATIONS_BY_GRID_GTG_AND_GEOCENTRIC_TRANSLATIONS_NEU_VELOCITIES_GTG \
+    1142
+#define EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATIONS_BY_GRID_GTG_AND_GEOCENTRIC_TRANSLATIONS_NEU_VELOCITIES_GTG \
+    "Geocen translations by grid (gtg) & Geocen translations NEU "                                          \
+    "velocities (gtg)"
+
+#define EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC_AND_GEOCENTRIC_TRANSLATIONS_NEU_VELOCITIES_GTG \
+    1143
+#define EPSG_NAME_METHOD_POSITION_VECTOR_GEOCENTRIC_AND_GEOCENTRIC_TRANSLATIONS_NEU_VELOCITIES_GTG \
+    "Position Vector (geocen) & Geocen translations NEU velocities (gtg)"
+
+#define EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATIONS_USING_NEU_VELOCITY_GRID_GTG   \
+    1144
+#define EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATIONS_USING_NEU_VELOCITY_GRID_GTG   \
+    "Geocentric translations using NEU velocity grid (gtg)"
+
+#define EPSG_CODE_PARAMETER_SOURCE_EPOCH 1068
+#define EPSG_NAME_PARAMETER_SOURCE_EPOCH "Source epoch"
+
+#define EPSG_CODE_PARAMETER_TARGET_EPOCH 1069
+#define EPSG_NAME_PARAMETER_TARGET_EPOCH "Target epoch"
+
 /* ------------------------------------------------------------------------ */
 
 #define EPSG_NAME_METHOD_NEW_ZEALAND_DEFORMATION_MODEL                         \

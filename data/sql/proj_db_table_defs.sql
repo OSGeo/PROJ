@@ -854,6 +854,20 @@ CREATE TABLE grid_transformation(
     grid2_param_name TEXT,
     grid2_name TEXT,
 
+    param1_auth_name TEXT,
+    param1_code INTEGER_OR_TEXT,
+    param1_name TEXT,
+    param1_value FLOAT,
+    param1_uom_auth_name TEXT,
+    param1_uom_code INTEGER_OR_TEXT,
+
+    param2_auth_name TEXT,
+    param2_code INTEGER_OR_TEXT,
+    param2_name TEXT,
+    param2_value FLOAT,
+    param2_uom_auth_name TEXT,
+    param2_uom_code INTEGER_OR_TEXT,
+
     interpolation_crs_auth_name TEXT,
     interpolation_crs_code INTEGER_OR_TEXT,
 
@@ -975,6 +989,25 @@ CREATE TABLE other_transformation(
     param7_value FLOAT,
     param7_uom_auth_name TEXT,
     param7_uom_code INTEGER_OR_TEXT,
+
+    param8_auth_name TEXT,
+    param8_code INTEGER_OR_TEXT,
+    param8_name TEXT,
+    param8_value FLOAT,
+    param8_uom_auth_name TEXT,
+    param8_uom_code INTEGER_OR_TEXT,
+
+    param9_auth_name TEXT,
+    param9_code INTEGER_OR_TEXT,
+    param9_name TEXT,
+    param9_value FLOAT,
+    param9_uom_auth_name TEXT,
+    param9_uom_code INTEGER_OR_TEXT,
+
+    grid_param_auth_name TEXT,
+    grid_param_code INTEGER_OR_TEXT,
+    grid_param_name TEXT,
+    grid_name TEXT,
 
     interpolation_crs_auth_name TEXT,
     interpolation_crs_code INTEGER_OR_TEXT,

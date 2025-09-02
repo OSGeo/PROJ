@@ -2539,7 +2539,10 @@ def import_geogtran():
                           "'EPSG','8601','Latitude offset',{param1_value},'{param1_uom_auth_name}','{param1_uom_code}'," \
                           "'EPSG','8602','Longitude offset',{param2_value},'{param2_uom_auth_name}','{param2_uom_code}',NULL,NULL,NULL,NULL,NULL,NULL,"\
                             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"\
-                            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,{deprecated});".format(
+                            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"\
+                            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"\
+                            "NULL,NULL,NULL,NULL,"\
+                            "{deprecated});".format(
                         code=wkid,
                         name=esri_name,
                         source_crs_auth_name=src_crs_auth_name,
@@ -2564,7 +2567,7 @@ def import_geogtran():
 
                     assert set(parsed_wkt2['COORDINATEOPERATION'][1].keys()) == {'SOURCECRS', 'METHOD', 'TARGETCRS', 'OPERATIONACCURACY'}, set(parsed_wkt2['COORDINATEOPERATION'][1].keys())
 
-                    sql = """INSERT INTO "other_transformation" VALUES('ESRI','%s','%s',NULL,'EPSG','9619','Geographic2D offsets','%s','%s','%s','%s',%s,'EPSG','8601','Latitude offset',%s,'EPSG','9104','EPSG','8602','Longitude offset',%s,'EPSG','9104',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                    sql = """INSERT INTO "other_transformation" VALUES('ESRI','%s','%s',NULL,'EPSG','9619','Geographic2D offsets','%s','%s','%s','%s',%s,'EPSG','8601','Latitude offset',%s,'EPSG','9104','EPSG','8602','Longitude offset',%s,'EPSG','9104',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                         wkid, esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, accuracy, lat_offset, long_offset, deprecated)
                     all_sql.append(sql)
                     sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','other_transformation','ESRI','%s','%s','%s','%s','%s');""" % (wkid, wkid, extent_auth_name, extent_code, 'EPSG', '1024')
@@ -2587,7 +2590,7 @@ def import_geogtran():
                         print('A grid_transformation (%s, using grid %s) is already known for the equivalent of %s (%s:%s --> %s:%s) for area %s, which uses grid %s. Skipping it' % (src_row[0], src_row[1], esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, row[idx_areaname], filename))
                         continue
 
-                    sql = """INSERT INTO "grid_transformation" VALUES('ESRI','%s','%s',NULL,'EPSG','9615','NTv2','%s','%s','%s','%s',%s,'EPSG','8656','Latitude and longitude difference file','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                    sql = """INSERT INTO "grid_transformation" VALUES('ESRI','%s','%s',NULL,'EPSG','9615','NTv2','%s','%s','%s','%s',%s,'EPSG','8656','Latitude and longitude difference file','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                         wkid, esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, accuracy, filename, deprecated)
                     all_sql.append(sql)
                     sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','grid_transformation','ESRI','%s','%s','%s','%s','%s');""" % (wkid, wkid, extent_auth_name, extent_code, 'EPSG', '1024')

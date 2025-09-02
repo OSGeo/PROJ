@@ -10207,8 +10207,8 @@ void PROJStringFormatter::addParam(const std::string &paramName, int val) {
 
 // ---------------------------------------------------------------------------
 
-static std::string formatToString(double val) {
-    if (std::abs(val * 10 - std::round(val * 10)) < 1e-8) {
+static std::string formatToString(double val, double precision) {
+    if (std::abs(val * 10 - std::round(val * 10)) < precision) {
         // For the purpose of
         // https://www.epsg-registry.org/export.htm?wkt=urn:ogc:def:crs:EPSG::27561
         // Latitude of natural of origin to be properly rounded from 55 grad
@@ -10226,7 +10226,12 @@ void PROJStringFormatter::addParam(const char *paramName, double val) {
 }
 
 void PROJStringFormatter::addParam(const std::string &paramName, double val) {
-    addParam(paramName, formatToString(val));
+    if (paramName == "dt") {
+        addParam(paramName,
+                 normalizeSerializedString(internal::toString(val, 7)));
+    } else {
+        addParam(paramName, formatToString(val, 1e-8));
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -10238,7 +10243,7 @@ void PROJStringFormatter::addParam(const char *paramName,
         if (i > 0) {
             paramValue += ',';
         }
-        paramValue += formatToString(vals[i]);
+        paramValue += formatToString(vals[i], 1e-8);
     }
     addParam(paramName, paramValue);
 }

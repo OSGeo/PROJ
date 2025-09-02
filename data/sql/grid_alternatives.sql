@@ -172,6 +172,8 @@ VALUES
 -- eur_nkg - Nordic Geodetic Commission
 ('eur_nkg_nkgrf03vel_realigned.tif','eur_nkg_nkgrf03vel_realigned.tif',NULL,'GTiff','velocity_grid',0,NULL,'https://cdn.proj.org/eur_nkg_nkgrf03vel_realigned.tif',1,1,NULL),
 ('eur_nkg_nkgrf17vel.tif','eur_nkg_nkgrf17vel.tif',NULL,'GTiff','velocity_grid',0,NULL,'https://cdn.proj.org/eur_nkg_nkgrf17vel.tif',1,1,NULL),
+('NKG_RF17vel_N.GRI','eur_nkg_nkgrf17vel.tif',NULL,'GTiff','velocity_grid',0,NULL,'https://cdn.proj.org/eur_nkg_nkgrf17vel.tif',1,1,NULL),
+('NKG_RF17vel.tif','eur_nkg_nkgrf17vel.tif',NULL,'GTiff','velocity_grid',0,NULL,'https://cdn.proj.org/eur_nkg_nkgrf17vel.tif',1,1,NULL),
 
 -- fi_nls - National Land Survey of Finland (MML)
 ('fi_nls_fin2000.tif','fi_nls_fin2000.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fi_nls_fin2000.tif',1,1,NULL),

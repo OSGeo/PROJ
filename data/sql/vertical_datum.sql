@@ -288,6 +288,8 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1415','Asse vertical datum 2025',NUL
 INSERT INTO "usage" VALUES('EPSG','23488','vertical_datum','EPSG','1415','EPSG','4805','EPSG','1144');
 INSERT INTO "vertical_datum" VALUES('EPSG','1416','Derived California Orthometric Heights of 1988 epoch 2025',NULL,'2025-06-15',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','23577','vertical_datum','EPSG','1416','EPSG','1375','EPSG','1180');
+INSERT INTO "vertical_datum" VALUES('EPSG','1424','Svalbard vertical datum 2024',NULL,'2025-01-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','24132','vertical_datum','EPSG','1424','EPSG','4831','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,NULL,NULL,0);

@@ -776,6 +776,9 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1416','COH88 2025 (NAVD
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1414','CSRN2025 (NAD83 2011)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1420','GR96(1996)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1422','NATRF2022','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1407','EUREF89','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1403','NKG_ETRF14','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1424','SVD2024','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -8149,3 +8152,9 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10921','CSRN2025 (NAD83 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10922','CSRN2025 (NAD83 2011) / CA zone 2 (m)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10923','CSRN2025 (NAD83 2011) / CA zone 3 (m)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','10924','CSRN2025 (NAD83 2011) / California zone 4 (m)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10873','EUREF89','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10874','EUREF89','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10875','EUREF89','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','20001','ETRS89 + SVD2006 height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','20001','EUREF89 + SVD2006 height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','11000','EUREF89 + SVD2024 height','EPSG');

@@ -830,10 +830,10 @@ script_dir_name = os.path.dirname(os.path.realpath(__file__))
 sql_dir_name = os.path.join(os.path.dirname(script_dir_name), 'data', 'sql')
 
 all_sql = []
-all_sql.append("""INSERT INTO "grid_transformation" VALUES('NRCAN','HT2_1997_NAD83CSRSV7','NAD83(CSRS)v7 to CGVD28 height',NULL,'EPSG','1060','Geographic3D to GravityRelatedHeight (NRCan byn)','EPSG','8254','EPSG','5713',0.05,'EPSG','8666','Geoid (height correction) model file','HT2_1997.byn',NULL,NULL,NULL,NULL,NULL,NULL,'NRC-Can CGG2000',0);""")
+all_sql.append("""INSERT INTO "grid_transformation" VALUES('NRCAN','HT2_1997_NAD83CSRSV7','NAD83(CSRS)v7 to CGVD28 height',NULL,'EPSG','1060','Geographic3D to GravityRelatedHeight (NRCan byn)','EPSG','8254','EPSG','5713',0.05,'EPSG','8666','Geoid (height correction) model file','HT2_1997.byn',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'NRC-Can CGG2000',0);""")
 all_sql.append("""INSERT INTO "usage" VALUES('NRCAN','USAGE_HT2_1997_NAD83CSRSV7','grid_transformation','NRCAN','HT2_1997_NAD83CSRSV7','EPSG','1289','EPSG','1133');""")
 
-all_sql.append("""INSERT INTO "grid_transformation" VALUES('NRCAN','HT2_2002_NAD83CSRSV7','NAD83(CSRS)v7 to CGVD28 height',NULL,'EPSG','1060','Geographic3D to GravityRelatedHeight (NRCan byn)','EPSG','8254','EPSG','5713',0.05,'EPSG','8666','Geoid (height correction) model file','HT2_2002v70.byn',NULL,NULL,NULL,NULL,NULL,NULL,'NRC-Can CGG2000 2002',0);""")
+all_sql.append("""INSERT INTO "grid_transformation" VALUES('NRCAN','HT2_2002_NAD83CSRSV7','NAD83(CSRS)v7 to CGVD28 height',NULL,'EPSG','1060','Geographic3D to GravityRelatedHeight (NRCan byn)','EPSG','8254','EPSG','5713',0.05,'EPSG','8666','Geoid (height correction) model file','HT2_2002v70.byn',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'NRC-Can CGG2000 2002',0);""")
 all_sql.append("""INSERT INTO "usage" VALUES('NRCAN','USAGE_HT2_2002_NAD83CSRSV7','grid_transformation','NRCAN','HT2_2002_NAD83CSRSV7','EPSG','1289','EPSG','1133');""")
 
 for zone in range(1, 17+1):
