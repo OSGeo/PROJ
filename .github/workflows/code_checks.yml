@@ -47,8 +47,6 @@ jobs:
         run: |
           git clone https://github.com/danmar/cppcheck
           cd cppcheck
-          # REMOVE me when it is solved: pin version to workaround bug https://trac.cppcheck.net/ticket/14063
-          git checkout 1d9ea2ffcca587f99c68f0b6a4c37d5b3e046c28
           mkdir build
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
