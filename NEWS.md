@@ -1,5 +1,67 @@
 # PROJ Release Notes
 
+## 9.7.0
+
+### Updates
+
+* Implement 'exact' authalic latitude->geographic latitude and use it in `+proj=aea/cea/laea/eqearth/healpix/rhealpix` (#4441)
+
+* Implement uniform conversions between auxiliary latitudes (#4446)
+
+* WKT2 parser: recognize `DEFININGTRANSFORMATION` (but ignore it) (#4484)
+
+* Database: add values from `alias_name` table that were removed in older EPSG releases, to improve
+  recognizing old WKT strings (#4490)
+
+* `proj_trans_bounds()`: sample points within the source grid to avoid missing extent such as world-wide
+  coverage from EPSG:4326 to ESRI:54099 (Spilhaus) (#4513)
+
+* Enable `-Wimplicit-fallthrough`, `-Wdeprecated-copy-dtor`, `-Wweak-vtables`,
+  `-Wdocumentation-unknown-command` when possible (#4516)
+
+* Geostationary projection: speed up inverse spherical and ellipsoidal computation (#4523)
+
+* WKT importer: better error message when `BBOX` is invalid (e.g south_lat > north_lat) (#4525)
+
+* Added `proj_geod_direct` for PJ trasformation object (#4532)
+
+* Support exporting Mercator (Spherical) on a sphere as `Mercator_1SP` in WKT1 (#4555)
+
+* Database: update to EPSG v12.022 (#4562)
+
+
+### Bug Fixes
+
+* `proj_trans_bounds()`: avoid erroring out, in some cases, when PJ* object is directly constructed
+  from a PROJ pipeline (#4512)
+
+* Fix issue related to `D_Unknown_based_on_WGS_84_ellipsoid` datum name (#4515)
+
+* `proj_trans_bounds()`: fix 9.6.2 regression when going from long/lat crossing antimeridian to
+  projected (#4526)
+
+* opt_parse: avoid potential heap-buffer-overflow when parsing non-ASCII characters (affect
+  `cct` and `gie`) (#4530)
+
+* `gie`: fix memory leak on non existing input file (#4531)
+
+* Database: referene `nl_nsgi_nllat2018.tif` and `nl_nsgi_bongeo2004.tif` grids (#4534)
+
+* Fixes related to WKT import/export of `DerivedGeodetic/GeographicCRS` (#4536)
+
+* Fix `tolower()`/`toupper()` implementation to not lead to undefined behavior (#4539)
+
+* IAU2015 CRS: fix wrong code for coordinate system of North Polar and South Polar CRSs (#4545)
+
+* `createOperations()`: fix a case involving 2 CompoundCRS, one with TOWGS84, and the 2
+  verticalCRS differing by units (#4552)
+
+* On SQLite query error, show first the error msg than the sql query (#4553)
+
+* Allow geodesic inverse for meridional points on prolate ellipsoid (#4560)
+
+
+
 ## 9.6.2
 
 ### Updates
