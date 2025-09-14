@@ -1050,58 +1050,72 @@ TEST(operation, geog3DCRS_to_vertCRS_depth_context) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_depth_context) {
-    auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
-    {
-        auto ctxt =
-            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
-        ctxt->setSpatialCriterion(
-            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
-        auto list = CoordinateOperationFactory::create()->createOperations(
-            authFactory->createCoordinateReferenceSystem("4937"), // ETRS89
-            authFactory->createCoordinateReferenceSystem("9883"),
-            // ETRS89 + CD Norway deph
-            ctxt);
-        ASSERT_GE(list.size(), 1U);
-        EXPECT_EQ(list[0]->exportToPROJString(
-                      PROJStringFormatter::create(
-                          PROJStringFormatter::Convention::PROJ_5,
-                          authFactory->databaseContext())
-                          .get()),
-                  "+proj=pipeline "
-                  "+step +proj=axisswap +order=2,1 "
-                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-                  "+step +inv +proj=vgridshift "
-                  "+grids=no_kv_CD_above_Ell_ETRS89_v2023b.tif +multiplier=1 "
-                  "+step +proj=axisswap +order=1,2,-3 "
-                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
-                  "+step +proj=axisswap +order=2,1");
-    }
-    {
-        auto ctxt =
-            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
-        ctxt->setSpatialCriterion(
-            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
-        auto list = CoordinateOperationFactory::create()->createOperations(
-            authFactory->createCoordinateReferenceSystem("9883"),
-            // ETRS89 + CD Norway deph
-            authFactory->createCoordinateReferenceSystem("4937"), // ETRS89
-            ctxt);
-        ASSERT_GE(list.size(), 1U);
-        EXPECT_EQ(list[0]->exportToPROJString(
-                      PROJStringFormatter::create(
-                          PROJStringFormatter::Convention::PROJ_5,
-                          authFactory->databaseContext())
-                          .get()),
-                  "+proj=pipeline "
-                  "+step +proj=axisswap +order=2,1 "
-                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-                  "+step +proj=axisswap +order=1,2,-3 "
-                  "+step +proj=vgridshift "
-                  "+grids=no_kv_CD_above_Ell_ETRS89_v2023b.tif +multiplier=1 "
-                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
-                  "+step +proj=axisswap +order=2,1");
-    }
+
+    const auto test = [](bool allAuthorities, const char *srcCode) {
+        auto authFactoryEPSG =
+            AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        auto authFactoryOp =
+            allAuthorities ? AuthorityFactory::create(DatabaseContext::create(),
+                                                      std::string())
+                           : authFactoryEPSG;
+        {
+            auto ctxt =
+                CoordinateOperationContext::create(authFactoryOp, nullptr, 0.0);
+            ctxt->setSpatialCriterion(
+                CoordinateOperationContext::SpatialCriterion::
+                    PARTIAL_INTERSECTION);
+            auto list = CoordinateOperationFactory::create()->createOperations(
+                authFactoryEPSG->createCoordinateReferenceSystem(srcCode),
+                // ETRS89-NOR [EUREF89] + CD Norway deph
+                authFactoryEPSG->createCoordinateReferenceSystem("9883"), ctxt);
+            ASSERT_GE(list.size(), 1U);
+            EXPECT_EQ(
+                list[0]->exportToPROJString(
+                    PROJStringFormatter::create(
+                        PROJStringFormatter::Convention::PROJ_5,
+                        authFactoryEPSG->databaseContext())
+                        .get()),
+                "+proj=pipeline "
+                "+step +proj=axisswap +order=2,1 "
+                "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                "+step +inv +proj=vgridshift "
+                "+grids=no_kv_CD_above_Ell_ETRS89_v2023b.tif +multiplier=1 "
+                "+step +proj=axisswap +order=1,2,-3 "
+                "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                "+step +proj=axisswap +order=2,1");
+        }
+        {
+            auto ctxt =
+                CoordinateOperationContext::create(authFactoryOp, nullptr, 0.0);
+            ctxt->setSpatialCriterion(
+                CoordinateOperationContext::SpatialCriterion::
+                    PARTIAL_INTERSECTION);
+            auto list = CoordinateOperationFactory::create()->createOperations(
+                // ETRS89-NOR [EUREF89] + CD Norway deph
+                authFactoryEPSG->createCoordinateReferenceSystem("9883"),
+                authFactoryEPSG->createCoordinateReferenceSystem(srcCode),
+                ctxt);
+            ASSERT_GE(list.size(), 1U);
+            EXPECT_EQ(
+                list[0]->exportToPROJString(
+                    PROJStringFormatter::create(
+                        PROJStringFormatter::Convention::PROJ_5,
+                        authFactoryEPSG->databaseContext())
+                        .get()),
+                "+proj=pipeline "
+                "+step +proj=axisswap +order=2,1 "
+                "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                "+step +proj=axisswap +order=1,2,-3 "
+                "+step +proj=vgridshift "
+                "+grids=no_kv_CD_above_Ell_ETRS89_v2023b.tif +multiplier=1 "
+                "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                "+step +proj=axisswap +order=2,1");
+        }
+    };
+
+    test(false, "4937");  // ETRS89 3D
+    test(true, "4937");   // ETRS89 3D
+    test(false, "10874"); // ETRS89-NOR [EUREF89] 3D
 }
 
 // ---------------------------------------------------------------------------
