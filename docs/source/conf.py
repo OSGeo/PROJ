@@ -23,15 +23,15 @@ title = "PROJ coordinate transformation software library"
 author = "PROJ contributors"
 
 # The major project version, used as the replacement for |version|
-version = "9.6"
+version = "9.7"
 
 # The full project version, used as the replacement for |release|
-release = "9.7.0-dev"
+release = "9.7.0"
 
 # PROJ-data version
-data_version = "1.22"
+data_version = "1.23"
 
-today_date = date.today() # or use a specific date
+today_date = date(2025, 9, 15) # or use a specific date
 today_fmt = "%d %b %Y"
 
 copyright = "1983-{}, PROJ contributors".format(today_date.year)
@@ -135,7 +135,7 @@ html_context = {
     "theme_vcs_pageview_mode": "edit",
     "github_user": "OSGeo",
     "github_repo": "PROJ",
-    "github_version": "master",
+    "github_version": "9.7",
     "conf_py_path": "/docs/source/",
 }
 
