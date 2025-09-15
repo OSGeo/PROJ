@@ -24,7 +24,7 @@ Updates
 
 * WKT importer: better error message when ``BBOX`` is invalid (e.g south_lat > north_lat) (`#4525 <https://github.com/OSGeo/PROJ/issues/4525>`_)
 
-* Added :c:func:`proj_geod_direct` for PJ trasformation object (`#4532 <https://github.com/OSGeo/PROJ/issues/4532>`_)
+* Added :c:func:`proj_geod_direct` for PJ transformation object (`#4532 <https://github.com/OSGeo/PROJ/issues/4532>`_)
 
 * Support exporting Mercator (Spherical) on a sphere as ``Mercator_1SP`` in WKT1 (`#4555 <https://github.com/OSGeo/PROJ/issues/4555>`_)
 
@@ -38,11 +38,11 @@ Bug Fixes
 
 * :c:func:`proj_trans_bounds()`: fix 9.6.2 regression when going from long/lat crossing antimeridian to projected (`#4526 <https://github.com/OSGeo/PROJ/issues/4526>`_)
 
-* opt_parse: avoid potential heap-buffer-overflow when parsing non-ASCII characters (affect :program:`cct`` and :program:`gie`) (`#4530 <https://github.com/OSGeo/PROJ/issues/4530>`_)
+* opt_parse: avoid potential heap-buffer-overflow when parsing non-ASCII characters (affect :program:`cct` and :program:`gie`) (`#4530 <https://github.com/OSGeo/PROJ/issues/4530>`_)
 
 * :program:`gie`: fix memory leak on non existing input file (`#4531 <https://github.com/OSGeo/PROJ/issues/4531>`_)
 
-* Database: referene ``nl_nsgi_nllat2018.tif`` and ``nl_nsgi_bongeo2004.tif`` grids (`#4534 <https://github.com/OSGeo/PROJ/issues/4534>`_)
+* Database: reference ``nl_nsgi_nllat2018.tif`` and ``nl_nsgi_bongeo2004.tif`` grids (`#4534 <https://github.com/OSGeo/PROJ/issues/4534>`_)
 
 * Fixes related to WKT import/export of ``DerivedGeodetic/GeographicCRS`` (`#4536 <https://github.com/OSGeo/PROJ/issues/4536>`_)
 
@@ -53,7 +53,7 @@ Bug Fixes
 * :cpp:func:`createOperations()`: fix a case involving 2 CompoundCRS, one with TOWGS84, and the 2
   verticalCRS differing by units (`#4552 <https://github.com/OSGeo/PROJ/issues/4552>`_)
 
-* On SQLite query error, show first the error msg than the sql query (`#4553 <https://github.com/OSGeo/PROJ/issues/4553>`_)
+* On SQLite query error, show first the error message than the sql query (`#4553 <https://github.com/OSGeo/PROJ/issues/4553>`_)
 
 * Allow geodesic inverse for meridional points on prolate ellipsoid (`#4560 <https://github.com/OSGeo/PROJ/issues/4560>`_)
 
