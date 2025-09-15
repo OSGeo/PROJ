@@ -4075,12 +4075,27 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
         }
     }
 
-    if ((res.empty() || tooSmallAreas) &&
-        !context.inCreateOperationsWithDatumPivotAntiRecursion &&
+    bool allRequiresPerCoordinateInputTime = false;
+    for (const auto &op : res) {
+        allRequiresPerCoordinateInputTime =
+            op->requiresPerCoordinateInputTime();
+        if (!allRequiresPerCoordinateInputTime) {
+            break;
+        }
+    }
+
+    if (!context.inCreateOperationsWithDatumPivotAntiRecursion &&
         !resFindDirectNonEmptyBeforeFiltering && geodSrc && geodDst &&
         !sameGeodeticDatum && context.context->getIntermediateCRS().empty() &&
         context.context->getAllowUseIntermediateCRS() !=
-            CoordinateOperationContext::IntermediateCRSUse::NEVER) {
+            CoordinateOperationContext::IntermediateCRSUse::NEVER &&
+        (res.empty() || tooSmallAreas ||
+         // If all coordinate operations are time-dependent and none of the
+         // source or target CRS are dynamic, try through an intermediate CRS
+         // (we go here between ETRS89 and ETRS89-NO that would otherwise only
+         // use NKG time-dependent transformations)
+         (allRequiresPerCoordinateInputTime && !geodSrc->isDynamic() &&
+          !geodDst->isDynamic()))) {
         // Currently triggered by "IG05/12 Intermediate CRS" to ITRF2014
 
         std::set<std::string> oSetNames;
@@ -4089,6 +4104,7 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
                 oSetNames.insert(op->nameStr());
             }
         }
+
         auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
             sourceCRS, targetCRS, context, true);
         if (tooSmallAreas && !res.empty()) {
@@ -6337,7 +6353,13 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                 const bool srcAndTargetGeogAreSame =
                     componentsSrc[0]->isEquivalentTo(
                         targetCRS->demoteTo2D(std::string(), dbContext).get(),
-                        util::IComparable::Criterion::EQUIVALENT);
+                        util::IComparable::Criterion::EQUIVALENT) &&
+                    // Kind of a hack for EPSG:4937 to EPSG:9883 to work
+                    // properly
+                    !((componentsSrc[0]->nameStr() == "ETRS89" &&
+                       targetCRS->nameStr() == "ETRS89-NOR [EUREF89]") ||
+                      (componentsSrc[0]->nameStr() == "ETRS89-NOR [EUREF89]" &&
+                       targetCRS->nameStr() == "ETRS89"));
 
                 // Lambda to add to the set the name of geodetic datum of the
                 // CRS

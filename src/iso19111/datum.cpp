@@ -1398,9 +1398,15 @@ void GeodeticReferenceFrame::_exportToWKT(
                                      .size() == 1;
                 }
                 if (!aliasFound) {
-                    l_name = io::WKTFormatter::morphNameToESRI(l_name);
-                    if (!starts_with(l_name, "D_")) {
-                        l_name = "D_" + l_name;
+                    // For now, there's no ESRI alias for this CRS. Fallback to
+                    // ETRS89
+                    if (l_name == "ETRS89-NOR [EUREF89]") {
+                        l_name = "D_ETRS_1989";
+                    } else {
+                        l_name = io::WKTFormatter::morphNameToESRI(l_name);
+                        if (!starts_with(l_name, "D_")) {
+                            l_name = "D_" + l_name;
+                        }
                     }
                 }
             }

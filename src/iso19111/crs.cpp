@@ -2250,9 +2250,15 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                 }
             }
             if (l_esri_name.empty()) {
-                l_esri_name = io::WKTFormatter::morphNameToESRI(l_name);
-                if (!starts_with(l_esri_name, "GCS_")) {
-                    l_esri_name = "GCS_" + l_esri_name;
+                // For now, there's no ESRI alias for this CRS. Fallback to
+                // ETRS89
+                if (l_name == "ETRS89-NOR [EUREF89]") {
+                    l_esri_name = "GCS_ETRS_1989";
+                } else {
+                    l_esri_name = io::WKTFormatter::morphNameToESRI(l_name);
+                    if (!starts_with(l_esri_name, "GCS_")) {
+                        l_esri_name = "GCS_" + l_esri_name;
+                    }
                 }
             }
         }
@@ -3169,10 +3175,10 @@ bool GeographicCRS::_isEquivalentTo(
     }
 
     const auto standardCriterion = getStandardCriterion(criterion);
+    const auto otherGeogCRS = dynamic_cast<const GeographicCRS *>(other);
     if (GeodeticCRS::_isEquivalentToNoTypeCheck(other, standardCriterion,
                                                 dbContext)) {
         // Make sure GeoPackage "Undefined geographic SRS" != EPSG:4326
-        const auto otherGeogCRS = dynamic_cast<const GeographicCRS *>(other);
         if ((nameStr() == "Undefined geographic SRS" ||
              otherGeogCRS->nameStr() == "Undefined geographic SRS") &&
             otherGeogCRS->nameStr() != nameStr()) {
@@ -3180,6 +3186,39 @@ bool GeographicCRS::_isEquivalentTo(
         }
         return true;
     }
+
+    // In EPSG v12.025, Norway projected systems based on ETRS89 (EPSG:4258)
+    // have swiched to use ETRS89-NOR [EUREF89] (EPSG:10875). There's no way
+    // from the current content of the database to infer both CRS are equivalent
+    if (criterion != util::IComparable::Criterion::STRICT) {
+        if (((nameStr() == "ETRS89" &&
+              otherGeogCRS->nameStr() == "ETRS89-NOR [EUREF89]") ||
+             (nameStr() == "ETRS89-NOR [EUREF89]" &&
+              otherGeogCRS->nameStr() == "ETRS89")) &&
+            ellipsoid()->_isEquivalentTo(otherGeogCRS->ellipsoid().get(),
+                                         criterion) &&
+            datumNonNull(dbContext)->primeMeridian()->_isEquivalentTo(
+                otherGeogCRS->datumNonNull(dbContext)->primeMeridian().get(),
+                criterion)) {
+            auto thisCS = coordinateSystem();
+            auto otherCS = otherGeogCRS->coordinateSystem();
+            if (thisCS->_isEquivalentTo(otherCS.get(), criterion)) {
+                return true;
+            } else if (criterion == util::IComparable::Criterion::
+                                        EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS) {
+                const auto &otherAxisList = otherCS->axisList();
+                return thisCS->axisList().size() == 2 &&
+                       otherAxisList.size() == 2 &&
+                       thisCS->_isEquivalentTo(
+                           cs::EllipsoidalCS::create(util::PropertyMap(),
+                                                     otherAxisList[1],
+                                                     otherAxisList[0])
+                               .get(),
+                           criterion);
+            }
+        }
+    }
+
     if (criterion !=
         util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS) {
         return false;
