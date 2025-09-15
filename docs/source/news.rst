@@ -3,6 +3,61 @@
 News
 ###############################################################################
 
+9.7.0
+++++++++++++++++++++
+*September 15th 2025*
+
+Updates
+-------
+
+* Implement "exact" authalic latitude to geographic latitude and use it in `+proj=aea/cea/laea/eqearth/healpix/rhealpix` (`#4441 <https://github.com/OSGeo/PROJ/issues/4441>`_)
+
+* Implement uniform conversions between auxiliary latitudes (`#4446 <https://github.com/OSGeo/PROJ/issues/4446>`_)
+
+* WKT2 parser: recognize ``DEFININGTRANSFORMATION`` (but ignore it) (`#4484 <https://github.com/OSGeo/PROJ/issues/4484>`_)
+
+* Database: add values from ``alias_name`` table that were removed in older EPSG releases, to improve recognizing old WKT strings (`#4490 <https://github.com/OSGeo/PROJ/issues/4490>`_)
+
+* Enable ``-Wimplicit-fallthrough``, ``-Wdeprecated-copy-dtor``, ``-Wweak-vtables``, ``-Wdocumentation-unknown-command`` when possible (`#4516 <https://github.com/OSGeo/PROJ/issues/4516>`_)
+
+* Geostationary projection: speed up inverse spherical and ellipsoidal computation (`#4523 <https://github.com/OSGeo/PROJ/issues/4523>`_)
+
+* WKT importer: better error message when ``BBOX`` is invalid (e.g south_lat > north_lat) (`#4525 <https://github.com/OSGeo/PROJ/issues/4525>`_)
+
+* Added :c:func:`proj_geod_direct` for PJ trasformation object (`#4532 <https://github.com/OSGeo/PROJ/issues/4532>`_)
+
+* Support exporting Mercator (Spherical) on a sphere as ``Mercator_1SP`` in WKT1 (`#4555 <https://github.com/OSGeo/PROJ/issues/4555>`_)
+
+* Database: update to EPSG v12.022 (`#4562 <https://github.com/OSGeo/PROJ/issues/4562>`_)
+
+
+Bug Fixes
+---------
+
+* Fix issue related to `D_Unknown_based_on_WGS_84_ellipsoid` datum name (`#4515 <https://github.com/OSGeo/PROJ/issues/4515>`_)
+
+* :c:func:`proj_trans_bounds()`: fix 9.6.2 regression when going from long/lat crossing antimeridian to projected (`#4526 <https://github.com/OSGeo/PROJ/issues/4526>`_)
+
+* opt_parse: avoid potential heap-buffer-overflow when parsing non-ASCII characters (affect :program:`cct`` and :program:`gie`) (`#4530 <https://github.com/OSGeo/PROJ/issues/4530>`_)
+
+* :program:`gie`: fix memory leak on non existing input file (`#4531 <https://github.com/OSGeo/PROJ/issues/4531>`_)
+
+* Database: referene ``nl_nsgi_nllat2018.tif`` and ``nl_nsgi_bongeo2004.tif`` grids (`#4534 <https://github.com/OSGeo/PROJ/issues/4534>`_)
+
+* Fixes related to WKT import/export of ``DerivedGeodetic/GeographicCRS`` (`#4536 <https://github.com/OSGeo/PROJ/issues/4536>`_)
+
+* Fix :c:func:`tolower()`/:c:func:`toupper()` implementation to not lead to undefined behavior (`#4539 <https://github.com/OSGeo/PROJ/issues/4539>`_)
+
+* IAU2015 CRS: fix wrong code for coordinate system of North Polar and South Polar CRSs (`#4545 <https://github.com/OSGeo/PROJ/issues/4545>`_)
+
+* :cpp:func:`createOperations()`: fix a case involving 2 CompoundCRS, one with TOWGS84, and the 2
+  verticalCRS differing by units (`#4552 <https://github.com/OSGeo/PROJ/issues/4552>`_)
+
+* On SQLite query error, show first the error msg than the sql query (`#4553 <https://github.com/OSGeo/PROJ/issues/4553>`_)
+
+* Allow geodesic inverse for meridional points on prolate ellipsoid (`#4560 <https://github.com/OSGeo/PROJ/issues/4560>`_)
+
+
 9.6.2
 ++++++++++++++++++++
 *June 6th 2025*
