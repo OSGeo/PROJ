@@ -7747,3 +7747,113 @@ TEST(crs, is_dynamic) {
 
     EXPECT_FALSE(createCompoundCRS()->isDynamic());
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, norway_ntm) {
+
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    // "ETRS89-NOR [EUREF89] / NTM zone 5"
+    auto crs = factory->createCoordinateReferenceSystem("5105");
+
+    auto esri_wkt =
+        "PROJCS[\"ETRS_1989_NTM_Zone_5\",GEOGCS[\"GCS_ETRS_1989\","
+        "DATUM[\"D_ETRS_1989\",SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+        "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Transverse_Mercator\"],"
+        "PARAMETER[\"False_Easting\",100000.0],"
+        "PARAMETER[\"False_Northing\",1000000.0],"
+        "PARAMETER[\"Central_Meridian\",5.5],"
+        "PARAMETER[\"Scale_Factor\",1.0],"
+        "PARAMETER[\"Latitude_Of_Origin\",58.0],"
+        "UNIT[\"Meter\",1.0]]";
+
+    // May change in a future version of the ESRI db
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        esri_wkt);
+
+    {
+        auto obj = createFromUserInput(esri_wkt, dbContext, true);
+        auto crs_from_esri = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs_from_esri != nullptr);
+
+        auto res = crs_from_esri->identify(factory);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first.get(), crs.get());
+        EXPECT_EQ(res.front().second, 100);
+    }
+
+    auto wkt2_before_epsg_12_025 =
+        "PROJCRS[\"ETRS89 / NTM zone 5\",\n"
+        "    BASEGEOGCRS[\"ETRS89\",\n"
+        "        ENSEMBLE[\"European Terrestrial Reference System 1989 "
+        "ensemble\",\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 1989\"],\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 1990\"],\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 1991\"],\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 1992\"],\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 1993\"],\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 1994\"],\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 1996\"],\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 1997\"],\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 2000\"],\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 2005\"],\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 2014\"],\n"
+        "            MEMBER[\"European Terrestrial Reference Frame 2020\"],\n"
+        "            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            ENSEMBLEACCURACY[0.1]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"EPSG\",4258]],\n"
+        "    CONVERSION[\"Norway TM zone 5\",\n"
+        "        METHOD[\"Transverse Mercator\",\n"
+        "            ID[\"EPSG\",9807]],\n"
+        "        PARAMETER[\"Latitude of natural origin\",58,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8801]],\n"
+        "        PARAMETER[\"Longitude of natural origin\",5.5,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8802]],\n"
+        "        PARAMETER[\"Scale factor at natural origin\",1,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8805]],\n"
+        "        PARAMETER[\"False easting\",100000,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",1000000,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"northing (N)\",north,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"easting (E)\",east,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    USAGE[\n"
+        "        SCOPE[\"Engineering survey.\"],\n"
+        "        AREA[\"Norway - onshore - west of 6°E.\"],\n"
+        "        BBOX[58.32,4.39,62.64,6.01]],\n"
+        "    ID[\"EPSG\",5105]]";
+
+    {
+        auto obj =
+            createFromUserInput(wkt2_before_epsg_12_025, dbContext, true);
+        auto crs_from_wkt2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs_from_wkt2 != nullptr);
+        EXPECT_TRUE(crs->isEquivalentTo(crs_from_wkt2.get(),
+                                        IComparable::Criterion::EQUIVALENT));
+        EXPECT_TRUE(crs_from_wkt2->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+
+        auto res = crs_from_wkt2->identify(factory);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first.get(), crs.get());
+        EXPECT_EQ(res.front().second, 100);
+    }
+}

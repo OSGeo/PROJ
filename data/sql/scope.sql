@@ -272,3 +272,4 @@ INSERT INTO "scope" VALUES('EPSG','1292','Crop inventory mapping.',0);
 INSERT INTO "scope" VALUES('EPSG','1293','Engineering survey and topographic mapping related to the Woodsmith mine project.',0);
 INSERT INTO "scope" VALUES('EPSG','1294','Emulation of SPCS27.',0);
 INSERT INTO "scope" VALUES('EPSG','1295','Geodesy. Active GNSS network / Continuously Operating Reference Station (CORS) network.',0);
+INSERT INTO "scope" VALUES('EPSG','1296','Merging of spatial data referenced to different national realizations of ETRS89 at the sub-decimetre level of accuracy.',0);
