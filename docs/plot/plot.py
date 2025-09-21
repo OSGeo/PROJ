@@ -152,8 +152,8 @@ def project_geoms(geoms, proj_string):
 
 def meridian(longitude, lat_min, lat_max):
     """Return LineString for a meridian."""
-    lons = np.repeat(longitude, N_POINTS)
-    lats = np.linspace(lat_min, lat_max, N_POINTS)
+    lons = np.repeat(longitude, N_POINTS + 1)
+    lats = np.linspace(lat_min, lat_max, N_POINTS + 1)
     return shapely.linestrings(np.stack((lons, lats)).T)
 
 
