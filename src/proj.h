@@ -1833,7 +1833,7 @@ PJ PROJ_DLL *proj_create_conversion_transverse_mercator_south_oriented(
 
 PJ PROJ_DLL *proj_create_conversion_two_point_equidistant(
     PJ_CONTEXT *ctx, double latitude_first_point, double longitude_first_point,
-    double latitude_second_point, double longitude_secon_point,
+    double latitude_second_point, double longitude_second_point,
     double false_easting, double false_northing, const char *ang_unit_name,
     double ang_unit_conv_factor, const char *linear_unit_name,
     double linear_unit_conv_factor);
