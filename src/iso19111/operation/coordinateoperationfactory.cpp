@@ -3714,7 +3714,8 @@ CoordinateOperationFactory::Private::createOperations(
     }
 
     if (dynamic_cast<const crs::EngineeringCRS *>(sourceCRS.get()) &&
-        sourceCRS->_isEquivalentTo(targetCRS.get())) {
+        sourceCRS->_isEquivalentTo(targetCRS.get(),
+                                   util::IComparable::Criterion::EQUIVALENT)) {
         std::string name("Identity transformation from ");
         name += sourceCRS->nameStr();
         name += " to ";
@@ -3845,7 +3846,9 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
             if (pmoDst.size() == pmoSrc.size()) {
                 bool ok = true;
                 for (size_t i = 0; i < pmoSrc.size(); ++i) {
-                    if (pmoSrc[i]->_isEquivalentTo(pmoDst[i].get())) {
+                    if (pmoSrc[i]->_isEquivalentTo(
+                            pmoDst[i].get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
                         auto pmo = pmoSrc[i]->cloneWithEpochs(*sourceEpoch,
                                                               *targetEpoch);
                         std::vector<operation::CoordinateOperationNNPtr> ops;
@@ -6629,7 +6632,9 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         const auto vertSrc = componentsSrc[1]->extractVerticalCRS();
         const auto vertDst = componentsDst[1]->extractVerticalCRS();
         if (vertSrc && vertDst &&
-            !componentsSrc[1]->_isEquivalentTo(componentsDst[1].get())) {
+            !componentsSrc[1]->_isEquivalentTo(
+                componentsDst[1].get(),
+                util::IComparable::Criterion::EQUIVALENT)) {
             if ((!vertSrc->geoidModel().empty() ||
                  !vertDst->geoidModel().empty()) &&
                 // To be able to use "CGVD28 height to
@@ -6966,7 +6971,8 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 dynamic_cast<crs::GeographicCRS *>(
                     compSrc0BoundCrs->hubCRS().get()) &&
                 compSrc0BoundCrs->hubCRS()->_isEquivalentTo(
-                    compDst0BoundCrs->hubCRS().get())) {
+                    compDst0BoundCrs->hubCRS().get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
                 interpolationCRS =
                     NN_NO_CHECK(util::nn_dynamic_pointer_cast<crs::SingleCRS>(
                         compSrc0BoundCrs->hubCRS()));
@@ -7155,7 +7161,8 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
                 const auto compDst0BoundCrsHubAsGeogCRSDatum =
                     compDst0BoundCrsHubAsGeogCRS->datumNonNull(dbContext);
                 if (boundSrcHubAsGeogCRSDatum->_isEquivalentTo(
-                        compDst0BoundCrsHubAsGeogCRSDatum.get())) {
+                        compDst0BoundCrsHubAsGeogCRSDatum.get(),
+                        util::IComparable::Criterion::EQUIVALENT)) {
                     auto cs = cs::EllipsoidalCS::
                         createLatitudeLongitudeEllipsoidalHeight(
                             common::UnitOfMeasure::DEGREE,
@@ -7181,7 +7188,8 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
                         for (const auto &opDst : geog3DToTargetOps) {
                             if (opSrc->targetCRS() && opDst->sourceCRS() &&
                                 !opSrc->targetCRS()->_isEquivalentTo(
-                                    opDst->sourceCRS().get())) {
+                                    opDst->sourceCRS().get(),
+                                    util::IComparable::Criterion::EQUIVALENT)) {
                                 // Shouldn't happen normally, but typically
                                 // one of them can be 2D and the other 3D
                                 // due to above createOperations() not
