@@ -104,6 +104,7 @@ VALUES
 
 -- cz_cuzk - ČÚZK
 ('CR2005_GTX.gtx','cz_cuzk_CR-2005.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/cz_cuzk_CR-2005.tif',1,1,NULL),
+('cz_cuzk_table_-y-x_3_v1710.tif','cz_cuzk_table_-y-x_3_v1710.tif',NULL,'GTiff','gridshift',0,NULL,'https://cdn.proj.org/cz_cuzk_table_-y-x_3_v1710.tif',1,1,NULL),
 
 -- de_adv - Arbeitsgemeinschaft der Vermessungsverwaltungender der Länder der Bundesrepublik Deutschland (AdV)
 ('BETA2007.gsb','de_adv_BETA2007.tif','BETA2007.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/de_adv_BETA2007.tif',1,1,NULL),
