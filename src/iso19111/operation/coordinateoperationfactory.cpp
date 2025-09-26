@@ -6955,8 +6955,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
 
         auto interpolationCRS =
             NN_NO_CHECK(std::static_pointer_cast<crs::SingleCRS>(srcGeog));
-        auto interpTransformCRS = verticalTransform->interpolationCRS();
-        if (interpTransformCRS) {
+        if (auto interpTransformCRS = verticalTransform->interpolationCRS()) {
             auto interpTransformSingleCRS =
                 std::static_pointer_cast<crs::SingleCRS>(interpTransformCRS);
             if (interpTransformSingleCRS) {
@@ -6976,6 +6975,12 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 interpolationCRS =
                     NN_NO_CHECK(util::nn_dynamic_pointer_cast<crs::SingleCRS>(
                         compSrc0BoundCrs->hubCRS()));
+            } else if (compSrc0BoundCrs && !compDst0BoundCrs &&
+                       compSrc0BoundCrs->hubCRS()->_isEquivalentTo(
+                           dstGeog.get(),
+                           util::IComparable::Criterion::EQUIVALENT)) {
+                interpolationCRS = NN_NO_CHECK(
+                    std::static_pointer_cast<crs::SingleCRS>(dstGeog));
             }
         }
 
