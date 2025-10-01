@@ -12313,7 +12313,9 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
             }
             if (param.value.empty()) {
                 methodName += " " + param.key;
-            } else if (isalpha(param.value[0])) {
+            } else if (isalpha(param.value[0]) || param.key == "gores") {
+                // The value of gores can be a string or a number.
+                // See interrupted.cpp for more info.
                 methodName += " " + param.key + "=" + param.value;
             } else {
                 parameters.push_back(OperationParameter::create(

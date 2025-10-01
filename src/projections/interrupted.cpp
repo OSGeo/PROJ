@@ -111,13 +111,9 @@ PJ *PJ_PROJECTION(interrupted) {
     }
     std::vector<double> sizes;
     if (pj_param(P->ctx, P->params, "tgores").i) {
-        std::string g = pj_param(P->ctx, P->params, "sgores").s;
-        if (g[0] == 'l' || g[0] == 'L') {
-            // if the first char is not alpha, projinfo parses
-            // completely as a number. Start with an L to allow the commas.
-            g = g.substr(1);
-        }
-        std::vector<std::string> gores = osgeo::proj::internal::split(g, ",");
+        const std::string g = pj_param(P->ctx, P->params, "sgores").s;
+        const std::vector<std::string> gores =
+            osgeo::proj::internal::split(g, ",");
         bool success = true;
         for (const auto &gore : gores) {
             if (gore.empty())
