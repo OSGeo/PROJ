@@ -779,6 +779,8 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1422','NATRF2022','EPSG
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1407','EUREF89','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1403','NKG_ETRF14','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1424','SVD2024','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1225','CR-SIRGAS','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1428','CR14','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -8330,6 +8332,15 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5970','EUREF89 / NTM zone
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5958','EUREF89 / NTM zone 18 + NN2000 height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6162','EUREF89 / NTM zone 22 + NN54 height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5962','EUREF89 / NTM zone 22 + NN2000 height','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8905','CR-SIRGAS','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8906','CR-SIRGAS','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8907','CR-SIRGAS','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8908','CR-SIRGAS / CRTM05','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','8912','CR-SIRGAS / CRTM05 + DACR52 height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8909','CR-SIRGAS / UTM zone 16N','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8910','CR-SIRGAS / UTM zone 17N','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11041','CR19','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11042','CR19','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','11027','EUREF89 / UTM zone 37','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5971','EUREF89 / UTM zone 31 + NN2000 height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5972','EUREF89 / UTM zone 32 + NN2000 height','EPSG');
