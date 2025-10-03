@@ -552,7 +552,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','8814','NAD83 / Missouri Central + NAVD
 INSERT INTO "usage" VALUES('EPSG','5993','compound_crs','EPSG','8814','EPSG','2218','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','8815','NAD83 / Missouri West + NAVD88 height',NULL,'EPSG','26998','EPSG','5703',0);
 INSERT INTO "usage" VALUES('EPSG','5994','compound_crs','EPSG','8815','EPSG','2220','EPSG','1142');
-INSERT INTO "compound_crs" VALUES('EPSG','8912','CR-SIRGAS / CRTM05 + DACR52 height',NULL,'EPSG','8908','EPSG','8911',0);
+INSERT INTO "compound_crs" VALUES('EPSG','8912','CR-SIRGAS epoch 2014.59 / CRTM05 + DACR52 height',NULL,'EPSG','8908','EPSG','8911',0);
 INSERT INTO "usage" VALUES('EPSG','6028','compound_crs','EPSG','8912','EPSG','3232','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','9286','ETRS89 + NAP height',NULL,'EPSG','4258','EPSG','5709',0);
 INSERT INTO "usage" VALUES('EPSG','14121','compound_crs','EPSG','9286','EPSG','1172','EPSG','1026');
@@ -930,6 +930,8 @@ INSERT INTO "compound_crs" VALUES('EPSG','10920','CSRN2025 (NAD83 2011) + COH88 
 INSERT INTO "usage" VALUES('EPSG','23574','compound_crs','EPSG','10920','EPSG','1375','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','11000','ETRS89-NOR [EUREF89] + SVD2024 height',NULL,'EPSG','10875','EPSG','10999',0);
 INSERT INTO "usage" VALUES('EPSG','24134','compound_crs','EPSG','11000','EPSG','4831','EPSG','1270');
+INSERT INTO "compound_crs" VALUES('EPSG','11158','RGM23 + IGN 2023 Mayotte height',NULL,'EPSG','10671','EPSG','11157',0);
+INSERT INTO "usage" VALUES('EPSG','24603','compound_crs','EPSG','11158','EPSG','3340','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89-NOR [EUREF89] + SVD2006 height',NULL,'EPSG','10875','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);
