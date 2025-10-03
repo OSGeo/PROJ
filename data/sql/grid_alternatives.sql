@@ -224,6 +224,7 @@ VALUES
 ('ggg00.txt','fr_ign_ggg00v2.tif','ggg00v2.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggg00v2.tif',1,1,NULL),
 ('ggguy00.txt','fr_ign_ggguy15.tif','ggguy15.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggguy15.tif',1,1,NULL),
 ('ggm00.txt','fr_ign_ggm00v2.tif','ggm00v2.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggm00v2.tif',1,1,NULL),
+('GGM23V2.tac','fr_ign_ggm23v2.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggm23v2.tif',1,1,NULL),
 ('GGSPM06v1.mnt','fr_ign_ggspm06v1.tif','ggspm06v1.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggspm06v1.tif',1,1,NULL),
 ('NOT-YET-IN-GRID-TRANSFORMATION-fr_ign_CGVD2013RGSPM06.tif','fr_ign_CGVD2013RGSPM06.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_CGVD2013RGSPM06.tif',1,1,NULL),
 ('NOT-YET-IN-GRID-TRANSFORMATION-fr_ign_ggpf02-Maiao.tif','fr_ign_ggpf02-Maiao.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggpf02-Maiao.tif',1,1,NULL),
