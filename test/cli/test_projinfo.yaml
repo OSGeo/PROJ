@@ -1871,7 +1871,7 @@ tests:
   args: -s ETRF2005 -t ETRF2014 --3d --summary --authority EPSG
   out: |
     Candidate operations found: 1
-    unknown id, Conversion from ETRF2005 (geog3D) to ETRF2005 (geocentric) + Inverse of ITRF2005 to ETRF2005 (1) + ITRF2005 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
+    unknown id, Conversion from ETRF2005 (geog3D) to ETRF2005 (geocentric) + Inverse of ITRF2005 to ETRF2005 (1) + ITRF2005 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0.01 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
 - comment: >
    Test that ETRF2000-PL to ETRF2014 is not negatively affected by https://github.com/OSGeo/PROJ/pull/4364 changes (the current actual result is not golden in any way, using ETRF2000 to ETRF2014 could probably make sense)
   args: -s ETRF2000-PL -t ETRF2014 --summary

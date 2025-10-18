@@ -2819,7 +2819,7 @@ INSERT INTO "projected_crs" VALUES('EPSG','3414','SVY21 / Singapore TM',NULL,'EP
 INSERT INTO "usage" VALUES('EPSG','2433','projected_crs','EPSG','3414','EPSG','1210','EPSG','1056');
 INSERT INTO "projected_crs" VALUES('EPSG','3415','WGS 72BE / South China Sea Lambert',NULL,'EPSG','4400','EPSG','4324','EPSG','19863',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2434','projected_crs','EPSG','3415','EPSG','3470','EPSG','1136');
-INSERT INTO "projected_crs" VALUES('EPSG','3416','ETRS89 / Austria Lambert',NULL,'EPSG','4530','EPSG','4258','EPSG','19947',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','3416','ETRS89-AUT [2002] / Austria Lambert',NULL,'EPSG','4530','EPSG','11057','EPSG','19947',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2435','projected_crs','EPSG','3416','EPSG','1037','EPSG','1210');
 INSERT INTO "projected_crs" VALUES('EPSG','3417','NAD83 / Iowa North (ftUS)',NULL,'EPSG','4497','EPSG','4269','EPSG','15377',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2436','projected_crs','EPSG','3417','EPSG','2198','EPSG','1142');
@@ -2881,7 +2881,7 @@ INSERT INTO "projected_crs" VALUES('EPSG','3445','NAD83(HARN) / New Hampshire (f
 INSERT INTO "usage" VALUES('EPSG','2464','projected_crs','EPSG','3445','EPSG','1398','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','3446','NAD83(HARN) / Rhode Island (ftUS)',NULL,'EPSG','4497','EPSG','4152','EPSG','15390',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2465','projected_crs','EPSG','3446','EPSG','1408','EPSG','1142');
-INSERT INTO "projected_crs" VALUES('EPSG','3447','ETRS89 / Belgian Lambert 2005',NULL,'EPSG','4499','EPSG','4258','EPSG','19862',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','3447','ETRS89-BEL [BEREF2002] / Belgian Lambert 2005',NULL,'EPSG','4499','EPSG','11063','EPSG','19862',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2466','projected_crs','EPSG','3447','EPSG','1347','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','3448','JAD2001 / Jamaica Metric Grid',NULL,'EPSG','4400','EPSG','4758','EPSG','19860',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2467','projected_crs','EPSG','3448','EPSG','3342','EPSG','1092');
@@ -3513,7 +3513,7 @@ INSERT INTO "projected_crs" VALUES('EPSG','3761','NAD83(CSRS) / UTM zone 22N',NU
 INSERT INTO "usage" VALUES('EPSG','2780','projected_crs','EPSG','3761','EPSG','2152','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','3762','WGS 84 / South Georgia Lambert',NULL,'EPSG','4400','EPSG','4326','EPSG','19854',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2781','projected_crs','EPSG','3762','EPSG','3529','EPSG','1189');
-INSERT INTO "projected_crs" VALUES('EPSG','3763','ETRS89 / Portugal TM06',NULL,'EPSG','4499','EPSG','4258','EPSG','19853',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','3763','ETRS89-PRT [1995] / Portugal TM06',NULL,'EPSG','4499','EPSG','11108','EPSG','19853',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2782','projected_crs','EPSG','3763','EPSG','1294','EPSG','1211');
 INSERT INTO "projected_crs" VALUES('EPSG','3764','NZGD2000 / Chatham Island Circuit 2000',NULL,'EPSG','4500','EPSG','4167','EPSG','17959',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2783','projected_crs','EPSG','3764','EPSG','2889','EPSG','1028');
@@ -3591,7 +3591,7 @@ INSERT INTO "projected_crs" VALUES('EPSG','3801','NAD83 / Alberta 3TM ref merid 
 INSERT INTO "usage" VALUES('EPSG','2819','projected_crs','EPSG','3801','EPSG','3540','EPSG','1096');
 INSERT INTO "projected_crs" VALUES('EPSG','3802','NAD83(CSRS) / Alberta 3TM ref merid 120 W',NULL,'EPSG','4400','EPSG','4617','EPSG','17726',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2820','projected_crs','EPSG','3802','EPSG','3540','EPSG','1096');
-INSERT INTO "projected_crs" VALUES('EPSG','3812','ETRS89 / Belgian Lambert 2008',NULL,'EPSG','4499','EPSG','4258','EPSG','3811',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','3812','ETRS89-BEL [BEREF2002] / Belgian Lambert 2008',NULL,'EPSG','4499','EPSG','11063','EPSG','3811',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2821','projected_crs','EPSG','3812','EPSG','1347','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','3814','NAD83 / Mississippi TM',NULL,'EPSG','4499','EPSG','4269','EPSG','3813',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2822','projected_crs','EPSG','3814','EPSG','1393','EPSG','1135');
@@ -5874,7 +5874,7 @@ INSERT INTO "projected_crs" VALUES('EPSG','6867','NAD83(CORS96) / Oregon LCC (m)
 INSERT INTO "usage" VALUES('EPSG','5020','projected_crs','EPSG','6867','EPSG','1406','EPSG','1212');
 INSERT INTO "projected_crs" VALUES('EPSG','6868','NAD83(CORS96) / Oregon GIC Lambert (ft)',NULL,'EPSG','4495','EPSG','6783','EPSG','15374',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5021','projected_crs','EPSG','6868','EPSG','1406','EPSG','1135');
-INSERT INTO "projected_crs" VALUES('EPSG','6870','ETRS89 / Albania TM 2010',NULL,'EPSG','4530','EPSG','4258','EPSG','6869',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','6870','ETRS89-ALB [KRGJSH] / Albania TM 2010',NULL,'EPSG','4530','EPSG','11047','EPSG','6869',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5022','projected_crs','EPSG','6870','EPSG','3212','EPSG','1092');
 INSERT INTO "projected_crs" VALUES('EPSG','6875','RDN2008 / Italy zone (N-E)',NULL,'EPSG','4500','EPSG','6706','EPSG','6877',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14417','projected_crs','EPSG','6875','EPSG','1127','EPSG','1241');
@@ -5916,7 +5916,7 @@ INSERT INTO "projected_crs" VALUES('EPSG','6958','VN-2000 / TM-3 zone 491',NULL,
 INSERT INTO "usage" VALUES('EPSG','5052','projected_crs','EPSG','6958','EPSG','4217','EPSG','1208');
 INSERT INTO "projected_crs" VALUES('EPSG','6959','VN-2000 / TM-3 Da Nang zone',NULL,'EPSG','4400','EPSG','4756','EPSG','6955',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','5053','projected_crs','EPSG','6959','EPSG','4218','EPSG','1208');
-INSERT INTO "projected_crs" VALUES('EPSG','6962','ETRS89 / Albania LCC 2010',NULL,'EPSG','4530','EPSG','4258','EPSG','6961',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','6962','ETRS89-ALB [KRGJSH] / Albania LCC 2010',NULL,'EPSG','4530','EPSG','11047','EPSG','6961',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5054','projected_crs','EPSG','6962','EPSG','3212','EPSG','1241');
 INSERT INTO "projected_crs" VALUES('EPSG','6966','NAD27 / Michigan North',NULL,'EPSG','4497','EPSG','4267','EPSG','6965',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5055','projected_crs','EPSG','6966','EPSG','1723','EPSG','1142');
@@ -6582,17 +6582,17 @@ INSERT INTO "projected_crs" VALUES('EPSG','7794','RDN2008 / Italy zone (E-N)',NU
 INSERT INTO "usage" VALUES('EPSG','5477','projected_crs','EPSG','7794','EPSG','1127','EPSG','1241');
 INSERT INTO "projected_crs" VALUES('EPSG','7795','RDN2008 / Zone 12 (E-N)',NULL,'EPSG','4400','EPSG','6706','EPSG','6878',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5478','projected_crs','EPSG','7795','EPSG','1127','EPSG','1189');
-INSERT INTO "projected_crs" VALUES('EPSG','7799','BGS2005 / UTM zone 34N (N-E)',NULL,'EPSG','4531','EPSG','7798','EPSG','16034',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','7799','ETRS89-BGR [BGS2005] / UTM zone 34N (N-E)',NULL,'EPSG','4531','EPSG','7798','EPSG','16034',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5482','projected_crs','EPSG','7799','EPSG','4428','EPSG','1210');
-INSERT INTO "projected_crs" VALUES('EPSG','7800','BGS2005 / UTM zone 35N (N-E)',NULL,'EPSG','4531','EPSG','7798','EPSG','16035',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','7800','ETRS89-BGR [BGS2005] / UTM zone 35N (N-E)',NULL,'EPSG','4531','EPSG','7798','EPSG','16035',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5483','projected_crs','EPSG','7800','EPSG','4427','EPSG','1210');
-INSERT INTO "projected_crs" VALUES('EPSG','7801','BGS2005 / CCS2005',NULL,'EPSG','4531','EPSG','7798','EPSG','7802',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','7801','ETRS89-BGR [BGS2005] / CCS2005',NULL,'EPSG','4531','EPSG','7798','EPSG','7802',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5484','projected_crs','EPSG','7801','EPSG','3224','EPSG','1061');
-INSERT INTO "projected_crs" VALUES('EPSG','7803','BGS2005 / UTM zone 34N',NULL,'EPSG','4400','EPSG','7798','EPSG','16034',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','5485','projected_crs','EPSG','7803','EPSG','4428','EPSG','1153');
+INSERT INTO "projected_crs" VALUES('EPSG','7803','ETRS89-BGR [BGS2005] / UTM zone 34N',NULL,'EPSG','4400','EPSG','7798','EPSG','16034',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','5485','projected_crs','EPSG','7803','EPSG','4428','EPSG','1189');
 INSERT INTO "projected_crs" VALUES('EPSG','7804','BGS2005 / UTM zone 35N',NULL,'EPSG','4400','EPSG','7798','EPSG','16034',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','5486','projected_crs','EPSG','7804','EPSG','4427','EPSG','1153');
-INSERT INTO "projected_crs" VALUES('EPSG','7805','BGS2005 / UTM zone 36N',NULL,'EPSG','4400','EPSG','7798','EPSG','16036',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','7805','ETRS89-BGR [BGS2005] / UTM zone 36N',NULL,'EPSG','4400','EPSG','7798','EPSG','16036',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5487','projected_crs','EPSG','7805','EPSG','4426','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','7825','Pulkovo 1942 / CS63 zone X1',NULL,'EPSG','4530','EPSG','4284','EPSG','7818',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','5490','projected_crs','EPSG','7825','EPSG','4435','EPSG','1055');
@@ -7154,7 +7154,7 @@ INSERT INTO "projected_crs" VALUES('EPSG','9039','ISN2016 / LAEA Europe',NULL,'E
 INSERT INTO "usage" VALUES('EPSG','6114','projected_crs','EPSG','9039','EPSG','1120','EPSG','1162');
 INSERT INTO "projected_crs" VALUES('EPSG','9040','ISN2016 / LCC Europe',NULL,'EPSG','4532','EPSG','8086','EPSG','19985',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6115','projected_crs','EPSG','9040','EPSG','1120','EPSG','1107');
-INSERT INTO "projected_crs" VALUES('EPSG','9141','KOSOVAREF01 / Balkans zone 7',NULL,'EPSG','4400','EPSG','9140','EPSG','18277',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','9141','ETRS89-XKX [KOSOVAREF01] / Balkans zone 7',NULL,'EPSG','4400','EPSG','9140','EPSG','18277',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6142','projected_crs','EPSG','9141','EPSG','4542','EPSG','1092');
 INSERT INTO "projected_crs" VALUES('EPSG','9149','SIRGAS-Chile 2013 / UTM zone 18S',NULL,'EPSG','4400','EPSG','9148','EPSG','16118',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6146','projected_crs','EPSG','9149','EPSG','3829','EPSG','1142');
@@ -7256,8 +7256,8 @@ INSERT INTO "projected_crs" VALUES('EPSG','9377','MAGNA-SIRGAS 2018 / Origen-Nac
 INSERT INTO "usage" VALUES('EPSG','13998','projected_crs','EPSG','9377','EPSG','1070','EPSG','1091');
 INSERT INTO "projected_crs" VALUES('EPSG','9387','AbInvA96_2020 Grid',NULL,'EPSG','4400','EPSG','9384','EPSG','9385',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14029','projected_crs','EPSG','9387','EPSG','4589','EPSG','1196');
-INSERT INTO "projected_crs" VALUES('EPSG','9391','BGS2005 / UTM zone 35N',NULL,'EPSG','4400','EPSG','7798','EPSG','16035',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','14051','projected_crs','EPSG','9391','EPSG','4427','EPSG','1153');
+INSERT INTO "projected_crs" VALUES('EPSG','9391','ETRS89-BGR [BGS2005] / UTM zone 35N',NULL,'EPSG','4400','EPSG','7798','EPSG','16035',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14051','projected_crs','EPSG','9391','EPSG','4427','EPSG','1189');
 INSERT INTO "projected_crs" VALUES('EPSG','9404','PN68 / UTM zone 27N',NULL,'EPSG','4400','EPSG','9403','EPSG','16027',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14043','projected_crs','EPSG','9404','EPSG','4599','EPSG','1178');
 INSERT INTO "projected_crs" VALUES('EPSG','9405','PN68 / UTM zone 28N',NULL,'EPSG','4400','EPSG','9403','EPSG','16028',NULL,0);
@@ -7702,6 +7702,8 @@ INSERT INTO "projected_crs" VALUES('EPSG','10986','NATRF2022 / Gulf East Central
 INSERT INTO "usage" VALUES('EPSG','23682','projected_crs','EPSG','10986','EPSG','4812','EPSG','1294');
 INSERT INTO "projected_crs" VALUES('EPSG','10987','NATRF2022 / Gulf East (ft)',NULL,'EPSG','4495','EPSG','10968','EPSG','10978',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','23683','projected_crs','EPSG','10987','EPSG','2174','EPSG','1294');
+INSERT INTO "projected_crs" VALUES('EPSG','10995','Xrail84 / London Survey Grid TM',NULL,'EPSG','4400','EPSG','10993','EPSG','10994',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','23909','projected_crs','EPSG','10995','EPSG','4822','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','11012','ETRS89-NOR [EUREF89] / UTM zone 30N (N-E)',NULL,'EPSG','4500','EPSG','10875','EPSG','16030',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','24106','projected_crs','EPSG','11012','EPSG','4823','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','11013','ETRS89-NOR [EUREF89] / UTM zone 31N (N-E)',NULL,'EPSG','4500','EPSG','10875','EPSG','16031',NULL,0);
@@ -7744,6 +7746,8 @@ INSERT INTO "projected_crs" VALUES('EPSG','11117','MAGNA-SIRGAS 2018 / Colombia 
 INSERT INTO "usage" VALUES('EPSG','18950','projected_crs','EPSG','11117','EPSG','1600','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','11118','MAGNA-SIRGAS 2018 / Colombia East zone',NULL,'EPSG','4500','EPSG','20046','EPSG','18069',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18951','projected_crs','EPSG','11118','EPSG','1601','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','11219','ETRS89-BEL [BEREF2011] / Belgian Lambert 2008',NULL,'EPSG','4499','EPSG','11215','EPSG','3811',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','24833','projected_crs','EPSG','11219','EPSG','1347','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','20002','MWC18 Grid',NULL,'EPSG','4400','EPSG','20033','EPSG','10127',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18336','projected_crs','EPSG','20002','EPSG','4666','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','20004','Pulkovo 1995 / Gauss-Kruger zone 4',NULL,'EPSG','4530','EPSG','4200','EPSG','16204',NULL,0);
