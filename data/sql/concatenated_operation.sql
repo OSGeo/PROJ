@@ -451,7 +451,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','9336','NAD27 to NAD83(CSRS)v
 INSERT INTO "usage" VALUES('EPSG','14011','concatenated_operation','EPSG','9336','EPSG','2376','EPSG','1151');
 INSERT INTO "concatenated_operation" VALUES('EPSG','9337','NTF (Paris) to RGF93 v1 (1)','See transformation code 7811 for an alternative which uses the NTv2 method as an emulation of the geocentric interpolation in the second step.','EPSG','4807','EPSG','4171',1.0,'IOGP-Fra',0);
 INSERT INTO "usage" VALUES('EPSG','14012','concatenated_operation','EPSG','9337','EPSG','3694','EPSG','1041');
-INSERT INTO "concatenated_operation" VALUES('EPSG','9499','ETRS89 to GHA height (2)','This concatenated operation gives the same result as the HoehenGrid-plus offset from ETRS89 to GHA height. HoehenGrid-plus is implemented in BEV-Transformator using MGI (CRS 4312) as the interpolation CRS for the grid','EPSG','4937','EPSG','5778',0.07,'BEV-Aut',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','9499','ETRS89-AUT [2002] to GHA height (2)','This concatenated operation gives the same result as the HoehenGrid-plus offset from ETRS89-AUT [2002] to GHA height. HoehenGrid-plus is implemented in BEV-Transformator using MGI (CRS 4312) as the interpolation CRS for the grid','EPSG','11056','EPSG','5778',0.07,'BEV-Aut',0);
 INSERT INTO "usage" VALUES('EPSG','14958','concatenated_operation','EPSG','9499','EPSG','1037','EPSG','1133');
 INSERT INTO "concatenated_operation" VALUES('EPSG','9683','ITRF2014 to GDA94 (2)','See ITRF2014 to GDA94 (1) (CT 9682) for conformal-only alternative (i.e. without distortion modelling).','EPSG','9000','EPSG','4283',0.06,'ICSM-Aus Conf+Dist',0);
 INSERT INTO "usage" VALUES('EPSG','14962','concatenated_operation','EPSG','9683','EPSG','2575','EPSG','1234');
@@ -533,3 +533,9 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','10895','ITRF2020 to ETRS89-D
 INSERT INTO "usage" VALUES('EPSG','24011','concatenated_operation','EPSG','10895','EPSG','1080','EPSG','1027');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11005','SVD2006 height to SVD2024 height (1)','Accuracy is RMS of the accuracies of the two concatenated operation steps.','EPSG','20000','EPSG','10999',1.4,'NMA-Sjm SV',0);
 INSERT INTO "usage" VALUES('EPSG','24141','concatenated_operation','EPSG','11005','EPSG','4831','EPSG','1059');
+INSERT INTO "concatenated_operation" VALUES('EPSG','11066','ITRF2020 to ETRS89-GBR [OSNet v2009] (1)','Accuracy is approximately 1cm at the ETRS89-GBR [OSNet v2009] anchor epoch of 2009.756 but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment. Scale difference in ppb and scale difference rate in ppb/yr where 1/billion = 1E-9 or nm/m.','EPSG','9988','EPSG','11007',0.1,'IOGP-Gbr 2009',0);
+INSERT INTO "usage" VALUES('EPSG','24569','concatenated_operation','EPSG','11066','EPSG','1264','EPSG','1026');
+INSERT INTO "concatenated_operation" VALUES('EPSG','11110','ITRF2020 to ETRS89-PRT [1995] (1)','Accuracy is approximately 1cm at the ETRS89-PRT [1995] anchor epoch of 1995.4, but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment.','EPSG','9988','EPSG','11106',0.1,'IOGP-Prt 1995',0);
+INSERT INTO "usage" VALUES('EPSG','24589','concatenated_operation','EPSG','11110','EPSG','4832','EPSG','1026');
+INSERT INTO "concatenated_operation" VALUES('EPSG','11196','ITRF2020 to ETRS89-XKX [KOSOVAREF01] (1)','Accuracy is approximately 1cm at the ETRS89-XKX [KOSOVAREF01] anchor epoch of 2010.5 but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment.','EPSG','9988','EPSG','9138',0.1,'IOGP-Kos 2001',0);
+INSERT INTO "usage" VALUES('EPSG','24869','concatenated_operation','EPSG','11196','EPSG','4542','EPSG','1026');

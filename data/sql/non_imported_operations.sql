@@ -42,7 +42,7 @@
 -- Non-imported: (6306, 'transformation', 'ED50 / TM 5 NE to Amersfoort / RD New (1)', 9653, 'Complex polynomial of degree 4', 23095, 28992, 1.0, 0)
 -- Non-imported: (7913, 'transformation', 'ETRS89 to OSGB36 / British National Grid (1)', 9633, 'Ordnance Survey National Transformation', 4258, 27700, 0.2, 0)
 -- Non-imported: (7952, 'transformation', 'ETRS89 to OSGB36 / British National Grid (2)', 9633, 'Ordnance Survey National Transformation', 4258, 27700, 0.0, 0)
--- Non-imported: (7953, 'transformation', 'ETRS89 to OSGB36 / British National Grid (3)', 9633, 'Ordnance Survey National Transformation', 4258, 27700, 0.0, 0)
+-- Non-imported: (7953, 'transformation', 'ETRS89-GBR [OSNet v2009] to OSGB36 / British National Grid (3)', 9633, 'Ordnance Survey National Transformation', 11009, 27700, 0.0, 0)
 -- Non-imported: (8241, 'concatenated operation', 'Madrid 1870 (Madrid) to WGS 84 (1)', None, None, 4903, 4326, 14.0, 0)
 -- Non-imported: (8653, 'concatenated operation', 'ED50 to WGS 84 (14)', None, None, 4230, 4326, 1.5, 0)
 -- Non-imported: (8654, 'concatenated operation', 'ED50 to ETRS89 (2)', None, None, 4230, 4258, 2.0, 0)

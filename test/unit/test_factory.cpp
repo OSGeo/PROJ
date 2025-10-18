@@ -2352,11 +2352,10 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
     {
         auto list =
             factory->createFromCoordinateReferenceSystemCodes("4179", "4258");
-        ASSERT_EQ(list.size(), 3U);
+        ASSERT_EQ(list.size(), 2U);
         // Romania has a larger area than Poland (given our approx formula)
-        EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
-        EXPECT_EQ(list[1]->getEPSGCode(), 15993); // Romania - 10m
-        EXPECT_EQ(list[2]->getEPSGCode(), 1644);  // Poland - 1m
+        EXPECT_EQ(list[0]->getEPSGCode(), 15993); // Romania - 10m
+        EXPECT_EQ(list[1]->getEPSGCode(), 1644);  // Poland - 1m
     }
     {
         // Test removal of superseded transform
@@ -2364,7 +2363,7 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
             "EPSG", "4179", "EPSG", "4258", false, false, false, true);
         ASSERT_EQ(list.size(), 2U);
         // Romania has a larger area than Poland (given our approx formula)
-        EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
+        EXPECT_EQ(list[0]->getEPSGCode(), 15993); // Romania - 10m
         EXPECT_EQ(list[1]->getEPSGCode(), 1644);  // Poland - 1m
     }
 }

@@ -1049,15 +1049,15 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
     c.xyzt.z = 0;
     c.xyzt.t = HUGE_VAL;
     c = proj_trans(P, PJ_FWD, c);
-    EXPECT_NEAR(c.xy.x, 44.999701238, 1e-9);
-    EXPECT_NEAR(c.xy.y, 24.998474948, 1e-9);
+    EXPECT_NEAR(c.xy.x, 45.000346961, 1e-9);
+    EXPECT_NEAR(c.xy.y, 25.001524075, 1e-9);
     EXPECT_EQ(std::string(proj_pj_info(P).definition),
               "proj=pipeline step proj=axisswap order=2,1 "
               "step proj=unitconvert xy_in=deg xy_out=rad "
               "step proj=push v_3 "
               "step proj=cart "
-              "ellps=krass step proj=helmert x=2.3287 y=-147.0425 z=-92.0802 "
-              "rx=0.3092483 ry=-0.32482185 rz=-0.49729934 s=5.68906266 "
+              "ellps=krass step proj=helmert x=68.1564 y=32.7756 z=80.2249 "
+              "rx=2.20333014 ry=2.19256447 rz=-2.54166911 s=-0.14155333 "
               "convention=coordinate_frame step inv proj=cart ellps=GRS80 "
               "step proj=pop v_3 "
               "step proj=unitconvert xy_in=rad xy_out=deg step proj=axisswap "
@@ -1074,8 +1074,8 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
     proj_trans_generic(P, PJ_FWD, &(c.xyz.x), sizeof(double), 1, &(c.xyz.y),
                        sizeof(double), 1, &(c.xyz.z), sizeof(double), 1,
                        nullptr, 0, 0);
-    EXPECT_NEAR(c.xy.x, 44.999701238, 1e-9);
-    EXPECT_NEAR(c.xy.y, 24.998474948, 1e-9);
+    EXPECT_NEAR(c.xy.x, 45.000346961, 1e-9);
+    EXPECT_NEAR(c.xy.y, 25.001524075, 1e-9);
 
     // Poland
     c.xyz.x = 52; // Lat
