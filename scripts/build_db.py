@@ -713,6 +713,22 @@ def fill_helmert_transformation(proj_db_cursor):
             for i in range(15):
                 assert param_uom_code[i] is not None, (code, name, i, param_name[i])
 
+        # FIXME: issues with EPSG 12.033. Remove when fixed
+        if param_uom_code[0] is None and (param_value[0], param_value[1], param_value[2]) == (0,0,0):
+            print(f"Warning: for transformation {code}, setting UoM of translation terms to metre")
+            param_uom_code[0] = 9001
+        if code == 10996 and source_crs_code == 11008:
+            print("Warning: for transformation 10996, patching source_crs_code from 11008 to 11007")
+            source_crs_code = 11007
+        if code == 11050 and source_crs_code == 11047 and target_crs_code == 4326:
+            print("Warning: for transformation 11050, patching source_crs_code from 11047 to 11045, and target_crs_code from 4326 to 4978")
+            source_crs_code = 11007
+            target_crs_code = 4978
+        if code == 11185 and method_name == "Geocentric translations (geog2D domain)":
+            print("Warning: for transformation 11185, patching coordinate operation method")
+            method_code = 1031
+            method_name = "Geocentric translations (geocentric domain)"
+
         arg = (EPSG_AUTHORITY, code, name,
                remarks,
                EPSG_AUTHORITY, method_code, method_name,
@@ -732,8 +748,12 @@ def fill_helmert_transformation(proj_db_cursor):
                )
 
         #proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'helmert_transformation')", (EPSG_AUTHORITY, code))
-        proj_db_cursor.execute('INSERT INTO helmert_transformation VALUES (' +
-            '?,?,?, ?, ?,?,?, ?,?, ?,?, ?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?, ?,?)', arg)
+        try:
+            proj_db_cursor.execute('INSERT INTO helmert_transformation VALUES (' +
+                '?,?,?, ?, ?,?,?, ?,?, ?,?, ?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?, ?,?)', arg)
+        except Exception:
+            print(arg)
+            raise
 
 def fill_grid_transformation(proj_db_cursor):
     proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type IN ('transformation', 'point motion operation') AND coord_op_method_code NOT IN (1131, 1136) AND (coord_op_method_name LIKE 'Geographic3D to%' OR coord_op_method_name LIKE 'Geog3D to%' OR coord_op_method_name LIKE 'Point motion % grid%' OR coord_op_method_name LIKE 'Vertical Offset %rid%' OR coord_op_method_name LIKE 'Geographic3D Offset % velocity %rid%' OR coord_op_method_name IN ('NADCON', 'NADCON5 (2D)', 'NADCON5 (3D)', 'NTv1', 'NTv2', 'VERTCON', 'Geocentric translations (geog2D domain) by grid (IGN)', 'Geocentric translations using NEU velocity grid (gtg)', 'Geocen translations by grid (gtg) & Geocen translations NEU velocities (gtg)', 'New Zealand Deformation Model', 'Cartesian Grid Offsets by TIN Interpolation (JSON)', 'Vertical Offset by TIN Interpolation (JSON)', 'Geographic2D Offsets by TIN Interpolation (JSON)', 'Vertical change by geoid grid difference (NRCan)'))")
@@ -1177,12 +1197,18 @@ def fill_supersession(proj_db_cursor):
             print('Skipping supersession of %d (%s) by %d (%s) because of exception specific to NAD27 to NAD83' % (code, src_name, superseded_by, dst_name))
             continue
 
-        proj_db_cursor.execute("SELECT source_crs_code, target_crs_code FROM epsg_coordoperation WHERE coord_op_code = ?", (code,))
-        source_crs_code_superseded, target_crs_code_superseded = proj_db_cursor.fetchone()
+        proj_db_cursor.execute("SELECT source_crs_code, crs1.coord_ref_sys_name, target_crs_code, crs2.coord_ref_sys_name FROM epsg_coordoperation LEFT JOIN epsg_coordinatereferencesystem crs1 ON source_crs_code = crs1.coord_ref_sys_code LEFT JOIN epsg_coordinatereferencesystem crs2 ON target_crs_code = crs2.coord_ref_sys_code WHERE coord_op_code = ?", (code,))
+        source_crs_code_superseded, source_crs_name_superseded, target_crs_code_superseded, target_crs_name_superseded = proj_db_cursor.fetchone()
 
-        proj_db_cursor.execute("SELECT source_crs_code, target_crs_code FROM epsg_coordoperation WHERE coord_op_code = ?", (superseded_by,))
-        source_crs_code_replacement, target_crs_code_replacement = proj_db_cursor.fetchone()
+        proj_db_cursor.execute("SELECT source_crs_code, crs1.coord_ref_sys_name, target_crs_code, crs2.coord_ref_sys_name FROM epsg_coordoperation LEFT JOIN epsg_coordinatereferencesystem crs1 ON source_crs_code = crs1.coord_ref_sys_code LEFT JOIN epsg_coordinatereferencesystem crs2 ON target_crs_code = crs2.coord_ref_sys_code WHERE coord_op_code = ?", (superseded_by,))
+        source_crs_code_replacement, source_crs_name_replacement, target_crs_code_replacement, target_crs_name_replacement = proj_db_cursor.fetchone()
         same_source_target_crs = (source_crs_code_superseded, target_crs_code_superseded) == (source_crs_code_replacement, target_crs_code_replacement)
+        if not same_source_target_crs:
+            for crs_name_prefix in ("ETRS89", ):
+                if source_crs_code_superseded == source_crs_code_replacement and target_crs_name_superseded.startswith(crs_name_prefix) and target_crs_name_replacement.startswith(crs_name_prefix):
+                    same_source_target_crs = True
+                elif target_crs_code_superseded == target_crs_code_replacement and source_crs_name_superseded.startswith(crs_name_prefix) and source_crs_name_replacement.startswith(crs_name_prefix):
+                    same_source_target_crs = True
         proj_db_cursor.execute("INSERT INTO supersession VALUES (?,'EPSG',?,?,'EPSG',?,'EPSG',?)", (superseded_table_name, code, replacement_table_name, superseded_by, same_source_target_crs))
 
 def fill_deprecation(proj_db_cursor):

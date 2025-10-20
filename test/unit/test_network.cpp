@@ -1383,7 +1383,7 @@ TEST(networking, network_endpoint_api_and_not_reachable_hgridshift) {
         EXPECT_EQ(c2.xyz.x, HUGE_VAL);
         EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
         PJ *last_op = proj_trans_get_last_used_operation(P);
-        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (8)");
+        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (5)");
         proj_destroy(last_op);
     }
 
@@ -1395,7 +1395,7 @@ TEST(networking, network_endpoint_api_and_not_reachable_hgridshift) {
         EXPECT_EQ(c2.xyz.x, HUGE_VAL);
         EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
         PJ *last_op = proj_trans_get_last_used_operation(P);
-        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (8)");
+        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (5)");
         proj_destroy(last_op);
     }
 
@@ -1407,7 +1407,7 @@ TEST(networking, network_endpoint_api_and_not_reachable_hgridshift) {
         EXPECT_EQ(c2.xyz.x, HUGE_VAL);
         EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
         PJ *last_op = proj_trans_get_last_used_operation(P);
-        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (8)");
+        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (5)");
         proj_destroy(last_op);
     }
 

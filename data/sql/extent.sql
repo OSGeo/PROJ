@@ -3797,6 +3797,7 @@ INSERT INTO "extent" VALUES('EPSG','4818','Kazakhstan - 72°E to 78°E','Kazakhs
 INSERT INTO "extent" VALUES('EPSG','4819','Kazakhstan - 78°E to 84°E','Kazakhstan - 78°E to 84°E.',42.19,53.18,78.0,84.0,0);
 INSERT INTO "extent" VALUES('EPSG','4820','Kazakhstan - east of 84°E','Kazakhstan - east of 84°E.',46.82,50.7,84.0,87.35,0);
 INSERT INTO "extent" VALUES('EPSG','4821','USA - Gulf central planning area deep water','United States (USA) - central Gulf of Mexico outer continental shelf (GoM OCS) planning area, deep water portion.',25.58,29.35,-93.38,-86.53,0);
+INSERT INTO "extent" VALUES('EPSG','4822','UK - Greater London','United Kingdom (UK) - Greater London and surrounding area.',51.1,52.0,-1.33,0.8,0);
 INSERT INTO "extent" VALUES('EPSG','4823','Norway - west of 0°E','Norway including Svalbard - west of 0°E.',63.47,80.49,-3.35,0.0,0);
 INSERT INTO "extent" VALUES('EPSG','4824','Norway - 0°E to 6°E','Norway including Svalbard between 0°E and 6°E, onshore and offshore.',56.08,82.45,0.0,6.0,0);
 INSERT INTO "extent" VALUES('EPSG','4825','Norway - 6°E to 12°E','Norway including Svalbard south of 84°N between 6°E and 12°E, onshore and offshore.',56.88,84.0,5.99,12.0,0);
@@ -3806,3 +3807,4 @@ INSERT INTO "extent" VALUES('EPSG','4828','Norway - 24°E to 30°E','Norway incl
 INSERT INTO "extent" VALUES('EPSG','4829','Norway - 30°E to 36°E','Norway including Svalbard south of 84°N between 30°E and 36°E, onshore and offshore.',69.46,84.0,30.0,36.0,0);
 INSERT INTO "extent" VALUES('EPSG','4830','Norway - east of 36°E','Norway including Svalbard - east of 36°E.',72.99,79.07,36.0,38.0,0);
 INSERT INTO "extent" VALUES('EPSG','4831','Svalbard','Svalbard including Bear Island.',74.3208,81.8504,6.49005,33.50985,0);
+INSERT INTO "extent" VALUES('EPSG','4832','Portugal - mainland - onshore and offshore','Portugal - mainland ("continental") - onshore and offshore.',34.91,42.16,-13.87,-6.19,0);
