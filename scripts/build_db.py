@@ -713,22 +713,6 @@ def fill_helmert_transformation(proj_db_cursor):
             for i in range(15):
                 assert param_uom_code[i] is not None, (code, name, i, param_name[i])
 
-        # FIXME: issues with EPSG 12.033. Remove when fixed
-        if param_uom_code[0] is None and (param_value[0], param_value[1], param_value[2]) == (0,0,0):
-            print(f"Warning: for transformation {code}, setting UoM of translation terms to metre")
-            param_uom_code[0] = 9001
-        if code == 10996 and source_crs_code == 11008:
-            print("Warning: for transformation 10996, patching source_crs_code from 11008 to 11007")
-            source_crs_code = 11007
-        if code == 11050 and source_crs_code == 11047 and target_crs_code == 4326:
-            print("Warning: for transformation 11050, patching source_crs_code from 11047 to 11045, and target_crs_code from 4326 to 4978")
-            source_crs_code = 11007
-            target_crs_code = 4978
-        if code == 11185 and method_name == "Geocentric translations (geog2D domain)":
-            print("Warning: for transformation 11185, patching coordinate operation method")
-            method_code = 1031
-            method_name = "Geocentric translations (geocentric domain)"
-
         arg = (EPSG_AUTHORITY, code, name,
                remarks,
                EPSG_AUTHORITY, method_code, method_name,

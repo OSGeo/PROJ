@@ -193,7 +193,7 @@ INSERT INTO "extent" VALUES('EPSG','1213','Solomon Islands - onshore main island
 INSERT INTO "extent" VALUES('EPSG','1214','Somalia','Somalia - onshore and offshore.',-3.61,13.5,40.98,54.43,0);
 INSERT INTO "extent" VALUES('EPSG','1215','South Africa','South Africa - onshore and offshore, including Marion Island, and Prince Edward Island.',-50.32,-22.13,13.33,42.85,0);
 INSERT INTO "extent" VALUES('EPSG','1216','South Georgia and the South Sandwich Islands','South Georgia and the South Sandwich Islands - onshore and offshore.',-62.79,-50.15,-48.06,-19.84,0);
-INSERT INTO "extent" VALUES('EPSG','1217','Spain','Spain - mainland, Balearic Islands, Canary Islands, Ceuta and Melila - onshore and offshore.',24.6,46.26,-21.93,6.3,0);
+INSERT INTO "extent" VALUES('EPSG','1217','Spain','Spain - mainland, Balearic Islands, Canary Islands, Ceuta and Melilla - onshore and offshore.',24.6,46.26,-21.93,6.3,0);
 INSERT INTO "extent" VALUES('EPSG','1218','Sri Lanka','Sri Lanka - onshore and offshore.',2.58,11.45,77.02,85.24,0);
 INSERT INTO "extent" VALUES('EPSG','1219','St Helena, Ascension and Tristan da Cunha','St Helena, Ascension and Tristan da Cunha archipelago (Gough, Inaccessible, Nightingale and Stoltenhoff Islands) - onshore and offshore.',-43.71,-4.55,-17.79,-2.16,0);
 INSERT INTO "extent" VALUES('EPSG','1220','St Pierre and Miquelon','St Pierre and Miquelon - onshore and offshore.',43.41,47.37,-57.1,-55.9,0);
@@ -3808,3 +3808,8 @@ INSERT INTO "extent" VALUES('EPSG','4829','Norway - 30°E to 36°E','Norway incl
 INSERT INTO "extent" VALUES('EPSG','4830','Norway - east of 36°E','Norway including Svalbard - east of 36°E.',72.99,79.07,36.0,38.0,0);
 INSERT INTO "extent" VALUES('EPSG','4831','Svalbard','Svalbard including Bear Island.',74.3208,81.8504,6.49005,33.50985,0);
 INSERT INTO "extent" VALUES('EPSG','4832','Portugal - mainland - onshore and offshore','Portugal - mainland ("continental") - onshore and offshore.',34.91,42.16,-13.87,-6.19,0);
+INSERT INTO "extent" VALUES('EPSG','4833','Spain - mainland and Balearic Islands','Spain - mainland, Balearic Islands, Ceuta and Melilla - onshore and offshore.',35.26,46.26,-13.86,6.3,0);
+INSERT INTO "extent" VALUES('EPSG','4834','Spain - mainland - west of 12°W','Spain - mainland offshore west of 12°W.',41.36,45.83,-13.86,-12.0,0);
+INSERT INTO "extent" VALUES('EPSG','4835','Spain - mainland - 12°W to 6°W','Spain - mainland between 12°W and 6°W - onshore and offshore.',35.75,46.26,-12.0,-5.99,0);
+INSERT INTO "extent" VALUES('EPSG','4836','Spain - mainland - 6°W to 0°E','Spain - mainland between 6°W and 0°E - onshore and offshore, including Ceuta and Melilla.',35.26,45.36,-6.0,0.0,0);
+INSERT INTO "extent" VALUES('EPSG','4837','Spain - east of 0°E','Spain - east of 0°E - onshore and offshore, including the Balearic Islands.',37.0,42.86,0.0,6.3,0);
