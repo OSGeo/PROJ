@@ -1129,3 +1129,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25884','LKS92 / TM Balti
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3447','ETRS89 / Lambert 2005','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6962','ETRS89 / Albania LCC','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6870','ETRS89 / Albania TM','EPSG_OLD');
+
+-- Changed in EPSG v12.035
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10826','ETRS89 + LAS-2000 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10839','ETRS89 + LAS-2000 height','EPSG_OLD');

@@ -1132,7 +1132,7 @@ tests:
   out: |
     PROJ.4 string:
     +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs
-- comment: Testing RH2000 height to SWEREF99
+- comment: Testing RH2000 height to ETRS89-SWE [SWEREF 99]
   args: -s EPSG:5613 -t EPSG:4977
   out: |
     Candidate operations found: 2
@@ -1161,10 +1161,11 @@ tests:
                         LENGTHUNIT["metre",1]],
                 ID["EPSG",5613]]],
         TARGETCRS[
-            GEOGCRS["SWEREF99",
-                DATUM["SWEREF99",
+            GEOGCRS["ETRS89-SWE [SWEREF 99]",
+                DATUM["SWEREF 99",
                     ELLIPSOID["GRS 1980",6378137,298.257222101,
-                        LENGTHUNIT["metre",1]]],
+                        LENGTHUNIT["metre",1]],
+                    ANCHOREPOCH[1999.5]],
                 PRIMEM["Greenwich",0,
                     ANGLEUNIT["degree",0.0174532925199433]],
                 CS[ellipsoidal,3],
@@ -1190,13 +1191,13 @@ tests:
     -------------------------------------
     Operation No. 2:
 
-    unknown id, Transformation from RH2000 height to SWEREF99 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
+    unknown id, Transformation from RH2000 height to ETRS89-SWE [SWEREF 99] (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
 
     PROJ string:
     +proj=noop
 
     WKT2:2019 string:
-    COORDINATEOPERATION["Transformation from RH2000 height to SWEREF99 (ballpark vertical transformation, without ellipsoid height to vertical height correction)",
+    COORDINATEOPERATION["Transformation from RH2000 height to ETRS89-SWE [SWEREF 99] (ballpark vertical transformation, without ellipsoid height to vertical height correction)",
         SOURCECRS[
             VERTCRS["RH2000 height",
                 DYNAMIC[
@@ -1207,10 +1208,11 @@ tests:
                         LENGTHUNIT["metre",1]],
                 ID["EPSG",5613]]],
         TARGETCRS[
-            GEOGCRS["SWEREF99",
-                DATUM["SWEREF99",
+            GEOGCRS["ETRS89-SWE [SWEREF 99]",
+                DATUM["SWEREF 99",
                     ELLIPSOID["GRS 1980",6378137,298.257222101,
-                        LENGTHUNIT["metre",1]]],
+                        LENGTHUNIT["metre",1]],
+                    ANCHOREPOCH[1999.5]],
                 PRIMEM["Greenwich",0,
                     ANGLEUNIT["degree",0.0174532925199433]],
                 CS[ellipsoidal,3],
@@ -1776,19 +1778,19 @@ tests:
   out: |
     EPSG:4258 "ETRS89"
     EPSG:9398 "Tenerife height"
-    EPSG:9505 "ETRS89 + Alicante height"
+    EPSG:9505 "ETRS89-ESP [REGENTE] + Alicante height"
 - args: --list-crs --area Spain --spatial-test contains
   grep: EPSG:9505|EPSG:9398|EPSG:4258|EPSG:5703
   sort:
   out: |
     EPSG:9398 "Tenerife height"
-    EPSG:9505 "ETRS89 + Alicante height"
+    EPSG:9505 "ETRS89-ESP [REGENTE] + Alicante height"
 - args: --list-crs --area Spain
   grep: EPSG:9505|EPSG:9398|EPSG:4258|EPSG:5703
   sort:
   out: |
     EPSG:9398 "Tenerife height"
-    EPSG:9505 "ETRS89 + Alicante height"
+    EPSG:9505 "ETRS89-ESP [REGENTE] + Alicante height"
 - args: --list-crs geodetic
   grep: EPSG:4326|EPSG:4979|EPSG:4978
   sort:
