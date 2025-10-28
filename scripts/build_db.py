@@ -1077,11 +1077,6 @@ def fill_concatenated_operation(proj_db_cursor):
     for (code, name, method_code, method_name, source_crs_code, target_crs_code,  coord_op_accuracy, coord_tfm_version, deprecated, remarks) in proj_db_cursor.fetchall():
         expected_order = 1
         steps_code = []
-        
-        # FIXME: bug in EPSG v12.037
-        if code == 11206 and source_crs_code == 10569:
-            print("Patching operation 11206 to use source_crs_code = 9988 instead of 10569")
-            source_crs_code = 9988
 
         iterator = proj_db_cursor.execute("SELECT op_path_step, single_operation_code FROM epsg_coordoperationpath WHERE concat_operation_code = ? ORDER BY op_path_step", (code,))
         for (order, single_operation_code) in iterator:

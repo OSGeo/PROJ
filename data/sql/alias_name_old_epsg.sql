@@ -1141,3 +1141,8 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3065','ETRF89 IT / UTM z
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3064','ETRF89 IT / UTM zone 32N','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9716','ETRF89 IT / UTM zone 34N','EPSG_OLD');
 
+-- Changed in EPSG v12.038
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3067','EUREF-FIN / UTM zone 35N','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10688','ETRS89','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10689','ETRS89','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10690','ETRS89','EPSG_OLD');
