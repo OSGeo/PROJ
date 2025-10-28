@@ -92,7 +92,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','5951','ETRS89-NOR [EUREF89] / NTM zone
 INSERT INTO "usage" VALUES('EPSG','4353','compound_crs','EPSG','5951','EPSG','3651','EPSG','1029');
 INSERT INTO "compound_crs" VALUES('EPSG','5952','ETRS89-NOR [EUREF89] / NTM zone 12 + NN2000 height',NULL,'EPSG','5112','EPSG','5941',0);
 INSERT INTO "usage" VALUES('EPSG','4354','compound_crs','EPSG','5952','EPSG','3653','EPSG','1029');
-INSERT INTO "compound_crs" VALUES('EPSG','5953','ETRS89-NOR [EUREF89 / NTM zone 13 + NN2000 height',NULL,'EPSG','5113','EPSG','5941',0);
+INSERT INTO "compound_crs" VALUES('EPSG','5953','ETRS89-NOR [EUREF89] / NTM zone 13 + NN2000 height',NULL,'EPSG','5113','EPSG','5941',0);
 INSERT INTO "usage" VALUES('EPSG','4355','compound_crs','EPSG','5953','EPSG','3654','EPSG','1029');
 INSERT INTO "compound_crs" VALUES('EPSG','5954','ETRS89-NOR [EUREF89] / NTM zone 14 + NN2000 height',NULL,'EPSG','5114','EPSG','5941',0);
 INSERT INTO "usage" VALUES('EPSG','4356','compound_crs','EPSG','5954','EPSG','3655','EPSG','1029');
@@ -704,11 +704,11 @@ INSERT INTO "compound_crs" VALUES('EPSG','9714','NAD83(CSRS) / UTM zone 24N + CG
 INSERT INTO "usage" VALUES('EPSG','15197','compound_crs','EPSG','9714','EPSG','4617','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','9715','NAD83(CSRS) / UTM zone 15N + CGVD2013a(2010) height',NULL,'EPSG','3159','EPSG','9245',0);
 INSERT INTO "usage" VALUES('EPSG','15200','compound_crs','EPSG','9715','EPSG','3414','EPSG','1142');
-INSERT INTO "compound_crs" VALUES('EPSG','9723','ETRS89 + Genoa 1942 height',NULL,'EPSG','4258','EPSG','5214',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9723','ETRS89-ITA [RDN2008] + Genoa 1942 height',NULL,'EPSG','6706','EPSG','5214',0);
 INSERT INTO "usage" VALUES('EPSG','15255','compound_crs','EPSG','9723','EPSG','3736','EPSG','1270');
-INSERT INTO "compound_crs" VALUES('EPSG','9724','ETRS89 + Catania 1965 height',NULL,'EPSG','4258','EPSG','9721',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9724','ETRS89-ITA [RDN2008] + Catania 1965 height',NULL,'EPSG','6706','EPSG','9721',0);
 INSERT INTO "usage" VALUES('EPSG','15324','compound_crs','EPSG','9724','EPSG','2340','EPSG','1270');
-INSERT INTO "compound_crs" VALUES('EPSG','9725','ETRS89 + Cagliari 1956 height',NULL,'EPSG','4258','EPSG','9722',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9725','ETRS89-ITA [RDN2008] + Cagliari 1956 height',NULL,'EPSG','6706','EPSG','9722',0);
 INSERT INTO "usage" VALUES('EPSG','15257','compound_crs','EPSG','9725','EPSG','2339','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','9742','EOS21 Grid + ODN height',NULL,'EPSG','9741','EPSG','5701',0);
 INSERT INTO "usage" VALUES('EPSG','15318','compound_crs','EPSG','9742','EPSG','4620','EPSG','1141');
@@ -933,7 +933,7 @@ INSERT INTO "usage" VALUES('EPSG','24857','compound_crs','EPSG','10997','EPSG','
 INSERT INTO "compound_crs" VALUES('EPSG','11000','ETRS89-NOR [EUREF89] + SVD2024 height',NULL,'EPSG','10875','EPSG','10999',0);
 INSERT INTO "usage" VALUES('EPSG','24134','compound_crs','EPSG','11000','EPSG','4831','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','11006','London Survey Grid 2025',NULL,'EPSG','10995','EPSG','10989',0);
-INSERT INTO "usage" VALUES('EPSG','24862','compound_crs','EPSG','11006','EPSG','4822','EPSG','1141');
+INSERT INTO "usage" VALUES('EPSG','24862','compound_crs','EPSG','11006','EPSG','4822','EPSG','1297');
 INSERT INTO "compound_crs" VALUES('EPSG','11158','RGM23 + IGN 2023 Mayotte height',NULL,'EPSG','10671','EPSG','11157',0);
 INSERT INTO "usage" VALUES('EPSG','24603','compound_crs','EPSG','11158','EPSG','3340','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89-NOR [EUREF89] + SVD2006 height',NULL,'EPSG','10875','EPSG','20000',0);

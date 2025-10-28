@@ -461,7 +461,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','9687','GDA94 to WGS 84 (G176
 INSERT INTO "usage" VALUES('EPSG','14964','concatenated_operation','EPSG','9687','EPSG','2575','EPSG','1234');
 INSERT INTO "concatenated_operation" VALUES('EPSG','9731','ETRS89 to ETRS89 + Catania 1965 height (1)','','EPSG','4937','EPSG','9724',0.035,'IGM-Ita 2005 Sicily',1);
 INSERT INTO "usage" VALUES('EPSG','15285','concatenated_operation','EPSG','9731','EPSG','2340','EPSG','1270');
-INSERT INTO "concatenated_operation" VALUES('EPSG','9750','ETRS89 to Catania 1965 height (1)','','EPSG','4937','EPSG','9721',0.035,'IGM-Ita 2005 Sicily',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','9750','ETRS89-ITA [RDN2008] to Catania 1965 height (1)','','EPSG','6705','EPSG','9721',0.035,'IGM-Ita 2005 Sicily',0);
 INSERT INTO "usage" VALUES('EPSG','15385','concatenated_operation','EPSG','9750','EPSG','2340','EPSG','1133');
 INSERT INTO "concatenated_operation" VALUES('EPSG','10146','INAGeoid2020 v1 height to INAGeoid v2 height (1)','In central Java INAGeoid2020 v2 height minus INAGeoid2020 v1 height is approximately +0.2m (v1 surface is above the v2 surface). This difference varies significantly across Indonesia.','EPSG','9471','EPSG','20036',0.2,'BIG-Idn 2022',1);
 INSERT INTO "usage" VALUES('EPSG','18452','concatenated_operation','EPSG','10146','EPSG','1122','EPSG','1178');
@@ -541,3 +541,5 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','11140','ITRF2020 to ETRS89-E
 INSERT INTO "usage" VALUES('EPSG','24595','concatenated_operation','EPSG','11140','EPSG','4833','EPSG','1026');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11196','ITRF2020 to ETRS89-XKX [KOSOVAREF01] (1)','Accuracy is approximately 1cm at the ETRS89-XKX [KOSOVAREF01] anchor epoch of 2010.5 but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment.','EPSG','9988','EPSG','9138',0.1,'IOGP-Kos 2001',0);
 INSERT INTO "usage" VALUES('EPSG','24869','concatenated_operation','EPSG','11196','EPSG','4542','EPSG','1026');
+INSERT INTO "concatenated_operation" VALUES('EPSG','11206','ITRF2020 to ETRS89-MDA [MOLDREF99] (1)','Accuracy is approximately 1cm at the ETRS89-MDA [MOLDREF99] anchor epoch of 1997.4 but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment.','EPSG','9988','EPSG','4000',0.1,'IOGP-Mda 1999',0);
+INSERT INTO "usage" VALUES('EPSG','24895','concatenated_operation','EPSG','11206','EPSG','1162','EPSG','1026');

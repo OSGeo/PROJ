@@ -10,7 +10,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1029','Iraqi Geospatial Reference Sy
 INSERT INTO "usage" VALUES('EPSG','13081','geodetic_datum','EPSG','1029','EPSG','1124','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1031','MGI 1901',NULL,'EPSG','7004','EPSG','8901','1901-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13083','geodetic_datum','EPSG','1031','EPSG','2370','EPSG','1027');
-INSERT INTO "geodetic_datum" VALUES('EPSG','1032','MOLDREF99',NULL,'EPSG','7019','EPSG','8901','1999-01-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1032','MOLDREF99',NULL,'EPSG','7019','EPSG','8901','1999-01-01',NULL,NULL,NULL,1997.4,0);
 INSERT INTO "usage" VALUES('EPSG','13084','geodetic_datum','EPSG','1032','EPSG','1162','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1033','Reseau Geodesique de la RDC 2005',NULL,'EPSG','7019','EPSG','8901','2005-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13085','geodetic_datum','EPSG','1033','EPSG','3613','EPSG','1027');
@@ -116,8 +116,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1120','Mexico ITRF2008',NULL,'EPSG',
 INSERT INTO "usage" VALUES('EPSG','13172','geodetic_datum','EPSG','1120','EPSG','1160','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1128','Japanese Geodetic Datum 2011',NULL,'EPSG','7019','EPSG','8901','2011-10-21',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13180','geodetic_datum','EPSG','1128','EPSG','1129','EPSG','1178');
-INSERT INTO "geodetic_datum" VALUES('EPSG','1132','Rete Dinamica Nazionale 2008',NULL,'EPSG','7019','EPSG','8901','2008-01-01',NULL,NULL,NULL,NULL,0);
-INSERT INTO "usage" VALUES('EPSG','13184','geodetic_datum','EPSG','1132','EPSG','3343','EPSG','1180');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1132','Rete Dinamica Nazionale 2008',NULL,'EPSG','7019','EPSG','8901','2008-01-01',NULL,NULL,NULL,2008.0,0);
+INSERT INTO "usage" VALUES('EPSG','13184','geodetic_datum','EPSG','1132','EPSG','3343','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1133','NAD83 (Continuously Operating Reference Station 1996)',NULL,'EPSG','7019','EPSG','8901','1998-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13185','geodetic_datum','EPSG','1133','EPSG','1511','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1135','Aden 1925',NULL,'EPSG','7012','EPSG','8901','1925-01-01',NULL,NULL,NULL,NULL,0);
@@ -469,7 +469,7 @@ INSERT INTO "usage" VALUES('EPSG','22831','geodetic_datum','EPSG','1406','EPSG',
 INSERT INTO "geodetic_datum" VALUES('EPSG','1407','ETRS89-NOR [EUREF89]',NULL,'EPSG','7019','EPSG','8901','1999-01-01',NULL,NULL,NULL,1995.0,0);
 INSERT INTO "usage" VALUES('EPSG','23762','geodetic_datum','EPSG','1407','EPSG','1182','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1408','Xrail84',NULL,'EPSG','7030','EPSG','8901',NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO "usage" VALUES('EPSG','23812','geodetic_datum','EPSG','1408','EPSG','4822','EPSG','1141');
+INSERT INTO "usage" VALUES('EPSG','23812','geodetic_datum','EPSG','1408','EPSG','4822','EPSG','1297');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1412','ETRS89-DNK',NULL,'EPSG','7019','EPSG','8901','2019-01-01',NULL,NULL,NULL,2015.829,0);
 INSERT INTO "usage" VALUES('EPSG','23440','geodetic_datum','EPSG','1412','EPSG','1080','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1413','Asse geodetic datum 2025',NULL,'EPSG','7004','EPSG','8901',NULL,NULL,NULL,NULL,NULL,0);
@@ -1122,8 +1122,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','6667','Iraq-Kuwait Boundary Datum 19
 INSERT INTO "usage" VALUES('EPSG','13727','geodetic_datum','EPSG','6667','EPSG','2876','EPSG','1053');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6668','European Datum 1979',NULL,'EPSG','7022','EPSG','8901','1979-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13728','geodetic_datum','EPSG','6668','EPSG','1297','EPSG','1027');
-INSERT INTO "geodetic_datum" VALUES('EPSG','6670','Istituto Geografico Militaire 1995',NULL,'EPSG','7019','EPSG','8901','1995-01-01',NULL,NULL,NULL,NULL,0);
-INSERT INTO "usage" VALUES('EPSG','14401','geodetic_datum','EPSG','6670','EPSG','3343','EPSG','1027');
+INSERT INTO "geodetic_datum" VALUES('EPSG','6670','Istituto Geografico Militaire 1995',NULL,'EPSG','7019','EPSG','8901','1995-01-01',NULL,NULL,NULL,1989.0,0);
+INSERT INTO "usage" VALUES('EPSG','14401','geodetic_datum','EPSG','6670','EPSG','3343','EPSG','1180');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6671','Voirol 1879',NULL,'EPSG','7011','EPSG','8901','1879-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13730','geodetic_datum','EPSG','6671','EPSG','1365','EPSG','1153');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6672','Chatham Islands Datum 1971',NULL,'EPSG','7022','EPSG','8901','1971-01-01',NULL,NULL,NULL,NULL,0);
