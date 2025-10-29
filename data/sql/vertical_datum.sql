@@ -289,7 +289,7 @@ INSERT INTO "usage" VALUES('EPSG','23488','vertical_datum','EPSG','1415','EPSG',
 INSERT INTO "vertical_datum" VALUES('EPSG','1416','Derived California Orthometric Heights of 1988 epoch 2025',NULL,'2025-06-15',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','23577','vertical_datum','EPSG','1416','EPSG','1375','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','1423','London Survey Grid height datum',NULL,NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO "usage" VALUES('EPSG','24863','vertical_datum','EPSG','1423','EPSG','4822','EPSG','1141');
+INSERT INTO "usage" VALUES('EPSG','24863','vertical_datum','EPSG','1423','EPSG','4822','EPSG','1297');
 INSERT INTO "vertical_datum" VALUES('EPSG','1424','Svalbard vertical datum 2024',NULL,'2025-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','24132','vertical_datum','EPSG','1424','EPSG','4831','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','1443','IGN 2023 Mayotte',NULL,'2025-03-14',NULL,NULL,NULL,NULL,0);

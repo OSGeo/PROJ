@@ -310,8 +310,6 @@ INSERT INTO "supersession" VALUES('helmert_transformation','EPSG','8257','helmer
 INSERT INTO "supersession" VALUES('helmert_transformation','EPSG','8256','helmert_transformation','EPSG','8257','EPSG',0);
 INSERT INTO "supersession" VALUES('helmert_transformation','EPSG','6865','helmert_transformation','EPSG','6866','EPSG',0);
 INSERT INTO "supersession" VALUES('helmert_transformation','EPSG','6864','helmert_transformation','EPSG','6865','EPSG',0);
-INSERT INTO "supersession" VALUES('grid_transformation','EPSG','10695','grid_transformation','EPSG','10697','EPSG',1);
-INSERT INTO "supersession" VALUES('grid_transformation','EPSG','10696','grid_transformation','EPSG','10698','EPSG',1);
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','10521','grid_transformation','EPSG','10522','EPSG',1);
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','10523','grid_transformation','EPSG','10524','EPSG',1);
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','10527','grid_transformation','EPSG','10528','EPSG',1);
@@ -328,7 +326,7 @@ INSERT INTO "supersession" VALUES('grid_transformation','EPSG','10528','grid_tra
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','10534','grid_transformation','EPSG','10714','EPSG',1);
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','9355','grid_transformation','EPSG','10775','EPSG',1);
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','9620','grid_transformation','EPSG','10776','EPSG',1);
-INSERT INTO "supersession" VALUES('helmert_transformation','EPSG','1638','helmert_transformation','EPSG','10098','EPSG',0);
+INSERT INTO "supersession" VALUES('helmert_transformation','EPSG','1638','helmert_transformation','EPSG','10098','EPSG',1);
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','10530','grid_transformation','EPSG','10713','EPSG',1);
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','10537','grid_transformation','EPSG','10716','EPSG',1);
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','9483','grid_transformation','EPSG','10707','EPSG',0);

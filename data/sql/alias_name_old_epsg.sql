@@ -1133,3 +1133,16 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6870','ETRS89 / Albania 
 -- Changed in EPSG v12.035
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10826','ETRS89 + LAS-2000 height','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10839','ETRS89 + LAS-2000 height','EPSG_OLD');
+
+-- Changed in EPSG v12.037
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1132','RDN2008','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6670','IGM95','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3065','ETRF89 IT / UTM zone 33N','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3064','ETRF89 IT / UTM zone 32N','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9716','ETRF89 IT / UTM zone 34N','EPSG_OLD');
+
+-- Changed in EPSG v12.038
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3067','EUREF-FIN / UTM zone 35N','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10688','ETRS89','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10689','ETRS89','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10690','ETRS89','EPSG_OLD');
