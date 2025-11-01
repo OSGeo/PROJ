@@ -1309,6 +1309,10 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         auto output = proj_trans(P, PJ_FWD, input);
         auto output_over = proj_trans(P, PJ_FWD, input_over);
 
+        auto P_clone = proj_clone(ctx, P);
+        auto output_clone_over = proj_trans(P_clone, PJ_FWD, input_over);
+        proj_destroy(P_clone);
+
         auto input_inv = proj_trans(P, PJ_INV, output);
         auto input_over_inv = proj_trans(P, PJ_INV, output_over);
 
@@ -1319,6 +1323,8 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
 
         EXPECT_NEAR(output.xyz.x, 15584728.711058298, 1e-8);
         EXPECT_NEAR(output_over.xyz.x, -24490287.974520184, 1e-8);
+
+        EXPECT_EQ(output_clone_over.xyz.x, output_over.xyz.x);
 
         // The distance from 140 to 180 and -220 to -180 should be pretty much
         // the same.

@@ -557,12 +557,14 @@ PJ *proj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
                 newPj->descr = "Set of coordinate operations";
                 newPj->ctx = ctx;
                 newPj->copyStateFrom(*obj);
+                ctx->forceOver = obj->over != 0;
                 const int old_debug_level = ctx->debug_level;
                 ctx->debug_level = PJ_LOG_NONE;
                 for (const auto &altOp : obj->alternativeCoordinateOperations) {
                     newPj->alternativeCoordinateOperations.emplace_back(
                         PJCoordOperation(ctx, altOp));
                 }
+                ctx->forceOver = false;
                 ctx->debug_level = old_debug_level;
             }
             return newPj;
@@ -570,7 +572,9 @@ PJ *proj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
         return nullptr;
     }
     try {
+        ctx->forceOver = obj->over != 0;
         PJ *newPj = pj_obj_create(ctx, NN_NO_CHECK(obj->iso_obj));
+        ctx->forceOver = false;
         if (newPj) {
             newPj->copyStateFrom(*obj);
         }
