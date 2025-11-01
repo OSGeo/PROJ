@@ -178,7 +178,9 @@ double proj_strtod(const char *str, char **endptr) {
     if ((0 == *p) || nullptr == strchr("0123456789eE.", *p) || isspace(*p)) {
         if (endptr)
             *endptr = const_cast<char *>(p);
-        return sign == -1 ? -0 : 0;
+        if (sign == -1)
+            return -number;
+        return number;
     }
 
     /* Now expect a (potentially zero-length) string of digits */
