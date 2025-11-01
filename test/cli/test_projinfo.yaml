@@ -1279,7 +1279,7 @@ tests:
     -------------------------------------
     Operation No. 1:
 
-    INVERSE(DERIVED_FROM(EPSG)):10000, Inverse of RGF93 v1 to NGF-IGN69 height (1), 0.5 m, France - mainland onshore.
+    INVERSE(DERIVED_FROM(EPSG)):10000, Inverse of ETRS89-FRA [RGF93 v1] to NGF-IGN69 height (1), 0.5 m, France - mainland onshore.
 
     PROJ string:
     +proj=pipeline
@@ -1292,7 +1292,7 @@ tests:
     -------------------------------------
     Operation No. 2:
 
-    unknown id, Transformation from NGF-IGN69 height to RGF93 v1 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
+    unknown id, Transformation from NGF-IGN69 height to ETRS89-FRA [RGF93 v1] (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
 
     PROJ string:
     +proj=noop
@@ -1823,9 +1823,9 @@ tests:
   out: EPSG:6512 "NAD83(2011) / Missouri East"
 - comment: Test case where --area has several matches
   args: --list-crs projected --area France
-  grep: RGF93 v1 / Lambert-93|UTM zone 11N
+  grep: ETRS89-FRA \[RGF93 v1\] / Lambert-93|UTM zone 11N
   sort:
-  out: EPSG:2154 "RGF93 v1 / Lambert-93"
+  out: EPSG:2154 "ETRS89-FRA [RGF93 v1] / Lambert-93"
 - comment: >
     Test North-Macedonia CRS for which there are several MGI 1901 -> WGS 84 Helmert
     transformations but only one matches the extent of the CRS
@@ -1915,7 +1915,7 @@ tests:
 - args: completion projinfo EGM
   out: |
      EGM2008\ height EGM96\ height EGM84\ height
-- args: completion projinfo "\"RGF93" v1 "/"
+- args: completion projinfo "\"ETRS89-FRA [RGF93 v1]" "/"
   out: |
      Lambert-93 CC42 CC43 CC44 CC45 CC46 CC47 CC48 CC49 CC50 Lambert-93\ +\ NGF-IGN69\ height Lambert-93\ +\ NGF-IGN78\ height
 - args: completion projinfo "\"NAD83(HARN) / California Albers" "+"

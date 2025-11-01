@@ -1061,12 +1061,16 @@ struct SortFunction {
             b_name.find("NTF (Paris) to NTF (1)") != std::string::npos) {
             return false;
         }
-        if (a_name.find("NTF (Paris) to RGF93 v1 (1)") != std::string::npos &&
-            b_name.find("NTF (Paris) to RGF93 v1 (2)") != std::string::npos) {
+        if (a_name.find("NTF (Paris) to ETRS89-FRA [RGF93 v1] (1)") !=
+                std::string::npos &&
+            b_name.find("NTF (Paris) to ETRS89-FRA [RGF93 v1] (2)") !=
+                std::string::npos) {
             return true;
         }
-        if (a_name.find("NTF (Paris) to RGF93 v1 (2)") != std::string::npos &&
-            b_name.find("NTF (Paris) to RGF93 v1 (1)") != std::string::npos) {
+        if (a_name.find("NTF (Paris) to ETRS89-FRA [RGF93 v1] (2)") !=
+                std::string::npos &&
+            b_name.find("NTF (Paris) to ETRS89-FRA [RGF93 v1] (1)") !=
+                std::string::npos) {
             return false;
         }
 

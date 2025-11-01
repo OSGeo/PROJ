@@ -1237,7 +1237,7 @@ tests:
   args: --only-best NTF RGF93 -E
   in: 49 2 0
   stderr: |
-    Attempt to use coordinate operation NTF to RGF93 v1 (1) failed. Grid fr_ign_gr3df97a.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+    Attempt to use coordinate operation NTF to ETRS89-FRA [RGF93 v1] (1) failed. Grid fr_ign_gr3df97a.tif is not available. Consult https://proj.org/resource_files.html for guidance.
   stdout: |
     49 2 0	*	* inf
 - comment: Test cs2cs --only-best (working) for EPSG:4326+5773 to EPSG:4979
