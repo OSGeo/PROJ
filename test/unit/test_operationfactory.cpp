@@ -1236,7 +1236,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
         ctxt);
     ASSERT_EQ(list.size(), 2U);
 
-    EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to RGF93 v1 (1)");
+    EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to ETRS89-FRA [RGF93 v1] (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
               "+step +proj=axisswap +order=2,1 "
@@ -1251,13 +1251,15 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
 
-    EXPECT_EQ(list[1]->nameStr(), "NTF (Paris) to RGF93 v1 (2)");
+    EXPECT_EQ(list[1]->nameStr(), "NTF (Paris) to ETRS89-FRA [RGF93 v1] (2)");
     EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
-              "+proj=longlat +ellps=clrk80ign +pm=paris +step +proj=hgridshift "
-              "+grids=fr_ign_ntf_r93.tif +step +proj=unitconvert +xy_in=rad "
-              "+xy_out=deg +step +proj=axisswap +order=2,1");
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=grad +xy_out=rad "
+              "+step +inv +proj=longlat +ellps=clrk80ign +pm=paris "
+              "+step +proj=hgridshift +grids=fr_ign_ntf_r93.tif "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 
     EXPECT_TRUE(nn_dynamic_pointer_cast<ConcatenatedOperation>(list[0]) !=
                 nullptr);
@@ -1906,8 +1908,8 @@ TEST(operation, geogCRS_3D_to_geogCRS_3D_different_datum_context) {
             std::string(), dbContext),
         ctxt);
     ASSERT_GE(list.size(), 1U);
-    EXPECT_EQ(list[0]->nameStr(),
-              "RGF93 v1 to ETRS89 (1) + Inverse of CH1903+ to ETRS89 (1)");
+    EXPECT_EQ(list[0]->nameStr(), "ETRS89-FRA [RGF93 v1] to ETRS89 (1) + "
+                                  "Inverse of CH1903+ to ETRS89 (1)");
     // Check that there is no +push +v_3
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
@@ -1948,8 +1950,9 @@ TEST(operation, geocentric_to_geogCRS_3D_different_datum_context) {
         ctxt);
     ASSERT_GE(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
-              "Conversion from RGF93 v1 (geocentric) to RGF93 v1 (geog3D) + "
-              "RGF93 v1 to ETRS89 (1) + "
+              "Conversion from ETRS89-FRA [RGF93 v1] (geocentric) to "
+              "ETRS89-FRA [RGF93 v1] (geog3D) + "
+              "ETRS89-FRA [RGF93 v1] to ETRS89 (1) + "
               "Inverse of CH1903+ to ETRS89 (1)");
     // Check that there is no +push +v_3
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),

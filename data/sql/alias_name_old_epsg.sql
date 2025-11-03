@@ -1146,3 +1146,9 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3067','EUREF-FIN / UTM z
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10688','ETRS89','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10689','ETRS89','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10690','ETRS89','EPSG_OLD');
+
+-- Changed in EPSG v12.039
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5316','ETRS89 / FOTM','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5698','RGF93 / Lambert-93 + NGF-IGN69 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5699','RGF93 / Lambert-93 + NGF-IGN78 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10659','ETRS89 + EOMA 1980 height','EPSG_OLD');
