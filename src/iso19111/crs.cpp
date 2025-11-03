@@ -6277,13 +6277,57 @@ BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                             refTransf.get(),
                             util::IComparable::Criterion::EQUIVALENT,
                             dbContext)) {
-                        resMatchOfTransfToWGS84.emplace_back(
-                            create(candidateBaseCRS, d->hubCRS_,
-                                   NN_NO_CHECK(util::nn_dynamic_pointer_cast<
-                                               operation::Transformation>(op))),
-                            pair.second);
-                        foundOp = true;
-                        break;
+                        auto transf = util::nn_dynamic_pointer_cast<
+                            operation::Transformation>(op);
+                        if (transf) {
+                            resMatchOfTransfToWGS84.emplace_back(
+                                create(candidateBaseCRS, d->hubCRS_,
+                                       NN_NO_CHECK(transf)),
+                                pair.second);
+                            foundOp = true;
+                            break;
+                        } else {
+                            auto concatenated = dynamic_cast<
+                                const operation::ConcatenatedOperation *>(
+                                op.get());
+                            if (concatenated) {
+                                // Case for EPSG:4807 / "NTF (Paris)" that is
+                                // made of a longitude rotation followed by a
+                                // Helmert The prime meridian shift will be
+                                // accounted elsewhere
+                                const auto &subops = concatenated->operations();
+                                if (subops.size() == 2) {
+                                    auto firstOpIsTransformation = dynamic_cast<
+                                        const operation::Transformation *>(
+                                        subops[0].get());
+                                    auto firstOpIsConversion = dynamic_cast<
+                                        const operation::Conversion *>(
+                                        subops[0].get());
+                                    if ((firstOpIsTransformation &&
+                                         firstOpIsTransformation
+                                             ->isLongitudeRotation()) ||
+                                        (dynamic_cast<DerivedCRS *>(
+                                             candidateBaseCRS.get()) &&
+                                         firstOpIsConversion)) {
+                                        transf = util::nn_dynamic_pointer_cast<
+                                            operation::Transformation>(
+                                            subops[1]);
+                                        if (transf &&
+                                            !starts_with(transf->nameStr(),
+                                                         "Ballpark geo")) {
+                                            resMatchOfTransfToWGS84
+                                                .emplace_back(
+                                                    create(candidateBaseCRS,
+                                                           d->hubCRS_,
+                                                           NN_NO_CHECK(transf)),
+                                                    pair.second);
+                                            foundOp = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 if (!foundOp) {
