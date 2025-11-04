@@ -5531,6 +5531,38 @@ TEST(crs, boundCRS_identify_db) {
         EXPECT_EQ(boundCRS->baseCRS()->getEPSGCode(), 4326);
         EXPECT_EQ(boundCRS->transformation()->method()->getEPSGCode(), 9606);
     }
+
+    {
+        // BoundCRS where the transformation to WGS84 is actually a concatenated
+        // operation if taking from "NTF (Paris)".
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"NTF (Paris) / Lambert zone II\","
+            "GEOGCS[\"NTF (Paris)\","
+            "DATUM[\"Nouvelle_Triangulation_Francaise_Paris\","
+            "SPHEROID[\"Clarke 1880 (IGN)\",6378249.2,293.4660212936269,"
+            "AUTHORITY[\"EPSG\",\"7011\"]],TOWGS84[-168,-60,320,0,0,0,0],"
+            "AUTHORITY[\"EPSG\",\"6807\"]],PRIMEM[\"Paris\",2.33722917,"
+            "AUTHORITY[\"EPSG\",\"8903\"]],UNIT[\"grad\",0.01570796326794897,"
+            "AUTHORITY[\"EPSG\",\"9105\"]],AUTHORITY[\"EPSG\",\"4807\"]],"
+            "PROJECTION[\"Lambert_Conformal_Conic_1SP\"],"
+            "PARAMETER[\"latitude_of_origin\",52],"
+            "PARAMETER[\"central_meridian\",0],"
+            "PARAMETER[\"scale_factor\",0.99987742],"
+            "PARAMETER[\"false_easting\",600000],"
+            "PARAMETER[\"false_northing\",2200000],"
+            "UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],"
+            "AXIS[\"X\",EAST],AXIS[\"Y\",NORTH],AUTHORITY[\"EPSG\",\"27572\"]"
+            "]");
+        auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factoryEPSG);
+        ASSERT_EQ(res.size(), 1U);
+        auto boundCRS = dynamic_cast<const BoundCRS *>(res.front().first.get());
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->baseCRS()->getEPSGCode(), 27572);
+        EXPECT_EQ(boundCRS->transformation()->nameStr(), "NTF to WGS 84 (1)");
+        EXPECT_EQ(res.front().second, 100);
+    }
 }
 
 // ---------------------------------------------------------------------------
