@@ -3651,6 +3651,40 @@ TEST(crs, projectedCRS_identify_db) {
         EXPECT_EQ(*(res.front().first->identifiers()[0]->codeSpace()), "EPSG");
         EXPECT_EQ(res.front().second, 70);
     }
+
+    {
+        // Identify a CRS after ETRS89 -> ETRS89-PRT [1995] changes
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"ETRS89 / Portugal TM06\","
+            "GEOGCS[\"ETRS89\","
+            "DATUM[\"European Terrestrial Reference System 1989\","
+            "SPHEROID[\"GRS 1980\", 6378137.0, 298.257222101,"
+            "AUTHORITY[\"EPSG\",\"7019\"]],"
+            "AUTHORITY[\"EPSG\",\"6258\"]],"
+            "PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]],"
+            "UNIT[\"degree\", 0.017453292519943295],"
+            "AXIS[\"Geodetic latitude\", NORTH],"
+            "AXIS[\"Geodetic longitude\", EAST],"
+            "AUTHORITY[\"EPSG\",\"4258\"]],"
+            "PROJECTION[\"Transverse_Mercator\","
+            "AUTHORITY[\"EPSG\",\"9807\"]],"
+            "PARAMETER[\"central_meridian\", -8.133108333333334],"
+            "PARAMETER[\"latitude_of_origin\", 39.66825833333334],"
+            "PARAMETER[\"scale_factor\", 1.0],"
+            "PARAMETER[\"false_easting\", 0.0],"
+            "PARAMETER[\"false_northing\", 0.0],"
+            "UNIT[\"m\", 1.0],"
+            "AXIS[\"Easting\", EAST],"
+            "AXIS[\"Northing\", NORTH],"
+            "AUTHORITY[\"EPSG\",\"3763\"]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factoryEPSG);
+        ASSERT_GE(res.size(), 1U);
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "3763");
+        EXPECT_EQ(*(res.front().first->identifiers()[0]->codeSpace()), "EPSG");
+        EXPECT_EQ(res.front().second, 100);
+    }
 }
 
 // ---------------------------------------------------------------------------
