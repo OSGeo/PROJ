@@ -2659,6 +2659,70 @@ TEST(crs, projectedCRS_from_EPSG_with_deprecated_ESRI_name_as_WKT1_ESRI) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_from_WKT1_ETRS89_with_db) {
+
+    auto wkt = "PROJCS[\"ETRS89 / UTM zone 32N (N-E)\","
+               "GEOGCS[\"ETRS89\","
+               "    DATUM[\"European_Terrestrial_Reference_System_1989\","
+               "        SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+               "            AUTHORITY[\"EPSG\",\"7019\"]],"
+               "        AUTHORITY[\"EPSG\",\"6258\"]],"
+               "    PRIMEM[\"Greenwich\",0,"
+               "        AUTHORITY[\"EPSG\",\"8901\"]],"
+               "    UNIT[\"degree\",0.0174532925199433,"
+               "        AUTHORITY[\"EPSG\",\"9122\"]],"
+               "    AUTHORITY[\"EPSG\",\"4258\"]],"
+               "PROJECTION[\"Transverse_Mercator\"],"
+               "PARAMETER[\"latitude_of_origin\",0],"
+               "PARAMETER[\"central_meridian\",9],"
+               "PARAMETER[\"scale_factor\",0.9996],"
+               "PARAMETER[\"false_easting\",500000],"
+               "PARAMETER[\"false_northing\",0],"
+               "UNIT[\"metre\",1,"
+               "    AUTHORITY[\"EPSG\",\"9001\"]],"
+               "AXIS[\"Northing\",NORTH],"
+               "AXIS[\"Easting\",EAST]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto datum = crs->baseCRS()->datum();
+    ASSERT_TRUE(datum != nullptr);
+    EXPECT_STREQ(datum->nameStr().c_str(),
+                 "European Terrestrial Reference System 1989");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projectedCRS_from_WKT1_ESRI_ETRS89_with_db) {
+
+    auto wkt = "PROJCS[\"ETRS89 / ETRS-LAEA\","
+               "GEOGCS[\"ETRS89\","
+               "DATUM[\"European_Terrestrial_Reference_System_1989\","
+               "SPHEROID[\"GRS 1980\",6378137,298.257222101]],"
+               "PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.01745329251994328]],"
+               "PROJECTION[\"Lambert_Azimuthal_Equal_Area\"],"
+               "PARAMETER[\"latitude_of_center\",52],"
+               "PARAMETER[\"longitude_of_center\",10],"
+               "PARAMETER[\"false_easting\",4321000],"
+               "PARAMETER[\"false_northing\",3210000],"
+               "UNIT[\"metre\",1]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto datum = crs->baseCRS()->datum();
+    ASSERT_TRUE(datum != nullptr);
+    EXPECT_STREQ(datum->nameStr().c_str(),
+                 "European Terrestrial Reference System 1989");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_as_PROJ_string) {
     auto crs = createProjected();
 

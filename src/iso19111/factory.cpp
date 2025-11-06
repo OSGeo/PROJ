@@ -3740,7 +3740,9 @@ std::list<std::string> DatabaseContext::getAliases(
     std::string sql("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
                     "auth_name = ? AND code = ?");
     ListOfParams params{genuineTableName, resolvedAuthName, resolvedCode};
-    if (!source.empty()) {
+    if (source == "not EPSG_OLD") {
+        sql += " AND source != 'EPSG_OLD'";
+    } else if (!source.empty()) {
         sql += " AND source = ?";
         params.emplace_back(source);
     }
@@ -9409,7 +9411,7 @@ AuthorityFactory::createObjectsFromNameEx(
         sql += " ov "
                "JOIN alias_name a ON "
                "ov.auth_name = a.auth_name AND ov.code = a.code WHERE "
-               "a.table_name = '";
+               "a.source != 'EPSG_OLD' AND a.table_name = '";
         sql += tableNameTypePair.first;
         sql += "' ";
         if (!tableNameTypePair.second.empty()) {

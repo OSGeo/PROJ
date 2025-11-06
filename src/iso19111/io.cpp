@@ -2327,7 +2327,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                     const auto aliases =
                         authFactory->databaseContext()->getAliases(
                             *id->codeSpace(), id->code(), refDatum->nameStr(),
-                            "geodetic_datum", std::string());
+                            "geodetic_datum", "not EPSG_OLD");
                     for (const auto &alias : aliases) {
                         if (metadata::Identifier::isEquivalentName(
                                 l_name.c_str(), alias.c_str())) {
