@@ -1160,3 +1160,7 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5698','RGF93 / Lambert-93
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5699','RGF93 / Lambert-93 + NGF-IGN78 height','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10659','ETRS89 + EOMA 1980 height','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1031','European Terrestrial Reference System 1989','EPSG_OLD');
+
+-- Changed in EPSG v12.041
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1297','EVRF2007-PL','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1305','ETRF2000-PL','EPSG_OLD');
