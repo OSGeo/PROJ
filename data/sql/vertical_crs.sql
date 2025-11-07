@@ -454,7 +454,7 @@ INSERT INTO "vertical_crs" VALUES('EPSG','9471','INAGeoid2020 v1 height',NULL,'E
 INSERT INTO "usage" VALUES('EPSG','14153','vertical_crs','EPSG','9471','EPSG','1122','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','9650','Baltic 1986 height',NULL,'EPSG','6499','EPSG','1296',0);
 INSERT INTO "usage" VALUES('EPSG','15032','vertical_crs','EPSG','9650','EPSG','3293','EPSG','1178');
-INSERT INTO "vertical_crs" VALUES('EPSG','9651','EVRF2007-PL height',NULL,'EPSG','6499','EPSG','1297',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','9651','PL-EVRF2007 height',NULL,'EPSG','6499','EPSG','1297',0);
 INSERT INTO "usage" VALUES('EPSG','15034','vertical_crs','EPSG','9651','EPSG','3293','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','9663','EH2000 height',NULL,'EPSG','6499','EPSG','1298',0);
 INSERT INTO "usage" VALUES('EPSG','14747','vertical_crs','EPSG','9663','EPSG','3246','EPSG','1178');

@@ -2144,8 +2144,9 @@ TEST(operation, geogCRS_to_geogCRS_with_intermediate_no_ids) {
         EXPECT_EQ(
             list[0]->nameStr(),
             "Conversion from input to ITRF2014 + ITRF2014 to ETRF2014 (2) + "
-            "ETRF2014 to NKG_ETRF14 (1) + NKG_ETRF14 to EST97 (1) + "
-            "Conversion from EST97 to output");
+            "ETRF2014 to NKG_ETRF14 (1) + "
+            "NKG_ETRF14 to ETRS89-EST [EST97] (1) + "
+            "Conversion from ETRS89-EST [EST97] to output");
     }
 }
 
