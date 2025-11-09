@@ -12,3 +12,5 @@ for the sake of broader interoperability.
 
    projjson
    geodetictiffgrids
+   tin_json
+
