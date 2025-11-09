@@ -4766,7 +4766,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
     }
 
     // In EPSG v12.025, Norway projected systems based on ETRS89 (EPSG:4258)
-    // have swiched to use ETRS89-NOR [EUREF89] (EPSG:10875). There's no way
+    // have switched to use ETRS89-NOR [EUREF89] (EPSG:10875). There's no way
     // from the current content of the database to infer both CRS are equivalent
     if (starts_with(projCRSName, "ETRS89 / NTM zone")) {
         projCRSName = "ETRS89-NOR [EUREF89] / NTM zone" +
