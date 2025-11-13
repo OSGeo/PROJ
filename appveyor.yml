@@ -28,13 +28,11 @@ build_script:
   - set VCPKG_DEFAULT_TRIPLET=%platform%-windows
   - set VCPKG_DEFAULT_HOST_TRIPLET=%platform%-windows
   # If cached directory does not exist, update vcpkg and install dependencies
-  # The checkout of a precise sha1 for VS2015 is a workaround for https://github.com/microsoft/vcpkg/issues/11666
   - if not exist %VCPKG_INSTALLED%\bin (
       cd "%VCPKG_ROOT%" &
-      git fetch --depth=1 origin 2023.04.15 &
       (if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" (git -c advice.detachedHead=false checkout FETCH_HEAD)) &
       .\bootstrap-vcpkg.bat -disableMetrics &
-      vcpkg install sqlite3[core,tool] tiff curl --triplet=%platform%-windows &
+      vcpkg install sqlite3[core,tool] tiff curl --triplet %platform%-windows &
       cd %APPVEYOR_BUILD_FOLDER%
     )
   - dir %VCPKG_INSTALLED%\bin
