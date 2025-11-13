@@ -5837,16 +5837,17 @@ TEST(operation, compoundCRS_to_compoundCRS_WGS84_EGM96_to_ETRS89_Belfast) {
     auto objSrc = createFromUserInput("EPSG:4326+5773", dbContext);
     auto srcCrs = nn_dynamic_pointer_cast<CompoundCRS>(objSrc);
     ASSERT_TRUE(srcCrs != nullptr);
-    // ETRS89 + Belfast height
-    auto objDest = createFromUserInput("EPSG:4258+5732", dbContext);
+    // ETRS89-IRE [ETRF2000] + Belfast height
+    auto objDest = createFromUserInput("EPSG:4173+5732", dbContext);
     auto destCrs = nn_dynamic_pointer_cast<CompoundCRS>(objDest);
     ASSERT_TRUE(destCrs != nullptr);
     auto list = CoordinateOperationFactory::create()->createOperations(
         NN_NO_CHECK(srcCrs), NN_NO_CHECK(destCrs), ctxt);
     ASSERT_GE(list.size(), 1U);
-    EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM96 height (1) + "
-                                  "Inverse of ETRS89 to WGS 84 (1) + "
-                                  "ETRS89 to Belfast height (2)");
+    EXPECT_EQ(list[0]->nameStr(),
+              "Inverse of WGS 84 to EGM96 height (1) + "
+              "Inverse of ETRS89-IRE [ETRF2000] to WGS 84 (1) + "
+              "ETRS89-IRE [ETRF2000] to Belfast height (2)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
@@ -5881,9 +5882,9 @@ TEST(operation, compoundCRS_to_compoundCRS_WGS84_EGM96_to_WGS84_Belfast) {
     auto list = CoordinateOperationFactory::create()->createOperations(
         NN_NO_CHECK(srcCrs), NN_NO_CHECK(destCrs), ctxt);
     ASSERT_GE(list.size(), 1U);
-    EXPECT_EQ(list[0]->nameStr(),
-              "Inverse of WGS 84 to EGM96 height (1) + "
-              "ETRS89 to Belfast height (2) using ETRS89 to WGS 84 (1)");
+    EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM96 height (1) + "
+                                  "ETRS89-IRE [ETRF2000] to Belfast height (2) "
+                                  "using ETRS89-IRE [ETRF2000] to WGS 84 (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "

@@ -539,6 +539,8 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','11110','ITRF2020 to ETRS89-P
 INSERT INTO "usage" VALUES('EPSG','24589','concatenated_operation','EPSG','11110','EPSG','4832','EPSG','1026');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11140','ITRF2020 to ETRS89-ESP [REGENTE] (1)','Accuracy is approximately 1cm at the ETRS89-ESP [REGENTE] anchor epoch of 1995.4, but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment.','EPSG','9988','EPSG','11129',0.1,'IOGP-Esp 1995',0);
 INSERT INTO "usage" VALUES('EPSG','24595','concatenated_operation','EPSG','11140','EPSG','4833','EPSG','1026');
+INSERT INTO "concatenated_operation" VALUES('EPSG','11194','ITRF2020 to ETRS89-HRV [HTRS96] (1)','','EPSG','9988','EPSG','4888',0.1,'IOGO-Hrv 1995',0);
+INSERT INTO "usage" VALUES('EPSG','24866','concatenated_operation','EPSG','11194','EPSG','1076','EPSG','1026');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11196','ITRF2020 to ETRS89-XKX [KOSOVAREF01] (1)','Accuracy is approximately 1cm at the ETRS89-XKX [KOSOVAREF01] anchor epoch of 2010.5 but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment.','EPSG','9988','EPSG','9138',0.1,'IOGP-Kos 2001',0);
 INSERT INTO "usage" VALUES('EPSG','24869','concatenated_operation','EPSG','11196','EPSG','4542','EPSG','1026');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11206','ITRF2020 to ETRS89-MDA [MOLDREF99] (1)','Accuracy is approximately 1cm at the ETRS89-MDA [MOLDREF99] anchor epoch of 1997.4 but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment.','EPSG','10569','EPSG','4000',0.1,'IOGP-Mda 1999',1);
