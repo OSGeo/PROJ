@@ -183,6 +183,9 @@ VALUES
 ('fi_nls_n43_n60.json','fi_nls_n43_n60.json',NULL,'JSON','tinshift',0,NULL,'https://cdn.proj.org/fi_nls_n43_n60.json',1,1,NULL),
 ('fi_nls_n60_n2000.json','fi_nls_n60_n2000.json',NULL,'JSON','tinshift',0,NULL,'https://cdn.proj.org/fi_nls_n60_n2000.json',1,1,NULL),
 ('fi_nls_ykj_etrs35fin.json','fi_nls_ykj_etrs35fin.json',NULL,'JSON','tinshift',0,NULL,'https://cdn.proj.org/fi_nls_ykj_etrs35fin.json',1,1,NULL),
+('NOT-YET-IN-GRID-TRANSFORMATION-fi_nls_n43_n60.gpkg','fi_nls_n43_n60.gpkg',NULL,'GPKG','tinshift',0,NULL,'https://cdn.proj.org/fi_nls_n43_n60.gpkg',1,1,NULL),
+('NOT-YET-IN-GRID-TRANSFORMATION-fi_nls_n60_n2000.gpkg','fi_nls_n60_n2000.gpkg',NULL,'GPKG','tinshift',0,NULL,'https://cdn.proj.org/fi_nls_n60_n2000.gpkg',1,1,NULL),
+('NOT-YET-IN-GRID-TRANSFORMATION-fi_nls_ykj_etrs35fin.gpkg','fi_nls_ykj_etrs35fin.gpkg',NULL,'GPKG','tinshift',0,NULL,'https://cdn.proj.org/fi_nls_ykj_etrs35fin.gpkg',1,1,NULL),
 
 -- fr_ign - IGN France
 ('rgf93_ntf.gsb','fr_ign_ntf_r93.tif','ntf_r93.gsb','GTiff','hgridshift',1,NULL,'https://cdn.proj.org/fr_ign_ntf_r93.tif',1,1,NULL),

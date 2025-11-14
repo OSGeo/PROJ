@@ -20,10 +20,11 @@ Triangulated Irregular Network based transformation
 
 
 The ``tinshift`` transformation takes one mandatory
-argument, ``file``, that points to a JSON file, which contains the
+argument, ``file``, that points to a :ref:`TIN JSON <tin_json>` or
+:ref:`TIN GeoPackage <tin_gpkg>` file, which contains the
 triangulation and associated metadata. Input and output coordinates must be
 geographic or projected coordinates.
-Depending on the content of the JSON file, horizontal, vertical or both
+Depending on the content of the TIN file, horizontal, vertical or both
 components of the coordinates may be transformed.
 
 The transformation is invertible, with the same computational complexity than
@@ -37,7 +38,7 @@ Required
 
 .. option:: +file=<filename>
 
-    Filename to the JSON file for the TIN.
+    Filename or URL to the JSON or GeoPackage file for the TIN.
 
 
 Example
@@ -116,7 +117,14 @@ the inverse transformation), otherwise which triangle will be selected is
 unspecified. Besides that, the triangulation does not need to have particular
 properties (like being a Delaunay triangulation)
 
-JSON File format
-++++++++++++++++
+JSON TIN File format
+++++++++++++++++++++
 
 See :ref:`tin_json`.
+
+GeoPackage TIN File format
+++++++++++++++++++++++++++
+
+.. versionadded:: 9.8.0
+
+See :ref:`tin_gpkg`.

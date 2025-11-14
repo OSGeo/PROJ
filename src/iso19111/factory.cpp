@@ -1261,7 +1261,8 @@ void DatabaseContext::Private::open(const std::string &databasePath,
 #ifndef USE_ONLY_EMBEDDED_RESOURCE_FILES
         path.resize(2048);
         const bool found =
-            pj_find_file(pjCtxt(), "proj.db", &path[0], path.size() - 1) != 0;
+            pj_find_file(pjCtxt(), "proj.db", &path[0], path.size() - 1,
+                         /* disable_network = */ true) != 0;
         path.resize(strlen(path.c_str()));
         if (!found)
 #endif
@@ -3498,7 +3499,8 @@ bool DatabaseContext::lookForGridInfo(
             bool gridAvailableWithNewName =
                 pj_find_file(ctxt, proj_grid_name.c_str(),
                              &fullFilenameNewName[0],
-                             fullFilenameNewName.size() - 1) != 0;
+                             fullFilenameNewName.size() - 1,
+                             /* disable_network = */ true) != 0;
             proj_context_errno_set(ctxt, errno_before);
             fullFilenameNewName.resize(strlen(fullFilenameNewName.c_str()));
             if (gridAvailableWithNewName) {

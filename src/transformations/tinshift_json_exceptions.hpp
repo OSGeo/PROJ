@@ -25,13 +25,13 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#ifndef TINSHIFT_NAMESPACE
+#ifndef TINSHIFT_JSON_NAMESPACE
 #error "Should be included only by tinshift.hpp"
 #endif
 
 #include <exception>
 
-namespace TINSHIFT_NAMESPACE {
+namespace TINSHIFT_JSON_NAMESPACE {
 
 // ---------------------------------------------------------------------------
 
@@ -49,4 +49,4 @@ const char *ParsingException::what() const noexcept { return msg_.c_str(); }
 
 // ---------------------------------------------------------------------------
 
-} // namespace TINSHIFT_NAMESPACE
+} // namespace TINSHIFT_JSON_NAMESPACE
