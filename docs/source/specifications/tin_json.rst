@@ -10,6 +10,9 @@ file.
 That file format may be used by the :ref:`tinshift <tinshift>` operation since
 PROJ 7.2
 
+Note: the :ref:`TIN GeoPackage <tin_gpkg>` file format can also be used since
+PROJ 9.8. It can handle arbitrarily large triangulations.
+
 Below a minimal example, from the KKJ to ETRS89 transformation, with just a
 single triangle:
 

@@ -3946,7 +3946,8 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
 
         /* full path of grid */
         if (!pj_find_file(ctx, gridname, grinfo.filename,
-                          sizeof(grinfo.filename) - 1)) {
+                          sizeof(grinfo.filename) - 1,
+                          /* disable_network = */ true)) {
             // Can happen when using a remote grid
             grinfo.filename[0] = 0;
         }
@@ -4021,7 +4022,8 @@ PJ_INIT_INFO proj_init_info(const char *initname) {
     memset(&ininfo, 0, sizeof(PJ_INIT_INFO));
 
     file_found =
-        pj_find_file(ctx, initname, ininfo.filename, sizeof(ininfo.filename));
+        pj_find_file(ctx, initname, ininfo.filename, sizeof(ininfo.filename),
+                     /* disable_network = */ true);
     if (!file_found || strlen(initname) > 64) {
         if (strcmp(initname, "epsg") == 0 || strcmp(initname, "EPSG") == 0) {
             const char *val;
