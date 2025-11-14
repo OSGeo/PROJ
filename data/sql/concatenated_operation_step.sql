@@ -564,6 +564,9 @@ INSERT INTO "concatenated_operation_step" VALUES('EPSG','11110',3,'EPSG','11109'
 INSERT INTO "concatenated_operation_step" VALUES('EPSG','11140',1,'EPSG','9996',NULL);
 INSERT INTO "concatenated_operation_step" VALUES('EPSG','11140',2,'EPSG','7938',NULL);
 INSERT INTO "concatenated_operation_step" VALUES('EPSG','11140',3,'EPSG','11135',NULL);
+INSERT INTO "concatenated_operation_step" VALUES('EPSG','11194',1,'EPSG','10586',NULL);
+INSERT INTO "concatenated_operation_step" VALUES('EPSG','11194',2,'EPSG','10988',NULL);
+INSERT INTO "concatenated_operation_step" VALUES('EPSG','11194',3,'EPSG','11192',NULL);
 INSERT INTO "concatenated_operation_step" VALUES('EPSG','11196',1,'EPSG','10586',NULL);
 INSERT INTO "concatenated_operation_step" VALUES('EPSG','11196',2,'EPSG','11228',NULL);
 INSERT INTO "concatenated_operation_step" VALUES('EPSG','11196',3,'EPSG','11195',NULL);

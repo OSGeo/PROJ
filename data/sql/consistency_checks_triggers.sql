@@ -443,6 +443,8 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: a transformation Geog3D to Geog2D+GravityRelatedHeight/Depth must use the same geodetic datum for the source and target CRS')
         WHERE NEW.deprecated = 0 AND
               NEW.method_name LIKE 'Geog3D to Geog2D+%' AND
+              -- Exception for following CRS 'ETRS89-CZE [2007] to ETRS89-CZE [2007] + Baltic 1957 height (2)'
+              (NOT (NEW.auth_name = 'EPSG' AND NEW.code = 10568)) AND
               NOT EXISTS (SELECT 1 FROM compound_crs ccrs
                       LEFT JOIN geodetic_crs target_gcrs ON
                           target_gcrs.auth_name = horiz_crs_auth_name AND target_gcrs.code = horiz_crs_code

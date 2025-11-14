@@ -586,9 +586,9 @@ INSERT INTO "compound_crs" VALUES('EPSG','9429','ETRS89 + Douglas height',NULL,'
 INSERT INTO "usage" VALUES('EPSG','14057','compound_crs','EPSG','9429','EPSG','2803','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9430','ETRS89-GBR [OSNet v2009] + St. Marys height',NULL,'EPSG','11009','EPSG','5749',0);
 INSERT INTO "usage" VALUES('EPSG','14058','compound_crs','EPSG','9430','EPSG','2802','EPSG','1026');
-INSERT INTO "compound_crs" VALUES('EPSG','9449','ETRS89 + Malin Head height',NULL,'EPSG','4258','EPSG','5731',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9449','ETRS89-IRE [ETRF2000] + Malin Head height',NULL,'EPSG','4173','EPSG','5731',0);
 INSERT INTO "usage" VALUES('EPSG','14084','compound_crs','EPSG','9449','EPSG','1305','EPSG','1026');
-INSERT INTO "compound_crs" VALUES('EPSG','9450','ETRS89 + Belfast height',NULL,'EPSG','4258','EPSG','5732',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9450','ETRS89-IRE [ETRF2000] + Belfast height',NULL,'EPSG','4173','EPSG','5732',0);
 INSERT INTO "usage" VALUES('EPSG','14085','compound_crs','EPSG','9450','EPSG','2530','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9452','ETRS89 + BI height',NULL,'EPSG','4258','EPSG','9451',0);
 INSERT INTO "usage" VALUES('EPSG','14088','compound_crs','EPSG','9452','EPSG','4606','EPSG','1026');
@@ -830,7 +830,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','10276','SMITB20 Grid + ODN height',NUL
 INSERT INTO "usage" VALUES('EPSG','19179','compound_crs','EPSG','10276','EPSG','4688','EPSG','1141');
 INSERT INTO "compound_crs" VALUES('EPSG','10281','RBEPP12 Grid + ODN height',NULL,'EPSG','10280','EPSG','5701',0);
 INSERT INTO "usage" VALUES('EPSG','19185','compound_crs','EPSG','10281','EPSG','4689','EPSG','1141');
-INSERT INTO "compound_crs" VALUES('EPSG','10293','ETRS89/DREF91/2016 + DHHN2016 height',NULL,'EPSG','10284','EPSG','7837',0);
+INSERT INTO "compound_crs" VALUES('EPSG','10293','ETRS89-DEU [ETRS89/DREF91/2016] + DHHN2016 height',NULL,'EPSG','10284','EPSG','7837',0);
 INSERT INTO "usage" VALUES('EPSG','19275','compound_crs','EPSG','10293','EPSG','1103','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','10318','RGNC15 (lon-lat) + NGNC08 height',NULL,'EPSG','10312','EPSG','9351',0);
 INSERT INTO "usage" VALUES('EPSG','19634','compound_crs','EPSG','10318','EPSG','3430','EPSG','1026');
@@ -964,6 +964,8 @@ INSERT INTO "compound_crs" VALUES('EPSG','11180','ETRS89-FIN [EUREF-FIN] / GK30F
 INSERT INTO "usage" VALUES('EPSG','24674','compound_crs','EPSG','11180','EPSG','3606','EPSG','1055');
 INSERT INTO "compound_crs" VALUES('EPSG','11181','ETRS89-FIN [EUREF-FIN] / GK31FIN + N2000 height',NULL,'EPSG','3885','EPSG','3900',0);
 INSERT INTO "usage" VALUES('EPSG','24675','compound_crs','EPSG','11181','EPSG','3607','EPSG','1055');
+INSERT INTO "compound_crs" VALUES('EPSG','11274','SRGI2013 epoch 2021.0 + INAGeoid2020 v2 height',NULL,'EPSG','11033','EPSG','20036',0);
+INSERT INTO "usage" VALUES('EPSG','24984','compound_crs','EPSG','11274','EPSG','1122','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89-NOR [EUREF89] + SVD2006 height',NULL,'EPSG','10875','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);

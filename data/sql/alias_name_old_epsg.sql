@@ -1181,3 +1181,15 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1031','European Terrest
 -- Changed in EPSG v12.041
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1297','EVRF2007-PL','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1305','ETRF2000-PL','EPSG_OLD');
+
+-- Changed in EPSG v12.042
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1034','SREF98','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1214','STRS00','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1214','SRB_ETRS89','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1353','ETRS89/DREF91/2016','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10284','ETRS89/DREF91/R16','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6173','European Terrestrial Reference System 1989','EPSG_OLD');
+
+-- Changed in EPSG v12.043
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1433','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1434','European Terrestrial Reference System 1989','EPSG_OLD');
