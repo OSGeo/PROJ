@@ -29,10 +29,12 @@
 #include "gtest_include.h"
 
 #define PROJ_COMPILATION
-#define TINSHIFT_NAMESPACE TestTINShift
-#include "transformations/tinshift.hpp"
+#define TINSHIFT_JSON_NAMESPACE TestTINShift
+#include "transformations/tinshift_json.hpp"
 
-using namespace TINSHIFT_NAMESPACE;
+using namespace TINSHIFT_JSON_NAMESPACE;
+
+TINShiftEvaluator::~TINShiftEvaluator() = default;
 
 namespace {
 
@@ -54,20 +56,20 @@ static json getMinValidContent() {
 // ---------------------------------------------------------------------------
 
 TEST(tinshift, basic) {
-    EXPECT_THROW(TINShiftFile::parse("foo"), ParsingException);
-    EXPECT_THROW(TINShiftFile::parse("null"), ParsingException);
-    EXPECT_THROW(TINShiftFile::parse("{}"), ParsingException);
+    EXPECT_THROW(TINShiftJSONFile::parse("foo"), ParsingException);
+    EXPECT_THROW(TINShiftJSONFile::parse("null"), ParsingException);
+    EXPECT_THROW(TINShiftJSONFile::parse("{}"), ParsingException);
 
     const auto jMinValid(getMinValidContent());
     {
-        auto f = TINShiftFile::parse(jMinValid.dump());
+        auto f = TINShiftJSONFile::parse(jMinValid.dump());
         EXPECT_EQ(f->fileType(), "triangulation_file");
         EXPECT_EQ(f->formatVersion(), "1.0");
         EXPECT_EQ(f->inputCRS(), "EPSG:2393");
         EXPECT_EQ(f->outputCRS(), "EPSG:3067");
         EXPECT_EQ(f->fallbackStrategy(), FALLBACK_NONE);
 
-        auto eval = Evaluator(std::move(f));
+        auto eval = TINShiftJSONEvaluator(std::move(f));
         double x_out = 0;
         double y_out = 0;
         double z_out = 0;
@@ -121,8 +123,8 @@ TEST(tinshift, basic) {
             {0, 0, 10.5, 10.6}, {0, 1, 15.0, 15.2}, {1, 1, 17.5, 18.0}};
         j["triangles"] = {{0, 1, 2}};
 
-        auto f = TINShiftFile::parse(j.dump());
-        auto eval = Evaluator(std::move(f));
+        auto f = TINShiftJSONFile::parse(j.dump());
+        auto eval = TINShiftJSONEvaluator(std::move(f));
         double x_out = 0;
         double y_out = 0;
         double z_out = 0;
@@ -152,8 +154,8 @@ TEST(tinshift, basic) {
         j["vertices"] = {{0, 0, 0.1}, {0, 1, 0.2}, {1, 1, 0.5}};
         j["triangles"] = {{0, 1, 2}};
 
-        auto f = TINShiftFile::parse(j.dump());
-        auto eval = Evaluator(std::move(f));
+        auto f = TINShiftJSONFile::parse(j.dump());
+        auto eval = TINShiftJSONEvaluator(std::move(f));
         double x_out = 0;
         double y_out = 0;
         double z_out = 0;
@@ -186,8 +188,8 @@ TEST(tinshift, basic) {
                          {1, 1, 100, 100, 0.5}};
         j["triangles"] = {{0, 1, 2}};
 
-        auto f = TINShiftFile::parse(j.dump());
-        auto eval = Evaluator(std::move(f));
+        auto f = TINShiftJSONFile::parse(j.dump());
+        auto eval = TINShiftJSONEvaluator(std::move(f));
         double x_out = 0;
         double y_out = 0;
         double z_out = 0;
@@ -212,7 +214,7 @@ TEST(tinshift, basic) {
     {
         auto j(jMinValid);
         j["fallback_strategy"] = "none";
-        EXPECT_THROW(TINShiftFile::parse(j.dump()), ParsingException);
+        EXPECT_THROW(TINShiftJSONFile::parse(j.dump()), ParsingException);
     }
 
     // invalid fallback_strategy field with 1.1 version
@@ -220,7 +222,7 @@ TEST(tinshift, basic) {
         auto j(jMinValid);
         j["format_version"] = "1.1";
         j["fallback_strategy"] = "invalid";
-        EXPECT_THROW(TINShiftFile::parse(j.dump()), ParsingException);
+        EXPECT_THROW(TINShiftJSONFile::parse(j.dump()), ParsingException);
     }
 
     // fail with no triangles and fallback nearest_side
@@ -230,8 +232,8 @@ TEST(tinshift, basic) {
         j["fallback_strategy"] = "nearest_side";
         j["triangles"] = json::array(); // empty
 
-        auto f = TINShiftFile::parse(j.dump());
-        auto eval = Evaluator(std::move(f));
+        auto f = TINShiftJSONFile::parse(j.dump());
+        auto eval = TINShiftJSONEvaluator(std::move(f));
         double x_out = 0;
         double y_out = 0;
         double z_out = 0;
@@ -247,8 +249,8 @@ TEST(tinshift, basic) {
         j["fallback_strategy"] = "nearest_side";
         j["vertices"] = {{0, 0, 101, 101}, {0, 1, 100, 101}, {0, 1, 100, 100}};
 
-        auto f = TINShiftFile::parse(j.dump());
-        auto eval = Evaluator(std::move(f));
+        auto f = TINShiftJSONFile::parse(j.dump());
+        auto eval = TINShiftJSONEvaluator(std::move(f));
         double x_out = 0;
         double y_out = 0;
         double z_out = 0;
@@ -265,8 +267,8 @@ TEST(tinshift, basic) {
         j["vertices"] = {
             {0, 0, 101, 101}, {0, 0.5, 100, 101}, {0, 1, 100, 100}};
 
-        auto f = TINShiftFile::parse(j.dump());
-        auto eval = Evaluator(std::move(f));
+        auto f = TINShiftJSONFile::parse(j.dump());
+        auto eval = TINShiftJSONEvaluator(std::move(f));
         double x_out = 0;
         double y_out = 0;
         double z_out = 0;

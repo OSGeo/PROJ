@@ -1,0 +1,27 @@
+
+-------------------------------------------------------------------------------
+===============================================================================
+Test +proj=tinshift with GeoPackage files on network
+===============================================================================
+
+<gie-strict>
+
+# +file doesn't point to an existing file
+operation   +proj=tinshift +file=https://cdn.proj.org/i_do_not_exist.gpkg
+expect failure errno invalid_op_file_not_found_or_invalid
+
+# Tests on a file with explicit CRS
+operation   +proj=tinshift +file=https://cdn.proj.org/fi_nls_ykj_etrs35fin.gpkg
+tolerance   0.1 mm
+# Verified with https://kartta.paikkatietoikkuna.fi/?lang=en with EPSG:2393 to EPSG:3067
+accept      3210000.0000 6700000.0000
+expect       209948.3217 6697187.0009
+roundtrip   1
+
+operation   +proj=tinshift +file=fi_nls_n60_n2000.gpkg
+tolerance   0.1 mm
+accept      3210000.0000 6700000.0000   10.0
+expect      3210000.0000 6700000.0000   10.2886
+roundtrip   1
+
+</gie-strict>

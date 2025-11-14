@@ -40,6 +40,8 @@
 #include "memvfs.h"
 #endif
 
+#include "filemanager.hpp"
+
 #include <cstdlib>
 #include <cstring>
 #include <sstream> // std::ostringstream
@@ -228,6 +230,200 @@ std::unique_ptr<SQLite3VFS> SQLite3VFS::create(bool fakeSync, bool fakeLock,
     }
     delete vfsUnique->vfs_;
     vfsUnique->vfs_ = nullptr;
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkClose(sqlite3_file *file) {
+    File *pj_file;
+    memcpy(&pj_file, reinterpret_cast<char *>(file) + sizeof(sqlite3_file),
+           sizeof(pj_file));
+    delete pj_file;
+    return SQLITE_OK;
+}
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkRead(sqlite3_file *file, void *pBuffer, int iAmt,
+                          sqlite3_int64 iOffset) {
+    File *pj_file;
+    memcpy(&pj_file, reinterpret_cast<char *>(file) + sizeof(sqlite3_file),
+           sizeof(pj_file));
+    if (!pj_file->seek(iOffset))
+        return SQLITE_IOERR_READ;
+    const int nRead = static_cast<int>(pj_file->read(pBuffer, iAmt));
+    if (nRead < iAmt) {
+        memset(static_cast<char *>(pBuffer) + nRead, 0, iAmt - nRead);
+        return SQLITE_IOERR_SHORT_READ;
+    }
+    return SQLITE_OK;
+}
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkWrite(sqlite3_file *, const void *, int, sqlite3_int64) {
+    return SQLITE_IOERR_WRITE;
+}
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkFileSize(sqlite3_file *file, sqlite3_int64 *pSize) {
+    File *pj_file;
+    memcpy(&pj_file, reinterpret_cast<char *>(file) + sizeof(sqlite3_file),
+           sizeof(pj_file));
+    pj_file->seek(0, SEEK_END);
+    *pSize = pj_file->tell();
+    return SQLITE_OK;
+}
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkTruncate(sqlite3_file *, sqlite3_int64) {
+    return SQLITE_IOERR_TRUNCATE;
+}
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkSync(sqlite3_file *, int) { return SQLITE_OK; }
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkLock(sqlite3_file *, int) { return SQLITE_OK; }
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkUnlock(sqlite3_file *, int) { return SQLITE_OK; }
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkCheckReservedLock(sqlite3_file *, int *pResOut) {
+    *pResOut = 0;
+    return SQLITE_OK;
+}
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkFileControl(sqlite3_file *, int, void *) {
+    return SQLITE_NOTFOUND;
+}
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkSectorSize(sqlite3_file *) { return 0; }
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkDeviceCharacteristics(sqlite3_file *) { return 0; }
+
+// ---------------------------------------------------------------------------
+
+static const sqlite3_io_methods VFSNetworkIOMethods = {
+    1,
+    VFSNetworkClose,
+    VFSNetworkRead,
+    VFSNetworkWrite,
+    VFSNetworkTruncate,
+    VFSNetworkSync,
+    VFSNetworkFileSize,
+    VFSNetworkLock,
+    VFSNetworkUnlock,
+    VFSNetworkCheckReservedLock,
+    VFSNetworkFileControl,
+    VFSNetworkSectorSize,
+    VFSNetworkDeviceCharacteristics,
+    nullptr, // xShmMap
+    nullptr, // xShmLock
+    nullptr, // xShmBarrier
+    nullptr, // xShmUnmap
+    nullptr, // xFetch
+    nullptr, // xUnfetch
+};
+
+static int VFSNetworkOpen(sqlite3_vfs *vfs, const char *name,
+                          sqlite3_file *file, int /*flags*/,
+                          int * /*outFlags*/) {
+    if (!name)
+        return SQLITE_CANTOPEN;
+    PJ_CONTEXT *ctx = static_cast<PJ_CONTEXT *>(vfs->pAppData);
+    auto pjFile = pj_network_file_open(ctx, name);
+    if (!pjFile)
+        return SQLITE_CANTOPEN;
+    file->pMethods = &VFSNetworkIOMethods;
+    File *pj_file_raw = pjFile.release();
+    memcpy(reinterpret_cast<char *>(file) + sizeof(sqlite3_file), &pj_file_raw,
+           sizeof(pj_file_raw));
+
+    return SQLITE_OK;
+}
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkFullPathname(sqlite3_vfs *, const char *zName, int nOut,
+                                  char *zOut) {
+    if (static_cast<int>(strlen(zName)) >= nOut) {
+        fprintf(stderr, "Maximum pathname length reserved for SQLite3 VFS "
+                        "isn't large enough.\n");
+        return SQLITE_CANTOPEN;
+    }
+    strncpy(zOut, zName, nOut);
+    zOut[nOut - 1] = '\0';
+    return SQLITE_OK;
+}
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkAccess(sqlite3_vfs *, const char *, int, int *pResOut) {
+    *pResOut = 0;
+    return SQLITE_OK;
+}
+
+// ---------------------------------------------------------------------------
+
+static int VFSNetworkDelete(sqlite3_vfs *, const char *, int) {
+    return SQLITE_IOERR_DELETE;
+}
+
+// ---------------------------------------------------------------------------
+
+/* static */ std::unique_ptr<SQLite3VFS>
+SQLite3VFS::createNetwork(PJ_CONTEXT *ctx) {
+    // Install SQLite3 logger if PROJ_LOG_SQLITE3 env var is defined
+    InstallSqliteLogger::GetSingleton();
+
+    // Call to sqlite3_initialize() is normally not needed, except for
+    // people building SQLite3 with -DSQLITE_OMIT_AUTOINIT
+    sqlite3_initialize();
+    sqlite3_vfs *defaultVFS = sqlite3_vfs_find(nullptr);
+    assert(defaultVFS);
+
+    auto vfs = new pj_sqlite3_vfs();
+
+    std::ostringstream buffer;
+    buffer << vfs;
+    vfs->namePtr = buffer.str();
+
+    vfs->base.iVersion = 1;
+    vfs->base.szOsFile = sizeof(sqlite3_file) + sizeof(File *);
+    vfs->base.mxPathname = defaultVFS->mxPathname;
+    vfs->base.zName = vfs->namePtr.c_str();
+    vfs->base.pAppData = ctx;
+    vfs->base.xOpen = VFSNetworkOpen;
+    vfs->base.xDelete = VFSNetworkDelete;
+    vfs->base.xAccess = VFSNetworkAccess;
+    vfs->base.xFullPathname = VFSNetworkFullPathname;
+    vfs->base.xDlOpen = defaultVFS->xDlOpen;
+    vfs->base.xDlError = defaultVFS->xDlError;
+    vfs->base.xDlSym = defaultVFS->xDlSym;
+    vfs->base.xDlClose = defaultVFS->xDlClose;
+    vfs->base.xRandomness = defaultVFS->xRandomness;
+    vfs->base.xSleep = defaultVFS->xSleep;
+    vfs->base.xCurrentTime = defaultVFS->xCurrentTime;
+    vfs->base.xGetLastError = defaultVFS->xGetLastError;
+    vfs->base.xCurrentTimeInt64 = defaultVFS->xCurrentTimeInt64;
+    if (sqlite3_vfs_register(&(vfs->base), false) == SQLITE_OK) {
+        return std::unique_ptr<SQLite3VFS>(new SQLite3VFS(vfs));
+    }
     return nullptr;
 }
 
