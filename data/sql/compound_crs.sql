@@ -586,7 +586,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','9429','ETRS89 + Douglas height',NULL,'
 INSERT INTO "usage" VALUES('EPSG','14057','compound_crs','EPSG','9429','EPSG','2803','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9430','ETRS89-GBR [OSNet v2009] + St. Marys height',NULL,'EPSG','11009','EPSG','5749',0);
 INSERT INTO "usage" VALUES('EPSG','14058','compound_crs','EPSG','9430','EPSG','2802','EPSG','1026');
-INSERT INTO "compound_crs" VALUES('EPSG','9449','ETRS89-IRE [IETRF2000 + Malin Head height',NULL,'EPSG','4173','EPSG','5731',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9449','ETRS89-IRE [ETRF2000] + Malin Head height',NULL,'EPSG','4173','EPSG','5731',0);
 INSERT INTO "usage" VALUES('EPSG','14084','compound_crs','EPSG','9449','EPSG','1305','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9450','ETRS89-IRE [ETRF2000] + Belfast height',NULL,'EPSG','4173','EPSG','5732',0);
 INSERT INTO "usage" VALUES('EPSG','14085','compound_crs','EPSG','9450','EPSG','2530','EPSG','1026');

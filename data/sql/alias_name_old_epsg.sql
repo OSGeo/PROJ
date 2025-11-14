@@ -1189,3 +1189,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1214','SRB_ETRS89','EPS
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1353','ETRS89/DREF91/2016','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10284','ETRS89/DREF91/R16','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6173','European Terrestrial Reference System 1989','EPSG_OLD');
+
+-- Changed in EPSG v12.043
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1433','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1434','European Terrestrial Reference System 1989','EPSG_OLD');

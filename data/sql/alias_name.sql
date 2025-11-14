@@ -8368,6 +8368,9 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3416','ETRS89 / Austria 
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9500','ETRS89 + EVRF2000 Austria height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','8370','ETRS89 / Belgian Lambert 2008 + Ostend height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9907','ETRS89 + Ostend height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','8360','ETRS89-CZE [2007] + Baltic 1957 height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','8360','ETRS89-SVK [SKTRF09] + Baltic 1957 height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','8360','ETRS89-SVK [SKTRF2022] + Baltic 1957 height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3145','ETRS89 / Faroe Lambert','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5316','ETRS89 / FOTM','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5318','ETRS89 / Faroe TM + FVR09 height','EPSG');
@@ -8579,7 +8582,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2179','ETRF2000-PL / CS2
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2180','ETRF2000-PL / CS92','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8683','SRB_ETRS89','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8684','SRB_ETRS89','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8685','ETRS89-SRB [STRS00]','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8685','SRB_ETRS89','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8682','SRB_ETRS89 / UTM zone 34N','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4073','SREF98','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4074','SREF98','EPSG');

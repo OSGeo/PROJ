@@ -924,19 +924,9 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             authFactory->createCoordinateReferenceSystem("8357"),
             // ETRS89
             authFactory->createCoordinateReferenceSystem("4937"), ctxt);
-        ASSERT_EQ(list.size(), 3U);
+        ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=pipeline "
-            "+step +proj=axisswap +order=2,1 "
-            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-            "+step +proj=vgridshift "
-            "+grids=cz_cuzk_CR-2005.tif "
-            "+multiplier=1 "
-            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
-            "+step +proj=axisswap +order=2,1");
-        EXPECT_EQ(
-            list[1]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline "
             "+step +proj=axisswap +order=2,1 "
             "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
@@ -974,7 +964,7 @@ TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_context) {
             "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
             "+step +proj=axisswap +order=2,1");
         EXPECT_EQ(list[0]->inverse()->nameStr(),
-                  "Inverse of ETRS89 to Baltic 1957 height (2)");
+                  "Inverse of ETRS89-CZE [2007] to Baltic 1957 height (2)");
 
         EXPECT_EQ(
             list[1]->exportToPROJString(PROJStringFormatter::create().get()),
