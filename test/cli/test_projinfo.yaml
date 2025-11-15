@@ -1941,3 +1941,26 @@ tests:
   out: |
     Candidate operations found: 1
     unknown id, Inverse of Saba to WGS 84 (1) + Saba to Saba height (1) + Saba Transverse Mercator 2020, 1.2 m, Bonaire, Sint Eustatius and Saba (BES Islands or Caribbean Netherlands) - Saba - onshore.
+- comment: Test that 'projinfo EGM2008' by default resolves to the datum
+  args: EGM2008
+  out: |
+    WKT2:2019 string:
+    VDATUM["EGM2008 geoid",
+        ID["EPSG",1027]]
+- comment: Test that 'projinfo -k crs EGM2008' resolves to the CRS
+  args: -k crs EGM2008
+  out: |
+    PROJ.4 string:
+    +geoidgrids=us_nga_egm08_25.tif +geoid_crs=WGS84 +vunits=m +no_defs +type=crs
+
+    WKT2:2019 string:
+    VERTCRS["EGM2008 height",
+        VDATUM["EGM2008 geoid"],
+        CS[vertical,1],
+            AXIS["gravity-related height (H)",up,
+                LENGTHUNIT["metre",1]],
+        USAGE[
+            SCOPE["Geodesy."],
+            AREA["World."],
+            BBOX[-90,-180,90,180]],
+        ID["EPSG",3855]]

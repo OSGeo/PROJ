@@ -346,7 +346,7 @@ static BaseObjectNNPtr buildObject(
                         }
                     }
                 }
-            } else if (dbContext && !kind.empty() && kind != "crs" &&
+            } else if (dbContext && !kind.empty() && kind != "crs_preferred" &&
                        l_user_string.find(':') == std::string::npos) {
                 std::vector<AuthorityFactory::ObjectType> allowedTypes;
                 if (kind == "operation")
@@ -360,6 +360,8 @@ static BaseObjectNNPtr buildObject(
                 else if (kind == "ensemble")
                     allowedTypes.push_back(
                         AuthorityFactory::ObjectType::DATUM_ENSEMBLE);
+                else if (kind == "crs")
+                    allowedTypes.push_back(AuthorityFactory::ObjectType::CRS);
                 constexpr size_t limitResultCount = 10;
                 auto factory = AuthorityFactory::create(NN_NO_CHECK(dbContext),
                                                         std::string());
@@ -406,6 +408,61 @@ static BaseObjectNNPtr buildObject(
             } else {
                 obj =
                     createFromUserInput(l_user_string, dbContext).as_nullable();
+                if (kind == "crs_preferred" &&
+                    dynamic_cast<CRS *>(obj.get()) == nullptr) {
+                    auto factory = AuthorityFactory::create(
+                        NN_NO_CHECK(dbContext), std::string());
+                    auto res = factory->createObjectsFromName(
+                        l_user_string, {AuthorityFactory::ObjectType::CRS},
+                        /* approximateMatch = */ false,
+                        /* limitResultCount = */ 2);
+                    if (res.size() == 1) {
+                        obj = res.front().as_nullable();
+                    } else if (res.empty()) {
+                        res = factory->createObjectsFromName(
+                            l_user_string, {AuthorityFactory::ObjectType::CRS},
+                            /* approximateMatch = */ true,
+                            /* limitResultCount = */ 2);
+                        if (res.size() == 1) {
+                            obj = res.front().as_nullable();
+                        } else {
+                            bool severalCandidates = false;
+                            BaseObjectPtr objCandidate;
+                            for (const auto &l_obj : res) {
+                                if (Identifier::isEquivalentName(
+                                        l_obj->nameStr().c_str(),
+                                        l_user_string.c_str())) {
+                                    if (objCandidate) {
+                                        severalCandidates = true;
+                                        break;
+                                    } else {
+                                        objCandidate = l_obj.as_nullable();
+                                    }
+                                }
+                            }
+                            if (severalCandidates) {
+                                std::string msg(
+                                    "several objects matching this name: ");
+                                bool first = true;
+                                for (const auto &l_obj : res) {
+                                    if (msg.size() > 200) {
+                                        msg += ", ...";
+                                        break;
+                                    }
+                                    if (!first) {
+                                        msg += ", ";
+                                    }
+                                    first = false;
+                                    msg += l_obj->nameStr();
+                                }
+                                std::cerr << context << ": " << msg
+                                          << std::endl;
+                                std::exit(1);
+                            } else if (objCandidate)
+                                obj = objCandidate;
+                        }
+                    }
+                }
             }
         }
     } catch (const std::exception &e) {
@@ -880,9 +937,9 @@ static void outputOperations(
     bool showSuperseded, bool promoteTo3D, bool normalizeAxisOrder,
     double minimumAccuracy, const OutputOptions &outputOpt, bool summary) {
     auto sourceObj = buildObject(
-        dbContext, sourceCRSStr, sourceEpoch, "crs", "source CRS", false,
-        CoordinateOperationContext::IntermediateCRSUse::NEVER, promoteTo3D,
-        normalizeAxisOrder, outputOpt.quiet);
+        dbContext, sourceCRSStr, sourceEpoch, "crs_preferred", "source CRS",
+        false, CoordinateOperationContext::IntermediateCRSUse::NEVER,
+        promoteTo3D, normalizeAxisOrder, outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     CoordinateMetadataPtr sourceCoordinateMetadata;
     if (!sourceCRS) {
@@ -901,9 +958,9 @@ static void outputOperations(
     }
 
     auto targetObj = buildObject(
-        dbContext, targetCRSStr, targetEpoch, "crs", "target CRS", false,
-        CoordinateOperationContext::IntermediateCRSUse::NEVER, promoteTo3D,
-        normalizeAxisOrder, outputOpt.quiet);
+        dbContext, targetCRSStr, targetEpoch, "crs_preferred", "target CRS",
+        false, CoordinateOperationContext::IntermediateCRSUse::NEVER,
+        promoteTo3D, normalizeAxisOrder, outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     CoordinateMetadataPtr targetCoordinateMetadata;
     if (!targetCRS) {
