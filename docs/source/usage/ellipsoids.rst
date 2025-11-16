@@ -111,6 +111,12 @@ Built-in ellipsoid definitions
 
 The ``+ellps=xxx`` parameter provides both size and shape for a number of
 built-in ellipsoid definitions. Default is GRS80 if not given.
+.. note::
+
+   The list below is not automatically updated. The command ``proj -le`` lists
+   all available ellipsoids, so this table may not include
+   all of them. Some values may differ from other sources.
+
 
     ============   =================================    ============================
     ellps          Parameters                           Datum name
