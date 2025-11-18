@@ -28,6 +28,14 @@ Foucaut Sinusoidal
 
    proj-string: ``+proj=fouc_s``
 
+   
+.. dropdown:: Show command used to generate this example map
+   :animate: fade-in
+
+   .. code-block:: bash
+
+      proj +proj=fouc_s +n=0.5 -R-180/180/-90/90 -T > fouc_s.txt
+
 
 The `y`-axis is based upon a weighted mean of the cylindrical equal-area and
 the sinusoidal projections. Parameter :math:`n=n` is the weighting factor where
