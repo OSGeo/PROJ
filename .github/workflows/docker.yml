@@ -33,6 +33,11 @@ jobs:
             dockerfile: "./docs/docbuild/Dockerfile"
             runner: "ubuntu-24.04"
     runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     env:
       # Only push proj-docs package for master
       PUSH_PACKAGES: ${{ github.repository_owner == 'OSGeo' && github.event_name != 'pull_request' && (matrix.container == 'proj' || (matrix.container == 'proj-docs' && github.ref_name == 'master')) }}
