@@ -20,7 +20,6 @@ Foucaut Sinusoidal
 | **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
 
-
 .. figure:: ./images/fouc_s.png
    :width: 500 px
    :align: center
@@ -28,13 +27,16 @@ Foucaut Sinusoidal
 
    proj-string: ``+proj=fouc_s``
 
-   
-.. dropdown:: Show command used to generate this example map
-   :animate: fade-in
+Command used to generate the example map
+----------------------------------------
 
-   .. code-block:: bash
+You can generate this map using the following command:
 
-      proj +proj=fouc_s +n=0.5 -R-180/180/-90/90 -T > fouc_s.txt
+.. code-block:: bash
+
+   proj +proj=fouc_s +n=0.5 -R-180/180/-90/90 -T > fouc_s.txt
+
+
 
 
 The `y`-axis is based upon a weighted mean of the cylindrical equal-area and
