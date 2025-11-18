@@ -133,6 +133,7 @@ jobs:
             org.opencontainers.image.created=${{ steps.prep.outputs.BUILD_DATE }}
       - name: Build image
         uses: docker/build-push-action@v6
+        id: push
         if: matrix.container == 'proj'
         with:
           push: ${{ env.PUSH_PACKAGES == 'true' }}
@@ -157,7 +158,7 @@ jobs:
         if: ${{ env.PUSH_PACKAGES == 'true' && matrix.container  == 'proj' }}
         uses: actions/attest-build-provenance@v3
         with:
-          subject-name: ghcr.io/osgeo/${{ matrix.container }}
+          subject-name: ghcr.io/osgeo/proj
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: ${{ env.PUSH_PACKAGES == 'true' }}
 
