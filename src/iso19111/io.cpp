@@ -2546,6 +2546,8 @@ WKTParser::Private::buildDatumEnsemble(const WKTNodeNNPtr &node,
         ThrowMissing(WKTConstants::ELLIPSOID);
     }
 
+    auto properties = buildProperties(node);
+
     std::vector<DatumNNPtr> datums;
     for (const auto &subNode : nodeP->children()) {
         if (ci_equal(subNode->GP()->value(), WKTConstants::MEMBER)) {
@@ -2565,6 +2567,31 @@ WKTParser::Private::buildDatumEnsemble(const WKTNodeNNPtr &node,
         }
     }
 
+    if (datums.empty() && !nodeP->children().empty()) {
+        auto name = stripQuotes(nodeP->children()[0]);
+        if (dbContext_) {
+            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+                                                        std::string());
+            auto res = authFactory->createObjectsFromName(
+                name, {AuthorityFactory::ObjectType::DATUM_ENSEMBLE}, true, 1);
+            if (res.size() == 1) {
+                auto datumEnsemble =
+                    dynamic_cast<const DatumEnsemble *>(res.front().get());
+                if (datumEnsemble) {
+                    datums = datumEnsemble->datums();
+                }
+            } else {
+                throw ParsingException(
+                    "No entry for datum ensemble '" + name +
+                    "' in database, and no explicit member specified");
+            }
+        } else {
+            throw ParsingException("Datum ensemble '" + name +
+                                   "' has no explicit member specified and no "
+                                   "connection to database");
+        }
+    }
+
     auto &accuracyNode = nodeP->lookForChild(WKTConstants::ENSEMBLEACCURACY);
     auto &accuracyNodeChildren = accuracyNode->GP()->children();
     if (accuracyNodeChildren.empty()) {
@@ -2574,7 +2601,7 @@ WKTParser::Private::buildDatumEnsemble(const WKTNodeNNPtr &node,
         PositionalAccuracy::create(accuracyNodeChildren[0]->GP()->value());
 
     try {
-        return DatumEnsemble::create(buildProperties(node), datums, accuracy);
+        return DatumEnsemble::create(properties, datums, accuracy);
     } catch (const util::Exception &e) {
         throw buildRethrow(__FUNCTION__, e);
     }
@@ -7104,70 +7131,98 @@ CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
 // ---------------------------------------------------------------------------
 
 DatumEnsembleNNPtr JSONParser::buildDatumEnsemble(const json &j) {
-    auto membersJ = getArray(j, "members");
     std::vector<DatumNNPtr> datums;
-    const bool hasEllipsoid(j.contains("ellipsoid"));
-    for (const auto &memberJ : membersJ) {
-        if (!memberJ.is_object()) {
-            throw ParsingException(
-                "Unexpected type for value of a \"members\" member");
-        }
-        auto datumName(getName(memberJ));
-        bool datumAdded = false;
-        if (dbContext_ && memberJ.contains("id")) {
-            auto id = getObject(memberJ, "id");
-            auto authority = getString(id, "authority");
-            auto authFactory =
-                AuthorityFactory::create(NN_NO_CHECK(dbContext_), authority);
-            auto code = id["code"];
-            std::string codeStr;
-            if (code.is_string()) {
-                codeStr = code.get<std::string>();
-            } else if (code.is_number_integer()) {
-                codeStr = internal::toString(code.get<int>());
-            } else {
-                throw ParsingException("Unexpected type for value of \"code\"");
+    if (j.contains("members")) {
+        auto membersJ = getArray(j, "members");
+        const bool hasEllipsoid(j.contains("ellipsoid"));
+        for (const auto &memberJ : membersJ) {
+            if (!memberJ.is_object()) {
+                throw ParsingException(
+                    "Unexpected type for value of a \"members\" member");
             }
-            try {
-                datums.push_back(authFactory->createDatum(codeStr));
-                datumAdded = true;
-            } catch (const std::exception &) {
-                // Silently ignore, as this isn't necessary an error.
-                // If an older PROJ version parses a DatumEnsemble object of
-                // a more recent PROJ version where the datum ensemble got
-                // a new member, it might be unknown from the older PROJ.
+            auto datumName(getName(memberJ));
+            bool datumAdded = false;
+            if (dbContext_ && memberJ.contains("id")) {
+                auto id = getObject(memberJ, "id");
+                auto authority = getString(id, "authority");
+                auto authFactory = AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext_), authority);
+                auto code = id["code"];
+                std::string codeStr;
+                if (code.is_string()) {
+                    codeStr = code.get<std::string>();
+                } else if (code.is_number_integer()) {
+                    codeStr = internal::toString(code.get<int>());
+                } else {
+                    throw ParsingException(
+                        "Unexpected type for value of \"code\"");
+                }
+                try {
+                    datums.push_back(authFactory->createDatum(codeStr));
+                    datumAdded = true;
+                } catch (const std::exception &) {
+                    // Silently ignore, as this isn't necessary an error.
+                    // If an older PROJ version parses a DatumEnsemble object of
+                    // a more recent PROJ version where the datum ensemble got
+                    // a new member, it might be unknown from the older PROJ.
+                }
             }
-        }
 
-        if (dbContext_ && !datumAdded) {
+            if (dbContext_ && !datumAdded) {
+                auto authFactory = AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext_), std::string());
+                auto list = authFactory->createObjectsFromName(
+                    datumName, {AuthorityFactory::ObjectType::DATUM},
+                    false /* approximate=false*/);
+                if (!list.empty()) {
+                    auto datum =
+                        util::nn_dynamic_pointer_cast<Datum>(list.front());
+                    if (!datum)
+                        throw ParsingException(
+                            "DatumEnsemble member is not a datum");
+                    datums.push_back(NN_NO_CHECK(datum));
+                    datumAdded = true;
+                }
+            }
+
+            if (!datumAdded) {
+                // Fallback if no db match
+                if (hasEllipsoid) {
+                    datums.emplace_back(GeodeticReferenceFrame::create(
+                        buildProperties(memberJ),
+                        buildEllipsoid(getObject(j, "ellipsoid")),
+                        optional<std::string>(), PrimeMeridian::GREENWICH));
+                } else {
+                    datums.emplace_back(VerticalReferenceFrame::create(
+                        buildProperties(memberJ)));
+                }
+            }
+        }
+    } else {
+        auto name = getString(j, "name");
+        if (dbContext_) {
             auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
                                                         std::string());
-            auto list = authFactory->createObjectsFromName(
-                datumName, {AuthorityFactory::ObjectType::DATUM},
-                false /* approximate=false*/);
-            if (!list.empty()) {
-                auto datum = util::nn_dynamic_pointer_cast<Datum>(list.front());
-                if (!datum)
-                    throw ParsingException(
-                        "DatumEnsemble member is not a datum");
-                datums.push_back(NN_NO_CHECK(datum));
-                datumAdded = true;
-            }
-        }
-
-        if (!datumAdded) {
-            // Fallback if no db match
-            if (hasEllipsoid) {
-                datums.emplace_back(GeodeticReferenceFrame::create(
-                    buildProperties(memberJ),
-                    buildEllipsoid(getObject(j, "ellipsoid")),
-                    optional<std::string>(), PrimeMeridian::GREENWICH));
+            auto res = authFactory->createObjectsFromName(
+                name, {AuthorityFactory::ObjectType::DATUM_ENSEMBLE}, true, 1);
+            if (res.size() == 1) {
+                auto datumEnsemble =
+                    dynamic_cast<const DatumEnsemble *>(res.front().get());
+                if (datumEnsemble) {
+                    datums = datumEnsemble->datums();
+                }
             } else {
-                datums.emplace_back(
-                    VerticalReferenceFrame::create(buildProperties(memberJ)));
+                throw ParsingException(
+                    "No entry for datum ensemble '" + name +
+                    "' in database, and no explicit member specified");
             }
+        } else {
+            throw ParsingException("Datum ensemble '" + name +
+                                   "' has no explicit member specified and no "
+                                   "connection to database");
         }
     }
+
     return DatumEnsemble::create(
         buildProperties(j), datums,
         PositionalAccuracy::create(getString(j, "accuracy")));

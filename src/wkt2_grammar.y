@@ -854,7 +854,6 @@ datum_ensemble: geodetic_datum_ensemble_without_pm | vertical_datum_ensemble
 geodetic_datum_ensemble_without_pm: datum_ensemble_keyword
                          left_delimiter
                          datum_ensemble_name
-                         wkt_separator datum_ensemble_member
                          datum_ensemble_member_list_ellipsoid_accuracy_identifier_list
                          right_delimiter
 
