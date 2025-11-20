@@ -149,8 +149,8 @@ Build requirements
 - C++17 compiler
 - CMake >= 3.16
 - SQLite3 >= 3.11: headers and library for target architecture, and sqlite3 executable for build architecture
-- libtiff >= 4.0 (optional but recommended)
-- curl >= 7.29.0 (optional but recommended)
+- libtiff >= 4.0 (optional but recommended to read grid formats based on GeoTIFF. Only basic TIFF support is required; optional features like WebP or ZStd are not needed.)
+- curl >= 7.29.0 (optional but recommended to download required grids at runtime.)
 - JSON for Modern C++ (nlohmann/json) >= 3.7.0; if not found as an external dependency then vendored version 3.9.1 from PROJ source tree is used
 
 .. _test_requirements:

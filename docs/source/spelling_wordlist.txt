@@ -1056,3 +1056,5 @@ Zusätze
 integrators
 IntlFeet
 erroring
+WebP
+ZStd
