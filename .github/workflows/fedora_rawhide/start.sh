@@ -26,8 +26,10 @@ ctest -j$(nproc)
 
 # Try EMBED_RESOURCE_DIRECTORY option
 wget https://raw.githubusercontent.com/OSGeo/PROJ-data/refs/heads/master/us_nga/us_nga_egm96_15.tif
+wget https://cdn.proj.org/fi_nls_ykj_etrs35fin.gpkg
 mkdir grids
 mv us_nga_egm96_15.tif grids
+mv fi_nls_ykj_etrs35fin.gpkg grids
 echo "Build with -DEMBED_RESOURCE_FILES=ON -DEMBED_RESOURCE_DIRECTORY=$PWD/grids"
 CC=clang CXX=clang++ cmake .. -DEMBED_RESOURCE_DIRECTORY=$PWD/grids
 make -j$(nproc)
@@ -36,6 +38,8 @@ echo 49 2 0 | bin/cs2cs "WGS84 + EGM96 height" EPSG:4979
 echo 49 2 0 | bin/cs2cs "WGS84 + EGM96 height" EPSG:4979  | grep 44.643 >/dev/null || (echo "Expected 49dN 2dE 44.643 as a result" && /bin/false)
 echo 0 0 0 | bin/cct +init=ITRF2000:ITRF96
 echo 0 0 0 | bin/cct +init=ITRF2000:ITRF96 | grep 0.0067 >/dev/null || (echo "Expected 0.0067 0.0061 -0.0185 as a result" && /bin/false)
+echo 3432087 6995748 0 | bin/cct +proj=tinshift +file=fi_nls_ykj_etrs35fin.gpkg
+echo 3432087 6995748 0 | bin/cct +proj=tinshift +file=fi_nls_ykj_etrs35fin.gpkg | grep 431943.0905 >/dev/null || (echo "Expected 431943.0905   6992816.7826 0 as a result" && /bin/false)
 
 echo "Build with -DEMBED_RESOURCE_FILES=ON -DEMBED_RESOURCE_DIRECTORY=$PWD/grids -DUSE_ONLY_EMBEDDED_RESOURCE_FILES=ON"
 CC=clang CXX=clang++ cmake .. -DEMBED_RESOURCE_DIRECTORY=$PWD/grids -DUSE_ONLY_EMBEDDED_RESOURCE_FILES=ON

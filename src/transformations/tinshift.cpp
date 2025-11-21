@@ -26,19 +26,29 @@
  *****************************************************************************/
 
 #define PROJ_COMPILATION
+#define FROM_PROJ_CPP
 
-#include "tinshift.hpp"
 #include "filemanager.hpp"
+#include "proj/internal/internal.hpp"
 #include "proj_internal.h"
+#include "tinshift_gpkg.hpp"
+#include "tinshift_iface.hpp"
+#include "tinshift_json.hpp"
 
 PROJ_HEAD(tinshift, "Triangulation based transformation");
 
-using namespace TINSHIFT_NAMESPACE;
+using namespace TINSHIFT_JSON_NAMESPACE;
+
+// ---------------------------------------------------------------------------
+
+TINShiftEvaluator::~TINShiftEvaluator() = default;
+
+// ---------------------------------------------------------------------------
 
 namespace {
 
 struct tinshiftData {
-    std::unique_ptr<Evaluator> evaluator{};
+    std::unique_ptr<TINShiftEvaluator> evaluator{};
 
     tinshiftData() = default;
 
@@ -85,6 +95,52 @@ PJ *PJ_TRANSFORMATION(tinshift, 1) {
         return pj_tinshift_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
+    P->fwd4d = tinshift_forward_4d;
+    P->inv4d = tinshift_reverse_4d;
+    P->left = PJ_IO_UNITS_WHATEVER;
+    P->right = PJ_IO_UNITS_WHATEVER;
+
+    if (NS_PROJ::internal::ends_with(filename, ".gpkg") ||
+        NS_PROJ::internal::ends_with(filename, ".GPKG")) {
+        std::string path;
+        if (NS_PROJ::internal::starts_with(filename, "http://") ||
+            NS_PROJ::internal::starts_with(filename, "https://")) {
+            path = filename;
+        } else {
+            path.resize(2048);
+            const bool found =
+                pj_find_file(P->ctx, filename, &path[0], path.size() - 1,
+                             /* disable_network = */ false) != 0;
+            path.resize(strlen(path.c_str()));
+            if (!found) {
+                proj_log_error(P, _("non existing file"));
+                return pj_tinshift_destructor(
+                    P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+            }
+        }
+
+        std::unique_ptr<TINShiftGeopackageFile> file;
+        try {
+            file = TINShiftGeopackageFile::open(P->ctx, path);
+
+        } catch (const std::exception &e) {
+            proj_log_error(P, _("invalid file: %s"), e.what());
+            return pj_tinshift_destructor(
+                P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+        }
+
+        auto Q = new tinshiftData();
+        P->opaque = (void *)Q;
+        P->destructor = pj_tinshift_destructor;
+
+        Q->evaluator =
+            std::make_unique<TINShiftGeopackageEvaluator>(std::move(file));
+
+        return P;
+    }
+
+    // else JSON file
+
     auto file = NS_PROJ::FileManager::open_resource_file(P->ctx, filename);
     if (nullptr == file) {
         proj_log_error(P, _("Cannot open %s"), filename);
@@ -120,17 +176,13 @@ PJ *PJ_TRANSFORMATION(tinshift, 1) {
     P->destructor = pj_tinshift_destructor;
 
     try {
-        Q->evaluator.reset(new Evaluator(TINShiftFile::parse(jsonStr)));
+        Q->evaluator = std::make_unique<TINShiftJSONEvaluator>(
+            TINShiftJSONFile::parse(jsonStr));
     } catch (const std::exception &e) {
         proj_log_error(P, _("invalid model: %s"), e.what());
         return pj_tinshift_destructor(
             P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
-
-    P->fwd4d = tinshift_forward_4d;
-    P->inv4d = tinshift_reverse_4d;
-    P->left = PJ_IO_UNITS_WHATEVER;
-    P->right = PJ_IO_UNITS_WHATEVER;
 
     return P;
 }
