@@ -204,11 +204,9 @@ PJ *pj_obj_create(PJ_CONTEXT *ctx, const BaseObjectNNPtr &objIn) {
             bTryToExportToProj = false;
         }
         if (bTryToExportToProj) {
-            auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
             try {
                 auto formatter = PROJStringFormatter::create(
-                    PROJStringFormatter::Convention::PROJ_5,
-                    std::move(dbContext));
+                    PROJStringFormatter::Convention::PROJ_5, nullptr);
                 auto projString = coordop->exportToPROJString(formatter.get());
                 const bool defer_grid_opening_backup = ctx->defer_grid_opening;
                 if (!defer_grid_opening_backup &&
