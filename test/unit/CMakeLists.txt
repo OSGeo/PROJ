@@ -255,7 +255,7 @@ add_test(NAME test_misc COMMAND test_misc)
 set_property(TEST test_misc
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
 
-if (Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+if (Threads_FOUND AND CMAKE_USE_PTHREADS_INIT AND NOT APPLE)
 add_definitions(-DPROJ_HAS_PTHREADS)
 add_executable(test_fork
   test_fork.c)
