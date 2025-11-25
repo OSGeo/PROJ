@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "GIE" "1" "08 Sep 2025" "9.6" "PROJ"
+.TH "GIE" "1" "01 Dec 2025" "9.7" "PROJ"
 .SH NAME
 gie \- The Geospatial Integrity Investigation Environment
 .SH SYNOPSIS
@@ -89,7 +89,8 @@ like:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 <gie>
 
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
@@ -101,7 +102,8 @@ accept     12  55
 expect     691_875.632_14   6_098_907.825_05
 
 </gie>
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -133,9 +135,11 @@ Run all tests in a file with all debug information turned on
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 gie \-vvvv corner\-cases.gie
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -145,9 +149,11 @@ Run all tests in several files
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 gie foo bar
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .SH GIE COMMAND LANGUAGE
@@ -158,7 +164,8 @@ Define a PROJ operation to test. Example:
 .INDENT 7.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 operation proj=utm zone=32 ellps=GRS80
 # test 4D function
 accept    12 55 0 0
@@ -167,7 +174,8 @@ expect    691875.63214  6098907.82501  0  0
 # test 2D function
 accept    12 56
 expect    687071.4391   6210141.3267
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .UNINDENT
@@ -208,11 +216,13 @@ pipeline is constructed.
 .INDENT 7.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 operation   proj=pipeline step
             proj=urm5 n=0.5 inv
 expect      failure pjd_err_malformed_pipeline
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -229,7 +239,8 @@ accurate within a few meters. \fI\%tolerance\fP should
 .INDENT 7.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 operation       proj=merc
 # test coordinate as returned by \(ga\(ga\(gaecho 12 55 | proj +proj=merc\(ga\(ga
 tolerance       1 cm
@@ -242,7 +253,8 @@ expect          1335833.89 7326837.72
 tolerance       100 m
 accept          12 55
 expect          1335883.89  7326837.72
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -264,11 +276,13 @@ Example with the default 100 iterations and the default tolerance:
 .INDENT 7.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 operation       proj=merc
 accept          12 55
 roundtrip
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -276,11 +290,13 @@ Example with count and default tolerance:
 .INDENT 7.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 operation       proj=merc
 accept          12 55
 roundtrip       10000
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -288,11 +304,13 @@ Example with count and tolerance:
 .INDENT 7.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 operation       proj=merc
 accept          12 55
 roundtrip       10000 5 mm
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .UNINDENT
@@ -306,7 +324,8 @@ pipeline returns the same results in both directions.
 .INDENT 7.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 operation proj=pipeline zone=32 step
           proj=utm  ellps=GRS80 step
           proj=utm  ellps=GRS80 inv
@@ -319,11 +338,12 @@ expect 12 55 0 0
 
 direction inverse
 expect 12 55 0 0
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
-The default direction is \(dqforward\(dq.
+The default direction is "forward".
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -334,13 +354,15 @@ available. Below is an example of that situation.
 .INDENT 7.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 operation proj=hgridshift +grids=nzgd2kgrid0005.gsb ellps=GRS80
 tolerance 1 mm
 ignore    pjd_err_failed_to_load_grid
 accept    172.999892181021551 \-45.001620431954613
 expect    173                 \-45
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -362,14 +384,16 @@ Add user defined text to the output stream. See the example below.
 .INDENT 7.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 <gie>
 echo ** Mercator projection tests **
 operation +proj=merc
 accept  0   0
 expect  0   0
 </gie>
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -377,14 +401,16 @@ which returns
 .INDENT 7.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 Reading file \(aqtest.gie\(aq
 ** Mercator projection test **
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 total:  1 tests succeeded,  0 tests skipped,  0 tests failed.
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .UNINDENT
@@ -397,7 +423,8 @@ relevant for debugging when writing new test cases.
 .INDENT 7.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 <gie>
 operation proj=merc
 accept  0   0
@@ -406,13 +433,14 @@ skip
 accept  0   1
 expect  0   110579.9
 </gie>
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .UNINDENT
 .SH STRICT MODE
 .sp
-Added in version 7.1.
+New in version 7.1.
 
 .sp
 A stricter variant of normal gie syntax can be used by wrapping gie commands
@@ -425,11 +453,12 @@ end with the space character followed by backslash to mark the continuation.
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 <gie\-strict>
 # This is a comment. The following line with multiple repeated characters too
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-# A command on several lines must use \(dq \e\(dq continuation
+# A command on several lines must use " \e" continuation
 operation proj=hgridshift +grids=nzgd2kgrid0005.gsb \e
           ellps=GRS80
 tolerance 1 mm
@@ -437,15 +466,16 @@ ignore    pjd_err_failed_to_load_grid
 accept    172.999892181021551 \-45.001620431954613
 expect    173                 \-45
 </gie\-strict>
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .UNINDENT
 .UNINDENT
 .SH BACKGROUND
 .sp
-More importantly than being an acronym for \(dqGeospatial Integrity Investigation
-Environment\(dq, gie were also the initials, user id, and USGS email address of
+More importantly than being an acronym for "Geospatial Integrity Investigation
+Environment", gie were also the initials, user id, and USGS email address of
 Gerald Ian Evenden (1935\-\-2016), the geospatial visionary, who, already in the
 1980s, started what was to become the PROJ of today.
 .sp
@@ -467,7 +497,7 @@ call like \fBhypot(x,y)\fP\&.
 .sp
 While today, we may have more formally well defined metadata systems (most
 prominent the OGC WKT2 representation), nothing comes close being as easily
-readable (\(dqhuman compatible\(dq) as Gerald\(aqs key\-value system. This system in
+readable ("human compatible") as Gerald\(aqs key\-value system. This system in
 particular, and the PROJ system in general, was Gerald\(aqs great gift to anyone
 using and/or communicating about geodata.
 .sp
@@ -481,11 +511,11 @@ So in honour, and hopefully also in the spirit, of Gerald Ian Evenden
 \fBproj(1)\fP, \fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBprojinfo(1)\fP, \fBprojsync(1)\fP
 .SH BUGS
 .sp
-A list of known bugs can be found at \X'tty: link https://github.com/OSGeo/PROJ/issues'\fI\%https://github.com/OSGeo/PROJ/issues\fP\X'tty: link'
+A list of known bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
 where new bug reports can be submitted to.
 .SH HOME PAGE
 .sp
-\X'tty: link https://proj.org/'\fI\%https://proj.org/\fP\X'tty: link'
+\fI\%https://proj.org/\fP
 .SH AUTHOR
 Thomas Knudsen
 .SH COPYRIGHT

@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "PROJ" "1" "08 Sep 2025" "9.6" "PROJ"
+.TH "PROJ" "1" "01 Dec 2025" "9.7" "PROJ"
 .SH NAME
 proj \- Cartographic projection filter
 .SH SYNOPSIS
@@ -61,7 +61,7 @@ and allows bypassing formatting operations.
 .B \-d <n>
 .UNINDENT
 .sp
-Added in version 5.2.0: Specify the number of decimals to round to in the output.
+New in version 5.2.0: Specify the number of decimals to round to in the output.
 
 .INDENT 0.0
 .TP
@@ -163,7 +163,7 @@ reciprocal value of \fImult\fP is employed.
 .B \-f <format>
 Where \fIformat\fP is a printf format string to control the form of the output values.
 For inverse projections, the output will be in degrees when this option is
-employed. The default format is \fB\(dq%.2f\(dq\fP for forward projection and DMS for
+employed. The default format is \fB"%.2f"\fP for forward projection and DMS for
 inverse.
 .UNINDENT
 .INDENT 0.0
@@ -201,8 +201,8 @@ projection has been established from either the run\-line or the contents of
 default directory for a file reference without an absolute path. This is
 also used for supporting files like datum shift files.
 .sp
-Added in version 9.3.0: \fI{crs}\fP is one of the possibilities accepted by :c:\fBproj_create()\fP, provided it
-expresses a projected CRS, like a WKT string, an object code (like \(dqEPSG:32632\(dq)
+New in version 9.3.0: \fI{crs}\fP is one of the possibilities accepted by :c:\fBproj_create()\fP, provided it
+expresses a projected CRS, like a WKT string, an object code (like "EPSG:32632")
 a PROJJSON string, etc.
 The projection computed will be those of the map projection implied by
 the transformation from the base geographic CRS of the projected CRS to the projected CRS.
@@ -218,7 +218,7 @@ portions of the input line are appended to the output line.
 Input geographic data (longitude and latitude) must be in DMS or decimal degrees format and input
 cartesian data must be in units consistent with the ellipsoid major axis or
 sphere radius units. Output geographic coordinates will be in DMS (if the
-\fB\-w\fP switch is not employed) and precise to 0.001\(dq with trailing, zero\-valued
+\fB\-w\fP switch is not employed) and precise to 0.001" with trailing, zero\-valued
 minute\-second fields deleted.
 .SH EXAMPLE
 .sp
@@ -226,13 +226,15 @@ The following script
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 proj +proj=utm +zone=12 \-r <<EOF
-45d15\(aq33.1\(dq 111.5W
+45d15\(aq33.1" 111.5W
 45d15.551666667N \-111d30
 +45.25919444444 111d30\(aq000w
 EOF
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -244,9 +246,11 @@ data will appear as three lines of:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 460770.43     5011865.86
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
@@ -254,21 +258,24 @@ This other example
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 proj EPSG:6421 \-V <<EOF
 \-120 35.8
 EOF
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .sp
-Will perform the projection of the coordinates in \(dqNAD83(2011) / California zone 4\(dq
-(\fIEPSG:6421\fP) into its geographic system, \(dqNAD83(2011)\(dq, showing the expanded annotated listing.
+Will perform the projection of the coordinates in "NAD83(2011) / California zone 4"
+(\fIEPSG:6421\fP) into its geographic system, "NAD83(2011)", showing the expanded annotated listing.
 The output will appear as:
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 #Lambert Conformal Conic
 #   Conic, Sph&Ell
 #   lat_1= and lat_2= or lat_0, k_0=
@@ -287,9 +294,10 @@ Parallel scale (k) : 1.00004382  ( 0.004382 % error )
 Areal scale (s):     1.00008765  ( 0.008765 % error )
 Angular distortion (w): 0.000
 Meridian/Parallel angle: 90.00000
-Convergence : \-0d35\(aq47.714\(dq [ \-0.59658715 ]
+Convergence : \-0d35\(aq47.714" [ \-0.59658715 ]
 Max\-min (Tissot axis a\-b) scale error: 1.00004 1.00004
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .SH OTHER PROGRAMS
@@ -305,11 +313,11 @@ support for datum translation.
 \fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBprojinfo(1)\fP, \fBprojsync(1)\fP
 .SH BUGS
 .sp
-A list of known bugs can be found at \X'tty: link https://github.com/OSGeo/PROJ/issues'\fI\%https://github.com/OSGeo/PROJ/issues\fP\X'tty: link'
+A list of known bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
 where new bug reports can be submitted to.
 .SH HOME PAGE
 .sp
-\X'tty: link https://proj.org/'\fI\%https://proj.org/\fP\X'tty: link'
+\fI\%https://proj.org/\fP
 .SH AUTHOR
 Gerald I. Evenden
 .SH COPYRIGHT

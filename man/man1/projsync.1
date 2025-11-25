@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "PROJSYNC" "1" "08 Sep 2025" "9.6" "PROJ"
+.TH "PROJSYNC" "1" "01 Dec 2025" "9.7" "PROJ"
 .SH NAME
 projsync \- Downloading tool of resource files
 .SH SYNOPSIS
@@ -145,7 +145,7 @@ Quiet mode
 .INDENT 0.0
 .TP
 .B \-\-verbose
-Added in version 8.1.
+New in version 8.1.
 
 .sp
 Verbose mode (more than default)
@@ -163,7 +163,7 @@ List file names, with the source_id and area_of_use properties.
 .INDENT 0.0
 .TP
 .B \-\-no\-version\-filtering
-Added in version 8.1.
+New in version 8.1.
 
 .sp
 By default, projsync only downloads files that are compatible of
@@ -186,9 +186,11 @@ Download all resource files
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 projsync \-\-all
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
@@ -198,9 +200,11 @@ Download resource files covering specified point and attributed to an agency
 .INDENT 0.0
 .INDENT 3.5
 .sp
-.EX
+.nf
+.ft C
 projsync \-\-source\-id fr_ign \-\-bbox 2,49,2,49
-.EE
+.ft P
+.fi
 .UNINDENT
 .UNINDENT
 .SH SEE ALSO
@@ -208,13 +212,13 @@ projsync \-\-source\-id fr_ign \-\-bbox 2,49,2,49
 \fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBproj(1)\fP, \fBprojinfo(1)\fP
 .SH BUGS
 .sp
-A list of known bugs can be found at \X'tty: link https://github.com/OSGeo/PROJ/issues'\fI\%https://github.com/OSGeo/PROJ/issues\fP\X'tty: link'
+A list of known bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
 where new bug reports can be submitted to.
 Bugs specific to resource files should be submitted to
-\X'tty: link https://github.com/OSGeo/PROJ-data/issues'\fI\%https://github.com/OSGeo/PROJ\-data/issues\fP\X'tty: link'
+\fI\%https://github.com/OSGeo/PROJ\-data/issues\fP
 .SH HOME PAGE
 .sp
-\X'tty: link https://proj.org/'\fI\%https://proj.org/\fP\X'tty: link'
+\fI\%https://proj.org/\fP
 .SH AUTHOR
 Even Rouault
 .SH COPYRIGHT
