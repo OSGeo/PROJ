@@ -159,6 +159,7 @@ set(SRC_LIBPROJ_TRANSFORMATIONS
   transformations/xyzgridshift.cpp
   transformations/defmodel.cpp
   transformations/tinshift.cpp
+  transformations/tinshift_gpkg.cpp
   transformations/vertoffset.cpp
 )
 
@@ -430,7 +431,7 @@ if (EMBED_RESOURCE_FILES)
   endif()
 endif()
 
-set(EMBED_RESOURCE_DIRECTORY "" CACHE PATH "Directory that contains .tif, .json or .pol files to embed into libproj")
+set(EMBED_RESOURCE_DIRECTORY "" CACHE PATH "Directory that contains .tif, .json, .gpkg or .pol files to embed into libproj")
 set(FILES_TO_EMBED)
 if (EMBED_RESOURCE_DIRECTORY)
     if (NOT EMBED_RESOURCE_FILES)
@@ -441,9 +442,13 @@ if (EMBED_RESOURCE_DIRECTORY)
         message(FATAL_ERROR "${EMBED_RESOURCE_DIRECTORY} is not a valid directory")
     endif()
 
-    file(GLOB FILES_TO_EMBED "${EMBED_RESOURCE_DIRECTORY}/*.tif" "${EMBED_RESOURCE_DIRECTORY}/*.json"  "${EMBED_RESOURCE_DIRECTORY}/*.pol")
+    file(GLOB FILES_TO_EMBED
+            "${EMBED_RESOURCE_DIRECTORY}/*.tif"
+            "${EMBED_RESOURCE_DIRECTORY}/*.json"
+            "${EMBED_RESOURCE_DIRECTORY}/*.gpkg"
+            "${EMBED_RESOURCE_DIRECTORY}/*.pol")
     if (NOT FILES_TO_EMBED)
-        message(FATAL_ERROR "No .tif, .json or .pol files found in ${EMBED_RESOURCE_DIRECTORY}")
+        message(FATAL_ERROR "No .tif, .json, .gpkg or .pol files found in ${EMBED_RESOURCE_DIRECTORY}")
     endif()
 endif()
 
