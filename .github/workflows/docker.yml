@@ -4,6 +4,7 @@ on:
   push:
       paths-ignore:
           - 'docs/**'
+      branches-ignore: ["dependabot/**"]
   pull_request:
       paths-ignore:
           - 'docs/**'
@@ -21,17 +22,22 @@ permissions:
 #
 jobs:
   containers:
-    name: ${{ matrix.container }} Container
-    runs-on: ubuntu-latest
+    name: ${{ matrix.container }} Container - ${{ matrix.runner }}
     strategy:
       matrix:
-        container: ["proj","proj-docs"]
-        dockerfile: ["./Dockerfile", "./docs/docbuild/Dockerfile"]
-        exclude:
-          - container: "proj"
-            dockerfile: "./docs/docbuild/Dockerfile"
+        container: ["proj"]
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        dockerfile: ["./Dockerfile"]
+        include:
           - container: "proj-docs"
-            dockerfile: "./Dockerfile"
+            dockerfile: "./docs/docbuild/Dockerfile"
+            runner: "ubuntu-24.04"
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     env:
       # Only push proj-docs package for master
       PUSH_PACKAGES: ${{ github.repository_owner == 'OSGeo' && github.event_name != 'pull_request' && (matrix.container == 'proj' || (matrix.container == 'proj-docs' && github.ref_name == 'master')) }}
@@ -44,24 +50,49 @@ jobs:
           echo "are we pushing packages" ${{ env.PUSH_PACKAGES }}
           echo "event_name" ${{ github.event_name }}
           echo "ref" ${{ github.ref }}
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+        with:
+          daemon-config: |
+            {
+              "debug": false,
+              "features": {
+                "containerd-snapshotter": true  
+              }
+            }
       - name: Setup Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
         with:
           version: latest
-      - if: ${{ env.PUSH_PACKAGES == 'true' }}
-        name: Login to GitHub Container Registry
+
+      - name: Login to GitHub Container Registry
+        if: env.PUSH_PACKAGES == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_TOKEN }}
-      - if: ${{ env.PUSH_PACKAGES == 'true' }}
-        name: Login to Docker Hub
+      - name: Login to Docker Hub
+        if: env.PUSH_PACKAGES == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Extract container metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/osgeo/${{ matrix.container }}
+            docker.io/osgeo/${{ matrix.container }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
       - name: Prepare
         id: prep
         run: |
@@ -71,8 +102,16 @@ jobs:
           fi
           echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-      - name: Build image
+            runner=${{ matrix.runner }}
+          if [[ "$runner" == *"-arm" ]]; then
+            ARCH=arm64
+          else
+            ARCH=amd64
+          fi
+          echo "ARCH=$ARCH" >> $GITHUB_OUTPUT
+      - name: Build docs image
         uses: docker/build-push-action@v6
+        if: matrix.container == 'proj-docs'
         with:
           push: ${{ env.PUSH_PACKAGES == 'true' }}
           builder: ${{ steps.buildx.outputs.name }}
@@ -92,3 +131,74 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ steps.prep.outputs.VERSION }}
             org.opencontainers.image.created=${{ steps.prep.outputs.BUILD_DATE }}
+      - name: Build image
+        uses: docker/build-push-action@v6
+        id: push
+        if: matrix.container == 'proj'
+        with:
+          push: ${{ env.PUSH_PACKAGES == 'true' }}
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/${{ steps.prep.outputs.ARCH }}
+          tags: |
+            docker.io/osgeo/${{ matrix.container }}:${{ steps.prep.outputs.VERSION }}-${{ steps.prep.outputs.ARCH }}
+            docker.io/osgeo/${{ matrix.container }}:latest-${{ steps.prep.outputs.ARCH }}
+            ghcr.io/osgeo/${{ matrix.container }}:${{ steps.prep.outputs.VERSION }}-${{ steps.prep.outputs.ARCH }}
+            ghcr.io/osgeo/${{ matrix.container }}:latest-${{ steps.prep.outputs.ARCH }}
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.description=${{ github.event.repository.description }}
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.url=${{ github.event.repository.html_url }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.VERSION }}
+            org.opencontainers.image.created=${{ steps.prep.outputs.BUILD_DATE }}
+      - name: Generate artifact attestation
+        if: ${{ env.PUSH_PACKAGES == 'true' && matrix.container  == 'proj' }}
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ghcr.io/osgeo/proj
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: ${{ env.PUSH_PACKAGES == 'true' }}
+
+  create-manifest:
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    runs-on: ubuntu-latest
+    env:
+      PUSH_PACKAGES: ${{ github.repository_owner == 'OSGeo' && github.event_name != 'pull_request' }}
+    needs: containers
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        if: env.PUSH_PACKAGES == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        if: env.PUSH_PACKAGES == 'true'
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create and push multi-platform manifest
+        if: env.PUSH_PACKAGES == 'true'
+        run: |
+          docker buildx imagetools create \
+          -t ghcr.io/osgeo/proj:latest \
+          ghcr.io/osgeo/proj:latest-amd64 \
+          ghcr.io/osgeo/proj:latest-arm64
+
+          docker buildx imagetools create \
+          -t osgeo/proj:latest \
+          osgeo/proj:latest-amd64 \
+          osgeo/proj:latest-arm64
+  

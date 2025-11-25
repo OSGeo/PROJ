@@ -1132,7 +1132,7 @@ tests:
   out: |
     PROJ.4 string:
     +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs
-- comment: Testing RH2000 height to SWEREF99
+- comment: Testing RH2000 height to ETRS89-SWE [SWEREF 99]
   args: -s EPSG:5613 -t EPSG:4977
   out: |
     Candidate operations found: 2
@@ -1161,10 +1161,11 @@ tests:
                         LENGTHUNIT["metre",1]],
                 ID["EPSG",5613]]],
         TARGETCRS[
-            GEOGCRS["SWEREF99",
-                DATUM["SWEREF99",
+            GEOGCRS["ETRS89-SWE [SWEREF 99]",
+                DATUM["SWEREF 99",
                     ELLIPSOID["GRS 1980",6378137,298.257222101,
-                        LENGTHUNIT["metre",1]]],
+                        LENGTHUNIT["metre",1]],
+                    ANCHOREPOCH[1999.5]],
                 PRIMEM["Greenwich",0,
                     ANGLEUNIT["degree",0.0174532925199433]],
                 CS[ellipsoidal,3],
@@ -1190,13 +1191,13 @@ tests:
     -------------------------------------
     Operation No. 2:
 
-    unknown id, Transformation from RH2000 height to SWEREF99 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
+    unknown id, Transformation from RH2000 height to ETRS89-SWE [SWEREF 99] (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
 
     PROJ string:
     +proj=noop
 
     WKT2:2019 string:
-    COORDINATEOPERATION["Transformation from RH2000 height to SWEREF99 (ballpark vertical transformation, without ellipsoid height to vertical height correction)",
+    COORDINATEOPERATION["Transformation from RH2000 height to ETRS89-SWE [SWEREF 99] (ballpark vertical transformation, without ellipsoid height to vertical height correction)",
         SOURCECRS[
             VERTCRS["RH2000 height",
                 DYNAMIC[
@@ -1207,10 +1208,11 @@ tests:
                         LENGTHUNIT["metre",1]],
                 ID["EPSG",5613]]],
         TARGETCRS[
-            GEOGCRS["SWEREF99",
-                DATUM["SWEREF99",
+            GEOGCRS["ETRS89-SWE [SWEREF 99]",
+                DATUM["SWEREF 99",
                     ELLIPSOID["GRS 1980",6378137,298.257222101,
-                        LENGTHUNIT["metre",1]]],
+                        LENGTHUNIT["metre",1]],
+                    ANCHOREPOCH[1999.5]],
                 PRIMEM["Greenwich",0,
                     ANGLEUNIT["degree",0.0174532925199433]],
                 CS[ellipsoidal,3],
@@ -1277,7 +1279,7 @@ tests:
     -------------------------------------
     Operation No. 1:
 
-    INVERSE(DERIVED_FROM(EPSG)):10000, Inverse of RGF93 v1 to NGF-IGN69 height (1), 0.5 m, France - mainland onshore.
+    INVERSE(DERIVED_FROM(EPSG)):10000, Inverse of ETRS89-FRA [RGF93 v1] to NGF-IGN69 height (1), 0.5 m, France - mainland onshore.
 
     PROJ string:
     +proj=pipeline
@@ -1290,7 +1292,7 @@ tests:
     -------------------------------------
     Operation No. 2:
 
-    unknown id, Transformation from NGF-IGN69 height to RGF93 v1 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
+    unknown id, Transformation from NGF-IGN69 height to ETRS89-FRA [RGF93 v1] (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
 
     PROJ string:
     +proj=noop
@@ -1776,19 +1778,19 @@ tests:
   out: |
     EPSG:4258 "ETRS89"
     EPSG:9398 "Tenerife height"
-    EPSG:9505 "ETRS89 + Alicante height"
+    EPSG:9505 "ETRS89-ESP [REGENTE] + Alicante height"
 - args: --list-crs --area Spain --spatial-test contains
   grep: EPSG:9505|EPSG:9398|EPSG:4258|EPSG:5703
   sort:
   out: |
     EPSG:9398 "Tenerife height"
-    EPSG:9505 "ETRS89 + Alicante height"
+    EPSG:9505 "ETRS89-ESP [REGENTE] + Alicante height"
 - args: --list-crs --area Spain
   grep: EPSG:9505|EPSG:9398|EPSG:4258|EPSG:5703
   sort:
   out: |
     EPSG:9398 "Tenerife height"
-    EPSG:9505 "ETRS89 + Alicante height"
+    EPSG:9505 "ETRS89-ESP [REGENTE] + Alicante height"
 - args: --list-crs geodetic
   grep: EPSG:4326|EPSG:4979|EPSG:4978
   sort:
@@ -1821,9 +1823,9 @@ tests:
   out: EPSG:6512 "NAD83(2011) / Missouri East"
 - comment: Test case where --area has several matches
   args: --list-crs projected --area France
-  grep: RGF93 v1 / Lambert-93|UTM zone 11N
+  grep: ETRS89-FRA \[RGF93 v1\] / Lambert-93|UTM zone 11N
   sort:
-  out: EPSG:2154 "RGF93 v1 / Lambert-93"
+  out: EPSG:2154 "ETRS89-FRA [RGF93 v1] / Lambert-93"
 - comment: >
     Test North-Macedonia CRS for which there are several MGI 1901 -> WGS 84 Helmert
     transformations but only one matches the extent of the CRS
@@ -1868,21 +1870,17 @@ tests:
       +step +proj=axisswap +order=2,1
 - comment: >
    Test that ETRF2000 to ETRF2014 only goes through ITRF2000, ITRF2008 or ITRF2014, and not ITRF9x or ITRF>2020
-  args: -s ETRF2000 -t ETRF2014 --3d --summary --authority EPSG
+  args: -s ETRF2005 -t ETRF2014 --3d --summary --authority EPSG
   out: |
-    Candidate operations found: 6
-    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2014 to ETRF2000 (1) + ITRF2014 to ETRF2014 (2) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
-    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2014 to ETRF2000 (1) + ITRF2014 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
-    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2008 to ETRF2000 (1) + ITRF2008 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
-    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2005 to ETRF2000 (1) + ITRF2005 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
-    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2000 to ETRF2000 (2) + ITRF2000 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
-    unknown id, Conversion from ETRF2000 (geog3D) to ETRF2000 (geocentric) + Inverse of ITRF2000 to ETRF2000 (1) + ITRF2000 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
+    Candidate operations found: 1
+    unknown id, Conversion from ETRF2005 (geog3D) to ETRF2005 (geocentric) + Inverse of ITRF2005 to ETRF2005 (1) + ITRF2005 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog3D), 0.01 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
 - comment: >
    Test that ETRF2000-PL to ETRF2014 is not negatively affected by https://github.com/OSGeo/PROJ/pull/4364 changes (the current actual result is not golden in any way, using ETRF2000 to ETRF2014 could probably make sense)
   args: -s ETRF2000-PL -t ETRF2014 --summary
   out: |
-    Candidate operations found: 1
-    unknown id, ETRF2000-PL to ETRS89 (1) + ETRS89 to ETRF2014, 0.1 m, Poland - onshore and offshore.
+    Candidate operations found: 2
+    unknown id, Conversion from ETRS89-POL [PL-ETRF2000] (geog2D) to ETRS89-POL [PL-ETRF2000] (geocentric) + Inverse of ITRF2020 to ETRS89-POL [PL-ETRF2000] (1) + ITRF2020 to ETRF2014 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog2D), 0.101 m, Europe - onshore and offshore - ETRF extent - approximately 16°W to 33°E and 33°N to 84°N., time-dependent operation
+    unknown id, Conversion from ETRS89-POL [PL-ETRF2000] (geog2D) to ETRS89-POL [PL-ETRF2000] (geocentric) + ETRS89-POL [PL-ETRF2000] to ETRF2000 (1) + Inverse of ETRF2014 to ETRF2000 (1) + Conversion from ETRF2014 (geocentric) to ETRF2014 (geog2D), 0.11 m, Poland - onshore and offshore., time-dependent operation
 - comment: >
    Test WGS 84 (G1150) to WGS 84 (G2296)
   args: -s "WGS 84 (G1150)" -t "WGS 84 (G2296)" --summary
@@ -1918,7 +1916,7 @@ tests:
 - args: completion projinfo EGM
   out: |
      EGM2008\ height EGM96\ height EGM84\ height
-- args: completion projinfo "\"RGF93" v1 "/"
+- args: completion projinfo "\"ETRS89-FRA [RGF93 v1]" "/"
   out: |
      Lambert-93 CC42 CC43 CC44 CC45 CC46 CC47 CC48 CC49 CC50 Lambert-93\ +\ NGF-IGN69\ height Lambert-93\ +\ NGF-IGN78\ height
 - args: completion projinfo "\"NAD83(HARN) / California Albers" "+"
@@ -1943,3 +1941,26 @@ tests:
   out: |
     Candidate operations found: 1
     unknown id, Inverse of Saba to WGS 84 (1) + Saba to Saba height (1) + Saba Transverse Mercator 2020, 1.2 m, Bonaire, Sint Eustatius and Saba (BES Islands or Caribbean Netherlands) - Saba - onshore.
+- comment: Test that 'projinfo EGM2008' by default resolves to the datum
+  args: EGM2008
+  out: |
+    WKT2:2019 string:
+    VDATUM["EGM2008 geoid",
+        ID["EPSG",1027]]
+- comment: Test that 'projinfo -k crs EGM2008' resolves to the CRS
+  args: -k crs EGM2008
+  out: |
+    PROJ.4 string:
+    +geoidgrids=us_nga_egm08_25.tif +geoid_crs=WGS84 +vunits=m +no_defs +type=crs
+
+    WKT2:2019 string:
+    VERTCRS["EGM2008 height",
+        VDATUM["EGM2008 geoid"],
+        CS[vertical,1],
+            AXIS["gravity-related height (H)",up,
+                LENGTHUNIT["metre",1]],
+        USAGE[
+            SCOPE["Geodesy."],
+            AREA["World."],
+            BBOX[-90,-180,90,180]],
+        ID["EPSG",3855]]

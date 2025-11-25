@@ -1237,7 +1237,7 @@ tests:
   args: --only-best NTF RGF93 -E
   in: 49 2 0
   stderr: |
-    Attempt to use coordinate operation NTF to RGF93 v1 (1) failed. Grid fr_ign_gr3df97a.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+    Attempt to use coordinate operation NTF to ETRS89-FRA [RGF93 v1] (1) failed. Grid fr_ign_gr3df97a.tif is not available. Consult https://proj.org/resource_files.html for guidance.
   stdout: |
     49 2 0	*	* inf
 - comment: Test cs2cs --only-best (working) for EPSG:4326+5773 to EPSG:4979
@@ -1383,7 +1383,7 @@ tests:
   in: 39 -3 0
   grep-v: pj_open_lib
   stderr: |
-    Attempt to use coordinate operation Inverse of WGS 84 to EGM96 height (1) + ETRS89 to Alicante height (1) using ETRS89 to WGS 84 (1) failed. Grid es_ign_egm08-rednap.tif is not available. Consult https://proj.org/resource_files.html for guidance. Grid us_nga_egm96_15.tif is not available. Consult https://proj.org/resource_files.html for guidance. This might become an error in a future PROJ major release. Set the ONLY_BEST option to YES or NO. This warning will no longer be emitted (for the current transformation instance).
+    Attempt to use coordinate operation Inverse of WGS 84 to EGM96 height (1) + ETRS89-ESP [REGENTE] to Alicante height (1) using ETRS89-ESP [REGENTE] to WGS 84 (1) failed. Grid es_ign_egm08-rednap.tif is not available. Consult https://proj.org/resource_files.html for guidance. Grid us_nga_egm96_15.tif is not available. Consult https://proj.org/resource_files.html for guidance. This might become an error in a future PROJ major release. Set the ONLY_BEST option to YES or NO. This warning will no longer be emitted (for the current transformation instance).
     Using coordinate operation Transformation from EGM96 height to Alicante height (ballpark vertical transformation)
   stdout: |
     39.00	-3.00 0.00
@@ -1413,7 +1413,7 @@ tests:
   in: 39 -3 0
   grep-v: pj_open_lib
   stderr: |
-    Attempt to use coordinate operation Inverse of WGS 84 to EGM96 height (1) + ETRS89 to Alicante height (1) using ETRS89 to WGS 84 (1) failed. Grid es_ign_egm08-rednap.tif is not available. Consult https://proj.org/resource_files.html for guidance. Grid us_nga_egm96_15.tif is not available. Consult https://proj.org/resource_files.html for guidance.
+    Attempt to use coordinate operation Inverse of WGS 84 to EGM96 height (1) + ETRS89-ESP [REGENTE] to Alicante height (1) using ETRS89-ESP [REGENTE] to WGS 84 (1) failed. Grid es_ign_egm08-rednap.tif is not available. Consult https://proj.org/resource_files.html for guidance. Grid us_nga_egm96_15.tif is not available. Consult https://proj.org/resource_files.html for guidance.
 
     cannot initialize transformation
     cause: File not found or invalid

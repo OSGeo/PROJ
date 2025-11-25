@@ -737,3 +737,17 @@ FROM grid_transformation gt, geodetic_crs gcrs
 JOIN usage u ON u.object_auth_name = gt.auth_name AND u.object_code = gt.code AND u.object_table_name = 'grid_transformation'
 WHERE gt.name = 'WGS 84 to EGM2008 height (1)'
 AND gcrs.auth_name = 'EPSG' AND gcrs.name LIKE 'WGS 84 (G%' AND gcrs.type='geographic 3D' and gcrs.deprecated=0;
+
+
+-- Undeprecate EPSG:1591 "RGF93 v1 to ETRS89 (1)"
+-- This has been deprecated in EPSG v12.039 where "RGF93 v1" was renamed "ETRS89-FRA [RGF93 v1]"
+-- The rationale is that "RGF93 v1" will be in the future part of the ETRS89 datum ensemble
+-- but it is not yet. In the meantime it is useful to have this noop transformation between both
+-- Do the same for "RGF93 v2 to ETRS89 (1)" and "RGF93 v2bto ETRS89 (1)"
+
+UPDATE helmert_transformation_table SET name = 'ETRS89-FRA [RGF93 v1] to ETRS89 (1)', deprecated = 0, description = description || ' Note: this transformation deprecated in EPSG v12.039 has been undeprecated by PROJ pending addition of ETRS89-FRA [RGF93 v1] to the ETRS89 datum ensemble' WHERE auth_name = 'EPSG' AND code = '1591' AND deprecated = 1;
+UPDATE helmert_transformation_table SET name = 'ETRS89-FRA [RGF93 v2] to ETRS89 (1)', deprecated = 0, description = description || ' Note: this transformation deprecated in EPSG v12.039 has been undeprecated by PROJ pending addition of ETRS89-FRA [RGF93 v2] to the ETRS89 datum ensemble' WHERE auth_name = 'EPSG' AND code = '9789' AND deprecated = 1;
+UPDATE helmert_transformation_table SET name = 'ETRS89-FRA [RGF93 v2b] to ETRS89 (1)', deprecated = 0, description = description || ' Note: this transformation deprecated in EPSG v12.039 has been undeprecated by PROJ pending addition of ETRS89-FRA [RGF93 v2b] to the ETRS89 datum ensemble' WHERE auth_name = 'EPSG' AND code = '9790' AND deprecated = 1;
+
+-- Fix issue in EPSG 12.043
+UPDATE concatenated_operation SET target_crs_code = 11076 WHERE auth_name = 'EPSG' AND code = 8443 AND name = 'S-JTSK to ETRS89-SVK [SKTRF09] (6)' AND target_crs_code = 4258;

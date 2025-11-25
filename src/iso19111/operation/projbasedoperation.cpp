@@ -125,8 +125,6 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     if (inverse) {
         formatter->startInversion();
     }
-    const bool bRequiresPerCoordinateInputTime =
-        formatter->requiresPerCoordinateInputTime();
     projExportable->_exportToPROJString(formatter.get());
     if (inverse) {
         formatter->stopInversion();
@@ -148,7 +146,8 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     op->projStringExportable_ = projExportable.as_nullable();
     op->inverse_ = inverse;
     op->setHasBallparkTransformation(hasBallparkTransformation);
-    op->setRequiresPerCoordinateInputTime(bRequiresPerCoordinateInputTime);
+    op->setRequiresPerCoordinateInputTime(
+        formatter->requiresPerCoordinateInputTime());
 
     return op;
 }

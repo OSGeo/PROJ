@@ -1442,7 +1442,8 @@ TEST(factory, AuthorityFactory_build_all_concatenated) {
         AuthorityFactory::ObjectType::CONCATENATED_OPERATION, false);
     EXPECT_LT(setConcatenatedNoDeprecated.size(), setConcatenated.size());
     for (const auto &code : setConcatenated) {
-        if (in(code, {"8422", "8481", "8482", "8565", "8566", "8572"})) {
+        if (in(code, {"8422", "8481", "8482", "8565", "8566", "8572", "9731",
+                      "11206"})) {
             EXPECT_THROW(factory->createCoordinateOperation(code, false),
                          FactoryException)
                 << code;
@@ -1721,7 +1722,7 @@ TEST(factory, AuthorityFactory_getDescriptionText) {
     EXPECT_THROW(factory->getDescriptionText("-1"),
                  NoSuchAuthorityCodeException);
     EXPECT_EQ(factory->getDescriptionText("10000"),
-              "RGF93 v1 to NGF-IGN69 height (1)");
+              "ETRS89-FRA [RGF93 v1] to NGF-IGN69 height (1)");
 
     // Several objects have 4326 code, including an area of use, but return
     // the CRS one.
@@ -2352,11 +2353,10 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
     {
         auto list =
             factory->createFromCoordinateReferenceSystemCodes("4179", "4258");
-        ASSERT_EQ(list.size(), 3U);
+        ASSERT_EQ(list.size(), 2U);
         // Romania has a larger area than Poland (given our approx formula)
-        EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
-        EXPECT_EQ(list[1]->getEPSGCode(), 15993); // Romania - 10m
-        EXPECT_EQ(list[2]->getEPSGCode(), 1644);  // Poland - 1m
+        EXPECT_EQ(list[0]->getEPSGCode(), 15993); // Romania - 10m
+        EXPECT_EQ(list[1]->getEPSGCode(), 1644);  // Poland - 1m
     }
     {
         // Test removal of superseded transform
@@ -2364,7 +2364,7 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
             "EPSG", "4179", "EPSG", "4258", false, false, false, true);
         ASSERT_EQ(list.size(), 2U);
         // Romania has a larger area than Poland (given our approx formula)
-        EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
+        EXPECT_EQ(list[0]->getEPSGCode(), 15993); // Romania - 10m
         EXPECT_EQ(list[1]->getEPSGCode(), 1644);  // Poland - 1m
     }
 }

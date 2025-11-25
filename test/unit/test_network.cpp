@@ -1115,7 +1115,7 @@ TEST(networking, curl_hgridshift) {
     proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
 
-    // NTF to RGF93 v1. Using fr_ign_gr3df97a.tif
+    // NTF to ETRS89-FRA [RGF93 v1]. Using fr_ign_gr3df97a.tif
     auto P = proj_create_crs_to_crs(ctx, "EPSG:4275", "EPSG:4171", nullptr);
     ASSERT_NE(P, nullptr);
 
@@ -1324,7 +1324,8 @@ TEST(networking, network_endpoint_api_and_not_reachable_xyzgridshift) {
         EXPECT_EQ(c2.xyz.x, HUGE_VAL);
         EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
         PJ *last_op = proj_trans_get_last_used_operation(P);
-        EXPECT_STREQ(proj_pj_info(last_op).description, "NTF to RGF93 v1 (1)");
+        EXPECT_STREQ(proj_pj_info(last_op).description,
+                     "NTF to ETRS89-FRA [RGF93 v1] (1)");
         proj_destroy(last_op);
     }
 
@@ -1336,7 +1337,8 @@ TEST(networking, network_endpoint_api_and_not_reachable_xyzgridshift) {
         EXPECT_EQ(c2.xyz.x, HUGE_VAL);
         EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
         PJ *last_op = proj_trans_get_last_used_operation(P);
-        EXPECT_STREQ(proj_pj_info(last_op).description, "NTF to RGF93 v1 (1)");
+        EXPECT_STREQ(proj_pj_info(last_op).description,
+                     "NTF to ETRS89-FRA [RGF93 v1] (1)");
         proj_destroy(last_op);
     }
 
@@ -1348,7 +1350,8 @@ TEST(networking, network_endpoint_api_and_not_reachable_xyzgridshift) {
         EXPECT_EQ(c2.xyz.x, HUGE_VAL);
         EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
         PJ *last_op = proj_trans_get_last_used_operation(P);
-        EXPECT_STREQ(proj_pj_info(last_op).description, "NTF to RGF93 v1 (1)");
+        EXPECT_STREQ(proj_pj_info(last_op).description,
+                     "NTF to ETRS89-FRA [RGF93 v1] (1)");
         proj_destroy(last_op);
     }
 
@@ -1383,7 +1386,7 @@ TEST(networking, network_endpoint_api_and_not_reachable_hgridshift) {
         EXPECT_EQ(c2.xyz.x, HUGE_VAL);
         EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
         PJ *last_op = proj_trans_get_last_used_operation(P);
-        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (8)");
+        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (5)");
         proj_destroy(last_op);
     }
 
@@ -1395,7 +1398,7 @@ TEST(networking, network_endpoint_api_and_not_reachable_hgridshift) {
         EXPECT_EQ(c2.xyz.x, HUGE_VAL);
         EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
         PJ *last_op = proj_trans_get_last_used_operation(P);
-        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (8)");
+        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (5)");
         proj_destroy(last_op);
     }
 
@@ -1407,7 +1410,7 @@ TEST(networking, network_endpoint_api_and_not_reachable_hgridshift) {
         EXPECT_EQ(c2.xyz.x, HUGE_VAL);
         EXPECT_EQ(proj_errno(P), PROJ_ERR_OTHER_NETWORK_ERROR);
         PJ *last_op = proj_trans_get_last_used_operation(P);
-        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (8)");
+        EXPECT_STREQ(proj_pj_info(last_op).description, "MGI to ETRS89 (5)");
         proj_destroy(last_op);
     }
 

@@ -237,7 +237,7 @@ INSERT INTO "usage" VALUES('EPSG','4234','vertical_crs','EPSG','5791','EPSG','13
 INSERT INTO "vertical_crs" VALUES('EPSG','5792','Danger 1950 height',NULL,'EPSG','6499','EPSG','5190',0);
 INSERT INTO "usage" VALUES('EPSG','4235','vertical_crs','EPSG','5792','EPSG','3299','EPSG','1179');
 INSERT INTO "vertical_crs" VALUES('EPSG','5793','Mayotte 1950 height',NULL,'EPSG','6499','EPSG','5191',0);
-INSERT INTO "usage" VALUES('EPSG','4236','vertical_crs','EPSG','5793','EPSG','3340','EPSG','1179');
+INSERT INTO "usage" VALUES('EPSG','4236','vertical_crs','EPSG','5793','EPSG','3340','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','5794','Martinique 1955 height',NULL,'EPSG','6499','EPSG','5192',0);
 INSERT INTO "usage" VALUES('EPSG','4237','vertical_crs','EPSG','5794','EPSG','3276','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','5795','Guadeloupe 1951 height',NULL,'EPSG','6499','EPSG','5193',0);
@@ -454,7 +454,7 @@ INSERT INTO "vertical_crs" VALUES('EPSG','9471','INAGeoid2020 v1 height',NULL,'E
 INSERT INTO "usage" VALUES('EPSG','14153','vertical_crs','EPSG','9471','EPSG','1122','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','9650','Baltic 1986 height',NULL,'EPSG','6499','EPSG','1296',0);
 INSERT INTO "usage" VALUES('EPSG','15032','vertical_crs','EPSG','9650','EPSG','3293','EPSG','1178');
-INSERT INTO "vertical_crs" VALUES('EPSG','9651','EVRF2007-PL height',NULL,'EPSG','6499','EPSG','1297',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','9651','PL-EVRF2007 height',NULL,'EPSG','6499','EPSG','1297',0);
 INSERT INTO "usage" VALUES('EPSG','15034','vertical_crs','EPSG','9651','EPSG','3293','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','9663','EH2000 height',NULL,'EPSG','6499','EPSG','1298',0);
 INSERT INTO "usage" VALUES('EPSG','14747','vertical_crs','EPSG','9663','EPSG','3246','EPSG','1178');
@@ -530,8 +530,12 @@ INSERT INTO "vertical_crs" VALUES('EPSG','10900','Asse 2025 height',NULL,'EPSG',
 INSERT INTO "usage" VALUES('EPSG','23352','vertical_crs','EPSG','10900','EPSG','4805','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','10918','COH88 2025 (NAVD88) height',NULL,'EPSG','6499','EPSG','1416',0);
 INSERT INTO "usage" VALUES('EPSG','23576','vertical_crs','EPSG','10918','EPSG','1375','EPSG','1178');
+INSERT INTO "vertical_crs" VALUES('EPSG','10989','London Survey Grid height',NULL,'EPSG','6499','EPSG','1423',0);
+INSERT INTO "usage" VALUES('EPSG','23914','vertical_crs','EPSG','10989','EPSG','4822','EPSG','1297');
 INSERT INTO "vertical_crs" VALUES('EPSG','10999','SVD2024 height',NULL,'EPSG','6499','EPSG','1424',0);
 INSERT INTO "usage" VALUES('EPSG','24133','vertical_crs','EPSG','10999','EPSG','4831','EPSG','1180');
+INSERT INTO "vertical_crs" VALUES('EPSG','11157','IGN 2023 Mayotte height',NULL,'EPSG','6499','EPSG','1443',0);
+INSERT INTO "usage" VALUES('EPSG','24641','vertical_crs','EPSG','11157','EPSG','3340','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','20000','SVD2006 height',NULL,'EPSG','6499','EPSG','1323',0);
 INSERT INTO "usage" VALUES('EPSG','17962','vertical_crs','EPSG','20000','EPSG','4058','EPSG','1180');
 INSERT INTO "vertical_crs" VALUES('EPSG','20034','CGVD2013a(2002) height',NULL,'EPSG','6499','EPSG','1325',0);

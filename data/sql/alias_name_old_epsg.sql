@@ -1124,3 +1124,72 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','3902','ETRS89-TM35FIN(N,E
 
 -- Changed in EPSG v12.007
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25884','LKS92 / TM Baltic93','EPSG_OLD');
+
+-- Changed in EPSG v12.021
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1407','European Terrestrial Reference System 1989','EPSG_OLD');
+
+-- Changed in EPSG v12.027
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5973','ETRS89 / UTM zone 33 + NN2000 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5975','ETRS89 / UTM zone 35 + NN2000 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5974','ETRS89 / UTM zone 34 + NN2000 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5976','ETRS89 / UTM zone 36 + NN2000 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5972','ETRS89 / UTM zone 32 + NN2000 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5971','ETRS89 / UTM zone 31 + NN2000 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6171','ETRS89 / UTM zone 31 + NN54 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6172','ETRS89 / UTM zone 32 + NN54 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6173','ETRS89 / UTM zone 33 + NN54 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6174','ETRS89 / UTM zone 34 + NN54 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6175','ETRS89 / UTM zone 35 + NN54 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6176','ETRS89 / UTM zone 36 + NN54 height','EPSG_OLD');
+
+-- Changed in EPSG v12.033
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3447','ETRS89 / Lambert 2005','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6962','ETRS89 / Albania LCC','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6870','ETRS89 / Albania TM','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1425','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1431','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1432','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1439','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1447','European Terrestrial Reference System 1989','EPSG_OLD');
+
+-- Changed in EPSG v12.035
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10826','ETRS89 + LAS-2000 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10839','ETRS89 + LAS-2000 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1441','European Terrestrial Reference System 1989','EPSG_OLD');
+
+-- Changed in EPSG v12.037
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1132','RDN2008','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6670','IGM95','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3065','ETRF89 IT / UTM zone 33N','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3064','ETRF89 IT / UTM zone 32N','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9716','ETRF89 IT / UTM zone 34N','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1132','European Terrestrial Reference System 1989','EPSG_OLD');
+
+-- Changed in EPSG v12.038
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3067','EUREF-FIN / UTM zone 35N','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10688','ETRS89','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10689','ETRS89','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10690','ETRS89','EPSG_OLD');
+
+-- Changed in EPSG v12.039
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5316','ETRS89 / FOTM','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5698','RGF93 / Lambert-93 + NGF-IGN69 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5699','RGF93 / Lambert-93 + NGF-IGN78 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10659','ETRS89 + EOMA 1980 height','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1031','European Terrestrial Reference System 1989','EPSG_OLD');
+
+-- Changed in EPSG v12.041
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1297','EVRF2007-PL','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1305','ETRF2000-PL','EPSG_OLD');
+
+-- Changed in EPSG v12.042
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1034','SREF98','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1214','STRS00','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1214','SRB_ETRS89','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1353','ETRS89/DREF91/2016','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10284','ETRS89/DREF91/R16','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6173','European Terrestrial Reference System 1989','EPSG_OLD');
+
+-- Changed in EPSG v12.043
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1433','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1434','European Terrestrial Reference System 1989','EPSG_OLD');

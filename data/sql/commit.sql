@@ -7,16 +7,6 @@ DELETE FROM alias_name WHERE (table_name, auth_name, code, alt_name) IN
             WHERE source in ('EPSG', 'EPSG_OLD')
             GROUP BY table_name, auth_name, code, alt_name) x WHERE count > 1) AND source = 'EPSG_OLD';
 
--- Remove "conflicting" entries in alias_name, that is entries of EPSG_OLD whose
--- name match an entry of EPSG but with a different code
-
-DELETE FROM alias_name WHERE (table_name, auth_name, code, alt_name, source) IN
-    (SELECT a2.table_name, a2.auth_name, a2.code, a2.alt_name, a2.source
-        FROM alias_name a1 JOIN alias_name a2
-        WHERE a1.table_name = a2.table_name AND a1.code != a2.code AND
-              a1.alt_name = a2.alt_name AND
-              a1.source = 'EPSG' AND a2.source = 'EPSG_OLD');
-
 -- Remove useless entries, i.e. where the official name matches the alias...
 
 DELETE FROM alias_name WHERE (table_name, auth_name, code, alt_name, source) IN

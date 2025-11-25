@@ -1061,12 +1061,16 @@ struct SortFunction {
             b_name.find("NTF (Paris) to NTF (1)") != std::string::npos) {
             return false;
         }
-        if (a_name.find("NTF (Paris) to RGF93 v1 (1)") != std::string::npos &&
-            b_name.find("NTF (Paris) to RGF93 v1 (2)") != std::string::npos) {
+        if (a_name.find("NTF (Paris) to ETRS89-FRA [RGF93 v1] (1)") !=
+                std::string::npos &&
+            b_name.find("NTF (Paris) to ETRS89-FRA [RGF93 v1] (2)") !=
+                std::string::npos) {
             return true;
         }
-        if (a_name.find("NTF (Paris) to RGF93 v1 (2)") != std::string::npos &&
-            b_name.find("NTF (Paris) to RGF93 v1 (1)") != std::string::npos) {
+        if (a_name.find("NTF (Paris) to ETRS89-FRA [RGF93 v1] (2)") !=
+                std::string::npos &&
+            b_name.find("NTF (Paris) to ETRS89-FRA [RGF93 v1] (1)") !=
+                std::string::npos) {
             return false;
         }
 
@@ -3714,7 +3718,8 @@ CoordinateOperationFactory::Private::createOperations(
     }
 
     if (dynamic_cast<const crs::EngineeringCRS *>(sourceCRS.get()) &&
-        sourceCRS->_isEquivalentTo(targetCRS.get())) {
+        sourceCRS->_isEquivalentTo(targetCRS.get(),
+                                   util::IComparable::Criterion::EQUIVALENT)) {
         std::string name("Identity transformation from ");
         name += sourceCRS->nameStr();
         name += " to ";
@@ -3845,7 +3850,9 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
             if (pmoDst.size() == pmoSrc.size()) {
                 bool ok = true;
                 for (size_t i = 0; i < pmoSrc.size(); ++i) {
-                    if (pmoSrc[i]->_isEquivalentTo(pmoDst[i].get())) {
+                    if (pmoSrc[i]->_isEquivalentTo(
+                            pmoDst[i].get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
                         auto pmo = pmoSrc[i]->cloneWithEpochs(*sourceEpoch,
                                                               *targetEpoch);
                         std::vector<operation::CoordinateOperationNNPtr> ops;
@@ -4075,12 +4082,27 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
         }
     }
 
-    if ((res.empty() || tooSmallAreas) &&
-        !context.inCreateOperationsWithDatumPivotAntiRecursion &&
+    bool allRequiresPerCoordinateInputTime = false;
+    for (const auto &op : res) {
+        allRequiresPerCoordinateInputTime =
+            op->requiresPerCoordinateInputTime();
+        if (!allRequiresPerCoordinateInputTime) {
+            break;
+        }
+    }
+
+    if (!context.inCreateOperationsWithDatumPivotAntiRecursion &&
         !resFindDirectNonEmptyBeforeFiltering && geodSrc && geodDst &&
         !sameGeodeticDatum && context.context->getIntermediateCRS().empty() &&
         context.context->getAllowUseIntermediateCRS() !=
-            CoordinateOperationContext::IntermediateCRSUse::NEVER) {
+            CoordinateOperationContext::IntermediateCRSUse::NEVER &&
+        (res.empty() || tooSmallAreas ||
+         // If all coordinate operations are time-dependent and none of the
+         // source or target CRS are dynamic, try through an intermediate CRS
+         // (we go here between ETRS89 and ETRS89-NO that would otherwise only
+         // use NKG time-dependent transformations)
+         (allRequiresPerCoordinateInputTime && !geodSrc->isDynamic() &&
+          !geodDst->isDynamic()))) {
         // Currently triggered by "IG05/12 Intermediate CRS" to ITRF2014
 
         std::set<std::string> oSetNames;
@@ -4089,6 +4111,7 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
                 oSetNames.insert(op->nameStr());
             }
         }
+
         auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
             sourceCRS, targetCRS, context, true);
         if (tooSmallAreas && !res.empty()) {
@@ -6337,7 +6360,13 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                 const bool srcAndTargetGeogAreSame =
                     componentsSrc[0]->isEquivalentTo(
                         targetCRS->demoteTo2D(std::string(), dbContext).get(),
-                        util::IComparable::Criterion::EQUIVALENT);
+                        util::IComparable::Criterion::EQUIVALENT) &&
+                    // Kind of a hack for EPSG:4937 to EPSG:9883 to work
+                    // properly
+                    !((componentsSrc[0]->nameStr() == "ETRS89" &&
+                       targetCRS->nameStr() == "ETRS89-NOR [EUREF89]") ||
+                      (componentsSrc[0]->nameStr() == "ETRS89-NOR [EUREF89]" &&
+                       targetCRS->nameStr() == "ETRS89"));
 
                 // Lambda to add to the set the name of geodetic datum of the
                 // CRS
@@ -6607,7 +6636,9 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         const auto vertSrc = componentsSrc[1]->extractVerticalCRS();
         const auto vertDst = componentsDst[1]->extractVerticalCRS();
         if (vertSrc && vertDst &&
-            !componentsSrc[1]->_isEquivalentTo(componentsDst[1].get())) {
+            !componentsSrc[1]->_isEquivalentTo(
+                componentsDst[1].get(),
+                util::IComparable::Criterion::EQUIVALENT)) {
             if ((!vertSrc->geoidModel().empty() ||
                  !vertDst->geoidModel().empty()) &&
                 // To be able to use "CGVD28 height to
@@ -6928,8 +6959,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
 
         auto interpolationCRS =
             NN_NO_CHECK(std::static_pointer_cast<crs::SingleCRS>(srcGeog));
-        auto interpTransformCRS = verticalTransform->interpolationCRS();
-        if (interpTransformCRS) {
+        if (auto interpTransformCRS = verticalTransform->interpolationCRS()) {
             auto interpTransformSingleCRS =
                 std::static_pointer_cast<crs::SingleCRS>(interpTransformCRS);
             if (interpTransformSingleCRS) {
@@ -6944,10 +6974,17 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 dynamic_cast<crs::GeographicCRS *>(
                     compSrc0BoundCrs->hubCRS().get()) &&
                 compSrc0BoundCrs->hubCRS()->_isEquivalentTo(
-                    compDst0BoundCrs->hubCRS().get())) {
+                    compDst0BoundCrs->hubCRS().get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
                 interpolationCRS =
                     NN_NO_CHECK(util::nn_dynamic_pointer_cast<crs::SingleCRS>(
                         compSrc0BoundCrs->hubCRS()));
+            } else if (compSrc0BoundCrs && !compDst0BoundCrs &&
+                       compSrc0BoundCrs->hubCRS()->_isEquivalentTo(
+                           dstGeog.get(),
+                           util::IComparable::Criterion::EQUIVALENT)) {
+                interpolationCRS = NN_NO_CHECK(
+                    std::static_pointer_cast<crs::SingleCRS>(dstGeog));
             }
         }
 
@@ -7133,7 +7170,8 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
                 const auto compDst0BoundCrsHubAsGeogCRSDatum =
                     compDst0BoundCrsHubAsGeogCRS->datumNonNull(dbContext);
                 if (boundSrcHubAsGeogCRSDatum->_isEquivalentTo(
-                        compDst0BoundCrsHubAsGeogCRSDatum.get())) {
+                        compDst0BoundCrsHubAsGeogCRSDatum.get(),
+                        util::IComparable::Criterion::EQUIVALENT)) {
                     auto cs = cs::EllipsoidalCS::
                         createLatitudeLongitudeEllipsoidalHeight(
                             common::UnitOfMeasure::DEGREE,
@@ -7159,7 +7197,8 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
                         for (const auto &opDst : geog3DToTargetOps) {
                             if (opSrc->targetCRS() && opDst->sourceCRS() &&
                                 !opSrc->targetCRS()->_isEquivalentTo(
-                                    opDst->sourceCRS().get())) {
+                                    opDst->sourceCRS().get(),
+                                    util::IComparable::Criterion::EQUIVALENT)) {
                                 // Shouldn't happen normally, but typically
                                 // one of them can be 2D and the other 3D
                                 // due to above createOperations() not

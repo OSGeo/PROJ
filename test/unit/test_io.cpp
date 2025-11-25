@@ -428,6 +428,62 @@ TEST(wkt_parse, invalid_geogcrs_with_ensemble) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, ensemble_without_members) {
+    auto wkt =
+        "GEOGCRS[\"WGS 84\","
+        "   ENSEMBLE[\"World Geodetic System 1984 ensemble\","
+        "       ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
+        "           LENGTHUNIT[\"metre\",1]],"
+        "       ENSEMBLEACCURACY[2]],"
+        "CS[ellipsoidal,2],"
+        "    AXIS[\"(lat)\",north,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"(lon)\",east,ANGLEUNIT[\"degree\",0.0174532925199433]]"
+        "]";
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = dynamic_cast<const GeodeticCRS *>(obj.get());
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_GE(crs->datumEnsemble()->datums().size(), 2U);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, ensemble_without_members_no_db) {
+    auto wkt =
+        "GEOGCRS[\"WGS 84\","
+        "   ENSEMBLE[\"World Geodetic System 1984 ensemble\","
+        "       ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
+        "           LENGTHUNIT[\"metre\",1]],"
+        "       ENSEMBLEACCURACY[2]],"
+        "CS[ellipsoidal,2],"
+        "    AXIS[\"(lat)\",north,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"(lon)\",east,ANGLEUNIT[\"degree\",0.0174532925199433]]"
+        "]";
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, ensemble_without_members_unknown_name) {
+    auto wkt =
+        "GEOGCRS[\"WGS 84\","
+        "   ENSEMBLE[\"i do not exist\","
+        "       ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
+        "           LENGTHUNIT[\"metre\",1]],"
+        "       ENSEMBLEACCURACY[2]],"
+        "CS[ellipsoidal,2],"
+        "    AXIS[\"(lat)\",north,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"(lon)\",east,ANGLEUNIT[\"degree\",0.0174532925199433]]"
+        "]";
+    EXPECT_THROW(WKTParser()
+                     .attachDatabaseContext(DatabaseContext::create())
+                     .createFromWKT(wkt),
+                 ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
 static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
                            bool checkEPSGCodes = true) {
     if (checkEPSGCodes) {
@@ -16966,6 +17022,130 @@ TEST(json_import, datum_ensemble_without_ellipsoid) {
     EXPECT_EQ(
         ensemble->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
         json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, ensemble_without_members) {
+    auto json = "{\n"
+                "  \"type\": \"GeographicCRS\",\n"
+                "  \"name\": \"WGS 84\",\n"
+                "  \"datum_ensemble\": {\n"
+                "    \"name\": \"World Geodetic System 1984 ensemble\",\n"
+                "    \"ellipsoid\": {\n"
+                "      \"name\": \"WGS 84\",\n"
+                "      \"semi_major_axis\": 6378137,\n"
+                "      \"inverse_flattening\": 298.257223563\n"
+                "    },\n"
+                "    \"accuracy\": \"2.0\",\n"
+                "    \"id\": {\n"
+                "      \"authority\": \"EPSG\",\n"
+                "      \"code\": 6326\n"
+                "    }\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"ellipsoidal\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Geodetic latitude\",\n"
+                "        \"abbreviation\": \"Lat\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Geodetic longitude\",\n"
+                "        \"abbreviation\": \"Lon\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, DatabaseContext::create());
+    auto crs = dynamic_cast<const GeodeticCRS *>(obj.get());
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_GE(crs->datumEnsemble()->datums().size(), 2U);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, ensemble_without_members_no_db) {
+    auto json = "{\n"
+                "  \"type\": \"GeographicCRS\",\n"
+                "  \"name\": \"WGS 84\",\n"
+                "  \"datum_ensemble\": {\n"
+                "    \"name\": \"World Geodetic System 1984 ensemble\",\n"
+                "    \"ellipsoid\": {\n"
+                "      \"name\": \"WGS 84\",\n"
+                "      \"semi_major_axis\": 6378137,\n"
+                "      \"inverse_flattening\": 298.257223563\n"
+                "    },\n"
+                "    \"accuracy\": \"2.0\",\n"
+                "    \"id\": {\n"
+                "      \"authority\": \"EPSG\",\n"
+                "      \"code\": 6326\n"
+                "    }\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"ellipsoidal\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Geodetic latitude\",\n"
+                "        \"abbreviation\": \"Lat\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Geodetic longitude\",\n"
+                "        \"abbreviation\": \"Lon\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    EXPECT_THROW(createFromUserInput(json, nullptr), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, ensemble_without_members_unknown_name) {
+    auto json = "{\n"
+                "  \"type\": \"GeographicCRS\",\n"
+                "  \"name\": \"WGS 84\",\n"
+                "  \"datum_ensemble\": {\n"
+                "    \"name\": \"i do not exist\",\n"
+                "    \"ellipsoid\": {\n"
+                "      \"name\": \"WGS 84\",\n"
+                "      \"semi_major_axis\": 6378137,\n"
+                "      \"inverse_flattening\": 298.257223563\n"
+                "    },\n"
+                "    \"accuracy\": \"2.0\",\n"
+                "    \"id\": {\n"
+                "      \"authority\": \"EPSG\",\n"
+                "      \"code\": 6326\n"
+                "    }\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"ellipsoidal\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Geodetic latitude\",\n"
+                "        \"abbreviation\": \"Lat\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Geodetic longitude\",\n"
+                "        \"abbreviation\": \"Lon\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    EXPECT_THROW(createFromUserInput(json, DatabaseContext::create()),
+                 ParsingException);
 }
 
 // ---------------------------------------------------------------------------

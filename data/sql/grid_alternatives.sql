@@ -104,6 +104,7 @@ VALUES
 
 -- cz_cuzk - ČÚZK
 ('CR2005_GTX.gtx','cz_cuzk_CR-2005.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/cz_cuzk_CR-2005.tif',1,1,NULL),
+('cz_cuzk_table_-y-x_3_v1710.tif','cz_cuzk_table_-y-x_3_v1710.tif',NULL,'GTiff','gridshift',0,NULL,'https://cdn.proj.org/cz_cuzk_table_-y-x_3_v1710.tif',1,1,NULL),
 
 -- de_adv - Arbeitsgemeinschaft der Vermessungsverwaltungender der Länder der Bundesrepublik Deutschland (AdV)
 ('BETA2007.gsb','de_adv_BETA2007.tif','BETA2007.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/de_adv_BETA2007.tif',1,1,NULL),
@@ -223,6 +224,7 @@ VALUES
 ('ggg00.txt','fr_ign_ggg00v2.tif','ggg00v2.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggg00v2.tif',1,1,NULL),
 ('ggguy00.txt','fr_ign_ggguy15.tif','ggguy15.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggguy15.tif',1,1,NULL),
 ('ggm00.txt','fr_ign_ggm00v2.tif','ggm00v2.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggm00v2.tif',1,1,NULL),
+('GGM23V2.tac','fr_ign_ggm23v2.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggm23v2.tif',1,1,NULL),
 ('GGSPM06v1.mnt','fr_ign_ggspm06v1.tif','ggspm06v1.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggspm06v1.tif',1,1,NULL),
 ('NOT-YET-IN-GRID-TRANSFORMATION-fr_ign_CGVD2013RGSPM06.tif','fr_ign_CGVD2013RGSPM06.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_CGVD2013RGSPM06.tif',1,1,NULL),
 ('NOT-YET-IN-GRID-TRANSFORMATION-fr_ign_ggpf02-Maiao.tif','fr_ign_ggpf02-Maiao.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggpf02-Maiao.tif',1,1,NULL),
@@ -273,7 +275,6 @@ VALUES
 -- Netherlands / RDNAP 2018
 ('nlgeo2018.gtx','nl_nsgi_nlgeo2018.tif','nlgeo2018.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nl_nsgi_nlgeo2018.tif',1,1,NULL),
 ('rdtrans2018.gsb','nl_nsgi_rdtrans2018.tif','rdtrans2018.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/nl_nsgi_rdtrans2018.tif',1,1,NULL),
-('NOT-YET-IN-GRID-TRANSFORMATION-naptrans2018.gtx','nl_nsgi_naptrans2018.tif','naptrans2018.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nl_nsgi_naptrans2018.tif',1,1,NULL),
 ('NOT-YET-IN-GRID-TRANSFORMATION-rdcorr2018.gsb','nl_nsgi_rdcorr2018.tif','rdcorr2018.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/nl_nsgi_rdcorr2018.tif',1,1,NULL),
 ('naptrans2008.gtx','','naptrans2008.gtx','GTX','geoid_like',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/naptrans2008.gtx',1,0,NULL),
 ('rdtrans2008.gsb','','rdtrans2008.gsb','NTv2','hgridshift',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/rdtrans2008.gsb',1,0,NULL),
