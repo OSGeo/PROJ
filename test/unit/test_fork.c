@@ -73,13 +73,13 @@ int main() {
             }
             if (children[i] == 0) {
                 {
-                    PJ *P = proj_create(ctxt, "EPSG:4326");
+                    PJ *P = proj_create(ctxt, "EPSG:3067");
                     if (P == NULL)
                         _exit(1);
                     proj_destroy(P);
                 }
                 {
-                    PJ *P = proj_create(ctxt2, "EPSG:4326");
+                    PJ *P = proj_create(ctxt2, "EPSG:32631");
                     if (P == NULL)
                         _exit(1);
                     proj_destroy(P);
