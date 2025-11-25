@@ -1,5 +1,28 @@
 # PROJ Release Notes
 
+## 9.7.1
+
+### Updates
+
+* Enable transformations_czechia.sql (#4578)
+
+* Update to EPSG v12.029 (#4586)
+
+### Bug Fixes
+
+* `createOperations()`: fix compound to compound when vertical CRS definition is equivalent but not strictly identical (#4579)
+
+* `createOperations()`: fix compound to compound when horizontal CRS of … (#4582)
+
+* `projinfo`: make it honour `-k crs` (#4592)
+
+* `proj_clone()`: fix insufficient propagation of `FORCE_OVER=YES` (#4595)
+
+* `BoundCRS::identify`: fix creation of an invalid BoundCRS (that can cause later crashes) for CRS based on 'NTF (Paris)' (#4601)
+
+* WKT/PROJJSON datum ensemble import: allow no members (#4615)
+
+
 ## 9.7.0
 
 ### Updates
