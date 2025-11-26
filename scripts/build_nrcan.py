@@ -780,6 +780,49 @@ def compound_crs_MTM_HT_2010(zone):
         j[key] = usage[key]
     return j
 
+def compound_crs_MTM_CGVD2013_1997(zone):
+    j = {
+        "type": "CompoundCRS",
+        "components": [
+            MTM_NAD83CSRSv7(zone),
+            vert_crs_CGVD2013a_1997()
+        ]
+    }
+    j["name"] = j["components"][0]["name"] + " + " + j["components"][1]["name"]
+    usage = usages_MTM[zone]
+    for key in usage:
+        j[key] = usage[key]
+    return j
+
+
+def compound_crs_MTM_CGVD2013_2002(zone):
+    j = {
+        "type": "CompoundCRS",
+        "components": [
+            MTM_NAD83CSRSv7(zone),
+            vert_crs_CGVD2013a_2002()
+        ]
+    }
+    j["name"] = j["components"][0]["name"] + " + " + j["components"][1]["name"]
+    usage = usages_MTM[zone]
+    for key in usage:
+        j[key] = usage[key]
+    return j
+
+
+def compound_crs_MTM_CGVD2013_2010(zone):
+    j = {
+        "type": "CompoundCRS",
+        "components": [
+            MTM_NAD83CSRSv7(zone),
+            vert_crs_CGVD2013a_2010()
+        ]
+    }
+    j["name"] = j["components"][0]["name"] + " + " + j["components"][1]["name"]
+    usage = usages_MTM[zone]
+    for key in usage:
+        j[key] = usage[key]
+    return j
 
 def compound_crs_UTM_CGVD2013_1997(zone):
     j = {
@@ -825,6 +868,50 @@ def compound_crs_UTM_CGVD2013_2010(zone):
         j[key] = usage[key]
     return j
 
+def compound_crs_UTM_HT_1997(zone):
+    j = {
+        "type": "CompoundCRS",
+        "components": [
+            UTM_NAD83CSRSv7(zone),
+            vert_crs_CGVD28_HT2_1997()
+        ]
+    }
+    j["name"] = j["components"][0]["name"] + " + " + j["components"][1]["name"]
+    usage = usages_UTM[zone]
+    for key in usage:
+        j[key] = usage[key]
+    return j
+
+
+def compound_crs_UTM_HT_2002(zone):
+    j = {
+        "type": "CompoundCRS",
+        "components": [
+            UTM_NAD83CSRSv7(zone),
+            vert_crs_CGVD28_HT2_2002()
+        ]
+    }
+    j["name"] = j["components"][0]["name"] + " + " + j["components"][1]["name"]
+    usage = usages_UTM[zone]
+    for key in usage:
+        j[key] = usage[key]
+    return j
+
+
+def compound_crs_UTM_HT_2010(zone):
+    j = {
+        "type": "CompoundCRS",
+        "components": [
+            UTM_NAD83CSRSv7(zone),
+            vert_crs_CGVD28_HT2_2010()
+        ]
+    }
+    j["name"] = j["components"][0]["name"] + " + " + j["components"][1]["name"]
+    usage = usages_UTM[zone]
+    for key in usage:
+        j[key] = usage[key]
+    return j
+
 
 script_dir_name = os.path.dirname(os.path.realpath(__file__))
 sql_dir_name = os.path.join(os.path.dirname(script_dir_name), 'data', 'sql')
@@ -850,6 +937,39 @@ for zone in range(1, 17+1):
     projjson = json.dumps(compound_crs_MTM_HT_2010(zone)).replace("'", "''")
     all_sql.append(
         f"""INSERT INTO coordinate_metadata VALUES('NRCAN', 'NAD83_CSRS_2010_MTM{zone}_HT2_2010', NULL, NULL, NULL, '{projjson}', 2010.0, 0);""")
+
+for zone in range(1, 17+1):
+    projjson = json.dumps(compound_crs_MTM_CGVD2013_1997(zone)).replace("'", "''")
+    all_sql.append(
+        f"""INSERT INTO coordinate_metadata VALUES('NRCAN', 'NAD83_CSRS_1997_MTM{zone}_CGVD2013_1997', NULL, NULL, NULL, '{projjson}', 1997.0, 0);""")
+
+for zone in range(1, 17+1):
+    projjson = json.dumps(compound_crs_MTM_CGVD2013_2002(zone)).replace("'", "''")
+    all_sql.append(
+        f"""INSERT INTO coordinate_metadata VALUES('NRCAN', 'NAD83_CSRS_2002_MTM{zone}_CGVD2013_2002', NULL, NULL, NULL, '{projjson}', 2002.0, 0);""")
+
+for zone in range(1, 17+1):
+    projjson = json.dumps(compound_crs_MTM_CGVD2013_2010(zone)).replace("'", "''")
+    all_sql.append(
+        f"""INSERT INTO coordinate_metadata VALUES('NRCAN', 'NAD83_CSRS_2010_MTM{zone}_CGVD2013_2010', NULL, NULL, NULL, '{projjson}', 2010.0, 0);""")
+
+for zone in range(7, 22+1):
+    projjson = json.dumps(
+        compound_crs_UTM_HT_1997(zone)).replace("'", "''")
+    all_sql.append(
+        f"""INSERT INTO coordinate_metadata VALUES('NRCAN', 'NAD83_CSRS_1997_UTM{zone}_HT2_1997', NULL, NULL, NULL, '{projjson}', 1997.0, 0);""")
+
+for zone in range(7, 22+1):
+    projjson = json.dumps(
+        compound_crs_UTM_HT_2002(zone)).replace("'", "''")
+    all_sql.append(
+        f"""INSERT INTO coordinate_metadata VALUES('NRCAN', 'NAD83_CSRS_2002_UTM{zone}_HT2_2002', NULL, NULL, NULL, '{projjson}', 2002.0, 0);""")
+
+for zone in range(7, 22+1):
+    projjson = json.dumps(
+        compound_crs_UTM_HT_2010(zone)).replace("'", "''")
+    all_sql.append(
+        f"""INSERT INTO coordinate_metadata VALUES('NRCAN', 'NAD83_CSRS_2010_UTM{zone}_HT2_2010', NULL, NULL, NULL, '{projjson}', 2010.0, 0);""")
 
 for zone in range(7, 22+1):
     projjson = json.dumps(
