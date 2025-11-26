@@ -98,18 +98,18 @@ INSERT INTO grid_alternatives(original_grid_name,
                               package_name,
                               url, direct_download, open_license, directory)
 VALUES
-('portugal/DLX_ETRS89_geo','pt_dgt_DLx_ETRS89_geo.tif','DLX_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_DLx_ETRS89_geo.tif',1,1,NULL),
-('portugal/D73_ETRS89_geo','pt_dgt_D73_ETRS89_geo.tif','D73_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_D73_ETRS89_geo.tif',1,1,NULL),
-('netherlands/rdtrans2008','','rdtrans2008.gsb','NTv2','hgridshift',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/rdtrans2008.gsb',1,0,NULL),
-('canada/GS7783','ca_nrc_GS7783.tif','GS7783.GSB','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_GS7783.tif',1,1,NULL),
-('spain/100800401','es_cat_icgc_100800401.tif','100800401.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_cat_icgc_100800401.tif',1,1,NULL),
-('australia/QLD_0900','au_icsm_National_84_02_07_01.tif','National_84_02_07_01.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/au_icsm_National_84_02_07_01.tif',1,1,NULL), -- From https://www.dnrme.qld.gov.au/__data/assets/pdf_file/0006/105765/gday-21-user-guide.pdf: "Note that the Queensland grid QLD_0900.gsb produces identical results to the National AGD84 grid for the equivalent coverage."
-('spain/PENR2009','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
-('spain/BALR2009','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
-('spain/peninsula','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
-('spain/baleares','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL);
--- 'france/RGNC1991_IGN72GrandeTerre' : we have a 3D geocentric corresponding one: no need for mapping
--- 'france/RGNC1991_NEA74Noumea' : we have a 3D geocentric corresponding one: no need for mapping
+('DLX_ETRS89_geo','pt_dgt_DLx_ETRS89_geo.tif','DLX_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_DLx_ETRS89_geo.tif',1,1,NULL),
+('D73_ETRS89_geo','pt_dgt_D73_ETRS89_geo.tif','D73_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_D73_ETRS89_geo.tif',1,1,NULL),
+('rdtrans2008','','rdtrans2008.gsb','NTv2','hgridshift',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/rdtrans2008.gsb',1,0,NULL),
+('GS7783','ca_nrc_GS7783.tif','GS7783.GSB','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_GS7783.tif',1,1,NULL),
+('100800401','es_cat_icgc_100800401.tif','100800401.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_cat_icgc_100800401.tif',1,1,NULL),
+('QLD_0900','au_icsm_National_84_02_07_01.tif','National_84_02_07_01.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/au_icsm_National_84_02_07_01.tif',1,1,NULL), -- From https://www.dnrme.qld.gov.au/__data/assets/pdf_file/0006/105765/gday-21-user-guide.pdf: "Note that the Queensland grid QLD_0900.gsb produces identical results to the National AGD84 grid for the equivalent coverage."
+('PENR2009','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
+('BALR2009','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
+('peninsula','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
+('baleares','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL);
+-- 'RGNC1991_IGN72GrandeTerre' : we have a 3D geocentric corresponding one: no need for mapping
+-- 'RGNC1991_NEA74Noumea' : we have a 3D geocentric corresponding one: no need for mapping
 """
 
 def escape_literal(x):
@@ -172,6 +172,7 @@ def find_extent(extentname, slat, nlat, llon, rlon):
 
 #################
 
+esri_linear_units = {}
 
 def import_linunit():
     with open(path_to_csv / 'pe_list_linunit.csv', 'rt') as csvfile:
@@ -193,6 +194,9 @@ def import_linunit():
 
         idx_authority = header.index('authority')
         assert idx_authority >= 0
+
+        idx_description = header.index('description')
+        assert idx_description >= 0
 
         while True:
             try:
@@ -225,6 +229,14 @@ def import_linunit():
                     sql = """INSERT INTO alias_name VALUES('unit_of_measure','EPSG','%s','%s','ESRI');""" % (
                         latestWkid, escape_literal(esri_name))
                     all_sql.append(sql)
+
+            elif authority == 'Esri':
+                code = row[idx_wkid]
+                if latestWkid == code:
+                    assert "LENGTHUNIT" in wkt
+                    sql = """INSERT INTO unit_of_measure VALUES('ESRI','%s','%s','length',%s,'%s',0);""" % (code, escape_literal(esri_name), esri_conv_factor, escape_literal(row[idx_description]))
+                    all_sql.append(sql)
+                    esri_linear_units[esri_name] = (code, esri_conv_factor)
 
 
 #################
@@ -291,16 +303,12 @@ def import_spheroid():
                 assert authority.upper() == 'ESRI', row
 
                 wkt2 = row[idx_wkt2]
-                wkt2_tokens_re = re.compile(r'ELLIPSOID\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?),(-?[\d]+(?:\.[\d]*)?),LENGTHUNIT\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?)]]')
+                wkt2_tokens_re = re.compile(r'ELLIPSOID\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?),(-?[\d]+(?:\.[\d]*)?)]')
                 match = wkt2_tokens_re.match(wkt2)
                 assert match, wkt2
 
                 a = match.group(2)
                 rf = match.group(3)
-                length_unit = match.group(4)
-                unit_size = float(match.group(5))
-                assert length_unit == 'Meter', 'Unhandled spheroid unit: {}'.format(length_unit)
-                assert unit_size == 1, 'Unhandled spheroid unit size: {}'.format(unit_size)
 
                 description = row[idx_description]
                 assert row[idx_deprecated] in ('yes', 'codechange', 'no')
@@ -395,15 +403,11 @@ def import_prime_meridian():
                 assert authority.upper() == 'ESRI', row
 
                 wkt2 = row[idx_wkt2]
-                wkt2_tokens_re = re.compile(r'PRIMEM\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?),ANGLEUNIT\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?)]]')
+                wkt2_tokens_re = re.compile(r'PRIMEM\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?)]')
                 match = wkt2_tokens_re.match(wkt2)
                 assert match, wkt2
 
                 value = match.group(2)
-                angle_unit = match.group(3)
-                unit_size = float(match.group(4))
-                assert angle_unit == 'Degree', 'Unhandled prime meridian unit: {}'.format(angle_unit)
-                assert unit_size == 0.0174532925199433, 'Unhandled prime meridian unit size: {}'.format(unit_size)
 
                 assert row[idx_deprecated] in ('yes', 'codechange', 'no')
                 deprecated = 1 if row[idx_deprecated] in ('yes', 'codechange') else 0
@@ -520,7 +524,7 @@ def import_datum():
 
                 wkt2 = row[idx_wkt2]
                 wkt2_tokens_re = re.compile(
-                    r'DATUM\[""?(.*?)""?,\s*ELLIPSOID\[""?(.*?)""?,\s*(-?[\d]+(?:\.[\d]*)?),\s*(-?[\d]+(?:\.[\d]*)?),\s*LENGTHUNIT\[""?(.*?)""?,\s*(-?[\d]+(?:\.[\d]*)?)]]]')
+                    r'DATUM\[""?(.*?)""?,\s*ELLIPSOID\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?),(-?[\d]+(?:\.[\d]*)?)](,ANCHOREPOCH\[[\d\.]+])?]')
                 match = wkt2_tokens_re.match(wkt2)
                 ellps_name = match.group(2)
 
@@ -941,6 +945,7 @@ def get_wkt_unit(UNIT_NAME, UNIT_VALUE, is_rate=False) -> Unit:
         uom_auth_name = 'EPSG'
         uom_code = '1027' if is_rate else '1025'
         assert UNIT_VALUE == '0.001', UNIT_VALUE
+        cs = CoordinateSystem('ESRI', 'Millimeter')
     elif UNIT_NAME == 'Chain':
         uom_auth_name = 'EPSG'
         assert not is_rate
@@ -960,6 +965,11 @@ def get_wkt_unit(UNIT_NAME, UNIT_VALUE, is_rate=False) -> Unit:
         uom_auth_name = 'EPSG'
         uom_code = '1032' if is_rate else '1031'
         assert UNIT_VALUE == '4.84813681109536e-09', UNIT_VALUE
+    elif UNIT_NAME == 'Microradian':
+        assert not is_rate
+        uom_auth_name = 'EPSG'
+        uom_code = '9109'
+        assert float(UNIT_VALUE) == 1e-6, UNIT_VALUE
     elif UNIT_NAME == 'Grad':
         assert not is_rate
         uom_auth_name = 'EPSG'
@@ -996,15 +1006,19 @@ def get_wkt_unit(UNIT_NAME, UNIT_VALUE, is_rate=False) -> Unit:
         uom_auth_name = 'EPSG'
         uom_code = '9201'
         assert UNIT_VALUE == '1.0', UNIT_VALUE
+    elif UNIT_NAME in esri_linear_units:
+        uom_auth_name = 'ESRI'
+        uom_code = esri_linear_units[UNIT_NAME][0]
+        cs = CoordinateSystem('ESRI', UNIT_NAME)
     else:
         assert False, UNIT_NAME
 
     if cs is not None and cs.auth_name == 'ESRI' and cs.code not in set_esri_cs_code:
         sql = f"""INSERT INTO "coordinate_system" VALUES('ESRI','{cs.code}','Cartesian',2);"""
         all_sql.append(sql)
-        sql = f"""INSERT INTO "axis" VALUES('ESRI','{2 * len(set_esri_cs_code) + 1}','Easting','E','east','ESRI','{cs.code}',1,'EPSG','{uom_code}');"""
+        sql = f"""INSERT INTO "axis" VALUES('ESRI','{2 * len(set_esri_cs_code) + 1}','Easting','E','east','ESRI','{cs.code}',1,'{uom_auth_name}','{uom_code}');"""
         all_sql.append(sql)
-        sql = f"""INSERT INTO "axis" VALUES('ESRI','{2 * len(set_esri_cs_code) + 2}','Northing','N','north','ESRI','{cs.code}',2,'EPSG','{uom_code}');"""
+        sql = f"""INSERT INTO "axis" VALUES('ESRI','{2 * len(set_esri_cs_code) + 2}','Northing','N','north','ESRI','{cs.code}',2,'{uom_auth_name}','{uom_code}');"""
         all_sql.append(sql)
         set_esri_cs_code.add(cs.code)
 
@@ -1053,14 +1067,24 @@ def get_parameter_value(wkt_definition: List) -> ParameterValue:
                           unit=get_wkt_unit(*wkt_definition[1][unit_type_str]))
 
 
-def get_parameter_values(wkt_definition: dict) -> Dict[str, ParameterValue]:
+def get_parameter_values(wkt_definition: dict, global_linear_unit: Unit|None) -> Dict[str, ParameterValue]:
     """
     Retrieves all WKT parameter values from a WKT string
     """
     res = {}
     for param, value in wkt_definition.items():
         if isinstance(value, str):
-            res[param] = value
+            if global_linear_unit and param != 'METHOD':
+                if param == "Scale_Factor":
+                    res[param] = ParameterValue(value=float(value), unit_type=UnitType.Scale, unit=get_wkt_unit('Unity', '1.0'))
+                elif param.startswith("Longitude") or param.startswith("Latitude") or "Parallel" in param or param in ('Central_Meridian', 'Azimuth'):
+                    res[param] = ParameterValue(value=float(value), unit_type=UnitType.Angle, unit=get_wkt_unit('Degree', '0.0174532925199433'))
+                elif param in ('False_Easting', 'False_Northing', 'Height'):
+                    res[param] = ParameterValue(value=float(value), unit_type=UnitType.Length, unit=global_linear_unit)
+                else:
+                    assert False, param
+            else:
+                res[param] = value
         else:
             try:
                 res[param] = get_parameter_value(value)
@@ -1405,13 +1429,17 @@ def import_projcs():
 
             if authority == 'EPSG':
 
+                # Patch weirdness in source file
+                if code == '3991' and latestWkid == '103987':
+                    latestWkid = '3991'
+
                 map_projcs_esri_name_to_auth_code[esri_name] = [
                     'EPSG', latestWkid]
 
                 cursor.execute(
                     "SELECT name FROM projected_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
                 src_row = cursor.fetchone()
-                assert src_row, row
+                assert src_row, (row, latestWkid)
                 src_name = src_row[0]
                 esri_name = row[idx_name]
                 if src_name != esri_name:
@@ -1456,8 +1484,14 @@ def import_projcs():
 
                 method = parsed_conv_wkt2['CONVERSION'][0]
 
+                match = re.compile(r'.*,ORDER\[2\]],LENGTHUNIT\["?([^"]+)"?,([\d\.]+)\].*').match(wkt2)
+                global_linear_unit = None
+                if match:
+                    global_linear_unit = get_wkt_unit(match.group(1), match.group(2))
+                assert global_linear_unit, wkt2
+
                 if method in ('Transverse_Mercator', 'Gauss_Kruger'):
-                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
+                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1], global_linear_unit)
                     cs = get_cs_from_false_easting_and_northing(params)
 
                     assert params['Central_Meridian'].unit.uom_auth_name == 'EPSG', 'Unhandled Central_Meridian authority {}'.format(params['Central_Meridian'].unit.uom_auth_name)
@@ -1532,7 +1566,7 @@ def import_projcs():
                     all_sql.append(sql)
 
                 elif (method in MAPPED_PROJCS or method in MAPPED_PROJCS_WITH_EXTRA_LOGIC) and code not in REQUIRES_ORIGINAL_WKT_DEF:
-                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
+                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1], global_linear_unit)
                     cs = get_cs_from_false_easting_and_northing(params)
                     if method in MAPPED_PROJCS:
                         conversion_mapping = MAPPED_PROJCS[method]
@@ -1554,7 +1588,7 @@ def import_projcs():
                     elif method == 'Cassini':
                         assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale unit {}'.format(
                             params['Scale_Factor'].unit.uom_code)
-                        assert params['Scale_Factor'].value == '1.0'
+                        assert params['Scale_Factor'].value == 1.0
 
                     sql = insert_conversion_sql(esri_code=code, esri_name=esri_name,
                                                 epsg_code=conversion_mapping.epsg_code,
@@ -2198,10 +2232,11 @@ def import_geogtran():
                 is_ntv2 = method == "NTv2"
                 is_geocon = method == "GEOCON"
                 is_harn = method == "HARN"
-                is_molodensky_badekas = method == "Molodensky_Badekas"
+                is_molodensky_badekas_cf = method == "Molodensky_Badekas"
+                is_molodensky_badekas_pv = method == "Molodensky_Badekas_Position_Vector"
                 is_Time_Based_Helmert_Position_Vector = method == "Time_Based_Helmert_Position_Vector"
                 is_Time_Based_Helmert_Coordinate_Frame = method == "Time_Based_Helmert_Coordinate_Frame"
-                assert is_cf or is_pv or is_geocentric_translation or is_molodensky_badekas or is_nadcon or is_geog2d_offset or is_ntv2 or is_geocon or is_null or is_harn or is_unitchange or is_Time_Based_Helmert_Position_Vector or is_Time_Based_Helmert_Coordinate_Frame, row
+                assert is_cf or is_pv or is_geocentric_translation or is_molodensky_badekas_cf or is_molodensky_badekas_pv or is_nadcon or is_geog2d_offset or is_ntv2 or is_geocon or is_null or is_harn or is_unitchange or is_Time_Based_Helmert_Position_Vector or is_Time_Based_Helmert_Coordinate_Frame, row
 
                 extent_auth_name, extent_code = find_extent(
                     row[idx_areaname], row[idx_slat], row[idx_nlat], row[idx_llon], row[idx_rlon])
@@ -2274,7 +2309,7 @@ def import_geogtran():
                     sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','helmert_transformation','ESRI','%s','%s','%s','%s','%s');""" % (wkid, wkid, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
-                elif is_molodensky_badekas:
+                elif is_molodensky_badekas_cf or is_molodensky_badekas_pv:
                     x = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation'][0]
                     x_axis_translation_unit = get_wkt_unit(
                         *parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation'][1]['LENGTHUNIT'])
@@ -2315,10 +2350,14 @@ def import_geogtran():
                     assert x_coordinate_of_rotation_origin_unit.uom_auth_name == y_coordinate_of_rotation_origin_unit.uom_auth_name == z_coordinate_of_rotation_origin_unit.uom_auth_name, 'Cannot handle different coordinate of rotation axis authorities'
                     assert x_coordinate_of_rotation_origin_unit.uom_code == y_coordinate_of_rotation_origin_unit.uom_code == z_coordinate_of_rotation_origin_unit.uom_code, 'Cannot handle different coordinate of rotation axis unit codes'
 
-                    # The ESRI naming is not really clear about the convention
-                    # but it looks like it is Coordinate Frame when comparing ESRI:1066 (Amersfoort_To_ETRS_1989_MB) with EPSG:1066
-                    method_code = '9636'
-                    method_name = 'Molodensky-Badekas (CF geog2D domain)'
+                    if is_molodensky_badekas_cf:
+                        method_code = '9636'
+                        method_name = 'Molodensky-Badekas (CF geog2D domain)'
+                    elif is_molodensky_badekas_pv:
+                        method_code = '1063'
+                        method_name = 'Molodensky-Badekas (PV geog2D domain)'
+                    else:
+                        assert False
 
                     sql = "INSERT INTO \"helmert_transformation\" VALUES('ESRI','{code}','{name}',NULL,'EPSG','{method_code}','{method_name}'," \
                           "'{source_crs_auth_name}','{source_crs_code}','{target_crs_auth_name}','{target_crs_code}',{accuracy},{tx},{ty},{tz}," \
