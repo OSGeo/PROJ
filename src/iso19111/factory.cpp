@@ -9194,6 +9194,7 @@ AuthorityFactory::createObjectsFromName(
  * @param approximateMatch Whether approximate name identification is allowed.
  * @param limitResultCount Maximum number of results to return.
  * Or 0 for unlimited.
+ * @param useAliases Whether querying the alias_name table is allowed
  * @return list of matched objects.
  * @throw FactoryException in case of error.
  */
@@ -9201,7 +9202,7 @@ std::list<AuthorityFactory::PairObjectName>
 AuthorityFactory::createObjectsFromNameEx(
     const std::string &searchedName,
     const std::vector<ObjectType> &allowedObjectTypes, bool approximateMatch,
-    size_t limitResultCount) const {
+    size_t limitResultCount, bool useAliases) const {
     std::string searchedNameWithoutDeprecated(searchedName);
     bool deprecated = false;
     if (ends_with(searchedNameWithoutDeprecated, " (deprecated)")) {
@@ -9401,40 +9402,42 @@ AuthorityFactory::createObjectsFromNameEx(
             params.emplace_back(d->authority());
         }
 
-        sql += " UNION SELECT '";
-        sql += tableNameTypePair.first;
-        sql += "' AS table_name, "
-               "ov.auth_name AS auth_name, "
-               "ov.code AS code, a.alt_name AS name, "
-               "ov.deprecated AS deprecated, 1 as is_alias FROM ";
-        sql += tableNameTypePair.first;
-        sql += " ov "
-               "JOIN alias_name a ON "
-               "ov.auth_name = a.auth_name AND ov.code = a.code WHERE "
-               "a.source != 'EPSG_OLD' AND a.table_name = '";
-        sql += tableNameTypePair.first;
-        sql += "' ";
-        if (!tableNameTypePair.second.empty()) {
-            if (tableNameTypePair.second == "frame_reference_epoch") {
-                sql += "AND ov.frame_reference_epoch IS NOT NULL ";
-            } else if (tableNameTypePair.second == "ensemble") {
-                sql += "AND ov.ensemble_accuracy IS NOT NULL ";
-            } else {
-                sql += "AND ov.type = '";
-                sql += tableNameTypePair.second;
-                sql += "' ";
+        if (useAliases) {
+            sql += " UNION SELECT '";
+            sql += tableNameTypePair.first;
+            sql += "' AS table_name, "
+                   "ov.auth_name AS auth_name, "
+                   "ov.code AS code, a.alt_name AS name, "
+                   "ov.deprecated AS deprecated, 1 as is_alias FROM ";
+            sql += tableNameTypePair.first;
+            sql += " ov "
+                   "JOIN alias_name a ON "
+                   "ov.auth_name = a.auth_name AND ov.code = a.code WHERE "
+                   "a.source != 'EPSG_OLD' AND a.table_name = '";
+            sql += tableNameTypePair.first;
+            sql += "' ";
+            if (!tableNameTypePair.second.empty()) {
+                if (tableNameTypePair.second == "frame_reference_epoch") {
+                    sql += "AND ov.frame_reference_epoch IS NOT NULL ";
+                } else if (tableNameTypePair.second == "ensemble") {
+                    sql += "AND ov.ensemble_accuracy IS NOT NULL ";
+                } else {
+                    sql += "AND ov.type = '";
+                    sql += tableNameTypePair.second;
+                    sql += "' ";
+                }
             }
-        }
-        if (deprecated) {
-            sql += "AND ov.deprecated = 1 ";
-        }
-        if (!approximateMatch) {
-            sql += "AND a.alt_name = ? COLLATE NOCASE ";
-            params.push_back(searchedNameWithoutDeprecated);
-        }
-        if (d->hasAuthorityRestriction()) {
-            sql += "AND ov.auth_name = ? ";
-            params.emplace_back(d->authority());
+            if (deprecated) {
+                sql += "AND ov.deprecated = 1 ";
+            }
+            if (!approximateMatch) {
+                sql += "AND a.alt_name = ? COLLATE NOCASE ";
+                params.push_back(searchedNameWithoutDeprecated);
+            }
+            if (d->hasAuthorityRestriction()) {
+                sql += "AND ov.auth_name = ? ";
+                params.emplace_back(d->authority());
+            }
         }
     }
 

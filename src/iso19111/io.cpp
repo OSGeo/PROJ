@@ -4649,6 +4649,45 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
     }();
     auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
 
+    // In EPSG v12.025, Norway projected systems based on ETRS89 (EPSG:4258)
+    // have switched to use ETRS89-NOR [EUREF89] (EPSG:10875).
+    // Similarly for other ETRS89-like datums in later releases
+    if (dbContext_ &&
+        (((starts_with(projCRSName, "ETRS89 / ") ||
+           (esriStyle_ && starts_with(projCRSName, "ETRS_1989_"))) &&
+          baseGeodCRS->nameStr() == "ETRS89") ||
+         starts_with(projCRSName, "ETRF2000-PL /")) &&
+        util::isOfExactType<GeographicCRS>(*(baseGeodCRS.get())) &&
+        baseGeodCRS->coordinateSystem()->axisList().size() == 2) {
+        auto authFactoryEPSG =
+            io::AuthorityFactory::create(NN_NO_CHECK(dbContext_), "EPSG");
+        const auto objCandidates = authFactoryEPSG->createObjectsFromNameEx(
+            projCRSName, {io::AuthorityFactory::ObjectType::PROJECTED_CRS},
+            false, // approximateMatch
+            0,     // limit
+            true   // useAliases
+        );
+        for (const auto &[obj, name] : objCandidates) {
+            if (name == projCRSName) {
+                auto candidateProj =
+                    dynamic_cast<const crs::ProjectedCRS *>(obj.get());
+                if (candidateProj &&
+                    candidateProj->baseCRS()->nameStr() !=
+                        baseGeodCRS->nameStr() &&
+                    candidateProj->baseCRS()->_isEquivalentTo(
+                        baseGeodCRS.get(),
+                        util::IComparable::Criterion::
+                            EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
+                        dbContext_)) {
+                    props.set(IdentifiedObject::NAME_KEY,
+                              candidateProj->nameStr());
+                    baseGeodCRS = candidateProj->baseCRS();
+                    break;
+                }
+            }
+        }
+    }
+
     if (esriStyle_ && dbContext_) {
         if (cartesianCS) {
             std::string outTableName;
@@ -4790,27 +4829,6 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
     }
     if (!cartesianCS) {
         ThrowNotExpectedCSType(CartesianCS::WKT2_TYPE);
-    }
-
-    // In EPSG v12.025, Norway projected systems based on ETRS89 (EPSG:4258)
-    // have switched to use ETRS89-NOR [EUREF89] (EPSG:10875). There's no way
-    // from the current content of the database to infer both CRS are equivalent
-    if (starts_with(projCRSName, "ETRS89 / NTM zone")) {
-        projCRSName = "ETRS89-NOR [EUREF89] / NTM zone" +
-                      projCRSName.substr(strlen("ETRS89 / NTM zone"));
-        props.set(IdentifiedObject::NAME_KEY, projCRSName);
-    }
-    if (dbContext_ &&
-        starts_with(projCRSName, "ETRS89-NOR [EUREF89] / NTM zone") &&
-        baseGeodCRS->nameStr() == "ETRS89" &&
-        util::isOfExactType<GeographicCRS>(*(baseGeodCRS.get())) &&
-        baseGeodCRS->coordinateSystem()->axisList().size() == 2) {
-        auto factoryCRS_EPSG =
-            AuthorityFactory::create(NN_NO_CHECK(dbContext_), Identifier::EPSG);
-        try {
-            baseGeodCRS = factoryCRS_EPSG->createGeodeticCRS("10875");
-        } catch (const std::exception &) {
-        }
     }
 
     if (cartesianCS->axisList().size() == 3 &&

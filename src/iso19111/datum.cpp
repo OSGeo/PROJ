@@ -1397,16 +1397,52 @@ void GeodeticReferenceFrame::_exportToWKT(
                                          )
                                      .size() == 1;
                 }
-                if (!aliasFound) {
-                    // For now, there's no ESRI alias for this CRS. Fallback to
-                    // ETRS89
-                    if (l_name == "ETRS89-NOR [EUREF89]") {
-                        l_name = "D_ETRS_1989";
-                    } else {
-                        l_name = io::WKTFormatter::morphNameToESRI(l_name);
-                        if (!starts_with(l_name, "D_")) {
-                            l_name = "D_" + l_name;
+                if (!aliasFound && dbContext && !ids.empty()) {
+                    // Case for example for ETRS89-NOR [EUREF89] that has no
+                    // ESRI alias. Fallback to ETRS89
+                    const auto EPSGOldAliases = dbContext->getAliases(
+                        *(ids[0]->codeSpace()), ids[0]->code(),
+                        std::string(), // officialName,
+                        "geodetic_datum", "EPSG_OLD");
+                    if (EPSGOldAliases.size() == 1) {
+                        std::string EPSGName = EPSGOldAliases.front();
+                        if (EPSGName ==
+                            "European Terrestrial Reference System 1989") {
+                            EPSGName += " ensemble";
                         }
+                        auto authFactoryEPSG = io::AuthorityFactory::create(
+                            NN_NO_CHECK(dbContext), "EPSG");
+                        auto objCandidates =
+                            authFactoryEPSG->createObjectsFromNameEx(
+                                EPSGName,
+                                {io::AuthorityFactory::ObjectType::
+                                     GEODETIC_REFERENCE_FRAME},
+                                false, // approximateMatch
+                                0,     // limitResultCount
+                                false  // useAliases
+                            );
+                        for (const auto &[obj, name] : objCandidates) {
+                            (void)name;
+                            const auto &objIdentifiers = obj->identifiers();
+                            if (!objIdentifiers.empty()) {
+                                const auto ESRIAliases = dbContext->getAliases(
+                                    *(objIdentifiers[0]->codeSpace()),
+                                    objIdentifiers[0]->code(),
+                                    std::string(), // officialName,
+                                    "geodetic_datum", "ESRI");
+                                if (ESRIAliases.size() == 1) {
+                                    l_name = ESRIAliases.front();
+                                    aliasFound = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!aliasFound) {
+                    l_name = io::WKTFormatter::morphNameToESRI(l_name);
+                    if (!starts_with(l_name, "D_")) {
+                        l_name = "D_" + l_name;
                     }
                 }
             }

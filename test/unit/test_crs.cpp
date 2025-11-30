@@ -7910,7 +7910,12 @@ TEST(crs, norway_ntm) {
         auto obj = createFromUserInput(esri_wkt, dbContext, true);
         auto crs_from_esri = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs_from_esri != nullptr);
-
+        EXPECT_STREQ(crs_from_esri->nameStr().c_str(),
+                     "ETRS89-NOR [EUREF89] / NTM zone 5");
+        EXPECT_STREQ(crs_from_esri->baseCRS()->nameStr().c_str(),
+                     "ETRS89-NOR [EUREF89]");
+        EXPECT_STREQ(crs_from_esri->baseCRS()->datum()->nameStr().c_str(),
+                     "ETRS89-NOR [EUREF89]");
         auto res = crs_from_esri->identify(factory);
         ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first.get(), crs.get());
