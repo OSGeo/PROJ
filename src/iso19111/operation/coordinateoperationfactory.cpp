@@ -6090,9 +6090,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
         }
 
         // Only do a vertical transformation if the target CRS is 3D.
-        const auto dstSingle = dynamic_cast<crs::SingleCRS *>(targetCRS.get());
-        if (dstSingle &&
-            dstSingle->coordinateSystem()->axisList().size() == 2) {
+        if (geogDst->coordinateSystem()->axisList().size() <= 2) {
             auto tmp = createOperations(componentsSrc[0], sourceEpoch,
                                         targetCRS, targetEpoch, context);
             for (const auto &op : tmp) {
@@ -6109,6 +6107,42 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
             horizTransforms = createOperations(componentsSrc[0], sourceEpoch,
                                                targetCRS, targetEpoch, context);
         }
+
+        const auto hasAtLeastOneOpWithNonTrivialAndWithAllGrids =
+            [&dbContext](
+                const std::vector<CoordinateOperationNNPtr> &verticalTransforms,
+                CoordinateOperationContext::GridAvailabilityUse
+                    gridAvailabilityUse,
+                bool ignoreMissingGrids,
+                bool *foundRegisteredTransform = nullptr) {
+                if (foundRegisteredTransform)
+                    *foundRegisteredTransform = false;
+                for (const auto &op : verticalTransforms) {
+                    if (hasIdentifiers(op) && dbContext) {
+                        bool missingGrid = false;
+                        if (!ignoreMissingGrids) {
+                            const auto gridsNeeded = op->gridsNeeded(
+                                dbContext,
+                                gridAvailabilityUse ==
+                                    CoordinateOperationContext::
+                                        GridAvailabilityUse::KNOWN_AVAILABLE);
+                            for (const auto &gridDesc : gridsNeeded) {
+                                if (!gridDesc.available) {
+                                    missingGrid = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (foundRegisteredTransform)
+                            *foundRegisteredTransform = true;
+                        if (!missingGrid) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+
         std::vector<CoordinateOperationNNPtr> verticalTransforms;
 
         if (componentsSrc.size() >= 2 &&
@@ -6127,7 +6161,6 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                     context.skipHorizontalTransformation = false;
                 }
             };
-            SetSkipHorizontalTransform setSkipHorizontalTransform(context);
 
             struct SetGeogCRSOfVertCRS {
                 Context &context;
@@ -6148,39 +6181,23 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
             };
             SetGeogCRSOfVertCRS setGeogCRSOfVertCRS(context, srcGeogCRS);
 
-            verticalTransforms = createOperations(
-                componentsSrc[1], util::optional<common::DataEpoch>(),
-                targetCRS->promoteTo3D(std::string(), dbContext),
-                util::optional<common::DataEpoch>(), context);
-            bool foundRegisteredTransformWithAllGridsAvailable = false;
+            {
+                SetSkipHorizontalTransform setSkipHorizontalTransform(context);
+
+                verticalTransforms = createOperations(
+                    componentsSrc[1], util::optional<common::DataEpoch>(),
+                    targetCRS, util::optional<common::DataEpoch>(), context);
+            }
             const auto gridAvailabilityUse =
                 context.context->getGridAvailabilityUse();
             const bool ignoreMissingGrids =
                 gridAvailabilityUse ==
                 CoordinateOperationContext::GridAvailabilityUse::
                     IGNORE_GRID_AVAILABILITY;
-            for (const auto &op : verticalTransforms) {
-                if (hasIdentifiers(op) && dbContext) {
-                    bool missingGrid = false;
-                    if (!ignoreMissingGrids) {
-                        const auto gridsNeeded = op->gridsNeeded(
-                            dbContext,
-                            gridAvailabilityUse ==
-                                CoordinateOperationContext::
-                                    GridAvailabilityUse::KNOWN_AVAILABLE);
-                        for (const auto &gridDesc : gridsNeeded) {
-                            if (!gridDesc.available) {
-                                missingGrid = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!missingGrid) {
-                        foundRegisteredTransformWithAllGridsAvailable = true;
-                        break;
-                    }
-                }
-            }
+            bool foundRegisteredTransformWithAllGridsAvailable =
+                hasAtLeastOneOpWithNonTrivialAndWithAllGrids(
+                    verticalTransforms, gridAvailabilityUse,
+                    ignoreMissingGrids);
             if (srcGeogCRS &&
                 !srcGeogCRS->_isEquivalentTo(
                     geogDst, util::IComparable::Criterion::EQUIVALENT) &&
@@ -6190,40 +6207,22 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                         ->demoteTo2D(std::string(), dbContext)
                         ->promoteTo3D(
                             std::string(), dbContext,
-                            geogDst->coordinateSystem()->axisList().size() == 3
-                                ? geogDst->coordinateSystem()->axisList()[2]
-                                : cs::VerticalCS::createGravityRelatedHeight(
-                                      common::UnitOfMeasure::METRE)
-                                      ->axisList()[0]);
-                auto verticalTransformsTmp = createOperations(
-                    componentsSrc[1], util::optional<common::DataEpoch>(),
-                    geogCRSTmp, util::optional<common::DataEpoch>(), context);
-                bool foundRegisteredTransform = false;
-                bool foundRegisteredTransformWithAllGridsAvailable2 = false;
-                for (const auto &op : verticalTransformsTmp) {
-                    if (hasIdentifiers(op) && dbContext) {
-                        bool missingGrid = false;
-                        if (!ignoreMissingGrids) {
-                            const auto gridsNeeded = op->gridsNeeded(
-                                dbContext,
-                                gridAvailabilityUse ==
-                                    CoordinateOperationContext::
-                                        GridAvailabilityUse::KNOWN_AVAILABLE);
-                            for (const auto &gridDesc : gridsNeeded) {
-                                if (!gridDesc.available) {
-                                    missingGrid = true;
-                                    break;
-                                }
-                            }
-                        }
-                        foundRegisteredTransform = true;
-                        if (!missingGrid) {
-                            foundRegisteredTransformWithAllGridsAvailable2 =
-                                true;
-                            break;
-                        }
-                    }
+                            geogDst->coordinateSystem()->axisList()[2]);
+                std::vector<CoordinateOperationNNPtr> verticalTransformsTmp;
+                {
+                    SetSkipHorizontalTransform setSkipHorizontalTransform(
+                        context);
+
+                    verticalTransformsTmp = createOperations(
+                        componentsSrc[1], util::optional<common::DataEpoch>(),
+                        geogCRSTmp, util::optional<common::DataEpoch>(),
+                        context);
                 }
+                bool foundRegisteredTransform = false;
+                const bool foundRegisteredTransformWithAllGridsAvailable2 =
+                    hasAtLeastOneOpWithNonTrivialAndWithAllGrids(
+                        verticalTransformsTmp, gridAvailabilityUse,
+                        ignoreMissingGrids, &foundRegisteredTransform);
                 if (foundRegisteredTransformWithAllGridsAvailable2 &&
                     !foundRegisteredTransformWithAllGridsAvailable) {
                     verticalTransforms = std::move(verticalTransformsTmp);
