@@ -9142,6 +9142,44 @@ TEST(operation, compoundCRS_with_non_meter_horiz_and_vertical_to_geog) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation,
+     compoundCRS_to_geogCRS_3D_using_intermediate_of_horizontal_transform) {
+    // Scenario of https://github.com/OSGeo/PROJ/issues/4618
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::KNOWN_AVAILABLE);
+    // "PNG94 / PNGMG94 zone 54 + Kumul 34 height"
+    auto objSrc = createFromUserInput("EPSG:5550+7651", dbContext);
+    auto srcCRS = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(srcCRS != nullptr);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(srcCRS),
+        // WGS 84 (G2139) (3D)
+        authFactoryEPSG->createCoordinateReferenceSystem("9754"), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(),
+              "Inverse of Papua New Guinea Map Grid 1994 zone 54 + "
+              "PNG94 to WGS 84 (1) + "
+              "Inverse of EGM96 height to Kumul 34 height (1) + "
+              "Inverse of WGS 84 to EGM96 height (1) + "
+              "WGS 84 to WGS 84 (G2139)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=utm +zone=54 +south +ellps=GRS80 "
+              "+step +proj=geogoffset +dh=0.87 "
+              "+step +proj=vgridshift +grids=us_nga_egm96_15.tif +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, boundCRS_to_compoundCRS) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS67 +nadgrids=@foo.gsb +type=crs");

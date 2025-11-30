@@ -6232,6 +6232,94 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                                               verticalTransformsTmp.end());
                 }
             }
+
+            // Case for EPSG:5550+7651 ("PNG94 / PNGMG94 zone 54 + Kumul 34
+            // height") to EPSG:9754 ("WGS 84 (G2139)")
+            // (https://github.com/OSGeo/PROJ/issues/4618)
+            // where there is a vertical transformation between Kumul 34 height
+            // and WGS84 going through EGM96 and the transformation between
+            // PNG94 and WGS 84 (G2139) goes through WGS84 We can then get a
+            // good result by doing EPSG:5550+7651 -> EPSG:4979 and EPSG:4979 ->
+            // EPSG:9754
+            const auto hasNonBallparkLambda =
+                [](const CoordinateOperationNNPtr &op) {
+                    return !op->hasBallparkTransformation();
+                };
+            const bool onlyVerticalBallparkTransformation =
+                std::find_if(verticalTransforms.begin(),
+                             verticalTransforms.end(),
+                             hasNonBallparkLambda) == verticalTransforms.end();
+            if (onlyVerticalBallparkTransformation) {
+                std::map<std::string, crs::CRSNNPtr> candidateIntermGeogCRS;
+                for (const auto &op : horizTransforms) {
+                    if (!op->hasBallparkTransformation()) {
+                        auto concatenatedOp =
+                            dynamic_cast<const ConcatenatedOperation *>(
+                                op.get());
+                        if (concatenatedOp) {
+                            for (const auto &subOp :
+                                 concatenatedOp->operations()) {
+                                auto subOpTargetCRS = subOp->targetCRS();
+                                if (subOpTargetCRS) {
+                                    auto tmpCRS = subOpTargetCRS->promoteTo3D(
+                                        std::string(), dbContext);
+                                    if (!tmpCRS->identifiers().empty() &&
+                                        !tmpCRS->_isEquivalentTo(
+                                            targetCRS.get(),
+                                            util::IComparable::Criterion::
+                                                EQUIVALENT) &&
+                                        candidateIntermGeogCRS.find(
+                                            tmpCRS->nameStr()) ==
+                                            candidateIntermGeogCRS.end()) {
+                                        candidateIntermGeogCRS.insert(
+                                            std::make_pair(tmpCRS->nameStr(),
+                                                           std::move(tmpCRS)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (const auto &[name, geogCRSTmp] : candidateIntermGeogCRS) {
+                    (void)name;
+                    const auto verticalTransformsTmp = createOperations(
+                        componentsSrc[1], util::optional<common::DataEpoch>(),
+                        geogCRSTmp, util::optional<common::DataEpoch>(),
+                        context);
+                    const bool onlyVerticalBallparkTransformationTmp =
+                        std::find_if(verticalTransformsTmp.begin(),
+                                     verticalTransformsTmp.end(),
+                                     hasNonBallparkLambda) ==
+                        verticalTransformsTmp.end();
+                    if (!onlyVerticalBallparkTransformationTmp) {
+                        const auto ops1 = createOperations(
+                            sourceCRS, util::optional<common::DataEpoch>(),
+                            geogCRSTmp, util::optional<common::DataEpoch>(),
+                            context);
+                        const auto ops2 = createOperations(
+                            geogCRSTmp, util::optional<common::DataEpoch>(),
+                            targetCRS, util::optional<common::DataEpoch>(),
+                            context);
+                        for (const auto &op1 : ops1) {
+                            if (!op1->hasBallparkTransformation()) {
+                                for (const auto &op2 : ops2) {
+                                    if (!op2->hasBallparkTransformation()) {
+                                        try {
+                                            res.emplace_back(
+                                                ConcatenatedOperation::
+                                                    createComputeMetadata(
+                                                        {op1, op2},
+                                                        disallowEmptyIntersection));
+                                        } catch (const std::exception &) {
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         if (horizTransforms.empty() || verticalTransforms.empty()) {
