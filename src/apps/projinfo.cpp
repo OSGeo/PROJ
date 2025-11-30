@@ -459,7 +459,7 @@ static BaseObjectNNPtr buildObject(
                                           << std::endl;
                                 std::exit(1);
                             } else if (objCandidate)
-                                obj = objCandidate;
+                                obj = std::move(objCandidate);
                         }
                     }
                 }
