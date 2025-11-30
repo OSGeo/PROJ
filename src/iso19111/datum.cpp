@@ -1919,6 +1919,26 @@ DatumEnsemble::positionalAccuracy() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+/* static */
+std::string DatumEnsemble::ensembleNameToNonEnsembleName(const std::string &s) {
+    if (s == "World Geodetic System 1984 ensemble") {
+        return "World Geodetic System 1984";
+    } else if (s == "European Terrestrial Reference System 1989 ensemble") {
+        return "European Terrestrial Reference System 1989";
+    } else if (s == "Greenland Reference 1996 ensemble") {
+        return "Greenland 1996";
+    }
+    return std::string();
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 DatumNNPtr
 DatumEnsemble::asDatum(const io::DatabaseContextPtr &dbContext) const {
 
@@ -1945,12 +1965,9 @@ DatumEnsemble::asDatum(const io::DatabaseContextPtr &dbContext) const {
     std::string l_name(nameStr());
     if (grf) {
         // Remap to traditional datum names
-        if (l_name == "World Geodetic System 1984 ensemble") {
-            l_name = "World Geodetic System 1984";
-        } else if (l_name ==
-                   "European Terrestrial Reference System 1989 ensemble") {
-            l_name = "European Terrestrial Reference System 1989";
-        }
+        auto oldName = ensembleNameToNonEnsembleName(l_name);
+        if (!oldName.empty())
+            l_name = std::move(oldName);
     }
     auto props =
         util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, l_name);

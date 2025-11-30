@@ -4932,14 +4932,13 @@ void AuthorityFactory::createGeodeticDatumOrEnsemble(
         const auto &anchor_epoch = row[9];
         const bool deprecated = row[10] == "1";
 
-        std::string massagedName = name;
+        std::string massagedName;
         if (turnEnsembleAsDatum) {
-            if (name == "World Geodetic System 1984 ensemble") {
-                massagedName = "World Geodetic System 1984";
-            } else if (name ==
-                       "European Terrestrial Reference System 1989 ensemble") {
-                massagedName = "European Terrestrial Reference System 1989";
-            }
+            massagedName =
+                datum::DatumEnsemble::ensembleNameToNonEnsembleName(name);
+        }
+        if (massagedName.empty()) {
+            massagedName = name;
         }
         auto props = d->createPropertiesSearchUsages("geodetic_datum", code,
                                                      massagedName, deprecated);

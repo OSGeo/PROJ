@@ -2377,18 +2377,20 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
 
     // Remap GDAL WGS_1984 to EPSG v9 "World Geodetic System 1984" official
     // name.
-    // Also remap EPSG v10 datum ensemble names to non-ensemble EPSG v9
     bool nameSet = false;
-    if (name == "WGS_1984" || name == "World Geodetic System 1984 ensemble") {
+    if (name == "WGS_1984") {
         nameSet = true;
         properties.set(IdentifiedObject::NAME_KEY,
                        GeodeticReferenceFrame::EPSG_6326->nameStr());
-    } else if (name == "European Terrestrial Reference System 1989 ensemble") {
-        nameSet = true;
-        properties.set(IdentifiedObject::NAME_KEY,
-                       "European Terrestrial Reference System 1989");
     }
-
+    // Also remap EPSG v10 datum ensemble names to non-ensemble EPSG v9
+    else if (internal::ends_with(name, " ensemble")) {
+        auto massagedName = DatumEnsemble::ensembleNameToNonEnsembleName(name);
+        if (!massagedName.empty()) {
+            nameSet = true;
+            properties.set(IdentifiedObject::NAME_KEY, massagedName);
+        }
+    }
     // If we got hints this might be a ESRI WKT, then check in the DB to
     // confirm
     std::string officialName;
