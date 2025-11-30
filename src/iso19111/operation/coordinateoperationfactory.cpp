@@ -6937,9 +6937,9 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         }
 
         const auto createOpsInTwoSteps =
-            [&res, bestAccuracy,
-             bestStepCount](const std::vector<CoordinateOperationNNPtr> &ops1,
-                            const std::vector<CoordinateOperationNNPtr> &ops2) {
+            [&res, &bestAccuracy, &bestStepCount](
+                const std::vector<CoordinateOperationNNPtr> &ops1,
+                const std::vector<CoordinateOperationNNPtr> &ops2) {
                 std::vector<CoordinateOperationNNPtr> res2;
                 double bestAccuracy2 = -1;
                 size_t bestStepCount2 = 0;
@@ -6999,35 +6999,41 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                     (bestAccuracy < 0 || (bestAccuracy2 < bestAccuracy ||
                                           (bestAccuracy2 == bestAccuracy &&
                                            bestStepCount2 < bestStepCount)))) {
-                    res = std::move(res2);
+                    bestAccuracy = bestAccuracy2;
+                    bestStepCount = bestStepCount2;
+                    res.insert(res.end(), res2.begin(), res2.end());
                 }
             };
 
-        // If the promoted-to-3D source geographic CRS is not a known object,
-        // transformations from it to another 3D one may not be relevant,
-        // so try doing source -> geogDst 3D -> dest, if geogDst 3D is a known
-        // object
-        if (!srcGeog->identifiers().empty() &&
-            intermGeogSrc->identifiers().empty() &&
-            !intermGeogDst->identifiers().empty() &&
-            hasNonTrivialTargetTransf) {
-            const auto opsSrcToIntermGeog = createOperations(
-                sourceCRS, util::optional<common::DataEpoch>(), intermGeogDst,
-                util::optional<common::DataEpoch>(), context);
-            if (hasNonTrivialTransf(opsSrcToIntermGeog)) {
-                createOpsInTwoSteps(opsSrcToIntermGeog, opsGeogToTarget);
+        if (res.empty() || intermGeogSrc->identifiers().empty() ||
+            intermGeogDst->identifiers().empty()) {
+            // If the promoted-to-3D source geographic CRS is not a known
+            // object, transformations from it to another 3D one may not be
+            // relevant, so try doing source -> geogDst 3D -> dest, if geogDst
+            // 3D is a known object
+            if (!srcGeog->identifiers().empty() &&
+                !intermGeogDst->identifiers().empty() &&
+                hasNonTrivialTargetTransf) {
+                const auto opsSrcToIntermGeog = createOperations(
+                    sourceCRS, util::optional<common::DataEpoch>(),
+                    intermGeogDst, util::optional<common::DataEpoch>(),
+                    context);
+                if (hasNonTrivialTransf(opsSrcToIntermGeog)) {
+                    createOpsInTwoSteps(opsSrcToIntermGeog, opsGeogToTarget);
+                }
             }
-        }
-        // Symmetrical situation with the promoted-to-3D target geographic CRS
-        else if (!dstGeog->identifiers().empty() &&
-                 intermGeogDst->identifiers().empty() &&
-                 !intermGeogSrc->identifiers().empty() &&
-                 hasNonTrivialSrcTransf) {
-            const auto opsIntermGeogToDst = createOperations(
-                intermGeogSrc, util::optional<common::DataEpoch>(), targetCRS,
-                util::optional<common::DataEpoch>(), context);
-            if (hasNonTrivialTransf(opsIntermGeogToDst)) {
-                createOpsInTwoSteps(opsSrcToGeog, opsIntermGeogToDst);
+
+            // Symmetrical situation with the promoted-to-3D target geographic
+            // CRS
+            if (!dstGeog->identifiers().empty() &&
+                !intermGeogSrc->identifiers().empty() &&
+                hasNonTrivialSrcTransf) {
+                const auto opsIntermGeogToDst = createOperations(
+                    intermGeogSrc, util::optional<common::DataEpoch>(),
+                    targetCRS, util::optional<common::DataEpoch>(), context);
+                if (hasNonTrivialTransf(opsIntermGeogToDst)) {
+                    createOpsInTwoSteps(opsSrcToGeog, opsIntermGeogToDst);
+                }
             }
         }
 
