@@ -1335,7 +1335,8 @@ class PROJ_GCC_DLL AuthorityFactory {
                             const std::vector<ObjectType> &allowedObjectTypes =
                                 std::vector<ObjectType>(),
                             bool approximateMatch = true,
-                            size_t limitResultCount = 0) const;
+                            size_t limitResultCount = 0,
+                            bool useAliases = true) const;
 
     PROJ_FOR_TEST std::vector<operation::PointMotionOperationNNPtr>
     getPointMotionOperationsFor(const crs::GeodeticCRSNNPtr &crs,

@@ -495,10 +495,13 @@ def import_datum():
                 src_row = cursor.fetchone()
                 assert src_row, row
                 src_name = src_row[0]
-                if src_name != esri_name:
-                    sql = """INSERT INTO alias_name VALUES('geodetic_datum','EPSG','%s','%s','ESRI');""" % (
-                        code, escape_literal(esri_name))
-                    all_sql.append(sql)
+
+                # We create the alias even if it the esri_name is the same as the
+                # EPSG name, otherwise we'll massage by adding a D_ prefix
+                # when exporting to WKT1:ESRI
+                sql = """INSERT INTO alias_name VALUES('geodetic_datum','EPSG','%s','%s','ESRI');""" % (
+                    code, escape_literal(esri_name))
+                all_sql.append(sql)
 
                 old_esri_name = get_old_esri_name(esri_name)
                 if old_esri_name != esri_name:
@@ -639,10 +642,13 @@ def import_geogcs():
                 src_row = cursor.fetchone()
                 assert src_row, row
                 src_name = src_row[0]
-                if src_name != esri_name:
-                    sql = """INSERT INTO alias_name VALUES('geodetic_crs','EPSG','%s','%s','ESRI');""" % (
-                        code, escape_literal(esri_name))
-                    all_sql.append(sql)
+
+                # We create the alias even if it the esri_name is the same as the
+                # EPSG name, otherwise we'll massage by adding a GCS_ prefix
+                # when exporting to WKT1:ESRI
+                sql = """INSERT INTO alias_name VALUES('geodetic_crs','EPSG','%s','%s','ESRI');""" % (
+                    code, escape_literal(esri_name))
+                all_sql.append(sql)
 
                 old_esri_name = get_old_esri_name(esri_name)
                 if old_esri_name != esri_name:

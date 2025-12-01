@@ -2248,17 +2248,70 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                     if (found)
                         l_esri_name = l_name;
                 }
+                if (l_esri_name.empty() && !l_identifiers.empty()) {
+                    // Case for example for ETRS89-NOR [EUREF89] that has no
+                    // ESRI alias. Fallback to ETRS89
+                    const auto EPSGOldAliases =
+                        dbContext->getAliases(*(l_identifiers[0]->codeSpace()),
+                                              l_identifiers[0]->code(),
+                                              std::string(), // officialName,
+                                              tableName, "EPSG_OLD");
+                    if (EPSGOldAliases.size() == 1) {
+                        auto authFactoryEPSG = io::AuthorityFactory::create(
+                            NN_NO_CHECK(dbContext), "EPSG");
+                        auto objCandidates =
+                            authFactoryEPSG->createObjectsFromNameEx(
+                                EPSGOldAliases.front(),
+                                {io::AuthorityFactory::ObjectType::
+                                     GEODETIC_CRS},
+                                false, // approximateMatch
+                                0,     // limitResultCount
+                                false  // useAliases
+                            );
+                        const auto thisNature = isGeographic3D ? "geographic_3D"
+                                                : isGeocentric()
+                                                    ? "geocentric"
+                                                    : "geographic_2D";
+                        for (const auto &[obj, name] : objCandidates) {
+                            (void)name;
+                            const auto objGeodetic =
+                                dynamic_cast<const GeodeticCRS *>(obj.get());
+                            if (objGeodetic) {
+                                const auto objGeographic =
+                                    dynamic_cast<const GeographicCRS *>(
+                                        obj.get());
+                                const auto objNature =
+                                    objGeographic &&
+                                            objGeographic->coordinateSystem()
+                                                    ->axisList()
+                                                    .size() == 3
+                                        ? "geographic_3D"
+                                    : objGeodetic->isGeocentric()
+                                        ? "geocentric"
+                                        : "geographic_2D";
+                                const auto &objIdentifiers = obj->identifiers();
+                                if (!objIdentifiers.empty() &&
+                                    strcmp(thisNature, objNature) == 0) {
+                                    const auto ESRIAliases =
+                                        dbContext->getAliases(
+                                            *(objIdentifiers[0]->codeSpace()),
+                                            objIdentifiers[0]->code(),
+                                            std::string(), // officialName,
+                                            tableName, "ESRI");
+                                    if (ESRIAliases.size() == 1) {
+                                        l_esri_name = ESRIAliases.front();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             if (l_esri_name.empty()) {
-                // For now, there's no ESRI alias for this CRS. Fallback to
-                // ETRS89
-                if (l_name == "ETRS89-NOR [EUREF89]") {
-                    l_esri_name = "GCS_ETRS_1989";
-                } else {
-                    l_esri_name = io::WKTFormatter::morphNameToESRI(l_name);
-                    if (!starts_with(l_esri_name, "GCS_")) {
-                        l_esri_name = "GCS_" + l_esri_name;
-                    }
+                l_esri_name = io::WKTFormatter::morphNameToESRI(l_name);
+                if (!starts_with(l_esri_name, "GCS_")) {
+                    l_esri_name = "GCS_" + l_esri_name;
                 }
             }
         }
@@ -3185,38 +3238,6 @@ bool GeographicCRS::_isEquivalentTo(
             return false;
         }
         return true;
-    }
-
-    // In EPSG v12.025, Norway projected systems based on ETRS89 (EPSG:4258)
-    // have switched to use ETRS89-NOR [EUREF89] (EPSG:10875). There's no way
-    // from the current content of the database to infer both CRS are equivalent
-    if (criterion != util::IComparable::Criterion::STRICT) {
-        if (((nameStr() == "ETRS89" &&
-              otherGeogCRS->nameStr() == "ETRS89-NOR [EUREF89]") ||
-             (nameStr() == "ETRS89-NOR [EUREF89]" &&
-              otherGeogCRS->nameStr() == "ETRS89")) &&
-            ellipsoid()->_isEquivalentTo(otherGeogCRS->ellipsoid().get(),
-                                         criterion) &&
-            datumNonNull(dbContext)->primeMeridian()->_isEquivalentTo(
-                otherGeogCRS->datumNonNull(dbContext)->primeMeridian().get(),
-                criterion)) {
-            auto thisCS = coordinateSystem();
-            auto otherCS = otherGeogCRS->coordinateSystem();
-            if (thisCS->_isEquivalentTo(otherCS.get(), criterion)) {
-                return true;
-            } else if (criterion == util::IComparable::Criterion::
-                                        EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS) {
-                const auto &otherAxisList = otherCS->axisList();
-                return thisCS->axisList().size() == 2 &&
-                       otherAxisList.size() == 2 &&
-                       thisCS->_isEquivalentTo(
-                           cs::EllipsoidalCS::create(util::PropertyMap(),
-                                                     otherAxisList[1],
-                                                     otherAxisList[0])
-                               .get(),
-                           criterion);
-            }
-        }
     }
 
     if (criterion !=

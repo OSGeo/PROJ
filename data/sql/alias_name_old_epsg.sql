@@ -1121,12 +1121,21 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3885','ETRS-GK31FIN','EP
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','3903','ETRS89-TM35FIN(N,E)/N2000','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5048','ETRS89-TM35FIN(N,E)','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','3902','ETRS89-TM35FIN(N,E)/N60','EPSG_OLD');
+-- EUREF-FIN
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1391','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10688','ETRS89','EPSG_OLD'); -- ETRS89-FIN [EUREF-FIN] (geocentric)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10689','ETRS89','EPSG_OLD'); -- ETRS89-FIN [EUREF-FIN] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10690','ETRS89','EPSG_OLD'); -- ETRS89-FIN [EUREF-FIN] (2d)
 
 -- Changed in EPSG v12.007
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25884','LKS92 / TM Baltic93','EPSG_OLD');
 
 -- Changed in EPSG v12.021
+-- ETRS89-NOR [EUREF89]
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1407','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10875','ETRS89','EPSG_OLD'); -- ETRS89-NOR [EUREF89] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10874','ETRS89','EPSG_OLD'); -- ETRS89-NOR [EUREF89] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10873','ETRS89','EPSG_OLD'); -- ETRS89-NOR [EUREF89] (geocentric)
 
 -- Changed in EPSG v12.027
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5973','ETRS89 / UTM zone 33 + NN2000 height','EPSG_OLD');
@@ -1146,50 +1155,100 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6176','ETRS89 / UTM zone 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3447','ETRS89 / Lambert 2005','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6962','ETRS89 / Albania LCC','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6870','ETRS89 / Albania TM','EPSG_OLD');
+-- OSNet v2009
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1425','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11009','ETRS89','EPSG_OLD'); -- ETRS89-GBR [OSNet v2009] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11008','ETRS89','EPSG_OLD'); -- ETRS89-GBR [OSNet v2009] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11007','ETRS89','EPSG_OLD'); -- ETRS89-GBR [OSNet v2009] (geocentric)
+-- Albanian Geodetic Reference Frame 2010
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1429','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11047','ETRS89','EPSG_OLD'); -- ETRS89-ALB [KRGJSH 2010] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11046','ETRS89','EPSG_OLD'); -- ETRS89-ALB [KRGJSH 2010] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11045','ETRS89','EPSG_OLD'); -- ETRS89-ALB [KRGJSH 2010] (geocentric)
+-- ETRS89-AUT [2002]
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1431','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11057','ETRS89','EPSG_OLD'); -- ETRS89-AUT [2002] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11056','ETRS89','EPSG_OLD'); -- ETRS89-AUT [2002] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11055','ETRS89','EPSG_OLD'); -- ETRS89-AUT [2002] (geocentric)
+-- Belgian Reference Frame 2002
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1432','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11063','ETRS89','EPSG_OLD'); -- ETRS89-BEL [BEREF2002] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11062','ETRS89','EPSG_OLD'); -- ETRS89-BEL [BEREF2002] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11061','ETRS89','EPSG_OLD'); -- ETRS89-BEL [BEREF2002] (geocentric)
+-- ETRS89-PRT [1995]
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1439','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11108','ETRS89','EPSG_OLD'); -- ETRS89-PRT [1995] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11107','ETRS89','EPSG_OLD'); -- ETRS89-PRT [1995] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11106','ETRS89','EPSG_OLD'); -- ETRS89-PRT [1995] (geocentric)
+-- Belgian Reference Frame 2011
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1447','European Terrestrial Reference System 1989','EPSG_OLD');
+
 
 -- Changed in EPSG v12.035
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10826','ETRS89 + LAS-2000 height','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10839','ETRS89 + LAS-2000 height','EPSG_OLD');
+-- ETRS89-ESP [REGENTE]
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1441','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11134','ETRS89','EPSG_OLD'); -- ETRS89-ESP [REGENTE] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11130','ETRS89','EPSG_OLD'); -- ETRS89-ESP [REGENTE] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11129','ETRS89','EPSG_OLD'); -- ETRS89-ESP [REGENTE] (geocentric)
 
 -- Changed in EPSG v12.037
+-- Rete Dinamica Nazionale 2008
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1132','RDN2008','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1132','European Terrestrial Reference System 1989','EPSG_OLD');
+-- Istituto Geografico Militaire 1995
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6670','IGM95','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3065','ETRF89 IT / UTM zone 33N','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3064','ETRF89 IT / UTM zone 32N','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9716','ETRF89 IT / UTM zone 34N','EPSG_OLD');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1132','European Terrestrial Reference System 1989','EPSG_OLD');
 
 -- Changed in EPSG v12.038
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3067','EUREF-FIN / UTM zone 35N','EPSG_OLD');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10688','ETRS89','EPSG_OLD');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10689','ETRS89','EPSG_OLD');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10690','ETRS89','EPSG_OLD');
 
 -- Changed in EPSG v12.039
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5316','ETRS89 / FOTM','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5698','RGF93 / Lambert-93 + NGF-IGN69 height','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5699','RGF93 / Lambert-93 + NGF-IGN78 height','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10659','ETRS89 + EOMA 1980 height','EPSG_OLD');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1031','European Terrestrial Reference System 1989','EPSG_OLD');
+-- ETRS89-FRO [2008]
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1436','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11087','ETRS89','EPSG_OLD'); -- ETRS89-FRO [2008] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11086','ETRS89','EPSG_OLD'); -- ETRS89-FRO [2008] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11085','ETRS89','EPSG_OLD'); -- ETRS89-FRO [2008] (geocentric)
+-- ETRS89-HUN [ETRF2000]
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1444','European Terrestrial Reference Frame 2000','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11163','ETRF2000','EPSG_OLD'); -- ETRS89-HUN [ETRF2000] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11162','ETRF2000','EPSG_OLD'); -- ETRS89-HUN [ETRF2000] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11161','ETRF2000','EPSG_OLD'); -- ETRS89-HUN [ETRF2000] (geocentric)
 
 -- Changed in EPSG v12.041
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1297','EVRF2007-PL','EPSG_OLD');
+-- ETRF2000 Poland
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1305','ETRF2000-PL','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9702','ETRF2000-PL','EPSG_OLD'); -- ETRS89-POL [PL-ETRF2000] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9701','ETRF2000-PL','EPSG_OLD'); -- ETRS89-POL [PL-ETRF2000] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9700','ETRF2000-PL','EPSG_OLD'); -- ETRS89-POL [PL-ETRF2000] (geocentric)
 
 -- Changed in EPSG v12.042
+-- Serbian Reference Network 1998
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1034','SREF98','EPSG_OLD');
+-- Serbian Spatial Reference System 2000
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1214','STRS00','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1214','SRB_ETRS89','EPSG_OLD');
+-- ETRS89/DREF91 Realization 2016
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1353','ETRS89/DREF91/2016','EPSG_OLD');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','10284','ETRS89/DREF91/R16','EPSG_OLD');
+-- ETRS89-IRE [ETRF2000]
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6173','European Terrestrial Reference System 1989','EPSG_OLD');
 
 -- Changed in EPSG v12.043
+-- ETRS89-CZE [2007]
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1433','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11070','ETRS89','EPSG_OLD'); -- ETRS89-CZE [2007] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11069','ETRS89','EPSG_OLD'); -- ETRS89-CZE [2007] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11068','ETRS89','EPSG_OLD'); -- ETRS89-CZE [2007] (geocentric)
+-- ETRS89-SVK [SKTRF09]
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1434','European Terrestrial Reference System 1989','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11076','ETRS89','EPSG_OLD'); -- ETRS89-SVK [2007] (2d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11075','ETRS89','EPSG_OLD'); -- ETRS89-SVK [2007] (3d)
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11074','ETRS89','EPSG_OLD'); -- ETRS89-SVK [2007] (geocentric)
