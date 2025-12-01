@@ -3,6 +3,34 @@
 News
 ###############################################################################
 
+9.7.1
+++++++++++++++++++++
+*December 1st 2025*
+
+Updates
+-------
+
+* Enable `transformations_czechia.sql` (`#4578 <https://github.com/OSGeo/PROJ/issues/4578>`_)
+
+* Update to EPSG v12.029 (`#4586 <https://github.com/OSGeo/PROJ/issues/4586>`_)
+
+Bug Fixes
+---------
+
+* :cpp:func:`createOperations()`: fix compound to compound when vertical CRS definition is equivalent but not strictly identical (`#4579 <https://github.com/OSGeo/PROJ/issues/4579>`_)
+
+* :cpp:func:`createOperations()`: fix compound to compound when horizontal CRS of … (`#4582 <https://github.com/OSGeo/PROJ/issues/4582>`_)
+
+* :program:`projinfo`: make it honour `-k crs` (`#4592 <https://github.com/OSGeo/PROJ/issues/4592>`_)
+
+* :c:func:`proj_clone()`: fix insufficient propagation of `FORCE_OVER=YES` (`#4595 <https://github.com/OSGeo/PROJ/issues/4595>`_)
+
+* :cpp:func:`BoundCRS::identify`: fix creation of an invalid BoundCRS (that can cause later crashes) for CRS based on 'NTF (Paris)' (`#4601 <https://github.com/OSGeo/PROJ/issues/4601>`_)
+
+* WKT/PROJJSON datum ensemble import: allow no members (`#4615 <https://github.com/OSGeo/PROJ/issues/4615>`_)
+
+
+
 9.7.0
 ++++++++++++++++++++
 *September 15th 2025*
