@@ -151,6 +151,9 @@ class PROJ_GCC_DLL DatumEnsemble final : public common::ObjectUsage,
     PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_INTERNAL static std::string
+    ensembleNameToNonEnsembleName(const std::string &s);
+
     PROJ_FOR_TEST DatumNNPtr
     asDatum(const io::DatabaseContextPtr &dbContext) const;
     //! @endcond
