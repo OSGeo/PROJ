@@ -48,58 +48,22 @@ This can be used to implement:
     * :math:`\theta` is the angle about which the axes of the source CRS need to
       be rotated to coincide with the axes of the target CRS, counter-clockwise
       being positive
-      
-Units and Limitations
+
+Usage notes
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The :code:`+proj=affine` transformation has specific unit-handling behavior that
-is not obvious from the parameter list. These points are important for correct
-usage:
+The `+proj=affine` operation applies a purely mathematical affine transformation
+on coordinate values. It does **not** perform any unit conversion and is not
+aware of whether coordinates are angular or linear. Users must ensure that the
+values provided to the affine operation are expressed in the appropriate units
+for their intended purpose.
 
-**1. Input and output angular units**
+The affine operation can be used with the `cct` utility or as a step inside a
+PROJ pipeline.
 
-When :code:`+proj=affine` is used on angular coordinates (longitude/latitude):
+Example (using cct):
 
-* **Input angular values are interpreted in radians**
-* **Output angular values are expressed in degrees**
-
-Example (showing the implicit unit conversion):
-
-    $ echo 0 1 | cs2cs +proj=affine +xoff=1
-    57d17'44.806"W  57d17'44.806"N 0.000
-
-The numeric input "1" is interpreted as one radian, and the output is reported
-in degrees. Users should be aware of this implicit unit conversion when applying
-affine steps to geographic coordinate values.
-
-**2. Affine transformation cannot be used directly with the `proj` utility**
-
-Attempting to run:
-
-    proj +proj=affine
-
-will produce the error:
-
-    can't initialize operations that take non-angular input coordinates
-
-This is expected. :code:`+proj=affine` must be used **as a step inside a
-PROJ pipeline**, where its input coordinate type is determined by previous
-pipeline steps.
-
-Example of valid usage inside a pipeline:
-
-    proj pipeline +step +proj=affine +xoff=1
-
-**3. Recommended usage**
-
-The affine transformation is generally intended for:
-
-* Modifying projected coordinates
-* Applying small adjustments inside pipelines
-* Implementing EPSG parametric and similarity transforms
-
-When applied to geographic coordinates, users must explicitly handle/unit-convert
-angles as needed.
+    echo "1 2" | cct +proj=affine +xoff=1
 
 
 Parameters
