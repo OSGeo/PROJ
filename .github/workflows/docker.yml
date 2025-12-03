@@ -43,7 +43,7 @@ jobs:
       PUSH_PACKAGES: ${{ github.repository_owner == 'OSGeo' && github.event_name != 'pull_request' && (matrix.container == 'proj' || (matrix.container == 'proj-docs' && github.ref_name == 'master')) }}
       CONTAINER: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Lint
         id: lint
         run: |
