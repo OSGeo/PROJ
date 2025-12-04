@@ -5738,6 +5738,33 @@ TEST(operation, normalizeForVisualization) {
                   "+step +proj=pop +v_3 "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
     }
+
+    // Test normalizeForVisualization on a concatenated operation with
+    // non-overlapping sub-operation extents (EPSG:8047 = ED50 -> ED87 -> WGS84)
+    // This should work even though EPSG:1147 (ED50->ED87) and EPSG:1146
+    // (ED87->WGS84) have non-overlapping validity areas.
+    {
+        auto op = authFactory->createCoordinateOperation("8047", false);
+        ASSERT_TRUE(op != nullptr);
+        // Verify it's a concatenated operation
+        auto concat = dynamic_cast<const ConcatenatedOperation *>(op.get());
+        ASSERT_TRUE(concat != nullptr);
+        // This should succeed (previously it threw due to extent intersection)
+        auto opNormalized = op->normalizeForVisualization();
+        EXPECT_FALSE(opNormalized->_isEquivalentTo(op.get()));
+        // Verify the normalized operation can produce a PROJ string
+        auto projString = opNormalized->exportToPROJString(
+            PROJStringFormatter::create().get());
+        EXPECT_FALSE(projString.empty());
+        EXPECT_EQ(opNormalized->coordinateOperationAccuracies(),
+                  op->coordinateOperationAccuracies());
+        EXPECT_EQ(opNormalized->remarks(), op->remarks());
+        EXPECT_STREQ(
+            opNormalized->nameStr().c_str(),
+            (op->nameStr() + " (with axis order normalized for visualization)")
+                .c_str());
+        EXPECT_EQ(opNormalized->domains().size(), 1U);
+    }
 }
 
 // ---------------------------------------------------------------------------

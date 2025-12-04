@@ -176,10 +176,13 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
 
     crs::CRSPtr interpolationCRS;
     bool interpolationCRSValid = true;
+    bool hasBallparkTransformation = false;
     for (size_t i = 0; i < operationsIn.size(); i++) {
         auto l_sourceCRS = operationsIn[i]->sourceCRS();
         auto l_targetCRS = operationsIn[i]->targetCRS();
 
+        hasBallparkTransformation |=
+            operationsIn[i]->hasBallparkTransformation();
         if (interpolationCRSValid) {
             auto subOpInterpCRS = operationsIn[i]->interpolationCRS();
             if (interpolationCRS == nullptr)
@@ -249,6 +252,7 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
         operationsIn);
     op->assignSelf(op);
     op->setProperties(properties);
+    op->setHasBallparkTransformation(hasBallparkTransformation);
     op->setCRSs(l_sourceCRS, l_targetCRS, interpolationCRS);
     op->setAccuracies(accuracies);
 #ifdef DEBUG_CONCATENATED_OPERATION

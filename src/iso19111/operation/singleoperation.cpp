@@ -37,6 +37,7 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include "proj/internal/crs_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
@@ -432,8 +433,40 @@ CoordinateOperation::normalizeForVisualization() const {
                     l_targetCRS->normalizeForVisualization(), nullptr);
         subOps.emplace_back(op);
     }
-    return util::nn_static_pointer_cast<CoordinateOperation>(
-        ConcatenatedOperation::createComputeMetadata(subOps, true));
+
+    util::PropertyMap properties;
+    // The domain(s) are unchanged
+    addDomains(properties, this);
+    addModifiedIdentifier(properties, this, /* inverse = */ false,
+                          /* derivedFrom = */ true);
+
+    std::string name = nameStr();
+    if (!name.empty()) {
+        name += NORMALIZED_AXIS_ORDER_SUFFIX_STR;
+        properties.set(common::IdentifiedObject::NAME_KEY, name);
+    }
+
+    const std::string &l_remarks = remarks();
+    if (!l_remarks.empty()) {
+        properties.set(common::IdentifiedObject::REMARKS_KEY, l_remarks);
+    }
+
+    std::vector<CoordinateOperationNNPtr> flattenOps;
+    for (const auto &subOp : subOps) {
+        auto subOpConcat =
+            dynamic_cast<const ConcatenatedOperation *>(subOp.get());
+        if (subOpConcat) {
+            auto subSubOps = subOpConcat->operations();
+            for (const auto &subSubOp : subSubOps) {
+                flattenOps.emplace_back(subSubOp);
+            }
+        } else {
+            flattenOps.emplace_back(subOp);
+        }
+    }
+
+    return ConcatenatedOperation::create(properties, flattenOps,
+                                         coordinateOperationAccuracies());
 }
 
 // ---------------------------------------------------------------------------
