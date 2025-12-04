@@ -363,6 +363,7 @@ endif()
 # Whether we should embed resources
 ################################################################################
 
+include(CheckCSourceCompiles)
 function (is_sharp_embed_available res)
     if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.21 AND
         ((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0) OR
