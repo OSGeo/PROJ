@@ -6090,9 +6090,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
         }
 
         // Only do a vertical transformation if the target CRS is 3D.
-        const auto dstSingle = dynamic_cast<crs::SingleCRS *>(targetCRS.get());
-        if (dstSingle &&
-            dstSingle->coordinateSystem()->axisList().size() == 2) {
+        if (geogDst->coordinateSystem()->axisList().size() <= 2) {
             auto tmp = createOperations(componentsSrc[0], sourceEpoch,
                                         targetCRS, targetEpoch, context);
             for (const auto &op : tmp) {
@@ -6109,6 +6107,42 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
             horizTransforms = createOperations(componentsSrc[0], sourceEpoch,
                                                targetCRS, targetEpoch, context);
         }
+
+        const auto hasAtLeastOneOpWithNonTrivialAndWithAllGrids =
+            [&dbContext](
+                const std::vector<CoordinateOperationNNPtr> &verticalTransforms,
+                CoordinateOperationContext::GridAvailabilityUse
+                    gridAvailabilityUse,
+                bool ignoreMissingGrids,
+                bool *foundRegisteredTransform = nullptr) {
+                if (foundRegisteredTransform)
+                    *foundRegisteredTransform = false;
+                for (const auto &op : verticalTransforms) {
+                    if (hasIdentifiers(op) && dbContext) {
+                        bool missingGrid = false;
+                        if (!ignoreMissingGrids) {
+                            const auto gridsNeeded = op->gridsNeeded(
+                                dbContext,
+                                gridAvailabilityUse ==
+                                    CoordinateOperationContext::
+                                        GridAvailabilityUse::KNOWN_AVAILABLE);
+                            for (const auto &gridDesc : gridsNeeded) {
+                                if (!gridDesc.available) {
+                                    missingGrid = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (foundRegisteredTransform)
+                            *foundRegisteredTransform = true;
+                        if (!missingGrid) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+
         std::vector<CoordinateOperationNNPtr> verticalTransforms;
 
         if (componentsSrc.size() >= 2 &&
@@ -6127,7 +6161,6 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                     context.skipHorizontalTransformation = false;
                 }
             };
-            SetSkipHorizontalTransform setSkipHorizontalTransform(context);
 
             struct SetGeogCRSOfVertCRS {
                 Context &context;
@@ -6148,39 +6181,23 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
             };
             SetGeogCRSOfVertCRS setGeogCRSOfVertCRS(context, srcGeogCRS);
 
-            verticalTransforms = createOperations(
-                componentsSrc[1], util::optional<common::DataEpoch>(),
-                targetCRS->promoteTo3D(std::string(), dbContext),
-                util::optional<common::DataEpoch>(), context);
-            bool foundRegisteredTransformWithAllGridsAvailable = false;
+            {
+                SetSkipHorizontalTransform setSkipHorizontalTransform(context);
+
+                verticalTransforms = createOperations(
+                    componentsSrc[1], util::optional<common::DataEpoch>(),
+                    targetCRS, util::optional<common::DataEpoch>(), context);
+            }
             const auto gridAvailabilityUse =
                 context.context->getGridAvailabilityUse();
             const bool ignoreMissingGrids =
                 gridAvailabilityUse ==
                 CoordinateOperationContext::GridAvailabilityUse::
                     IGNORE_GRID_AVAILABILITY;
-            for (const auto &op : verticalTransforms) {
-                if (hasIdentifiers(op) && dbContext) {
-                    bool missingGrid = false;
-                    if (!ignoreMissingGrids) {
-                        const auto gridsNeeded = op->gridsNeeded(
-                            dbContext,
-                            gridAvailabilityUse ==
-                                CoordinateOperationContext::
-                                    GridAvailabilityUse::KNOWN_AVAILABLE);
-                        for (const auto &gridDesc : gridsNeeded) {
-                            if (!gridDesc.available) {
-                                missingGrid = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!missingGrid) {
-                        foundRegisteredTransformWithAllGridsAvailable = true;
-                        break;
-                    }
-                }
-            }
+            bool foundRegisteredTransformWithAllGridsAvailable =
+                hasAtLeastOneOpWithNonTrivialAndWithAllGrids(
+                    verticalTransforms, gridAvailabilityUse,
+                    ignoreMissingGrids);
             if (srcGeogCRS &&
                 !srcGeogCRS->_isEquivalentTo(
                     geogDst, util::IComparable::Criterion::EQUIVALENT) &&
@@ -6190,40 +6207,22 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                         ->demoteTo2D(std::string(), dbContext)
                         ->promoteTo3D(
                             std::string(), dbContext,
-                            geogDst->coordinateSystem()->axisList().size() == 3
-                                ? geogDst->coordinateSystem()->axisList()[2]
-                                : cs::VerticalCS::createGravityRelatedHeight(
-                                      common::UnitOfMeasure::METRE)
-                                      ->axisList()[0]);
-                auto verticalTransformsTmp = createOperations(
-                    componentsSrc[1], util::optional<common::DataEpoch>(),
-                    geogCRSTmp, util::optional<common::DataEpoch>(), context);
-                bool foundRegisteredTransform = false;
-                bool foundRegisteredTransformWithAllGridsAvailable2 = false;
-                for (const auto &op : verticalTransformsTmp) {
-                    if (hasIdentifiers(op) && dbContext) {
-                        bool missingGrid = false;
-                        if (!ignoreMissingGrids) {
-                            const auto gridsNeeded = op->gridsNeeded(
-                                dbContext,
-                                gridAvailabilityUse ==
-                                    CoordinateOperationContext::
-                                        GridAvailabilityUse::KNOWN_AVAILABLE);
-                            for (const auto &gridDesc : gridsNeeded) {
-                                if (!gridDesc.available) {
-                                    missingGrid = true;
-                                    break;
-                                }
-                            }
-                        }
-                        foundRegisteredTransform = true;
-                        if (!missingGrid) {
-                            foundRegisteredTransformWithAllGridsAvailable2 =
-                                true;
-                            break;
-                        }
-                    }
+                            geogDst->coordinateSystem()->axisList()[2]);
+                std::vector<CoordinateOperationNNPtr> verticalTransformsTmp;
+                {
+                    SetSkipHorizontalTransform setSkipHorizontalTransform(
+                        context);
+
+                    verticalTransformsTmp = createOperations(
+                        componentsSrc[1], util::optional<common::DataEpoch>(),
+                        geogCRSTmp, util::optional<common::DataEpoch>(),
+                        context);
                 }
+                bool foundRegisteredTransform = false;
+                const bool foundRegisteredTransformWithAllGridsAvailable2 =
+                    hasAtLeastOneOpWithNonTrivialAndWithAllGrids(
+                        verticalTransformsTmp, gridAvailabilityUse,
+                        ignoreMissingGrids, &foundRegisteredTransform);
                 if (foundRegisteredTransformWithAllGridsAvailable2 &&
                     !foundRegisteredTransformWithAllGridsAvailable) {
                     verticalTransforms = std::move(verticalTransformsTmp);
@@ -6231,6 +6230,94 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                     verticalTransforms.insert(verticalTransforms.end(),
                                               verticalTransformsTmp.begin(),
                                               verticalTransformsTmp.end());
+                }
+            }
+
+            // Case for EPSG:5550+7651 ("PNG94 / PNGMG94 zone 54 + Kumul 34
+            // height") to EPSG:9754 ("WGS 84 (G2139)")
+            // (https://github.com/OSGeo/PROJ/issues/4618)
+            // where there is a vertical transformation between Kumul 34 height
+            // and WGS84 going through EGM96 and the transformation between
+            // PNG94 and WGS 84 (G2139) goes through WGS84 We can then get a
+            // good result by doing EPSG:5550+7651 -> EPSG:4979 and EPSG:4979 ->
+            // EPSG:9754
+            const auto hasNonBallparkLambda =
+                [](const CoordinateOperationNNPtr &op) {
+                    return !op->hasBallparkTransformation();
+                };
+            const bool onlyVerticalBallparkTransformation =
+                std::find_if(verticalTransforms.begin(),
+                             verticalTransforms.end(),
+                             hasNonBallparkLambda) == verticalTransforms.end();
+            if (onlyVerticalBallparkTransformation) {
+                std::map<std::string, crs::CRSNNPtr> candidateIntermGeogCRS;
+                for (const auto &op : horizTransforms) {
+                    if (!op->hasBallparkTransformation()) {
+                        auto concatenatedOp =
+                            dynamic_cast<const ConcatenatedOperation *>(
+                                op.get());
+                        if (concatenatedOp) {
+                            for (const auto &subOp :
+                                 concatenatedOp->operations()) {
+                                auto subOpTargetCRS = subOp->targetCRS();
+                                if (subOpTargetCRS) {
+                                    auto tmpCRS = subOpTargetCRS->promoteTo3D(
+                                        std::string(), dbContext);
+                                    if (!tmpCRS->identifiers().empty() &&
+                                        !tmpCRS->_isEquivalentTo(
+                                            targetCRS.get(),
+                                            util::IComparable::Criterion::
+                                                EQUIVALENT) &&
+                                        candidateIntermGeogCRS.find(
+                                            tmpCRS->nameStr()) ==
+                                            candidateIntermGeogCRS.end()) {
+                                        candidateIntermGeogCRS.insert(
+                                            std::make_pair(tmpCRS->nameStr(),
+                                                           std::move(tmpCRS)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (const auto &[name, geogCRSTmp] : candidateIntermGeogCRS) {
+                    (void)name;
+                    const auto verticalTransformsTmp = createOperations(
+                        componentsSrc[1], util::optional<common::DataEpoch>(),
+                        geogCRSTmp, util::optional<common::DataEpoch>(),
+                        context);
+                    const bool onlyVerticalBallparkTransformationTmp =
+                        std::find_if(verticalTransformsTmp.begin(),
+                                     verticalTransformsTmp.end(),
+                                     hasNonBallparkLambda) ==
+                        verticalTransformsTmp.end();
+                    if (!onlyVerticalBallparkTransformationTmp) {
+                        const auto ops1 = createOperations(
+                            sourceCRS, util::optional<common::DataEpoch>(),
+                            geogCRSTmp, util::optional<common::DataEpoch>(),
+                            context);
+                        const auto ops2 = createOperations(
+                            geogCRSTmp, util::optional<common::DataEpoch>(),
+                            targetCRS, util::optional<common::DataEpoch>(),
+                            context);
+                        for (const auto &op1 : ops1) {
+                            if (!op1->hasBallparkTransformation()) {
+                                for (const auto &op2 : ops2) {
+                                    if (!op2->hasBallparkTransformation()) {
+                                        try {
+                                            res.emplace_back(
+                                                ConcatenatedOperation::
+                                                    createComputeMetadata(
+                                                        {op1, op2},
+                                                        disallowEmptyIntersection));
+                                        } catch (const std::exception &) {
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -6850,9 +6937,9 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         }
 
         const auto createOpsInTwoSteps =
-            [&res, bestAccuracy,
-             bestStepCount](const std::vector<CoordinateOperationNNPtr> &ops1,
-                            const std::vector<CoordinateOperationNNPtr> &ops2) {
+            [&res, &bestAccuracy, &bestStepCount](
+                const std::vector<CoordinateOperationNNPtr> &ops1,
+                const std::vector<CoordinateOperationNNPtr> &ops2) {
                 std::vector<CoordinateOperationNNPtr> res2;
                 double bestAccuracy2 = -1;
                 size_t bestStepCount2 = 0;
@@ -6912,35 +6999,41 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                     (bestAccuracy < 0 || (bestAccuracy2 < bestAccuracy ||
                                           (bestAccuracy2 == bestAccuracy &&
                                            bestStepCount2 < bestStepCount)))) {
-                    res = std::move(res2);
+                    bestAccuracy = bestAccuracy2;
+                    bestStepCount = bestStepCount2;
+                    res.insert(res.end(), res2.begin(), res2.end());
                 }
             };
 
-        // If the promoted-to-3D source geographic CRS is not a known object,
-        // transformations from it to another 3D one may not be relevant,
-        // so try doing source -> geogDst 3D -> dest, if geogDst 3D is a known
-        // object
-        if (!srcGeog->identifiers().empty() &&
-            intermGeogSrc->identifiers().empty() &&
-            !intermGeogDst->identifiers().empty() &&
-            hasNonTrivialTargetTransf) {
-            const auto opsSrcToIntermGeog = createOperations(
-                sourceCRS, util::optional<common::DataEpoch>(), intermGeogDst,
-                util::optional<common::DataEpoch>(), context);
-            if (hasNonTrivialTransf(opsSrcToIntermGeog)) {
-                createOpsInTwoSteps(opsSrcToIntermGeog, opsGeogToTarget);
+        if (res.empty() || intermGeogSrc->identifiers().empty() ||
+            intermGeogDst->identifiers().empty()) {
+            // If the promoted-to-3D source geographic CRS is not a known
+            // object, transformations from it to another 3D one may not be
+            // relevant, so try doing source -> geogDst 3D -> dest, if geogDst
+            // 3D is a known object
+            if (!srcGeog->identifiers().empty() &&
+                !intermGeogDst->identifiers().empty() &&
+                hasNonTrivialTargetTransf) {
+                const auto opsSrcToIntermGeog = createOperations(
+                    sourceCRS, util::optional<common::DataEpoch>(),
+                    intermGeogDst, util::optional<common::DataEpoch>(),
+                    context);
+                if (hasNonTrivialTransf(opsSrcToIntermGeog)) {
+                    createOpsInTwoSteps(opsSrcToIntermGeog, opsGeogToTarget);
+                }
             }
-        }
-        // Symmetrical situation with the promoted-to-3D target geographic CRS
-        else if (!dstGeog->identifiers().empty() &&
-                 intermGeogDst->identifiers().empty() &&
-                 !intermGeogSrc->identifiers().empty() &&
-                 hasNonTrivialSrcTransf) {
-            const auto opsIntermGeogToDst = createOperations(
-                intermGeogSrc, util::optional<common::DataEpoch>(), targetCRS,
-                util::optional<common::DataEpoch>(), context);
-            if (hasNonTrivialTransf(opsIntermGeogToDst)) {
-                createOpsInTwoSteps(opsSrcToGeog, opsIntermGeogToDst);
+
+            // Symmetrical situation with the promoted-to-3D target geographic
+            // CRS
+            if (!dstGeog->identifiers().empty() &&
+                !intermGeogSrc->identifiers().empty() &&
+                hasNonTrivialSrcTransf) {
+                const auto opsIntermGeogToDst = createOperations(
+                    intermGeogSrc, util::optional<common::DataEpoch>(),
+                    targetCRS, util::optional<common::DataEpoch>(), context);
+                if (hasNonTrivialTransf(opsIntermGeogToDst)) {
+                    createOpsInTwoSteps(opsSrcToGeog, opsIntermGeogToDst);
+                }
             }
         }
 
