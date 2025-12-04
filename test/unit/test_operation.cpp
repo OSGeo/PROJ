@@ -5756,6 +5756,14 @@ TEST(operation, normalizeForVisualization) {
         auto projString = opNormalized->exportToPROJString(
             PROJStringFormatter::create().get());
         EXPECT_FALSE(projString.empty());
+        EXPECT_EQ(opNormalized->coordinateOperationAccuracies(),
+                  op->coordinateOperationAccuracies());
+        EXPECT_EQ(opNormalized->remarks(), op->remarks());
+        EXPECT_STREQ(
+            opNormalized->nameStr().c_str(),
+            (op->nameStr() + " (with axis order normalized for visualization)")
+                .c_str());
+        EXPECT_EQ(opNormalized->domains().size(), 1U);
     }
 }
 
