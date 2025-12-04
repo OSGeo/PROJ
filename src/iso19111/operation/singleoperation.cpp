@@ -432,8 +432,13 @@ CoordinateOperation::normalizeForVisualization() const {
                     l_targetCRS->normalizeForVisualization(), nullptr);
         subOps.emplace_back(op);
     }
+    // Use checkExtent=false because axis-swap operations don't change the
+    // geographic validity of the underlying operation - they only reorder
+    // coordinates. This allows normalizeForVisualization() to work on
+    // concatenated operations where sub-operations may have non-overlapping
+    // validity areas (e.g., EPSG:8047).
     return util::nn_static_pointer_cast<CoordinateOperation>(
-        ConcatenatedOperation::createComputeMetadata(subOps, true));
+        ConcatenatedOperation::createComputeMetadata(subOps, false));
 }
 
 // ---------------------------------------------------------------------------
