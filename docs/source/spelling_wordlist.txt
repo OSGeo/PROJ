@@ -526,6 +526,7 @@ Jagiellonian
 jakarta
 jitter
 Jivall
+js
 João
 json
 JSON
