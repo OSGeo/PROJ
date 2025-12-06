@@ -483,6 +483,7 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
     Users will also typically want to set EMBED_PROJ_DATA_PATH=OFF if setting
     USE_ONLY_EMBEDDED_RESOURCE_FILES=OFF.
 
+.. _install_emscripten_fetch:
 .. option:: ENABLE_EMSCRIPTEN_FETCH=ON/OFF
 
     .. versionadded:: 9.8

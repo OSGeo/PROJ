@@ -49,7 +49,7 @@ Emscripten
 ^^^^^^^^^^
 
 To compile with emscripten (to produce a WASM file) with network capability,
-the CMake configure option `ENABLE_EMSCRIPTEN_FETCH` can be used.
+the CMake configure option :ref:`ENABLE_EMSCRIPTEN_FETCH<install_emscripten_fetch>` can be used.
 
 Setting endpoint
 ----------------
