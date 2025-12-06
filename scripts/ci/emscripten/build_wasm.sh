@@ -1,4 +1,16 @@
 #!/bin/bash
+
+###############################################################################
+# $Id$
+#
+#  Project:  PROJ
+#  Purpose:  Build with emscripten compiler
+#  Author:   Javier Jimenez Shaw
+#
+###############################################################################
+#  Copyright (c) 2025 Javier Jimenez Shaw
+###############################################################################
+
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
