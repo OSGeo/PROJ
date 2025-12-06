@@ -286,6 +286,7 @@ eg
 egm
 ellps
 emphasize
+emscripten
 encodings
 endian
 engsager

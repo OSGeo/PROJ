@@ -45,6 +45,12 @@ Authorizing network access can be done in multiple ways:
     with :cpp:func:`proj_context_set_network_callbacks`. Enabling network use
     must still be done with one of the above mentioned method.
 
+Emscripten
+^^^^^^^^^^
+
+To compile with emscripten (to produce a WASM file) with network capability,
+the CMake configure option :ref:`ENABLE_EMSCRIPTEN_FETCH<install_emscripten_fetch>` can be used.
+
 Setting endpoint
 ----------------
 

@@ -483,6 +483,19 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
     Users will also typically want to set EMBED_PROJ_DATA_PATH=OFF if setting
     USE_ONLY_EMBEDDED_RESOURCE_FILES=OFF.
 
+.. _install_emscripten_fetch:
+.. option:: ENABLE_EMSCRIPTEN_FETCH=ON/OFF
+
+    .. versionadded:: 9.8
+
+    When ON, the function emscripten_fetch is used to get files
+    from the network (grid files, etc), in a similar way as with cURL.
+    PROJ is doing synchronous fetch calls, so emscripten must have the `-pthread` flag enabled.
+    In addition to that, it is very recommended to run it in a Web Worker in the browser,
+    to not block the main thread.
+    It is incompatible with cURL, so ``ENABLE_CURL`` must be OFF.
+    Default: OFF.
+
 
 Building on Windows with vcpkg and Visual Studio 2017 or 2019
 --------------------------------------------------------------------------------
