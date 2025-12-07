@@ -10008,13 +10008,27 @@ AuthorityFactory::createProjectedCRSFromExisting(
         }
     }
 
-    std::string sql("SELECT projected_crs.auth_name, projected_crs.code, "
-                    "projected_crs.name FROM projected_crs "
-                    "JOIN conversion_table conv ON "
-                    "projected_crs.conversion_auth_name = conv.auth_name AND "
-                    "projected_crs.conversion_code = conv.code WHERE "
-                    "projected_crs.deprecated = 0 AND ");
+    std::string sql(
+        "SELECT projected_crs.auth_name, projected_crs.code, "
+        "projected_crs.name FROM projected_crs "
+        "JOIN conversion_table conv ON "
+        "projected_crs.conversion_auth_name = conv.auth_name AND "
+        "projected_crs.conversion_code = conv.code "
+        "JOIN geodetic_crs gcrs ON "
+        "gcrs.auth_name = projected_crs.geodetic_crs_auth_name AND "
+        "gcrs.code = projected_crs.geodetic_crs_code "
+        "JOIN geodetic_datum datum ON "
+        "datum.auth_name = gcrs.datum_auth_name AND "
+        "datum.code = gcrs.datum_code "
+        "JOIN ellipsoid ellps ON "
+        "ellps.auth_name = datum.ellipsoid_auth_name AND "
+        "ellps.code = datum.ellipsoid_code "
+        "WHERE "
+        "abs(ellps.semi_major_axis - ?) <= 1e-4 * ellps.semi_major_axis AND "
+        "projected_crs.deprecated = 0 AND ");
     ListOfParams params;
+    params.emplace_back(
+        toString(crs->baseCRS()->ellipsoid()->semiMajorAxis().value()));
     if (!candidatesGeodCRS.empty()) {
         sql += buildSqlLookForAuthNameCode(candidatesGeodCRS, params,
                                            "projected_crs.geodetic_crs_");
