@@ -7910,7 +7910,12 @@ TEST(crs, norway_ntm) {
         auto obj = createFromUserInput(esri_wkt, dbContext, true);
         auto crs_from_esri = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs_from_esri != nullptr);
-
+        EXPECT_STREQ(crs_from_esri->nameStr().c_str(),
+                     "ETRS89-NOR [EUREF89] / NTM zone 5");
+        EXPECT_STREQ(crs_from_esri->baseCRS()->nameStr().c_str(),
+                     "ETRS89-NOR [EUREF89]");
+        EXPECT_STREQ(crs_from_esri->baseCRS()->datum()->nameStr().c_str(),
+                     "ETRS89-NOR [EUREF89]");
         auto res = crs_from_esri->identify(factory);
         ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first.get(), crs.get());
@@ -7976,6 +7981,74 @@ TEST(crs, norway_ntm) {
             createFromUserInput(wkt2_before_epsg_12_025, dbContext, true);
         auto crs_from_wkt2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs_from_wkt2 != nullptr);
+        EXPECT_TRUE(crs->isEquivalentTo(crs_from_wkt2.get(),
+                                        IComparable::Criterion::EQUIVALENT));
+        EXPECT_TRUE(crs_from_wkt2->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+
+        auto res = crs_from_wkt2->identify(factory);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first.get(), crs.get());
+        EXPECT_EQ(res.front().second, 100);
+    }
+}
+// ---------------------------------------------------------------------------
+
+TEST(crs, ETRF2000_PL_CS92) {
+
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    // "ETRS89 / PL-1992" (formerly ETRF2000-PL / CS92)
+    auto crs = factory->createCoordinateReferenceSystem("2180");
+
+    auto wkt2_before_epsg_12_041 =
+        "PROJCRS[\"ETRF2000-PL / CS92\",\n"
+        "    BASEGEOGCRS[\"ETRF2000-PL\",\n"
+        "        DATUM[\"ETRF2000 Poland\",\n"
+        "            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"EPSG\",9702]],\n"
+        "    CONVERSION[\"Poland CS92\",\n"
+        "        METHOD[\"Transverse Mercator\",\n"
+        "            ID[\"EPSG\",9807]],\n"
+        "        PARAMETER[\"Latitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8801]],\n"
+        "        PARAMETER[\"Longitude of natural origin\",19,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8802]],\n"
+        "        PARAMETER[\"Scale factor at natural origin\",0.9993,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8805]],\n"
+        "        PARAMETER[\"False easting\",500000,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",-5300000,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"northing (x)\",north,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"easting (y)\",east,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    USAGE[\n"
+        "        SCOPE[\"Topographic mapping (medium and small scale).\"],\n"
+        "        AREA[\"Poland - onshore and offshore.\"],\n"
+        "        BBOX[49,14.14,55.93,24.15]],\n"
+        "    ID[\"EPSG\",2180]]";
+
+    {
+        auto obj =
+            createFromUserInput(wkt2_before_epsg_12_041, dbContext, true);
+        auto crs_from_wkt2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs_from_wkt2 != nullptr);
+        EXPECT_STREQ(crs_from_wkt2->nameStr().c_str(), "ETRS89 / PL-1992");
+        EXPECT_STREQ(crs_from_wkt2->baseCRS()->nameStr().c_str(), "ETRS89");
+
         EXPECT_TRUE(crs->isEquivalentTo(crs_from_wkt2.get(),
                                         IComparable::Criterion::EQUIVALENT));
         EXPECT_TRUE(crs_from_wkt2->isEquivalentTo(

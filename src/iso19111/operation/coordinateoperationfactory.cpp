@@ -6447,13 +6447,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                 const bool srcAndTargetGeogAreSame =
                     componentsSrc[0]->isEquivalentTo(
                         targetCRS->demoteTo2D(std::string(), dbContext).get(),
-                        util::IComparable::Criterion::EQUIVALENT) &&
-                    // Kind of a hack for EPSG:4937 to EPSG:9883 to work
-                    // properly
-                    !((componentsSrc[0]->nameStr() == "ETRS89" &&
-                       targetCRS->nameStr() == "ETRS89-NOR [EUREF89]") ||
-                      (componentsSrc[0]->nameStr() == "ETRS89-NOR [EUREF89]" &&
-                       targetCRS->nameStr() == "ETRS89"));
+                        util::IComparable::Criterion::EQUIVALENT);
 
                 // Lambda to add to the set the name of geodetic datum of the
                 // CRS
