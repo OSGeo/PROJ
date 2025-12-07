@@ -870,6 +870,22 @@ TEST(crs, implicit_compound_ESRI_104971_to_3D_as_WKT1_ESRI_with_database) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, ITRF2020_as_WKT1_ESRI_with_database) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("9990");
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext));
+    EXPECT_EQ(crs->exportToWKT(f.get()),
+              "GEOGCS[\"ITRF2020\","
+              "DATUM[\"International_Terrestrial_Reference_Frame_2020\","
+              "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+              "PRIMEM[\"Greenwich\",0.0],"
+              "UNIT[\"Degree\",0.0174532925199433]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, IAU_1000_as_WKT2) {
     auto dbContext = DatabaseContext::create();
     auto factory = AuthorityFactory::create(dbContext, "IAU_2015");
@@ -2635,10 +2651,10 @@ TEST(crs, projectedCRS_from_EPSG_with_deprecated_ESRI_name_as_WKT1_ESRI) {
 
     // Check we use the non-deprecated ESRI names, so:
     // "KGD2002_Central_Belt_2010" and not "Korea_2000_Korea_Central_Belt_2010"
-    // "GCS_KGD2002" and not "GCS_Korea_2000"
+    // "KGD2002" and not "GCS_Korea_2000"
     // "D_Korea_Geodetic_Datum_2002" and not "D_Korea_2000"
     auto esri_wkt =
-        "PROJCS[\"KGD2002_Central_Belt_2010\",GEOGCS[\"GCS_KGD2002\","
+        "PROJCS[\"KGD2002_Central_Belt_2010\",GEOGCS[\"KGD2002\","
         "DATUM[\"D_Korea_Geodetic_Datum_2002\","
         "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
         "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
