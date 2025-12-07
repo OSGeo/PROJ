@@ -614,6 +614,10 @@ if(CURL_ENABLED)
       $<$<CXX_COMPILER_ID:MSVC>:normaliz>)
 endif()
 
+if(EMSCRIPTEN_FETCH_ENABLED)
+  target_compile_definitions(proj PRIVATE -DEMSCRIPTEN_FETCH_ENABLED)
+endif()
+
 if(BUILD_SHARED_LIBS)
   if(MSVC)
     target_compile_definitions(proj PRIVATE PROJ_MSVC_DLL_EXPORT=1)
