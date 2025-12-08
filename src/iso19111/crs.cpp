@@ -5039,6 +5039,8 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             }
             hasNonMatchingId = true;
         } else if (!insignificantName) {
+            const double semiMajorAxis =
+                ellipsoid->semiMajorAxis().getSIValue();
             for (int ipass = 0; ipass < 2; ipass++) {
                 const bool approximateMatch = ipass == 1;
                 auto objects = authorityFactory->createObjectsFromNameEx(
@@ -5053,8 +5055,14 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                         thisName.c_str(), pairObjName.second.c_str());
                     foundEquivalentName |= eqName;
 
-                    if (addCRS(crsNN, eqName, false).second == 100) {
-                        return res;
+                    if (std::fabs(semiMajorAxis - crsNN->baseCRS()
+                                                      ->ellipsoid()
+                                                      ->semiMajorAxis()
+                                                      .getSIValue()) <=
+                        1e-4 * semiMajorAxis) {
+                        if (addCRS(crsNN, eqName, false).second == 100) {
+                            return res;
+                        }
                     }
                 }
                 if (!res.empty()) {

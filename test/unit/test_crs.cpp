@@ -3765,6 +3765,51 @@ TEST(crs, projectedCRS_identify_db) {
         EXPECT_EQ(*(res.front().first->identifiers()[0]->codeSpace()), "EPSG");
         EXPECT_EQ(res.front().second, 100);
     }
+    {
+        // The ellipsoid definition uses a unusual value for the inverse
+        // flattening Check that we only identify CRS whose ellipsoid shape is
+        // close to the input one (in particular no IAU_2015...)
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCRS[\"Transverse Mercator\",\n"
+            "    BASEGEOGCRS[\"DE_DHDN (whole country, 2001) to ETRS89\",\n"
+            "        DATUM[\"DE_DHDN (whole country, 2001) to ETRS89\",\n"
+            "            ELLIPSOID[\"Bessel\",6377397.155,299.15281310608,\n"
+            "                LENGTHUNIT[\"metre\",1,\n"
+            "                    ID[\"EPSG\",9001]]]],\n"
+            "        PRIMEM[\"Greenwich\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+            "                ID[\"EPSG\",9122]]]],\n"
+            "    CONVERSION[\"Transverse Mercator\",\n"
+            "        METHOD[\"Transverse Mercator\",\n"
+            "            ID[\"EPSG\",9807]],\n"
+            "        PARAMETER[\"Latitude of natural origin\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "            ID[\"EPSG\",8801]],\n"
+            "        PARAMETER[\"Longitude of natural origin\",12,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "            ID[\"EPSG\",8802]],\n"
+            "        PARAMETER[\"Scale factor at natural origin\",1,\n"
+            "            SCALEUNIT[\"unity\",1],\n"
+            "            ID[\"EPSG\",8805]],\n"
+            "        PARAMETER[\"False easting\",4500000,\n"
+            "            LENGTHUNIT[\"metre\",1],\n"
+            "            ID[\"EPSG\",8806]],\n"
+            "        PARAMETER[\"False northing\",0,\n"
+            "            LENGTHUNIT[\"metre\",1],\n"
+            "            ID[\"EPSG\",8807]]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"easting\",east,\n"
+            "            ORDER[1],\n"
+            "            LENGTHUNIT[\"meters\",1]],\n"
+            "        AXIS[\"northing\",north,\n"
+            "            ORDER[2],\n"
+            "            LENGTHUNIT[\"meters\",1]]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(factoryAll);
+        EXPECT_EQ(res.size(), 13U);
+    }
 }
 
 // ---------------------------------------------------------------------------
