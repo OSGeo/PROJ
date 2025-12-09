@@ -49,6 +49,23 @@ This can be used to implement:
       be rotated to coincide with the axes of the target CRS, counter-clockwise
       being positive
 
+Usage notes
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The `+proj=affine` operation applies a purely mathematical affine transformation
+on coordinate values. It does **not** perform any unit conversion and is not
+aware of whether coordinates are angular or linear. Users must ensure that the
+values provided to the affine operation are expressed in the appropriate units
+for their intended purpose.
+
+The affine operation can be used with the `cct` utility or as a step inside a
+PROJ pipeline.
+
+Example (using cct):
+
+    echo "1 2" | cct +proj=affine +xoff=1
+
+
 Parameters
 ################################################################################
 
