@@ -25,8 +25,8 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#ifndef TINSHIFT_HPP
-#define TINSHIFT_HPP
+#ifndef TINSHIFT_JSON_HPP
+#define TINSHIFT_JSON_HPP
 
 #ifdef PROJ_COMPILATION
 #include "proj/internal/include_nlohmann_json.hpp"
@@ -44,14 +44,15 @@
 #include <vector>
 
 #include "quadtree.hpp"
+#include "tinshift_iface.hpp"
 
-#ifndef TINSHIFT_NAMESPACE
-#define TINSHIFT_NAMESPACE TINShift
+#ifndef TINSHIFT_JSON_NAMESPACE
+#define TINSHIFT_JSON_NAMESPACE TINShiftJSON
 #endif
 
-#include "tinshift_exceptions.hpp"
+#include "tinshift_json_exceptions.hpp"
 
-namespace TINSHIFT_NAMESPACE {
+namespace TINSHIFT_JSON_NAMESPACE {
 
 enum FallbackStrategy {
     FALLBACK_NONE,
@@ -64,13 +65,13 @@ using json = nlohmann::json;
 // ---------------------------------------------------------------------------
 
 /** Content of a TINShift file. */
-class TINShiftFile {
+class TINShiftJSONFile {
   public:
     /** Parse the provided serialized JSON content and return an object.
      *
      * @throws ParsingException in case of error.
      */
-    static std::unique_ptr<TINShiftFile> parse(const std::string &text);
+    static std::unique_ptr<TINShiftJSONFile> parse(const std::string &text);
 
     /** Get file type. Should always be "triangulation_file" */
     const std::string &fileType() const { return mFileType; }
@@ -205,7 +206,7 @@ class TINShiftFile {
     const std::vector<VertexIndices> &triangles() const { return mTriangles; }
 
   private:
-    TINShiftFile() = default;
+    TINShiftJSONFile() = default;
 
     std::string mFileType{};
     std::string mFormatVersion{};
@@ -229,26 +230,26 @@ class TINShiftFile {
 // ---------------------------------------------------------------------------
 
 /** Class to evaluate the transformation of a coordinate */
-class Evaluator {
+class TINShiftJSONEvaluator : public TINShiftEvaluator {
   public:
     /** Constructor. */
-    explicit Evaluator(std::unique_ptr<TINShiftFile> &&fileIn);
+    explicit TINShiftJSONEvaluator(std::unique_ptr<TINShiftJSONFile> &&fileIn);
 
     /** Get file */
-    const TINShiftFile &file() const { return *(mFile.get()); }
+    const TINShiftJSONFile &file() const { return *(mFile.get()); }
 
     /** Evaluate displacement of a position given by (x,y,z,t) and
      * return it in (x_out,y_out_,z_out).
      */
     bool forward(double x, double y, double z, double &x_out, double &y_out,
-                 double &z_out);
+                 double &z_out) override;
 
     /** Apply inverse transformation. */
     bool inverse(double x, double y, double z, double &x_out, double &y_out,
-                 double &z_out);
+                 double &z_out) override;
 
   private:
-    std::unique_ptr<TINShiftFile> mFile;
+    std::unique_ptr<TINShiftJSONFile> mFile;
 
     // Reused between invocations to save memory allocations
     std::vector<unsigned> mTriangleIndices{};
@@ -259,10 +260,10 @@ class Evaluator {
 
 // ---------------------------------------------------------------------------
 
-} // namespace TINSHIFT_NAMESPACE
+} // namespace TINSHIFT_JSON_NAMESPACE
 
 // ---------------------------------------------------------------------------
 
-#include "tinshift_impl.hpp"
+#include "tinshift_json_impl.hpp"
 
-#endif // TINSHIFT_HPP
+#endif // TINSHIFT_JSON_HPP

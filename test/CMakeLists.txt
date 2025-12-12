@@ -78,7 +78,12 @@ proj_add_gie_test("adams_ws2" "gie/adams_ws2.gie")
 proj_add_gie_test("guyou" "gie/guyou.gie")
 proj_add_gie_test("peirce_q" "gie/peirce_q.gie")
 proj_add_gie_test("tinshift" "gie/tinshift.gie")
+proj_add_gie_test("tinshift_gpkg" "gie/tinshift_gpkg.gie")
 proj_add_gie_test("spilhaus" "gie/spilhaus.gie")
+
+if(CURL_ENABLED AND RUN_NETWORK_DEPENDENT_TESTS)
+proj_add_gie_network_dependent_test("tinshift_gpkg_network" "gie/tinshift_gpkg_network.gie")
+endif()
 
 if(TIFF_ENABLED)
 proj_add_gie_test("Deformation" "gie/deformation.gie")

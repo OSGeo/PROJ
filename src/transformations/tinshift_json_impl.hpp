@@ -25,7 +25,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#ifndef TINSHIFT_NAMESPACE
+#ifndef TINSHIFT_JSON_NAMESPACE
 #error "Should be included only by tinshift.hpp"
 #endif
 
@@ -33,7 +33,7 @@
 #include <cmath>
 #include <limits>
 
-namespace TINSHIFT_NAMESPACE {
+namespace TINSHIFT_JSON_NAMESPACE {
 
 // ---------------------------------------------------------------------------
 
@@ -76,8 +76,9 @@ static json getArrayMember(const json &j, const char *key) {
 
 // ---------------------------------------------------------------------------
 
-std::unique_ptr<TINShiftFile> TINShiftFile::parse(const std::string &text) {
-    std::unique_ptr<TINShiftFile> tinshiftFile(new TINShiftFile());
+std::unique_ptr<TINShiftJSONFile>
+TINShiftJSONFile::parse(const std::string &text) {
+    std::unique_ptr<TINShiftJSONFile> tinshiftFile(new TINShiftJSONFile());
     json j;
     try {
         j = json::parse(text);
@@ -361,7 +362,7 @@ std::unique_ptr<TINShiftFile> TINShiftFile::parse(const std::string &text) {
 
 // ---------------------------------------------------------------------------
 
-static NS_PROJ::QuadTree::RectObj GetBounds(const TINShiftFile &file,
+static NS_PROJ::QuadTree::RectObj GetBounds(const TINShiftJSONFile &file,
                                             bool forward) {
     NS_PROJ::QuadTree::RectObj rect;
     rect.minx = std::numeric_limits<double>::max();
@@ -386,7 +387,7 @@ static NS_PROJ::QuadTree::RectObj GetBounds(const TINShiftFile &file,
 // ---------------------------------------------------------------------------
 
 static std::unique_ptr<NS_PROJ::QuadTree::QuadTree<unsigned>>
-BuildQuadTree(const TINShiftFile &file, bool forward) {
+BuildQuadTree(const TINShiftJSONFile &file, bool forward) {
     auto quadtree = std::unique_ptr<NS_PROJ::QuadTree::QuadTree<unsigned>>(
         new NS_PROJ::QuadTree::QuadTree<unsigned>(GetBounds(file, forward)));
     const auto &triangles = file.triangles();
@@ -425,7 +426,8 @@ BuildQuadTree(const TINShiftFile &file, bool forward) {
 
 // ---------------------------------------------------------------------------
 
-Evaluator::Evaluator(std::unique_ptr<TINShiftFile> &&fileIn)
+TINShiftJSONEvaluator::TINShiftJSONEvaluator(
+    std::unique_ptr<TINShiftJSONFile> &&fileIn)
     : mFile(std::move(fileIn)) {}
 
 // ---------------------------------------------------------------------------
@@ -452,8 +454,8 @@ static double distance_point_segment(double x, double y, double x1, double y1,
     return squared_distance(x, y, x1 + t * (x2 - x1), y1 + t * (y2 - y1));
 }
 
-static const TINShiftFile::VertexIndices *
-FindTriangle(const TINShiftFile &file,
+static const TINShiftJSONFile::VertexIndices *
+FindTriangle(const TINShiftJSONFile &file,
              const NS_PROJ::QuadTree::QuadTree<unsigned> &quadtree,
              std::vector<unsigned> &triangleIndices, double x, double y,
              bool forward, double &lambda1, double &lambda2, double &lambda3) {
@@ -594,8 +596,8 @@ FindTriangle(const TINShiftFile &file,
 
 // ---------------------------------------------------------------------------
 
-bool Evaluator::forward(double x, double y, double z, double &x_out,
-                        double &y_out, double &z_out) {
+bool TINShiftJSONEvaluator::forward(double x, double y, double z, double &x_out,
+                                    double &y_out, double &z_out) {
     if (!mQuadTreeForward)
         mQuadTreeForward = BuildQuadTree(*(mFile.get()), true);
 
@@ -638,8 +640,8 @@ bool Evaluator::forward(double x, double y, double z, double &x_out,
 
 // ---------------------------------------------------------------------------
 
-bool Evaluator::inverse(double x, double y, double z, double &x_out,
-                        double &y_out, double &z_out) {
+bool TINShiftJSONEvaluator::inverse(double x, double y, double z, double &x_out,
+                                    double &y_out, double &z_out) {
     NS_PROJ::QuadTree::QuadTree<unsigned> *quadtree;
     if (!mFile->transformHorizontalComponent() &&
         mFile->transformVerticalComponent()) {
@@ -688,4 +690,4 @@ bool Evaluator::inverse(double x, double y, double z, double &x_out,
     return true;
 }
 
-} // namespace TINSHIFT_NAMESPACE
+} // namespace TINSHIFT_JSON_NAMESPACE

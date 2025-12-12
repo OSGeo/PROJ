@@ -1897,14 +1897,16 @@ TEST(networking, download_whole_files) {
 
     char out_full_filename[1024];
     EXPECT_FALSE(pj_find_file(ctx, "dk_sdfe_dvr90.tif", out_full_filename,
-                              sizeof(out_full_filename)));
+                              sizeof(out_full_filename),
+                              /* disable_network = */ true));
     EXPECT_STREQ(out_full_filename, "");
 
     ASSERT_TRUE(
         proj_download_file(ctx, "dk_sdfe_dvr90.tif", false, nullptr, nullptr));
 
     EXPECT_TRUE(pj_find_file(ctx, "dk_sdfe_dvr90.tif", out_full_filename,
-                             sizeof(out_full_filename)));
+                             sizeof(out_full_filename),
+                             /* disable_network = */ true));
     EXPECT_NE(out_full_filename[0], 0);
 
     // lookForGridInfo() returns false because the grid is not known in the DB,

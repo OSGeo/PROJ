@@ -12446,7 +12446,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             std::string initname(stepName);
             initname.resize(initname.find(':'));
             int file_found =
-                pj_find_file(ctx, initname.c_str(), unused, sizeof(unused));
+                pj_find_file(ctx, initname.c_str(), unused, sizeof(unused),
+                             /* disable_network = */ true);
 
             if (!file_found) {
                 auto obj = createFromUserInput(stepName, d->dbContext_, true);
