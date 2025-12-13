@@ -234,6 +234,28 @@ They can be combined in +axis in forms like:
 Order of applications of parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+The following table summarizes the order in which commonly used parameters
+are applied when specified within the same projection step.
+
++------------+-------------------------------------------------------------+------------------------------+
+| Step Order | Operation                                                   | Parameters                   |
++============+=============================================================+==============================+
+| 1          | Apply prime meridian and central meridian offsets           | ``+pm``, ``+lon_0``           |
++------------+-------------------------------------------------------------+------------------------------+
+| 2          | Normalize longitude range                                   | ``+over``                    |
++------------+-------------------------------------------------------------+------------------------------+
+| 3          | Apply map projection formula and scale factor               | ``+proj``, ``+k_0``, ``+lat_0``|
++------------+-------------------------------------------------------------+------------------------------+
+| 4          | Scale projected coordinates by ellipsoid semimajor axis     | ``+a``                       |
++------------+-------------------------------------------------------------+------------------------------+
+| 5          | Apply false easting and northing                            | ``+x_0``, ``+y_0``           |
++------------+-------------------------------------------------------------+------------------------------+
+| 6          | Apply output horizontal and vertical units                  | ``+units``, ``+to_meter``, ``+vunits`` |
++------------+-------------------------------------------------------------+------------------------------+
+| 7          | Apply axis orientation and order                            | ``+axis``                    |
++------------+-------------------------------------------------------------+------------------------------+
+
+
 In the forward direction (from geodetic to projected coordinates), steps
 are performed in the following order:
 
