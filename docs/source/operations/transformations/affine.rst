@@ -52,9 +52,9 @@ This can be used to implement:
 Examples
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The `+proj=affine` operation applies a purely mathematical affine transformation
-on coordinate values. It does **not** perform any unit conversion and is not
-aware of whether coordinates are angular or linear. Users must ensure that the
+The `+proj=affine` operation applies an affine transformation on coordinate values.
+Note that it does not perform any unit conversion and will accept
+coordinates whether  they are angular or linear. Users must ensure that the
 values provided to the affine operation are expressed in the appropriate units
 for their intended purpose.
 
