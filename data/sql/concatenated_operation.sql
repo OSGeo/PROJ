@@ -95,7 +95,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','8245','NAD27 to WGS 84 (26)'
 INSERT INTO "usage" VALUES('EPSG','10450','concatenated_operation','EPSG','8245','EPSG','1061','EPSG','1252');
 INSERT INTO "concatenated_operation" VALUES('EPSG','8263','MGI (Ferro) to WGS 84 (1)','Accuracy estimate is not available.','EPSG','4805','EPSG','4326',NULL,'DMA-balk',1);
 INSERT INTO "usage" VALUES('EPSG','10458','concatenated_operation','EPSG','8263','EPSG','2370','EPSG','1160');
-INSERT INTO "concatenated_operation" VALUES('EPSG','8363','ETRS89 + Baltic 1957 height to ETRS89 + EVRF2007 height (1)','Recommended method for transforming coordinates between Baltic 1957 height and EVRF2007 height and vice-versa in Slovakia. Compound transformation using two separate quasigeoid models (DVRM05 and DMQSK2014E).','EPSG','8360','EPSG','7423',0.05,'UGKK-Svk',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','8363','ETRS89-SVK [SKTRF09] + Baltic 1957 ht to ETRS89-SVK [SKTRF09] + EVRF2007 ht (1)','Recommended method for transforming coordinates between Baltic 1957 height and EVRF2007 height and vice-versa in Slovakia. Compound transformation using two separate quasigeoid models (DVRM05 and DMQSK2014E).','EPSG','11312','EPSG','11314',0.05,'UGKK-Svk',0);
 INSERT INTO "usage" VALUES('EPSG','10510','concatenated_operation','EPSG','8363','EPSG','1211','EPSG','1059');
 INSERT INTO "concatenated_operation" VALUES('EPSG','8386','Old Hawaiian to WGS 84 (1)','Approximation at the +/- 1m level assuming that NAD83 is equivalent to WGS 84.','EPSG','4135','EPSG','4326',NULL,'EPSG-Usa Hi',1);
 INSERT INTO "usage" VALUES('EPSG','10523','concatenated_operation','EPSG','8386','EPSG','1334','EPSG','1252');
@@ -133,7 +133,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','8422','NAD83 to WGS 84 (8)',
 INSERT INTO "usage" VALUES('EPSG','10552','concatenated_operation','EPSG','8422','EPSG','2376','EPSG','1252');
 INSERT INTO "concatenated_operation" VALUES('EPSG','8442','ETRS89-SVK [SKTRF09] to S-JTSK (5)','Recommended method of a transformation from ETRS89 to S-JTSK in Slovakia. For reverse transformation see S-JTSK to ETRS89-SVK [SKTRF09] (6) (code 8443). Both together replace S-JTSK to ETRS89 (4) (code 4827).','EPSG','11076','EPSG','4156',0.06,'UGKK-Sk JTSK03',0);
 INSERT INTO "usage" VALUES('EPSG','10562','concatenated_operation','EPSG','8442','EPSG','1211','EPSG','1027');
-INSERT INTO "concatenated_operation" VALUES('EPSG','8443','S-JTSK to ETRS89-SVK [SKTRF09] (6)','Recommended method of a transformation from S-JTSK to ETRS89 in Slovakia. For reverse transformation see ETRS89-SVK [SKTRF09] to S-JTSK (5) (code 8442). Both together replace S-JTSK to ETRS89 (4) (code 4827).','EPSG','4156','EPSG','4258',0.06,'UGKK-Sk JTSK03',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','8443','S-JTSK to ETRS89-SVK [SKTRF09] (6)','Recommended method of a transformation from S-JTSK to ETRS89 in Slovakia. For reverse transformation see ETRS89-SVK [SKTRF09] to S-JTSK (5) (code 8442). Both together replace S-JTSK to ETRS89 (4) (code 4827).','EPSG','4156','EPSG','11076',0.06,'UGKK-Sk JTSK03',0);
 INSERT INTO "usage" VALUES('EPSG','10563','concatenated_operation','EPSG','8443','EPSG','1211','EPSG','1027');
 INSERT INTO "concatenated_operation" VALUES('EPSG','8453','AGD66 to WGS 84 (7)','Approximation at the +/- 1m level assuming that GDA94 is equivalent to WGS 84.','EPSG','4202','EPSG','4326',NULL,'EPSG-Aus Tas 0.1m',1);
 INSERT INTO "usage" VALUES('EPSG','10572','concatenated_operation','EPSG','8453','EPSG','1282','EPSG','1252');
@@ -511,7 +511,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','10816','ITRF2014 to ETRS89-F
 INSERT INTO "usage" VALUES('EPSG','23999','concatenated_operation','EPSG','10816','EPSG','1095','EPSG','1027');
 INSERT INTO "concatenated_operation" VALUES('EPSG','10817','ITRF2014 to ETRS89-NOR [EUREF89] (1)','The coordinate epoch (in years) of the coordinates referenced to the source CRS (ITRF2014) is user-defined and is used as the source epoch in step 2.','EPSG','7789','EPSG','10873',0.006,'NKG2020',0);
 INSERT INTO "usage" VALUES('EPSG','24000','concatenated_operation','EPSG','10817','EPSG','1352','EPSG','1027');
-INSERT INTO "concatenated_operation" VALUES('EPSG','10818','ITRF2014 to LKS94 (1)','The coordinate epoch (in years) of the coordinates referenced to the source CRS (ITRF2014) is user-defined and is used as the source epoch in step 2.','EPSG','7789','EPSG','4950',0.013,'NKG2020',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','10818','ITRF2014 to ETRS89-LTU [LKS94] (1)','The coordinate epoch (in years) of the coordinates referenced to the source CRS (ITRF2014) is user-defined and is used as the source epoch in step 2.','EPSG','7789','EPSG','4950',0.013,'NKG2020',0);
 INSERT INTO "usage" VALUES('EPSG','24001','concatenated_operation','EPSG','10818','EPSG','1145','EPSG','1027');
 INSERT INTO "concatenated_operation" VALUES('EPSG','10824','ITRF2014 to ETRS89-SWE [SWEREF 99] (1)','The coordinate epoch (in years) of the coordinates referenced to the source CRS (ITRF2014) is user-defined and is used as the source epoch in step 2. For coordinates originating before 2021-02-07, the NKG2008 transformation should be used.','EPSG','7789','EPSG','4976',0.004,'NKG2020',0);
 INSERT INTO "usage" VALUES('EPSG','24002','concatenated_operation','EPSG','10824','EPSG','1225','EPSG','1027');
@@ -523,8 +523,8 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','10869','ITRF2020 to ETRS89-F
 INSERT INTO "usage" VALUES('EPSG','24005','concatenated_operation','EPSG','10869','EPSG','1095','EPSG','1027');
 INSERT INTO "concatenated_operation" VALUES('EPSG','10870','ITRF2020 to ETRS89-NOR [EUREF89] (1)','The coordinate epoch (in years) of the coordinates referenced to the source CRS (ITRF2020) is user-defined and is used as the source epoch in step 2.','EPSG','9988','EPSG','10873',0.006,'NKG2020',0);
 INSERT INTO "usage" VALUES('EPSG','24006','concatenated_operation','EPSG','10870','EPSG','1352','EPSG','1027');
-INSERT INTO "concatenated_operation" VALUES('EPSG','10871','ITRF2020 to LKS94 (1)','The coordinate epoch of the coordinates referenced to the source CRS (ITRF2020) is user-defined input and is used as the source epoch in step 2.','EPSG','9988','EPSG','4950',0.013,'NKG2020',0);
-INSERT INTO "usage" VALUES('EPSG','24013','concatenated_operation','EPSG','10871','EPSG','1145','EPSG','1180');
+INSERT INTO "concatenated_operation" VALUES('EPSG','10871','ITRF2020 to ETRS89-LTU [LKS94] (1)','The coordinate epoch of the coordinates referenced to the source CRS (ITRF2020) is user-defined input and is used as the source epoch in step 2.','EPSG','9988','EPSG','4950',0.013,'NKG2020',0);
+INSERT INTO "usage" VALUES('EPSG','24013','concatenated_operation','EPSG','10871','EPSG','1145','EPSG','1027');
 INSERT INTO "concatenated_operation" VALUES('EPSG','10872','ITRF2020 to ETRS89-SWE [SWEREF 99] (1)','The coordinate epoch (in years) of the coordinates referenced to the source CRS (ITRF2020) is user-defined and is used as the source epoch in step 2. For coordinates originating before 2021-02-07, the NKG2008 transformation should be used.','EPSG','9988','EPSG','4976',0.004,'NKG2020',0);
 INSERT INTO "usage" VALUES('EPSG','24008','concatenated_operation','EPSG','10872','EPSG','1225','EPSG','1027');
 INSERT INTO "concatenated_operation" VALUES('EPSG','10894','ITRF2014 to ETRS89-DNK (1)','The coordinate epoch (in years) of the coordinates referenced to the source CRS (ITRF2014) is user-defined input and is used as the source epoch in step 2.','EPSG','7789','EPSG','10890',0.006,'NKG2020',0);
@@ -539,7 +539,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','11110','ITRF2020 to ETRS89-P
 INSERT INTO "usage" VALUES('EPSG','24589','concatenated_operation','EPSG','11110','EPSG','4832','EPSG','1026');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11140','ITRF2020 to ETRS89-ESP [REGENTE] (1)','Accuracy is approximately 1cm at the ETRS89-ESP [REGENTE] anchor epoch of 1995.4, but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment.','EPSG','9988','EPSG','11129',0.1,'IOGP-Esp 1995',0);
 INSERT INTO "usage" VALUES('EPSG','24595','concatenated_operation','EPSG','11140','EPSG','4833','EPSG','1026');
-INSERT INTO "concatenated_operation" VALUES('EPSG','11194','ITRF2020 to ETRS89-HRV [HTRS96] (1)','','EPSG','9988','EPSG','4888',0.1,'IOGO-Hrv 1995',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','11194','ITRF2020 to ETRS89-HRV [HTRS96] (1)','','EPSG','9988','EPSG','4888',0.1,'IOGP-Hrv 1995',0);
 INSERT INTO "usage" VALUES('EPSG','24866','concatenated_operation','EPSG','11194','EPSG','1076','EPSG','1026');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11196','ITRF2020 to ETRS89-XKX [KOSOVAREF01] (1)','Accuracy is approximately 1cm at the ETRS89-XKX [KOSOVAREF01] anchor epoch of 2010.5 but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment.','EPSG','9988','EPSG','9138',0.1,'IOGP-Kos 2001',0);
 INSERT INTO "usage" VALUES('EPSG','24869','concatenated_operation','EPSG','11196','EPSG','4542','EPSG','1026');

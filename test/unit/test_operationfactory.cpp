@@ -924,9 +924,9 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             authFactory->createCoordinateReferenceSystem("8357"),
             // ETRS89
             authFactory->createCoordinateReferenceSystem("4937"), ctxt);
-        ASSERT_EQ(list.size(), 2U);
+        ASSERT_GE(list.size(), 2U);
         EXPECT_EQ(
-            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            list[1]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline "
             "+step +proj=axisswap +order=2,1 "
             "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
@@ -942,6 +942,8 @@ TEST(operation, vertCRS_to_geogCRS_context) {
 
 TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_context) {
     auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto authFactoryEPSG =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     {
         auto ctxt =
@@ -950,9 +952,9 @@ TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_context) {
             CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
         auto list = CoordinateOperationFactory::create()->createOperations(
             // ETRS89 (3D)
-            authFactory->createCoordinateReferenceSystem("4937"),
-            // ETRS89 + Baltic 1957 height
-            authFactory->createCoordinateReferenceSystem("8360"), ctxt);
+            authFactoryEPSG->createCoordinateReferenceSystem("4937"),
+            // ETRS89 + Baltic 1957 height (now deprecated)
+            authFactoryEPSG->createCoordinateReferenceSystem("8360"), ctxt);
         ASSERT_GE(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -6299,6 +6301,8 @@ TEST(
     operation,
     compoundCRS_to_compoundCRS_concatenated_operation_with_two_vert_transformation) {
     auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto authFactoryEPSG =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     {
         auto ctxt =
@@ -6306,10 +6310,10 @@ TEST(
         ctxt->setSpatialCriterion(
             CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
         auto list = CoordinateOperationFactory::create()->createOperations(
-            // ETRS89 + Baltic 1957 height
-            authFactory->createCoordinateReferenceSystem("8360"),
+            // ETRS89 + Baltic 1957 height (now deprecated)
+            authFactoryEPSG->createCoordinateReferenceSystem("8360"),
             // ETRS89 + EVRF2007 height
-            authFactory->createCoordinateReferenceSystem("7423"), ctxt);
+            authFactoryEPSG->createCoordinateReferenceSystem("7423"), ctxt);
         ASSERT_GE(list.size(), 2U);
 
         // For Czechia
@@ -6337,12 +6341,12 @@ TEST(
             "+grids=sk_gku_Slovakia_ETRS89h_to_EVRF2007.tif +multiplier=1 "
             "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
             "+step +proj=axisswap +order=2,1");
-        EXPECT_EQ(
-            list[1]->nameStr(),
-            "ETRS89 + Baltic 1957 height to ETRS89 + EVRF2007 height (1)");
-        EXPECT_EQ(list[1]->inverse()->nameStr(), "Inverse of 'ETRS89 + Baltic "
-                                                 "1957 height to ETRS89 + "
-                                                 "EVRF2007 height (1)'");
+        EXPECT_EQ(list[1]->nameStr(),
+                  "Inverse of 'ETRS89 to ETRS89 + Baltic 1957 height (1)' + "
+                  "ETRS89 to ETRS89 + EVRF2007 height (1)");
+        EXPECT_EQ(list[1]->inverse()->nameStr(),
+                  "Inverse of 'ETRS89 to ETRS89 + EVRF2007 height (1)' + "
+                  "ETRS89 to ETRS89 + Baltic 1957 height (1)");
     }
 }
 
