@@ -49,7 +49,7 @@ This can be used to implement:
       be rotated to coincide with the axes of the target CRS, counter-clockwise
       being positive
 
-Usage notes
+Examples
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The `+proj=affine` operation applies a purely mathematical affine transformation
