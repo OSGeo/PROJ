@@ -61,10 +61,9 @@ for their intended purpose.
 The affine operation can be used with the `cct` utility or as a step inside a
 PROJ pipeline.
 
-Example (using cct):
+Offsetting a the x-component of a coordinate by 1:
 
     echo "1 2" | cct +proj=affine +xoff=1
-
 
 Parameters
 ################################################################################
