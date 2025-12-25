@@ -1262,7 +1262,7 @@ void ObjectUsage::baseExportToWKT(WKTFormatter *formatter) const {
     if (formatter->outputId()) {
         formatID(formatter);
     }
-    if (isWKT2) {
+    if (isWKT2 && formatter->outputUsage()) {
         formatRemarks(formatter);
     }
 }

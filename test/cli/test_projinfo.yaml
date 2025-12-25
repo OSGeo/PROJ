@@ -1964,3 +1964,26 @@ tests:
             AREA["World."],
             BBOX[-90,-180,90,180]],
         ID["EPSG",3855]]
+
+- args: EPSG:11037 -o WKT2:2019 -q
+  out: |
+    GEOGCRS["ETRS89-NLD [AGRS2010]",
+        DATUM["AGRS2010 (ETRF2000)",
+            ELLIPSOID["GRS 1980",6378137,298.257222101,
+                LENGTHUNIT["metre",1]],
+            ANCHOREPOCH[2010.5]],
+        PRIMEM["Greenwich",0,
+            ANGLEUNIT["degree",0.0174532925199433]],
+        CS[ellipsoidal,2],
+            AXIS["geodetic latitude (Lat)",north,
+                ORDER[1],
+                ANGLEUNIT["degree",0.0174532925199433]],
+            AXIS["geodetic longitude (Lon)",east,
+                ORDER[2],
+                ANGLEUNIT["degree",0.0174532925199433]],
+        USAGE[
+            SCOPE["Horizontal component of 3D system."],
+            AREA["Netherlands - onshore and offshore."],
+            BBOX[50.75,2.53,55.77,7.22]],
+        ID["EPSG",11037],
+        REMARK["Horizontal component of national realization of ETRS89 in the Netherlands, aligned to ETRF2000."]]
