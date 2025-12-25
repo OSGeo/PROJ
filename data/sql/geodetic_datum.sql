@@ -490,6 +490,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1425','OSNet v2009',NULL,'EPSG','701
 INSERT INTO "usage" VALUES('EPSG','23923','geodetic_datum','EPSG','1425','EPSG','1264','EPSG','1295');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1426','Sistem Referensi Geospasial Indonesia 2013 epoch 2021.0',NULL,'EPSG','7030','EPSG','8901','2025-02-25',NULL,NULL,NULL,2021.0,0);
 INSERT INTO "usage" VALUES('EPSG','25001','geodetic_datum','EPSG','1426','EPSG','1122','EPSG','1266');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1427','AGRS2010 (ETRF2000)',NULL,'EPSG','7019','EPSG','8901','2011-01-01',NULL,NULL,NULL,2010.5,0);
+INSERT INTO "usage" VALUES('EPSG','25149','geodetic_datum','EPSG','1427','EPSG','1172','EPSG','1295');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1428','CR-SIRGAS epoch 2019.24',NULL,'EPSG','7019','EPSG','8901','2020-09-04',NULL,NULL,NULL,2019.24,0);
 INSERT INTO "usage" VALUES('EPSG','24187','geodetic_datum','EPSG','1428','EPSG','1074','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1429','Albanian Geodetic Reference Frame 2010',NULL,'EPSG','7019','EPSG','8901',NULL,NULL,NULL,NULL,2008.0,0);
