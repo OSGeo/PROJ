@@ -554,7 +554,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','8815','NAD83 / Missouri West + NAVD88 
 INSERT INTO "usage" VALUES('EPSG','5994','compound_crs','EPSG','8815','EPSG','2220','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','8912','CR-SIRGAS epoch 2014.59 / CRTM05 + DACR52 height',NULL,'EPSG','8908','EPSG','8911',0);
 INSERT INTO "usage" VALUES('EPSG','6028','compound_crs','EPSG','8912','EPSG','3232','EPSG','1142');
-INSERT INTO "compound_crs" VALUES('EPSG','9286','ETRS89 + NAP height',NULL,'EPSG','4258','EPSG','5709',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9286','ETRS89-NLD [AGRS2010] + NAP height',NULL,'EPSG','11037','EPSG','5709',0);
 INSERT INTO "usage" VALUES('EPSG','14121','compound_crs','EPSG','9286','EPSG','1172','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9289','ETRS89 + LAT NL depth',NULL,'EPSG','4258','EPSG','9287',0);
 INSERT INTO "usage" VALUES('EPSG','14124','compound_crs','EPSG','9289','EPSG','4742','EPSG','1198');
