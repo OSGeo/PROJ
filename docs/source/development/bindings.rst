@@ -6,6 +6,12 @@ Language bindings
 
 PROJ bindings are available for a number of different development platforms.
 
+Clojure
+=======
+
+`clj-proj <https://github.com/willcohen/clj-proj>`_:
+Clojure bindings with embedded native libraries (JNA) and GraalVM WASM fallback
+
 Excel
 =====
 
@@ -26,8 +32,17 @@ Go bindings for PROJ.
 Java
 ====
 
+`clj-proj (Java API) <https://github.com/willcohen/clj-proj#java-api>`_:
+Java API with embedded native libraries (JNA) and GraalVM WASM fallback
+
 `PROJ-JNI <https://github.com/OSGeo/PROJ-JNI>`_:
 Java Native Interface for PROJ
+
+JavaScript
+==========
+
+`proj-wasm <https://github.com/willcohen/clj-proj#javascript--clojurescript>`_:
+ES6 module with WASM-compiled PROJ for Node.js and browsers
 
 Julia
 =====
