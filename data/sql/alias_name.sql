@@ -810,6 +810,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1426','Indonesian Geosp
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1426','Jaring Kontrol Geodesi (JKG)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6126','ETRS89-LTU [LKS94]','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1445','ETRS89-HRV [CROPOS]','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1427','ETRS89-NLD [AGRS2010]','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -8370,6 +8371,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8909','CR-SIRGAS / UTM z
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8910','CR-SIRGAS / UTM zone 17N','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11041','CR19','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11042','CR19','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9286','ETRS89 + NAP height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3416','ETRS89 / Austria Lambert','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9500','ETRS89 + EVRF2000 Austria height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','8370','ETRS89 / Belgian Lambert 2008 + Ostend height','EPSG');
@@ -8675,6 +8677,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2158','IRENET95 / UTM zo
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2158','ETRS89 / UTM zone 29N','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9450','ETRS89 + Belfast height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9449','ETRS89 + Malin Head height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9286','AGRS2010 + NAP height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','11219','ETRS89 / Lambert 2008','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','11219','ETRS89 / LB08','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','10997','ETRS89 + LSG height','EPSG');
@@ -8729,8 +8732,11 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9850','RGF93 v2b / CC50'
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11029','SRGI2013e2021','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11030','SRGI2013e2021','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11033','SRGI2013e2021','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11035','AGRS2010','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11036','AGRS2010','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','11312','ETRS89 [ETRF2000] + Bpv','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','11312','ETRS89 + Baltic 1957 height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','11314','ETRS89 + EVRF2007 height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','11311','ETRS89 [ETRF2000] + Bpv','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','11311','ETRS89 + Baltic 1957 height','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11037','AGRS2010','EPSG');

@@ -9029,7 +9029,8 @@ TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
     auto src = authFactory->createCoordinateReferenceSystem(
         "7415"); // Amersfoort / RD New + NAP height
     auto dst =
-        authFactory->createCoordinateReferenceSystem("4937"); // ETRS89 3D
+        // ETRS89-NLD [AGRS2010] 3D
+        authFactory->createCoordinateReferenceSystem("11036");
     auto list =
         CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
     ASSERT_GE(list.size(), 1U);
