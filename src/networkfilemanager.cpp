@@ -2047,10 +2047,10 @@ static size_t pj_emscripten_read_range(PJ_CONTEXT *ctx,
                 emscripten_fetch_close(fetch);
             }
 
-            TRACE_FETCH("Pre fecth. url: " << url << " range: " << szBuffer);
+            TRACE_FETCH("Pre-fetch, url: " << url << ", range: " << szBuffer);
             fetch = emscripten_fetch(&attr, url.c_str());
             // emscripten_fetch_wait(fetch, -1); // This is deprecated
-            TRACE_FETCH("Post fecth");
+            TRACE_FETCH("Post-fetch");
 
             if (!fetch) {
                 snprintf(out_error_string, error_string_max_size,
@@ -2059,7 +2059,7 @@ static size_t pj_emscripten_read_range(PJ_CONTEXT *ctx,
                 return;
             }
             const auto response_code = fetch->status;
-            TRACE_FETCH("response code: " << response_code);
+            TRACE_FETCH("Received HTTP response code: " << response_code);
             if (response_code == 0 || response_code >= 300) {
                 const double delay =
                     GetNewRetryDelay(static_cast<int>(response_code), oldDelay,
@@ -2068,8 +2068,9 @@ static size_t pj_emscripten_read_range(PJ_CONTEXT *ctx,
                     pj_log(ctx, PJ_LOG_TRACE,
                            "Got a HTTP %ld error. Retrying in %d ms",
                            response_code, static_cast<int>(delay));
-                    TRACE_FETCH("Got a HTTP " << response_code
-                                              << " retry in ms " << delay);
+                    TRACE_FETCH("HTTP error " << response_code
+                                              << ", retrying in " << delay
+                                              << " ms");
 
                     sleep_ms(static_cast<int>(delay));
                     oldDelay = delay;
@@ -2084,7 +2085,7 @@ static size_t pj_emscripten_read_range(PJ_CONTEXT *ctx,
                                      fetch->data);
                         }
                     }
-                    TRACE_FETCH("HTTP  error for " << url);
+                    TRACE_FETCH("HTTP error for " << url);
                     emscripten_fetch_close(fetch);
                     return;
                 }
@@ -2099,8 +2100,8 @@ static size_t pj_emscripten_read_range(PJ_CONTEXT *ctx,
 
         const size_t numBytes = static_cast<size_t>(fetch->numBytes);
 
-        TRACE_FETCH("read bytes: " << numBytes);
-        TRACE_FETCH("size to read: " << size_to_read);
+        TRACE_FETCH("Read bytes: " << numBytes);
+        TRACE_FETCH("Size to read: " << size_to_read);
 
         if (fetch->readyState != 4) {
             std::cout << "fetch ready state (" << fetch->readyState
@@ -2112,20 +2113,20 @@ static size_t pj_emscripten_read_range(PJ_CONTEXT *ctx,
         if (numBytes) {
             memcpy(buffer, fetch->data, real_read);
         }
-        TRACE_FETCH("real read: " << real_read);
+        TRACE_FETCH("Real read: " << real_read);
 
         // get the http headers
         {
             // https://github.com/emscripten-core/emscripten/blob/56c214a/test/fetch/test_fetch_headers_received.c
             size_t headersLengthBytes =
                 emscripten_fetch_get_response_headers_length(fetch) + 1;
-            TRACE_FETCH("headers length: " << headersLengthBytes);
+            TRACE_FETCH("Headers length: " << headersLengthBytes);
             char *headerString = (char *)malloc(headersLengthBytes);
             assert(headerString);
 
             emscripten_fetch_get_response_headers(fetch, headerString,
                                                   headersLengthBytes);
-            TRACE_FETCH("Got headers: " << headerString);
+            TRACE_FETCH("Raw headers:\n" << headerString);
 
             char **responseHeaders =
                 emscripten_fetch_unpack_response_headers(headerString);
@@ -2133,13 +2134,14 @@ static size_t pj_emscripten_read_range(PJ_CONTEXT *ctx,
 
             free(headerString);
 
+            TRACE_FETCH("Parsed headers:");
             int numHeaders = 0;
             for (; responseHeaders[numHeaders * 2]; ++numHeaders) {
                 // Check both the header and its value are present.
                 assert(responseHeaders[(numHeaders * 2) + 1]);
                 std::string key(responseHeaders[numHeaders * 2]);
                 std::string val(responseHeaders[(numHeaders * 2) + 1]);
-                TRACE_FETCH(key << ":" << val);
+                TRACE_FETCH("  " << key << ": " << val);
                 std::transform(key.begin(), key.end(), key.begin(), ::tolower);
                 handle->m_headers.emplace(key, val);
             }
@@ -2147,13 +2149,13 @@ static size_t pj_emscripten_read_range(PJ_CONTEXT *ctx,
             emscripten_fetch_free_unpacked_response_headers(responseHeaders);
         }
 
-        TRACE_FETCH("pre-close");
+        TRACE_FETCH("Pre-close");
         emscripten_fetch_close(fetch);
-        TRACE_FETCH("post-close");
+        TRACE_FETCH("Post-close");
         return;
     };
     fetching();
-    TRACE_FETCH("post fetching");
+    TRACE_FETCH("Post-fetching");
 
     if (real_read == 0) {
         std::cout << "Problems in fetch:" << out_error_string << std::endl;
