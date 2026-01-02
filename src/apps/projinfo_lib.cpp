@@ -139,66 +139,70 @@ struct Streamer {
 
 // ---------------------------------------------------------------------------
 
-static int usage(Streamer &strm) {
-    strm.cerr
-        << "usage: projinfo [-o formats] "
-           "[-k crs|operation|datum|ensemble|ellipsoid] "
-           "[--summary] [-q]"
-        << std::endl
-        << "                ([--area name_or_code] | "
-           "[--bbox west_long,south_lat,east_long,north_lat]) "
-        << std::endl
-        << "                [--spatial-test contains|intersects]" << std::endl
-        << "                [--crs-extent-use none|both|intersection|smallest]"
-        << std::endl
-        << "                [--grid-check "
-           "none|discard_missing|sort|known_available] "
-        << std::endl
-        << "                [--pivot-crs always|if_no_direct_transformation|"
-        << "never|{auth:code[,auth:code]*}]" << std::endl
-        << "                [--show-superseded] [--hide-ballpark] "
-           "[--accuracy {accuracy}]"
-        << std::endl
-        << "                [--allow-ellipsoidal-height-as-vertical-crs]"
-        << std::endl
-        << "                [--boundcrs-to-wgs84]" << std::endl
-        << "                [--authority name]" << std::endl
-        << "                [--main-db-path path] [--aux-db-path path]*"
-        << std::endl
-        << "                [--identify] [--3d]" << std::endl
-        << "                [--output-id AUTH:CODE]" << std::endl
-        << "                [--c-ify] [--single-line]" << std::endl
-        << "                --searchpaths | --remote-data |" << std::endl
-        << "                --list-crs [list-crs-filter] |" << std::endl
-        << "                --dump-db-structure [{object_definition} | "
-           "{object_reference}] |"
-        << std::endl
-        << "                {object_definition} | {object_reference} |"
-        << std::endl
-        << "                (-s {srs_def} [--s_epoch {epoch}] "
-           "-t {srs_def} [--t_epoch {epoch}]) |"
-        << std::endl
-        << "                ({srs_def} {srs_def})" << std::endl;
-    strm.cerr << std::endl;
-    strm.cerr << "-o: formats is a comma separated combination of: "
-                 "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
-                 "WKT1:ESRI,PROJJSON,SQL"
-              << std::endl;
-    strm.cerr << "    Except 'all' and 'default', other format can be preceded "
-                 "by '-' to disable them"
-              << std::endl;
-    strm.cerr << std::endl;
-    strm.cerr << "list-crs-filter is a comma separated combination of: "
-                 "allow_deprecated,geodetic,geocentric,"
-              << std::endl;
-    strm.cerr
-        << "geographic,geographic_2d,geographic_3d,vertical,projected,compound"
-        << std::endl;
-    strm.cerr << std::endl;
-    strm.cerr << "{object_definition} might be a PROJ string, a WKT string, "
-                 "a AUTHORITY:CODE, or urn:ogc:def:OBJECT_TYPE:AUTHORITY::CODE"
-              << std::endl;
-    return 1;
+static int usage(Streamer &strm, bool is_error = true) {
+    std::stringstream s;
+    s << "usage: projinfo [-o formats] "
+         "[-k crs|operation|datum|ensemble|ellipsoid] "
+         "[--summary] [-q]"
+      << std::endl
+      << "                ([--area name_or_code] | "
+         "[--bbox west_long,south_lat,east_long,north_lat]) "
+      << std::endl
+      << "                [--spatial-test contains|intersects]" << std::endl
+      << "                [--crs-extent-use none|both|intersection|smallest]"
+      << std::endl
+      << "                [--grid-check "
+         "none|discard_missing|sort|known_available] "
+      << std::endl
+      << "                [--pivot-crs always|if_no_direct_transformation|"
+      << "never|{auth:code[,auth:code]*}]" << std::endl
+      << "                [--show-superseded] [--hide-ballpark] "
+         "[--accuracy {accuracy}]"
+      << std::endl
+      << "                [--allow-ellipsoidal-height-as-vertical-crs]"
+      << std::endl
+      << "                [--boundcrs-to-wgs84]" << std::endl
+      << "                [--authority name]" << std::endl
+      << "                [--main-db-path path] [--aux-db-path path]*"
+      << std::endl
+      << "                [--identify] [--3d]" << std::endl
+      << "                [--output-id AUTH:CODE]" << std::endl
+      << "                [--c-ify] [--single-line]" << std::endl
+      << "                --searchpaths | --remote-data |" << std::endl
+      << "                --list-crs [list-crs-filter] |" << std::endl
+      << "                --dump-db-structure [{object_definition} | "
+         "{object_reference}] |"
+      << std::endl
+      << "                {object_definition} | {object_reference} |"
+      << std::endl
+      << "                (-s {srs_def} [--s_epoch {epoch}] "
+         "-t {srs_def} [--t_epoch {epoch}]) |"
+      << std::endl
+      << "                ({srs_def} {srs_def})" << std::endl;
+    s << std::endl;
+    s << "-o: formats is a comma separated combination of: "
+         "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
+         "WKT1:ESRI,PROJJSON,SQL"
+      << std::endl;
+    s << "    Except 'all' and 'default', other format can be preceded "
+         "by '-' to disable them"
+      << std::endl;
+    s << std::endl;
+    s << "list-crs-filter is a comma separated combination of: "
+         "allow_deprecated,geodetic,geocentric,"
+      << std::endl;
+    s << "geographic,geographic_2d,geographic_3d,vertical,projected,compound"
+      << std::endl;
+    s << std::endl;
+    s << "{object_definition} might be a PROJ string, a WKT string, "
+         "a AUTHORITY:CODE, or urn:ogc:def:OBJECT_TYPE:AUTHORITY::CODE"
+      << std::endl;
+    if (is_error) {
+        strm.cerr << s.str();
+    } else {
+        strm.cout << s.str();
+    }
+    return is_error ? 1 : 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -1883,7 +1887,7 @@ static int main_projinfo(PJ_CONTEXT *ctx, int argc, char **argv,
 #endif
             return 0;
         } else if (arg == "-?" || arg == "--help") {
-            return usage(strm);
+            return usage(strm, false);
         } else if (arg[0] == '-') {
             strm.cerr << "Unrecognized option: " << arg << std::endl;
             return usage(strm);
