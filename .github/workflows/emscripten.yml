@@ -36,7 +36,7 @@ jobs:
         run: docker run --rm -v "$PWD":/build/proj_src -v "$PWD"/wasm_out:/usr/local/wasm proj-emscripten-builder
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: proj-js-wasm
           retention-days: 15
