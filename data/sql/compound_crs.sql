@@ -289,7 +289,7 @@ INSERT INTO "usage" VALUES('EPSG','5278','compound_crs','EPSG','7413','EPSG','17
 INSERT INTO "compound_crs" VALUES('EPSG','7414','Tokyo + JSLD69 height',NULL,'EPSG','4301','EPSG','5723',0);
 INSERT INTO "usage" VALUES('EPSG','5279','compound_crs','EPSG','7414','EPSG','4166','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','7415','Amersfoort / RD New + NAP height',NULL,'EPSG','28992','EPSG','5709',0);
-INSERT INTO "usage" VALUES('EPSG','5280','compound_crs','EPSG','7415','EPSG','1275','EPSG','1142');
+INSERT INTO "usage" VALUES('EPSG','5280','compound_crs','EPSG','7415','EPSG','1172','EPSG','1056');
 INSERT INTO "compound_crs" VALUES('EPSG','7416','ETRS89 / UTM zone 32N + DVR90 height',NULL,'EPSG','25832','EPSG','5799',0);
 INSERT INTO "usage" VALUES('EPSG','5281','compound_crs','EPSG','7416','EPSG','3471','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','7417','ETRS89 / UTM zone 33N + DVR90 height',NULL,'EPSG','25833','EPSG','5799',0);
@@ -556,9 +556,9 @@ INSERT INTO "compound_crs" VALUES('EPSG','8912','CR-SIRGAS epoch 2014.59 / CRTM0
 INSERT INTO "usage" VALUES('EPSG','6028','compound_crs','EPSG','8912','EPSG','3232','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','9286','ETRS89-NLD [AGRS2010] + NAP height',NULL,'EPSG','11037','EPSG','5709',0);
 INSERT INTO "usage" VALUES('EPSG','14121','compound_crs','EPSG','9286','EPSG','1172','EPSG','1026');
-INSERT INTO "compound_crs" VALUES('EPSG','9289','ETRS89 + LAT NL depth',NULL,'EPSG','4258','EPSG','9287',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9289','ETRS89-NLD [AGRS2010] + LAT-NLD depth',NULL,'EPSG','11037','EPSG','9287',0);
 INSERT INTO "usage" VALUES('EPSG','14124','compound_crs','EPSG','9289','EPSG','4742','EPSG','1198');
-INSERT INTO "compound_crs" VALUES('EPSG','9290','ETRS89 + MSL NL depth',NULL,'EPSG','4258','EPSG','9288',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9290','ETRS89-NLD [AGRS2010] + MSL-NLD depth',NULL,'EPSG','11037','EPSG','9288',0);
 INSERT INTO "usage" VALUES('EPSG','14125','compound_crs','EPSG','9290','EPSG','4742','EPSG','1265');
 INSERT INTO "compound_crs" VALUES('EPSG','9306','HS2 Survey Grid + HS2-VRF height',NULL,'EPSG','9300','EPSG','9303',0);
 INSERT INTO "usage" VALUES('EPSG','14050','compound_crs','EPSG','9306','EPSG','4582','EPSG','1260');
