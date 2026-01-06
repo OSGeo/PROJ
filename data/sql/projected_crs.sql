@@ -10077,10 +10077,10 @@ INSERT INTO "projected_crs" VALUES('EPSG','28492','Pulkovo 1942 / Gauss-Kruger 3
 INSERT INTO "usage" VALUES('EPSG','6931','projected_crs','EPSG','28492','EPSG','1791','EPSG','1209');
 INSERT INTO "projected_crs" VALUES('EPSG','28600','Qatar 1974 / Qatar National Grid',NULL,'EPSG','4400','EPSG','4285','EPSG','19919',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6932','projected_crs','EPSG','28600','EPSG','1346','EPSG','1142');
-INSERT INTO "projected_crs" VALUES('EPSG','28991','Amersfoort / RD Old',NULL,'EPSG','4499','EPSG','4289','EPSG','19913',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','6933','projected_crs','EPSG','28991','EPSG','1275','EPSG','1142');
-INSERT INTO "projected_crs" VALUES('EPSG','28992','Amersfoort / RD New',NULL,'EPSG','4499','EPSG','4289','EPSG','19914',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','6934','projected_crs','EPSG','28992','EPSG','1275','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','28991','Amersfoort / RD Old',NULL,'EPSG','1054','EPSG','4289','EPSG','19913',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','6933','projected_crs','EPSG','28991','EPSG','1172','EPSG','1056');
+INSERT INTO "projected_crs" VALUES('EPSG','28992','Amersfoort / RD New',NULL,'EPSG','1054','EPSG','4289','EPSG','19914',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','6934','projected_crs','EPSG','28992','EPSG','1172','EPSG','1056');
 INSERT INTO "projected_crs" VALUES('EPSG','29100','SAD69 / Brazil Polyconic',NULL,'EPSG','4499','EPSG','4291','EPSG','19941',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','6935','projected_crs','EPSG','29100','EPSG','1053','EPSG','1241');
 INSERT INTO "projected_crs" VALUES('EPSG','29101','SAD69 / Brazil Polyconic',NULL,'EPSG','4499','EPSG','4618','EPSG','19941',NULL,0);

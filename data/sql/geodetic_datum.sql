@@ -945,7 +945,7 @@ INSERT INTO "usage" VALUES('EPSG','13628','geodetic_datum','EPSG','6287','EPSG',
 INSERT INTO "geodetic_datum" VALUES('EPSG','6288','Loma Quintana',NULL,'EPSG','7022','EPSG','8901',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13629','geodetic_datum','EPSG','6288','EPSG','1313','EPSG','1153');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6289','Amersfoort',NULL,'EPSG','7004','EPSG','8901',NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO "usage" VALUES('EPSG','13630','geodetic_datum','EPSG','6289','EPSG','1275','EPSG','1181');
+INSERT INTO "usage" VALUES('EPSG','13630','geodetic_datum','EPSG','6289','EPSG','1172','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6291','South American Datum 1969',NULL,'EPSG','7036','EPSG','8901','1969-01-01',NULL,NULL,NULL,NULL,1);
 INSERT INTO "usage" VALUES('EPSG','13631','geodetic_datum','EPSG','6291','EPSG','1358','EPSG','1153');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6292','Sapper Hill 1943',NULL,'EPSG','7022','EPSG','8901','1943-01-01',NULL,NULL,NULL,NULL,0);

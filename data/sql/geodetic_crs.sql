@@ -458,8 +458,8 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','4287','Qornoq','','geographic 2D','EPS
 INSERT INTO "usage" VALUES('EPSG','3169','geodetic_crs','EPSG','4287','EPSG','1107','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4288','Loma Quintana','Replaced by La Canoa (code 4247).','geographic 2D','EPSG','6422','EPSG','6288',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3170','geodetic_crs','EPSG','4288','EPSG','1313','EPSG','1027');
-INSERT INTO "geodetic_crs" VALUES('EPSG','4289','Amersfoort','Use of geographic2D CRS Amersfoort (code 4289) for spatial referencing is discouraged. Use projected CRS Amersfoort / RD New (code 28992).','geographic 2D','EPSG','6422','EPSG','6289',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','3171','geodetic_crs','EPSG','4289','EPSG','1275','EPSG','1269');
+INSERT INTO "geodetic_crs" VALUES('EPSG','4289','Amersfoort','Use of geographic2D CRS Amersfoort (code 4289) for spatial referencing is discouraged. Use projected CRS Amersfoort / RD New (code 28992) or ETRS89-NLD [AGRS2010] (code 11037).','geographic 2D','EPSG','6422','EPSG','6289',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','3171','geodetic_crs','EPSG','4289','EPSG','1172','EPSG','1269');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4291','SAD69','Uses GRS67 ellipsoid with 1/f to exactly 2 decimal places. Precision of ellipsoid entry increased from 2 to 5 dp with change id 97.251. Error introduced if not using the truncated precision is 0 to 31mm.','geographic 2D','EPSG','6402','EPSG','6291',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','3172','geodetic_crs','EPSG','4291','EPSG','1358','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4292','Sapper Hill 1943','','geographic 2D','EPSG','6422','EPSG','6292',NULL,0);

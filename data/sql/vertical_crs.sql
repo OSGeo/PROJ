@@ -410,9 +410,9 @@ INSERT INTO "vertical_crs" VALUES('EPSG','9274','EVRF2000 Austria height',NULL,'
 INSERT INTO "usage" VALUES('EPSG','13915','vertical_crs','EPSG','9274','EPSG','1037','EPSG','1027');
 INSERT INTO "vertical_crs" VALUES('EPSG','9279','SA LLD height',NULL,'EPSG','6499','EPSG','1262',0);
 INSERT INTO "usage" VALUES('EPSG','13916','vertical_crs','EPSG','9279','EPSG','3309','EPSG','1178');
-INSERT INTO "vertical_crs" VALUES('EPSG','9287','LAT NL depth',NULL,'EPSG','6498','EPSG','1290',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','9287','LAT-NLD depth',NULL,'EPSG','6498','EPSG','1290',0);
 INSERT INTO "usage" VALUES('EPSG','14122','vertical_crs','EPSG','9287','EPSG','4742','EPSG','1198');
-INSERT INTO "vertical_crs" VALUES('EPSG','9288','MSL NL depth',NULL,'EPSG','6498','EPSG','1270',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','9288','MSL-NLD depth',NULL,'EPSG','6498','EPSG','1270',0);
 INSERT INTO "usage" VALUES('EPSG','14123','vertical_crs','EPSG','9288','EPSG','4742','EPSG','1265');
 INSERT INTO "vertical_crs" VALUES('EPSG','9303','HS2-VRF height',NULL,'EPSG','6499','EPSG','1265',0);
 INSERT INTO "usage" VALUES('EPSG','14049','vertical_crs','EPSG','9303','EPSG','4582','EPSG','1260');

@@ -7,7 +7,7 @@ INSERT INTO "usage" VALUES('EPSG','9014','concatenated_operation','EPSG','3966',
 INSERT INTO "concatenated_operation" VALUES('EPSG','4435','Puerto Rico to NAD83(HARN) (1)','Accuracy 0.1m at 67% confidence level. May be taken as approximate transformation Puerto Rico to WGS 84 - see code 8583.','EPSG','4139','EPSG','4152',0.08,'NGS-PRVI',0);
 INSERT INTO "usage" VALUES('EPSG','9074','concatenated_operation','EPSG','4435','EPSG','3634','EPSG','1031');
 INSERT INTO "concatenated_operation" VALUES('EPSG','4837','Amersfoort to ED50 (1)','Adopted by NAM in 2006, replacing polynomial tfms 1046, 6304, 1050 and 6306.','EPSG','4289','EPSG','4230',1.5,'NAM-Nld 2006',0);
-INSERT INTO "usage" VALUES('EPSG','9130','concatenated_operation','EPSG','4837','EPSG','1275','EPSG','1136');
+INSERT INTO "usage" VALUES('EPSG','9130','concatenated_operation','EPSG','4837','EPSG','1172','EPSG','1136');
 INSERT INTO "concatenated_operation" VALUES('EPSG','5190','Tokyo 1892 to KGD2002 (1)','','EPSG','5132','EPSG','4737',1.0,'OGP-Kor',0);
 INSERT INTO "usage" VALUES('EPSG','9275','concatenated_operation','EPSG','5190','EPSG','3266','EPSG','1050');
 INSERT INTO "concatenated_operation" VALUES('EPSG','5192','Tokyo 1892 to WGS 84 (1)','','EPSG','5132','EPSG','4326',1.0,'OGP-Kor',0);

@@ -1501,6 +1501,8 @@ TEST(operation, geogCRS_without_id_to_geogCRS_3D_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
     auto src =
         authFactory->createCoordinateReferenceSystem("4289"); // Amersfoort
     auto dst =
@@ -1531,8 +1533,9 @@ TEST(operation, geogCRS_without_id_to_geogCRS_3D_context) {
     ASSERT_TRUE(src_from_wkt2 != nullptr);
     auto list2 = CoordinateOperationFactory::create()->createOperations(
         NN_NO_CHECK(src_from_wkt2), dst, ctxt);
+    ASSERT_GE(list2.size(), 3U);
     ASSERT_GE(list.size(), list2.size());
-    for (size_t i = 0; i < list.size(); i++) {
+    for (size_t i = 0; i < list2.size(); i++) {
         const auto &op = list[i];
         const auto &op2 = list2[i];
         EXPECT_TRUE(
@@ -2933,16 +2936,14 @@ TEST(operation, transform_from_amersfoort_rd_new_to_epsg_4326) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("28992"),
         authFactory->createCoordinateReferenceSystem("4326"), ctxt);
-    ASSERT_EQ(list.size(), 2U);
-    // The order matters: "Amersfoort to WGS 84 (4)" replaces "Amersfoort to WGS
-    // 84 (3)"
+    ASSERT_GE(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
               "Inverse of RD New + Amersfoort to WGS 84 (4)");
-    EXPECT_EQ(list[1]->nameStr(),
-              "Inverse of RD New + Amersfoort to WGS 84 (3)");
 }
 
 // ---------------------------------------------------------------------------

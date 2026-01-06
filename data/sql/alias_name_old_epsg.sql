@@ -1252,3 +1252,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1434','European Terrest
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11076','ETRS89','EPSG_OLD'); -- ETRS89-SVK [2007] (2d)
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11075','ETRS89','EPSG_OLD'); -- ETRS89-SVK [2007] (3d)
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11074','ETRS89','EPSG_OLD'); -- ETRS89-SVK [2007] (geocentric)
+
+-- Changed in EPSG v12.047
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1270','MSL NL','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1290','LAT NL','EPSG_OLD');
