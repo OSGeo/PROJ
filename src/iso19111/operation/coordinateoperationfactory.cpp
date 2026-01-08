@@ -578,6 +578,15 @@ struct CoordinateOperationFactory::Private {
                 const metadata::ExtentPtr &extent2In,
                 const CoordinateOperationContextNNPtr &contextIn)
             : extent1(extent1In), extent2(extent2In), context(contextIn) {}
+
+        // Returns whether empty extent intersection should be disallowed
+        // when creating concatenated operations. When the user sets
+        // SourceTargetCRSExtentUse::NONE, extent checking should be
+        // completely disabled, including for internal operations.
+        bool disallowEmptyIntersection() const {
+            return context->getSourceAndTargetCRSExtentUse() !=
+                   CoordinateOperationContext::SourceTargetCRSExtentUse::NONE;
+        }
     };
 
     static std::vector<CoordinateOperationNNPtr>
@@ -586,9 +595,6 @@ struct CoordinateOperationFactory::Private {
                      const crs::CRSNNPtr &targetCRS,
                      const util::optional<common::DataEpoch> &targetEpoch,
                      Context &context);
-
-  private:
-    static constexpr bool disallowEmptyIntersection = true;
 
     static void
     buildCRSIds(const crs::CRSNNPtr &crs, Private::Context &context,
@@ -6931,7 +6937,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         }
 
         const auto createOpsInTwoSteps =
-            [&res, &bestAccuracy, &bestStepCount](
+            [&res, &bestAccuracy, &bestStepCount, &context](
                 const std::vector<CoordinateOperationNNPtr> &ops1,
                 const std::vector<CoordinateOperationNNPtr> &ops2) {
                 std::vector<CoordinateOperationNNPtr> res2;
