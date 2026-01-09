@@ -2893,7 +2893,7 @@ TEST(operation, projCRS_to_geogCRS_concatenated_operation_extent_none) {
         }
         // With default extent settings, ED87 pathway typically not found
         // from projected CRS due to extent intersection checks
-        (void)found_ED87_pathway;
+        EXPECT_FALSE(found_ED87_pathway);
     }
 
     // With NONE, the ED87 pathway should appear
