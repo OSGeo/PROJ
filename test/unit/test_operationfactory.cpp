@@ -2865,6 +2865,60 @@ TEST(operation, projCRS_to_geogCRS_crs_extent_use_none) {
 
 // ---------------------------------------------------------------------------
 
+// Test that ConcatenatedOperations with non-overlapping sub-operation extents
+// are returned when CRS_EXTENT_USE=NONE (fixes issue with EPSG:8047)
+TEST(operation, projCRS_to_geogCRS_concatenated_operation_extent_none) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+
+    // EPSG:8047 "ED50 to WGS 84 (15)" is a ConcatenatedOperation:
+    // - EPSG:1147 (ED50 to ED87) domain = Norway offshore north of 65°N
+    // - EPSG:1146 (ED87 to WGS 84) domain = North Sea
+    // These domains don't overlap, but the operation should still be
+    // available when extent filtering is disabled.
+
+    // Without NONE, the ED87 pathway may not appear from projected CRS
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setDiscardSuperseded(false);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("23031"), // ED50 UTM31
+            authFactory->createCoordinateReferenceSystem("4326"), ctxt);
+        bool found_ED87_pathway = false;
+        for (const auto &op : list) {
+            if (op->nameStr().find("ED87") != std::string::npos) {
+                found_ED87_pathway = true;
+            }
+        }
+        // With default extent settings, ED87 pathway typically not found
+        // from projected CRS due to extent intersection checks
+        (void)found_ED87_pathway;
+    }
+
+    // With NONE, the ED87 pathway should appear
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setDiscardSuperseded(false);
+        ctxt->setSourceAndTargetCRSExtentUse(
+            CoordinateOperationContext::SourceTargetCRSExtentUse::NONE);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("23031"), // ED50 UTM31
+            authFactory->createCoordinateReferenceSystem("4326"), ctxt);
+        bool found_ED87_pathway = false;
+        for (const auto &op : list) {
+            if (op->nameStr().find("ED87") != std::string::npos) {
+                found_ED87_pathway = true;
+                break;
+            }
+        }
+        EXPECT_TRUE(found_ED87_pathway);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, projCRS_to_projCRS_north_pole_inverted_axis) {
 
     auto authFactory =
