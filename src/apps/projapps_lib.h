@@ -1,11 +1,11 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  projinfo utility
- * Author:   Even Rouault <even dot rouault at spatialys dot com>
+ * Purpose:  projinfo C API
+ * Author:   Javier Jimenez Shaw
  *
  ******************************************************************************
- * Copyright (c) 2018, Even Rouault <even dot rouault at spatialys dot com>
+ * Copyright (c) 2025  Javier Jimenez Shaw
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -26,37 +26,43 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-//! @cond Doxygen_Suppress
-
-#define FROM_PROJ_CPP
-
-#include <iostream>
+#if !defined(PROJAPPS_LIB_H)
+#define PROJAPPS_LIB_H
 
 #include "proj.h"
-#include "proj_internal.h"
 
-#include "projapps_lib.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// ---------------------------------------------------------------------------
+/*
+ * Level for the output given by projinfo in its callback.
+ */
+typedef enum {
+    PJ_PROJINFO_LOG_LEVEL_INFO = 1,
+    PJ_PROJINFO_LOG_LEVEL_WARN = 2,
+    PJ_PROJINFO_LOG_LEVEL_ERR = 3,
+} PJ_PROJINFO_LOG_LEVEL;
 
-int main(int argc, char **argv) {
-    pj_stderr_proj_lib_deprecation_warning();
+typedef void (*projinfo_cb_t)(PJ_PROJINFO_LOG_LEVEL level, const char *msg,
+                              void *user_data);
 
-    auto dump = [](PJ_PROJINFO_LOG_LEVEL level, const char *s, void *) {
-        switch (level) {
-        case PJ_PROJINFO_LOG_LEVEL_WARN:
-        case PJ_PROJINFO_LOG_LEVEL_ERR:
-            std::cerr << s;
-            break;
-        case PJ_PROJINFO_LOG_LEVEL_INFO:
-        default:
-            std::cout << s;
-            break;
-        }
-    };
+/*
+ * Internal C implementation of projinfo CLI application.
+ * See https://proj.org/apps/projinfo.html for more documentation.
+ * @param ctx context. It can be nullptr.
+ * @param argc number for parameters in argv.
+ * @param argv list of char* with the command parameters of projinfo.
+ *  It does not contain the program name as first parameter.
+ * @param cb callback that to get the output of projinfo.
+ *  It can be very fragmented, no necesarily by lines.
+ * @param user_data pointer for data passed to the callback.
+ */
+int PROJ_DLL projinfo(PJ_CONTEXT *ctx, int argc, char **argv, projinfo_cb_t cb,
+                      void *user_data);
 
-    int res = projinfo(nullptr, argc - 1, ++argv, dump, nullptr);
-    return res;
+#ifdef __cplusplus
 }
+#endif
 
-//! @endcond
+#endif
