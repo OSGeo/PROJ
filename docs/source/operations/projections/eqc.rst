@@ -6,10 +6,13 @@ Equidistant Cylindrical (Plate Carrée)
 
 The simplest of all projections. Standard parallels (0° when omitted) may be specified that determine latitude of true scale (k=h=1).
 
+This projection is available in both spherical (EPSG:1029) and ellipsoidal (EPSG:1028) forms.
+When using an ellipsoid, PROJ uses the ellipsoidal formulas from IOGP Guidance Note 7-2.
+
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Conformal cylindrical                                    |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse                                      |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global, but best used near the equator                   |
 +---------------------+----------------------------------------------------------+
@@ -92,15 +95,18 @@ Parameters
 Mathematical definition
 #######################
 
-The formulas describing the Equidistant Cylindrical projection are all taken from :cite:`Snyder1987`.
-
 :math:`\phi_{ts}` is the latitude of true scale, i.e., the standard parallel where the scale of the projection is true. It can be set with ``+lat_ts``.
 
 :math:`\phi_0` is the latitude of origin that match the center of the map. It can be set with ``+lat_0``.
 
 
-Forward projection
+Spherical formulas
 ==================
+
+The spherical formulas are taken from :cite:`Snyder1987` and correspond to EPSG method 1029.
+
+Forward projection
+------------------
 
 .. math::
 
@@ -111,15 +117,51 @@ Forward projection
    y = \phi - \phi_0
 
 Inverse projection
-==================
+------------------
 
 .. math::
 
-   \lambda = x / cos \phi_{ts}
+   \lambda = x / \cos \phi_{ts}
 
 .. math::
 
    \phi = y + \phi_0
+
+
+Ellipsoidal formulas
+====================
+
+The ellipsoidal formulas are from IOGP Guidance Note 7-2, Section 3.2.5, and correspond to EPSG method 1028.
+
+Forward projection
+------------------
+
+.. math::
+
+   x = \nu_1 \cos \phi_{ts} \cdot \lambda
+
+.. math::
+
+   y = M(\phi) - M(\phi_0)
+
+where :math:`\nu_1` is the radius of curvature in the prime vertical at the standard parallel:
+
+.. math::
+
+   \nu_1 = \frac{a}{\sqrt{1 - e^2 \sin^2 \phi_{ts}}}
+
+and :math:`M(\phi)` is the meridional arc distance from the equator to latitude :math:`\phi`.
+
+Inverse projection
+------------------
+
+.. math::
+
+   \lambda = x / (\nu_1 \cos \phi_{ts})
+
+.. math::
+
+   \phi = M^{-1}(y + M(\phi_0))
 
 
 Further reading
@@ -127,5 +169,6 @@ Further reading
 
 #. `Wikipedia <https://en.wikipedia.org/wiki/Equirectangular_projection>`_
 #. `Wolfram Mathworld <http://mathworld.wolfram.com/CylindricalEquidistantProjection.html>`_
+#. `IOGP Guidance Note 7-2 <https://www.iogp.org/wp-content/uploads/2019/09/373-07-02.pdf>`_ - Section 3.2.5
 
 
