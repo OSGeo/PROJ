@@ -29,9 +29,9 @@
 
 namespace { // anonymous namespace
 struct pj_eqc_data {
-    double rc;   // Spherical: cos(lat_ts); Ellipsoidal: nu1 * cos(lat_ts)
-    double M0;   // Meridional arc at latitude of origin (lat_0)
-    double *en;  // Coefficients for meridional arc computation
+    double rc;  // Spherical: cos(lat_ts); Ellipsoidal: nu1 * cos(lat_ts)
+    double M0;  // Meridional arc at latitude of origin (lat_0)
+    double *en; // Coefficients for meridional arc computation
 };
 } // anonymous namespace
 
