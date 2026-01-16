@@ -17,6 +17,7 @@ repos:
                 src/wkt2_generated_parser.h|
                 src/geodesic.c|
                 src/geodesic.h|
+                src/proj_symbol_rename.h|
                 src/tests/geodtest.c|
                 src/tests/geodsigntest.c
               )
