@@ -1629,11 +1629,12 @@ expect  -0.002029979 -0.000789630
 
 ===============================================================================
 # Equidistant Cylindrical (Plate Carree)
-# 	Cyl, Sph
+# 	Cyl, Sph&Ell
 # 	lat_ts=[, lat_0=0]
 ===============================================================================
 
 -------------------------------------------------------------------------------
+# Spherical case
 operation +proj=eqc   +a=6400000
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
@@ -1655,6 +1656,143 @@ accept  -200 100
 expect  -0.001790493 0.000895247
 accept  -200 -100
 expect  -0.001790493 -0.000895247
+
+-------------------------------------------------------------------------------
+# Ellipsoidal case (EPSG:1028)
+# Test values from IOGP Guidance Note 7-2, Section 3.2.5
+# WGS84 ellipsoid: a=6378137, 1/f=298.257223563
+# Standard parallel: 0° (lat_ts=0)
+# Input: lat=55°, lon=10°
+# Expected: E=1113194.91, N=6097230.31
+operation +proj=eqc +ellps=WGS84 +lat_ts=0
+-------------------------------------------------------------------------------
+tolerance 0.01 m
+accept  10 55
+expect  1113194.91 6097230.31
+
+direction inverse
+accept  1113194.91 6097230.31
+expect  10 55
+
+-------------------------------------------------------------------------------
+# Ellipsoidal case - high latitude test
+# WGS84 ellipsoid
+# Input: lat=71.9993230521°, lon=-143.9999611505°
+# Expected:
+#   E=-16030002.350, N=7992053.817
+operation +proj=eqc +ellps=WGS84 +lat_ts=0
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  -143.9999611505 71.9993230521
+expect  -16030002.350 7992053.817
+
+direction inverse
+accept  -16030002.350 7992053.817
+expect  -143.9999611505 71.9993230521
+
+-------------------------------------------------------------------------------
+# Ellipsoidal case - Edge cases
+# WGS84 ellipsoid, lat_ts=0
+# Tests for origin, hemispheres, date line, near-pole
+operation +proj=eqc +ellps=WGS84 +lat_ts=0
+-------------------------------------------------------------------------------
+tolerance 0.001 m
+
+# Origin (0, 0)
+accept  0 0
+expect  0.0 0.0
+
+# Southern hemisphere (10, -45)
+accept  10 -45
+expect  1113194.90793 -4984944.37798
+
+# Date line (180, 30)
+accept  180 30
+expect  20037508.34279 3320113.39794
+
+# Near north pole (0, 89)
+accept  0 89
+expect  0.0 9890271.86440
+
+# San Francisco (-122.4194, 37.7749)
+accept  -122.4194 37.7749
+expect  -13627665.27122 4182513.19136
+
+direction inverse
+# Inverse tests for edge cases
+accept  0.0 0.0
+expect  0 0
+
+accept  1113194.90793 -4984944.37798
+expect  10 -45
+
+accept  20037508.34279 3320113.39794
+expect  180 30
+
+accept  0.0 9890271.86440
+expect  0 89
+
+accept  -13627665.27122 4182513.19136
+expect  -122.4194 37.7749
+
+-------------------------------------------------------------------------------
+# Ellipsoidal case with non-zero standard parallel (lat_ts=45)
+# WGS84 ellipsoid
+# Tests the ν₁ cos(φ₁) scaling factor for easting
+operation +proj=eqc +ellps=WGS84 +lat_ts=45
+-------------------------------------------------------------------------------
+tolerance 0.01 m
+
+# Paris region (2, 49)
+accept  2 49
+expect  157693.670 5429627.632
+
+# Origin (0, 0) - northing should still be 0
+accept  0 0
+expect  0.0 0.0
+
+# High latitude (10, 70)
+accept  10 70
+expect  788468.351 7768980.728
+
+direction inverse
+accept  157693.670 5429627.632
+expect  2 49
+
+accept  0.0 0.0
+expect  0 0
+
+accept  788468.351 7768980.728
+expect  10 70
+
+-------------------------------------------------------------------------------
+# Ellipsoidal case with lat_ts=30 and lat_0=45 (non-zero origin)
+# Tests meridional arc offset M₀
+operation +proj=eqc +ellps=WGS84 +lat_ts=30 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.01 m
+
+# At the origin latitude, northing should be 0
+accept  0 45
+expect  0.0 0.0
+
+# Above origin
+accept  0 60
+expect  0.0 1669128.442
+
+# Below origin
+accept  0 30
+expect  0.0 -1664830.980
+
+direction inverse
+accept  0.0 0.0
+expect  0 45
+
+accept  0.0 1669128.442
+expect  0 60
+
+accept  0.0 -1664830.980
+expect  0 30
 
 
 ===============================================================================
