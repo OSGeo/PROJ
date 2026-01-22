@@ -3446,6 +3446,65 @@ TEST(wkt_parse, vertcrs_WKT1_LAS_metre) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, compoundcrs_WKT1_LAS_only_geoid_name) {
+
+    // Yes, this WKT is quite odd...
+    auto wkt =
+        "COMPD_CS[\"NAD83 / NAD83 / South Dakota South / Geoid 2012A (ftUS)\","
+        "PROJCS[\"NAD83 / NAD83 / South Dakota South / Geoid 2012A (ftUS)\","
+        "GEOGCS[\"NAD83 / NAD83 / South Dakota South / Geoid 2012A (ftUS)\","
+        "DATUM[\"NAD83\",SPHEROID[\"GRS80\",6378137.000,298.257222100,"
+        "AUTHORITY[\"EPSG\",\"0\"]],AUTHORITY[\"EPSG\",\"0\"]],"
+        "PRIMEM[\"Greenwich\",0.0000000000000000,"
+        "AUTHORITY[\"EPSG\",\"8901\"]],"
+        "UNIT[\"US survey foot\",0.30480060960121918567,"
+        "AUTHORITY[\"EPSG\",\"9003\"]],"
+        "AUTHORITY[\"EPSG\",\"0\"]],"
+        "PROJECTION[\"Lambert_Conformal_Conic_2SP\","
+        "AUTHORITY[\"EPSG\",\"9802\"]],"
+        "PARAMETER[\"standard_parallel_1\",44.4000000000000057],"
+        "PARAMETER[\"standard_parallel_2\",42.8333333333333357],"
+        "PARAMETER[\"latitude_of_origin\",42.3333333333333499],"
+        "PARAMETER[\"central_meridian\",-100.3333333333333428],"
+        "PARAMETER[\"false_easting\",1968500.000],"
+        "PARAMETER[\"false_northing\",0.000],"
+        "UNIT[\"US survey foot\",0.30480060960121918567,"
+        "AUTHORITY[\"EPSG\",\"9003\"]],"
+        "AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],"
+        "AUTHORITY[\"EPSG\",\"0\"]],"
+        "VERT_CS[\"Geoid 2012A\",VERT_DATUM[\"Geoid 2012A\",2005],"
+        "UNIT[\"US survey foot\",0.30480060960121918567,"
+        "AUTHORITY[\"EPSG\",\"9003\"]],AXIS[\"Gravity-related height\",UP],"
+        "AUTHORITY[\"EPSG\",\"0\"]],AUTHORITY[\"EPSG\",\"0\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto compoundCRS = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(compoundCRS != nullptr);
+    auto vcrs = nn_dynamic_pointer_cast<VerticalCRS>(
+        compoundCRS->componentReferenceSystems()[1]);
+    ASSERT_TRUE(vcrs != nullptr);
+    EXPECT_EQ(vcrs->nameStr(), "NAVD88 height (ftUS)");
+    ASSERT_EQ(vcrs->identifiers().size(), 1U);
+    EXPECT_EQ(*(vcrs->identifiers()[0]->codeSpace()), "EPSG");
+
+    const auto &geoidModel = vcrs->geoidModel();
+    ASSERT_TRUE(!geoidModel.empty());
+    EXPECT_EQ(geoidModel[0]->nameStr(), "GEOID12A");
+
+    auto datum = vcrs->datum();
+    EXPECT_EQ(datum->nameStr(), "North American Vertical Datum 1988");
+    ASSERT_EQ(datum->identifiers().size(), 1U);
+    EXPECT_EQ(datum->identifiers()[0]->code(), "5103");
+    EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
+
+    const auto &axis = vcrs->coordinateSystem()->axisList()[0];
+    EXPECT_EQ(axis->direction(), AxisDirection::UP);
+    EXPECT_EQ(axis->unit().name(), "US survey foot");
+    EXPECT_NEAR(axis->unit().conversionToSI(), 0.3048006096012192, 1e-16);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, dynamic_vertical_reference_frame) {
     auto obj = WKTParser().createFromWKT(
         "VERTCRS[\"RH2000\","
