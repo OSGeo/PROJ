@@ -5136,20 +5136,36 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
         ci_equal(nodeValue, WKTConstants::VERTCS)) {
         std::string name;
         if (props.getStringValue(IdentifiedObject::NAME_KEY, name)) {
-            std::string geoidName;
+            std::string navd88GeoidName;
             for (const char *prefix :
                  {"NAVD88 - ", "NAVD88 via ", "NAVD88 height - ",
                   "NAVD88 height (ftUS) - "}) {
                 if (starts_with(name, prefix)) {
-                    geoidName = name.substr(strlen(prefix));
-                    auto pos = geoidName.find_first_of(" (");
+                    navd88GeoidName = name.substr(strlen(prefix));
+                    auto pos = navd88GeoidName.find_first_of(" (");
                     if (pos != std::string::npos) {
-                        geoidName.resize(pos);
+                        navd88GeoidName.resize(pos);
                     }
                     break;
                 }
             }
-            if (!geoidName.empty()) {
+
+            // Deal with vertical CRS names like "Geoid 2012A"
+            if (navd88GeoidName.empty() && ci_starts_with(name, "Geoid") &&
+                geogCRSOfCompoundCRS_ &&
+                starts_with(geogCRSOfCompoundCRS_->nameStr(), "NAD83")) {
+                // Remove spaces
+                navd88GeoidName = replaceAll(name, " ", "");
+                // Morph "Geoid 20XX[Y]" to "GeoidXX[Y]"
+                if (navd88GeoidName.size() >= 9 &&
+                    ci_starts_with(navd88GeoidName, "Geoid20") &&
+                    navd88GeoidName[7] >= '0' && navd88GeoidName[7] <= '9' &&
+                    navd88GeoidName[8] >= '0' && navd88GeoidName[8] <= '9') {
+                    navd88GeoidName = "Geoid" + navd88GeoidName.substr(7);
+                }
+            }
+
+            if (!navd88GeoidName.empty()) {
                 const auto &axis = verticalCS->axisList()[0];
                 const auto &dir = axis->direction();
                 if (dir == cs::AxisDirection::UP) {
@@ -5165,7 +5181,8 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
                     }
                 }
                 PropertyMap propsModel;
-                propsModel.set(IdentifiedObject::NAME_KEY, toupper(geoidName));
+                propsModel.set(IdentifiedObject::NAME_KEY,
+                               toupper(navd88GeoidName));
                 PropertyMap propsDatum;
                 propsDatum.set(IdentifiedObject::NAME_KEY,
                                "North American Vertical Datum 1988");
