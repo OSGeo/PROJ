@@ -172,7 +172,8 @@ set(PROJ_TEST_CPP_API_SOURCES
   test_datum.cpp
   test_factory.cpp
   test_c_api.cpp
-  test_grids.cpp)
+  test_grids.cpp
+  test_projinfo_lib.cpp)
 add_executable(proj_test_cpp_api ${PROJ_TEST_CPP_API_SOURCES})
 set_property(SOURCE ${PROJ_TEST_CPP_API_SOURCES} PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
 
