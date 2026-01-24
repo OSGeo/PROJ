@@ -8,7 +8,7 @@ Name: PROJ
 Description: Coordinate transformation software library
 Requires:
 Version: @VERSION@
-Libs: -L${libdir} -lproj
+Libs: -L${libdir} -l@PROJ_OUTPUT_NAME@
 Libs.private: @EXTRA_LIBS@
 Requires.private: @EXTRA_REQUIRES@
 Cflags: -I${includedir}
