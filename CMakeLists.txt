@@ -49,6 +49,7 @@ set(PROJ_common_WARN_FLAGS  # common only to GNU/Clang C/C++
   -Werror=vla
   -Wextra
   -Wformat
+  -Wimplicit-fallthrough
   -Wmissing-declarations
   -Wshadow
   -Wswitch
@@ -59,7 +60,6 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     -Wduplicated-cond
     -Wduplicated-branches
     -Wlogical-op
-    -Wimplicit-fallthrough
   )
   set(PROJ_C_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Wmissing-prototypes
@@ -81,7 +81,6 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
     -Wdocumentation -Wno-documentation-deprecated-sync
     -Wfloat-conversion
     -Wlogical-op-parentheses
-    -Wimplicit-fallthrough
   )
 
   # Not sure about the minimum version, but clang 12 complains about \file, @cond Doxygen_Suppress, etc.
