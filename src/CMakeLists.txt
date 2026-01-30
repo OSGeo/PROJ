@@ -2,6 +2,9 @@
 add_compile_options("$<$<COMPILE_LANGUAGE:C>:${PROJ_C_WARN_FLAGS}>")
 add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>")
 
+# 0: include the lib files for the apps.
+include(apps/lib_projapps.cmake)
+
 # First configure proj library
 include(lib_proj.cmake)
 add_subdirectory(apps)
