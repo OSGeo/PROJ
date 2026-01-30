@@ -60,8 +60,7 @@ The following control parameters can appear in any order:
 
 .. option:: -I
 
-    Method to specify inverse translation, convert from *+to* coordinate system to
-    the primary coordinate system defined.
+    Perform the inverse transformation, that is from target CRS to source CRS.
 
 .. option:: -t<a>
 
@@ -181,12 +180,12 @@ The following control parameters can appear in any order:
 
     Force `cs2cs` to only use the best transformation known by PROJ.
     `cs2cs` will return an error if a grid needed for the best transformation is missing.
-    
+
     Best transformation should be understood as the most accurate transformation
     available among all relevant for the point to transform, and if all known
     grids required to perform such transformation were accessible (either locally
     or through network).
-    
+
     Note that the default value for this option can be also set with the
     :envvar:`PROJ_ONLY_BEST_DEFAULT` environment variable, or with the
     ``only_best_default`` setting of :ref:`proj-ini` (:option:`--only-best`
@@ -256,11 +255,11 @@ The following control parameters can appear in any order:
     parameters. Usage varies with projection and for a complete description
     consult the :ref:`projection pages <projections>`.
 
-The :program:`cs2cs` program requires two coordinate reference system (CRS) definitions. The first (or
-primary is defined based on all projection parameters not appearing after the
-*+to* argument. All projection parameters appearing after the *+to* argument
-are considered the definition of the second CRS. If there is no
-second CRS defined, a geographic CRS based on the
+The :program:`cs2cs` program takes two coordinate reference system (CRS) definitions.
+These can be given in a variety of formats such as EPSG-codes, WKT-strings or legacy PROJ.4
+CRS descriptions.
+
+If there is no second CRS defined, a geographic CRS based on the
 datum and ellipsoid of the source CRS is assumed. Note that the
 source and destination CRS can both of same or different nature (geographic,
 projected, compound CRS), or one of each and may have the same or different datums.
@@ -303,6 +302,45 @@ More details are available in the :ref:`network` section.
 
 Examples
 ********
+
+Using EPSG CRS codes
+--------------------
+
+Transforming from WGS 84 latitude/longitude (in that order) to UTM Zone 31N/WGS 84
+
+::
+
+    cs2cs EPSG:4326 EPSG:32631 <<EOF
+    45N 2E
+    EOF
+
+outputs
+
+::
+
+    421184.70   4983436.77 0.00
+
+Using EPSG CRS names
+--------------------
+
+Transforming from WGS 84 latitude/longitude (in that order) with EGM96 height to
+UTM Zone 31N/WGS 84 with WGS84 ellipsoidal height
+
+::
+
+    echo 45 2 0 | cs2cs "WGS 84 + EGM96 height" "WGS 84 / UTM zone 31N" --3d
+
+outputs
+
+::
+
+    421184.70   4983436.77 50.69
+
+
+.. note::
+
+    To get those exact values, you have need to have the EGM96 grid installed
+    locally or use networking capabilities mentioned above.
 
 Using PROJ strings
 ------------------
@@ -360,45 +398,6 @@ would return:
 which is the result when the NAD27 and NAD83 datums are dealt as identical,
 which is an approximation at a level of several tens of metres.
 
-
-Using EPSG CRS codes
---------------------
-
-Transforming from WGS 84 latitude/longitude (in that order) to UTM Zone 31N/WGS 84
-
-::
-
-    cs2cs EPSG:4326 EPSG:32631 <<EOF
-    45N 2E
-    EOF
-
-outputs
-
-::
-
-    421184.70   4983436.77 0.00
-
-Using EPSG CRS names
---------------------
-
-Transforming from WGS 84 latitude/longitude (in that order) with EGM96 height to
-UTM Zone 31N/WGS 84 with WGS84 ellipsoidal height
-
-::
-
-    echo 45 2 0 | cs2cs "WGS 84 + EGM96 height" "WGS 84 / UTM zone 31N" --3d
-
-outputs
-
-::
-
-    421184.70   4983436.77 50.69
-
-
-.. note::
-
-    To get those exact values, you have need to have the EGM96 grid installed
-    locally or use networking capabilities mentioned above.
 
 
 .. only:: man

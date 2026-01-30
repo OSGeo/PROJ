@@ -48,22 +48,14 @@ transform from one coordinate reference system to another. Say we want to
 convert the above Mercator coordinates to UTM, we can do that with
 :program:`cs2cs`:
 
-::
-
-    $ echo 3399483.80 752085.60 | cs2cs +proj=merc +lat_ts=56.5 +ellps=GRS80 +to +proj=utm +zone=32
-    6103992.36      1924052.47 0.00
-
-Notice the ``+to`` parameter that separates the source and destination
-projection definitions.
-
-If you happen to know the EPSG identifiers for the two coordinates reference
-systems you are transforming between you can use those with :program:`cs2cs`:
+The most common use case is to give EPSG identifiers for the two coordinates reference
+systems you are transforming between. Give them as input to :program:`cs2cs`:
 
 ::
 
-   $ echo 56 12 | cs2cs +init=epsg:4326 +to +init=epsg:25832
-   231950.54      1920310.71 0.00
+   $ echo 56 12 | cs2cs EPSG:4326 EPSG:25832
+   687071.44       6210141.33 0.00
 
-In the above example we transform geodetic coordinates in the WGS84 reference
-frame to UTM zone 32N coordinates in the ETRS89 reference frame.
-UTM coordinates 
+In the above example we transform geodetic coordinates in latitude, longitude
+order in the WGS84 reference frame to UTM zone 32N coordinates in the
+ETRS89 reference frame.
