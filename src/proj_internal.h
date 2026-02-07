@@ -956,8 +956,6 @@ COMPLEX pj_zpoly1(COMPLEX, const COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, const COMPLEX *, int, COMPLEX *);
 
 int pj_deriv(PJ_LP, double, const PJ *, struct DERIVS *);
-int pj_factors(PJ_LP, PJ *toplevel, const PJ *internal, double,
-               struct FACTORS *);
 
 void *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
