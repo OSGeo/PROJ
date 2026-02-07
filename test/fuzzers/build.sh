@@ -88,3 +88,4 @@ echo "[libfuzzer]" > $OUT/proj_crs_to_crs_fuzzer.options
 echo "max_len = 10000" >> $OUT/proj_crs_to_crs_fuzzer.options
 
 cp -r data/* $OUT
+cp -r build/data/* $OUT
