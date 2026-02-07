@@ -32,12 +32,29 @@ jobs:
       - name: Artifacts folder
         run: mkdir -p "$PWD"/wasm_out
 
-      - name: Run docker
-        run: docker run --rm -v "$PWD":/build/proj_src -v "$PWD"/wasm_out:/usr/local/wasm proj-emscripten-builder
+      - name: Run docker build
+        run: |
+          docker run --user $(id -u):$(id -g) --rm \
+            -v "$PWD":/build/proj_src \
+            -v "$PWD"/wasm_out:/build/install \
+            proj-emscripten-builder
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
           name: proj-js-wasm
-          retention-days: 15
+          retention-days: 90
           path: wasm_out/projModule.*
+
+      - name: Copy for tests
+        run: |
+          mkdir -p "$PWD"/out_node
+          cp wasm_out/projModule.* out_node
+          cp scripts/ci/emscripten/proj.ems.tests.js out_node
+
+      - name: Run docker tests
+        run: |
+          docker run --user $(id -u):$(id -g) --rm \
+            -v "$PWD"/out_node:/opt/node/tests \
+            node:24-alpine \
+            node /opt/node/tests/proj.ems.tests.js

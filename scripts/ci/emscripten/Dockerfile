@@ -12,15 +12,9 @@ RUN apt-get update && \
     # Clean up apt cache to reduce image size
     rm -rf /var/lib/apt/lists/*
 
-# --- Setup Build Directories ---
-# Define standard locations for building and installing
 ENV BUILD_DIR="/build"
-ENV INSTALL_DIR="/usr/local/wasm"
-
-# Create the directories
-RUN mkdir -p ${BUILD_DIR}/proj_src \
-             ${BUILD_DIR}/deps_src \
-             ${INSTALL_DIR}
+RUN mkdir -p ${BUILD_DIR}
+RUN chmod ugo+rwx ${BUILD_DIR}
 
 # Copy the build script into the container
 COPY build_wasm.sh /scripts/build_wasm.sh
