@@ -1,6 +1,66 @@
 const assert = require("node:assert/strict");
 const ProjModuleFactory = require("./projModule.js");
 
+// Small class to help to manage memory.
+class Keeper {
+    constructor(proj, debug = false) {
+        if (!proj) {
+            throw new Error("proj cannot be empty in class Keeper");
+        }
+
+        this.proj = proj;
+        this.debug = debug;
+        this.to_free = [];
+        this.to_destroy = [];
+    };
+
+    add(ptr, proj_destroy = true) {
+        if (proj_destroy) {
+            if (this.debug)
+                console.debug("add destroy", ptr);
+            this.to_destroy.push(ptr);
+        } else {
+            if (this.debug)
+                console.debug("add free", ptr);
+            this.to_free.push(ptr);
+        }
+        return ptr;
+    };
+
+    call(name, ...args) {
+        const ptr = this.proj[name](...args);
+        return this.add(ptr, true);
+    }
+
+    malloc(ptrSize) {
+        const ptr = this.proj._malloc(ptrSize);
+        return this.add(ptr, false);
+    };
+
+    string(str) {
+        const ptr = this.proj.stringToNewUTF8(str);
+        return this.add(ptr, false);
+    };
+
+    destroy() {
+        this.to_destroy.reverse();
+        for (const p of this.to_destroy) {
+            if (this.debug)
+                console.debug("call destroy", p);
+            this.proj._proj_destroy(p);
+        }
+        this.to_destroy = [];
+
+        this.to_free.reverse();
+        for (const p of this.to_free) {
+            if (this.debug)
+                console.debug("call free", p);
+            this.proj._free(p);
+        }
+        this.to_free = [];
+    };
+};
+
 const tests = {
     test_proj_info : (proj) => {
         const r = proj.proj_info_ems();
@@ -93,49 +153,48 @@ const tests = {
             return str;
         }
         function get_axes(crs) {
-            // TODO support compound CRSs with type PJ_TYPE_COMPOUND_CRS = 16;
+            let keep = new Keeper(proj);
+            try {
+                // TODO support compound CRS
 
-            // Emscripten (wasm32) pointers are so far 4 bytes
-            const ptrSize = 4;
-            const doubleSize = 8; // Doubles are 8 bytes
-            const sourceCRS = proj.stringToNewUTF8(crs);
-            const P_crs = proj._proj_create(ctx, sourceCRS);
-            const P_cs = proj._proj_crs_get_coordinate_system(ctx, P_crs);
-            const axis_count = proj._proj_cs_get_axis_count(ctx, P_cs);
-            let outNamePtr = proj._malloc(ptrSize);
-            let outAbbrevPtr = proj._malloc(ptrSize);
-            let outDirectionPtr = proj._malloc(ptrSize);
-            let outConvFactorPtr = proj._malloc(doubleSize);
-            let outUnitPtr = proj._malloc(ptrSize);
-            res = {
-                name : [],
-                abbr : [],
-                direction : [],
-                conv_factor : [],
-                unit : []
-            };
-            for (let i = 0; i < axis_count; i++) {
-                const r = proj._proj_cs_get_axis_info(
-                    ctx, P_cs, i, outNamePtr, outAbbrevPtr, outDirectionPtr,
-                    outConvFactorPtr, outUnitPtr, 0, 0);
-                if (r != 1) {
-                    throw new Error("error calling proj_cs_get_axis_info");
+                // Emscripten (wasm32) pointers are so far 4 bytes
+                const ptrSize = 4;
+                const doubleSize = 8; // Doubles are 8 bytes
+                const sourceCRS = keep.string(crs);
+                const P_crs = keep.call("_proj_create", ctx, sourceCRS);
+                const P_cs =
+                    keep.add(proj._proj_crs_get_coordinate_system(ctx, P_crs));
+                const axis_count = proj._proj_cs_get_axis_count(ctx, P_cs);
+                const outNamePtr = keep.malloc(ptrSize);
+                const outAbbrevPtr = keep.malloc(ptrSize);
+                const outDirectionPtr = keep.malloc(ptrSize);
+                const outConvFactorPtr = keep.malloc(doubleSize);
+                const outUnitPtr = keep.malloc(ptrSize);
+                res = {
+                    name : [],
+                    abbr : [],
+                    direction : [],
+                    conv_factor : [],
+                    unit : []
+                };
+                for (let i = 0; i < axis_count; i++) {
+                    const r = proj._proj_cs_get_axis_info(
+                        ctx, P_cs, i, outNamePtr, outAbbrevPtr, outDirectionPtr,
+                        outConvFactorPtr, outUnitPtr, 0, 0);
+                    if (r != 1) {
+                        throw new Error("error calling proj_cs_get_axis_info");
+                    }
+
+                    res.name.push(get_str(outNamePtr));
+                    res.abbr.push(get_str(outAbbrevPtr));
+                    res.direction.push(get_str(outDirectionPtr));
+                    res.conv_factor.push(
+                        proj.getValue(outConvFactorPtr, 'double'));
+                    res.unit.push(get_str(outUnitPtr));
                 }
-
-                res.name.push(get_str(outNamePtr));
-                res.abbr.push(get_str(outAbbrevPtr));
-                res.direction.push(get_str(outDirectionPtr));
-                res.conv_factor.push(proj.getValue(outConvFactorPtr, 'double'));
-                res.unit.push(get_str(outUnitPtr));
+            } finally {
+                keep.destroy();
             }
-            proj._free(outUnitPtr);
-            proj._free(outConvFactorPtr);
-            proj._free(outDirectionPtr);
-            proj._free(outAbbrevPtr);
-            proj._free(outNamePtr);
-            proj._proj_destroy(P_cs);
-            proj._proj_destroy(P_crs);
-            proj._free(sourceCRS);
             return res;
         }
         const ax4326 = get_axes("EPSG:4326");
