@@ -7094,4 +7094,544 @@ TEST_F(CApi, concurrent_context) {
 
 #endif // __MINGW32__
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_linear_affine_parametric_conversion) {
+
+    {
+        PJ *pj = proj_create_linear_affine_parametric_conversion(
+            nullptr, nullptr, 1.1, nullptr, 0, 2.1, nullptr, 0, 3.1, nullptr, 0,
+            4.1, nullptr, 0, 5.1, nullptr, 0, 6.1, nullptr, 0);
+        ObjectKeeper keeper(pj);
+        auto wkt = proj_as_wkt(nullptr, pj, PJ_WKT2_2019, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_STREQ(wkt, "CONVERSION[\"unnamed\",\n"
+                          "    METHOD[\"Affine parametric transformation\",\n"
+                          "        ID[\"EPSG\",9624]],\n"
+                          "    PARAMETER[\"A0\",1.1,\n"
+                          "        LENGTHUNIT[\"metre\",1],\n"
+                          "        ID[\"EPSG\",8623]],\n"
+                          "    PARAMETER[\"A1\",2.1,\n"
+                          "        SCALEUNIT[\"unity\",1],\n"
+                          "        ID[\"EPSG\",8624]],\n"
+                          "    PARAMETER[\"A2\",3.1,\n"
+                          "        SCALEUNIT[\"unity\",1],\n"
+                          "        ID[\"EPSG\",8625]],\n"
+                          "    PARAMETER[\"B0\",4.1,\n"
+                          "        LENGTHUNIT[\"metre\",1],\n"
+                          "        ID[\"EPSG\",8639]],\n"
+                          "    PARAMETER[\"B1\",5.1,\n"
+                          "        SCALEUNIT[\"unity\",1],\n"
+                          "        ID[\"EPSG\",8640]],\n"
+                          "    PARAMETER[\"B2\",6.1,\n"
+                          "        SCALEUNIT[\"unity\",1],\n"
+                          "        ID[\"EPSG\",8641]]]");
+    }
+
+    {
+        PJ *pj = proj_create_linear_affine_parametric_conversion(
+            m_ctxt, "conversion name", 1.1, "my unit1", 0.11, 2.1, "my unit2",
+            0.12, 3.1, "my unit3", 0.13, 4.1, "my unit4", 0.14, 5.1, "my unit5",
+            0.15, 6.1, "my unit6", 0.16);
+        ObjectKeeper keeper(pj);
+        auto wkt = proj_as_wkt(m_ctxt, pj, PJ_WKT2_2019, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_STREQ(wkt, "CONVERSION[\"conversion name\",\n"
+                          "    METHOD[\"Affine parametric transformation\",\n"
+                          "        ID[\"EPSG\",9624]],\n"
+                          "    PARAMETER[\"A0\",1.1,\n"
+                          "        LENGTHUNIT[\"my unit1\",0.11],\n"
+                          "        ID[\"EPSG\",8623]],\n"
+                          "    PARAMETER[\"A1\",2.1,\n"
+                          "        SCALEUNIT[\"my unit2\",0.12],\n"
+                          "        ID[\"EPSG\",8624]],\n"
+                          "    PARAMETER[\"A2\",3.1,\n"
+                          "        SCALEUNIT[\"my unit3\",0.13],\n"
+                          "        ID[\"EPSG\",8625]],\n"
+                          "    PARAMETER[\"B0\",4.1,\n"
+                          "        LENGTHUNIT[\"my unit4\",0.14],\n"
+                          "        ID[\"EPSG\",8639]],\n"
+                          "    PARAMETER[\"B1\",5.1,\n"
+                          "        SCALEUNIT[\"my unit5\",0.15],\n"
+                          "        ID[\"EPSG\",8640]],\n"
+                          "    PARAMETER[\"B2\",6.1,\n"
+                          "        SCALEUNIT[\"my unit6\",0.16],\n"
+                          "        ID[\"EPSG\",8641]]]");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_derived_projected_crs) {
+
+    PJ *proj_crs = proj_create(m_ctxt, "EPSG:32631");
+    ASSERT_NE(proj_crs, nullptr);
+    ObjectKeeper keeper_proj_crs(proj_crs);
+    PJ *conv = proj_create_linear_affine_parametric_conversion(
+        m_ctxt, nullptr, 1.1, nullptr, 0, 2.1, nullptr, 0, 3.1, nullptr, 0, 4.1,
+        nullptr, 0, 5.1, nullptr, 0, 6.1, nullptr, 0);
+    ASSERT_NE(conv, nullptr);
+    ObjectKeeper keeper_conv(conv);
+
+    PJ *cs = proj_create_cartesian_2D_cs(m_ctxt, PJ_CART2D_EASTING_NORTHING,
+                                         nullptr, 0);
+    ASSERT_NE(cs, nullptr);
+    ObjectKeeper keeper_cs(cs);
+
+    {
+        PJ *pj = proj_create_derived_projected_crs(m_ctxt, "my derived crs",
+                                                   proj_crs, conv, cs);
+        ASSERT_NE(pj, nullptr);
+        ObjectKeeper keeper_pj(pj);
+
+        auto wkt = proj_as_wkt(m_ctxt, pj, PJ_WKT2_2019, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_STREQ(
+            wkt,
+            "DERIVEDPROJCRS[\"my derived crs\",\n"
+            "    BASEPROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+            "        BASEGEOGCRS[\"WGS 84\",\n"
+            "            ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n"
+            "                MEMBER[\"World Geodetic System 1984 "
+            "(Transit)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G730)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G873)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G1150)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G2139)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G2296)\"],\n"
+            "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                    LENGTHUNIT[\"metre\",1]],\n"
+            "                ENSEMBLEACCURACY[2.0]],\n"
+            "            PRIMEM[\"Greenwich\",0,\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+            "        CONVERSION[\"UTM zone 31N\",\n"
+            "            METHOD[\"Transverse Mercator\",\n"
+            "                ID[\"EPSG\",9807]],\n"
+            "            PARAMETER[\"Latitude of natural origin\",0,\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                ID[\"EPSG\",8801]],\n"
+            "            PARAMETER[\"Longitude of natural origin\",3,\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                ID[\"EPSG\",8802]],\n"
+            "            PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+            "                SCALEUNIT[\"unity\",1],\n"
+            "                ID[\"EPSG\",8805]],\n"
+            "            PARAMETER[\"False easting\",500000,\n"
+            "                LENGTHUNIT[\"metre\",1],\n"
+            "                ID[\"EPSG\",8806]],\n"
+            "            PARAMETER[\"False northing\",0,\n"
+            "                LENGTHUNIT[\"metre\",1],\n"
+            "                ID[\"EPSG\",8807]]],\n"
+            "        ID[\"EPSG\",32631]],\n"
+            "    DERIVINGCONVERSION[\"unnamed\",\n"
+            "        METHOD[\"Affine parametric transformation\",\n"
+            "            ID[\"EPSG\",9624]],\n"
+            "        PARAMETER[\"A0\",1.1,\n"
+            "            LENGTHUNIT[\"metre\",1],\n"
+            "            ID[\"EPSG\",8623]],\n"
+            "        PARAMETER[\"A1\",2.1,\n"
+            "            SCALEUNIT[\"unity\",1],\n"
+            "            ID[\"EPSG\",8624]],\n"
+            "        PARAMETER[\"A2\",3.1,\n"
+            "            SCALEUNIT[\"unity\",1],\n"
+            "            ID[\"EPSG\",8625]],\n"
+            "        PARAMETER[\"B0\",4.1,\n"
+            "            LENGTHUNIT[\"metre\",1],\n"
+            "            ID[\"EPSG\",8639]],\n"
+            "        PARAMETER[\"B1\",5.1,\n"
+            "            SCALEUNIT[\"unity\",1],\n"
+            "            ID[\"EPSG\",8640]],\n"
+            "        PARAMETER[\"B2\",6.1,\n"
+            "            SCALEUNIT[\"unity\",1],\n"
+            "            ID[\"EPSG\",8641]]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"(E)\",east,\n"
+            "            ORDER[1],\n"
+            "            LENGTHUNIT[\"metre\",1,\n"
+            "                ID[\"EPSG\",9001]]],\n"
+            "        AXIS[\"(N)\",north,\n"
+            "            ORDER[2],\n"
+            "            LENGTHUNIT[\"metre\",1,\n"
+            "                ID[\"EPSG\",9001]]]]");
+    }
+    {
+
+        PJ *pj = proj_create_derived_projected_crs(m_ctxt, nullptr, proj_crs,
+                                                   conv, cs);
+        ASSERT_NE(pj, nullptr);
+        ObjectKeeper keeper_pj(pj);
+    }
+
+    // Error cases
+    {
+        EXPECT_EQ(proj_create_derived_projected_crs(m_ctxt, nullptr, nullptr,
+                                                    conv, cs),
+                  nullptr);
+        EXPECT_EQ(proj_create_derived_projected_crs(m_ctxt, nullptr, proj_crs,
+                                                    nullptr, cs),
+                  nullptr);
+        EXPECT_EQ(proj_create_derived_projected_crs(m_ctxt, nullptr, proj_crs,
+                                                    conv, nullptr),
+                  nullptr);
+
+        EXPECT_EQ(
+            proj_create_derived_projected_crs(m_ctxt, nullptr, conv, conv, cs),
+            nullptr);
+        EXPECT_EQ(proj_create_derived_projected_crs(m_ctxt, nullptr, proj_crs,
+                                                    cs, cs),
+                  nullptr);
+        EXPECT_EQ(proj_create_derived_projected_crs(m_ctxt, nullptr, proj_crs,
+                                                    conv, proj_crs),
+                  nullptr);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_crs_add_horizontal_derived_conversion) {
+
+    PJ *conv = proj_create_linear_affine_parametric_conversion(
+        m_ctxt, nullptr, 1.1, nullptr, 0, 2.1, nullptr, 0, 3.1, nullptr, 0, 4.1,
+        nullptr, 0, 5.1, nullptr, 0, 6.1, nullptr, 0);
+    ASSERT_NE(conv, nullptr);
+    ObjectKeeper keeper_conv(conv);
+
+    PJ *cs = proj_create_cartesian_2D_cs(m_ctxt, PJ_CART2D_EASTING_NORTHING,
+                                         nullptr, 0);
+    ASSERT_NE(cs, nullptr);
+    ObjectKeeper keeper_cs(cs);
+
+    {
+        PJ *proj_crs = proj_create(m_ctxt, "EPSG:32631");
+        ASSERT_NE(proj_crs, nullptr);
+        ObjectKeeper keeper_proj_crs(proj_crs);
+
+        PJ *pj = proj_crs_add_horizontal_derived_conversion(
+            m_ctxt, "my derived crs", proj_crs, conv, cs);
+        ASSERT_NE(pj, nullptr);
+        ObjectKeeper keeper_pj(pj);
+
+        auto wkt = proj_as_wkt(m_ctxt, pj, PJ_WKT2_2019, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_STREQ(
+            wkt,
+            "DERIVEDPROJCRS[\"my derived crs\",\n"
+            "    BASEPROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+            "        BASEGEOGCRS[\"WGS 84\",\n"
+            "            ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n"
+            "                MEMBER[\"World Geodetic System 1984 "
+            "(Transit)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G730)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G873)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G1150)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G2139)\"],\n"
+            "                MEMBER[\"World Geodetic System 1984 (G2296)\"],\n"
+            "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                    LENGTHUNIT[\"metre\",1]],\n"
+            "                ENSEMBLEACCURACY[2.0]],\n"
+            "            PRIMEM[\"Greenwich\",0,\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+            "        CONVERSION[\"UTM zone 31N\",\n"
+            "            METHOD[\"Transverse Mercator\",\n"
+            "                ID[\"EPSG\",9807]],\n"
+            "            PARAMETER[\"Latitude of natural origin\",0,\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                ID[\"EPSG\",8801]],\n"
+            "            PARAMETER[\"Longitude of natural origin\",3,\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                ID[\"EPSG\",8802]],\n"
+            "            PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+            "                SCALEUNIT[\"unity\",1],\n"
+            "                ID[\"EPSG\",8805]],\n"
+            "            PARAMETER[\"False easting\",500000,\n"
+            "                LENGTHUNIT[\"metre\",1],\n"
+            "                ID[\"EPSG\",8806]],\n"
+            "            PARAMETER[\"False northing\",0,\n"
+            "                LENGTHUNIT[\"metre\",1],\n"
+            "                ID[\"EPSG\",8807]]],\n"
+            "        ID[\"EPSG\",32631]],\n"
+            "    DERIVINGCONVERSION[\"unnamed\",\n"
+            "        METHOD[\"Affine parametric transformation\",\n"
+            "            ID[\"EPSG\",9624]],\n"
+            "        PARAMETER[\"A0\",1.1,\n"
+            "            LENGTHUNIT[\"metre\",1],\n"
+            "            ID[\"EPSG\",8623]],\n"
+            "        PARAMETER[\"A1\",2.1,\n"
+            "            SCALEUNIT[\"unity\",1],\n"
+            "            ID[\"EPSG\",8624]],\n"
+            "        PARAMETER[\"A2\",3.1,\n"
+            "            SCALEUNIT[\"unity\",1],\n"
+            "            ID[\"EPSG\",8625]],\n"
+            "        PARAMETER[\"B0\",4.1,\n"
+            "            LENGTHUNIT[\"metre\",1],\n"
+            "            ID[\"EPSG\",8639]],\n"
+            "        PARAMETER[\"B1\",5.1,\n"
+            "            SCALEUNIT[\"unity\",1],\n"
+            "            ID[\"EPSG\",8640]],\n"
+            "        PARAMETER[\"B2\",6.1,\n"
+            "            SCALEUNIT[\"unity\",1],\n"
+            "            ID[\"EPSG\",8641]]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"(E)\",east,\n"
+            "            ORDER[1],\n"
+            "            LENGTHUNIT[\"metre\",1,\n"
+            "                ID[\"EPSG\",9001]]],\n"
+            "        AXIS[\"(N)\",north,\n"
+            "            ORDER[2],\n"
+            "            LENGTHUNIT[\"metre\",1,\n"
+            "                ID[\"EPSG\",9001]]]]");
+    }
+
+    {
+        PJ *compound_crs = proj_create(m_ctxt, "EPSG:32631+3855");
+        ASSERT_NE(compound_crs, nullptr);
+        ObjectKeeper keeper_compound_crs(compound_crs);
+
+        PJ *pj = proj_crs_add_horizontal_derived_conversion(
+            m_ctxt, "my derived crs", compound_crs, conv, cs);
+        ASSERT_NE(pj, nullptr);
+        ObjectKeeper keeper_pj(pj);
+
+        auto wkt = proj_as_wkt(m_ctxt, pj, PJ_WKT2_2019, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_STREQ(
+            wkt,
+            "COMPOUNDCRS[\"my derived crs + EGM2008 height\",\n"
+            "    DERIVEDPROJCRS[\"my derived crs\",\n"
+            "        BASEPROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+            "            BASEGEOGCRS[\"WGS 84\",\n"
+            "                ENSEMBLE[\"World Geodetic System 1984 "
+            "ensemble\",\n"
+            "                    MEMBER[\"World Geodetic System 1984 "
+            "(Transit)\"],\n"
+            "                    MEMBER[\"World Geodetic System 1984 "
+            "(G730)\"],\n"
+            "                    MEMBER[\"World Geodetic System 1984 "
+            "(G873)\"],\n"
+            "                    MEMBER[\"World Geodetic System 1984 "
+            "(G1150)\"],\n"
+            "                    MEMBER[\"World Geodetic System 1984 "
+            "(G1674)\"],\n"
+            "                    MEMBER[\"World Geodetic System 1984 "
+            "(G1762)\"],\n"
+            "                    MEMBER[\"World Geodetic System 1984 "
+            "(G2139)\"],\n"
+            "                    MEMBER[\"World Geodetic System 1984 "
+            "(G2296)\"],\n"
+            "                    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                        LENGTHUNIT[\"metre\",1]],\n"
+            "                    ENSEMBLEACCURACY[2.0]],\n"
+            "                PRIMEM[\"Greenwich\",0,\n"
+            "                    ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+            "            CONVERSION[\"UTM zone 31N\",\n"
+            "                METHOD[\"Transverse Mercator\",\n"
+            "                    ID[\"EPSG\",9807]],\n"
+            "                PARAMETER[\"Latitude of natural origin\",0,\n"
+            "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                    ID[\"EPSG\",8801]],\n"
+            "                PARAMETER[\"Longitude of natural origin\",3,\n"
+            "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                    ID[\"EPSG\",8802]],\n"
+            "                PARAMETER[\"Scale factor at natural "
+            "origin\",0.9996,\n"
+            "                    SCALEUNIT[\"unity\",1],\n"
+            "                    ID[\"EPSG\",8805]],\n"
+            "                PARAMETER[\"False easting\",500000,\n"
+            "                    LENGTHUNIT[\"metre\",1],\n"
+            "                    ID[\"EPSG\",8806]],\n"
+            "                PARAMETER[\"False northing\",0,\n"
+            "                    LENGTHUNIT[\"metre\",1],\n"
+            "                    ID[\"EPSG\",8807]]],\n"
+            "            ID[\"EPSG\",32631]],\n"
+            "        DERIVINGCONVERSION[\"unnamed\",\n"
+            "            METHOD[\"Affine parametric transformation\",\n"
+            "                ID[\"EPSG\",9624]],\n"
+            "            PARAMETER[\"A0\",1.1,\n"
+            "                LENGTHUNIT[\"metre\",1],\n"
+            "                ID[\"EPSG\",8623]],\n"
+            "            PARAMETER[\"A1\",2.1,\n"
+            "                SCALEUNIT[\"unity\",1],\n"
+            "                ID[\"EPSG\",8624]],\n"
+            "            PARAMETER[\"A2\",3.1,\n"
+            "                SCALEUNIT[\"unity\",1],\n"
+            "                ID[\"EPSG\",8625]],\n"
+            "            PARAMETER[\"B0\",4.1,\n"
+            "                LENGTHUNIT[\"metre\",1],\n"
+            "                ID[\"EPSG\",8639]],\n"
+            "            PARAMETER[\"B1\",5.1,\n"
+            "                SCALEUNIT[\"unity\",1],\n"
+            "                ID[\"EPSG\",8640]],\n"
+            "            PARAMETER[\"B2\",6.1,\n"
+            "                SCALEUNIT[\"unity\",1],\n"
+            "                ID[\"EPSG\",8641]]],\n"
+            "        CS[Cartesian,2],\n"
+            "            AXIS[\"(E)\",east,\n"
+            "                ORDER[1],\n"
+            "                LENGTHUNIT[\"metre\",1,\n"
+            "                    ID[\"EPSG\",9001]]],\n"
+            "            AXIS[\"(N)\",north,\n"
+            "                ORDER[2],\n"
+            "                LENGTHUNIT[\"metre\",1,\n"
+            "                    ID[\"EPSG\",9001]]]],\n"
+            "    VERTCRS[\"EGM2008 height\",\n"
+            "        VDATUM[\"EGM2008 geoid\"],\n"
+            "        CS[vertical,1],\n"
+            "            AXIS[\"gravity-related height (H)\",up,\n"
+            "                LENGTHUNIT[\"metre\",1]],\n"
+            "        USAGE[\n"
+            "            SCOPE[\"Geodesy.\"],\n"
+            "            AREA[\"World.\"],\n"
+            "            BBOX[-90,-180,90,180]],\n"
+            "        ID[\"EPSG\",3855]]]");
+    }
+
+    {
+        PJ *bound_crs = proj_create(
+            m_ctxt, "+proj=utm +zone=31 +ellps=GRS80 +towgs84=0,0,0 +type=crs");
+        ASSERT_NE(bound_crs, nullptr);
+        ObjectKeeper keeper_bound_crs(bound_crs);
+
+        PJ *pj = proj_crs_add_horizontal_derived_conversion(
+            m_ctxt, "my derived crs", bound_crs, conv, cs);
+        ASSERT_NE(pj, nullptr);
+        ObjectKeeper keeper_pj(pj);
+
+        auto wkt = proj_as_wkt(m_ctxt, pj, PJ_WKT2_2019, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_STREQ(
+            wkt,
+            "BOUNDCRS[\n"
+            "    SOURCECRS[\n"
+            "        DERIVEDPROJCRS[\"my derived crs\",\n"
+            "            BASEPROJCRS[\"unknown\",\n"
+            "                BASEGEOGCRS[\"unknown\",\n"
+            "                    DATUM[\"Unknown based on GRS 1980 ellipsoid "
+            "using towgs84=0,0,0\",\n"
+            "                        ELLIPSOID[\"GRS "
+            "1980\",6378137,298.257222101,\n"
+            "                            LENGTHUNIT[\"metre\",1],\n"
+            "                            ID[\"EPSG\",7019]]],\n"
+            "                    PRIMEM[\"Greenwich\",0,\n"
+            "                        "
+            "ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                        ID[\"EPSG\",8901]]],\n"
+            "                CONVERSION[\"UTM zone 31N\",\n"
+            "                    METHOD[\"Transverse Mercator\",\n"
+            "                        ID[\"EPSG\",9807]],\n"
+            "                    PARAMETER[\"Latitude of natural origin\",0,\n"
+            "                        "
+            "ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                        ID[\"EPSG\",8801]],\n"
+            "                    PARAMETER[\"Longitude of natural origin\",3,\n"
+            "                        "
+            "ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                        ID[\"EPSG\",8802]],\n"
+            "                    PARAMETER[\"Scale factor at natural "
+            "origin\",0.9996,\n"
+            "                        SCALEUNIT[\"unity\",1],\n"
+            "                        ID[\"EPSG\",8805]],\n"
+            "                    PARAMETER[\"False easting\",500000,\n"
+            "                        LENGTHUNIT[\"metre\",1],\n"
+            "                        ID[\"EPSG\",8806]],\n"
+            "                    PARAMETER[\"False northing\",0,\n"
+            "                        LENGTHUNIT[\"metre\",1],\n"
+            "                        ID[\"EPSG\",8807]],\n"
+            "                    ID[\"EPSG\",16031]]],\n"
+            "            DERIVINGCONVERSION[\"unnamed\",\n"
+            "                METHOD[\"Affine parametric transformation\",\n"
+            "                    ID[\"EPSG\",9624]],\n"
+            "                PARAMETER[\"A0\",1.1,\n"
+            "                    LENGTHUNIT[\"metre\",1],\n"
+            "                    ID[\"EPSG\",8623]],\n"
+            "                PARAMETER[\"A1\",2.1,\n"
+            "                    SCALEUNIT[\"unity\",1],\n"
+            "                    ID[\"EPSG\",8624]],\n"
+            "                PARAMETER[\"A2\",3.1,\n"
+            "                    SCALEUNIT[\"unity\",1],\n"
+            "                    ID[\"EPSG\",8625]],\n"
+            "                PARAMETER[\"B0\",4.1,\n"
+            "                    LENGTHUNIT[\"metre\",1],\n"
+            "                    ID[\"EPSG\",8639]],\n"
+            "                PARAMETER[\"B1\",5.1,\n"
+            "                    SCALEUNIT[\"unity\",1],\n"
+            "                    ID[\"EPSG\",8640]],\n"
+            "                PARAMETER[\"B2\",6.1,\n"
+            "                    SCALEUNIT[\"unity\",1],\n"
+            "                    ID[\"EPSG\",8641]]],\n"
+            "            CS[Cartesian,2],\n"
+            "                AXIS[\"(E)\",east,\n"
+            "                    ORDER[1],\n"
+            "                    LENGTHUNIT[\"metre\",1,\n"
+            "                        ID[\"EPSG\",9001]]],\n"
+            "                AXIS[\"(N)\",north,\n"
+            "                    ORDER[2],\n"
+            "                    LENGTHUNIT[\"metre\",1,\n"
+            "                        ID[\"EPSG\",9001]]]]],\n"
+            "    TARGETCRS[\n"
+            "        GEOGCRS[\"WGS 84\",\n"
+            "            DATUM[\"World Geodetic System 1984\",\n"
+            "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                    LENGTHUNIT[\"metre\",1]]],\n"
+            "            PRIMEM[\"Greenwich\",0,\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "            CS[ellipsoidal,2],\n"
+            "                AXIS[\"latitude\",north,\n"
+            "                    ORDER[1],\n"
+            "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "                AXIS[\"longitude\",east,\n"
+            "                    ORDER[2],\n"
+            "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "            ID[\"EPSG\",4326]]],\n"
+            "    ABRIDGEDTRANSFORMATION[\"Transformation from unknown to "
+            "WGS84\",\n"
+            "        METHOD[\"Geocentric translations (geog2D domain)\",\n"
+            "            ID[\"EPSG\",9603]],\n"
+            "        PARAMETER[\"X-axis translation\",0,\n"
+            "            ID[\"EPSG\",8605]],\n"
+            "        PARAMETER[\"Y-axis translation\",0,\n"
+            "            ID[\"EPSG\",8606]],\n"
+            "        PARAMETER[\"Z-axis translation\",0,\n"
+            "            ID[\"EPSG\",8607]]]]");
+    }
+
+    // Error cases
+    {
+        PJ *proj_crs = proj_create(m_ctxt, "EPSG:32631");
+        ASSERT_NE(proj_crs, nullptr);
+        ObjectKeeper keeper_proj_crs(proj_crs);
+
+        EXPECT_EQ(proj_crs_add_horizontal_derived_conversion(m_ctxt, nullptr,
+                                                             nullptr, conv, cs),
+                  nullptr);
+        EXPECT_EQ(proj_crs_add_horizontal_derived_conversion(
+                      m_ctxt, nullptr, proj_crs, nullptr, cs),
+                  nullptr);
+        EXPECT_EQ(proj_crs_add_horizontal_derived_conversion(
+                      m_ctxt, nullptr, proj_crs, conv, nullptr),
+                  nullptr);
+
+        EXPECT_EQ(proj_crs_add_horizontal_derived_conversion(m_ctxt, nullptr,
+                                                             conv, conv, cs),
+                  nullptr);
+        EXPECT_EQ(proj_crs_add_horizontal_derived_conversion(m_ctxt, nullptr,
+                                                             proj_crs, cs, cs),
+                  nullptr);
+        EXPECT_EQ(proj_crs_add_horizontal_derived_conversion(
+                      m_ctxt, nullptr, proj_crs, conv, proj_crs),
+                  nullptr);
+
+        PJ *geog_crs = proj_create(m_ctxt, "EPSG:4326");
+        ASSERT_NE(geog_crs, nullptr);
+        ObjectKeeper keeper_geog_crs(geog_crs);
+
+        EXPECT_EQ(proj_crs_add_horizontal_derived_conversion(
+                      m_ctxt, "my derived crs", geog_crs, conv, cs),
+                  nullptr);
+    }
+}
+
 } // namespace

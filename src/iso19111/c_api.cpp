@@ -9766,3 +9766,239 @@ int proj_crs_has_point_motion_operation(PJ_CONTEXT *ctx, const PJ *crs) {
     }
     return false;
 }
+
+// ---------------------------------------------------------------------------
+
+static UnitOfMeasure createScaleUnit(const char *name, double convFactor,
+                                     const char *unit_auth_name = nullptr,
+                                     const char *unit_code = nullptr) {
+    return name == nullptr
+               ? UnitOfMeasure::SCALE_UNITY
+               : UnitOfMeasure(name, convFactor, UnitOfMeasure::Type::SCALE,
+                               unit_auth_name ? unit_auth_name : "",
+                               unit_code ? unit_code : "");
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a conversion with method Affine Parametric, assuming
+ * it works in linear coordinate space
+ *
+ * This method is defined as
+ * <a href="https://epsg.org/coord-operation-method_9624/index.html">
+ * EPSG:9624</a>.
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param name Conversion name, or nullptr
+ * @param A0 translation term for output first axis
+ * @param A0_unit_name Name of the linear unit for A0. Or NULL for metre.
+ * @param A0_unit_conv_factor Conversion factor to metre for A0. Note: this is
+ * indicative only, and not taken into account in coordinate conversion
+ * @param A1 coefficient term for output first axis taking that is multiplied
+ * with the value along the source first axis
+ * @param A1_unit_name Name of the scale unit for A1. Or NULL for unity.
+ * @param A1_unit_conv_factor Conversion factor to unity for A1. Note: this is
+ * indicative only, and not taken into account in coordinate conversion
+ * @param A2 coefficient term for output first axis taking that is multiplied
+ * with the value along the source second axis
+ * @param A2_unit_name Name of the scale unit for A2. Or NULL for unity.
+ * @param A2_unit_conv_factor Conversion factor to unity for A2. Note: this is
+ * indicative only, and not taken into account in coordinate conversion
+ * @param B0 translation term for output second axis
+ * @param B0_unit_name Name of the linear unit for B0. Or NULL for metre.
+ * @param B0_unit_conv_factor Conversion factor to metre for B0. Note: this is
+ * indicative only, and not taken into account in coordinate conversion
+ * @param B1 coefficient term for output second axis taking that is multiplied
+ * with the value along the source first axis
+ * @param B1_unit_name Name of the scale unit for B1. Or NULL for unity.
+ * @param B1_unit_conv_factor Conversion factor to unity for B1. Note: this is
+ * indicative only, and not taken into account in coordinate conversion
+ * @param B2 coefficient term for output second axis taking that is multiplied
+ * with the value along the source second axis
+ * @param B2_unit_name Name of the scale unit for B2. Or NULL for unity.
+ * @param B2_unit_conv_factor Conversion factor to unity for B2. Note: this is
+ * indicative only, and not taken into account in coordinate conversion
+ * @return Object that must be unreferenced with proj_destroy(), or NULL
+ * in case of error.
+ *
+ * @since 9.8
+ */
+/* clang-format off */
+PJ PROJ_DLL *proj_create_linear_affine_parametric_conversion(
+    PJ_CONTEXT *ctx, const char* name,
+    double A0, const char *A0_unit_name, double A0_unit_conv_factor,
+    double A1, const char *A1_unit_name, double A1_unit_conv_factor,
+    double A2, const char *A2_unit_name, double A2_unit_conv_factor,
+    double B0, const char *B0_unit_name, double B0_unit_conv_factor,
+    double B1, const char *B1_unit_name, double B1_unit_conv_factor,
+    double B2, const char *B2_unit_name, double B2_unit_conv_factor)
+/* clang-format on */
+{
+    SANITIZE_CTX(ctx);
+    try {
+        auto conv = Conversion::createAffineParametric(
+            createPropertyMapName(name),
+            Length(A0, createLinearUnit(A0_unit_name, A0_unit_conv_factor)),
+            Scale(A1, createScaleUnit(A1_unit_name, A1_unit_conv_factor)),
+            Scale(A2, createScaleUnit(A2_unit_name, A2_unit_conv_factor)),
+            Length(B0, createLinearUnit(B0_unit_name, B0_unit_conv_factor)),
+            Scale(B1, createScaleUnit(B1_unit_name, B1_unit_conv_factor)),
+            Scale(B2, createScaleUnit(B2_unit_name, B2_unit_conv_factor)));
+        return pj_obj_create(ctx, conv);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a DerivedProjectedCRS
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs_name CRS name. Or NULL
+ * @param base_proj_crs Base ProjectedCRS. Must not be NULL.
+ * @param deriving_conversion Conversion. Must not be NULL.
+ * @param coordinate_system Cartesian coordinate system. Must not be NULL.
+ *
+ * @return Object that must be unreferenced with
+ * proj_destroy(), or NULL in case of error.
+ *
+ * @since 9.8
+ */
+
+PJ *proj_create_derived_projected_crs(PJ_CONTEXT *ctx, const char *crs_name,
+                                      const PJ *base_proj_crs,
+                                      const PJ *deriving_conversion,
+                                      const PJ *coordinate_system) {
+    SANITIZE_CTX(ctx);
+    if (!base_proj_crs || !deriving_conversion || !coordinate_system) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return nullptr;
+    }
+    auto baseProjCRS =
+        std::dynamic_pointer_cast<ProjectedCRS>(base_proj_crs->iso_obj);
+    if (!baseProjCRS) {
+        return nullptr;
+    }
+    auto conv =
+        std::dynamic_pointer_cast<Conversion>(deriving_conversion->iso_obj);
+    if (!conv) {
+        return nullptr;
+    }
+    auto cs =
+        std::dynamic_pointer_cast<CartesianCS>(coordinate_system->iso_obj);
+    if (!cs) {
+        return nullptr;
+    }
+    try {
+        return pj_obj_create(ctx, DerivedProjectedCRS::create(
+                                      createPropertyMapName(crs_name),
+                                      NN_NO_CHECK(baseProjCRS),
+                                      NN_NO_CHECK(conv), NN_NO_CHECK(cs)));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Add a deriving conversion to a horizontal CRS
+ *
+ * This is for now restricting when the horizontal CRS is a ProjectedCRS,
+ * a CompoundCRS with a ProjectedCRS, or a BoundCRS of a ProjectedCRS.
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs_name Name of the derived projected CRS. Or NULL
+ * @param base_crs ProjectedCRS, CompoundCRS with a ProjectedCRS, or
+ * BoundCRS of a ProjectedCRS. Must not be NULL.
+ * @param deriving_conversion Conversion. Must not be NULL.
+ * @param coordinate_system Cartesian coordinate system. Must not be NULL.
+ *
+ * @return Object that must be unreferenced with
+ * proj_destroy(), or NULL in case of error.
+ *
+ * @since 9.8
+ */
+PJ *proj_crs_add_horizontal_derived_conversion(PJ_CONTEXT *ctx,
+                                               const char *crs_name,
+                                               const PJ *base_crs,
+                                               const PJ *deriving_conversion,
+                                               const PJ *coordinate_system) {
+    SANITIZE_CTX(ctx);
+    if (!base_crs || !deriving_conversion || !coordinate_system) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return nullptr;
+    }
+
+    CRSPtr baseCRS = std::dynamic_pointer_cast<CRS>(base_crs->iso_obj);
+    if (!baseCRS)
+        return nullptr;
+    auto conv =
+        std::dynamic_pointer_cast<Conversion>(deriving_conversion->iso_obj);
+    if (!conv) {
+        return nullptr;
+    }
+    auto cs =
+        std::dynamic_pointer_cast<CartesianCS>(coordinate_system->iso_obj);
+    if (!cs) {
+        return nullptr;
+    }
+
+    auto compoundCRS = std::dynamic_pointer_cast<CompoundCRS>(baseCRS);
+    CRSPtr verticalCRS;
+    if (compoundCRS) {
+        const auto &components = compoundCRS->componentReferenceSystems();
+        if (components.size() == 2) {
+            baseCRS = components[0];
+            verticalCRS = components[1];
+        }
+    }
+
+    auto boundCRS = std::dynamic_pointer_cast<BoundCRS>(baseCRS);
+    if (boundCRS) {
+        baseCRS = boundCRS->baseCRS();
+    }
+
+    auto baseProjCRS = std::dynamic_pointer_cast<ProjectedCRS>(baseCRS);
+    if (!baseProjCRS) {
+        return nullptr;
+    }
+
+    try {
+        CRSNNPtr retCRS = DerivedProjectedCRS::create(
+            createPropertyMapName(crs_name), NN_NO_CHECK(baseProjCRS),
+            NN_NO_CHECK(conv), NN_NO_CHECK(cs));
+
+        if (boundCRS) {
+            retCRS = BoundCRS::create(retCRS, boundCRS->hubCRS(),
+                                      boundCRS->transformation());
+        }
+        if (verticalCRS) {
+            retCRS = CompoundCRS::create(
+                createPropertyMapName(
+                    (retCRS->nameStr() + " + " + verticalCRS->nameStr())
+                        .c_str()),
+                {retCRS, NN_NO_CHECK(verticalCRS)});
+        }
+        return pj_obj_create(ctx, retCRS);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}

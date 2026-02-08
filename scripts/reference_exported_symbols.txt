@@ -553,6 +553,7 @@ osgeo::proj::operation::ConcatenatedOperation::inverse() const
 osgeo::proj::operation::ConcatenatedOperation::operations() const
 osgeo::proj::operation::Conversion::~Conversion()
 osgeo::proj::operation::Conversion::convertToOtherMethod(int) const
+osgeo::proj::operation::Conversion::createAffineParametric(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Measure const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Measure const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Scale const&)
 osgeo::proj::operation::Conversion::createAlbersEqualArea(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createAmericanPolyconic(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createAxisOrderReversal(bool)
@@ -991,6 +992,7 @@ proj_create_crs_to_crs
 proj_create_crs_to_crs_from_pj
 proj_create_cs
 proj_create_derived_geographic_crs
+proj_create_derived_projected_crs
 proj_create_ellipsoidal_2D_cs
 proj_create_ellipsoidal_3D_cs
 proj_create_engineering_crs
@@ -1001,12 +1003,14 @@ proj_create_geocentric_crs
 proj_create_geocentric_crs_from_datum
 proj_create_geographic_crs
 proj_create_geographic_crs_from_datum
+proj_create_linear_affine_parametric_conversion
 proj_create_operation_factory_context
 proj_create_operations
 proj_create_projected_crs
 proj_create_transformation
 proj_create_vertical_crs
 proj_create_vertical_crs_ex
+proj_crs_add_horizontal_derived_conversion
 proj_crs_alter_cs_angular_unit
 proj_crs_alter_cs_linear_unit
 proj_crs_alter_geodetic_crs
