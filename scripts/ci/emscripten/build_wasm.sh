@@ -307,6 +307,10 @@ extern "C" {
 const char* get_compilation_date() {
     return "$DDD" ;
 }
+
+int get_ptr_size() {
+    return sizeof(void*);
+}
 }
 EOF
 
@@ -330,7 +334,7 @@ FINAL_LIBS="${INSTALL_DIR}/lib/libproj.a \
             ${WRAPPER_OBJ_FILE}"
 
 # include all exported symbols
-echo -e "_malloc\n_free\n_get_compilation_date" > ${INSTALL_DIR}/exported_symbols.txt
+echo -e "_malloc\n_free\n_get_compilation_date\n_get_ptr_size" > ${INSTALL_DIR}/exported_symbols.txt
 grep "^proj_\|^geod_" ${PROJ_SRC_DIR}/scripts/reference_exported_symbols.txt | grep -v "(" | sed 's/^/_/' >> ${INSTALL_DIR}/exported_symbols.txt
 head ${INSTALL_DIR}/exported_symbols.txt
 

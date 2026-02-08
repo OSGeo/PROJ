@@ -157,8 +157,8 @@ const tests = {
             try {
                 // TODO support compound CRS
 
-                // Emscripten (wasm32) pointers are so far 4 bytes
-                const ptrSize = 4;
+                const ptrSize = proj._get_ptr_size();
+                assert.ok(ptrSize == 4 || ptrSize == 8);
                 const doubleSize = 8; // Doubles are 8 bytes
                 const sourceCRS = keep.string(crs);
                 const P_crs = keep.call("_proj_create", ctx, sourceCRS);
