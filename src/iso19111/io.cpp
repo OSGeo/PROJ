@@ -10192,7 +10192,7 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             }
         }
     }
-    if (invGlobal) {
+    if (invGlobal && !steps.empty()) {
         for (auto &step : steps) {
             step.inverted = !step.inverted;
         }
