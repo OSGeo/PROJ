@@ -353,7 +353,7 @@ emcc -v ${FINAL_LIBS} \
     -s EXPORT_NAME="'ProjModuleFactory'" \
     -s FORCE_FILESYSTEM=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
-    -s EXPORTED_RUNTIME_METHODS="[ccall, cwrap, FS, HEAPF64, stringToNewUTF8, UTF8ToString, getValue]" \
+    -s EXPORTED_RUNTIME_METHODS="[ccall, cwrap, FS, HEAP8, HEAP16, HEAP32, HEAPF64, lengthBytesUTF8, stringToUTF8, stringToNewUTF8, UTF8ToString, getValue, setValue]" \
     -s EXPORTED_FUNCTIONS=@${INSTALL_DIR}/exported_symbols.txt \
     ${EM_PTHREADS_FLAGS}
 
