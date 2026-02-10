@@ -328,7 +328,7 @@ def create_datumensemble_transformations(proj_db_cursor):
                 # Insert a null transformation between the representative CRS of the datum ensemble
                 # and each representative CRS of its members.
                 crs_code, crs_name, crs_extent = find_crs_code_name_extent_from_geodetic_datum_code(proj_db_cursor, member_code)
-                assert crs_extent == ensemble_crs_extent or (crs_extent in (2830, 1262) and ensemble_crs_extent in (2830, 1262)) or (ensemble_crs_code == 4258 and ensemble_crs_extent == 4755 and crs_extent in (1298, 1162, 4543, 1096, 1305, 1090, 1225, 1139, 1145, 3343, 1076, 1212, 1056, 4542, 1192, 1103, 1050, 1095, 1182, 1264, 1172, 1037, 1044, 1079, 1211, 1093, 1106, 1148, 4832, 1197, 4833, 1119)), (ensemble_crs_code, ensemble_crs_name, ensemble_crs_extent, crs_code, crs_name, crs_extent)
+                assert crs_extent == ensemble_crs_extent or (crs_extent in (2830, 1262) and ensemble_crs_extent in (2830, 1262)) or (ensemble_crs_code == 4258 and ensemble_crs_extent == 4755 and crs_extent in (1298, 1162, 4543, 1096, 1305, 1090, 1225, 1139, 1145, 3343, 1076, 1212, 1056, 4542, 1192, 1103, 1050, 1095, 1182, 1264, 1172, 1037, 1044, 1079, 1211, 1093, 1106, 1148, 4832, 1197, 4833, 1119, 1286)), (ensemble_crs_code, ensemble_crs_name, ensemble_crs_extent, crs_code, crs_name, crs_extent)
 
                 # Check if there's already any transformation registered between
                 # the member crs and the ensemble crs

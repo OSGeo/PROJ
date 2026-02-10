@@ -253,7 +253,7 @@ INSERT INTO "usage" VALUES('EPSG','4917','compound_crs','EPSG','6700','EPSG','41
 INSERT INTO "compound_crs" VALUES('EPSG','6871','WGS 84 / Pseudo-Mercator +  EGM2008 geoid height',NULL,'EPSG','3857','EPSG','3855',1);
 INSERT INTO "usage" VALUES('EPSG','5023','compound_crs','EPSG','6871','EPSG','1262','EPSG','1229');
 INSERT INTO "compound_crs" VALUES('EPSG','6893','WGS 84 / World Mercator + EGM2008 height',NULL,'EPSG','3395','EPSG','3855',0);
-INSERT INTO "usage" VALUES('EPSG','5036','compound_crs','EPSG','6893','EPSG','1262','EPSG','1229');
+INSERT INTO "usage" VALUES('EPSG','5036','compound_crs','EPSG','6893','EPSG','3391','EPSG','1229');
 INSERT INTO "compound_crs" VALUES('EPSG','6917','SVY21 + SHD height',NULL,'EPSG','4757','EPSG','6916',0);
 INSERT INTO "usage" VALUES('EPSG','5040','compound_crs','EPSG','6917','EPSG','1210','EPSG','1144');
 INSERT INTO "compound_crs" VALUES('EPSG','6927','SVY21 / Singapore TM + SHD height',NULL,'EPSG','3414','EPSG','6916',0);
@@ -651,7 +651,7 @@ INSERT INTO "usage" VALUES('EPSG','14356','compound_crs','EPSG','9523','EPSG','3
 INSERT INTO "compound_crs" VALUES('EPSG','9524','NAD83(MA11) + GUVD04 height',NULL,'EPSG','6325','EPSG','6644',0);
 INSERT INTO "usage" VALUES('EPSG','14364','compound_crs','EPSG','9524','EPSG','3255','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9525','NAD83(MA11) + NMVD03 height',NULL,'EPSG','6325','EPSG','6640',0);
-INSERT INTO "usage" VALUES('EPSG','14367','compound_crs','EPSG','9525','EPSG','4521','EPSG','1026');
+INSERT INTO "usage" VALUES('EPSG','14367','compound_crs','EPSG','9525','EPSG','4171','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9526','NAD83(PA11) + ASVD02 height',NULL,'EPSG','6322','EPSG','6643',0);
 INSERT INTO "usage" VALUES('EPSG','14462','compound_crs','EPSG','9526','EPSG','2288','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9527','NZGD2000 + NZVD2009 height',NULL,'EPSG','4167','EPSG','4440',0);

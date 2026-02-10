@@ -744,3 +744,13 @@ INSERT INTO "grid_transformation" VALUES('PROJ','OLD_EPSG_8361','ETRS89 to ETRS8
 INSERT INTO "usage" VALUES('PROJ','OLD_EPSG_10508','grid_transformation','PROJ','OLD_EPSG_8361','EPSG','1211','EPSG','1186');
 INSERT INTO "grid_transformation" VALUES('PROJ','OLD_EPSG_8362','ETRS89 to ETRS89 + EVRF2007 height (1)','Uses ETRS89 (realization ETRF2000) and quasigeoid model DMQSK2014E. 1 sigma = 29 mm (test performed on 93 independent points). Recommended as part of transformation between Baltic 1957 height and EVRF2007 height (see concatenated operation code 8363).','EPSG','1088','Geog3D to Geog2D+GravityRelatedHeight (gtx)','EPSG','4937','EPSG','7423',0.03,'EPSG','8666','Geoid (height correction) model file','Slovakia_ETRS89h_to_EVRF2007.gtx',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'EPSG','4258','UGKK-Svk',0);
 INSERT INTO "usage" VALUES('PROJ','OLD_EPSG_10509','grid_transformation','PROJ','OLD_EPSG_8362','EPSG','1211','EPSG','1186');
+
+-- Synthetize a concatenated operation for the pre-EPSG 12.048 EPSG:1647 "CH1903+ to ETRS89 (1)"
+-- that has now been changed to "CH1903+ to ETRS89-CHE [CHTRF95] (1)"
+
+INSERT INTO "concatenated_operation" VALUES(
+    'PROJ','CH1903+_to_ETRS89','CH1903+ to ETRS89 (1)',
+    'Equivalent of pre-EPSG 12.048 EPSG:1647 "CH1903+ to ETRS89 (1)"','EPSG','4150','EPSG','4258',NULL,NULL,0);
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','CH1903+_to_ETRS89',1,'EPSG','1647','forward');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','CH1903+_to_ETRS89',2,'PROJ','ETRS89_TO_ETRS89-CHE[CHTRF95]','reverse');
+INSERT INTO "usage" VALUES('PROJ','CH1903+_to_ETRS89_USAGE','concatenated_operation','PROJ','CH1903+_to_ETRS89','EPSG','1286','EPSG','1031');

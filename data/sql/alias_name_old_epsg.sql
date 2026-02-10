@@ -1256,3 +1256,27 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','11074','ETRS89','EPSG_OLD
 -- Changed in EPSG v12.047
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1270','MSL NL','EPSG_OLD');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1290','LAT NL','EPSG_OLD');
+
+-- Changed in EPSG v12.048
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1064','SIRGAS-Chile 2002','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1252','SIRGAS-Chile 2013','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6151','Swiss Terrestrial Reference Frame 1995 (CHTRF95)','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1327','SIRGAS-Chile 2021','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1253','SIRGAS-Chile 2016','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1446','ETRS89/DREF91/2025','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','5358','SIRGAS-Chile realización 1','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','5359','SIRGAS-Chile realización 1','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','5360','SIRGAS-Chile realización 1','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9146','SIRGAS-Chile realización 3','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9153','SIRGAS-Chile realización 4','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9147','SIRGAS-Chile realización 3','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9148','SIRGAS-Chile realización 3','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9151','SIRGAS-Chile realización 4','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9152','SIRGAS-Chile realización 4','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4932','CHTRF95','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4933','CHTRF95','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4151','CHTRF95','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','20039','SIRGAS-Chile realización 5','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','20040','SIRGAS-Chile realización 5','EPSG_OLD');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','20041','SIRGAS-Chile realización 5','EPSG_OLD');
+

@@ -1741,7 +1741,7 @@ tests:
     (superseded transformation, but replacements has unknown grid)
   out: |
     Candidate operations found: 2
-    unknown id, Inverse of UTM zone 30N + ED50 to ETRS89 (12) + UTM zone 30N, 0.2 m, Spain - mainland, Balearic Islands, Ceuta and Melila - onshore.
+    unknown id, Inverse of UTM zone 30N + ED50 to ETRS89 (12) + UTM zone 30N, 0.2 m, Spain - mainland, Balearic Islands and Ceuta - onshore.
     unknown id, Inverse of UTM zone 30N + ED50 to ETRS89 (7) + UTM zone 30N, 1.5 m, Spain - onshore mainland except northwest (north of 41°30'N and west of 4°30'W).
 - args: --list-crs
   grep: EPSG:32632|ESRI:103668|OGC

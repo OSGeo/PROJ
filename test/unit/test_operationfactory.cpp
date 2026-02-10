@@ -1906,7 +1906,8 @@ TEST(operation, geogCRS_3D_to_geogCRS_3D_different_datum_context) {
     ASSERT_GE(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
               "Inverse of ETRS89 to ETRS89-FRA [RGF93 v1] + "
-              "Inverse of CH1903+ to ETRS89 (1)");
+              "ETRS89 to ETRS89-CHE [CHTRF95] + "
+              "Inverse of CH1903+ to ETRS89-CHE [CHTRF95] (1)");
     // Check that there is no +push +v_3
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
@@ -1951,7 +1952,8 @@ TEST(operation, geocentric_to_geogCRS_3D_different_datum_context) {
               "Conversion from ETRS89-FRA [RGF93 v1] (geocentric) to "
               "ETRS89-FRA [RGF93 v1] (geog3D) + "
               "Inverse of ETRS89 to ETRS89-FRA [RGF93 v1] + "
-              "Inverse of CH1903+ to ETRS89 (1)");
+              "ETRS89 to ETRS89-CHE [CHTRF95] + "
+              "Inverse of CH1903+ to ETRS89-CHE [CHTRF95] (1)");
     // Check that there is no +push +v_3
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
