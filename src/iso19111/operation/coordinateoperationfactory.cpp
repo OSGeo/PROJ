@@ -825,7 +825,19 @@ CoordinateOperationPtr CoordinateOperationFactory::createOperation(
 
 // ---------------------------------------------------------------------------
 
+static bool isNullTransformation(const std::string &name) {
+    if (name.find(" + ") != std::string::npos)
+        return false;
+    return starts_with(name, BALLPARK_GEOCENTRIC_TRANSLATION) ||
+           starts_with(name, BALLPARK_GEOGRAPHIC_OFFSET) ||
+           starts_with(name, NULL_GEOGRAPHIC_OFFSET) ||
+           starts_with(name, NULL_GEOCENTRIC_TRANSLATION);
+}
+
+// ---------------------------------------------------------------------------
+
 struct PrecomputedOpCharacteristics {
+
     double area_{};
     double accuracy_{};
     bool isPROJExportable_ = false;
@@ -838,19 +850,33 @@ struct PrecomputedOpCharacteristics {
     bool hasBallparkVertical_ = false;
     bool isNullTransformation_ = false;
 
+    // 3 below tests are for ETRS89-XXX to ETRS89-YYY following
+    // recommandations of IOGP 373-07-7 to use ETRF2000 hub
+    bool is_ETRS89_XXX_to_ETRS89_YYY_ = false;
+    bool uses_ETRF2000_ = false;
+    bool uses_ETRS89_to_ETRS89_XXX_generic_ = false;
+
     PrecomputedOpCharacteristics() = default;
-    PrecomputedOpCharacteristics(double area, double accuracy,
-                                 bool isPROJExportable, bool hasGrids,
-                                 bool gridsAvailable, bool gridsKnown,
-                                 size_t stepCount, size_t projStepCount,
-                                 bool isApprox, bool hasBallparkVertical,
-                                 bool isNullTransformation)
-        : area_(area), accuracy_(accuracy), isPROJExportable_(isPROJExportable),
-          hasGrids_(hasGrids), gridsAvailable_(gridsAvailable),
-          gridsKnown_(gridsKnown), stepCount_(stepCount),
-          projStepCount_(projStepCount), isApprox_(isApprox),
-          hasBallparkVertical_(hasBallparkVertical),
-          isNullTransformation_(isNullTransformation) {}
+    PrecomputedOpCharacteristics(const CoordinateOperationNNPtr &op,
+                                 double area, bool isPROJExportable,
+                                 bool hasGrids, bool gridsAvailable,
+                                 bool gridsKnown, size_t stepCount,
+                                 size_t projStepCount)
+        : area_(area), accuracy_(getAccuracy(op)),
+          isPROJExportable_(isPROJExportable), hasGrids_(hasGrids),
+          gridsAvailable_(gridsAvailable), gridsKnown_(gridsKnown),
+          stepCount_(stepCount), projStepCount_(projStepCount),
+          isApprox_(op->hasBallparkTransformation()),
+          hasBallparkVertical_(
+              op->nameStr().find(BALLPARK_VERTICAL_TRANSFORMATION) !=
+              std::string::npos),
+          isNullTransformation_(isNullTransformation(op->nameStr())),
+          is_ETRS89_XXX_to_ETRS89_YYY_(
+              starts_with(op->sourceCRS()->nameStr().c_str(), "ETRS89-") &&
+              starts_with(op->targetCRS()->nameStr().c_str(), "ETRS89-")),
+          uses_ETRF2000_(op->nameStr().find("ETRF2000") != std::string::npos),
+          uses_ETRS89_to_ETRS89_XXX_generic_(
+              op->nameStr().find("ETRS89 to ETRS89-") != std::string::npos) {}
 };
 
 // ---------------------------------------------------------------------------
@@ -978,6 +1004,22 @@ struct SortFunction {
             if (iterA->second.hasGrids_ && !iterB->second.hasGrids_) {
                 return false;
             }
+        }
+
+        // Follow recommandations of IOGP 373-07-7 to use ETRF2000 hub if
+        // no direct Transformation
+        if (iterA->second.is_ETRS89_XXX_to_ETRS89_YYY_ &&
+            iterB->second.is_ETRS89_XXX_to_ETRS89_YYY_) {
+            if (iterA->second.uses_ETRF2000_ &&
+                !iterA->second.uses_ETRS89_to_ETRS89_XXX_generic_ &&
+                !iterA->second.uses_ETRF2000_ &&
+                iterB->second.uses_ETRS89_to_ETRS89_XXX_generic_)
+                return true;
+            if (iterB->second.uses_ETRF2000_ &&
+                !iterB->second.uses_ETRS89_to_ETRS89_XXX_generic_ &&
+                !iterA->second.uses_ETRF2000_ &&
+                iterA->second.uses_ETRS89_to_ETRS89_XXX_generic_)
+                return false;
         }
 
         // The less intermediate steps, the better
@@ -1128,17 +1170,6 @@ static size_t getTransformationStepCount(const CoordinateOperationNNPtr &op) {
         }
     }
     return stepCount;
-}
-
-// ---------------------------------------------------------------------------
-
-static bool isNullTransformation(const std::string &name) {
-    if (name.find(" + ") != std::string::npos)
-        return false;
-    return starts_with(name, BALLPARK_GEOCENTRIC_TRANSLATION) ||
-           starts_with(name, BALLPARK_GEOGRAPHIC_OFFSET) ||
-           starts_with(name, NULL_GEOGRAPHIC_OFFSET) ||
-           starts_with(name, NULL_GEOCENTRIC_TRANSLATION);
 }
 
 // ---------------------------------------------------------------------------
@@ -1475,12 +1506,8 @@ struct FilterResults {
             std::cerr << std::endl;
 #endif
             map[op.get()] = PrecomputedOpCharacteristics(
-                area, getAccuracy(op), isPROJExportable, hasGrids,
-                gridsAvailable, gridsKnown, stepCount, projStepCount,
-                op->hasBallparkTransformation(),
-                op->nameStr().find(BALLPARK_VERTICAL_TRANSFORMATION) !=
-                    std::string::npos,
-                isNullTransformation(op->nameStr()));
+                op, area, isPROJExportable, hasGrids, gridsAvailable,
+                gridsKnown, stepCount, projStepCount);
         }
 
         // Sort !
