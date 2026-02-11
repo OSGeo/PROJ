@@ -1781,6 +1781,24 @@ PJ PROJ_DLL *proj_create_conversion(PJ_CONTEXT *ctx, const char *name,
                                     const char *method_code, int param_count,
                                     const PJ_PARAM_DESCRIPTION *params);
 
+PJ PROJ_DLL *proj_create_conversion(PJ_CONTEXT *ctx, const char *name,
+                                    const char *auth_name, const char *code,
+                                    const char *method_name,
+                                    const char *method_auth_name,
+                                    const char *method_code, int param_count,
+                                    const PJ_PARAM_DESCRIPTION *params);
+
+/* clang-format off */
+PJ PROJ_DLL *proj_create_linear_affine_parametric_conversion(
+    PJ_CONTEXT *ctx, const char* name,
+    double A0, const char *A0_unit_name, double A0_unit_conv_factor,
+    double A1, const char *A1_unit_name, double A1_unit_conv_factor,
+    double A2, const char *A2_unit_name, double A2_unit_conv_factor,
+    double B0, const char *B0_unit_name, double B0_unit_conv_factor,
+    double B1, const char *B1_unit_name, double B1_unit_conv_factor,
+    double B2, const char *B2_unit_name, double B2_unit_conv_factor);
+/* clang-format on */
+
 PJ PROJ_DLL *proj_create_transformation(
     PJ_CONTEXT *ctx, const char *name, const char *auth_name, const char *code,
     const PJ *source_crs, const PJ *target_crs, const PJ *interpolation_crs,
@@ -1797,6 +1815,16 @@ PJ PROJ_DLL *proj_create_projected_crs(PJ_CONTEXT *ctx, const char *crs_name,
                                        const PJ *geodetic_crs,
                                        const PJ *conversion,
                                        const PJ *coordinate_system);
+
+PJ PROJ_DLL *proj_create_derived_projected_crs(PJ_CONTEXT *ctx,
+                                               const char *crs_name,
+                                               const PJ *base_proj_crs,
+                                               const PJ *deriving_conversion,
+                                               const PJ *coordinate_system);
+
+PJ PROJ_DLL *proj_crs_add_horizontal_derived_conversion(
+    PJ_CONTEXT *ctx, const char *crs_name, const PJ *base_crs,
+    const PJ *deriving_conversion, const PJ *coordinate_system);
 
 PJ PROJ_DLL *proj_crs_create_bound_crs(PJ_CONTEXT *ctx, const PJ *base_crs,
                                        const PJ *hub_crs,

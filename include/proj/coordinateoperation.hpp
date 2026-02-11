@@ -1494,6 +1494,12 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     createVerticalOffset(const util::PropertyMap &properties,
                          const common::Length &offsetHeight);
 
+    PROJ_DLL static ConversionNNPtr
+    createAffineParametric(const util::PropertyMap &properties,
+                           const common::Measure &A0, const common::Scale &A1,
+                           const common::Scale &A2, const common::Measure &B0,
+                           const common::Scale &B1, const common::Scale &B2);
+
     PROJ_DLL ConversionPtr convertToOtherMethod(int targetEPSGCode) const;
 
     PROJ_PRIVATE :
