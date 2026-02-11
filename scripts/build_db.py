@@ -273,7 +273,7 @@ def fill_datumensemble(proj_db_cursor):
 
 
 def find_crs_code_name_extent_from_geodetic_datum_code(proj_db_cursor, datum_code):
-    proj_db_cursor.execute("SELECT coord_ref_sys_code, coord_ref_sys_name FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind = 'geographic 2D' AND deprecated = 0 AND datum_code = ?", (datum_code,))
+    proj_db_cursor.execute("SELECT coord_ref_sys_code, coord_ref_sys_name FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind = 'geographic 2D' AND deprecated = 0 AND datum_code = ? AND coord_ref_sys_name NOT LIKE '%(lon-lat)'", (datum_code,))
     subrows = proj_db_cursor.fetchall()
     assert len(subrows) == 1, (subrows, datum_code)
     crs_code = subrows[0][0]
@@ -316,14 +316,27 @@ def create_datumensemble_transformations(proj_db_cursor):
             assert datum_type in ('dynamic geodetic', 'geodetic'), datum_code
             ensemble_crs_code, ensemble_crs_name, ensemble_crs_extent = find_crs_code_name_extent_from_geodetic_datum_code(proj_db_cursor, datum_code)
 
-        proj_db_cursor.execute("SELECT datum_code, datum_sequence FROM epsg.epsg_datumensemblemember WHERE datum_ensemble_code = ? ORDER by datum_sequence", (datum_code,))
-        for member_code, sequence in proj_db_cursor.fetchall():
-
+        proj_db_cursor.execute("SELECT datum_code FROM epsg.epsg_datumensemblemember WHERE datum_ensemble_code = ? ORDER by datum_sequence", (datum_code,))
+        list_datums = list(proj_db_cursor.fetchall())
+        if datum_code == 6258: # ETRS89
+            # This hack will be removed once the ETRS89 datum ensemble officially contains all national realizations
+            proj_db_cursor.execute("SELECT datum_code FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind = 'geographic 2D' AND coord_ref_sys_name LIKE 'ETRS89-___ [%]'")
+            etrs89_national_realizations = list(proj_db_cursor.fetchall())
+            list_datums += etrs89_national_realizations
+        for member_code, in list_datums:
             if datum_ensemble_member_table == 'geodetic_datum_ensemble_member':
                 # Insert a null transformation between the representative CRS of the datum ensemble
                 # and each representative CRS of its members.
                 crs_code, crs_name, crs_extent = find_crs_code_name_extent_from_geodetic_datum_code(proj_db_cursor, member_code)
-                assert crs_extent == ensemble_crs_extent or (crs_extent in (2830, 1262) and ensemble_crs_extent in (2830, 1262)) or (ensemble_crs_code == 4258 and ensemble_crs_extent == 4755 and crs_extent == 1298), (ensemble_crs_code, ensemble_crs_name, ensemble_crs_extent, crs_code, crs_name, crs_extent)
+                assert crs_extent == ensemble_crs_extent or (crs_extent in (2830, 1262) and ensemble_crs_extent in (2830, 1262)) or (ensemble_crs_code == 4258 and ensemble_crs_extent == 4755 and crs_extent in (1298, 1162, 4543, 1096, 1305, 1090, 1225, 1139, 1145, 3343, 1076, 1212, 1056, 4542, 1192, 1103, 1050, 1095, 1182, 1264, 1172, 1037, 1044, 1079, 1211, 1093, 1106, 1148, 4832, 1197, 4833, 1119, 1286)), (ensemble_crs_code, ensemble_crs_name, ensemble_crs_extent, crs_code, crs_name, crs_extent)
+
+                # Check if there's already any transformation registered between
+                # the member crs and the ensemble crs
+                proj_db_cursor.execute(f"SELECT coord_op_name FROM epsg.epsg_coordoperation WHERE coord_op_name = '{crs_name} to {ensemble_crs_name} (1)' OR coord_op_name = '{ensemble_crs_name} to {crs_name} (1)'")
+                v = proj_db_cursor.fetchone()
+                if v:
+                    print(f"Skipping {ensemble_crs_name} to {crs_name} because of {v}")
+                    continue
 
                 code = '%s_TO_%s' % (ensemble_crs_name, crs_name)
                 code = code.replace(' ', '')

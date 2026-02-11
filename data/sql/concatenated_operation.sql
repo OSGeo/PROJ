@@ -547,5 +547,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','11206','ITRF2020 to ETRS89-M
 INSERT INTO "usage" VALUES('EPSG','24895','concatenated_operation','EPSG','11206','EPSG','1162','EPSG','1026');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11285','ITRF2020 to ETRS89-MDA [MOLDREF99] (1)','Accuracy is approximately 1cm at the ETRS89-MDA [MOLDREF99] anchor epoch of 1997.4 but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment.','EPSG','9988','EPSG','4000',0.1,'IOGP-Mda 1999',0);
 INSERT INTO "usage" VALUES('EPSG','24996','concatenated_operation','EPSG','11285','EPSG','1162','EPSG','1026');
+INSERT INTO "concatenated_operation" VALUES('EPSG','11310','ITRF2020 to ETRS89-CHE [CHTRF95] (1)','','EPSG','9988','EPSG','11222',0.1,'IOGP-Che 1995',0);
+INSERT INTO "usage" VALUES('EPSG','25091','concatenated_operation','EPSG','11310','EPSG','1286','EPSG','1026');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11315','ITRF2020 to ETRS89-LVA [LKS-2020] (1)','The coordinate epoch (in years) of the coordinates referenced to the source CRS (ITRF2020) is user-defined and is used as the source epoch in step 2. For coordinates originating before 2021-02-07, the NKG2008 transformation should be used.','EPSG','9988','EPSG','10303',0.006,'NKG2020',0);
 INSERT INTO "usage" VALUES('EPSG','25133','concatenated_operation','EPSG','11315','EPSG','1139','EPSG','1027');

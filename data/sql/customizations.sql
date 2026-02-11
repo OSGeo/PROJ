@@ -738,20 +738,19 @@ JOIN usage u ON u.object_auth_name = gt.auth_name AND u.object_code = gt.code AN
 WHERE gt.name = 'WGS 84 to EGM2008 height (1)'
 AND gcrs.auth_name = 'EPSG' AND gcrs.name LIKE 'WGS 84 (G%' AND gcrs.type='geographic 3D' and gcrs.deprecated=0;
 
-
--- Undeprecate EPSG:1591 "RGF93 v1 to ETRS89 (1)"
--- This has been deprecated in EPSG v12.039 where "RGF93 v1" was renamed "ETRS89-FRA [RGF93 v1]"
--- The rationale is that "RGF93 v1" will be in the future part of the ETRS89 datum ensemble
--- but it is not yet. In the meantime it is useful to have this noop transformation between both
--- Do the same for "RGF93 v2 to ETRS89 (1)" and "RGF93 v2bto ETRS89 (1)"
-
-UPDATE helmert_transformation_table SET name = 'ETRS89-FRA [RGF93 v1] to ETRS89 (1)', deprecated = 0, description = description || ' Note: this transformation deprecated in EPSG v12.039 has been undeprecated by PROJ pending addition of ETRS89-FRA [RGF93 v1] to the ETRS89 datum ensemble' WHERE auth_name = 'EPSG' AND code = '1591' AND deprecated = 1;
-UPDATE helmert_transformation_table SET name = 'ETRS89-FRA [RGF93 v2] to ETRS89 (1)', deprecated = 0, description = description || ' Note: this transformation deprecated in EPSG v12.039 has been undeprecated by PROJ pending addition of ETRS89-FRA [RGF93 v2] to the ETRS89 datum ensemble' WHERE auth_name = 'EPSG' AND code = '9789' AND deprecated = 1;
-UPDATE helmert_transformation_table SET name = 'ETRS89-FRA [RGF93 v2b] to ETRS89 (1)', deprecated = 0, description = description || ' Note: this transformation deprecated in EPSG v12.039 has been undeprecated by PROJ pending addition of ETRS89-FRA [RGF93 v2b] to the ETRS89 datum ensemble' WHERE auth_name = 'EPSG' AND code = '9790' AND deprecated = 1;
-
 -- EPSG:8360 has been deprecated in EPSG 12.044
 
 INSERT INTO "grid_transformation" VALUES('PROJ','OLD_EPSG_8361','ETRS89 to ETRS89 + Baltic 1957 height (1)','Uses ETRS89 (realization ETRF2000) and quasigeoid model DVRM05. 1 sigma = 34 mm (test performed on 563 independent points). Recommended as part of transformation between Baltic 1957 height and EVRF2007 height (see concatenated operation code 8363).','EPSG','1088','Geog3D to Geog2D+GravityRelatedHeight (gtx)','EPSG','4937','EPSG','8360',0.03,'EPSG','8666','Geoid (height correction) model file','Slovakia_ETRS89h_to_Baltic1957.gtx',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'EPSG','4258','UGKK-Svk',0);
 INSERT INTO "usage" VALUES('PROJ','OLD_EPSG_10508','grid_transformation','PROJ','OLD_EPSG_8361','EPSG','1211','EPSG','1186');
 INSERT INTO "grid_transformation" VALUES('PROJ','OLD_EPSG_8362','ETRS89 to ETRS89 + EVRF2007 height (1)','Uses ETRS89 (realization ETRF2000) and quasigeoid model DMQSK2014E. 1 sigma = 29 mm (test performed on 93 independent points). Recommended as part of transformation between Baltic 1957 height and EVRF2007 height (see concatenated operation code 8363).','EPSG','1088','Geog3D to Geog2D+GravityRelatedHeight (gtx)','EPSG','4937','EPSG','7423',0.03,'EPSG','8666','Geoid (height correction) model file','Slovakia_ETRS89h_to_EVRF2007.gtx',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'EPSG','4258','UGKK-Svk',0);
 INSERT INTO "usage" VALUES('PROJ','OLD_EPSG_10509','grid_transformation','PROJ','OLD_EPSG_8362','EPSG','1211','EPSG','1186');
+
+-- Synthetize a concatenated operation for the pre-EPSG 12.048 EPSG:1647 "CH1903+ to ETRS89 (1)"
+-- that has now been changed to "CH1903+ to ETRS89-CHE [CHTRF95] (1)"
+
+INSERT INTO "concatenated_operation" VALUES(
+    'PROJ','CH1903+_to_ETRS89','CH1903+ to ETRS89 (1)',
+    'Equivalent of pre-EPSG 12.048 EPSG:1647 "CH1903+ to ETRS89 (1)"','EPSG','4150','EPSG','4258',NULL,NULL,0);
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','CH1903+_to_ETRS89',1,'EPSG','1647','forward');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','CH1903+_to_ETRS89',2,'PROJ','ETRS89_TO_ETRS89-CHE[CHTRF95]','reverse');
+INSERT INTO "usage" VALUES('PROJ','CH1903+_to_ETRS89_USAGE','concatenated_operation','PROJ','CH1903+_to_ETRS89','EPSG','1286','EPSG','1031');

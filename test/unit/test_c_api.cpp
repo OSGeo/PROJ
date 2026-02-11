@@ -2062,8 +2062,8 @@ TEST_F(CApi, proj_create_operations_with_pivot) {
         ObjectKeeper keeper_op(op);
 
         EXPECT_EQ(proj_get_name(op),
-                  std::string("ED50 to ETRS89 (10) + Inverse of ETRS89-FRA "
-                              "[RGF93 v1] to ETRS89 (1)"));
+                  std::string("ED50 to ETRS89 (10) + ETRS89 to ETRS89-FRA "
+                              "[RGF93 v1]"));
     }
 
     // Disallow pivots
@@ -2089,7 +2089,7 @@ TEST_F(CApi, proj_create_operations_with_pivot) {
 
     // Restrict pivot to ETRS89
     {
-        auto ctxt = proj_create_operation_factory_context(m_ctxt, "EPSG");
+        auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
         ASSERT_NE(ctxt, nullptr);
         ContextKeeper keeper_ctxt(ctxt);
 
@@ -2106,8 +2106,8 @@ TEST_F(CApi, proj_create_operations_with_pivot) {
         ObjectKeeper keeper_op(op);
 
         EXPECT_EQ(proj_get_name(op),
-                  std::string("ED50 to ETRS89 (10) + Inverse of ETRS89-FRA "
-                              "[RGF93 v1] to ETRS89 (1)"));
+                  std::string("ED50 to ETRS89 (10) + ETRS89 to ETRS89-FRA "
+                              "[RGF93 v1]"));
     }
 
     // Restrict pivot to something unrelated

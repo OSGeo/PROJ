@@ -44,6 +44,8 @@
 
 #include "proj_constants.h"
 
+#include <algorithm>
+
 // ---------------------------------------------------------------------------
 
 NS_PROJ_START
@@ -579,13 +581,51 @@ double getAccuracy(const CoordinateOperationNNPtr &op) {
 // Returns the accuracy of a set of concatenated operations, or -1 if unknown
 double getAccuracy(const std::vector<CoordinateOperationNNPtr> &ops) {
     double accuracy = -1.0;
-    for (const auto &subop : ops) {
-        const double subops_accuracy = getAccuracy(subop);
+    double next_accuracy = -1.0;
+    for (size_t i = 0; i < ops.size(); ++i) {
+        const double subops_accuracy =
+            next_accuracy >= 0 ? next_accuracy : getAccuracy(ops[i]);
         if (subops_accuracy < 0.0) {
             return -1.0;
         }
         if (accuracy < 0.0) {
             accuracy = 0.0;
+        }
+        next_accuracy = -1.0;
+        if (subops_accuracy > 0 && i + 1 < ops.size()) {
+            next_accuracy = getAccuracy(ops[i + 1]);
+            if (next_accuracy > 0) {
+                const auto crs1 = ops[i]->sourceCRS();
+                const auto crsMiddle = ops[i]->targetCRS();
+                const auto crs2 = ops[i + 1]->targetCRS();
+
+                // Special case when doing ETRS89-XXX -> ETRS89/ETRFzzzz ->
+                // ETRS89-YYY and at least one of the 2 operations is a no-op
+                constexpr double ACCURACY_ENSEMBLE_ETRS89 = 0.1;
+                if (crs1 && crsMiddle && crs2 &&
+                    std::max(subops_accuracy, next_accuracy) <=
+                        ACCURACY_ENSEMBLE_ETRS89 &&
+                    (crsMiddle->nameStr() == "ETRS89" ||
+                     starts_with(crsMiddle->nameStr(), "ETRF")) &&
+                    starts_with(crs1->nameStr(), "ETRS89-") &&
+                    starts_with(crs2->nameStr(), "ETRS89-")) {
+                    const auto IsNoOp = [](const CoordinateOperationNNPtr &op) {
+                        auto formatter = io::PROJStringFormatter::create();
+                        try {
+                            return op->exportToPROJString(formatter.get()) ==
+                                   "+proj=noop";
+                        } catch (const std::exception &) {
+                        }
+                        return false;
+                    };
+                    if (IsNoOp(ops[i]) || IsNoOp(ops[i + 1])) {
+                        accuracy += std::max(subops_accuracy, next_accuracy);
+                        next_accuracy = -1.0;
+                        ++i;
+                        continue;
+                    }
+                }
+            }
         }
         accuracy += subops_accuracy;
     }

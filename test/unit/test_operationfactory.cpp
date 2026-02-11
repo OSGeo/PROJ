@@ -1891,20 +1891,23 @@ TEST(operation, geocentricCRS_to_geogCRS_different_datum_context) {
 TEST(operation, geogCRS_3D_to_geogCRS_3D_different_datum_context) {
     // Test for https://github.com/OSGeo/PROJ/issues/2541
     auto dbContext = DatabaseContext::create();
-    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
     auto list = CoordinateOperationFactory::create()->createOperations(
         // RGF93 (3D)
-        authFactory->createCoordinateReferenceSystem("4965"),
+        authFactoryEPSG->createCoordinateReferenceSystem("4965"),
         // CH1903+ promoted to 3D
-        authFactory->createCoordinateReferenceSystem("4150")->promoteTo3D(
+        authFactoryEPSG->createCoordinateReferenceSystem("4150")->promoteTo3D(
             std::string(), dbContext),
         ctxt);
     ASSERT_GE(list.size(), 1U);
-    EXPECT_EQ(list[0]->nameStr(), "ETRS89-FRA [RGF93 v1] to ETRS89 (1) + "
-                                  "Inverse of CH1903+ to ETRS89 (1)");
+    EXPECT_EQ(list[0]->nameStr(),
+              "Inverse of ETRS89 to ETRS89-FRA [RGF93 v1] + "
+              "ETRS89 to ETRS89-CHE [CHTRF95] + "
+              "Inverse of CH1903+ to ETRS89-CHE [CHTRF95] (1)");
     // Check that there is no +push +v_3
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
@@ -1932,23 +1935,25 @@ TEST(operation, geogCRS_3D_to_geogCRS_3D_different_datum_context) {
 TEST(operation, geocentric_to_geogCRS_3D_different_datum_context) {
     // Test variant of https://github.com/OSGeo/PROJ/issues/2541
     auto dbContext = DatabaseContext::create();
-    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
     auto list = CoordinateOperationFactory::create()->createOperations(
         // RGF93 (geocentric)
-        authFactory->createCoordinateReferenceSystem("4964"),
+        authFactoryEPSG->createCoordinateReferenceSystem("4964"),
         // CH1903+ promoted to 3D
-        authFactory->createCoordinateReferenceSystem("4150")->promoteTo3D(
+        authFactoryEPSG->createCoordinateReferenceSystem("4150")->promoteTo3D(
             std::string(), dbContext),
         ctxt);
     ASSERT_GE(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
               "Conversion from ETRS89-FRA [RGF93 v1] (geocentric) to "
               "ETRS89-FRA [RGF93 v1] (geog3D) + "
-              "ETRS89-FRA [RGF93 v1] to ETRS89 (1) + "
-              "Inverse of CH1903+ to ETRS89 (1)");
+              "Inverse of ETRS89 to ETRS89-FRA [RGF93 v1] + "
+              "ETRS89 to ETRS89-CHE [CHTRF95] + "
+              "Inverse of CH1903+ to ETRS89-CHE [CHTRF95] (1)");
     // Check that there is no +push +v_3
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
@@ -11838,4 +11843,57 @@ TEST(operation, createOperation_ITRF2014_to_ETRS89_DNK) {
               "+convention=position_vector "
               "+step +proj=deformation +dt=15.829 "
               "+grids=eur_nkg_nkgrf17vel.tif +ellps=GRS80");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_ETRS89_XXX_to_ETRS89_YYY_using_ETRF2000) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // ETRS89-PRT [1995]
+        authFactoryEPSG->createCoordinateReferenceSystem("11108"),
+        // ETRS89-ESP [ERGNSS]
+        authFactoryEPSG->createCoordinateReferenceSystem("11128"), ctxt);
+    ASSERT_GE(list.size(), 2U);
+
+    EXPECT_STREQ(list[0]->nameStr().c_str(),
+                 "Conversion from ETRS89-PRT [1995] (geog2D) to "
+                 "ETRS89-PRT [1995] (geocentric) + "
+                 "ETRS89-PRT [1995] to ETRF2000 (1) + "
+                 "Inverse of ETRS89-ESP [ERGNSS] to ETRF2000 (1) + "
+                 "Conversion from ETRS89-ESP [ERGNSS] (geocentric) to "
+                 "ETRS89-ESP [ERGNSS] (geog2D)");
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=helmert +x=0.0063 +y=0.00294 +z=0.01726 "
+              "+rx=-0.0007616 +ry=-6.4e-05 +rz=-0.0008768 +s=-0.001534 "
+              "+dx=0 +dy=6e-05 +dz=0.0014 +drx=-0.000119 +dry=-1e-05 "
+              "+drz=-0.000162 +ds=-1e-05 +t_epoch=1995.4 "
+              "+convention=position_vector "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1U);
+    EXPECT_EQ(list[0]->coordinateOperationAccuracies()[0]->value(), "0.1");
+
+    EXPECT_STREQ(list[1]->nameStr().c_str(),
+                 "Inverse of ETRS89 to ETRS89-PRT [1995] + "
+                 "ETRS89 to ETRS89-ESP [ERGNSS]");
+    EXPECT_FALSE(list[1]->hasBallparkTransformation());
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+    ASSERT_EQ(list[1]->coordinateOperationAccuracies().size(), 1U);
+    EXPECT_EQ(list[1]->coordinateOperationAccuracies()[0]->value(), "0.1");
 }
