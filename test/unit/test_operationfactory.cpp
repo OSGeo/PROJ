@@ -11885,6 +11885,8 @@ TEST(operation, createOperation_ETRS89_XXX_to_ETRS89_YYY_using_ETRF2000) {
               "+step +inv +proj=cart +ellps=GRS80 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
+    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1U);
+    EXPECT_EQ(list[0]->coordinateOperationAccuracies()[0]->value(), "0.1");
 
     EXPECT_STREQ(list[1]->nameStr().c_str(),
                  "Inverse of ETRS89 to ETRS89-PRT [1995] + "
@@ -11892,4 +11894,6 @@ TEST(operation, createOperation_ETRS89_XXX_to_ETRS89_YYY_using_ETRF2000) {
     EXPECT_FALSE(list[1]->hasBallparkTransformation());
     EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=noop");
+    ASSERT_EQ(list[1]->coordinateOperationAccuracies().size(), 1U);
+    EXPECT_EQ(list[1]->coordinateOperationAccuracies()[0]->value(), "0.1");
 }
