@@ -256,6 +256,7 @@
 #define proj_grid_info internal_proj_grid_info
 #define proj_identify internal_proj_identify
 #define proj_info internal_proj_info
+#define projinfo internal_projinfo
 #define proj_init_info internal_proj_init_info
 #define proj_insert_object_session_create internal_proj_insert_object_session_create
 #define proj_insert_object_session_destroy internal_proj_insert_object_session_destroy
