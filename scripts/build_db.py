@@ -249,9 +249,9 @@ def fill_datumensemble(proj_db_cursor):
     rows = proj_db_cursor.fetchall()
     for (datum_code, datum_name, ensemble_accuracy, deprecated) in rows:
         assert ensemble_accuracy is not None
-        proj_db_cursor.execute("SELECT DISTINCT datum_type, ellipsoid_code, prime_meridian_code FROM epsg.epsg_datum WHERE datum_code IN (SELECT datum_code FROM epsg.epsg_datumensemblemember WHERE datum_ensemble_code = ?)", (datum_code,))
+        proj_db_cursor.execute("SELECT DISTINCT replace(datum_type, 'dynamic ',''), ellipsoid_code, prime_meridian_code FROM epsg.epsg_datum WHERE datum_code IN (SELECT datum_code FROM epsg.epsg_datumensemblemember WHERE datum_ensemble_code = ?)", (datum_code,))
         subrows = proj_db_cursor.fetchall()
-        assert len(subrows) == 1, datum_code
+        assert len(subrows) == 1, (datum_code, subrows)
         datum_type = subrows[0][0]
         if datum_type == 'vertical':
             datum_ensemble_member_table = 'vertical_datum_ensemble_member'
@@ -304,9 +304,9 @@ def create_datumensemble_transformations(proj_db_cursor):
     rows = proj_db_cursor.fetchall()
     for (datum_code, datum_name, ensemble_accuracy, deprecated) in rows:
         assert ensemble_accuracy is not None
-        proj_db_cursor.execute("SELECT DISTINCT datum_type, ellipsoid_code, prime_meridian_code FROM epsg.epsg_datum WHERE datum_code IN (SELECT datum_code FROM epsg.epsg_datumensemblemember WHERE datum_ensemble_code = ?)", (datum_code,))
+        proj_db_cursor.execute("SELECT DISTINCT replace(datum_type, 'dynamic ',''), ellipsoid_code, prime_meridian_code FROM epsg.epsg_datum WHERE datum_code IN (SELECT datum_code FROM epsg.epsg_datumensemblemember WHERE datum_ensemble_code = ?)", (datum_code,))
         subrows = proj_db_cursor.fetchall()
-        assert len(subrows) == 1, datum_code
+        assert len(subrows) == 1, (datum_code, subrows)
         datum_type = subrows[0][0]
         if datum_type == 'vertical':
             datum_ensemble_member_table = 'vertical_datum_ensemble_member'
@@ -318,17 +318,12 @@ def create_datumensemble_transformations(proj_db_cursor):
 
         proj_db_cursor.execute("SELECT datum_code FROM epsg.epsg_datumensemblemember WHERE datum_ensemble_code = ? ORDER by datum_sequence", (datum_code,))
         list_datums = list(proj_db_cursor.fetchall())
-        if datum_code == 6258: # ETRS89
-            # This hack will be removed once the ETRS89 datum ensemble officially contains all national realizations
-            proj_db_cursor.execute("SELECT datum_code FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind = 'geographic 2D' AND coord_ref_sys_name LIKE 'ETRS89-___ [%]'")
-            etrs89_national_realizations = list(proj_db_cursor.fetchall())
-            list_datums += etrs89_national_realizations
         for member_code, in list_datums:
             if datum_ensemble_member_table == 'geodetic_datum_ensemble_member':
                 # Insert a null transformation between the representative CRS of the datum ensemble
                 # and each representative CRS of its members.
                 crs_code, crs_name, crs_extent = find_crs_code_name_extent_from_geodetic_datum_code(proj_db_cursor, member_code)
-                assert crs_extent == ensemble_crs_extent or (crs_extent in (2830, 1262) and ensemble_crs_extent in (2830, 1262)) or (ensemble_crs_code == 4258 and ensemble_crs_extent == 4755 and crs_extent in (1298, 1162, 4543, 1096, 1305, 1090, 1225, 1139, 1145, 3343, 1076, 1212, 1056, 4542, 1192, 1103, 1050, 1095, 1182, 1264, 1172, 1037, 1044, 1079, 1211, 1093, 1106, 1148, 4832, 1197, 4833, 1119, 1286)), (ensemble_crs_code, ensemble_crs_name, ensemble_crs_extent, crs_code, crs_name, crs_extent)
+                assert crs_extent == ensemble_crs_extent or (crs_extent in (2830, 1262) and ensemble_crs_extent in (2830, 1262)) or (ensemble_crs_code == 4258 and ensemble_crs_extent == 4755 and crs_extent in (1298, 1162, 4543, 1096, 1305, 1090, 1225, 1139, 1145, 3343, 1076, 1212, 1056, 4542, 1192, 1103, 1050, 1095, 1182, 1264, 1172, 1037, 1044, 1079, 1211, 1093, 1106, 1148, 4832, 1197, 4833, 1119, 1286, 1080, 1025)), (ensemble_crs_code, ensemble_crs_name, ensemble_crs_extent, crs_code, crs_name, crs_extent)
 
                 # Check if there's already any transformation registered between
                 # the member crs and the ensemble crs

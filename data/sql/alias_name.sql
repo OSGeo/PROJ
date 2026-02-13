@@ -64,7 +64,6 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6238','ID74','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6242','JAD69','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6246','KOC','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6248','PSAD56','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6258','ETRS89','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6267','NAD27','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6269','NAD83','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6272','NZGD49','EPSG');
@@ -595,7 +594,6 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1130','JGD2000 (vertica
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1129','JSLD72','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1132','ETRS89-ITA [RDN2008]','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1288','BI','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6258','European Terrestrial Reference System 1989','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6326','World Geodetic System 1984','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6670','ETRS89-ITA [IGM95]','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1295','LTF2004','EPSG');
@@ -800,6 +798,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6619','ETRS89-SWE [SWER
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6173','IRENET95','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1432','ETRS89-BEL [BEREF2002]','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1447','ETRS89-BEL [BEREF2011]','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1448','DrukRef23','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1423','LSGH','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1426','Indonesian Geospatial Reference System 2013 epoch 2021.0','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1426','Jaring Kontrol Geodesi (JKG)','EPSG');
@@ -807,6 +806,8 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6126','ETRS89-LTU [LKS9
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1445','ETRS89-HRV [CROPOS]','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1427','ETRS89-NLD [AGRS2010]','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1429','ETRS89-ALB [KRGJSH 2010]','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6258','ETRS89','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6258','European Terrestrial Reference System 1989','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6761','Croatian Terrestrial Reference System','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1449','ETRS89-CHE [CHTRF95]','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
