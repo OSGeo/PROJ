@@ -18,12 +18,19 @@ set -e
 # Use environment variables from Dockerfile or runtime.
 PROJ_REPO=${PROJ_REPO:-https://github.com/OSGeo/PROJ.git}
 
-EMSDK_PATH=${EMSDK_PATH:-/emsdk}
+INSTALL_DIR=${INSTALL_DIR:-/build/install}
 BUILD_DIR=${BUILD_DIR:-/build}
-INSTALL_DIR=${INSTALL_DIR:-/usr/local/wasm}
 PROJ_SRC_DIR="${BUILD_DIR}/proj_src"
+PROJ_BUILD_WASM_DIR="${BUILD_DIR}/proj_build_wasm"
 DEPS_SRC_DIR="${BUILD_DIR}/deps_src"
 TEMP_BUILD_DIR="${BUILD_DIR}/temp_build"
+
+# Clean build directories to ensure a fresh build
+rm -rf ${TEMP_BUILD_DIR}
+# We keep DEPS_SRC_DIR to cache downloads
+mkdir -p ${PROJ_SRC_DIR}
+mkdir -p ${DEPS_SRC_DIR}
+mkdir -p ${TEMP_BUILD_DIR}
 
 # Emscripten flags for Pthreads (multithreading support for synchronous emscripten_fetch)
 # and some other.
@@ -65,12 +72,6 @@ if [ "${FORCE_REBUILD}" = "1" ]; then
     echo "!!! FORCE_REBUILD is set. Existing libraries will be ignored and rebuilt. !!!"
     rm -rf "${INSTALL_DIR}"/*
 fi
-
-# Clean build directories to ensure a fresh build
-rm -rf ${TEMP_BUILD_DIR}
-# We keep DEPS_SRC_DIR to cache downloads
-mkdir -p ${TEMP_BUILD_DIR}
-mkdir -p ${DEPS_SRC_DIR}
 
 if [ -f "${PROJ_SRC_DIR}/CMakeLists.txt" ]; then
     echo "Using content from ${PROJ_SRC_DIR} to build PROJ"
@@ -217,8 +218,6 @@ cd ${PROJ_SRC_DIR}
 
 log_step "6. Building and Installing PROJ"
 
-PROJ_BUILD_WASM_DIR="${PROJ_SRC_DIR}/build_wasm"
-
 if [ "${FORCE_REBUILD}" != "1" ] && [ -f "${INSTALL_DIR}/lib/libproj.a" ]; then
     echo "PROJ already built. Skipping."
 else
@@ -232,7 +231,7 @@ else
     cd ${PROJ_BUILD_WASM_DIR}
 
     # Configure PROJ
-    configure_cmake .. \
+    configure_cmake ${PROJ_SRC_DIR} \
         -D BUILD_TESTING=OFF \
         -D BUILD_APPS=OFF \
         -D ENABLE_TIFF=ON \
@@ -308,6 +307,10 @@ extern "C" {
 const char* get_compilation_date() {
     return "$DDD" ;
 }
+
+int get_ptr_size() {
+    return sizeof(void*);
+}
 }
 EOF
 
@@ -330,6 +333,11 @@ FINAL_LIBS="${INSTALL_DIR}/lib/libproj.a \
             ${INSTALL_DIR}/lib/libz.a \
             ${WRAPPER_OBJ_FILE}"
 
+# include all exported symbols
+echo -e "_malloc\n_free\n_get_compilation_date\n_get_ptr_size" > ${INSTALL_DIR}/exported_symbols.txt
+grep "^proj_\|^geod_" ${PROJ_SRC_DIR}/scripts/reference_exported_symbols.txt | grep -v "(" | sed 's/^/_/' >> ${INSTALL_DIR}/exported_symbols.txt
+head ${INSTALL_DIR}/exported_symbols.txt
+
 emcc -v ${FINAL_LIBS} \
     -o ${INSTALL_DIR}/projModule.js \
     -O3 \
@@ -345,23 +353,8 @@ emcc -v ${FINAL_LIBS} \
     -s EXPORT_NAME="'ProjModuleFactory'" \
     -s FORCE_FILESYSTEM=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
-    -s EXPORTED_RUNTIME_METHODS="[ccall, cwrap, FS, HEAPF64, stringToNewUTF8, UTF8ToString, getValue]" \
-    -s EXPORTED_FUNCTIONS="[
-     _get_compilation_date,
-     _proj_info,
-     _proj_context_errno_string,
-     _proj_context_create,
-     _proj_context_set_enable_network,
-     _proj_create,
-     _proj_create_from_database,
-     _proj_create_crs_to_crs,
-     _proj_create_crs_to_crs_from_pj,
-     _proj_trans,
-     _proj_trans_array,
-     _proj_context_destroy,
-     _proj_destroy,
-     _malloc, _free
-     ]" \
+    -s EXPORTED_RUNTIME_METHODS="[ccall, cwrap, FS, HEAP8, HEAP16, HEAP32, HEAPF64, lengthBytesUTF8, stringToUTF8, stringToNewUTF8, UTF8ToString, getValue, setValue]" \
+    -s EXPORTED_FUNCTIONS=@${INSTALL_DIR}/exported_symbols.txt \
     ${EM_PTHREADS_FLAGS}
 
 log_step "BUILD SUCCESSFUL!"
