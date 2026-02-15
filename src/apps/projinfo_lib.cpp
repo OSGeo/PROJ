@@ -1004,11 +1004,11 @@ static int outputOperations(
         promoteTo3D, normalizeAxisOrder, outputOpt.quiet, strm);
     if (!sourceObj.has_value())
         return 1;
-    auto sourceCRS = nn_dynamic_pointer_cast<CRS>(*sourceObj);
+    auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj.value());
     CoordinateMetadataPtr sourceCoordinateMetadata;
     if (!sourceCRS) {
         sourceCoordinateMetadata =
-            nn_dynamic_pointer_cast<CoordinateMetadata>(*sourceObj);
+            nn_dynamic_pointer_cast<CoordinateMetadata>(sourceObj.value());
         if (!sourceCoordinateMetadata) {
             strm.cerr
                 << "source CRS string is not a CRS or a CoordinateMetadata"
@@ -1027,11 +1027,11 @@ static int outputOperations(
         promoteTo3D, normalizeAxisOrder, outputOpt.quiet, strm);
     if (!targetObj.has_value())
         return 1;
-    auto targetCRS = nn_dynamic_pointer_cast<CRS>(*targetObj);
+    auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj.value());
     CoordinateMetadataPtr targetCoordinateMetadata;
     if (!targetCRS) {
         targetCoordinateMetadata =
-            nn_dynamic_pointer_cast<CoordinateMetadata>(*targetObj);
+            nn_dynamic_pointer_cast<CoordinateMetadata>(targetObj.value());
         if (!targetCoordinateMetadata) {
             strm.cerr
                 << "target CRS string is not a CRS or a CoordinateMetadata"
@@ -2112,9 +2112,9 @@ static int main_projinfo(PJ_CONTEXT *ctx, int argc, char **argv,
                 dbContext, user_string, std::string(), objectKind,
                 "input string", buildBoundCRSToWGS84, allowUseIntermediateCRS,
                 promoteTo3D, normalizeAxisOrder, outputOpt.quiet, strm));
-            if (!obj_opt)
+            if (!obj_opt.has_value())
                 return 1;
-            auto obj = *obj_opt;
+            auto obj = obj_opt.value();
             if (guessDialect) {
                 auto dialect = WKTParser().guessDialect(user_string);
                 strm.cout << "Guessed WKT dialect: ";
@@ -2234,9 +2234,13 @@ static int main_projinfo(PJ_CONTEXT *ctx, int argc, char **argv,
 
 int projinfo(PJ_CONTEXT *ctx, int argc, char **argv, projinfo_cb_t callback,
              void *user_data) {
-
-    Streamer strm(callback, user_data);
-    return main_projinfo(ctx, argc, argv, strm);
+    try {
+        Streamer strm(callback, user_data);
+        return main_projinfo(ctx, argc, argv, strm);
+    } catch (const std::exception &e) {
+        pj_log(ctx, PJ_LOG_ERROR, "Unexpected exception: %s", e.what());
+    }
+    return 1;
 }
 
 //! @endcond
