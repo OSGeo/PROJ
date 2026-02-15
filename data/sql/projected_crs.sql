@@ -7812,6 +7812,8 @@ INSERT INTO "projected_crs" VALUES('EPSG','11305','Hartebeesthoek94 / Inverted L
 INSERT INTO "usage" VALUES('EPSG','25107','projected_crs','EPSG','11305','EPSG','1462','EPSG','1092');
 INSERT INTO "projected_crs" VALUES('EPSG','11306','Hartebeesthoek94 / Inverted Lo33',NULL,'EPSG','4498','EPSG','4148','EPSG','11295',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','25108','projected_crs','EPSG','11306','EPSG','1463','EPSG','1092');
+INSERT INTO "projected_crs" VALUES('EPSG','11341','DrukRef23 / BNG2023',NULL,'EPSG','4400','EPSG','11226','EPSG','11340',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','25371','projected_crs','EPSG','11341','EPSG','1048','EPSG','1056');
 INSERT INTO "projected_crs" VALUES('EPSG','11360','NAD83(2011) / RMTCRS Big Timber 83 (m)',NULL,'EPSG','4499','EPSG','6318','EPSG','11342',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','25299','projected_crs','EPSG','11360','EPSG','4838','EPSG','1029');
 INSERT INTO "projected_crs" VALUES('EPSG','11361','NAD83(2011) / RMTCRS Big Timber 83 (ft)',NULL,'EPSG','4495','EPSG','6318','EPSG','11343',NULL,0);

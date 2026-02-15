@@ -1302,11 +1302,11 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','5251','TUREF','','geographic 3D','EPSG
 INSERT INTO "usage" VALUES('EPSG','3883','geodetic_crs','EPSG','5251','EPSG','1237','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','5252','TUREF','','geographic 2D','EPSG','6422','EPSG','1057',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3884','geodetic_crs','EPSG','5252','EPSG','1237','EPSG','1183');
-INSERT INTO "geodetic_crs" VALUES('EPSG','5262','DRUKREF 03','','geocentric','EPSG','6500','EPSG','1058',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','5262','DRUKREF 03','Replaced by DrukRef23 (CRS code 11224).','geocentric','EPSG','6500','EPSG','1058',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3892','geodetic_crs','EPSG','5262','EPSG','1048','EPSG','1027');
-INSERT INTO "geodetic_crs" VALUES('EPSG','5263','DRUKREF 03','','geographic 3D','EPSG','6423','EPSG','1058',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','5263','DRUKREF 03','Replaced by DrukRef23 (CRS code 11225).','geographic 3D','EPSG','6423','EPSG','1058',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3893','geodetic_crs','EPSG','5263','EPSG','1048','EPSG','1027');
-INSERT INTO "geodetic_crs" VALUES('EPSG','5264','DRUKREF 03','','geographic 2D','EPSG','6422','EPSG','1058',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','5264','DRUKREF 03','Replaced by DrukRef23 (CRS code 11226).','geographic 2D','EPSG','6422','EPSG','1058',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3894','geodetic_crs','EPSG','5264','EPSG','1048','EPSG','1183');
 INSERT INTO "geodetic_crs" VALUES('EPSG','5322','ISN2004','Replaces ISN93 (CRS code 4944). Replaced by ISN2016 (CRS code 8084).','geocentric','EPSG','6500','EPSG','1060',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3928','geodetic_crs','EPSG','5322','EPSG','1120','EPSG','1027');
@@ -2584,6 +2584,12 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','11222','ETRS89-CHE [CHTRF95]','First r
 INSERT INTO "usage" VALUES('EPSG','25319','geodetic_crs','EPSG','11222','EPSG','1286','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','11223','ETRS89-CHE [CHTRF95]','First realization of CHTRS95. Referenced to ETRF89 at epoch 1993.0. For CRS used for topographic and cadastral purposes see CH1903+ (CRS code 4150).','geographic 3D','EPSG','6423','EPSG','1449',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','25320','geodetic_crs','EPSG','11223','EPSG','1286','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','11224','DrukRef23','Replaces DRUKREF 03 (CRS code 5262).','geocentric','EPSG','6500','EPSG','1448',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','25367','geodetic_crs','EPSG','11224','EPSG','1048','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','11225','DrukRef23','Replaces DRUKREF 03 (CRS code 5263).','geographic 3D','EPSG','6423','EPSG','1448',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','24835','geodetic_crs','EPSG','11225','EPSG','1048','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','11226','DrukRef23','Replaces DRUKREF 03 (CRS code 5264).','geographic 2D','EPSG','6422','EPSG','1448',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','24836','geodetic_crs','EPSG','11226','EPSG','1048','EPSG','1183');
 INSERT INTO "geodetic_crs" VALUES('EPSG','11307','ETRS89-CHE [CHTRF95]','First realization of CHTRS95. For CRS used for topographic and cadastral purposes see CH1903+ (CRS code 4150).','geographic 2D','EPSG','6422','EPSG','1449',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','25321','geodetic_crs','EPSG','11307','EPSG','1286','EPSG','1183');
 INSERT INTO "geodetic_crs" VALUES('EPSG','20033','MWC18-IRF','Intermediate CRS created in 2022 to assist the emulation of the ETRS89 / MWC18 SnakeGrid projected CRS through transformation ETRS89-GBR [OSNet v2009] to MWC18 (1) (code 10108) used in conjunction with the MWC18-TM map projection (code 10127).','geographic 2D','EPSG','6422','EPSG','1324',NULL,0);
