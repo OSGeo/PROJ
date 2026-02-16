@@ -8525,8 +8525,8 @@ PJ_OPERATION_LIST::getPreparedOperations(PJ_CONTEXT *ctx) {
  * component. You may need to use proj_crs_promote_to_3D().
  *
  * @param ctx PROJ context, or NULL for default context
- * @param source_crs source CRS. Must not be NULL.
- * @param target_crs source CRS. Must not be NULL.
+ * @param source_crs source CRS or CoordinateMetadata. Must not be NULL.
+ * @param target_crs target CRS or CoordinateMetadata. Must not be NULL.
  * @param operationContext Search context. Must not be NULL.
  * @return a result set that must be unreferenced with
  * proj_list_destroy(), or NULL in case of error.
