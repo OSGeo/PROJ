@@ -128,21 +128,28 @@ static PJ_XY tmerc_spherical_fwd(PJ_LP lp, PJ *P) {
     }
 
     xy.x = Q->ml0 * log((1. + b) / (1. - b));
-    xy.y = cosphi * cos(lp.lam) / sqrt(1. - b * b);
+    if (cosphi == 1.0) {
+        if ((lp.lam < -M_HALFPI || lp.lam > M_HALFPI)) {
+            /* Helps to be able to roundtrip |longitudes| > 90 at lat=0 */
+            /* We could also map to -M_PI ... */
+            xy.y = M_PI;
+        } else {
+            xy.y = 0;
+        }
+    } else {
+        xy.y = cosphi * cos(lp.lam) / sqrt(1. - b * b);
 
-    b = fabs(xy.y);
-    if (cosphi == 1 && (lp.lam < -M_HALFPI || lp.lam > M_HALFPI)) {
-        /* Helps to be able to roundtrip |longitudes| > 90 at lat=0 */
-        /* We could also map to -M_PI ... */
-        xy.y = M_PI;
-    } else if (b >= 1.) {
-        if ((b - 1.) > EPS10) {
-            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
-            return xy;
+        b = fabs(xy.y);
+        if (b >= 1.) {
+            if ((b - 1.) > EPS10) {
+                proj_errno_set(
+                    P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+                return xy;
+            } else
+                xy.y = 0.;
         } else
-            xy.y = 0.;
-    } else
-        xy.y = acos(xy.y);
+            xy.y = acos(xy.y);
+    }
 
     if (lp.phi < 0.)
         xy.y = -xy.y;
