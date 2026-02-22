@@ -7033,7 +7033,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                     }
                 }
 
-                // Keep the results of this new attempt, if there are better
+                // Use the results of this new attempt if they are better
                 // than the previous ones
                 if (bestAccuracy2 >= 0 &&
                     (bestAccuracy < 0 || (bestAccuracy2 < bestAccuracy ||
@@ -7041,7 +7041,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                                            bestStepCount2 < bestStepCount)))) {
                     bestAccuracy = bestAccuracy2;
                     bestStepCount = bestStepCount2;
-                    res.insert(res.end(), res2.begin(), res2.end());
+                    res = std::move(res2);
                 }
             };
 
