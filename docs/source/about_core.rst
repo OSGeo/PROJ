@@ -1,4 +1,4 @@
-PROJ is generic coordinate transformation software that transforms geospatial
+PROJ is a generic coordinate transformation software that transforms geospatial
 coordinates from one coordinate reference system (CRS) to another. This
 includes cartographic projections as well as geodetic transformations. PROJ
 is released under the :ref:`X/MIT open source license <license>`.
