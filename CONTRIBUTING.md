@@ -3,7 +3,7 @@
 PROJ has a wide and varied user base. Some are highly skilled geodesists with a deep
 knowledge of map projections and reference systems, some are GIS software developers
 and others are GIS users. All users, regardless of the profession or skill level,
-has the ability to contribute to PROJ. Here's a few suggestion on how:
+have the ability to contribute to PROJ. Here are a few suggestions on how:
 
 * Help PROJ-users that is less experienced than yourself.
 * Write a bug report
