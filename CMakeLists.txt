@@ -240,6 +240,10 @@ endif()
 
 find_package(SQLite3 REQUIRED)
 
+if(NOT TARGET SQLite3::SQLite3) # CMake < 4.3
+  add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
+endif()
+
 # Would build and run with older versions, but with horrible performance
 # See https://github.com/OSGeo/PROJ/issues/1718
 if(SQLite3_VERSION VERSION_LESS "3.11")
