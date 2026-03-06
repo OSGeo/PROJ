@@ -1259,7 +1259,8 @@ class PROJ_GCC_DLL AuthorityFactory {
         const std::vector<std::string> &allowedAuthorities =
             std::vector<std::string>(),
         const metadata::ExtentPtr &intersectingExtent1 = nullptr,
-        const metadata::ExtentPtr &intersectingExtent2 = nullptr) const;
+        const metadata::ExtentPtr &intersectingExtent2 = nullptr,
+        bool skipIntermediateExtentIntersection = false) const;
 
     PROJ_DLL std::string getOfficialNameFromAlias(
         const std::string &aliasedName, const std::string &tableName,
@@ -1326,7 +1327,8 @@ class PROJ_GCC_DLL AuthorityFactory {
         bool considerKnownGridsAsAvailable, bool discardSuperseded,
         const std::vector<std::string> &allowedAuthorities,
         const metadata::ExtentPtr &intersectingExtent1,
-        const metadata::ExtentPtr &intersectingExtent2) const;
+        const metadata::ExtentPtr &intersectingExtent2,
+        bool skipIntermediateExtentIntersection = false) const;
 
     typedef std::pair<common::IdentifiedObjectNNPtr, std::string>
         PairObjectName;

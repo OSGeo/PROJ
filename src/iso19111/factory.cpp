@@ -7481,6 +7481,9 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
  * must intersect.
  * @param intersectingExtent2 Optional extent that the resulting operations
  * must intersect.
+ * @param skipIntermediateExtentIntersection When true, skip the requirement
+ * that the extents of the two intermediate operations must intersect each
+ * other. This is useful when SourceTargetCRSExtentUse::NONE is set.
  * @return list of coordinate operations
  * @throw NoSuchAuthorityCodeException if there is no matching object.
  * @throw FactoryException in case of other errors.
@@ -7497,7 +7500,8 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     ObjectType allowedIntermediateObjectType,
     const std::vector<std::string> &allowedAuthorities,
     const metadata::ExtentPtr &intersectingExtent1,
-    const metadata::ExtentPtr &intersectingExtent2) const {
+    const metadata::ExtentPtr &intersectingExtent2,
+    bool skipIntermediateExtentIntersection) const {
 
     std::vector<operation::CoordinateOperationNNPtr> listTmp;
 
@@ -7669,9 +7673,12 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     auto params = ListOfParams{sourceCRSAuthName, sourceCRSCode,
                                targetCRSAuthName, targetCRSCode};
     std::string additionalWhere(
-        "AND v1.deprecated = 0 AND v2.deprecated = 0 "
-        "AND intersects_bbox(south_lat1, west_lon1, north_lat1, east_lon1, "
-        "south_lat2, west_lon2, north_lat2, east_lon2) = 1 ");
+        skipIntermediateExtentIntersection
+            ? "AND v1.deprecated = 0 AND v2.deprecated = 0 "
+            : "AND v1.deprecated = 0 AND v2.deprecated = 0 "
+              "AND intersects_bbox(south_lat1, west_lon1, north_lat1, "
+              "east_lon1, south_lat2, west_lon2, north_lat2, "
+              "east_lon2) = 1 ");
     if (!allowedAuthorities.empty()) {
         additionalWhere += "AND v1.auth_name IN (";
         for (size_t i = 0; i < allowedAuthorities.size(); i++) {
@@ -8123,7 +8130,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
     bool considerKnownGridsAsAvailable, bool discardSuperseded,
     const std::vector<std::string> &allowedAuthorities,
     const metadata::ExtentPtr &intersectingExtent1,
-    const metadata::ExtentPtr &intersectingExtent2) const {
+    const metadata::ExtentPtr &intersectingExtent2,
+    bool skipIntermediateExtentIntersection) const {
 
     std::vector<operation::CoordinateOperationNNPtr> listTmp;
 
@@ -8370,7 +8378,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
                 auto bbox2 = metadata::GeographicBoundingBox::create(
                     trfmTarget.west, trfmTarget.south, trfmTarget.east,
                     trfmTarget.north);
-                if (!bbox1->intersects(bbox2))
+                if (!skipIntermediateExtentIntersection &&
+                    !bbox1->intersects(bbox2))
                     continue;
                 bool okBbox2 = true;
                 for (const auto bbox : extraBbox)

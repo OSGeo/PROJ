@@ -12142,3 +12142,63 @@ TEST(operation, createOperation_defmodel_from_database) {
               "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
               "+step +proj=axisswap +order=2,1");
 }
+
+// ---------------------------------------------------------------------------
+
+// Test that createHorizVerticalHorizPROJBased respects
+// SourceTargetCRSExtentUse::NONE in compound CRS pipeline composition.
+// Before the fix, the two call sites in createHorizVerticalHorizPROJBased
+// hard-coded checkExtent=true, silently dropping valid horizontal+vertical
+// operation combinations when their registered extents didn't overlap.
+TEST(operation, compoundCRS_to_compoundCRS_context_extent_use_none) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+
+    // NAD27 + NGVD29 height (ftUS)  -->  NAD83(NSRS2007) + NAVD88 height
+    // This exercises the compound-to-compound code path through
+    // createHorizVerticalHorizPROJBased. The vertical transforms (VERTCON)
+    // have CONUS-only extents, while the horizontal transforms
+    // (NAD27 to WGS 84 via Alaska / Canada regional variants composed with
+    // WGS 84 to NAD83(NSRS2007)) include operations with extents outside
+    // CONUS. Combining an Alaska horizontal transform with a CONUS-only
+    // VERTCON grid produces an empty extent intersection, which was
+    // incorrectly rejected even when the user requested NONE.
+
+    size_t countDefault;
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
+        ctxt->setSpatialCriterion(
+            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("7406"),
+            authFactory->createCoordinateReferenceSystem("5500"), ctxt);
+        countDefault = list.size();
+        ASSERT_GE(countDefault, 1U);
+    }
+
+    size_t countNone;
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
+        ctxt->setSpatialCriterion(
+            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+        ctxt->setSourceAndTargetCRSExtentUse(
+            CoordinateOperationContext::SourceTargetCRSExtentUse::NONE);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("7406"),
+            authFactory->createCoordinateReferenceSystem("5500"), ctxt);
+        countNone = list.size();
+    }
+
+    // With NONE, extent-disjoint compound pipeline combinations (such as
+    // Alaska NAD27->WGS84 horizontal + CONUS VERTCON vertical) are no longer
+    // silently filtered, so we expect strictly more results.
+    EXPECT_GT(countNone, countDefault);
+}

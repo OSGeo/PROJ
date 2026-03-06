@@ -2182,7 +2182,8 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
                                     authorities.size() > 1
                                 ? authorities
                                 : std::vector<std::string>(),
-                            context.extent1, context.extent2);
+                            context.extent1, context.extent2,
+                            !context.disallowEmptyIntersection());
             } else {
                 io::AuthorityFactory::ObjectType intermediateObjectType =
                     io::AuthorityFactory::ObjectType::CRS;
@@ -2216,7 +2217,8 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
                             authorities.size() > 1
                         ? authorities
                         : std::vector<std::string>(),
-                    context.extent1, context.extent2);
+                    context.extent1, context.extent2,
+                    !context.disallowEmptyIntersection());
             }
             if (!res.empty()) {
 
@@ -6581,7 +6583,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                             auto op = createHorizVerticalHorizPROJBased(
                                 sourceCRS, targetCRS, srcToInterp,
                                 verticalTransform, interpToTarget,
-                                interpolationGeogCRS, true);
+                                interpolationGeogCRS, context.disallowEmptyIntersection());
                             res.emplace_back(op);
                             hasVerticalTransformWithInterpGeogCRS = true;
                         } catch (const std::exception &) {
@@ -7186,7 +7188,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 try {
                     auto op = createHorizVerticalHorizPROJBased(
                         sourceCRS, targetCRS, opSrc, verticalTransform, opDst,
-                        interpolationCRS, true);
+                        interpolationCRS, context.disallowEmptyIntersection());
                     res.emplace_back(op);
                 } catch (const InvalidOperationEmptyIntersection &) {
                 } catch (const io::FormattingException &) {
