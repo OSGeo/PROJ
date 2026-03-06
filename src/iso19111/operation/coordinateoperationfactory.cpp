@@ -6583,7 +6583,8 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                             auto op = createHorizVerticalHorizPROJBased(
                                 sourceCRS, targetCRS, srcToInterp,
                                 verticalTransform, interpToTarget,
-                                interpolationGeogCRS, context.disallowEmptyIntersection());
+                                interpolationGeogCRS,
+                                context.disallowEmptyIntersection());
                             res.emplace_back(op);
                             hasVerticalTransformWithInterpGeogCRS = true;
                         } catch (const std::exception &) {
