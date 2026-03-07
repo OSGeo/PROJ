@@ -261,6 +261,8 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
                 proj_as_proj_string(ctx, newOp, PJ_PROJ_5, nullptr);
             if (!pszProjStr) {
                 proj_destroy(newOp);
+                if (horiz)
+                    proj_destroy(horiz);
                 return factors;
             }
             std::string osProjStr = pszProjStr;
