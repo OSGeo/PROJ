@@ -798,6 +798,79 @@ TEST(gie, proj_factors) {
         proj_destroy(P);
     }
 
+    // Test with a derived projected CRS that cannot be exported to PROJ string
+    {
+        PJ_COORD c;
+        c.lp.lam = proj_torad(9);
+        c.lp.phi = proj_torad(0);
+
+        const char *wkt =
+            "DERIVEDPROJCRS[\"unknown\",\n"
+            "    BASEPROJCRS[\"unknown\",\n"
+            "        BASEGEOGCRS[\"unknown\",\n"
+            "            DATUM[\"Unknown based on WGS 84 ellipsoid\",\n"
+            "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                    LENGTHUNIT[\"metre\",1],\n"
+            "                    ID[\"EPSG\",7030]]],\n"
+            "            PRIMEM[\"Greenwich\",0,\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                ID[\"EPSG\",8901]]],\n"
+            "        CONVERSION[\"World Mercator\",\n"
+            "            METHOD[\"Mercator (variant A)\",\n"
+            "                ID[\"EPSG\",9804]],\n"
+            "            PARAMETER[\"Latitude of natural origin\",1,\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                ID[\"EPSG\",8801]],\n"
+            "            PARAMETER[\"Longitude of natural origin\",0,\n"
+            "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+            "                ID[\"EPSG\",8802]],\n"
+            "            PARAMETER[\"Scale factor at natural origin\",1,\n"
+            "                SCALEUNIT[\"unity\",1],\n"
+            "                ID[\"EPSG\",8805]],\n"
+            "            PARAMETER[\"False easting\",0,\n"
+            "                LENGTHUNIT[\"metre\",1],\n"
+            "                ID[\"EPSG\",8806]],\n"
+            "            PARAMETER[\"False northing\",0,\n"
+            "                LENGTHUNIT[\"metre\",1],\n"
+            "                ID[\"EPSG\",8807]]]],\n"
+            "    DERIVINGCONVERSION[\"Identity\",\n"
+            "        METHOD[\"Affine parametric transformation\",\n"
+            "            ID[\"EPSG\",9624]],\n"
+            "        PARAMETER[\"A0\",0,\n"
+            "            LENGTHUNIT[\"metre\",1],\n"
+            "            ID[\"EPSG\",8623]],\n"
+            "        PARAMETER[\"A1\",1,\n"
+            "            SCALEUNIT[\"coefficient\",1],\n"
+            "            ID[\"EPSG\",8624]],\n"
+            "        PARAMETER[\"A2\",0,\n"
+            "            SCALEUNIT[\"coefficient\",1],\n"
+            "            ID[\"EPSG\",8625]],\n"
+            "        PARAMETER[\"B0\",0,\n"
+            "            LENGTHUNIT[\"metre\",1],\n"
+            "            ID[\"EPSG\",8639]],\n"
+            "        PARAMETER[\"B1\",0,\n"
+            "            SCALEUNIT[\"coefficient\",1],\n"
+            "            ID[\"EPSG\",8640]],\n"
+            "        PARAMETER[\"B2\",1,\n"
+            "            SCALEUNIT[\"coefficient\",1],\n"
+            "            ID[\"EPSG\",8641]]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"easting (X)\",east,\n"
+            "            ORDER[1],\n"
+            "            LENGTHUNIT[\"metre\",1]],\n"
+            "        AXIS[\"northing (Y)\",north,\n"
+            "            ORDER[2],\n"
+            "            LENGTHUNIT[\"metre\",1]]]";
+        P = proj_create(PJ_DEFAULT_CTX, wkt);
+        ASSERT_TRUE(P != nullptr);
+
+        factors = proj_factors(P, c);
+        EXPECT_NE(proj_errno(P), 0);
+        EXPECT_EQ(factors.meridional_scale, 0);
+
+        proj_destroy(P);
+    }
+
     // Same as above but with foot unit
     {
         PJ_COORD c;

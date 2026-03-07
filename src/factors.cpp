@@ -257,8 +257,13 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
             proj_destroy(cs);
 
             // Remove trailing unit conversion and axis swap
-            std::string osProjStr =
+            const char *pszProjStr =
                 proj_as_proj_string(ctx, newOp, PJ_PROJ_5, nullptr);
+            if (!pszProjStr) {
+                proj_destroy(newOp);
+                return factors;
+            }
+            std::string osProjStr = pszProjStr;
             bool resized = false;
             for (const char *suffix :
                  {" +step +proj=unitconvert", " +step +proj=axiswap"}) {
@@ -271,7 +276,9 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
             if (resized) {
                 proj_destroy(newOp);
                 newOp = proj_create(ctx, osProjStr.c_str());
-                assert(newOp);
+                if (!newOp) {
+                    return factors;
+                }
             }
 
             newOp->fr_meter = cs_unit_conv_factor;
