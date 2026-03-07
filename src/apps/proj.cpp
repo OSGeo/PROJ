@@ -4,6 +4,7 @@
 #include "proj_experimental.h"
 #include "proj_internal.h"
 #include "utils.h"
+#include <algorithm>
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
@@ -556,10 +557,20 @@ int main(int argc, char **argv) {
                 try {
                     auto crs = dynamic_cast<const NS_PROJ::crs::ProjectedCRS *>(
                         P->iso_obj.get());
-                    auto &dir =
-                        crs->coordinateSystem()->axisList()[0]->direction();
-                    swapAxisCrs = dir == NS_PROJ::cs::AxisDirection::NORTH ||
-                                  dir == NS_PROJ::cs::AxisDirection::SOUTH;
+                    const auto &firstAxis =
+                        crs->coordinateSystem()->axisList()[0];
+                    auto axisName = firstAxis->nameStr();
+                    std::transform(axisName.begin(), axisName.end(),
+                                   axisName.begin(),
+                                   [](unsigned char c) { return tolower(c); });
+                    auto axisAbbrev = firstAxis->abbreviation();
+                    std::transform(axisAbbrev.begin(), axisAbbrev.end(),
+                                   axisAbbrev.begin(),
+                                   [](unsigned char c) { return toupper(c); });
+                    swapAxisCrs = axisName == "northing" ||
+                                  axisName.rfind("northing ", 0) == 0 ||
+                                  axisName.rfind("north", 0) == 0 ||
+                                  axisAbbrev == "N" || axisAbbrev == "Y";
                 } catch (...) {
                 }
                 auto geodetic_crs = proj_get_source_crs(ctx, P);
