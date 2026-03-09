@@ -7275,6 +7275,34 @@ TEST(operation, vertCRS_to_vertCRS_New_Zealand_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, vertCRS_to_vertCRS_height_depth_pivot_context) {
+    // Test that PROJ can chain a registered vertical CT with a
+    // height↔depth axis conversion when the target CRS differs from
+    // the CT's registered target only by axis direction.
+    //
+    // EPSG:5705 (Baltic 1977 height) → EPSG:5706 (Caspian depth)
+    // should compose: EPSG:5438 (5705→5611, geogoffset +dh=28)
+    //               + height-to-depth (axisswap order=1,2,-3)
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // Baltic 1977 height
+        authFactory->createCoordinateReferenceSystem("5705"),
+        // Caspian depth (same datum as Caspian height 5611, but axis: down)
+        authFactory->createCoordinateReferenceSystem("5706"), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    // Must NOT be a ballpark transformation
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    // The pipeline should contain geogoffset +dh=28 and axisswap
+    auto projStr =
+        list[0]->exportToPROJString(PROJStringFormatter::create().get());
+    EXPECT_TRUE(projStr.find("geogoffset") != std::string::npos) << projStr;
+    EXPECT_TRUE(projStr.find("axisswap") != std::string::npos) << projStr;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, projCRS_3D_to_geogCRS_3D) {
 
     auto compoundcrs_ft_obj = PROJStringParser().createFromPROJString(
