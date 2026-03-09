@@ -7303,6 +7303,34 @@ TEST(operation, vertCRS_to_vertCRS_height_depth_pivot_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, vertCRS_to_vertCRS_depth_height_pivot_strategy2_context) {
+    // Test Strategy 2: pivot through a candidate sharing the SOURCE's datum.
+    //
+    // EPSG:5706 (Caspian depth) → EPSG:5705 (Baltic 1977 height)
+    // The registered operation EPSG:5438 goes 5705 → 5611 (Caspian height).
+    // Strategy 2 finds 5611 (shares Caspian datum with source 5706), discovers
+    // the reverse of EPSG:5438 from 5611 → 5705, and composes:
+    //   5706 →(depth-to-height)→ 5611 →(reverse 5438)→ 5705
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // Caspian depth
+        authFactory->createCoordinateReferenceSystem("5706"),
+        // Baltic 1977 height
+        authFactory->createCoordinateReferenceSystem("5705"), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    // Must NOT be a ballpark transformation
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
+    // The pipeline should contain axisswap (depth→height) and geogoffset
+    auto projStr =
+        list[0]->exportToPROJString(PROJStringFormatter::create().get());
+    EXPECT_TRUE(projStr.find("geogoffset") != std::string::npos) << projStr;
+    EXPECT_TRUE(projStr.find("axisswap") != std::string::npos) << projStr;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, projCRS_3D_to_geogCRS_3D) {
 
     auto compoundcrs_ft_obj = PROJStringParser().createFromPROJString(

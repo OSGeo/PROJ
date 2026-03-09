@@ -4701,21 +4701,15 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
                 // first one, which is likely/hopefully the only one.
                 for (const auto &opFirst : opsFirst) {
                     if (hasIdentifiers(opFirst)) {
-                        if (candidateVert->_isEquivalentTo(
-                                targetCRS.get(),
-                                util::IComparable::Criterion::EQUIVALENT)) {
-                            res.emplace_back(opFirst);
-                        } else {
-                            try {
-                                res.emplace_back(
-                                    ConcatenatedOperation::
-                                        createComputeMetadata(
-                                            {opFirst, opsSecond.front()},
-                                            context
-                                                .disallowEmptyIntersection()));
-                            } catch (
-                                const InvalidOperationEmptyIntersection &) {
-                            }
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::
+                                    createComputeMetadata(
+                                        {opFirst, opsSecond.front()},
+                                        context
+                                            .disallowEmptyIntersection()));
+                        } catch (
+                            const InvalidOperationEmptyIntersection &) {
                         }
                     }
                 }
@@ -4744,21 +4738,15 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
             if (!opsFirst.empty()) {
                 for (const auto &opSecond : opsSecond) {
                     if (hasIdentifiers(opSecond)) {
-                        if (candidateVert->_isEquivalentTo(
-                                sourceCRS.get(),
-                                util::IComparable::Criterion::EQUIVALENT)) {
-                            res.emplace_back(opSecond);
-                        } else {
-                            try {
-                                res.emplace_back(
-                                    ConcatenatedOperation::
-                                        createComputeMetadata(
-                                            {opsFirst.front(), opSecond},
-                                            context
-                                                .disallowEmptyIntersection()));
-                            } catch (
-                                const InvalidOperationEmptyIntersection &) {
-                            }
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::
+                                    createComputeMetadata(
+                                        {opsFirst.front(), opSecond},
+                                        context
+                                            .disallowEmptyIntersection()));
+                        } catch (
+                            const InvalidOperationEmptyIntersection &) {
                         }
                     }
                 }
