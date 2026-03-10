@@ -4686,8 +4686,7 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
         authFactory, vertDst->datumNonNull(dbContext).get());
     for (const auto &candidateVert : candidatesDst) {
         if (candidateVert->_isEquivalentTo(
-                targetCRS.get(),
-                util::IComparable::Criterion::EQUIVALENT)) {
+                targetCRS.get(), util::IComparable::Criterion::EQUIVALENT)) {
             continue; // Skip the target itself — already tried by the caller.
         }
         auto opsFirst = createOperations(sourceCRS, sourceEpoch, candidateVert,
@@ -4703,13 +4702,10 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
                     if (hasIdentifiers(opFirst)) {
                         try {
                             res.emplace_back(
-                                ConcatenatedOperation::
-                                    createComputeMetadata(
-                                        {opFirst, opsSecond.front()},
-                                        context
-                                            .disallowEmptyIntersection()));
-                        } catch (
-                            const InvalidOperationEmptyIntersection &) {
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {opFirst, opsSecond.front()},
+                                    context.disallowEmptyIntersection()));
+                        } catch (const InvalidOperationEmptyIntersection &) {
                         }
                     }
                 }
@@ -4726,8 +4722,7 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
         authFactory, vertSrc->datumNonNull(dbContext).get());
     for (const auto &candidateVert : candidatesSrc) {
         if (candidateVert->_isEquivalentTo(
-                sourceCRS.get(),
-                util::IComparable::Criterion::EQUIVALENT)) {
+                sourceCRS.get(), util::IComparable::Criterion::EQUIVALENT)) {
             continue;
         }
         auto opsSecond = createOperations(candidateVert, sourceEpoch, targetCRS,
@@ -4740,13 +4735,10 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
                     if (hasIdentifiers(opSecond)) {
                         try {
                             res.emplace_back(
-                                ConcatenatedOperation::
-                                    createComputeMetadata(
-                                        {opsFirst.front(), opSecond},
-                                        context
-                                            .disallowEmptyIntersection()));
-                        } catch (
-                            const InvalidOperationEmptyIntersection &) {
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {opsFirst.front(), opSecond},
+                                    context.disallowEmptyIntersection()));
+                        } catch (const InvalidOperationEmptyIntersection &) {
                         }
                     }
                 }
