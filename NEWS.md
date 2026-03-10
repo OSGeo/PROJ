@@ -45,6 +45,10 @@
 * `createOperationsCompoundToGeog()`: discard 2D-only transformations from interpolation
   3D CRS to target 3D CRS (#4677)
 
+* `createOperations()`: chain vertical CRS transformations through intermediate
+  same-datum vertical CRS when no direct operation exists, avoiding ballpark fallback
+  for CRS pairs differing in axis direction, units, or both
+
 
 ### Bug Fixes
 

@@ -566,7 +566,15 @@ Overall logic is similar to the above case. There might be direct operations in
 the PROJ database, involving grid transformations or simple offsets. The fallback
 case is to synthesize a ballpark transformation.
 
-This is implemented by the ``createOperationsVertToVert`` method
+When no direct operation is found, a search is made for intermediate vertical CRS
+entries sharing the same datum as the source or target. If a registered operation
+exists between the source (or target) and such an intermediate CRS, it is composed
+with the axis/unit conversion to the actual target (or from the actual source).
+This is implemented by the ``createOperationsVertToVertWithIntermediateVert``
+method and avoids ballpark fallback for CRS pairs that differ only in axis
+direction (height vs depth), units (e.g. metres vs feet), or both.
+
+The direct case is handled by the ``createOperationsVertToVert`` method.
 
 .. code-block:: shell
 
