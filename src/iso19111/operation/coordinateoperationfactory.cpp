@@ -4639,13 +4639,13 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
 // When transforming between two vertical CRS with different datums, check
 // if there are registered operations whose target (or source) is a different
 // vertical CRS sharing the same datum as our target (or source).  If so,
-// chain: source → intermediate + intermediate → target (the latter being a
+// chain: source to intermediate + intermediate to target (the latter being a
 // simple unit/axis conversion handled by createOperationsVertToVert).
 //
-// Typical example: Baltic 1977 height (EPSG:5705) → Caspian depth (EPSG:5706).
-// EPSG has an operation 5705 → 5611 (Caspian height).  5611 and 5706 share the
+// Typical example: Baltic 1977 height (EPSG:5705) to Caspian depth (EPSG:5706).
+// EPSG has an operation 5705 to 5611 (Caspian height).  5611 and 5706 share the
 // same datum but differ only in axis direction.  We compose:
-//   5705 →(EPSG:5438)→ 5611 →(height-to-depth)→ 5706
+//   5705 ->(EPSG:5438)-> 5611 ->(height-to-depth)-> 5706
 std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
     createOperationsVertToVertWithIntermediateVert(
         const crs::CRSNNPtr &sourceCRS,
@@ -4687,7 +4687,7 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
     for (const auto &candidateVert : candidatesDst) {
         if (candidateVert->_isEquivalentTo(
                 targetCRS.get(), util::IComparable::Criterion::EQUIVALENT)) {
-            continue; // Skip the target itself — already tried by the caller.
+            continue; // Skip the target itself (already tried by the caller)
         }
         auto opsFirst = createOperations(sourceCRS, sourceEpoch, candidateVert,
                                          sourceEpoch, context);
