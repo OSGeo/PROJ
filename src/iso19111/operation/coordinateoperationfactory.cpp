@@ -4602,15 +4602,17 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
     auto candidatesVert = findCandidateVertCRSForDatum(
         authFactory, vertDst->datumNonNull(dbContext).get());
     for (const auto &candidateVert : candidatesVert) {
+        // Collect all registered source-to-candidate operations, which
+        // may differ in accuracy or area of use, for later ranking.
         auto resTmp = createOperations(sourceCRS, sourceEpoch, candidateVert,
                                        sourceEpoch, context);
         if (!resTmp.empty()) {
+            // The candidate-to-target conversion is expected to be a
+            // trivial unit or axis change, so we only use the first
+            // result (opsSecond.front()).
             const auto opsSecond = createOperations(
                 candidateVert, sourceEpoch, targetCRS, targetEpoch, context);
             if (!opsSecond.empty()) {
-                // The transformation from candidateVert to targetCRS should
-                // be just a unit change typically, so take only the first one,
-                // which is likely/hopefully the only one.
                 for (const auto &opFirst : resTmp) {
                     if (hasIdentifiers(opFirst)) {
                         if (candidateVert->_isEquivalentTo(
@@ -4689,15 +4691,17 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
                 targetCRS.get(), util::IComparable::Criterion::EQUIVALENT)) {
             continue; // Skip the target itself (already tried by the caller)
         }
+        // Collect all registered source-to-candidate operations, which
+        // may differ in accuracy or area of use, for later ranking.
         auto opsFirst = createOperations(sourceCRS, sourceEpoch, candidateVert,
                                          sourceEpoch, context);
         if (!opsFirst.empty()) {
+            // The candidate-to-target conversion is expected to be a
+            // trivial unit or axis change, so we only use the first
+            // result (opsSecond.front()).
             const auto opsSecond = createOperations(
                 candidateVert, sourceEpoch, targetCRS, targetEpoch, context);
             if (!opsSecond.empty()) {
-                // The transformation from candidateVert to targetCRS should
-                // be just a unit/axis change typically, so take only the
-                // first one, which is likely/hopefully the only one.
                 for (const auto &opFirst : opsFirst) {
                     if (hasIdentifiers(opFirst)) {
                         try {
