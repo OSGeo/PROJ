@@ -7299,34 +7299,34 @@ TEST(operation, vertCRS_to_vertCRS_height_depth_pivot_context) {
     // Caspian: EPSG:5705 (Baltic 1977 height) -> EPSG:5706 (Caspian depth)
     // via EPSG:5438 (dh=28) + height-to-depth axisswap
     checkPipeline("5705", "5706",
-                     "+proj=pipeline +step +proj=geogoffset +dh=28 "
-                     "+step +proj=axisswap +order=1,2,-3");
+                  "+proj=pipeline +step +proj=geogoffset +dh=28 "
+                  "+step +proj=axisswap +order=1,2,-3");
 
     // AIOC95: EPSG:5705 -> EPSG:5734 (AIOC95 depth)
     // via EPSG:5443 (dh=26.3) + height-to-depth axisswap
     checkPipeline("5705", "5734",
-                     "+proj=pipeline +step +proj=geogoffset +dh=26.3 "
-                     "+step +proj=axisswap +order=1,2,-3");
+                  "+proj=pipeline +step +proj=geogoffset +dh=26.3 "
+                  "+step +proj=axisswap +order=1,2,-3");
 
     // KOC: EPSG:5790 (KOC CD height) -> EPSG:5789 (KOC WD depth)
     // via EPSG:7986 (dh=-4.74) + height-to-depth axisswap
     checkPipeline("5790", "5789",
-                     "+proj=pipeline +step +proj=geogoffset +dh=-4.74 "
-                     "+step +proj=axisswap +order=1,2,-3");
+                  "+proj=pipeline +step +proj=geogoffset +dh=-4.74 "
+                  "+step +proj=axisswap +order=1,2,-3");
 
     // Kuwait PWD: EPSG:5788 -> EPSG:5789 (KOC WD depth)
     // via EPSG:7981 (dh=-4.25) + height-to-depth axisswap
     checkPipeline("5788", "5789",
-                     "+proj=pipeline +step +proj=geogoffset +dh=-4.25 "
-                     "+step +proj=axisswap +order=1,2,-3");
+                  "+proj=pipeline +step +proj=geogoffset +dh=-4.25 "
+                  "+step +proj=axisswap +order=1,2,-3");
 
     // KOC ft: EPSG:5790 -> EPSG:5614 (KOC WD depth ft)
     // via EPSG:7987 (dh=-4.74) + axisswap + unit conversion m->ft
     checkPipeline("5790", "5614",
-                     "+proj=pipeline "
-                     "+step +proj=geogoffset +dh=-4.74 "
-                     "+step +proj=axisswap +order=1,2,-3 "
-                     "+step +proj=unitconvert +z_in=m +z_out=ft");
+                  "+proj=pipeline "
+                  "+step +proj=geogoffset +dh=-4.74 "
+                  "+step +proj=axisswap +order=1,2,-3 "
+                  "+step +proj=unitconvert +z_in=m +z_out=ft");
 }
 
 // ---------------------------------------------------------------------------
@@ -7356,34 +7356,34 @@ TEST(operation, vertCRS_to_vertCRS_depth_height_pivot_context) {
     // Caspian: EPSG:5706 (Caspian depth) -> EPSG:5705 (Baltic 1977 height)
     // axisswap + inverse of EPSG:5438 (dh=-28)
     checkPipeline("5706", "5705",
-                     "+proj=pipeline +step +proj=axisswap +order=1,2,-3 "
-                     "+step +proj=geogoffset +dh=-28");
+                  "+proj=pipeline +step +proj=axisswap +order=1,2,-3 "
+                  "+step +proj=geogoffset +dh=-28");
 
     // AIOC95: EPSG:5734 (AIOC95 depth) -> EPSG:5705 (Baltic 1977 height)
     // axisswap + inverse of EPSG:5443 (dh=-26.3)
     checkPipeline("5734", "5705",
-                     "+proj=pipeline +step +proj=axisswap +order=1,2,-3 "
-                     "+step +proj=geogoffset +dh=-26.3");
+                  "+proj=pipeline +step +proj=axisswap +order=1,2,-3 "
+                  "+step +proj=geogoffset +dh=-26.3");
 
     // KOC: EPSG:5789 (KOC WD depth) -> EPSG:5790 (KOC CD height)
     // axisswap + inverse of EPSG:7986 (dh=4.74)
     checkPipeline("5789", "5790",
-                     "+proj=pipeline +step +proj=axisswap +order=1,2,-3 "
-                     "+step +proj=geogoffset +dh=4.74");
+                  "+proj=pipeline +step +proj=axisswap +order=1,2,-3 "
+                  "+step +proj=geogoffset +dh=4.74");
 
     // Kuwait PWD: EPSG:5789 (KOC WD depth) -> EPSG:5788 (Kuwait PWD height)
     // axisswap + inverse of EPSG:7981 (dh=4.25)
     checkPipeline("5789", "5788",
-                     "+proj=pipeline +step +proj=axisswap +order=1,2,-3 "
-                     "+step +proj=geogoffset +dh=4.25");
+                  "+proj=pipeline +step +proj=axisswap +order=1,2,-3 "
+                  "+step +proj=geogoffset +dh=4.25");
 
     // KOC ft: EPSG:5614 (KOC WD depth ft) -> EPSG:5790 (KOC CD height)
     // unit conversion ft->m + axisswap + inverse of EPSG:7987 (dh=4.74)
     checkPipeline("5614", "5790",
-                     "+proj=pipeline "
-                     "+step +proj=unitconvert +z_in=ft +z_out=m "
-                     "+step +proj=axisswap +order=1,2,-3 "
-                     "+step +proj=geogoffset +dh=4.74");
+                  "+proj=pipeline "
+                  "+step +proj=unitconvert +z_in=ft +z_out=m "
+                  "+step +proj=axisswap +order=1,2,-3 "
+                  "+step +proj=geogoffset +dh=4.74");
 }
 
 // ---------------------------------------------------------------------------
@@ -7395,7 +7395,7 @@ TEST(operation, vertCRS_to_vertCRS_height_depth_pivot_blacksea_context) {
     // EPSG:5705 (Baltic 1977 height) to EPSG:5336 (Black Sea depth)
     // Strategy 1 composes: EPSG:5447 (5705 to 5735, geogoffset +dh=0.4)
     //                    + height-to-depth (axisswap order=1,2,-3)
-    // PARTIAL_INTERSECTION is needed because EPSG:5447's area 
+    // PARTIAL_INTERSECTION is needed because EPSG:5447's area
     // is slightly smaller than EPSG:5336's extent
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
