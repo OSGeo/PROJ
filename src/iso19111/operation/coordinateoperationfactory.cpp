@@ -4680,41 +4680,48 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
         return res;
     const auto dbContext = authFactory->databaseContext().as_nullable();
 
+    // Try both pivot strategies and collect all candidates.  The caller's
+    // filterAndSort will rank them (by accuracy, area of use, etc.)
+
     // Strategy 1: pivot through candidates sharing the TARGET's datum.
-    // Find vertical CRSs on the same datum as the target, then look for
-    // operations from the source to each candidate (using the full
-    // createOperations machinery so multi-step chains are also found).
-    auto candidatesDst = findCandidateVertCRSForDatum(
-        authFactory, vertDst->datumNonNull(dbContext).get());
-    for (const auto &candidateVert : candidatesDst) {
-        if (candidateVert->_isEquivalentTo(
-                targetCRS.get(), util::IComparable::Criterion::EQUIVALENT)) {
-            continue; // Skip the target itself (already tried by the caller)
-        }
-        // Collect all registered source-to-candidate operations, which
-        // may differ in accuracy or area of use, for later ranking.
-        auto opsFirst = createOperations(sourceCRS, sourceEpoch, candidateVert,
-                                         sourceEpoch, context);
-        if (!opsFirst.empty()) {
-            // The candidate-to-target conversion is expected to be a
-            // trivial unit or axis change, so we only use the first
-            // result (opsSecond.front()).
-            const auto opsSecond = createOperations(
-                candidateVert, sourceEpoch, targetCRS, targetEpoch, context);
-            if (!opsSecond.empty()) {
-                for (const auto &opFirst : opsFirst) {
-                    if (hasIdentifiers(opFirst)) {
-                        try {
-                            res.emplace_back(
-                                ConcatenatedOperation::createComputeMetadata(
-                                    {opFirst, opsSecond.front()},
-                                    context.disallowEmptyIntersection()));
-                        } catch (const InvalidOperationEmptyIntersection &) {
+    // source -> candidate (registered CT) -> target (trivial axis/unit change)
+    {
+        auto candidatesDst = findCandidateVertCRSForDatum(
+            authFactory, vertDst->datumNonNull(dbContext).get());
+        for (const auto &candidateVert : candidatesDst) {
+            if (candidateVert->_isEquivalentTo(
+                    targetCRS.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                continue;
+            }
+            // Collect all registered source-to-candidate operations, which
+            // may differ in accuracy or area of use, for later ranking.
+            auto opsFirst = createOperations(sourceCRS, sourceEpoch,
+                                             candidateVert, sourceEpoch,
+                                             context);
+            if (!opsFirst.empty()) {
+                // The candidate-to-target conversion is expected to be a
+                // trivial unit or axis change, so we only use the first
+                // result (opsSecond.front()).
+                const auto opsSecond = createOperations(
+                    candidateVert, sourceEpoch, targetCRS, targetEpoch,
+                    context);
+                if (!opsSecond.empty()) {
+                    for (const auto &opFirst : opsFirst) {
+                        if (hasIdentifiers(opFirst)) {
+                            try {
+                                res.emplace_back(
+                                    ConcatenatedOperation::
+                                        createComputeMetadata(
+                                            {opFirst, opsSecond.front()},
+                                            context
+                                                .disallowEmptyIntersection()));
+                            } catch (
+                                const InvalidOperationEmptyIntersection &) {
+                            }
                         }
                     }
                 }
-                if (!res.empty())
-                    return res;
             }
         }
     }
@@ -4722,32 +4729,37 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
     // Strategy 2: pivot through candidates sharing the SOURCE's datum.
     // Find vertical CRSs on the same datum as the source, then look for
     // operations from each candidate to the target.
-    auto candidatesSrc = findCandidateVertCRSForDatum(
-        authFactory, vertSrc->datumNonNull(dbContext).get());
-    for (const auto &candidateVert : candidatesSrc) {
-        if (candidateVert->_isEquivalentTo(
-                sourceCRS.get(), util::IComparable::Criterion::EQUIVALENT)) {
-            continue;
-        }
-        auto opsSecond = createOperations(candidateVert, sourceEpoch, targetCRS,
-                                          targetEpoch, context);
-        if (!opsSecond.empty()) {
-            const auto opsFirst = createOperations(
-                sourceCRS, sourceEpoch, candidateVert, sourceEpoch, context);
-            if (!opsFirst.empty()) {
-                for (const auto &opSecond : opsSecond) {
-                    if (hasIdentifiers(opSecond)) {
-                        try {
-                            res.emplace_back(
-                                ConcatenatedOperation::createComputeMetadata(
-                                    {opsFirst.front(), opSecond},
-                                    context.disallowEmptyIntersection()));
-                        } catch (const InvalidOperationEmptyIntersection &) {
+    {
+        auto candidatesSrc = findCandidateVertCRSForDatum(
+            authFactory, vertSrc->datumNonNull(dbContext).get());
+        for (const auto &candidateVert : candidatesSrc) {
+            if (candidateVert->_isEquivalentTo(
+                    sourceCRS.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                continue;
+            }
+            auto opsSecond = createOperations(candidateVert, sourceEpoch,
+                                              targetCRS, targetEpoch, context);
+            if (!opsSecond.empty()) {
+                const auto opsFirst = createOperations(
+                    sourceCRS, sourceEpoch, candidateVert, sourceEpoch,
+                    context);
+                if (!opsFirst.empty()) {
+                    for (const auto &opSecond : opsSecond) {
+                        if (hasIdentifiers(opSecond)) {
+                            try {
+                                res.emplace_back(
+                                    ConcatenatedOperation::
+                                        createComputeMetadata(
+                                            {opsFirst.front(), opSecond},
+                                            context
+                                                .disallowEmptyIntersection()));
+                            } catch (
+                                const InvalidOperationEmptyIntersection &) {
+                            }
                         }
                     }
                 }
-                if (!res.empty())
-                    return res;
             }
         }
     }
