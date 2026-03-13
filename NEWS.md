@@ -45,6 +45,7 @@
 * `createOperationsCompoundToGeog()`: discard 2D-only transformations from interpolation
   3D CRS to target 3D CRS (#4677)
 
+
 ### Bug Fixes
 
 * CRS identification: fix issue when identifying WKT from older EPSG releases with newer
