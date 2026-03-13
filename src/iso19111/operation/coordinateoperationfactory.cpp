@@ -4728,7 +4728,7 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
     // Strategy 2: pivot through candidates sharing the SOURCE's datum.
     // Find vertical CRSs on the same datum as the source, then look for
     // operations from each candidate to the target.
-    {
+    if (res.empty()) {
         auto candidatesSrc = findCandidateVertCRSForDatum(
             authFactory, vertSrc->datumNonNull(dbContext).get());
         for (const auto &candidateVert : candidatesSrc) {
