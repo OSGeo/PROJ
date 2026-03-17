@@ -4,7 +4,7 @@ Create a first draft of release notes for a new version of PROJ
 The script outputs a section for the NEWS.md file. It's based on the title of
 entries added to the specified GitHub milestone. The script tries to group the
 entries into "updates" and "bug fixes" although it might not always be
-succesful.
+successful.
 
 The output of the scripts should be edited before adding to NEWS.md. Less editing
 is needed if PR's are given good titles when originally created.

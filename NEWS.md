@@ -104,7 +104,7 @@
 
 * WKT importer: better error message when `BBOX` is invalid (e.g south_lat > north_lat) (#4525)
 
-* Added `proj_geod_direct` for PJ trasformation object (#4532)
+* Added `proj_geod_direct` for PJ transformation object (#4532)
 
 * Support exporting Mercator (Spherical) on a sphere as `Mercator_1SP` in WKT1 (#4555)
 
@@ -126,7 +126,7 @@
 
 * `gie`: fix memory leak on non existing input file (#4531)
 
-* Database: referene `nl_nsgi_nllat2018.tif` and `nl_nsgi_bongeo2004.tif` grids (#4534)
+* Database: reference `nl_nsgi_nllat2018.tif` and `nl_nsgi_bongeo2004.tif` grids (#4534)
 
 * Fixes related to WKT import/export of `DerivedGeodetic/GeographicCRS` (#4536)
 

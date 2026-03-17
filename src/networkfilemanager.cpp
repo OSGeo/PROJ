@@ -2027,7 +2027,7 @@ static size_t pj_emscripten_read_range(PJ_CONTEXT *ctx,
     // It is easier running all PROJ in the Web Worker (that is the test done).
     // Documentation says compiling with pthread flag is needed.
     // https://emscripten.org/docs/api_reference/fetch.html#synchronous-fetches
-    // We encapsulate the code related to empscripten_fetch in a lamda.
+    // We encapsulate the code related to empscripten_fetch in a lambda.
     // Some tests running this lambda in a thread were partially successful.
     size_t real_read = 0;
     const std::string url = handle->m_url;

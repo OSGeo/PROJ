@@ -178,7 +178,7 @@ double pj_authalic_lat_inverse(double beta, const double *APA, const PJ *P,
 //
 //   constexpr int L = int(AuxLat::ORDER);
 //   // Managing the memory for the coefficient array is the
-//   // responibility of the calling routine.
+//   // responsibility of the calling routine.
 //   double F[L];
 //   // Fill F[] with coefficients to convert conformal to geographic
 //   pj_auxlat_coeffs(P->n, AuxLat::CONFORMAL, AuxLat::GEOGRAPHIC, F);
@@ -191,7 +191,7 @@ double pj_authalic_lat_inverse(double beta, const double *APA, const PJ *P,
 // coefficient is given as a Taylor series in n truncated at order 6 (=
 // AuxLat::ORDER).  This suffices to give full double precision accuracy for
 // |f| <= 1/150 and probably provide satisfactory results for |f| <= 1/50.  The
-// coefficients for these Taylor series are given by matrics listed in
+// coefficients for these Taylor series are given by matrices listed in
 // Eqs. (A1-A28) of this paper.
 //
 // These coefficients are bundled up into a single array coeffs in

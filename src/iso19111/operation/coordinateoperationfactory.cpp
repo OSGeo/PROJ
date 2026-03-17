@@ -865,7 +865,7 @@ struct PrecomputedOpCharacteristics {
     bool isNullTransformation_ = false;
 
     // 3 below tests are for ETRS89-XXX to ETRS89-YYY following
-    // recommandations of IOGP 373-07-7 to use ETRF2000 hub
+    // recommendations of IOGP 373-07-7 to use ETRF2000 hub
     bool is_ETRS89_XXX_to_ETRS89_YYY_ = false;
     bool uses_ETRF2000_ = false;
     bool uses_ETRS89_to_ETRS89_XXX_generic_ = false;
@@ -1020,7 +1020,7 @@ struct SortFunction {
             }
         }
 
-        // Follow recommandations of IOGP 373-07-7 to use ETRF2000 hub if
+        // Follow recommendations of IOGP 373-07-7 to use ETRF2000 hub if
         // no direct Transformation
         if (iterA->second.is_ETRS89_XXX_to_ETRS89_YYY_ &&
             iterB->second.is_ETRS89_XXX_to_ETRS89_YYY_) {
