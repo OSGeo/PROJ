@@ -304,7 +304,7 @@ The following control parameters can appear in any order:
     Affected by options :option:`--authority`, :option:`--area`, :option:`--bbox` and :option:`--spatial-test`
 
     A visual alternative is the webpage
-   `CRS Explorer <https://crs-explorer.proj.org/?all=true>` (https://crs-explorer.proj.org/?all=true).
+    `CRS Explorer <https://crs-explorer.proj.org/?all=true>` (https://crs-explorer.proj.org/?all=true).
 
 .. option:: --3d
 
