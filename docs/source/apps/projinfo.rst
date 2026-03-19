@@ -126,7 +126,7 @@ The following control parameters can appear in any order:
 
     Specify an area of interest to restrict the results when researching
     coordinate operations between 2 CRS. The area of interest can be specified either
-    as a name (e.g "Denmark - onshore") or a AUTHORITY:CODE (EPSG:3237)
+    as a name (e.g., projinfo --list-crs --area "Denmark - onshore") or a AUTHORITY:CODE (EPSG:3237)
     This option is exclusive of :option:`--bbox`.
 
     .. note:: only used for coordinate operation computation
