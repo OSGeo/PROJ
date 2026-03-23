@@ -388,6 +388,14 @@ add_library(proj
 )
 add_library(PROJ::proj ALIAS proj)
 
+if (PROJ_SET_INSTALL_RELATIVE_RPATH)
+  if(APPLE)
+    set_target_properties(proj PROPERTIES INSTALL_RPATH "@loader_path")
+  elseif(UNIX)
+    set_target_properties(proj PROPERTIES INSTALL_RPATH "$ORIGIN")
+  endif()
+endif()
+
 if(MSVC OR MINGW)
     target_compile_definitions(proj PRIVATE -DNOMINMAX)
 endif()

@@ -433,6 +433,10 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
     Path to an existing directory used to cache :file:`proj.db` to speed-up
     subsequent builds without modifications to source SQL files.
 
+.. option:: PROJ_SET_INSTALL_RELATIVE_RPATH
+
+    Whether to set rpath on installed libraries
+
 .. option:: TESTING_USE_NETWORK=ON
 
     .. versionadded:: 9.5

@@ -425,6 +425,8 @@ if (USE_ONLY_EMBEDDED_RESOURCE_FILES AND NOT EMBED_RESOURCE_FILES)
   message(WARNING "USE_ONLY_EMBEDDED_RESOURCE_FILES=ON set but EMBED_RESOURCE_FILES=OFF: some drivers will lack required resource files")
 endif()
 
+option(PROJ_SET_INSTALL_RELATIVE_RPATH "Whether to set rpath on installed libraries" OFF)
+
 ################################################################################
 # Build configured components
 ################################################################################
