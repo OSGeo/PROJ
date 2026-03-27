@@ -607,6 +607,45 @@ Output:
                 LENGTHUNIT["metre",1]],
         ID["HOBU","MY_CRS"]]
 
+A ``DerivedProjectedCRS`` — a CRS derived from an existing ``ProjectedCRS`` base — must be
+registered directly in the ``derived_projected_crs`` table. The base CRS must already exist
+in the ``projected_crs`` table (e.g. an EPSG entry), and a deriving conversion must be
+registered separately. For example, to register a net projection derived from EPSG:32631
+(WGS 84 / UTM zone 31N):
+
+.. code-block:: sql
+
+    -- Register the deriving conversion (e.g. an affine net unfold)
+    INSERT INTO conversion_table VALUES(
+        'HOBU','MY_NET_CONV','My net conversion',NULL,
+        'EPSG','9624',  -- Affine parametric transformation
+        NULL,NULL,NULL,NULL,NULL,  -- param1
+        NULL,NULL,NULL,NULL,NULL,  -- param2
+        NULL,NULL,NULL,NULL,NULL,  -- param3
+        NULL,NULL,NULL,NULL,NULL,  -- param4
+        NULL,NULL,NULL,NULL,NULL,  -- param5
+        NULL,NULL,NULL,NULL,NULL,  -- param6
+        NULL,NULL,NULL,NULL,NULL,  -- param7
+        0);
+    INSERT INTO usage VALUES('HOBU','USAGE_MY_NET_CONV','conversion',
+        'HOBU','MY_NET_CONV','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+
+    -- Register the DerivedProjectedCRS
+    INSERT INTO derived_projected_crs VALUES(
+        'HOBU','MY_NET_CRS','My net CRS',NULL,
+        'EPSG','4400',   -- coordinate system (Cartesian 2D, metres)
+        'EPSG','32631',  -- base ProjectedCRS
+        'HOBU','MY_NET_CONV',
+        NULL,0);
+    INSERT INTO usage VALUES('HOBU','USAGE_MY_NET_CRS','derived_projected_crs',
+        'HOBU','MY_NET_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+
+.. note::
+
+    The ``derived_projected_crs`` table was introduced in PROJ 9.9. A ``DERIVEDPROJCRS``
+    WKT string placed in the ``text_definition`` column of the ``projected_crs`` table
+    will produce a directed error pointing to the correct table.
+
 5. Get the WKT representation of EPSG:25832 in the WKT1:GDAL output format and on a single line
 
 .. code-block:: console

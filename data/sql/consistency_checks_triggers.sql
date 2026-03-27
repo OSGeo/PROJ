@@ -685,6 +685,35 @@ FOR EACH ROW BEGIN
         WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.table_name AND o.auth_name = NEW.auth_name AND o.code = NEW.code);
 END;
 
+CREATE TRIGGER derived_projected_crs_insert_trigger
+BEFORE INSERT ON derived_projected_crs
+FOR EACH ROW BEGIN
+
+    SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: (auth_name, code) must not already exist in crs_view')
+        WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
+
+    SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) crs_view')
+        WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.name = NEW.name AND crs_view.deprecated = 0 AND NEW.deprecated = 0
+        AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name NOT IN ('IGNF', 'ESRI'))
+    );
+
+    SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: base_crs must not be deprecated when derived_projected_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM projected_crs WHERE projected_crs.auth_name = NEW.base_crs_auth_name AND projected_crs.code = NEW.base_crs_code AND projected_crs.deprecated != 0) AND NEW.deprecated = 0;
+
+    SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: conversion must exist when text_definition is NULL')
+        WHERE NOT EXISTS(SELECT 1 FROM conversion WHERE conversion.auth_name = NEW.conversion_auth_name AND conversion.code = NEW.conversion_code) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: conversion must not be deprecated when derived_projected_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM conversion WHERE conversion.auth_name = NEW.conversion_auth_name AND conversion.code = NEW.conversion_code AND conversion.deprecated != 0) AND NEW.deprecated = 0;
+
+    SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: coordinate_system.type must be ''cartesian''')
+        WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 'Cartesian';
+
+    SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: coordinate_system.dimension must be 2')
+        WHERE (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 2;
+
+END;
+
 CREATE TRIGGER supersession_insert_trigger
 BEFORE INSERT ON supersession
 FOR EACH ROW BEGIN

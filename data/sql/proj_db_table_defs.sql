@@ -587,6 +587,29 @@ CREATE TABLE projected_crs(
     CONSTRAINT check_projected_crs_conversion CHECK (NOT((NOT(conversion_auth_name IS NULL OR conversion_code IS NULL)) AND text_definition IS NOT NULL))
 ) WITHOUT ROWID;
 
+CREATE TABLE derived_projected_crs(
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code INTEGER_OR_TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
+    description TEXT,
+    coordinate_system_auth_name TEXT,
+    coordinate_system_code INTEGER_OR_TEXT,
+    base_crs_auth_name TEXT,
+    base_crs_code INTEGER_OR_TEXT,
+    conversion_auth_name TEXT,
+    conversion_code INTEGER_OR_TEXT,
+    text_definition TEXT, -- PROJ string or WKT string. Use of this is discouraged as prone to definition ambiguities
+    deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
+    CONSTRAINT pk_derived_projected_crs PRIMARY KEY (auth_name, code),
+    CONSTRAINT fk_derived_projected_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_derived_projected_crs_base_crs FOREIGN KEY (base_crs_auth_name, base_crs_code) REFERENCES projected_crs(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_derived_projected_crs_conversion FOREIGN KEY (conversion_auth_name, conversion_code) REFERENCES conversion_table(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT check_derived_projected_crs_cs CHECK (NOT((coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL) AND text_definition IS NULL)),
+    CONSTRAINT check_derived_projected_crs_cs_bis CHECK (NOT((NOT(coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL)) AND text_definition IS NOT NULL)),
+    CONSTRAINT check_derived_projected_crs_base_crs CHECK (NOT((base_crs_auth_name IS NULL OR base_crs_code IS NULL) AND text_definition IS NULL)),
+    CONSTRAINT check_derived_projected_crs_conversion CHECK (NOT((NOT(conversion_auth_name IS NULL OR conversion_code IS NULL)) AND text_definition IS NOT NULL))
+) WITHOUT ROWID;
+
 CREATE TABLE compound_crs(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
     code INTEGER_OR_TEXT NOT NULL CHECK (length(code) >= 1),
@@ -1193,6 +1216,10 @@ CREATE VIEW crs_view AS
     SELECT CAST('engineering_crs' AS TEXT) AS table_name, auth_name, code, name, CAST('engineering' AS TEXT),
            description,
            deprecated FROM engineering_crs
+    UNION ALL
+    SELECT CAST('derived_projected_crs' AS TEXT) AS table_name, auth_name, code, name, CAST('derived projected' AS TEXT),
+           description,
+           deprecated FROM derived_projected_crs
 ;
 
 CREATE VIEW object_view AS

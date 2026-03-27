@@ -117,6 +117,10 @@ class ProjectedCRS;
 using ProjectedCRSPtr = std::shared_ptr<ProjectedCRS>;
 using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
 
+class DerivedProjectedCRS;
+using DerivedProjectedCRSPtr = std::shared_ptr<DerivedProjectedCRS>;
+using DerivedProjectedCRSNNPtr = util::nn<DerivedProjectedCRSPtr>;
+
 class CompoundCRS;
 using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
 using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
@@ -1065,6 +1069,9 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_DLL crs::ProjectedCRSNNPtr
     createProjectedCRS(const std::string &code) const;
+
+    PROJ_DLL crs::DerivedProjectedCRSNNPtr
+    createDerivedProjectedCRS(const std::string &code) const;
 
     PROJ_DLL crs::CompoundCRSNNPtr
     createCompoundCRS(const std::string &code) const;

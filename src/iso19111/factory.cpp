@@ -112,6 +112,7 @@ namespace io {
 #define GEOCENTRIC "geocentric"
 #define OTHER "other"
 #define PROJECTED "projected"
+#define DERIVED_PROJECTED "derived projected"
 #define ENGINEERING "engineering"
 #define VERTICAL "vertical"
 #define COMPOUND "compound"
@@ -4157,6 +4158,11 @@ struct AuthorityFactory::Private {
     crs::ProjectedCRSNNPtr createProjectedCRSEnd(const std::string &code,
                                                  const SQLResultSet &res);
 
+    SQLResultSet createDerivedProjectedCRSBegin(const std::string &code);
+    crs::DerivedProjectedCRSNNPtr
+    createDerivedProjectedCRSEnd(const std::string &code,
+                                 const SQLResultSet &res);
+
   private:
     DatabaseContextNNPtr context_;
     std::string authority_;
@@ -5901,6 +5907,11 @@ AuthorityFactory::Private::createProjectedCRSEnd(const std::string &code,
                 }
             }
 
+            if (dynamic_cast<const crs::DerivedProjectedCRS *>(obj.get())) {
+                throw FactoryException(
+                    "text_definition defines a DerivedProjectedCRS — "
+                    "register in the derived_projected_crs table instead");
+            }
             throw FactoryException(
                 "text_definition does not define a ProjectedCRS");
         }
@@ -5929,6 +5940,130 @@ AuthorityFactory::Private::createProjectedCRSEnd(const std::string &code,
                                cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
         throw buildFactoryException("projectedCRS", authority(), code, ex);
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a crs::DerivedProjectedCRS from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException if there is no matching object.
+ * @throw FactoryException in case of other errors.
+ */
+crs::DerivedProjectedCRSNNPtr
+AuthorityFactory::createDerivedProjectedCRS(const std::string &code) const {
+    const auto cacheKey(d->authority() + code);
+    auto crs = d->context()->d->getCRSFromCache(cacheKey);
+    if (crs) {
+        auto derivedProjCRS =
+            std::dynamic_pointer_cast<crs::DerivedProjectedCRS>(crs);
+        if (derivedProjCRS) {
+            return NN_NO_CHECK(derivedProjCRS);
+        }
+        throw NoSuchAuthorityCodeException("derivedProjectedCRS not found",
+                                           d->authority(), code);
+    }
+    return d->createDerivedProjectedCRSEnd(
+        code, d->createDerivedProjectedCRSBegin(code));
+}
+
+// ---------------------------------------------------------------------------
+//! @cond Doxygen_Suppress
+
+/** Returns the result of the SQL query needed by createDerivedProjectedCRSEnd
+ */
+SQLResultSet AuthorityFactory::Private::createDerivedProjectedCRSBegin(
+    const std::string &code) {
+    return runWithCodeParam(
+        "SELECT name, coordinate_system_auth_name, "
+        "coordinate_system_code, base_crs_auth_name, base_crs_code, "
+        "conversion_auth_name, conversion_code, "
+        "text_definition, "
+        "deprecated FROM derived_projected_crs WHERE auth_name = ? AND code = ?",
+        code);
+}
+
+// ---------------------------------------------------------------------------
+
+/** Build a DerivedProjectedCRS from the result of
+ * createDerivedProjectedCRSBegin() */
+crs::DerivedProjectedCRSNNPtr
+AuthorityFactory::Private::createDerivedProjectedCRSEnd(
+    const std::string &code, const SQLResultSet &res) {
+    const auto cacheKey(authority() + code);
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("derivedProjectedCRS not found",
+                                           authority(), code);
+    }
+    try {
+        const auto &row = res.front();
+        const auto &name = row[0];
+        const auto &cs_auth_name = row[1];
+        const auto &cs_code = row[2];
+        const auto &base_crs_auth_name = row[3];
+        const auto &base_crs_code = row[4];
+        const auto &conversion_auth_name = row[5];
+        const auto &conversion_code = row[6];
+        const auto &text_definition = row[7];
+        const bool deprecated = row[8] == "1";
+
+        auto props = createPropertiesSearchUsages(
+            "derived_projected_crs", code, name, deprecated);
+
+        if (!text_definition.empty()) {
+            DatabaseContext::Private::RecursionDetector detector(context());
+            auto obj = createFromUserInput(
+                pj_add_type_crs_if_needed(text_definition), context());
+            auto derivedProjCRS =
+                dynamic_cast<const crs::DerivedProjectedCRS *>(obj.get());
+            if (derivedProjCRS) {
+                auto conv = derivedProjCRS->derivingConversion();
+                auto newConv =
+                    (conv->nameStr() == "unnamed")
+                        ? operation::Conversion::create(
+                              util::PropertyMap().set(
+                                  common::IdentifiedObject::NAME_KEY, name),
+                              conv->method(), conv->parameterValues())
+                        : std::move(conv);
+                auto crsRet = crs::DerivedProjectedCRS::create(
+                    props, derivedProjCRS->baseCRS(), newConv,
+                    derivedProjCRS->coordinateSystem());
+                context()->d->cache(cacheKey, crsRet);
+                return crsRet;
+            }
+            throw FactoryException(
+                "text_definition does not define a DerivedProjectedCRS");
+        }
+
+        auto cs = createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
+
+        auto baseCRS = createFactory(base_crs_auth_name)
+                           ->createProjectedCRS(base_crs_code);
+
+        auto conv = createFactory(conversion_auth_name)
+                        ->createConversion(conversion_code);
+        if (conv->nameStr() == "unnamed") {
+            conv = conv->shallowClone();
+            conv->setProperties(util::PropertyMap().set(
+                common::IdentifiedObject::NAME_KEY, name));
+        }
+
+        auto cartesianCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
+        if (cartesianCS) {
+            auto crsRet = crs::DerivedProjectedCRS::create(
+                props, baseCRS, conv, NN_NO_CHECK(cartesianCS));
+            context()->d->cache(cacheKey, crsRet);
+            return crsRet;
+        }
+        throw FactoryException(
+            "unsupported CS type for derivedProjectedCRS: " +
+            cs->getWKT2Type(true));
+    } catch (const std::exception &ex) {
+        throw buildFactoryException("derivedProjectedCRS", authority(), code,
+                                    ex);
     }
 }
 //! @endcond
@@ -6094,6 +6229,9 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
     }
     if (type == PROJECTED) {
         return createProjectedCRS(code);
+    }
+    if (type == DERIVED_PROJECTED) {
+        return createDerivedProjectedCRS(code);
     }
     if (type == ENGINEERING) {
         return createEngineeringCRS(code);
@@ -9620,6 +9758,8 @@ AuthorityFactory::createObjectsFromNameEx(
                     return factory->createGeodeticCRS(l_code);
                 } else if (l_table_name == "projected_crs") {
                     return factory->createProjectedCRS(l_code);
+                } else if (l_table_name == "derived_projected_crs") {
+                    return factory->createDerivedProjectedCRS(l_code);
                 } else if (l_table_name == "vertical_crs") {
                     return factory->createVerticalCRS(l_code);
                 } else if (l_table_name == "compound_crs") {
