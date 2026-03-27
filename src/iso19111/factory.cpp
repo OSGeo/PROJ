@@ -5907,11 +5907,6 @@ AuthorityFactory::Private::createProjectedCRSEnd(const std::string &code,
                 }
             }
 
-            if (dynamic_cast<const crs::DerivedProjectedCRS *>(obj.get())) {
-                throw FactoryException(
-                    "text_definition defines a DerivedProjectedCRS — "
-                    "register in the derived_projected_crs table instead");
-            }
             throw FactoryException(
                 "text_definition does not define a ProjectedCRS");
         }
