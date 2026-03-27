@@ -694,7 +694,6 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: name (of a non-deprecated entry) must not already exist in (a non-deprecated entry of) crs_view')
         WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.name = NEW.name AND crs_view.deprecated = 0 AND NEW.deprecated = 0
-        AND NEW.auth_name IN (SELECT auth_name FROM builtin_authorities WHERE auth_name NOT IN ('IGNF', 'ESRI'))
     );
 
     SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: base_crs must not be deprecated when derived_projected_crs is not deprecated')
