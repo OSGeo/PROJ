@@ -3296,17 +3296,17 @@ TEST_F(FactoryWithTmpDatabase, custom_derived_projected_crs) {
     // conversion_table: auth_name,code,name,description,method_auth_name,
     //   method_code, then 7x(param_auth_name,param_code,param_value,
     //   param_uom_auth_name,param_uom_code), deprecated = 42 cols total
-    ASSERT_TRUE(execute(
-        "INSERT INTO conversion_table VALUES('TEST_NS','DERIVING_CONV',"
-        "'Deriving conversion',NULL,'EPSG','9807',"
-        "NULL,NULL,NULL,NULL,NULL,"  // param1
-        "NULL,NULL,NULL,NULL,NULL,"  // param2
-        "NULL,NULL,NULL,NULL,NULL,"  // param3
-        "NULL,NULL,NULL,NULL,NULL,"  // param4
-        "NULL,NULL,NULL,NULL,NULL,"  // param5
-        "NULL,NULL,NULL,NULL,NULL,"  // param6
-        "NULL,NULL,NULL,NULL,NULL,"  // param7
-        "0);"))
+    ASSERT_TRUE(
+        execute("INSERT INTO conversion_table VALUES('TEST_NS','DERIVING_CONV',"
+                "'Deriving conversion',NULL,'EPSG','9807',"
+                "NULL,NULL,NULL,NULL,NULL," // param1
+                "NULL,NULL,NULL,NULL,NULL," // param2
+                "NULL,NULL,NULL,NULL,NULL," // param3
+                "NULL,NULL,NULL,NULL,NULL," // param4
+                "NULL,NULL,NULL,NULL,NULL," // param5
+                "NULL,NULL,NULL,NULL,NULL," // param6
+                "NULL,NULL,NULL,NULL,NULL," // param7
+                "0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('TEST_NS',"
                         "'deriving_conv_usage','conversion',"
@@ -3318,8 +3318,8 @@ TEST_F(FactoryWithTmpDatabase, custom_derived_projected_crs) {
     ASSERT_TRUE(execute("INSERT INTO derived_projected_crs "
                         "VALUES('TEST_NS','DERIVED1',"
                         "'my derived projected crs',NULL,"
-                        "'EPSG','4400',"   // Cartesian 2D CS
-                        "'EPSG','32631',"  // base: UTM zone 31N
+                        "'EPSG','4400',"  // Cartesian 2D CS
+                        "'EPSG','32631'," // base: UTM zone 31N
                         "'TEST_NS','DERIVING_CONV',"
                         "NULL,0);"))
         << last_error();
@@ -3337,7 +3337,8 @@ TEST_F(FactoryWithTmpDatabase, custom_derived_projected_crs) {
         "      DATUM[\"World Geodetic System 1984\","
         "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
         "          LENGTHUNIT[\"metre\",1]]],"
-        "      PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "      "
+        "PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
         "      CS[ellipsoidal,2],"
         "        AXIS[\"latitude\",north],AXIS[\"longitude\",east],"
         "        ANGLEUNIT[\"degree\",0.0174532925199433]],"
@@ -3380,7 +3381,8 @@ TEST_F(FactoryWithTmpDatabase, custom_derived_projected_crs) {
         "      DATUM[\"World Geodetic System 1984\","
         "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
         "          LENGTHUNIT[\"metre\",1]]],"
-        "      PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "      "
+        "PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
         "      CS[ellipsoidal,2],"
         "        AXIS[\"latitude\",north],AXIS[\"longitude\",east],"
         "        ANGLEUNIT[\"degree\",0.0174532925199433]],"
@@ -3428,10 +3430,11 @@ TEST_F(FactoryWithTmpDatabase, custom_derived_projected_crs) {
         << "should reject: no conversion and no text_definition";
 
     // Trigger: coordinate_system type not Cartesian (ellipsoidal)
-    EXPECT_FALSE(execute("INSERT INTO derived_projected_crs "
-                         "VALUES('TEST_NS','DERIVED_ELLIPS_CS','ellips cs',NULL,"
-                         "'EPSG','6422','EPSG','32631',"
-                         "'TEST_NS','DERIVING_CONV',NULL,0);"))
+    EXPECT_FALSE(
+        execute("INSERT INTO derived_projected_crs "
+                "VALUES('TEST_NS','DERIVED_ELLIPS_CS','ellips cs',NULL,"
+                "'EPSG','6422','EPSG','32631',"
+                "'TEST_NS','DERIVING_CONV',NULL,0);"))
         << "should reject: CS type is ellipsoidal, not Cartesian";
 
     // Trigger: coordinate_system dimension not 2 (vertical=1)
@@ -3449,24 +3452,24 @@ TEST_F(FactoryWithTmpDatabase, custom_derived_projected_crs) {
         auto crs = factory->createDerivedProjectedCRS("DERIVED1");
         EXPECT_EQ(crs->nameStr(), "my derived projected crs");
         EXPECT_EQ(crs->identifiers().size(), 1U);
-        EXPECT_TRUE(
-            nn_dynamic_pointer_cast<ProjectedCRS>(crs->baseCRS()) != nullptr);
+        EXPECT_TRUE(nn_dynamic_pointer_cast<ProjectedCRS>(crs->baseCRS()) !=
+                    nullptr);
         EXPECT_EQ(crs->baseCRS()->nameStr(), "WGS 84 / UTM zone 31N");
     }
 
     // createCoordinateReferenceSystem dispatches correctly
     {
         auto crs = factory->createCoordinateReferenceSystem("DERIVED1");
-        EXPECT_TRUE(
-            nn_dynamic_pointer_cast<DerivedProjectedCRS>(crs) != nullptr);
+        EXPECT_TRUE(nn_dynamic_pointer_cast<DerivedProjectedCRS>(crs) !=
+                    nullptr);
     }
 
     // text_definition lookup
     {
         auto crs = factory->createDerivedProjectedCRS("DERIVED2");
         EXPECT_EQ(crs->nameStr(), "my derived projected crs text_def");
-        EXPECT_TRUE(
-            nn_dynamic_pointer_cast<ProjectedCRS>(crs->baseCRS()) != nullptr);
+        EXPECT_TRUE(nn_dynamic_pointer_cast<ProjectedCRS>(crs->baseCRS()) !=
+                    nullptr);
     }
 
     // text_definition that is not a DERIVEDPROJCRS gives a clear error

@@ -5982,7 +5982,8 @@ SQLResultSet AuthorityFactory::Private::createDerivedProjectedCRSBegin(
         "coordinate_system_code, base_crs_auth_name, base_crs_code, "
         "conversion_auth_name, conversion_code, "
         "text_definition, "
-        "deprecated FROM derived_projected_crs WHERE auth_name = ? AND code = ?",
+        "deprecated FROM derived_projected_crs WHERE auth_name = ? AND code = "
+        "?",
         code);
 }
 
@@ -6010,8 +6011,8 @@ AuthorityFactory::Private::createDerivedProjectedCRSEnd(
         const auto &text_definition = row[7];
         const bool deprecated = row[8] == "1";
 
-        auto props = createPropertiesSearchUsages(
-            "derived_projected_crs", code, name, deprecated);
+        auto props = createPropertiesSearchUsages("derived_projected_crs", code,
+                                                  name, deprecated);
 
         if (!text_definition.empty()) {
             DatabaseContext::Private::RecursionDetector detector(context());
@@ -6058,9 +6059,8 @@ AuthorityFactory::Private::createDerivedProjectedCRSEnd(
             context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }
-        throw FactoryException(
-            "unsupported CS type for derivedProjectedCRS: " +
-            cs->getWKT2Type(true));
+        throw FactoryException("unsupported CS type for derivedProjectedCRS: " +
+                               cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
         throw buildFactoryException("derivedProjectedCRS", authority(), code,
                                     ex);
