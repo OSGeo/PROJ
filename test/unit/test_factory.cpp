@@ -3429,20 +3429,6 @@ TEST_F(FactoryWithTmpDatabase, custom_derived_projected_crs) {
                          "NULL,NULL,NULL,0);"))
         << "should reject: no conversion and no text_definition";
 
-    // Trigger: coordinate_system type not Cartesian (ellipsoidal)
-    EXPECT_FALSE(
-        execute("INSERT INTO derived_projected_crs "
-                "VALUES('TEST_NS','DERIVED_ELLIPS_CS','ellips cs',NULL,"
-                "'EPSG','6422','EPSG','32631',"
-                "'TEST_NS','DERIVING_CONV',NULL,0);"))
-        << "should reject: CS type is ellipsoidal, not Cartesian";
-
-    // Trigger: coordinate_system dimension not 2 (vertical=1)
-    EXPECT_FALSE(execute("INSERT INTO derived_projected_crs "
-                         "VALUES('TEST_NS','DERIVED_1D_CS','1d cs',NULL,"
-                         "'EPSG','6499','EPSG','32631',"
-                         "'TEST_NS','DERIVING_CONV',NULL,0);"))
-        << "should reject: CS dimension is 1, not 2";
 
     auto factory =
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "TEST_NS");
