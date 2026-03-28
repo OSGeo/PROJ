@@ -3323,6 +3323,11 @@ TEST_F(FactoryWithTmpDatabase, custom_derived_projected_crs) {
                         "'TEST_NS','DERIVING_CONV',"
                         "NULL,0);"))
         << last_error();
+    ASSERT_TRUE(execute("INSERT INTO usage VALUES('TEST_NS',"
+                        "'derived1_usage','derived_projected_crs',"
+                        "'TEST_NS','DERIVED1',"
+                        "'EPSG','1262','EPSG','1024');"))
+        << last_error();
 
     // text_definition registration of a derived_projected_crs
     ASSERT_TRUE(execute(
@@ -3429,6 +3434,21 @@ TEST_F(FactoryWithTmpDatabase, custom_derived_projected_crs) {
                          "NULL,NULL,NULL,0);"))
         << "should reject: no conversion and no text_definition";
 
+    // Trigger: coordinate_system type not in permitted set (ellipsoidal)
+    EXPECT_FALSE(
+        execute("INSERT INTO derived_projected_crs "
+                "VALUES('TEST_NS','DERIVED_ELLIPS_CS','ellips cs',NULL,"
+                "'EPSG','6422','EPSG','32631',"
+                "'TEST_NS','DERIVING_CONV',NULL,0);"))
+        << "should reject: CS type 'ellipsoidal' not in permitted set";
+
+    // Trigger: coordinate_system type not in permitted set (vertical, dim=1)
+    EXPECT_FALSE(
+        execute("INSERT INTO derived_projected_crs "
+                "VALUES('TEST_NS','DERIVED_VERT_CS','vert cs',NULL,"
+                "'EPSG','6499','EPSG','32631',"
+                "'TEST_NS','DERIVING_CONV',NULL,0);"))
+        << "should reject: CS type 'vertical' not in permitted set";
 
     auto factory =
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "TEST_NS");
@@ -3462,16 +3482,38 @@ TEST_F(FactoryWithTmpDatabase, custom_derived_projected_crs) {
     EXPECT_THROW(factory->createDerivedProjectedCRS("DERIVED_WRONG"),
                  FactoryException);
 
-    // DERIVEDPROJCRS WKT in projected_crs table gives a directed error
+    // DERIVEDPROJCRS WKT in projected_crs table throws
+    EXPECT_THROW(factory->createProjectedCRS("PROJ_WITH_DERIVED_WKT"),
+                 FactoryException);
+
+    // getAuthorityCodes
     {
-        try {
-            factory->createProjectedCRS("PROJ_WITH_DERIVED_WKT");
-            FAIL() << "expected FactoryException";
-        } catch (const FactoryException &e) {
-            EXPECT_TRUE(std::string(e.what()).find("derived_projected_crs") !=
-                        std::string::npos)
-                << "error message should mention derived_projected_crs table";
+        auto codes = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::DERIVED_PROJECTED_CRS);
+        EXPECT_EQ(codes.size(), 3U);
+        EXPECT_TRUE(codes.count("DERIVED1") == 1);
+    }
+
+    // getDescriptionText
+    {
+        EXPECT_EQ(factory->getDescriptionText("DERIVED1"),
+                  "my derived projected crs");
+    }
+
+    // getCRSInfoList
+    {
+        auto list = factory->getCRSInfoList();
+        bool found = false;
+        for (const auto &info : list) {
+            if (info.authName == "TEST_NS" && info.code == "DERIVED1") {
+                found = true;
+                EXPECT_EQ(info.name, "my derived projected crs");
+                EXPECT_EQ(info.type,
+                          AuthorityFactory::ObjectType::DERIVED_PROJECTED_CRS);
+                break;
+            }
         }
+        EXPECT_TRUE(found) << "DERIVED1 not found in getCRSInfoList()";
     }
 }
 

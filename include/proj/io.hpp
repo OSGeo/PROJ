@@ -1132,6 +1132,8 @@ class PROJ_GCC_DLL AuthorityFactory {
         ENGINEERING_CRS,
         /** Object of type crs::EngineeringCRS */
         COMPOUND_CRS,
+        /** Object of type crs::DerivedProjectedCRS */
+        DERIVED_PROJECTED_CRS,
         /** Object of type operation::CoordinateOperation (and derived
            classes) */
         COORDINATE_OPERATION,

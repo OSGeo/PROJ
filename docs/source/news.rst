@@ -3,19 +3,6 @@
 News
 ###############################################################################
 
-9.9.0
-++++++++++++++++++++
-
-New features
-------------
-
-* Database: add ``derived_projected_crs`` table to support registration of
-  :cpp:class:`DerivedProjectedCRS` objects (ISO 19111) in ``proj.db`` /
-  ``user.db``. Adds :cpp:func:`AuthorityFactory::createDerivedProjectedCRS()`
-  and corresponding ``crs_view`` entry with type ``'derived projected'``.
-  A ``DERIVEDPROJCRS`` WKT in the ``projected_crs`` ``text_definition`` column
-  now produces a directed error pointing to the new table.
-
 9.8.0
 ++++++++++++++++++++
 *March 2nd 2026*

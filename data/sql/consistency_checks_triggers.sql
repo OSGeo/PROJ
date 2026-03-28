@@ -242,8 +242,8 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: horiz_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.horiz_crs_auth_name AND crs_view.code = NEW.horiz_crs_code);
 
-    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: horiz_crs must be equal to ''geographic 2D'', ''projected'' or ''engineering''')
-        WHERE (SELECT type FROM crs_view WHERE crs_view.auth_name = NEW.horiz_crs_auth_name AND crs_view.code = NEW.horiz_crs_code) NOT IN ('geographic 2D', 'projected', 'engineering');
+    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: horiz_crs must be equal to ''geographic 2D'', ''projected'', ''derived projected'' or ''engineering''')
+        WHERE (SELECT type FROM crs_view WHERE crs_view.auth_name = NEW.horiz_crs_auth_name AND crs_view.code = NEW.horiz_crs_code) NOT IN ('geographic 2D', 'projected', 'derived projected', 'engineering');
 
     SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: vertical_crs must be equal to ''vertical''')
         WHERE (SELECT type FROM crs_view WHERE crs_view.auth_name = NEW.vertical_crs_auth_name AND crs_view.code = NEW.vertical_crs_code) NOT IN ('vertical');
@@ -705,11 +705,11 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: conversion must not be deprecated when derived_projected_crs is not deprecated')
         WHERE EXISTS(SELECT 1 FROM conversion WHERE conversion.auth_name = NEW.conversion_auth_name AND conversion.code = NEW.conversion_code AND conversion.deprecated != 0) AND NEW.deprecated = 0;
 
-    SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: coordinate_system.type must be ''cartesian''')
-        WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 'Cartesian';
+    SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: coordinate_system.type must be one of ''affine'', ''Cartesian'', ''cylindrical'', ''ordinal'', ''polar'', ''spherical''')
+        WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) NOT IN ('affine', 'Cartesian', 'cylindrical', 'ordinal', 'polar', 'spherical');
 
-    SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: coordinate_system.dimension must be 2')
-        WHERE (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 2;
+    SELECT RAISE(ABORT, 'insert on derived_projected_crs violates constraint: coordinate_system.dimension must be 1, 2 or 3')
+        WHERE (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) NOT IN (1, 2, 3);
 
 END;
 

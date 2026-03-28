@@ -132,7 +132,7 @@ constexpr const char *CS_TYPE_ORDINAL = cs::OrdinalCS::WKT2_TYPE;
 constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 // If the code depends on the new additions, then DATABASE_LAYOUT_VERSION_MINOR
 // must be incremented.
-constexpr int DATABASE_LAYOUT_VERSION_MINOR = 6;
+constexpr int DATABASE_LAYOUT_VERSION_MINOR = 7;
 
 constexpr size_t N_MAX_PARAMS = 7;
 
@@ -6047,15 +6047,10 @@ AuthorityFactory::Private::createDerivedProjectedCRSEnd(
                 common::IdentifiedObject::NAME_KEY, name));
         }
 
-        auto cartesianCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
-        if (cartesianCS) {
-            auto crsRet = crs::DerivedProjectedCRS::create(
-                props, baseCRS, conv, NN_NO_CHECK(cartesianCS));
-            context()->d->cache(cacheKey, crsRet);
-            return crsRet;
-        }
-        throw FactoryException("unsupported CS type for derivedProjectedCRS: " +
-                               cs->getWKT2Type(true));
+        auto crsRet =
+            crs::DerivedProjectedCRS::create(props, baseCRS, conv, cs);
+        context()->d->cache(cacheKey, crsRet);
+        return crsRet;
     } catch (const std::exception &ex) {
         throw buildFactoryException("derivedProjectedCRS", authority(), code,
                                     ex);
@@ -8867,6 +8862,9 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
     case ObjectType::ENGINEERING_CRS:
         sql = "SELECT code FROM engineering_crs WHERE ";
         break;
+    case ObjectType::DERIVED_PROJECTED_CRS:
+        sql = "SELECT code FROM derived_projected_crs WHERE ";
+        break;
     case ObjectType::COORDINATE_OPERATION:
         sql =
             "SELECT code FROM coordinate_operation_with_conversion_view WHERE ";
@@ -8928,7 +8926,8 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
         const auto &tableName = row[1];
         if (tableName == "geodetic_crs" || tableName == "projected_crs" ||
             tableName == "vertical_crs" || tableName == "compound_crs" ||
-            tableName == "engineering_crs") {
+            tableName == "engineering_crs" ||
+            tableName == "derived_projected_crs") {
             return row[0];
         } else if (text.empty()) {
             text = row[0];
@@ -9038,6 +9037,15 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
         sql += "WHERE c.auth_name = ? ";
         params.emplace_back(d->authority());
     }
+    sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'derived projected', "
+           "c.deprecated, "
+           "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
+           "a.description, NULL, 'Earth' FROM derived_projected_crs c ";
+    sql += getSqlArea("derived_projected_crs");
+    if (d->hasAuthorityRestriction()) {
+        sql += "WHERE c.auth_name = ? ";
+        params.emplace_back(d->authority());
+    }
     sql += ") r ORDER BY auth_name, code";
     auto sqlRes = d->run(sql, params);
     std::list<AuthorityFactory::CRSInfo> res;
@@ -9063,6 +9071,8 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
             info.type = AuthorityFactory::ObjectType::COMPOUND_CRS;
         } else if (type == ENGINEERING) {
             info.type = AuthorityFactory::ObjectType::ENGINEERING_CRS;
+        } else if (type == DERIVED_PROJECTED) {
+            info.type = AuthorityFactory::ObjectType::DERIVED_PROJECTED_CRS;
         }
         info.deprecated = row[4] == "1";
         if (row[5].empty()) {
