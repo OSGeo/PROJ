@@ -1163,6 +1163,23 @@ def fill_alias(proj_db_cursor):
 
         print('Cannot find CRS %s in geodetic_crs, projected_crs, vertical_crs or compound_crs' % (code))
 
+    proj_db_cursor.execute("SELECT DISTINCT object_code, alias, coord_op_name FROM epsg.epsg_alias, epsg.epsg_coordoperation ON coord_op_code = object_code WHERE object_table_name = 'epsg_coordoperation' AND epsg_coordoperation.deprecated = 0")
+    for row in proj_db_cursor.fetchall():
+        code, alt_name, new_name = row
+        if "ETRS89" not in alt_name:
+            # print('Ignoring alias %s for coordinate operation %s %s' % (alt_name, code, new_name))
+            continue
+
+        proj_db_cursor.execute('SELECT table_name FROM coordinate_operation_view WHERE code = ?', (code,))
+        row = proj_db_cursor.fetchone()
+        if row is not None:
+            table_name = row[0]
+            if table_name != "conversion":
+                proj_db_cursor.execute("INSERT INTO alias_name VALUES (?,'EPSG',?,?,'EPSG')", (table_name, code, alt_name))
+            continue
+
+        print('Cannot find coordinate operation %s for alias %s' % (code, alt_name))
+
 
 def find_table(proj_db_cursor, code):
     for table_name in ('helmert_transformation', 'grid_transformation', 'concatenated_operation', 'geodetic_crs', 'projected_crs', 'vertical_crs', 'compound_crs'):
