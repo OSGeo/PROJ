@@ -4270,6 +4270,80 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
         }
     }
 
+    // ETRS89 specific hack to deal with the fact that a lot of ETRS89-XXX
+    // datum/CRS have been created, with older transformations going from/to
+    // generic ETRS89 being re-attributed to that specific ETRS89-XXX datum/CRS
+    // which breaks backwards compatibility
+    // e.g we want ETRS89 to MGI to be able to use the previously named
+    // "MGI to ETRS89 (8)" operation, that is now "MGI to ETRS89-AUT [2002] (8)"
+    const bool srcIsETRS89 = sourceCRS->nameStr() == "ETRS89";
+    const bool dstIsETRS89 = targetCRS->nameStr() == "ETRS89";
+    if (geodSrc && geodDst && (srcIsETRS89 || dstIsETRS89) &&
+        !(srcIsETRS89 && dstIsETRS89)) {
+        const auto &authFactory = context.context->getAuthorityFactory();
+        const auto gridAvailabilityUse =
+            context.context->getGridAvailabilityUse();
+        const auto opFromAlias = authFactory->getOperationsFromAlias(
+            sourceCRS->nameStr(), targetCRS->nameStr(),
+            context.context->getUsePROJAlternativeGridNames(),
+            /* discardIfMissingGrid = */
+            gridAvailabilityUse ==
+                    CoordinateOperationContext::GridAvailabilityUse::
+                        DISCARD_OPERATION_IF_MISSING_GRID ||
+                gridAvailabilityUse == CoordinateOperationContext::
+                                           GridAvailabilityUse::KNOWN_AVAILABLE,
+            /* considerKnownGridsAsAvailable = */
+            gridAvailabilityUse == CoordinateOperationContext::
+                                       GridAvailabilityUse::KNOWN_AVAILABLE,
+            context.context->getDiscardSuperseded());
+        for (const auto &aliasOp : opFromAlias) {
+            const auto aliasOpSourceCRS = aliasOp->sourceCRS();
+            const auto aliasOpTargetCRS = aliasOp->targetCRS();
+            if (aliasOpSourceCRS && aliasOpTargetCRS &&
+                (aliasOpSourceCRS->nameStr().find("ETRS89-") !=
+                     std::string::npos ||
+                 aliasOpTargetCRS->nameStr().find("ETRS89-") !=
+                     std::string::npos)) {
+                const bool bSourceAliasIsEquivalentToSourceCRS = starts_with(
+                    aliasOpSourceCRS->nameStr(), sourceCRS->nameStr());
+                auto newOp = aliasOp->shallowClone();
+                // Patch the transformation to modify its source/target CRS
+                // to the expected one
+                if (bSourceAliasIsEquivalentToSourceCRS) {
+                    setCRSs(newOp.get(), sourceCRS, targetCRS);
+                } else {
+                    setCRSs(newOp.get(), targetCRS, sourceCRS);
+                    newOp = newOp->inverse();
+                }
+
+                const auto getNatureOf =
+                    [](const crs::GeodeticCRS &crs) -> std::string {
+                    if (dynamic_cast<const crs::GeographicCRS *>(&crs) !=
+                        nullptr) {
+                        if (crs.coordinateSystem()->axisList().size() == 2)
+                            return "geographic2D";
+                        else
+                            return "geographic3D";
+                    } else {
+                        return "geodetic";
+                    }
+                };
+                // TODO? Ideally we'd create 2D<-->3D<-->geocentric conversions
+                // when needed
+                const auto newOpSrc = dynamic_cast<const crs::GeodeticCRS *>(
+                    newOp->sourceCRS().get());
+                const auto newOpDst = dynamic_cast<const crs::GeodeticCRS *>(
+                    newOp->targetCRS().get());
+                if (newOpSrc && newOpDst &&
+                    getNatureOf(*newOpSrc) == getNatureOf(*geodSrc) &&
+                    getNatureOf(*newOpDst) == getNatureOf(*geodDst)) {
+                    res.emplace_back(newOp);
+                    doFilterAndCheckPerfectOp = true;
+                }
+            }
+        }
+    }
+
     if (doFilterAndCheckPerfectOp) {
         // If we get at least a result with perfect accuracy, do not bother
         // generating synthetic transforms.

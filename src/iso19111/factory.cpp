@@ -10431,6 +10431,62 @@ AuthorityFactory::getPointMotionOperationsFor(
     return res;
 }
 
+// ---------------------------------------------------------------------------
+
+std::vector<operation::CoordinateOperationNNPtr>
+AuthorityFactory::getOperationsFromAlias(const std::string &crs1Name,
+                                         const std::string &crs2Name,
+                                         bool usePROJAlternativeGridNames,
+                                         bool discardIfMissingGrid,
+                                         bool considerKnownGridsAsAvailable,
+                                         bool discardSuperseded) const {
+    std::string sql("SELECT alias.auth_name, alias.code FROM alias_name alias "
+                    "JOIN coordinate_operation_view cov "
+                    "ON alias.table_name = cov.table_name "
+                    "AND alias.auth_name = cov.auth_name "
+                    "AND alias.code = cov.code "
+                    "WHERE alias.table_name IN ('grid_transformation', "
+                    "'helmert_transformation', 'other_transformation', "
+                    "'concatenated_operation') "
+                    "AND (alt_name LIKE ? OR alt_name LIKE ?) "
+                    "AND NOT (alt_name LIKE ? OR alt_name LIKE ? OR alt_name "
+                    "LIKE ? OR alt_name LIKE ?) "
+                    "AND cov.deprecated = 0");
+    if (discardSuperseded) {
+        sql += " AND NOT EXISTS (SELECT 1 FROM supersession ss WHERE "
+               "ss.superseded_table_name = cov.table_name AND "
+               "ss.superseded_auth_name = cov.auth_name AND "
+               "ss.superseded_code = cov.code AND "
+               "ss.superseded_table_name = ss.replacement_table_name AND "
+               "ss.same_source_target_crs = 1)";
+    }
+    ListOfParams params{
+        std::string(crs1Name).append(" to ").append(crs2Name).append("%"),
+        std::string(crs2Name).append(" to ").append(crs1Name).append("%"),
+        //  If looking for "MGI to ETRS89", don't match "ETRS89 to ETRS89-XXX"
+        std::string(crs1Name).append(" to ").append(crs1Name).append("-%"),
+        std::string(crs2Name).append(" to ").append(crs2Name).append("-%"),
+        // If looking for "MGI to ETRS89", don't match "MGI to ETRS89-XXX" (not
+        // an actual example, but just in case)
+        std::string(crs1Name).append(" to ").append(crs2Name).append("-%"),
+        std::string(crs2Name).append(" to ").append(crs1Name).append("-%"),
+    };
+
+    std::vector<operation::CoordinateOperationNNPtr> res;
+    auto sqlRes = d->run(sql, params);
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        auto op = d->createFactory(auth_name)->createCoordinateOperation(
+            code, usePROJAlternativeGridNames);
+        if (!discardIfMissingGrid ||
+            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
+            res.emplace_back(op);
+        }
+    }
+    return res;
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
