@@ -209,8 +209,8 @@ osgeo::proj::cs::CartesianCS::createEastingNorthing(osgeo::proj::common::UnitOfM
 osgeo::proj::cs::CartesianCS::createGeocentric(osgeo::proj::common::UnitOfMeasure const&)
 osgeo::proj::cs::CartesianCS::createNorthingEasting(osgeo::proj::common::UnitOfMeasure const&)
 osgeo::proj::cs::CartesianCS::createNorthPoleEastingSouthNorthingSouth(osgeo::proj::common::UnitOfMeasure const&)
-osgeo::proj::cs::CartesianCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
-osgeo::proj::cs::CartesianCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::CartesianCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, bool)
+osgeo::proj::cs::CartesianCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, bool)
 osgeo::proj::cs::CartesianCS::createSouthPoleEastingNorthNorthingNorth(osgeo::proj::common::UnitOfMeasure const&)
 osgeo::proj::cs::CartesianCS::createWestingSouthing(osgeo::proj::common::UnitOfMeasure const&)
 osgeo::proj::cs::CoordinateSystemAxis::abbreviation() const
@@ -234,6 +234,8 @@ osgeo::proj::cs::EllipsoidalCS::createLongitudeLatitude(osgeo::proj::common::Uni
 osgeo::proj::cs::EllipsoidalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
 osgeo::proj::cs::EllipsoidalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
 osgeo::proj::cs::EllipsoidalCS::~EllipsoidalCS()
+osgeo::proj::cs::InvalidCoordinateSystem::~InvalidCoordinateSystem()
+osgeo::proj::cs::InvalidCoordinateSystem::InvalidCoordinateSystem(osgeo::proj::cs::InvalidCoordinateSystem const&)
 osgeo::proj::cs::Meridian::create(osgeo::proj::common::Angle const&)
 osgeo::proj::cs::Meridian::longitude() const
 osgeo::proj::cs::Meridian::~Meridian()

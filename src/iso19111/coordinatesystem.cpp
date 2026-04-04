@@ -746,6 +746,27 @@ bool CoordinateSystem::_isEquivalentTo(
 }
 //! @endcond
 
+//! @cond Doxygen_Suppress
+// ---------------------------------------------------------------------------
+
+InvalidCoordinateSystem::InvalidCoordinateSystem(const char *message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+InvalidCoordinateSystem::InvalidCoordinateSystem(const std::string &message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+InvalidCoordinateSystem::InvalidCoordinateSystem(
+    const InvalidCoordinateSystem &) = default;
+
+// ---------------------------------------------------------------------------
+
+InvalidCoordinateSystem::~InvalidCoordinateSystem() = default;
+//! @endcond
+
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
@@ -1101,12 +1122,20 @@ CartesianCS::CartesianCS(const CartesianCS &) = default;
  * @param properties See \ref general_properties.
  * @param axis1 The first axis.
  * @param axis2 The second axis.
+ * @param enforceSameUnit Whether to check that all axis have the same unit.
+ * (since 9.9)
  * @return a new CartesianCS.
+ * @throw InvalidCoordinateSystem in case of error (since 9.9)
  */
 CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
                                      const CoordinateSystemAxisNNPtr &axis1,
-                                     const CoordinateSystemAxisNNPtr &axis2) {
+                                     const CoordinateSystemAxisNNPtr &axis2,
+                                     bool enforceSameUnit) {
     std::vector<CoordinateSystemAxisNNPtr> axis{axis1, axis2};
+    if (enforceSameUnit && axis1->unit() != axis2->unit()) {
+        throw InvalidCoordinateSystem(
+            "All axis of a CartesianCS must have the same unit");
+    }
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     cs->setProperties(properties);
     return cs;
@@ -1120,13 +1149,22 @@ CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
  * @param axis1 The first axis.
  * @param axis2 The second axis.
  * @param axis3 The third axis.
+ * @param enforceSameUnit Whether to check that all axis have the same unit.
+ * (since 9.9)
  * @return a new CartesianCS.
+ * @throw InvalidCoordinateSystem in case of error (since 9.9)
  */
 CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
                                      const CoordinateSystemAxisNNPtr &axis1,
                                      const CoordinateSystemAxisNNPtr &axis2,
-                                     const CoordinateSystemAxisNNPtr &axis3) {
+                                     const CoordinateSystemAxisNNPtr &axis3,
+                                     bool enforceSameUnit) {
     std::vector<CoordinateSystemAxisNNPtr> axis{axis1, axis2, axis3};
+    if (enforceSameUnit &&
+        (axis1->unit() != axis2->unit() || axis1->unit() != axis3->unit())) {
+        throw InvalidCoordinateSystem(
+            "All axis of a CartesianCS must have the same unit");
+    }
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     cs->setProperties(properties);
     return cs;

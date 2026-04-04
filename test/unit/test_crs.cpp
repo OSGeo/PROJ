@@ -71,6 +71,44 @@ static nn<std::shared_ptr<UnrelatedObject>> createUnrelatedObject() {
 
 // ---------------------------------------------------------------------------
 
+TEST(cs, CartesianCS) {
+    auto axis0 = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Easting"), "X",
+        AxisDirection::EAST, UnitOfMeasure::METRE);
+
+    auto axis1 = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Northing"), "Y",
+        AxisDirection::NORTH, UnitOfMeasure::METRE);
+
+    auto axis2 = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Height"), "H",
+        AxisDirection::UP, UnitOfMeasure::METRE);
+
+    EXPECT_NO_THROW(CartesianCS::create(PropertyMap(), axis0, axis1));
+    EXPECT_NO_THROW(CartesianCS::create(PropertyMap(), axis0, axis1, axis2));
+
+    auto axis2_foot = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Height"), "H",
+        AxisDirection::UP, UnitOfMeasure::FOOT);
+
+    EXPECT_THROW(CartesianCS::create(PropertyMap(), axis0, axis2_foot),
+                 InvalidCoordinateSystem);
+    EXPECT_THROW(CartesianCS::create(PropertyMap(), axis0, axis2_foot, true),
+                 InvalidCoordinateSystem);
+    EXPECT_NO_THROW(
+        CartesianCS::create(PropertyMap(), axis0, axis2_foot, false));
+
+    EXPECT_THROW(CartesianCS::create(PropertyMap(), axis0, axis1, axis2_foot),
+                 InvalidCoordinateSystem);
+    EXPECT_THROW(
+        CartesianCS::create(PropertyMap(), axis0, axis1, axis2_foot, true),
+        InvalidCoordinateSystem);
+    EXPECT_NO_THROW(
+        CartesianCS::create(PropertyMap(), axis0, axis1, axis2_foot, false));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_4326_get_components) {
     auto crs = GeographicCRS::EPSG_4326;
     ASSERT_EQ(crs->identifiers().size(), 1U);

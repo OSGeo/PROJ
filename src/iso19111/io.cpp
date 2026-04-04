@@ -3097,10 +3097,21 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         }
     } else if (ci_equal(csType, CartesianCS::WKT2_TYPE)) {
         if (axisCount == 2) {
-            return CartesianCS::create(csMap, axisList[0], axisList[1]);
-        } else if (axisCount == 3) {
+            if (axisList[0]->unit() != axisList[1]->unit()) {
+                emitRecoverableWarning(
+                    "All axis of a CartesianCS must have the same unit");
+            }
             return CartesianCS::create(csMap, axisList[0], axisList[1],
-                                       axisList[2]);
+                                       /* enforceSameUnit = */ false);
+        } else if (axisCount == 3) {
+            if (axisList[0]->unit() != axisList[1]->unit() ||
+                axisList[0]->unit() != axisList[2]->unit()) {
+                emitRecoverableWarning(
+                    "All axis of a CartesianCS must have the same unit");
+            }
+            return CartesianCS::create(csMap, axisList[0], axisList[1],
+                                       axisList[2],
+                                       /* enforceSameUnit = */ false);
         }
     } else if (ci_equal(csType, AffineCS::WKT2_TYPE)) {
         if (axisCount == 2) {
@@ -5943,6 +5954,7 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 class JSONParser {
     DatabaseContextPtr dbContext_{};
     std::string deformationModelName_{};
+    PJ_CONTEXT *ctx_ = nullptr;
 
     static std::string getString(const json &j, const char *key);
     static json getObject(const json &j, const char *key);
@@ -6053,11 +6065,26 @@ class JSONParser {
                                  NN_NO_CHECK(csCast));
     }
 
+    void emitRecoverableWarning(const std::string &warningMsg) {
+        if (ctx_) {
+            proj_context_log_debug(ctx_, "PROJJSON parsing: %s",
+                                   warningMsg.c_str());
+        }
+    }
+
+    JSONParser(const JSONParser &) = delete;
+    JSONParser &operator=(const JSONParser &) = delete;
+
   public:
     JSONParser() = default;
 
     JSONParser &attachDatabaseContext(const DatabaseContextPtr &dbContext) {
         dbContext_ = dbContext;
+        return *this;
+    }
+
+    JSONParser &attachContext(PJ_CONTEXT *ctx) {
+        ctx_ = ctx;
         return *this;
     }
 
@@ -7113,11 +7140,22 @@ CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
     }
     if (subtype == CartesianCS::WKT2_TYPE) {
         if (axisCount == 2) {
-            return CartesianCS::create(csMap, axisList[0], axisList[1]);
+            if (axisList[0]->unit() != axisList[1]->unit()) {
+                emitRecoverableWarning(
+                    "All axis of a CartesianCS must have the same unit");
+            }
+            return CartesianCS::create(csMap, axisList[0], axisList[1],
+                                       /* enforceSameUnit = */ false);
         }
         if (axisCount == 3) {
+            if (axisList[0]->unit() != axisList[1]->unit() ||
+                axisList[0]->unit() != axisList[2]->unit()) {
+                emitRecoverableWarning(
+                    "All axis of a CartesianCS must have the same unit");
+            }
             return CartesianCS::create(csMap, axisList[0], axisList[1],
-                                       axisList[2]);
+                                       axisList[2],
+                                       /* enforceSameUnit = */ false);
         }
         throw ParsingException("Expected 2 or 3 axis");
     }
@@ -7721,7 +7759,10 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         } catch (const std::exception &e) {
             throw ParsingException(e.what());
         }
-        return JSONParser().attachDatabaseContext(dbContext).create(j);
+        return JSONParser()
+            .attachContext(ctx)
+            .attachDatabaseContext(dbContext)
+            .create(j);
     }
 
     if (!ci_starts_with(text, "step proj=") &&
@@ -12330,9 +12371,11 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
 
     auto csGeodCRS = geodCRS->coordinateSystem();
     auto cs = csGeodCRS->axisList().size() == 2
-                  ? CartesianCS::create(emptyPropertyMap, axis[0], axis[1])
+                  ? CartesianCS::create(emptyPropertyMap, axis[0], axis[1],
+                                        /* enforceSameUnit = */ false)
                   : CartesianCS::create(emptyPropertyMap, axis[0], axis[1],
-                                        csGeodCRS->axisList()[2]);
+                                        csGeodCRS->axisList()[2],
+                                        /* enforceSameUnit = */ false);
     if (isTopocentricStep(step.name)) {
         cs = CartesianCS::create(
             emptyPropertyMap,

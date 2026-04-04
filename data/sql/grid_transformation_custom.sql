@@ -24,30 +24,6 @@ INSERT INTO "usage" VALUES(
     'EPSG','1024'  -- unknown
 );
 
--- Faroe Islands
-
-INSERT INTO "grid_transformation" VALUES(
-    'PROJ','EPSG_4937_TO_EPSG_5317','ETRS89 to FVR09 height',
-    NULL,
-    'EPSG','9665','Geographic3D to GravityRelatedHeight (gtx)',
-    'EPSG','4937', -- source CRS (ETRS89)
-    'EPSG','5317', -- target CRS (FVR09 height)
-    NULL,
-    'EPSG','8666','Geoid (height correction) model file','fvr09.gtx',
-    NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-    NULL,NULL,NULL,NULL,NULL,NULL,
-    NULL,NULL,NULL,NULL,NULL,NULL,0);
-
-INSERT INTO "usage" VALUES(
-    'PROJ',
-    'EPSG_4937_TO_EPSG_5317_USAGE',
-    'grid_transformation',
-    'PROJ',
-    'EPSG_4937_TO_EPSG_5317',
-    'EPSG','3248', -- area of use: Faroe Islands - onshore
-    'EPSG','1024'  -- unknown
-);
-
 -- Sweden
 
 INSERT INTO "grid_transformation" VALUES(

@@ -1298,8 +1298,9 @@ std::string CRS::getOriginatingAuthName() const {
 /** \brief Return a variant of this CRS "promoted" to a 3D one, if not already
  * the case.
  *
- * The new axis will be ellipsoidal height, oriented upwards, and with metre
- * units.
+ * The new axis will be ellipsoidal height, oriented upwards, and with the same
+ * unit as the existing coordinate system for a CartesianCS, or otherwise
+ * with metre units
  *
  * @param newName Name of the new CRS. If empty, nameStr() will be used.
  * @param dbContext Database context to look for potentially already registered
@@ -1310,11 +1311,26 @@ std::string CRS::getOriginatingAuthName() const {
  */
 CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                           const io::DatabaseContextPtr &dbContext) const {
+
+    common::UnitOfMeasure uom = common::UnitOfMeasure::METRE;
+    if (auto projCRS = dynamic_cast<const ProjectedCRS *>(this)) {
+        const auto &axisList = projCRS->coordinateSystem()->axisList();
+        assert(!axisList.empty());
+        uom = axisList[0]->unit();
+    } else if (auto derivedProjCRS =
+                   dynamic_cast<const DerivedProjectedCRS *>(this)) {
+        const auto &cs = derivedProjCRS->coordinateSystem();
+        if (dynamic_cast<const cs::CartesianCS *>(cs.get())) {
+            const auto &axisList = cs->axisList();
+            assert(!axisList.empty());
+            uom = axisList[0]->unit();
+        }
+    }
+
     auto upAxis = cs::CoordinateSystemAxis::create(
         util::PropertyMap().set(IdentifiedObject::NAME_KEY,
                                 cs::AxisName::Ellipsoidal_height),
-        cs::AxisAbbreviation::h, cs::AxisDirection::UP,
-        common::UnitOfMeasure::METRE);
+        cs::AxisAbbreviation::h, cs::AxisDirection::UP, uom);
     return promoteTo3D(newName, dbContext, upAxis);
 }
 
@@ -1375,8 +1391,8 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                 util::PropertyMap(), axisList[0], axisList[1],
                 verticalAxisIfNotAlreadyPresent);
             auto baseGeog3DCRS = util::nn_dynamic_pointer_cast<GeodeticCRS>(
-                derivedGeogCRS->baseCRS()->promoteTo3D(
-                    std::string(), dbContext, verticalAxisIfNotAlreadyPresent));
+                derivedGeogCRS->baseCRS()->promoteTo3D(std::string(),
+                                                       dbContext));
             return util::nn_static_pointer_cast<CRS>(
                 DerivedGeographicCRS::create(
                     createProperties(),
@@ -1393,8 +1409,8 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                                               axisList[1],
                                               verticalAxisIfNotAlreadyPresent);
             auto baseProj3DCRS = util::nn_dynamic_pointer_cast<ProjectedCRS>(
-                derivedProjCRS->baseCRS()->promoteTo3D(
-                    std::string(), dbContext, verticalAxisIfNotAlreadyPresent));
+                derivedProjCRS->baseCRS()->promoteTo3D(std::string(),
+                                                       dbContext));
             return util::nn_static_pointer_cast<CRS>(
                 DerivedProjectedCRS::create(
                     createProperties(),

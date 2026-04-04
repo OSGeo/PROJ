@@ -48,6 +48,23 @@ namespace cs {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Exception that can be thrown when an invalid coordinate system is
+ * attempted to be constructed.
+ *
+ * @since 9.9
+ */
+class PROJ_GCC_DLL InvalidCoordinateSystem : public util::Exception {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_INTERNAL explicit InvalidCoordinateSystem(const char *message);
+    PROJ_INTERNAL explicit InvalidCoordinateSystem(const std::string &message);
+    PROJ_DLL InvalidCoordinateSystem(const InvalidCoordinateSystem &other);
+    PROJ_DLL ~InvalidCoordinateSystem() override;
+    //! @endcond
+};
+
+// ---------------------------------------------------------------------------
+
 /** \brief The direction of positive increase in the coordinate value for a
  * coordinate system axis.
  *
@@ -549,12 +566,12 @@ class PROJ_GCC_DLL CartesianCS final : public CoordinateSystem {
     PROJ_DLL static CartesianCSNNPtr
     create(const util::PropertyMap &properties,
            const CoordinateSystemAxisNNPtr &axis1,
-           const CoordinateSystemAxisNNPtr &axis2);
+           const CoordinateSystemAxisNNPtr &axis2, bool enforceSameUnit = true);
     PROJ_DLL static CartesianCSNNPtr
     create(const util::PropertyMap &properties,
            const CoordinateSystemAxisNNPtr &axis1,
            const CoordinateSystemAxisNNPtr &axis2,
-           const CoordinateSystemAxisNNPtr &axis3);
+           const CoordinateSystemAxisNNPtr &axis3, bool enforceSameUnit = true);
 
     PROJ_DLL static CartesianCSNNPtr
     createEastingNorthing(const common::UnitOfMeasure &unit);
