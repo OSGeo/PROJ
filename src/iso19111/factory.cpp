@@ -4521,6 +4521,10 @@ AuthorityFactory::createObject(const std::string &code) const {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createProjectedCRS(code));
     }
+    if (table_name == "derived_projected_crs") {
+        return util::nn_static_pointer_cast<util::BaseObject>(
+            createDerivedProjectedCRS(code));
+    }
     if (table_name == "compound_crs") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createCompoundCRS(code));
@@ -9037,6 +9041,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
         sql += "WHERE c.auth_name = ? ";
         params.emplace_back(d->authority());
     }
+    // FIXME: we can't handle non-EARTH compound CRS for now
     sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'derived projected', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
@@ -9382,10 +9387,10 @@ AuthorityFactory::createObjectsFromNameEx(
             for (const auto &tableName :
                  {"prime_meridian", "ellipsoid", "geodetic_datum",
                   "vertical_datum", "engineering_datum", "geodetic_crs",
-                  "projected_crs", "vertical_crs", "compound_crs",
-                  "engineering_crs", "conversion", "helmert_transformation",
-                  "grid_transformation", "other_transformation",
-                  "concatenated_operation"}) {
+                  "projected_crs", "derived_projected_crs", "vertical_crs",
+                  "compound_crs", "engineering_crs", "conversion",
+                  "helmert_transformation", "grid_transformation",
+                  "other_transformation", "concatenated_operation"}) {
                 if (!(startsWithDUnderscore &&
                       strcmp(tableName, "vertical_datum") == 0)) {
                     res.emplace_back(TableType(tableName, std::string()));
@@ -9438,6 +9443,8 @@ AuthorityFactory::createObjectsFromNameEx(
                     res.emplace_back(TableType("compound_crs", std::string()));
                     res.emplace_back(
                         TableType("engineering_crs", std::string()));
+                    res.emplace_back(
+                        TableType("derived_projected_crs", std::string()));
                     break;
                 case ObjectType::GEODETIC_CRS:
                     res.emplace_back(TableType("geodetic_crs", std::string()));
@@ -9457,6 +9464,10 @@ AuthorityFactory::createObjectsFromNameEx(
                     break;
                 case ObjectType::PROJECTED_CRS:
                     res.emplace_back(TableType("projected_crs", std::string()));
+                    break;
+                case ObjectType::DERIVED_PROJECTED_CRS:
+                    res.emplace_back(
+                        TableType("derived_projected_crs", std::string()));
                     break;
                 case ObjectType::VERTICAL_CRS:
                     res.emplace_back(TableType("vertical_crs", std::string()));
