@@ -3443,11 +3443,10 @@ TEST_F(FactoryWithTmpDatabase, custom_derived_projected_crs) {
         << "should reject: CS type 'ellipsoidal' not in permitted set";
 
     // Trigger: coordinate_system type not in permitted set (vertical, dim=1)
-    EXPECT_FALSE(
-        execute("INSERT INTO derived_projected_crs "
-                "VALUES('TEST_NS','DERIVED_VERT_CS','vert cs',NULL,"
-                "'EPSG','6499','EPSG','32631',"
-                "'TEST_NS','DERIVING_CONV',NULL,0);"))
+    EXPECT_FALSE(execute("INSERT INTO derived_projected_crs "
+                         "VALUES('TEST_NS','DERIVED_VERT_CS','vert cs',NULL,"
+                         "'EPSG','6499','EPSG','32631',"
+                         "'TEST_NS','DERIVING_CONV',NULL,0);"))
         << "should reject: CS type 'vertical' not in permitted set";
 
     auto factory =
