@@ -238,17 +238,10 @@ if(DEFINED SQLITE3_LIBRARY)
   set(SQLite3_LIBRARY ${SQLITE3_LIBRARY})
 endif()
 
-find_package(SQLite3 REQUIRED)
+find_package(SQLite3 3.11 REQUIRED)
 
 if(NOT TARGET SQLite3::SQLite3) # CMake < 4.3
-  set_target_properties(SQLite::SQLite3 PROPERTIES IMPORTED_GLOBAL TRUE)
   add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
-endif()
-
-# Would build and run with older versions, but with horrible performance
-# See https://github.com/OSGeo/PROJ/issues/1718
-if(SQLite3_VERSION VERSION_LESS "3.11")
-  message(SEND_ERROR "SQLite3 >= 3.11 required!")
 endif()
 
 ################################################################################
