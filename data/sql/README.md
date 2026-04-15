@@ -1,5 +1,8 @@
 # Directory data/sql
 
+- [proj.db.sql.expected.md5](proj.db.sql.expected.md5): The MD5 hash of all the sql files, 
+used to determine if the database has been updated and if extra validation is necessary.
+
 ## Simplified UML diagram of database classes
 
 - [diagram.xmi](diagram.xmi): to be opened with Umbrello
