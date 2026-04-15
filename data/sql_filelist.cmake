@@ -6,12 +6,6 @@ set(SQL_FILES_CONSISTENCY_CHECKS_TRIGGERS
   "${SQL_DIR}/conversion_triggers_hand_written.sql"
 )
 
-# When setting PROJ_DB_EXTRA_VALIDATION=OFF, we defer the insertion of check triggers
-# until the very end to save build time. We also entirely skip running
-# final_consistency_checks.sql.
-# Typical build time with PROJ_DB_EXTRA_VALIDATION=ON: 60 seconds
-# Typical build time with PROJ_DB_EXTRA_VALIDATION=OFF: 3.7 seconds
-
 set(SQL_FILES
   "${SQL_DIR}/begin.sql"
   "${SQL_DIR}/proj_db_table_defs.sql"
@@ -57,6 +51,11 @@ list(APPEND SQL_FILES
   "${SQL_DIR}/iau.sql"
   "${SQL_DIR}/nrcan.sql"
   "${SQL_DIR}/transformations_czechia.sql"
+)
+list(APPEND SQL_FILES
+    "${SQL_DIR}/emlid_patch.sql"
+)
+list(APPEND SQL_FILES
   "${SQL_DIR}/grid_alternatives.sql"
   "${SQL_DIR}/grid_alternatives_generated_noaa.sql"
   "${SQL_DIR}/nadcon5_concatenated_operations.sql"
