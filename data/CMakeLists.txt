@@ -29,9 +29,11 @@ file(GLOB GEOTIFF_FILES *.tif)
 
 set(ALL_SQL_IN "${CMAKE_CURRENT_BINARY_DIR}/all.sql.in")
 set(PROJ_DB "${CMAKE_CURRENT_BINARY_DIR}/proj.db")
+
+include(db_consistency_check_toggle.cmake)
 include(sql_filelist.cmake)
 
-set(PROJ_DB_SQL_EXPECTED_MD5 "e0922b19b6c4e44a1c490244541c659d")
+set(PROJ_DB_SQL_EXPECTED_MD5 "ebb212ca45153cb525ffd2027739374b")
 
 add_custom_command(
   OUTPUT ${PROJ_DB}
@@ -39,7 +41,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} "-DALL_SQL_IN=${ALL_SQL_IN}" "-DEXE_SQLITE3=${EXE_SQLITE3}" "-DPROJ_DB=${PROJ_DB}" "-DPROJ_VERSION=${PROJ_VERSION}" "-DPROJ_DB_CACHE_DIR=${PROJ_DB_CACHE_DIR}" "-DPROJ_DB_SQL_EXPECTED_MD5=${PROJ_DB_SQL_EXPECTED_MD5}" "-DDATA_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}"
     -P "${CMAKE_CURRENT_SOURCE_DIR}/generate_proj_db.cmake"
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJ_DB} ${CMAKE_CURRENT_BINARY_DIR}/for_tests
-  DEPENDS ${SQL_FILES} "${CMAKE_CURRENT_SOURCE_DIR}/generate_proj_db.cmake"
+  DEPENDS ${SQL_FILES} "${CMAKE_CURRENT_SOURCE_DIR}/generate_proj_db.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/db_consistency_check_toggle.cmake"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   COMMENT "Generating proj.db"
   VERBATIM
