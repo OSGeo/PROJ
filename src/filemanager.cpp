@@ -817,6 +817,148 @@ std::unique_ptr<File> FileStdio::open(PJ_CONTEXT *ctx, const char *filename,
 
 // ---------------------------------------------------------------------------
 
+class FileScrambled : public File {
+    PJ_CONTEXT *m_ctx;
+    FILE *m_fp;
+    char *_buffer;
+    size_t _length;
+    size_t _position;
+
+    FileScrambled(const FileScrambled &) = delete;
+    FileScrambled &operator=(const FileScrambled &) = delete;
+
+    void decrypt() {
+        if (_buffer != nullptr) {
+            for (size_t i = 0; i < _length; i++) {
+                _buffer[i] = _buffer[i] ^ 123;
+                _buffer[i] -= 27;
+            }
+        }
+    }
+
+  protected:
+    FileScrambled(const std::string &filename, PJ_CONTEXT *ctx, FILE *fp)
+        : File(filename), m_ctx(ctx), m_fp(fp), _buffer(nullptr), _length(0),
+          _position(0) {
+
+        fseek(fp, 0, SEEK_END);
+        _length = ftell(fp);
+        _buffer = new char[_length];
+
+        fseek(fp, 0, SEEK_SET);
+        fread(_buffer, 1, _length, fp);
+        fseek(fp, 0, SEEK_SET);
+
+        decrypt();
+    }
+
+  public:
+    ~FileScrambled() override;
+
+    size_t read(void *buffer, size_t sizeBytes) override;
+    size_t write(const void *buffer, size_t sizeBytes) override;
+    bool seek(unsigned long long offset, int whence = SEEK_SET) override;
+    unsigned long long tell() override;
+    void reassign_context(PJ_CONTEXT *ctx) override { m_ctx = ctx; }
+
+    bool hasChanged() const override { return false; }
+
+    static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename,
+                                      FileAccess access);
+};
+
+// ---------------------------------------------------------------------------
+
+FileScrambled::~FileScrambled() {
+    delete[] _buffer;
+    fclose(m_fp);
+}
+
+// ---------------------------------------------------------------------------
+
+size_t FileScrambled::read(void *buffer, size_t sizeBytes) {
+    pj_log(m_ctx, PJ_LOG_DEBUG,
+           "call FileScrambled::read %zu bytes starting from %zu", sizeBytes,
+           _position);
+
+    size_t actualSize = sizeBytes;
+    if (_length - _position < sizeBytes) {
+        actualSize = _length - _position;
+    }
+
+    memcpy(buffer, &_buffer[_position], actualSize);
+    _position += actualSize;
+
+    return actualSize;
+}
+
+// ---------------------------------------------------------------------------
+
+size_t FileScrambled::write(const void *buffer, size_t sizeBytes) {
+    throw util::Exception("Writing is not supported for this type of file");
+}
+
+// ---------------------------------------------------------------------------
+
+bool FileScrambled::seek(unsigned long long offset, int whence) {
+    if (offset != static_cast<unsigned long long>(static_cast<long>(offset))) {
+        pj_log(m_ctx, PJ_LOG_ERROR,
+               "Attempt at seeking to a 64 bit offset. Not supported yet");
+        return false;
+    }
+    size_t position = 0;
+
+    switch (whence) {
+    case SEEK_SET:
+        pj_log(m_ctx, PJ_LOG_DEBUG,
+               "call FileScrambled::seek, SEEK_SET with offset %llu", offset);
+        position = static_cast<size_t>(offset);
+        break;
+    case SEEK_CUR:
+        pj_log(m_ctx, PJ_LOG_DEBUG,
+               "call FileScrambled::seek SEEK_CUR with offset %llu", offset);
+        position = _position + static_cast<size_t>(offset);
+        break;
+    case SEEK_END:
+        pj_log(m_ctx, PJ_LOG_DEBUG,
+               "call FileScrambled::seek SEEK_END with offset %llu", offset);
+        position = _length + static_cast<size_t>(offset);
+        break;
+    }
+
+    if (position < _length) {
+        pj_log(m_ctx, PJ_LOG_DEBUG, "return true, position is %zu\n", position);
+        _position = position;
+        return true;
+    } else {
+        pj_log(m_ctx, PJ_LOG_DEBUG, "return false, position is %zu\n", position);
+        return false;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+unsigned long long FileScrambled::tell() {
+    pj_log(m_ctx, PJ_LOG_DEBUG, "call FileScrambled::tell, position is %zu",
+           _position);
+    return _position;
+}
+
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<File> FileScrambled::open(PJ_CONTEXT *ctx, const char *filename,
+                                          FileAccess access) {
+    pj_log(ctx, PJ_LOG_DEBUG, "call FileScrambled::open");
+    auto fp = fopen(filename,
+                    access == FileAccess::READ_ONLY
+                        ? "rb"
+                        : access == FileAccess::READ_UPDATE ? "r+b" : "w+b");
+    return std::unique_ptr<File>(fp ? new FileScrambled(filename, ctx, fp)
+                                    : nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 class FileApiAdapter : public File {
     PJ_CONTEXT *m_ctx;
     PROJ_FILE_HANDLE *m_fp;
@@ -999,7 +1141,14 @@ std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename,
 #ifdef _WIN32
     ret = FileWin32::open(ctx, filename, access);
 #else
-    ret = FileStdio::open(ctx, filename, access);
+    {
+        const std::string fn(filename);
+        if (fn.size() >= 5 && fn.compare(fn.size() - 5, 5, ".mtif") == 0) {
+            ret = FileScrambled::open(ctx, filename, access);
+        } else {
+            ret = FileStdio::open(ctx, filename, access);
+        }
+    }
 #endif
 #endif
 
