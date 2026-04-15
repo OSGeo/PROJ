@@ -114,12 +114,6 @@ foreach (PROJECT_VARIANT_NAME IN LISTS PROJECT_LIST)
     "${CMAKE_CURRENT_BINARY_DIR}/project-${PROJECT_VARIANT_LOWER}-version.cmake"
     DESTINATION "${CMAKECONFIGSUBDIR}"
     RENAME "${PROJECT_VARIANT_LOWER}-config-version.cmake")
-  # Make information about the cmake targets (the library and the tools)
-  # available.
-  install(EXPORT targets
-    NAMESPACE ${PROJECT_NAME}::
-    FILE ${PROJECT_NAME_LOWER}-targets.cmake
-    DESTINATION "${CMAKECONFIGSUBDIR}")
   if (INSTALL_LEGACY_CMAKE_FILES)
       install(EXPORT targets
         NAMESPACE ${PROJECT_LEGACY_NAME}::

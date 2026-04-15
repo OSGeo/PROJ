@@ -522,7 +522,6 @@ if(NOT _is_multi_config_generator)
   message(STATUS "PROJ: Configured 'dist' target")
 endif()
 
-configure_file(cmake/uninstall.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/proj_uninstall.cmake @ONLY)
-add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/proj_uninstall.cmake)
+# Uninstall target is omitted: this fork is only built as a CMake sub-project.
 
 message(STATUS "EMBED_RESOURCE_FILES=${EMBED_RESOURCE_FILES}")
