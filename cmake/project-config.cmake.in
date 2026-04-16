@@ -2,78 +2,54 @@
 #
 # Set
 #  @PROJECT_VARIANT_NAME@_FOUND = 1
-#  @PROJECT_VARIANT_NAME@_INCLUDE_DIRS = /usr/local/include
+#  @PROJECT_VARIANT_NAME@_INCLUDE_DIRS = $<INSTALL_PREFIX>/include
+#  @PROJECT_VARIANT_NAME@_LIBRARY_DIRS = $<INSTALL_PREFIX>/lib
+#  @PROJECT_VARIANT_NAME@_BINARY_DIRS = $<INSTALL_PREFIX>/bin
 #  @PROJECT_VARIANT_NAME@_LIBRARIES = @PROJECT_VARIANT_NAME@::proj
-#  @PROJECT_VARIANT_NAME@_LIBRARY_DIRS = /usr/local/lib
-#  @PROJECT_VARIANT_NAME@_BINARY_DIRS = /usr/local/bin
 #  @PROJECT_VARIANT_NAME@_VERSION = 4.9.1 (for example)
-if(@PROJECT_VARIANT_NAME@ STREQUAL "PROJ4")
+
+if("@PROJECT_VARIANT_NAME@" STREQUAL "PROJ4")
   message(DEPRECATION "find_package(PROJ4) is deprecated and will be retired soon. Please use find_package(PROJ) instead.")
+endif()
+
+@PACKAGE_INIT@
+
+set_and_check("@PROJECT_VARIANT_NAME@_INCLUDE_DIRS" "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set_and_check("@PROJECT_VARIANT_NAME@_LIBRARY_DIRS" "@PACKAGE_CMAKE_INSTALL_LIBDIR@")
+set_and_check("@PROJECT_VARIANT_NAME@_BINARY_DIRS" "@PACKAGE_CMAKE_INSTALL_BINDIR@")
+
+if(CMAKE_VERSION VERSION_LESS_EQUAL "2.6.4")
+  message(FATAL_ERROR "CMake 2.6.5 or later required because of CMP0012")
 endif()
 
 include(CMakeFindDependencyMacro)
 
-# We cannot have a find_dependency() call between cmake_policy(PUSH)/cmake_policy(POP)
-# because find_dependency() issues a return() on failure, which results in
-# imbalanced push/pop
-# Cf https://gitlab.kitware.com/cmake/cmake/-/issues/17612
-cmake_policy(PUSH)
-cmake_policy(SET CMP0012 NEW)
-if("@ENABLE_TIFF@")
-    set(PROJ_CONFIG_FIND_TIFF_DEP ON)
-endif()
-if("@CURL_ENABLED@")
-    set(PROJ_CONFIG_FIND_CURL_DEP ON)
-endif()
-cmake_policy(POP)
-
 find_dependency(SQLite3)
 
-if(DEFINED PROJ_CONFIG_FIND_TIFF_DEP)
-    find_dependency(TIFF)
+if("@ENABLE_TIFF@")
+  find_dependency(TIFF)
 endif()
 
-if(DEFINED PROJ_CONFIG_FIND_CURL_DEP)
+if("@CURL_ENABLED@")
   # Chainload CURL usage requirements
   find_dependency(CURL)
   # Target CURL::libcurl only defined since CMake 3.12
   if(NOT TARGET CURL::libcurl)
-      add_library(CURL::libcurl INTERFACE IMPORTED)
-      set_target_properties(CURL::libcurl PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}"
-        INTERFACE_LINK_LIBRARIES      "${CURL_LIBRARIES}"
-      )
+    add_library(CURL::libcurl INTERFACE IMPORTED)
+    set_target_properties(CURL::libcurl PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}"
+      INTERFACE_LINK_LIBRARIES      "${CURL_LIBRARIES}"
+    )
   endif()
 endif()
 
-function(set_variable_from_rel_or_absolute_path var root rel_or_abs_path)
-  if(IS_ABSOLUTE "${rel_or_abs_path}")
-    set(${var} "${rel_or_abs_path}" PARENT_SCOPE)
-  else()
-    set(${var} "${root}/${rel_or_abs_path}" PARENT_SCOPE)
-  endif()
-endfunction()
-
-# Tell the user project where to find our headers and libraries
-get_filename_component (_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
-get_filename_component (_ROOT "${_DIR}/@PROJECT_ROOT_DIR@" ABSOLUTE)
-# Use _ROOT as prefix here for the possibility of relocation after installation.
-set_variable_from_rel_or_absolute_path("@PROJECT_VARIANT_NAME@_INCLUDE_DIRS" "${_ROOT}" "@CMAKE_INSTALL_INCLUDEDIR@")
-set_variable_from_rel_or_absolute_path("@PROJECT_VARIANT_NAME@_LIBRARY_DIRS" "${_ROOT}" "@CMAKE_INSTALL_LIBDIR@")
-set_variable_from_rel_or_absolute_path("@PROJECT_VARIANT_NAME@_BINARY_DIRS" "${_ROOT}" "@CMAKE_INSTALL_BINDIR@")
-
-set (@PROJECT_VARIANT_NAME@_LIBRARIES @PROJECT_VARIANT_NAME@::proj)
-# Read in the exported definition of the library
-include ("${_DIR}/@PROJECT_NAME_LOWER@-targets.cmake")
-if (@INSTALL_LEGACY_CMAKE_FILES@)
-  include ("${_DIR}/@PROJECT_LEGACY_LOWER@-targets.cmake")
-endif()
-
-unset (_ROOT)
-unset (_DIR)
+include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_VARIANT_LOWER@-targets.cmake")
+list(APPEND @PROJECT_VARIANT_NAME@_LIBRARIES @PROJECT_VARIANT_NAME@::proj)
 
 if ("@PROJECT_VARIANT_NAME@" STREQUAL "PROJ4")
   # For backward compatibility with old releases of libgeotiff
   set (@PROJECT_VARIANT_NAME@_INCLUDE_DIR
     ${@PROJECT_VARIANT_NAME@_INCLUDE_DIRS})
 endif ()
+
+check_required_components(@PROJECT_VARIANT_NAME@)
