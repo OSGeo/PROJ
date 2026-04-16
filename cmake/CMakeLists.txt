@@ -83,6 +83,8 @@ else ()
   set (MSVC_TOOLSET_MAJOR 0)
 endif ()
 
+include(CMakePackageConfigHelpers)
+
 # If this is a regular build (PROJECT_SOURCE_DIR == CMAKE_SOURCE_DIR), export legacy files by default
 # Otherwise, this is embedded in another project, only export PROJ target
 # cf https://github.com/OSGeo/gdal/issues/5646
@@ -102,29 +104,23 @@ foreach (PROJECT_VARIANT_NAME IN LISTS PROJECT_LIST)
   # be relocated.)
   file (RELATIVE_PATH PROJECT_ROOT_DIR
     ${CMAKE_INSTALL_PREFIX}/${CMAKECONFIGSUBDIR} ${CMAKE_INSTALL_PREFIX})
-  configure_file (project-config.cmake.in
-    project-${PROJECT_VARIANT_LOWER}-config.cmake @ONLY)
+  configure_package_config_file(
+    ${CMAKE_CURRENT_LIST_DIR}/project-config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_VARIANT_LOWER}-config.cmake
+    INSTALL_DESTINATION "${CMAKECONFIGSUBDIR}"
+    PATH_VARS CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_BINDIR
+  )
   configure_file (project-config-version.cmake.in
-    project-${PROJECT_VARIANT_LOWER}-version.cmake @ONLY)
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_VARIANT_LOWER}-config-version.cmake" @ONLY)
   install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/project-${PROJECT_VARIANT_LOWER}-config.cmake"
-    DESTINATION "${CMAKECONFIGSUBDIR}"
-    RENAME "${PROJECT_VARIANT_LOWER}-config.cmake")
-  install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/project-${PROJECT_VARIANT_LOWER}-version.cmake"
-    DESTINATION "${CMAKECONFIGSUBDIR}"
-    RENAME "${PROJECT_VARIANT_LOWER}-config-version.cmake")
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_VARIANT_LOWER}-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_VARIANT_LOWER}-config-version.cmake"
+    DESTINATION "${CMAKECONFIGSUBDIR}")
   # Make information about the cmake targets (the library and the tools)
   # available.
   install(EXPORT targets
-    NAMESPACE ${PROJECT_NAME}::
-    FILE ${PROJECT_NAME_LOWER}-targets.cmake
+    NAMESPACE ${PROJECT_VARIANT_NAME}::
+    FILE ${PROJECT_VARIANT_LOWER}-targets.cmake
     DESTINATION "${CMAKECONFIGSUBDIR}")
-  if (INSTALL_LEGACY_CMAKE_FILES)
-      install(EXPORT targets
-        NAMESPACE ${PROJECT_LEGACY_NAME}::
-        FILE ${PROJECT_LEGACY_LOWER}-targets.cmake
-        DESTINATION "${CMAKECONFIGSUBDIR}")
-  endif()
 endforeach ()
 
