@@ -491,11 +491,7 @@ endif()
 ################################################################################
 # pkg-config support
 ################################################################################
-configure_proj_pc()
-
-install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+configure_and_install_proj_pc("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
 ################################################################################
 # "make dist" workalike

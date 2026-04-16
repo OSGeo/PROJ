@@ -47,7 +47,10 @@ function(set_variable_from_rel_or_absolute_path var root rel_or_abs_path)
   endif()
 endfunction()
 
-function(configure_proj_pc)
+# Replace with just CMAKE_CURRENT_FUNCTION_LIST_DIR once CMake 3.18
+set(PROJ_PC_IN_DIR "${CMAKE_CURRENT_LIST_DIR}")
+
+function(configure_proj_pc DIRECTORY)
   set(prefix ${CMAKE_INSTALL_PREFIX})
   set_variable_from_rel_or_absolute_path("libdir" "$\{prefix\}" "${CMAKE_INSTALL_LIBDIR}")
   set_variable_from_rel_or_absolute_path("includedir" "$\{prefix\}" "${CMAKE_INSTALL_INCLUDEDIR}")
@@ -94,7 +97,43 @@ function(configure_proj_pc)
   list(JOIN EXTRA_REQUIRES " " EXTRA_REQUIRES)
 
   configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/proj.pc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
+    ${PROJ_PC_IN_DIR}/proj.pc.in
+    ${DIRECTORY}/proj.pc
     @ONLY)
+endfunction()
+
+# Takes two directories, and create the pkg-config files both
+# for the configure time environment and the install environment.
+# BUILD_DIRECTORY is where the configure time version should be written
+# INSTALL_DIRECTORY is the argument that would otherwise be provided to install(FILES ... DIRECTORY)
+function(configure_and_install_proj_pc BUILD_DIRECTORY INSTALL_DIRECTORY)
+  configure_proj_pc(${BUILD_DIRECTORY})
+  # This is kind of ridiculous, basically we save all the variables
+  # that are used to generate the proj.pc except for the INSTALL_PREFIX.
+  # Then at install time, we load all those variables, include this script file,
+  # and calculate the output directory potentially in relation to the INSTALL_PREFIX.
+  # Lastly, the file gets configured again, and written, *not to the install directory itself*
+  # but instead to the install directory *inside* the DESTDIR environment variable.
+  # See: https://cmake.org/cmake/help/latest/envvar/DESTDIR.html
+  install(CODE "\
+    set(PROJ_VERSION ${PROJ_VERSION})\n\
+    set(CMAKE_THREAD_LIBS_INIT ${CMAKE_THREAD_LIBS_INIT})\n\
+    set(USE_PKGCONFIG_REQUIRES ${USE_PKGCONFIG_REQUIRES} CACHE BOOL \"\")\n\
+    set(TIFF_ENABLED ${TIFF_ENABLED})\n\
+    set(CURL_ENABLED ${CURL_ENABLED})\n\
+    set(WIN32 ${WIN32})\n\
+    set(MINGW ${MINGW})\n\
+    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES})\n\
+    set(CMAKE_C_IMPLICIT_LINK_LIBRARIES ${CMAKE_C_IMPLICIT_LINK_LIBRARIES})\n\
+    set(HAVE_LIBM ${HAVE_LIBM})\n\
+    set(HAVE_LIBDL ${HAVE_LIBDL})\n\
+    set(CMAKE_INSTALL_LIBDIR \"${CMAKE_INSTALL_LIBDIR}\")\n\
+    set(CMAKE_INSTALL_INCLUDEDIR \"${CMAKE_INSTALL_INCLUDEDIR}\")\n\
+    set(CMAKE_INSTALL_DATAROOTDIR \"${CMAKE_INSTALL_DATAROOTDIR}\")\n\
+    set(INSTALL_DIRECTORY \"${INSTALL_DIRECTORY}\")\n\
+    include(\"${PROJ_PC_IN_DIR}/ProjUtilities.cmake\")\n\
+    set_variable_from_rel_or_absolute_path(\"OUT_DIRECTORY\" \"\${CMAKE_INSTALL_PREFIX}\" \"\${INSTALL_DIRECTORY}\")\n\
+    configure_proj_pc(\"\$ENV{DESTDIR}/\${OUT_DIRECTORY}\")\n\
+    message(STATUS \"Generated pkg-config file at \$ENV{DESTDIR}/\${OUT_DIRECTORY}/proj.pc\")\n\
+  ")
 endfunction()
