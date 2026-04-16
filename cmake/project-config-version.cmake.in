@@ -1,52 +1,85 @@
 # Version checking for @PROJECT_VARIANT_NAME@
 
+# This is a variant on the basic version file for the Config-mode of find_package().
+# It would normally be used by write_basic_package_version_file() as input file for configure_file()
+# to create a version-file which can be installed along a config.cmake file.
+#
+# The created file sets PACKAGE_VERSION_EXACT if the current version string and
+# the requested version string are exactly the same and it sets
+# PACKAGE_VERSION_COMPATIBLE if the current version is >= requested version,
+# but only if the requested major version is the same as the current one.
+# The variable PROJ_VERSION must be set before calling configure_file().
+
+
 set (PACKAGE_VERSION "@PROJ_VERSION@")
 set (PACKAGE_VERSION_MAJOR "@PROJ_VERSION_MAJOR@")
 set (PACKAGE_VERSION_MINOR "@PROJ_VERSION_MINOR@")
 set (PACKAGE_VERSION_PATCH "@PROJ_VERSION_PATCH@")
 
-# These variable definitions parallel those in @PROJECT_NAME@'s
-# cmake/CMakeLists.txt.
+if(NOT PACKAGE_FIND_NAME STREQUAL "@PROJECT_VARIANT_NAME@")
+  # Check package name (in particular, because of the way cmake finds
+  # package config files, the capitalization could easily be "wrong").
+  # This is necessary to ensure that the automatically generated
+  # variables, e.g., <package>_FOUND, are consistently spelled.
+  set(PACKAGE_VERSION "package = @PROJECT_VARIANT_NAME@, NOT ${PACKAGE_FIND_NAME}")
+  set(PACKAGE_VERSION_UNSUITABLE TRUE)
+  return()
+endif()
+
+if(PACKAGE_VERSION VERSION_LESS PACKAGE_FIND_VERSION)
+  set(PACKAGE_VERSION_COMPATIBLE FALSE)
+else()
+  if(PACKAGE_FIND_VERSION_RANGE)
+    # both endpoints of the range must have the expected major version
+    math(EXPR PACKAGE_VERSION_MAJOR_NEXT "${PACKAGE_VERSION_MAJOR} + 1")
+    if(NOT PACKAGE_FIND_VERSION_MIN_MAJOR STREQUAL PACKAGE_VERSION_MAJOR
+      OR ((PACKAGE_FIND_VERSION_RANGE_MAX STREQUAL "INCLUDE" AND NOT PACKAGE_FIND_VERSION_MAX_MAJOR STREQUAL PACKAGE_VERSION_MAJOR)
+      OR (PACKAGE_FIND_VERSION_RANGE_MAX STREQUAL "EXCLUDE" AND NOT PACKAGE_FIND_VERSION_MAX VERSION_LESS_EQUAL PACKAGE_VERSION_MAJOR_NEXT)))
+      set(PACKAGE_VERSION_COMPATIBLE FALSE)
+    elseif(PACKAGE_FIND_VERSION_MIN_MAJOR STREQUAL PACKAGE_VERSION_MAJOR
+      AND ((PACKAGE_FIND_VERSION_RANGE_MAX STREQUAL "INCLUDE" AND PACKAGE_VERSION VERSION_LESS_EQUAL PACKAGE_FIND_VERSION_MAX)
+      OR (PACKAGE_FIND_VERSION_RANGE_MAX STREQUAL "EXCLUDE" AND PACKAGE_VERSION VERSION_LESS PACKAGE_FIND_VERSION_MAX)))
+      set(PACKAGE_VERSION_COMPATIBLE TRUE)
+    else()
+      set(PACKAGE_VERSION_COMPATIBLE FALSE)
+    endif()
+  else()
+    if(PACKAGE_FIND_VERSION_MAJOR STREQUAL PACKAGE_VERSION_MAJOR)
+      set(PACKAGE_VERSION_COMPATIBLE TRUE)
+    else()
+      set(PACKAGE_VERSION_COMPATIBLE FALSE)
+    endif()
+
+    if(PACKAGE_FIND_VERSION STREQUAL PACKAGE_VERSION)
+      set(PACKAGE_VERSION_EXACT TRUE)
+    endif()
+  endif()
+endif()
+
 if (MSVC)
   # For checking the compatibility of MSVC_TOOLSET_VERSION; see
   # https://docs.microsoft.com/en-us/cpp/porting/overview-of-potential-upgrade-issues-visual-cpp
   # Assume major version number is obtained by dropping the last decimal
   # digit.
-  math (EXPR MSVC_TOOLSET_MAJOR "${MSVC_TOOLSET_VERSION}/10")
+  math(EXPR MSVC_TOOLSET_MAJOR "${MSVC_TOOLSET_VERSION}/10")
+  # toolset version must be at least as great as @PROJECT_NAME@'s and major versions must match
+  if(MSVC_TOOLSET_VERSION GREATER_EQUAL @MSVC_TOOLSET_VERSION@ AND
+      MSVC_TOOLSET_MAJOR EQUAL @MSVC_TOOLSET_MAJOR@)
+    set(PACKAGE_VERSION "MSVC_TOOLSET_VERSION[${MSVC_TOOLSET_VERSION}] \
+      incompatible with @MSVC_TOOLSET_VERSION@")
+    set(PACKAGE_VERSION_UNSUITABLE TRUE)
+  endif()
 endif ()
 
-if (NOT PACKAGE_FIND_NAME STREQUAL "@PROJECT_VARIANT_NAME@")
-  # Check package name (in particular, because of the way cmake finds
-  # package config files, the capitalization could easily be "wrong").
-  # This is necessary to ensure that the automatically generated
-  # variables, e.g., <package>_FOUND, are consistently spelled.
-  set (REASON "package = @PROJECT_VARIANT_NAME@, NOT ${PACKAGE_FIND_NAME}")
-  set (PACKAGE_VERSION_UNSUITABLE TRUE)
-elseif (NOT (APPLE OR (NOT DEFINED CMAKE_SIZEOF_VOID_P) OR
-      CMAKE_SIZEOF_VOID_P EQUAL "@CMAKE_SIZEOF_VOID_P@"))
-  # Reject if there's a 32-bit/64-bit mismatch (not necessary with Apple
-  # since a multi-architecture library is built for that platform).
-  set (REASON "sizeof(*void) = @CMAKE_SIZEOF_VOID_P@")
-  set (PACKAGE_VERSION_UNSUITABLE TRUE)
-elseif (MSVC AND NOT (
-    # toolset version must be at least as great as @PROJECT_NAME@'s
-    MSVC_TOOLSET_VERSION GREATER_EQUAL @MSVC_TOOLSET_VERSION@
-    # and major versions must match
-    AND MSVC_TOOLSET_MAJOR EQUAL @MSVC_TOOLSET_MAJOR@ ))
-  # Reject if there's a mismatch in MSVC compiler versions
-  set (REASON "MSVC_TOOLSET_VERSION = @MSVC_TOOLSET_VERSION@")
-  set (PACKAGE_VERSION_UNSUITABLE TRUE)
-elseif (PACKAGE_FIND_VERSION)
-  if (PACKAGE_FIND_VERSION VERSION_EQUAL PACKAGE_VERSION)
-    set (PACKAGE_VERSION_EXACT TRUE)
-  elseif (PACKAGE_FIND_VERSION VERSION_LESS PACKAGE_VERSION
-    AND PACKAGE_FIND_VERSION_MAJOR EQUAL PACKAGE_VERSION_MAJOR)
-    set (PACKAGE_VERSION_COMPATIBLE TRUE)
-  endif ()
-endif ()
+# if the installed or the using project don't have CMAKE_SIZEOF_VOID_P set, ignore it:
+if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "" OR "@CMAKE_SIZEOF_VOID_P@" STREQUAL "")
+  return()
+endif()
 
-# If unsuitable, append the reason to the package version so that it's
-# visible to the user.
-if (PACKAGE_VERSION_UNSUITABLE)
-  set (PACKAGE_VERSION "${PACKAGE_VERSION} (${REASON})")
-endif ()
+# check that the installed version has the same 32/64bit-ness as the one which is currently searching:
+# (not necessary with Apple since a multi-architecture library is built for that platform).
+if(NOT APPLE AND NOT CMAKE_SIZEOF_VOID_P STREQUAL "@CMAKE_SIZEOF_VOID_P@")
+  math(EXPR installedBits "@CMAKE_SIZEOF_VOID_P@ * 8")
+  set(PACKAGE_VERSION "${PACKAGE_VERSION} (${installedBits}bit)")
+  set(PACKAGE_VERSION_UNSUITABLE TRUE)
+endif()
