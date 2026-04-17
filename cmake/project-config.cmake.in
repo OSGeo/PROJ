@@ -19,18 +19,18 @@ set_and_check("@PROJECT_VARIANT_NAME@_LIBRARY_DIRS" "@PACKAGE_CMAKE_INSTALL_LIBD
 set_and_check("@PROJECT_VARIANT_NAME@_BINARY_DIRS" "@PACKAGE_CMAKE_INSTALL_BINDIR@")
 
 if(CMAKE_VERSION VERSION_LESS_EQUAL "2.6.4")
-  message(FATAL_ERROR "CMake 2.6.5 or later required because of CMP0012")
+  message(SEND_ERROR "CMake version more recent than 2.6.4 required because of CMP0012")
 endif()
 
 include(CMakeFindDependencyMacro)
 
 find_dependency(SQLite3)
 
-if("@ENABLE_TIFF@")
+if(@ENABLE_TIFF@)
   find_dependency(TIFF)
 endif()
 
-if("@CURL_ENABLED@")
+if(@CURL_ENABLED@)
   # Chainload CURL usage requirements
   find_dependency(CURL)
   # Target CURL::libcurl only defined since CMake 3.12
