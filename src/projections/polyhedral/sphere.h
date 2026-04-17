@@ -1,0 +1,134 @@
+/******************************************************************************
+ *
+ * Project:  PROJ
+ * Purpose:  Spherical coordinate helpers for polyhedral projections —
+ *           triangle containment, lon/lat ↔ cartesian with orientation.
+ * Author:   Felix Palmer
+ *
+ ****************************************************************************/
+
+#ifndef POLYHEDRAL_SPHERE_H
+#define POLYHEDRAL_SPHERE_H
+
+#include "authalic.h"
+#include "snyder.h"
+
+#include <cmath>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+namespace polyhedral {
+
+constexpr int MAX_TRIANGLES = 120;
+
+struct pj_polyhedral_data {
+    int n_triangles;
+
+    SphericalTriangle sph_tris[MAX_TRIANGLES];
+    FaceTriangle face_tris[MAX_TRIANGLES];
+
+    double orient[3][3];
+    double orient_inv[3][3];
+};
+
+// Load triangle data from generated header arrays.
+template <int N>
+inline void load_triangles(pj_polyhedral_data *Q,
+                           const double (&sph)[N][3][3],
+                           const double (&face)[N][3][2]) {
+    Q->n_triangles = N;
+    for (int i = 0; i < N; i++) {
+        Q->sph_tris[i] = {
+            {sph[i][0][0], sph[i][0][1], sph[i][0][2]},
+            {sph[i][1][0], sph[i][1][1], sph[i][1][2]},
+            {sph[i][2][0], sph[i][2][1], sph[i][2][2]},
+        };
+        Q->face_tris[i] = {
+            {face[i][0][0], face[i][0][1]},
+            {face[i][1][0], face[i][1][1]},
+            {face[i][2][0], face[i][2][1]},
+        };
+    }
+}
+
+// Build rotation matrix from three angles (degrees):
+//   lat, lon: the geographic point to rotate to the north pole
+//   az:       an azimuthal (z-axis) rotation applied after the above
+inline void set_orient_from_angles(pj_polyhedral_data *Q, double lat_deg,
+                                   double lon_deg, double az_deg) {
+    const double lat = lat_deg * M_PI / 180.0;
+    const double lon = lon_deg * M_PI / 180.0;
+    const double az = az_deg * M_PI / 180.0;
+    const double alpha = M_PI / 2.0 - lat;
+    const double ca = std::cos(alpha), sa = std::sin(alpha);
+    const double cl = std::cos(lon), sl = std::sin(lon);
+    const double cz = std::cos(az), sz = std::sin(az);
+
+    const double r00 = ca * cl, r01 = ca * sl, r02 = -sa;
+    const double r10 = -sl,     r11 = cl,      r12 = 0.0;
+    const double r20 = sa * cl, r21 = sa * sl, r22 = ca;
+
+    double m[3][3];
+    m[0][0] = cz * r00 - sz * r10;
+    m[0][1] = cz * r01 - sz * r11;
+    m[0][2] = cz * r02 - sz * r12;
+    m[1][0] = sz * r00 + cz * r10;
+    m[1][1] = sz * r01 + cz * r11;
+    m[1][2] = sz * r02 + cz * r12;
+    m[2][0] = r20;
+    m[2][1] = r21;
+    m[2][2] = r22;
+
+    for (int r = 0; r < 3; r++)
+        for (int c = 0; c < 3; c++) {
+            Q->orient[r][c] = m[r][c];
+            Q->orient_inv[r][c] = m[c][r];
+        }
+}
+
+// Find the triangle containing point v by linear search.
+inline int find_triangle(const pj_polyhedral_data *Q, Vec3 v) {
+    for (int i = 0; i < Q->n_triangles; i++) {
+        if (vec3_dot(v, Q->sph_tris[i].a) <= 0)
+            continue;
+        double t1 = triple_product(v, Q->sph_tris[i].a, Q->sph_tris[i].b);
+        double t2 = triple_product(v, Q->sph_tris[i].b, Q->sph_tris[i].c);
+        double t3 = triple_product(v, Q->sph_tris[i].c, Q->sph_tris[i].a);
+        if ((t1 >= 0 && t2 >= 0 && t3 >= 0) || (t1 <= 0 && t2 <= 0 && t3 <= 0))
+            return i;
+    }
+    return -1;
+}
+
+// Convert geodetic lon/lat to unit vector, applying orientation rotation.
+inline Vec3 lonlat_to_cart(const pj_polyhedral_data *Q, double lam, double phi) {
+    double auth_lat = geodetic_to_authalic(phi);
+    double ca = std::cos(auth_lat), sa = std::sin(auth_lat);
+    double cl = std::cos(lam), sl = std::sin(lam);
+    double gx = ca * cl, gy = ca * sl, gz = sa;
+    return {Q->orient[0][0] * gx + Q->orient[0][1] * gy + Q->orient[0][2] * gz,
+            Q->orient[1][0] * gx + Q->orient[1][1] * gy + Q->orient[1][2] * gz,
+            Q->orient[2][0] * gx + Q->orient[2][1] * gy + Q->orient[2][2] * gz};
+}
+
+// Convert unit vector back to lon/lat, applying inverse orientation.
+inline void cart_to_lonlat(const pj_polyhedral_data *Q, Vec3 v, double &lam, double &phi) {
+    double gx = Q->orient_inv[0][0] * v.x + Q->orient_inv[0][1] * v.y + Q->orient_inv[0][2] * v.z;
+    double gy = Q->orient_inv[1][0] * v.x + Q->orient_inv[1][1] * v.y + Q->orient_inv[1][2] * v.z;
+    double gz = Q->orient_inv[2][0] * v.x + Q->orient_inv[2][1] * v.y + Q->orient_inv[2][2] * v.z;
+
+    if (gz > 1.0) gz = 1.0;
+    if (gz < -1.0) gz = -1.0;
+
+    double auth_lat = std::asin(gz);
+    phi = authalic_to_geodetic(auth_lat);
+    lam = std::atan2(gy, gx);
+    if (lam < -M_PI) lam += 2 * M_PI;
+    if (lam > M_PI) lam -= 2 * M_PI;
+}
+
+} // namespace polyhedral
+
+#endif // POLYHEDRAL_SPHERE_H
