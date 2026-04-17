@@ -119,6 +119,7 @@ function(configure_and_install_proj_pc BUILD_DIRECTORY INSTALL_DIRECTORY)
     cmake_minimum_required(VERSION ${CMAKE_MINIMUM_REQUIRED_VERSION})\n\
     include(\"${PROJ_PC_IN_DIR}/policies.cmake\")\n\
     set(PROJ_VERSION ${PROJ_VERSION})\n\
+    set(PROJ_OUTPUT_NAME ${PROJ_OUTPUT_NAME})\n\
     set(CMAKE_THREAD_LIBS_INIT ${CMAKE_THREAD_LIBS_INIT})\n\
     set(USE_PKGCONFIG_REQUIRES ${USE_PKGCONFIG_REQUIRES} CACHE BOOL \"\")\n\
     set(TIFF_ENABLED ${TIFF_ENABLED})\n\
