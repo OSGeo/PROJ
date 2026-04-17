@@ -116,6 +116,8 @@ function(configure_and_install_proj_pc BUILD_DIRECTORY INSTALL_DIRECTORY)
   # but instead to the install directory *inside* the DESTDIR environment variable.
   # See: https://cmake.org/cmake/help/latest/envvar/DESTDIR.html
   install(CODE "\
+    cmake_minimum_required(VERSION ${CMAKE_MINIMUM_REQUIRED_VERSION})\n\
+    include(\"${PROJ_PC_IN_DIR}/policies.cmake\")\n\
     set(PROJ_VERSION ${PROJ_VERSION})\n\
     set(CMAKE_THREAD_LIBS_INIT ${CMAKE_THREAD_LIBS_INIT})\n\
     set(USE_PKGCONFIG_REQUIRES ${USE_PKGCONFIG_REQUIRES} CACHE BOOL \"\")\n\
