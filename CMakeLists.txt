@@ -491,6 +491,11 @@ endif()
 ################################################################################
 # pkg-config support
 ################################################################################
+option(USE_PKGCONFIG_REQUIRES "Use 'Requires' instead 'Libs' in proj.pc" ON)
+set(GENERATED_INSTALL_FILE_DIR "" CACHE PATH
+  "Directory where generated install files will persist.")
+mark_as_advanced(GENERATED_INSTALL_FILE_DIR)
+
 configure_and_install_proj_pc("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
 ################################################################################
