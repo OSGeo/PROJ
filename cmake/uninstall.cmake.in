@@ -4,9 +4,6 @@ if (NOT EXISTS "@CMAKE_BINARY_DIR@/install_manifest.txt")
 endif()
 
 set(uninstall_file_list "@CMAKE_BINARY_DIR@/install_manifest.txt")
-if(EXISTS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest_extra.txt")
-   list(APPEND uninstall_file_list "@CMAKE_CURRENT_BINARY_DIR@/install_manifest_extra.txt")
-endif()
 
 set(dir_list)
 foreach (manifest_file IN ITEMS ${uninstall_file_list})

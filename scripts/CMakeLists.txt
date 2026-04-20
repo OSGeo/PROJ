@@ -21,8 +21,13 @@ set(BASH_COMPLETIONS_DIR
     "${BASH_COMPLETIONS_DIR_DEFAULT}"
     CACHE PATH "Installation sub-directory for bash completion scripts")
 
+set(BASH_COMPLETION_PROGRAMS
+  projinfo
+)
+
 if (NOT BASH_COMPLETIONS_DIR STREQUAL "")
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/install_bash_completions.cmake.in
-                 ${CMAKE_CURRENT_BINARY_DIR}/install_bash_completions.cmake @ONLY)
-  install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/install_bash_completions.cmake)
+  foreach (program IN LISTS BASH_COMPLETION_PROGRAMS)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${program}-bash-completion.sh
+      RENAME ${program} DESTINATION ${BASH_COMPLETIONS_DIR})
+  endforeach()
 endif ()
