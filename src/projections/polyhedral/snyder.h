@@ -63,7 +63,6 @@
 #ifndef SNYDER_H
 #define SNYDER_H
 
-#include "authalic.h"
 #include "vec3.h"
 #include "vec3_helpers.h"
 

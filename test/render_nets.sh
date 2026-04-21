@@ -5,7 +5,7 @@
 set -e
 
 SCRIPT_DIR=`dirname "$0"`
-RENDER="python3 $SCRIPT_DIR/render_net.py"
+RENDER="uv run $SCRIPT_DIR/render_net.py"
 
 $RENDER --proj="+proj=tsea +R=1" \
     --title="TSEA: Tetrahedral Snyder Equal Area" \

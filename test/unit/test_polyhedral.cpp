@@ -37,6 +37,7 @@ static const RoundtripPoint test_points[] = {
 
 static const char *proj_strings[] = {
     "+proj=tsea +R=1",
+    "+proj=tsea +ellps=WGS84",
 };
 
 static void roundtrip_test(const char *proj_string, double tolerance) {

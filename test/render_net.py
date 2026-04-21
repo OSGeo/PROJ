@@ -1,8 +1,15 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#     "numpy",
+#     "matplotlib",
+# ]
+# ///
 """Render a polyhedral net projection to an image.
 
 Usage:
-    python3 test/render_net.py --proj="+proj=tsea +R=1" \\
+    uv run test/render_net.py --proj="+proj=tsea +R=1" \\
         --title="TSEA" --figsize=16,10 -o tsea_net.png
 """
 

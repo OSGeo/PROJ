@@ -38,7 +38,7 @@ static PJ_XY polyhedral_fwd(PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0, 0.0};
     auto *Q = static_cast<pj_polyhedral_data *>(P->opaque);
 
-    polyhedral::Vec3 v = polyhedral::lonlat_to_cart(Q, lp.lam, lp.phi);
+    polyhedral::Vec3 v = polyhedral::lonlat_to_cart(Q, P, lp.lam, lp.phi);
 
     int tri_idx = polyhedral::find_triangle(Q, v);
     if (tri_idx < 0) {
@@ -66,7 +66,7 @@ static PJ_LP polyhedral_inv(PJ_XY xy, PJ *P) {
         if (bary.u >= -1e-10 && bary.v >= -1e-10 && bary.w >= -1e-10) {
             polyhedral::Vec3 v = polyhedral::snyder_inv(
                 {xy.x, xy.y}, Q->face_tris[i], Q->sph_tris[i]);
-            polyhedral::cart_to_lonlat(Q, v, lp.lam, lp.phi);
+            polyhedral::cart_to_lonlat(Q, P, v, lp.lam, lp.phi);
             return lp;
         }
     }
@@ -75,16 +75,37 @@ static PJ_LP polyhedral_inv(PJ_XY xy, PJ *P) {
     return proj_coord_error().lp;
 }
 
-PROJ_HEAD(tsea, "Tetrahedral Snyder Equal Area") "\n\tSph";
+static PJ *polyhedral_destructor(PJ *P, int errlev) {
+    if (nullptr == P)
+        return nullptr;
+    if (nullptr == P->opaque)
+        return pj_default_destructor(P, errlev);
+    free(static_cast<pj_polyhedral_data *>(P->opaque)->apa);
+    return pj_default_destructor(P, errlev);
+}
+
+static PJ *polyhedral_setup(PJ *P) {
+    auto *Q = static_cast<pj_polyhedral_data *>(P->opaque);
+    if (P->es != 0.0) {
+        Q->apa = pj_authalic_lat_compute_coeffs(P->n);
+        if (nullptr == Q->apa)
+            return polyhedral_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+        Q->qp = pj_authalic_lat_q(1.0, P);
+    }
+    P->fwd = polyhedral_fwd;
+    P->inv = polyhedral_inv;
+    return P;
+}
+
+PROJ_HEAD(tsea, "Tetrahedral Snyder Equal Area") "\n\tSph&Ell";
 PJ *PJ_PROJECTION(tsea) {
     auto *Q = static_cast<pj_polyhedral_data *>(calloc(1, sizeof(pj_polyhedral_data)));
     if (nullptr == Q) return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
+    P->destructor = polyhedral_destructor;
 
     polyhedral::load_triangles(Q, hexakis_tetrahedron::SPH_TRI, nets::tsea::tsea::FACE_TRI);
     polyhedral::set_orient_from_angles(Q, 90.0, 0.0, 0.0);
 
-    P->fwd = polyhedral_fwd;
-    P->inv = polyhedral_inv;
-    return P;
+    return polyhedral_setup(P);
 }

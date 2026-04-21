@@ -10,8 +10,10 @@
 #ifndef POLYHEDRAL_SPHERE_H
 #define POLYHEDRAL_SPHERE_H
 
-#include "authalic.h"
 #include "snyder.h"
+
+#include "proj.h"
+#include "proj_internal.h"
 
 #include <cmath>
 
@@ -31,6 +33,11 @@ struct pj_polyhedral_data {
 
     double orient[3][3];
     double orient_inv[3][3];
+
+    // Authalic latitude conversion (ellipsoidal case only; apa is null for
+    // spheres, where geodetic and authalic latitudes coincide).
+    double *apa;
+    double qp;
 };
 
 // Load triangle data from generated header arrays.
@@ -103,8 +110,15 @@ inline int find_triangle(const pj_polyhedral_data *Q, Vec3 v) {
 }
 
 // Convert geodetic lon/lat to unit vector, applying orientation rotation.
-inline Vec3 lonlat_to_cart(const pj_polyhedral_data *Q, double lam, double phi) {
-    double auth_lat = geodetic_to_authalic(phi);
+// In the ellipsoidal case the latitude is first converted to the authalic
+// latitude so that equal-area properties are preserved on the sphere.
+inline Vec3 lonlat_to_cart(const pj_polyhedral_data *Q, const PJ *P,
+                           double lam, double phi) {
+    double auth_lat = phi;
+    if (P->es != 0.0) {
+        auth_lat = pj_authalic_lat(phi, std::sin(phi), std::cos(phi),
+                                   Q->apa, P, Q->qp);
+    }
     double ca = std::cos(auth_lat), sa = std::sin(auth_lat);
     double cl = std::cos(lam), sl = std::sin(lam);
     double gx = ca * cl, gy = ca * sl, gz = sa;
@@ -114,19 +128,16 @@ inline Vec3 lonlat_to_cart(const pj_polyhedral_data *Q, double lam, double phi) 
 }
 
 // Convert unit vector back to lon/lat, applying inverse orientation.
-inline void cart_to_lonlat(const pj_polyhedral_data *Q, Vec3 v, double &lam, double &phi) {
+inline void cart_to_lonlat(const pj_polyhedral_data *Q, const PJ *P, Vec3 v,
+                           double &lam, double &phi) {
     double gx = Q->orient_inv[0][0] * v.x + Q->orient_inv[0][1] * v.y + Q->orient_inv[0][2] * v.z;
     double gy = Q->orient_inv[1][0] * v.x + Q->orient_inv[1][1] * v.y + Q->orient_inv[1][2] * v.z;
     double gz = Q->orient_inv[2][0] * v.x + Q->orient_inv[2][1] * v.y + Q->orient_inv[2][2] * v.z;
 
-    if (gz > 1.0) gz = 1.0;
-    if (gz < -1.0) gz = -1.0;
-
-    double auth_lat = std::asin(gz);
-    phi = authalic_to_geodetic(auth_lat);
-    lam = std::atan2(gy, gx);
-    if (lam < -M_PI) lam += 2 * M_PI;
-    if (lam > M_PI) lam -= 2 * M_PI;
+    double auth_lat = aasin(P->ctx, gz);
+    phi = (P->es != 0.0) ? pj_authalic_lat_inverse(auth_lat, Q->apa, P, Q->qp)
+                         : auth_lat;
+    lam = adjlon(std::atan2(gy, gx));
 }
 
 } // namespace polyhedral
