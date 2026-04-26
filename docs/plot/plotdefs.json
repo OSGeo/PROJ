@@ -636,6 +636,18 @@
         "type": "line"
     },
     {
+        "filename": "interrupted.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "interrupted",
+        "projstring": "+proj=interrupted +base=sinu",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
         "filename": "isea.png",
         "latmax": 90,
         "latmin": -90,
