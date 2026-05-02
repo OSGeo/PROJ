@@ -1,0 +1,49 @@
+<gie-strict>
+
+------------------------------------------------------------
+# Interrupted over sinu, tmerc, cass, and poly
+------------------------------------------------------------
+operation   +proj=interrupted +base=sinu
+tolerance   1 mm
+
+accept      0 0
+expect      0 0
+roundtrip   1
+
+accept      120 30
+expect      13358338.8952 3320113.3978
+roundtrip   1
+
+operation   +proj=interrupted +base=sinu +gores=1,2,3
+tolerance   1 mm
+
+accept      0 0
+expect      0 0
+roundtrip   1
+
+accept      120 30
+expect      12913342.5789 3320113.3978
+roundtrip   1
+
+operation   +proj=interrupted +base=tmerc +gores=5
+tolerance   1 mm
+
+accept      -120 30
+expect      -14862738.2699 3575648.8083
+roundtrip   1
+
+operation   +proj=interrupted +base=cass +gores=5
+tolerance   1 mm
+
+accept      -120 30
+expect      -13732123.8999 3575100.4520
+roundtrip   1
+
+operation   +proj=interrupted +base=poly +gores=5
+tolerance   1 mm
+
+accept      -120 30
+expect      -13731228.3039 3561724.7405
+roundtrip   1
+
+</gie-strict>
