@@ -137,13 +137,6 @@ PJ *PJ_PROJECTION(interrupted) {
         proj_log_error(P, _("Invalid 0 gores"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
-    for (size_t i = 0; i < sizes.size(); i++) {
-        if (sizes[i] != sizes[sizes.size() - i - 1]) {
-            proj_log_error(P, _("gores sizes must be symmetric"));
-            return pj_default_destructor(P,
-                                         PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
-        }
-    }
 
     auto get_fun_ptr = [&base]() {
         if (base == "cass") {
@@ -174,18 +167,21 @@ PJ *PJ_PROJECTION(interrupted) {
 
     const double total_size = std::accumulate(sizes.begin(), sizes.end(), 0.0);
 
+    // Compute center and east border of every gore in lambda (radians)
     double lam_start = -M_PI;
     std::vector<double> x_semi_widths;
     for (auto &s : sizes) {
-        const double width = s * M_PI * 2 / total_size;
-        auto x_wd = Q->base_pj->fwd({width / 2, 0}, Q->base_pj);
-        x_semi_widths.push_back(x_wd.x);
-        const double lam_end = lam_start + width;
-        Q->lam_borders.push_back(lam_end);
-        const double lam_center = (lam_start + lam_end) / 2;
+        const double lam_semi_width = s * M_PI / total_size;
+        const auto x_swd = Q->base_pj->fwd({lam_semi_width, 0}, Q->base_pj);
+        x_semi_widths.push_back(x_swd.x);
+        const double lam_center = lam_start + lam_semi_width;
         Q->lam_centers.push_back(lam_center);
+        const double lam_end = lam_start + lam_semi_width * 2;
+        Q->lam_borders.push_back(lam_end);
         lam_start = lam_end;
     }
+
+    // Compute center and east border of every gore in x
     double x_start =
         -std::accumulate(x_semi_widths.begin(), x_semi_widths.end(), 0.0);
     for (auto &x_semi_width : x_semi_widths) {
@@ -195,6 +191,8 @@ PJ *PJ_PROJECTION(interrupted) {
         Q->x_borders.push_back(x_end);
         x_start = x_end;
     }
+
+    // Add some marging to the last gore
     Q->lam_borders.back() += 1.;
     Q->x_borders.back() += 100.;
 

@@ -40,17 +40,19 @@ Parameters
 .. option:: +base=<value>
 
     Base projection. It can be one of ``cass``, ``poly``, ``sinu`` or ``tmerc``.
+    Note that some projections may not behave correctly with too wide gores.
 
 .. option:: +gores=<value>
 
     :option:`+gores` can be a number or a list of comma separated values.
     When it is a single number, it is the number of equal gores.
     When it is a list, they are the relative sizes of the gores (v.g. ``1,2,1``).
-    The gore sizes must be symmetric respect to the center.
 
     *Defaults to 3.*
 
 .. include:: ../options/lon_0.rst
+
+.. include:: ../options/ellps.rst
 
 .. include:: ../options/R.rst
 
