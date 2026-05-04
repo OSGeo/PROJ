@@ -37,7 +37,7 @@ namespace polyhedral {
 
 // Numerically stable angular distance measure.
 // Returns a value proportional to sin(angle/2) between a and b.
-inline double vector_difference(Vec3 a, Vec3 b) {
+inline double vector_difference(const Vec3 &a, const Vec3 &b) {
     Vec3 midpoint_ab = vec3_normalize(vec3_lerp(a, b, 0.5));
     Vec3 cross_result = vec3_cross(a, midpoint_ab);
     double d = vec3_length(cross_result);
@@ -49,20 +49,21 @@ inline double vector_difference(Vec3 a, Vec3 b) {
     return d;
 }
 
-inline double triple_product(Vec3 a, Vec3 b, Vec3 c) {
+inline double triple_product(const Vec3 &a, const Vec3 &b, const Vec3 &c) {
     return vec3_dot(a, vec3_cross(b, c));
 }
 
 // Great-circle intersection helper.
 // Returns dot(b,cross(c,d))*a - dot(a,cross(c,d))*b
-inline Vec3 quadruple_product(Vec3 a, Vec3 b, Vec3 c, Vec3 d) {
+inline Vec3 quadruple_product(const Vec3 &a, const Vec3 &b, const Vec3 &c,
+                              const Vec3 &d) {
     Vec3 cross_cd = vec3_cross(c, d);
     double tp_acd = vec3_dot(a, cross_cd);
     double tp_bcd = vec3_dot(b, cross_cd);
     return vec3_subtract(vec3_scale(b, tp_acd), vec3_scale(a, tp_bcd));
 }
 
-inline Vec3 slerp(Vec3 a, Vec3 b, double t) {
+inline Vec3 slerp(const Vec3 &a, const Vec3 &b, double t) {
     double gamma = vec3_angle(a, b);
     if (gamma < 1e-12) {
         return vec3_lerp(a, b, t);
@@ -75,7 +76,8 @@ inline Vec3 slerp(Vec3 a, Vec3 b, double t) {
 
 // Spherical triangle area via midpoint triple product method.
 // More numerically stable than vertex-based spherical excess.
-inline double spherical_triangle_area(Vec3 v1, Vec3 v2, Vec3 v3) {
+inline double spherical_triangle_area(const Vec3 &v1, const Vec3 &v2,
+                                      const Vec3 &v3) {
     Vec3 mid_a = vec3_normalize(vec3_lerp(v2, v3, 0.5));
     Vec3 mid_b = vec3_normalize(vec3_lerp(v3, v1, 0.5));
     Vec3 mid_c = vec3_normalize(vec3_lerp(v1, v2, 0.5));

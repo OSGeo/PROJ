@@ -101,8 +101,8 @@ inline Face2D barycentric_to_face(Barycentric b, FaceTriangle tri) {
             b.u * tri.a.y + b.v * tri.b.y + b.w * tri.c.y};
 }
 
-inline Face2D snyder_fwd(Vec3 v, SphericalTriangle stri,
-                                 FaceTriangle ftri) {
+inline Face2D snyder_fwd(const Vec3 &v, const SphericalTriangle &stri,
+                                 const FaceTriangle &ftri) {
     Vec3 a = stri.a, b = stri.b, c = stri.c;
 
     Vec3 z = vec3_normalize(vec3_subtract(v, a));
@@ -126,8 +126,8 @@ inline Face2D snyder_fwd(Vec3 v, SphericalTriangle stri,
     return barycentric_to_face(bary, ftri);
 }
 
-inline Vec3 snyder_inv(Face2D face_point, FaceTriangle ftri,
-                               SphericalTriangle stri) {
+inline Vec3 snyder_inv(const Face2D &face_point, const FaceTriangle &ftri,
+                               const SphericalTriangle &stri) {
     Vec3 a = stri.a, b = stri.b, c = stri.c;
     Barycentric bcoords = face_to_barycentric(face_point, ftri);
 

@@ -41,50 +41,50 @@ struct Vec3 {
     double x, y, z;
 };
 
-inline double vec3_dot(Vec3 a, Vec3 b) {
+inline double vec3_dot(const Vec3 &a, const Vec3 &b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-inline Vec3 vec3_cross(Vec3 a, Vec3 b) {
+inline Vec3 vec3_cross(const Vec3 &a, const Vec3 &b) {
     return {a.y * b.z - a.z * b.y,
             a.z * b.x - a.x * b.z,
             a.x * b.y - a.y * b.x};
 }
 
-inline double vec3_length(Vec3 v) {
+inline double vec3_length(const Vec3 &v) {
     return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-inline Vec3 vec3_normalize(Vec3 v) {
+inline Vec3 vec3_normalize(const Vec3 &v) {
     double len = vec3_length(v);
     if (len == 0.0)
         return v;
     return {v.x / len, v.y / len, v.z / len};
 }
 
-inline Vec3 vec3_subtract(Vec3 a, Vec3 b) {
+inline Vec3 vec3_subtract(const Vec3 &a, const Vec3 &b) {
     return {a.x - b.x, a.y - b.y, a.z - b.z};
 }
 
-inline Vec3 vec3_add(Vec3 a, Vec3 b) {
+inline Vec3 vec3_add(const Vec3 &a, const Vec3 &b) {
     return {a.x + b.x, a.y + b.y, a.z + b.z};
 }
 
-inline Vec3 vec3_scale(Vec3 v, double s) {
+inline Vec3 vec3_scale(const Vec3 &v, double s) {
     return {v.x * s, v.y * s, v.z * s};
 }
 
-inline Vec3 vec3_lerp(Vec3 a, Vec3 b, double t) {
+inline Vec3 vec3_lerp(const Vec3 &a, const Vec3 &b, double t) {
     return {a.x + t * (b.x - a.x),
             a.y + t * (b.y - a.y),
             a.z + t * (b.z - a.z)};
 }
 
-inline double vec3_distance(Vec3 a, Vec3 b) {
+inline double vec3_distance(const Vec3 &a, const Vec3 &b) {
     return vec3_length(vec3_subtract(a, b));
 }
 
-inline double vec3_angle(Vec3 a, Vec3 b) {
+inline double vec3_angle(const Vec3 &a, const Vec3 &b) {
     double d = vec3_dot(a, b) / (vec3_length(a) * vec3_length(b));
     return std::acos(std::clamp(d, -1.0, 1.0));
 }

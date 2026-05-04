@@ -92,7 +92,7 @@ inline void set_orient_from_angles(pj_polyhedral_data *Q, double lat_deg,
 }
 
 // Find the triangle containing point v by linear search.
-inline int find_triangle(const pj_polyhedral_data *Q, Vec3 v) {
+inline int find_triangle(const pj_polyhedral_data *Q, const Vec3 &v) {
     for (int i = 0; i < Q->n_triangles; i++) {
         if (vec3_dot(v, Q->sph_tris[i].a) <= 0)
             continue;
