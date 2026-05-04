@@ -110,12 +110,11 @@ PJ *PJ_PROJECTION(tsea) {
 
     double spherical_triangles[24][3][3];
     polyhedral::conway_meta(polyhedra::tetrahedron::VERTICES,
-                            polyhedra::tetrahedron::FACES,
-                            spherical_triangles);
+                            polyhedra::tetrahedron::FACES, spherical_triangles);
 
     double face_triangles[24][3][2];
-    polyhedral::conway_meta(nets::tsea::tsea::VERTICES,
-                            nets::tsea::tsea::FACES, face_triangles);
+    polyhedral::conway_meta(nets::tsea::tsea::VERTICES, nets::tsea::tsea::FACES,
+                            face_triangles);
 
     polyhedral::load_triangles(Q, spherical_triangles, face_triangles);
 

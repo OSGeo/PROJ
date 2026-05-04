@@ -44,10 +44,9 @@ inline void normalize3(double v[3]) {
 // Output buffer is sized 2 * NFV * NumFaces triangles. Templated on every
 // array dimension so they stay self-describing at the call site.
 template <int NumVertices, int NumFaces, int NumFaceVertices, int Dim>
-inline void conway_meta(
-    const double (&vertices)[NumVertices][Dim],
-    const int (&faces)[NumFaces][NumFaceVertices],
-    double (&out)[2 * NumFaceVertices * NumFaces][3][Dim]) {
+inline void conway_meta(const double (&vertices)[NumVertices][Dim],
+                        const int (&faces)[NumFaces][NumFaceVertices],
+                        double (&out)[2 * NumFaceVertices * NumFaces][3][Dim]) {
     constexpr int FanSize = 2 * NumFaceVertices;
     for (int i = 0; i < NumFaces; i++) {
         double fan[FanSize][Dim];

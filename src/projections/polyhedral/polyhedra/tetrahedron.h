@@ -16,9 +16,9 @@ namespace tetrahedron {
 constexpr double C0 = 0.35355339059327376220042e+00; // sqrt(2) / 4
 
 constexpr double VERTICES[4][3] = {
-    { C0, -C0,  C0},
-    { C0,  C0, -C0},
-    {-C0,  C0,  C0},
+    {C0, -C0, C0},
+    {C0, C0, -C0},
+    {-C0, C0, C0},
     {-C0, -C0, -C0},
 };
 constexpr int FACES[4][3] = {
