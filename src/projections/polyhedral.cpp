@@ -22,13 +22,15 @@
  * limitations under the License.
  ****************************************************************************/
 
+#include "polyhedral/conway.h"
 #include "polyhedral/nets/tsea/tsea.h"
-#include "polyhedral/polyhedra/hexakis_tetrahedron.h"
+#include "polyhedral/polyhedra/tetrahedron.h"
 #include "polyhedral/sphere.h"
 
 #include "proj.h"
 #include "proj_internal.h"
 
+#include <cmath>
 #include <cstdlib>
 
 using polyhedral::pj_polyhedral_data;
@@ -106,9 +108,13 @@ PJ *PJ_PROJECTION(tsea) {
     P->opaque = Q;
     P->destructor = polyhedral_destructor;
 
-    polyhedral::load_triangles(Q, hexakis_tetrahedron::SPH_TRI,
-                               nets::tsea::tsea::FACE_TRI);
-    polyhedral::set_orient_from_angles(Q, 90.0, 0.0, 0.0);
+    double spherical_triangles[24][3][3];
+    polyhedral::meta_spherical(polyhedra::tetrahedron::V,
+                               polyhedra::tetrahedron::F, spherical_triangles);
+    polyhedral::load_triangles(Q, spherical_triangles, nets::tsea::tsea::FACE_TRI);
+
+    const double apex_lat_deg = std::asin(1.0 / std::sqrt(3.0)) * RAD_TO_DEG;
+    polyhedral::set_orient_from_angles(Q, apex_lat_deg, 120.0, 135.0);
 
     return polyhedral_setup(P);
 }
