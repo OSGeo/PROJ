@@ -10,6 +10,7 @@
 #ifndef POLYHEDRAL_SPHERE_H
 #define POLYHEDRAL_SPHERE_H
 
+#include "conway.h"
 #include "snyder.h"
 
 #include "proj.h"
@@ -36,10 +37,18 @@ struct pj_polyhedral_data {
     double qp;
 };
 
-// Load triangle data from conway_meta output
-template <int N>
-inline void load_triangles(pj_polyhedral_data *Q, const Vec3 (&sph)[N][3],
-                           const Vec3 (&face)[N][3]) {
+// Build triangle data from a polyhedron + matching net.
+// The `meta` Conway operation is used to cut up the faces
+template <int NV_p, int NV_n, int NF, int NFV>
+inline void load_meshes(pj_polyhedral_data *Q,
+                        const Mesh<NV_p, NF, NFV> &polyhedron,
+                        const Mesh<NV_n, NF, NFV> &net) {
+    constexpr int N = 2 * NFV * NF;
+    Vec3 sph[N][3];
+    Vec3 face[N][3];
+    conway_meta<ConwayMode::Sphere>(polyhedron.vertices, polyhedron.faces, sph);
+    conway_meta<ConwayMode::Plane>(net.vertices, net.faces, face);
+
     Q->n_triangles = N;
     for (int i = 0; i < N; i++) {
         Q->sph_tris[i] = {sph[i][0], sph[i][1], sph[i][2]};

@@ -13,6 +13,14 @@
 
 namespace polyhedral {
 
+// Mesh struct, both for representing polyhedra & flat nets
+template <int NumVertices, int NumFaces, int NumFaceVertices> struct Mesh {
+    // List of vertices as 3D vectors
+    Vec3 vertices[NumVertices];
+    // Faces, indexing above vertices
+    int faces[NumFaces][NumFaceVertices];
+};
+
 // ConwayMode:
 // - Sphere: project centroid + fan vertices onto unit sphere (for polyhedra)
 // - Plane: scale centroid to the arithmetic mean (for nets)
