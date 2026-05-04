@@ -38,8 +38,7 @@ struct pj_polyhedral_data {
 
 // Load triangle data from generated header arrays.
 template <int N>
-inline void load_triangles(pj_polyhedral_data *Q,
-                           const double (&sph)[N][3][3],
+inline void load_triangles(pj_polyhedral_data *Q, const double (&sph)[N][3][3],
                            const double (&face)[N][3][2]) {
     Q->n_triangles = N;
     for (int i = 0; i < N; i++) {
@@ -70,7 +69,7 @@ inline void set_orient_from_angles(pj_polyhedral_data *Q, double lat_deg,
     const double cz = std::cos(az), sz = std::sin(az);
 
     const double r00 = ca * cl, r01 = ca * sl, r02 = -sa;
-    const double r10 = -sl,     r11 = cl,      r12 = 0.0;
+    const double r10 = -sl, r11 = cl, r12 = 0.0;
     const double r20 = sa * cl, r21 = sa * sl, r22 = ca;
 
     double m[3][3];
@@ -108,12 +107,12 @@ inline int find_triangle(const pj_polyhedral_data *Q, const Vec3 &v) {
 // Convert geodetic lon/lat to unit vector, applying orientation rotation.
 // In the ellipsoidal case the latitude is first converted to the authalic
 // latitude so that equal-area properties are preserved on the sphere.
-inline Vec3 lonlat_to_cart(const pj_polyhedral_data *Q, const PJ *P,
-                           double lam, double phi) {
+inline Vec3 lonlat_to_cart(const pj_polyhedral_data *Q, const PJ *P, double lam,
+                           double phi) {
     double auth_lat = phi;
     if (P->es != 0.0) {
-        auth_lat = pj_authalic_lat(phi, std::sin(phi), std::cos(phi),
-                                   Q->apa, P, Q->qp);
+        auth_lat = pj_authalic_lat(phi, std::sin(phi), std::cos(phi), Q->apa, P,
+                                   Q->qp);
     }
     double ca = std::cos(auth_lat), sa = std::sin(auth_lat);
     double cl = std::cos(lam), sl = std::sin(lam);
@@ -124,11 +123,14 @@ inline Vec3 lonlat_to_cart(const pj_polyhedral_data *Q, const PJ *P,
 }
 
 // Convert unit vector back to lon/lat, applying inverse orientation.
-inline void cart_to_lonlat(const pj_polyhedral_data *Q, const PJ *P, Vec3 v,
-                           double &lam, double &phi) {
-    double gx = Q->orient_inv[0][0] * v.x + Q->orient_inv[0][1] * v.y + Q->orient_inv[0][2] * v.z;
-    double gy = Q->orient_inv[1][0] * v.x + Q->orient_inv[1][1] * v.y + Q->orient_inv[1][2] * v.z;
-    double gz = Q->orient_inv[2][0] * v.x + Q->orient_inv[2][1] * v.y + Q->orient_inv[2][2] * v.z;
+inline void cart_to_lonlat(const pj_polyhedral_data *Q, const PJ *P,
+                           const Vec3 &v, double &lam, double &phi) {
+    double gx = Q->orient_inv[0][0] * v.x + Q->orient_inv[0][1] * v.y +
+                Q->orient_inv[0][2] * v.z;
+    double gy = Q->orient_inv[1][0] * v.x + Q->orient_inv[1][1] * v.y +
+                Q->orient_inv[1][2] * v.z;
+    double gz = Q->orient_inv[2][0] * v.x + Q->orient_inv[2][1] * v.y +
+                Q->orient_inv[2][2] * v.z;
 
     double auth_lat = aasin(P->ctx, gz);
     phi = (P->es != 0.0) ? pj_authalic_lat_inverse(auth_lat, Q->apa, P, Q->qp)

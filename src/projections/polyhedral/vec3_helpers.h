@@ -7,7 +7,7 @@
  ******************************************************************************
  * Derived from A5 (Apache-2.0).
  * https://github.com/felixpalmer/a5
- * 
+ *
  * modules/utils/vector.ts
  *
  * Copyright (c) A5 contributors

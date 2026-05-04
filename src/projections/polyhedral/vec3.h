@@ -46,8 +46,7 @@ inline double vec3_dot(const Vec3 &a, const Vec3 &b) {
 }
 
 inline Vec3 vec3_cross(const Vec3 &a, const Vec3 &b) {
-    return {a.y * b.z - a.z * b.y,
-            a.z * b.x - a.x * b.z,
+    return {a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z,
             a.x * b.y - a.y * b.x};
 }
 
@@ -75,8 +74,7 @@ inline Vec3 vec3_scale(const Vec3 &v, double s) {
 }
 
 inline Vec3 vec3_lerp(const Vec3 &a, const Vec3 &b, double t) {
-    return {a.x + t * (b.x - a.x),
-            a.y + t * (b.y - a.y),
+    return {a.x + t * (b.x - a.x), a.y + t * (b.y - a.y),
             a.z + t * (b.z - a.z)};
 }
 

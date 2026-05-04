@@ -23,16 +23,9 @@ struct RoundtripPoint {
 };
 
 static const RoundtripPoint test_points[] = {
-    {  0.0,    0.0},
-    { 45.0,   90.0},
-    {-45.0,  -90.0},
-    { 89.0,    0.0},
-    {-89.0,  170.0},
-    { 30.0,  120.0},
-    {-60.0, -150.0},
-    { 15.0,   45.0},
-    {-30.0,  -60.0},
-    { 70.0, -170.0},
+    {0.0, 0.0},     {45.0, 90.0},   {-45.0, -90.0},  {89.0, 0.0},
+    {-89.0, 170.0}, {30.0, 120.0},  {-60.0, -150.0}, {15.0, 45.0},
+    {-30.0, -60.0}, {70.0, -170.0},
 };
 
 static const char *proj_strings[] = {
@@ -68,7 +61,8 @@ static void roundtrip_test(const char *proj_string, double tolerance) {
 
 TEST(polyhedral, roundtrip) {
     for (const auto *proj_string : proj_strings) {
-        // 1e-13 radians corresponds to accuracy to ~0.6nm (worst case at equator)
+        // 1e-13 radians corresponds to accuracy to ~0.6nm (worst case at
+        // equator)
         roundtrip_test(proj_string, 1e-13);
     }
 }

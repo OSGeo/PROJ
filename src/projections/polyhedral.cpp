@@ -22,9 +22,9 @@
  * limitations under the License.
  ****************************************************************************/
 
-#include "polyhedral/sphere.h"
-#include "polyhedral/polyhedra/hexakis_tetrahedron.h"
 #include "polyhedral/nets/tsea/tsea.h"
+#include "polyhedral/polyhedra/hexakis_tetrahedron.h"
+#include "polyhedral/sphere.h"
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -46,8 +46,8 @@ static PJ_XY polyhedral_fwd(PJ_LP lp, PJ *P) {
         return proj_coord_error().xy;
     }
 
-    polyhedral::Face2D result = polyhedral::snyder_fwd(
-        v, Q->sph_tris[tri_idx], Q->face_tris[tri_idx]);
+    polyhedral::Face2D result =
+        polyhedral::snyder_fwd(v, Q->sph_tris[tri_idx], Q->face_tris[tri_idx]);
 
     xy.x = result.x;
     xy.y = result.y;
@@ -99,12 +99,15 @@ static PJ *polyhedral_setup(PJ *P) {
 
 PROJ_HEAD(tsea, "Tetrahedral Snyder Equal Area") "\n\tSph&Ell";
 PJ *PJ_PROJECTION(tsea) {
-    auto *Q = static_cast<pj_polyhedral_data *>(calloc(1, sizeof(pj_polyhedral_data)));
-    if (nullptr == Q) return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    auto *Q = static_cast<pj_polyhedral_data *>(
+        calloc(1, sizeof(pj_polyhedral_data)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = polyhedral_destructor;
 
-    polyhedral::load_triangles(Q, hexakis_tetrahedron::SPH_TRI, nets::tsea::tsea::FACE_TRI);
+    polyhedral::load_triangles(Q, hexakis_tetrahedron::SPH_TRI,
+                               nets::tsea::tsea::FACE_TRI);
     polyhedral::set_orient_from_angles(Q, 90.0, 0.0, 0.0);
 
     return polyhedral_setup(P);
