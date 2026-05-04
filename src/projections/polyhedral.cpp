@@ -108,13 +108,14 @@ PJ *PJ_PROJECTION(tsea) {
     P->opaque = Q;
     P->destructor = polyhedral_destructor;
 
-    double spherical_triangles[24][3][3];
-    polyhedral::conway_meta(polyhedra::tetrahedron::VERTICES,
-                            polyhedra::tetrahedron::FACES, spherical_triangles);
+    polyhedral::Vec3 spherical_triangles[24][3];
+    polyhedral::conway_meta<polyhedral::ConwayMode::Sphere>(
+        polyhedra::tetrahedron::VERTICES, polyhedra::tetrahedron::FACES,
+        spherical_triangles);
 
-    double face_triangles[24][3][2];
-    polyhedral::conway_meta(nets::tsea::tsea::VERTICES, nets::tsea::tsea::FACES,
-                            face_triangles);
+    polyhedral::Vec3 face_triangles[24][3];
+    polyhedral::conway_meta<polyhedral::ConwayMode::Plane>(
+        nets::tsea::tsea::VERTICES, nets::tsea::tsea::FACES, face_triangles);
 
     polyhedral::load_triangles(Q, spherical_triangles, face_triangles);
 

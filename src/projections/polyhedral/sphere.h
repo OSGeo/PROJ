@@ -36,21 +36,17 @@ struct pj_polyhedral_data {
     double qp;
 };
 
-// Load triangle data from generated header arrays.
+// Load triangle data from conway_meta output
 template <int N>
-inline void load_triangles(pj_polyhedral_data *Q, const double (&sph)[N][3][3],
-                           const double (&face)[N][3][2]) {
+inline void load_triangles(pj_polyhedral_data *Q, const Vec3 (&sph)[N][3],
+                           const Vec3 (&face)[N][3]) {
     Q->n_triangles = N;
     for (int i = 0; i < N; i++) {
-        Q->sph_tris[i] = {
-            {sph[i][0][0], sph[i][0][1], sph[i][0][2]},
-            {sph[i][1][0], sph[i][1][1], sph[i][1][2]},
-            {sph[i][2][0], sph[i][2][1], sph[i][2][2]},
-        };
+        Q->sph_tris[i] = {sph[i][0], sph[i][1], sph[i][2]};
         Q->face_tris[i] = {
-            {face[i][0][0], face[i][0][1]},
-            {face[i][1][0], face[i][1][1]},
-            {face[i][2][0], face[i][2][1]},
+            {face[i][0].x, face[i][0].y},
+            {face[i][1].x, face[i][1].y},
+            {face[i][2].x, face[i][2].y},
         };
     }
 }
