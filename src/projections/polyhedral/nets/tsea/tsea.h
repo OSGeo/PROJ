@@ -41,10 +41,10 @@ constexpr double VERTICES[6][2] = {
 // face in polyhedra::tetrahedron::FACES so that conway_meta produces
 // sub-triangles in the same order for both triangulations.
 constexpr int FACES[4][3] = {
-    {3, 1, 0},
     {4, 0, 2},
-    {5, 2, 1},
-    {0, 1, 2},
+    {0, 3, 1},
+    {2, 1, 5},
+    {1, 2, 0},
 };
 
 } } } // namespace nets::tsea::tsea

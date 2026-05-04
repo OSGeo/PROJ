@@ -30,10 +30,10 @@ constexpr double VERTICES[4][3] = {
 // 4 triangular faces, each listed with outward-pointing winding.
 // The order here matches the order TSEA's planar net expects.
 constexpr int FACES[4][3] = {
-    {0, 3, 1},
     {0, 1, 2},
-    {0, 2, 3},
-    {1, 3, 2},
+    {1, 0, 3},
+    {2, 3, 0},
+    {3, 2, 1},
 };
 
 } // namespace tetrahedron
