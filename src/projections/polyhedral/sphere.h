@@ -17,10 +17,6 @@
 
 #include <cmath>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 namespace polyhedral {
 
 constexpr int MAX_TRIANGLES = 120;
@@ -65,10 +61,10 @@ inline void load_triangles(pj_polyhedral_data *Q,
 //   az:       an azimuthal (z-axis) rotation applied after the above
 inline void set_orient_from_angles(pj_polyhedral_data *Q, double lat_deg,
                                    double lon_deg, double az_deg) {
-    const double lat = lat_deg * M_PI / 180.0;
-    const double lon = lon_deg * M_PI / 180.0;
-    const double az = az_deg * M_PI / 180.0;
-    const double alpha = M_PI / 2.0 - lat;
+    const double lat = lat_deg * DEG_TO_RAD;
+    const double lon = lon_deg * DEG_TO_RAD;
+    const double az = az_deg * DEG_TO_RAD;
+    const double alpha = M_HALFPI - lat;
     const double ca = std::cos(alpha), sa = std::sin(alpha);
     const double cl = std::cos(lon), sl = std::sin(lon);
     const double cz = std::cos(az), sz = std::sin(az);
