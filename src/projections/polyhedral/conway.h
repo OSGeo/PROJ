@@ -2,8 +2,9 @@
  *
  * Project:  PROJ
  * Purpose:  Conway polyhedron operations.
- *           Currently provides the "meta" (a.k.a. bevel) operation specialised
- *           to triangular-faced polyhedra projected onto the unit sphere.
+ *           Provides the "meta" (a.k.a. bevel) operation generalised to
+ *           polyhedra with NVF-gon faces, in either 2D (planar net) or
+ *           3D (vertices projected onto the unit sphere).
  *           See https://en.wikipedia.org/wiki/Conway_polyhedron_notation
  * Author:   Felix Palmer
  *
@@ -24,53 +25,56 @@ inline void normalize3(double v[3]) {
     v[2] /= n;
 }
 
-// Apply the Conway "meta" operation to a polyhedron whose faces are triangles,
-// projecting every derived point onto the unit sphere. Each face yields 6
-// right triangles, each spanning (face center, edge midpoint, original vertex).
+// Apply the Conway "meta" operation to a polyhedron whose faces all have
+// NVF vertices. Each face yields 2*NVF triangles fanning out from the face
+// centroid. For a face (v_0, ..., v_{NVF-1}) the 2*NVF fan vertices are
 //
-// For a face (a, b, c) we walk the boundary
+//     v_0, mid(v_0,v_1), v_1, mid(v_1,v_2), ..., v_{NVF-1}, mid(v_{NVF-1},v_0)
 //
-//     a  →  mid(a,b)  →  b  →  mid(b,c)  →  c  →  mid(c,a)  →  a
+// and the emitted triangles are (centroid, fan[k+1], fan[k]) for k = 0..2*NVF-1.
+// This preserves the outward winding of the input face, so containment tests
+// on the resulting triangulation behave consistently across faces.
 //
-// and emit 6 triangles (center, walk[k+1], walk[k]) for k = 0..5. This
-// preserves the outward winding of the input face, so spherical containment
-// tests on the resulting triangulation behave consistently across faces.
+// DIM == 3: vertices are projected onto the unit sphere (so callers can
+// supply unnormalized symmetric Cartesian coordinates, e.g. McCooey-style).
+// DIM == 2: planar input — the centroid is the unweighted average of the
+// face vertices and no normalization is applied.
 //
-// Output buffer is sized 6 * NF triangles. Caller passes V (NV vertices) and
-// F (NF triangular faces) as flat arrays; templated on NV/NF so the array
-// dimensions stay self-describing at the call site.
-template <int NV, int NF>
-inline void meta_spherical(const double (&V)[NV][3], const int (&F)[NF][3],
-                           double (&out)[6 * NF][3][3]) {
+// Output buffer is sized 2 * NVF * NF triangles. Templated on every array
+// dimension so they stay self-describing at the call site.
+template <int NV, int NF, int NVF, int DIM>
+inline void conway_meta(const double (&V)[NV][DIM], const int (&F)[NF][NVF],
+                        double (&out)[2 * NVF * NF][3][DIM]) {
+    constexpr int N = 2 * NVF;
     for (int i = 0; i < NF; i++) {
-        const int ia = F[i][0], ib = F[i][1], ic = F[i][2];
-        const double *Va = V[ia], *Vb = V[ib], *Vc = V[ic];
-
-        double walk[6][3];
-        for (int d = 0; d < 3; d++) {
-            walk[0][d] = Va[d];
-            walk[2][d] = Vb[d];
-            walk[4][d] = Vc[d];
-            walk[1][d] = 0.5 * (Va[d] + Vb[d]);
-            walk[3][d] = 0.5 * (Vb[d] + Vc[d]);
-            walk[5][d] = 0.5 * (Vc[d] + Va[d]);
+        double fan[N][DIM];
+        double center[DIM] = {};
+        for (int k = 0; k < NVF; k++) {
+            const int ia = F[i][k];
+            const int ib = F[i][(k + 1) % NVF];
+            for (int d = 0; d < DIM; d++) {
+                fan[2 * k][d] = V[ia][d];
+                fan[2 * k + 1][d] = 0.5 * (V[ia][d] + V[ib][d]);
+                center[d] += V[ia][d];
+            }
         }
-        normalize3(walk[1]);
-        normalize3(walk[3]);
-        normalize3(walk[5]);
 
-        double center[3] = {(Va[0] + Vb[0] + Vc[0]) / 3.0,
-                            (Va[1] + Vb[1] + Vc[1]) / 3.0,
-                            (Va[2] + Vb[2] + Vc[2]) / 3.0};
-        normalize3(center);
+        if constexpr (DIM == 3) {
+            for (int k = 0; k < N; k++)
+                normalize3(fan[k]);
+            normalize3(center);
+        } else {
+            for (int d = 0; d < DIM; d++)
+                center[d] /= NVF;
+        }
 
-        for (int k = 0; k < 6; k++) {
-            const double *p1 = walk[(k + 1) % 6];
-            const double *p2 = walk[k];
-            for (int d = 0; d < 3; d++) {
-                out[6 * i + k][0][d] = center[d];
-                out[6 * i + k][1][d] = p1[d];
-                out[6 * i + k][2][d] = p2[d];
+        for (int k = 0; k < N; k++) {
+            const double *p1 = fan[(k + 1) % N];
+            const double *p2 = fan[k];
+            for (int d = 0; d < DIM; d++) {
+                out[N * i + k][0][d] = center[d];
+                out[N * i + k][1][d] = p1[d];
+                out[N * i + k][2][d] = p2[d];
             }
         }
     }

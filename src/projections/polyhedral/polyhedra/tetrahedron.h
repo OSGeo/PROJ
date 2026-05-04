@@ -15,14 +15,16 @@
 namespace polyhedra {
 namespace tetrahedron {
 
-// 4 vertices on the unit sphere, with one apex at the north pole.
-// Coordinates: (0, 0, 1) and three points at z = -1/3, evenly spaced in
-// longitude, with horizontal radius 2*sqrt(2)/3.
+// 4 vertices in the symmetric Cartesian form (C0 = sqrt(2)/4). The
+// tetrahedron is centered at the origin; vertices lie on a sphere of
+// radius sqrt(6)/4 and are normalized to the unit sphere by conway_meta.
+constexpr double C0 = 0.35355339059327376220042e+00; // sqrt(2) / 4
+
 constexpr double V[4][3] = {
-    { 0.0,                            0.0,                            1.0      }, // 0  apex
-    { 0.94280904158206336586779e+00,  0.0,                           -1.0/3.0  }, // 1  2*sqrt(2)/3
-    {-0.47140452079103168293390e+00,  0.81649658092772603273243e+00, -1.0/3.0  }, // 2
-    {-0.47140452079103168293390e+00, -0.81649658092772603273243e+00, -1.0/3.0  }, // 3
+    { C0, -C0,  C0}, // 0
+    { C0,  C0, -C0}, // 1
+    {-C0,  C0,  C0}, // 2
+    {-C0, -C0, -C0}, // 3
 };
 
 // 4 triangular faces, each listed with outward-pointing winding.

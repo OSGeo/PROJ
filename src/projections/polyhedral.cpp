@@ -109,9 +109,14 @@ PJ *PJ_PROJECTION(tsea) {
     P->destructor = polyhedral_destructor;
 
     double spherical_triangles[24][3][3];
-    polyhedral::meta_spherical(polyhedra::tetrahedron::V,
-                               polyhedra::tetrahedron::F, spherical_triangles);
-    polyhedral::load_triangles(Q, spherical_triangles, nets::tsea::tsea::FACE_TRI);
+    polyhedral::conway_meta(polyhedra::tetrahedron::V,
+                            polyhedra::tetrahedron::F, spherical_triangles);
+
+    double face_triangles[24][3][2];
+    polyhedral::conway_meta(nets::tsea::tsea::V, nets::tsea::tsea::F,
+                            face_triangles);
+
+    polyhedral::load_triangles(Q, spherical_triangles, face_triangles);
 
     const double apex_lat_deg = std::asin(1.0 / std::sqrt(3.0)) * RAD_TO_DEG;
     polyhedral::set_orient_from_angles(Q, apex_lat_deg, 120.0, 135.0);
