@@ -26,55 +26,58 @@ inline void normalize3(double v[3]) {
 }
 
 // Apply the Conway "meta" operation to a polyhedron whose faces all have
-// NVF vertices. Each face yields 2*NVF triangles fanning out from the face
-// centroid. For a face (v_0, ..., v_{NVF-1}) the 2*NVF fan vertices are
+// NumFaceVertices (NFV) vertices. Each face yields 2*NFV triangles fanning
+// out from the face centroid. For a face (v_0, ..., v_{NFV-1}) the 2*NFV
+// fan vertices are
 //
-//     v_0, mid(v_0,v_1), v_1, mid(v_1,v_2), ..., v_{NVF-1}, mid(v_{NVF-1},v_0)
+//     v_0, mid(v_0,v_1), v_1, mid(v_1,v_2), ..., v_{NFV-1}, mid(v_{NFV-1},v_0)
 //
-// and the emitted triangles are (centroid, fan[k+1], fan[k]) for k = 0..2*NVF-1.
-// This preserves the outward winding of the input face, so containment tests
-// on the resulting triangulation behave consistently across faces.
+// and the emitted triangles are (centroid, fan[k+1], fan[k]) for k in
+// [0, 2*NFV). This preserves the outward winding of the input face, so
+// containment tests on the resulting triangulation behave consistently.
 //
-// DIM == 3: vertices are projected onto the unit sphere (so callers can
+// Dim == 3: vertices are projected onto the unit sphere (so callers can
 // supply unnormalized symmetric Cartesian coordinates, e.g. McCooey-style).
-// DIM == 2: planar input — the centroid is the unweighted average of the
+// Dim == 2: planar input — the centroid is the unweighted average of the
 // face vertices and no normalization is applied.
 //
-// Output buffer is sized 2 * NVF * NF triangles. Templated on every array
-// dimension so they stay self-describing at the call site.
-template <int NV, int NF, int NVF, int DIM>
-inline void conway_meta(const double (&V)[NV][DIM], const int (&F)[NF][NVF],
-                        double (&out)[2 * NVF * NF][3][DIM]) {
-    constexpr int N = 2 * NVF;
-    for (int i = 0; i < NF; i++) {
-        double fan[N][DIM];
-        double center[DIM] = {};
-        for (int k = 0; k < NVF; k++) {
-            const int ia = F[i][k];
-            const int ib = F[i][(k + 1) % NVF];
-            for (int d = 0; d < DIM; d++) {
-                fan[2 * k][d] = V[ia][d];
-                fan[2 * k + 1][d] = 0.5 * (V[ia][d] + V[ib][d]);
-                center[d] += V[ia][d];
+// Output buffer is sized 2 * NFV * NumFaces triangles. Templated on every
+// array dimension so they stay self-describing at the call site.
+template <int NumVertices, int NumFaces, int NumFaceVertices, int Dim>
+inline void conway_meta(
+    const double (&vertices)[NumVertices][Dim],
+    const int (&faces)[NumFaces][NumFaceVertices],
+    double (&out)[2 * NumFaceVertices * NumFaces][3][Dim]) {
+    constexpr int FanSize = 2 * NumFaceVertices;
+    for (int i = 0; i < NumFaces; i++) {
+        double fan[FanSize][Dim];
+        double center[Dim] = {};
+        for (int k = 0; k < NumFaceVertices; k++) {
+            const int ia = faces[i][k];
+            const int ib = faces[i][(k + 1) % NumFaceVertices];
+            for (int d = 0; d < Dim; d++) {
+                fan[2 * k][d] = vertices[ia][d];
+                fan[2 * k + 1][d] = 0.5 * (vertices[ia][d] + vertices[ib][d]);
+                center[d] += vertices[ia][d];
             }
         }
 
-        if constexpr (DIM == 3) {
-            for (int k = 0; k < N; k++)
+        if constexpr (Dim == 3) {
+            for (int k = 0; k < FanSize; k++)
                 normalize3(fan[k]);
             normalize3(center);
         } else {
-            for (int d = 0; d < DIM; d++)
-                center[d] /= NVF;
+            for (int d = 0; d < Dim; d++)
+                center[d] /= NumFaceVertices;
         }
 
-        for (int k = 0; k < N; k++) {
-            const double *p1 = fan[(k + 1) % N];
+        for (int k = 0; k < FanSize; k++) {
+            const double *p1 = fan[(k + 1) % FanSize];
             const double *p2 = fan[k];
-            for (int d = 0; d < DIM; d++) {
-                out[N * i + k][0][d] = center[d];
-                out[N * i + k][1][d] = p1[d];
-                out[N * i + k][2][d] = p2[d];
+            for (int d = 0; d < Dim; d++) {
+                out[FanSize * i + k][0][d] = center[d];
+                out[FanSize * i + k][1][d] = p1[d];
+                out[FanSize * i + k][2][d] = p2[d];
             }
         }
     }

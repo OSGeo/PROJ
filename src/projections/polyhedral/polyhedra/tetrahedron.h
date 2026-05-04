@@ -20,7 +20,7 @@ namespace tetrahedron {
 // radius sqrt(6)/4 and are normalized to the unit sphere by conway_meta.
 constexpr double C0 = 0.35355339059327376220042e+00; // sqrt(2) / 4
 
-constexpr double V[4][3] = {
+constexpr double VERTICES[4][3] = {
     { C0, -C0,  C0}, // 0
     { C0,  C0, -C0}, // 1
     {-C0,  C0,  C0}, // 2
@@ -29,7 +29,7 @@ constexpr double V[4][3] = {
 
 // 4 triangular faces, each listed with outward-pointing winding.
 // The order here matches the order TSEA's planar net expects.
-constexpr int F[4][3] = {
+constexpr int FACES[4][3] = {
     {0, 3, 1},
     {0, 1, 2},
     {0, 2, 3},
