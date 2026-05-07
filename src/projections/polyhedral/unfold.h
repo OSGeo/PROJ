@@ -1,0 +1,176 @@
+/******************************************************************************
+ *
+ * Project:  PROJ
+ * Purpose:  Unfold a 3D polyhedron Mesh into a planar net Mesh by laying each
+ *           face flat in its own local 2D frame and chaining 2D rigid
+ *           transforms over a parents-tree of faces.
+ * Author:   Felix Palmer
+ *
+ ****************************************************************************/
+
+#ifndef POLYHEDRAL_UNFOLD_H
+#define POLYHEDRAL_UNFOLD_H
+
+#include "conway.h"
+#include "vec3.h"
+
+#include "proj_internal.h"
+
+#include <cmath>
+
+namespace polyhedral {
+
+// Number of net vertices produced by unfolding NF faces with NFV vertices each
+template <int NF, int NFV> constexpr int unfolded_vertex_count() {
+    return NFV + (NFV - 2) * (NF - 1);
+}
+
+template <int NV_p, int NFV>
+inline Vec3 face_normal(const Vec3 (&vertices)[NV_p], const int (&face)[NFV]) {
+    const Vec3 v0 = vertices[face[0]];
+    return vec3_normalize(vec3_cross(vec3_subtract(vertices[face[1]], v0),
+                                     vec3_subtract(vertices[face[2]], v0)));
+}
+
+// Rigid transform mapping the polyhedron face f onto the 2D plane (z=0) such
+// that the face's directed edge from slot idx_a to slot idx_b is aligned
+// with the 2D edge net_vertex_a → net_vertex_b.
+template <int NV_p, int NF, int NFV>
+inline Mat4 mat4_rigidTransform(const Mesh<NV_p, NF, NFV> &polyhedron, int f,
+                                int idx_a, int idx_b, const Vec3 &net_vertex_a,
+                                const Vec3 &net_vertex_b) {
+    const Vec3 poly_vertex_a = polyhedron.vertices[polyhedron.faces[f][idx_a]];
+    const Vec3 poly_vertex_b = polyhedron.vertices[polyhedron.faces[f][idx_b]];
+
+    // Face local unit vectors
+    const Vec3 normal = face_normal(polyhedron.vertices, polyhedron.faces[f]);
+    const Vec3 u = vec3_normalize(vec3_subtract(poly_vertex_b, poly_vertex_a));
+    const Vec3 v = vec3_cross(normal, u);
+
+    // Transform the face-local frame (u, v) into the net plane.
+    const Vec3 edge_direction =
+        vec3_normalize(vec3_subtract(net_vertex_b, net_vertex_a));
+    const Vec3 r0 = vec3_subtract(vec3_scale(u, edge_direction.x),
+                                  vec3_scale(v, edge_direction.y));
+    const Vec3 r1 = vec3_add(vec3_scale(u, edge_direction.y),
+                             vec3_scale(v, edge_direction.x));
+    const double t0 = net_vertex_a.x - vec3_dot(r0, poly_vertex_a);
+    const double t1 = net_vertex_a.y - vec3_dot(r1, poly_vertex_a);
+    return {{{r0.x, r0.y, r0.z, t0},
+             {r1.x, r1.y, r1.z, t1},
+             {0.0, 0.0, 0.0, 0.0},
+             {0.0, 0.0, 0.0, 1.0}}};
+}
+
+template <int NFV>
+inline double polygon_area_2d(const Vec3 *verts, const int (&face)[NFV]) {
+    double a = 0.0;
+    for (int k = 0; k < NFV; k++)
+        a += vec3_cross(verts[face[k]], verts[face[(k + 1) % NFV]]).z;
+    return std::fabs(a) * 0.5;
+}
+
+// Unfold a polyhedron Mesh into a planar net Mesh.
+//
+// `parents[i]` is the index of face i's parent in the unfolding tree, or -1
+// if i is the root. Exactly one entry must be -1.
+//
+// The polyhedron faces must have consistent CCW winding from the outside.
+// Each child face is hinged about its shared edge with its parent; the
+// algorithm relies on shared edges being traversed in opposite directions
+// in the two adjacent faces (which is the case for any closed polyhedron
+// with consistent outward winding).
+//
+// The resulting net is auto-scaled so its total area equals 4π (i.e. the
+// area of the unit sphere) and translated so the root face's centroid lies
+// at the origin, with the first edge along the x-axis.
+template <int NV_p, int NF, int NFV>
+inline Mesh<unfolded_vertex_count<NF, NFV>(), NF, NFV>
+unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
+    constexpr int NV_n = unfolded_vertex_count<NF, NFV>();
+    Mesh<NV_n, NF, NFV> net{};
+    int n_verts = 0;
+
+    // Find and place root face
+    int root = 0;
+    while (parents[root] != -1)
+        root++;
+    const Mat4 root_face_to_plane = mat4_rigidTransform(
+        polyhedron, root, 0, 1, {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0});
+    for (int k = 0; k < NFV; k++) {
+        Vec3 face_vertex = polyhedron.vertices[polyhedron.faces[root][k]];
+        net.vertices[n_verts] = vec3_applyMat4(root_face_to_plane, face_vertex);
+        net.faces[root][k] = n_verts++;
+    }
+
+    // Initialize queue with direct children of parent face
+    int queue[NF];
+    int q_head = 0, q_tail = 0;
+    for (int i = 0; i < NF; i++)
+        if (parents[i] == root)
+            queue[q_tail++] = i;
+
+    // Hinge each child onto its parent at the shared edge.
+    while (q_head < q_tail) {
+        const int c = queue[q_head++];
+        const int p = parents[c];
+
+        // Find shared edge
+        int ia_c = -1, ib_c = -1, ia_p = -1, ib_p = -1;
+        for (int kc = 0; kc < NFV; kc++)
+            for (int kp = 0; kp < NFV; kp++)
+                if (polyhedron.faces[c][kc] == polyhedron.faces[p][kp]) {
+                    if (ia_c == -1) {
+                        ia_c = kc;
+                        ia_p = kp;
+                    } else if (ib_c == -1) {
+                        ib_c = kc;
+                        ib_p = kp;
+                    }
+                }
+
+        // Place face onto net using shared edge for orientation
+        const int na = net.faces[p][ia_p];
+        const int nb = net.faces[p][ib_p];
+        const Mat4 face_to_plane = mat4_rigidTransform(
+            polyhedron, c, ia_c, ib_c, net.vertices[na], net.vertices[nb]);
+        for (int k = 0; k < NFV; k++) {
+            if (k == ia_c) {
+                net.faces[c][k] = na;
+            } else if (k == ib_c) {
+                net.faces[c][k] = nb;
+            } else {
+                Vec3 face_vertex = polyhedron.vertices[polyhedron.faces[c][k]];
+                net.vertices[n_verts] =
+                    vec3_applyMat4(face_to_plane, face_vertex);
+                net.faces[c][k] = n_verts++;
+            }
+        }
+
+        // Append children of this face to queue
+        for (int i = 0; i < NF; i++)
+            if (parents[i] == c)
+                queue[q_tail++] = i;
+    }
+
+    // Rescale so the net's total area equals the unit sphere's (4π).
+    double total_area = 0.0;
+    for (int f = 0; f < NF; f++)
+        total_area += polygon_area_2d(net.vertices, net.faces[f]);
+    const double scale = std::sqrt(4.0 * M_PI / total_area);
+
+    // Translate so the root face's centroid is at origin, then scale.
+    Vec3 centroid{0.0, 0.0, 0.0};
+    for (int k = 0; k < NFV; k++)
+        centroid = vec3_add(centroid, net.vertices[net.faces[root][k]]);
+    centroid = vec3_scale(centroid, 1.0 / NFV);
+    for (int i = 0; i < NV_n; i++)
+        net.vertices[i] =
+            vec3_scale(vec3_subtract(net.vertices[i], centroid), scale);
+
+    return net;
+}
+
+} // namespace polyhedral
+
+#endif // POLYHEDRAL_UNFOLD_H

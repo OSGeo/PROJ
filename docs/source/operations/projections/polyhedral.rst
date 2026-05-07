@@ -94,6 +94,57 @@ When choosing projection, a set of nets is made available to the user by name.
 The nets are tied to the projection, as the order of the triangles are important.
 The net parameter can be omitted to use the default net.
 
+Parameters
+********************************************************************************
+
+.. note::
+    All parameters are optional. Each polyhedral projection ships with a
+    default orientation that places its vertices in symmetric, well-known
+    positions; the parameters below override that default.
+
+.. option:: +orient_lat=<value>
+
+    Geodetic latitude of the polyhedron's first vertex, in degrees.
+
+    *Default depends on the projection.*
+
+.. option:: +orient_lon=<value>
+
+    Longitude of the polyhedron's first vertex, in degrees.
+
+    *Default depends on the projection.*
+
+.. option:: +azi=<value>
+
+    Azimuth from the first vertex to the second, in degrees. Together with
+    ``+orient_lat`` and ``+orient_lon`` this fully constrains the 3D pose of
+    the polyhedron on the sphere.
+
+    *Default depends on the projection.*
+
+.. option:: +net=<name>
+
+    Selects the planar unfolding (net). Only applies to ``+proj=dsea``.
+    Accepted values: ``dsea`` (default), ``a5``, ``crescent``, ``flower``.
+
+.. include:: ../options/lat_0.rst
+
+For polyhedral projections, ``+lat_0`` / ``+lon_0`` specify the geographic
+point that should land at the projected origin ``(0, 0)``. They translate
+the projected output without rotating the polyhedron — the triangle edges
+stay where ``+orient_*`` placed them. ``+x_0`` / ``+y_0`` are applied on top
+of this translation.
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
+
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/R.rst
+
 Examples:
 
 .. figure:: ./images/polyhedral_tsea.png
@@ -110,16 +161,9 @@ Examples:
 
    proj-string: ``+proj=isea2``
 
-.. figure:: ./images/polyhedral_dsea_two_flower.png
+.. figure:: ./images/polyhedral_dsea_flower.png
    :width: 500 px
    :align: center
-   :alt:   DSEA Two Flower
+   :alt:   DSEA Flower
 
-   proj-string: ``+proj=dsea +net=two_flower``
-
-.. figure:: ./images/polyhedral_dsea_icosahedron.png
-   :width: 500 px
-   :align: center
-   :alt:   DSEA Icosahedron
-
-   proj-string: ``+proj=dsea +net=icosahedron``
+   proj-string: ``+proj=dsea +net=flower``

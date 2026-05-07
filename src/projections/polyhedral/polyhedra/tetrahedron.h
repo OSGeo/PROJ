@@ -1,7 +1,11 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Regular tetrahedron inscribed in the unit sphere.
+ * Purpose:  Regular tetrahedron inscribed in the unit sphere, oriented with
+ *           one vertex at the north pole. The remaining three vertices sit
+ *           at latitude -arcsin(1/3) ≈ -19.47°, separated by 120° in
+ *           longitude (0°, +120°, -120°). Face 0 is the bottom triangle
+ *           opposite the apex — the natural root for a "star" net.
  * Author:   Felix Palmer
  *
  ****************************************************************************/
@@ -10,28 +14,36 @@
 #define POLYHEDRA_TETRAHEDRON_H
 
 #include "../conway.h"
+#include "validation.h"
 
 namespace polyhedra {
+namespace tetrahedron_constants {
 
-// Following definition from https://dmccooey.com/polyhedra/Tetrahedron.txt
-constexpr double C0 = 0.35355339059327376220042e+00; // sqrt(2) / 4
+constexpr double A = 0.9428090415820635; // sqrt(8/9)
+constexpr double B = 0.8164965809277260; // sqrt(2/3)
 
-constexpr polyhedral::Mesh<4, 4, 3> tetrahedron = {
+constexpr polyhedral::Mesh<4, 4, 3> mesh = {
     // Vertices
     {
-        {C0, -C0, C0},
-        {C0, C0, -C0},
-        {-C0, C0, C0},
-        {-C0, -C0, -C0},
+        {0.0, 0.0, 1.0},
+        {A, 0.0, -1.0 / 3.0},
+        {-0.5 * A, B, -1.0 / 3.0},
+        {-0.5 * A, -B, -1.0 / 3.0},
     },
     // Faces
     {
+        {3, 2, 1},
         {0, 1, 2},
         {1, 0, 3},
         {2, 3, 0},
-        {3, 2, 1},
     },
 };
+
+[[maybe_unused]] constexpr validate_polyhedron<mesh> _validate{};
+
+} // namespace tetrahedron_constants
+
+constexpr auto &tetrahedron = tetrahedron_constants::mesh;
 
 } // namespace polyhedra
 

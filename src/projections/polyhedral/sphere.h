@@ -31,10 +31,24 @@ struct pj_polyhedral_data {
     double orient[3][3];
     double orient_inv[3][3];
 
+    // Translation in projected space so that the geographic point
+    // (P->phi0, P->lam0) lands at (0, 0). +x_0/+y_0 stack on top via PROJ
+    // core. Both zero unless +lat_0 / +lon_0 was supplied.
+    double x_offset;
+    double y_offset;
+
     // Authalic latitude conversion (ellipsoidal case only; apa is null for
     // spheres, where geodetic and authalic latitudes coincide).
     double *apa;
     double qp;
+};
+
+// Per-projection orientation defaults applied when the user does not specify
+// +orient_lat / +orient_lon / +azi.
+struct PolyhedralDefaults {
+    double orient_lat_deg;
+    double orient_lon_deg;
+    double azi_deg;
 };
 
 // Build triangle data from a polyhedron + matching net.
@@ -141,6 +155,53 @@ inline void cart_to_lonlat(const pj_polyhedral_data *Q, const PJ *P,
     phi = (P->es != 0.0) ? pj_authalic_lat_inverse(auth_lat, Q->apa, P, Q->qp)
                          : auth_lat;
     lam = adjlon(std::atan2(gy, gx));
+}
+
+// Read +orient_lat / +orient_lon / +azi (with the supplied defaults) and
+// build the orientation matrix. +lat_0 / +lon_0 are loaded into
+// P->phi0 / P->lam0 by PROJ core (init.cpp); if they are non-zero, run the
+// forward projection on that point once and store the result as the
+// projected-space offset so (lat_0, lon_0) maps to (0, 0).
+//
+// Authalic-latitude state (Q->apa, Q->qp) must already be initialized
+// because the offset computation uses lonlat_to_cart on the ellipsoid.
+//
+// Returns false (with proj_log_error already called) if (lat_0, lon_0) does
+// not lie within the polyhedron's coverage and so cannot be used as the
+// projected origin.
+inline bool apply_polyhedral_params(pj_polyhedral_data *Q, PJ *P,
+                                    const PolyhedralDefaults &d) {
+    double orient_lat = d.orient_lat_deg;
+    double orient_lon = d.orient_lon_deg;
+    double azi = d.azi_deg;
+    if (pj_param(P->ctx, P->params, "torient_lat").i)
+        orient_lat = pj_param(P->ctx, P->params, "dorient_lat").f;
+    if (pj_param(P->ctx, P->params, "torient_lon").i)
+        orient_lon = pj_param(P->ctx, P->params, "dorient_lon").f;
+    if (pj_param(P->ctx, P->params, "tazi").i)
+        azi = pj_param(P->ctx, P->params, "dazi").f;
+
+    set_orient_from_angles(Q, orient_lat, orient_lon, azi);
+
+    Q->x_offset = 0.0;
+    Q->y_offset = 0.0;
+    if (P->phi0 == 0.0 && P->lam0 == 0.0)
+        return true;
+
+    // PROJ core (src/fwd.cpp) subtracts P->lam0 from the input longitude
+    // before calling polyhedral_fwd, so we mirror that here by passing lam=0.
+    // The offset is therefore the projection of (phi0, lam=0).
+    Vec3 v = lonlat_to_cart(Q, P, 0.0, P->phi0);
+    int tri_idx = find_triangle(Q, v);
+    if (tri_idx < 0) {
+        proj_log_error(P, _("+lat_0 / +lon_0 lies outside the polyhedron's "
+                            "coverage; cannot be used as projected origin"));
+        return false;
+    }
+    Face2D r = snyder_fwd(v, Q->sph_tris[tri_idx], Q->face_tris[tri_idx]);
+    Q->x_offset = r.x;
+    Q->y_offset = r.y;
+    return true;
 }
 
 } // namespace polyhedral

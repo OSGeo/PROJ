@@ -78,13 +78,23 @@ inline Vec3 vec3_lerp(const Vec3 &a, const Vec3 &b, double t) {
             a.z + t * (b.z - a.z)};
 }
 
-inline double vec3_distance(const Vec3 &a, const Vec3 &b) {
-    return vec3_length(vec3_subtract(a, b));
-}
-
 inline double vec3_angle(const Vec3 &a, const Vec3 &b) {
     double d = vec3_dot(a, b) / (vec3_length(a) * vec3_length(b));
     return std::acos(std::clamp(d, -1.0, 1.0));
+}
+
+struct Mat4 {
+    double m[4][4];
+};
+
+// Apply an affine 4x4 to a 3D point (treated as (v.x, v.y, v.z, 1)). Assumes
+// the bottom row is [0, 0, 0, 1] (true affine, no perspective divide).
+inline Vec3 vec3_applyMat4(const Mat4 &m, const Vec3 &v) {
+    return {
+        m.m[0][0] * v.x + m.m[0][1] * v.y + m.m[0][2] * v.z + m.m[0][3],
+        m.m[1][0] * v.x + m.m[1][1] * v.y + m.m[1][2] * v.z + m.m[1][3],
+        m.m[2][0] * v.x + m.m[2][1] * v.y + m.m[2][2] * v.z + m.m[2][3],
+    };
 }
 
 } // namespace polyhedral
