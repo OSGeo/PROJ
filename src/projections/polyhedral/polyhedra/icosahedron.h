@@ -52,7 +52,7 @@ constexpr polyhedral::Mesh<12, 20, 3> mesh = {
     //   F10..F14 lower band (up-pointing)
     //   F15..F19 south cap (around V11)
     {
-        {1, 2, 0}, // Permutation to correctly orient net along x-axis
+        {1, 2, 0}, // permuted so the net's first edge lies along +x
         {0, 2, 3},
         {0, 3, 4},
         {0, 4, 5},

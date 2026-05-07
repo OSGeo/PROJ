@@ -43,10 +43,10 @@ An example is taking a tetrahedron, and cutting each of its 4 triangular faces
 into 6 right triangles. The result is a hexakis tetrahedron, with 24 faces.
 
 By defining polyhedra in this manner we can describe both the geometry of the
-solid, as well as making clear which of the vertices should be treated as the
-apex. For example, if we take the regular icosahedral and dodecahedron, and
-apply the akisation described above to both we get the same 120 vertices, but
-we can distinguish between the shapes:
+solid and which of the vertices should be treated as the apex. For example,
+if we take the regular icosahedron and dodecahedron, and apply the akisation
+described above to both, we get the same 120 vertices, but we can distinguish
+between the shapes:
 
 - Hexakis icosahedron (20 triangular faces, cut into 6)
 - Decakis dodecahedron (12 triangular faces, cut into 10)
@@ -59,15 +59,15 @@ Net mapping
 ********************************************************************************
 
 Internally, the projection outputs triangles in barycentric coordinates, which
-are then be transformed into triangles on a 2D plane. Here is ``tsea``,
-projecting the 24 faces of the hexakis tetrahedron into triangular net.
+are then transformed into triangles on a 2D plane. Here is ``tsea``,
+projecting the 24 faces of the hexakis tetrahedron into a triangular net.
 
 While it feels natural to project onto the net of the unfolded polyhedron, e.g.
 
 - **Hexakis Icosahedron** onto **Icosahedron Net**
 - **Decakis Dodecahedron** onto **Dodecahedron Net**
 
-we can equally we unfold onto any net that has the same symmetry group (in other
+we can equally unfold onto any net that has the same symmetry group (in other
 words, shares the same set of triangles). So it is completely valid to unfold:
 
 - **Hexakis Icosahedron** onto **Dodecahedron Net**
@@ -88,10 +88,8 @@ Equal Area**.
 - ``dsea`` **Dodecahedral Snyder Equal Area**: Decakis Dodecahedron (120 triangles)
 - ``isea2`` **Icosahedral Snyder Equal Area**: Hexakis Icosahedron (120 triangles)
 
-(Note ``isea2`` can be renamed to ``isea`` if it replaces the existing implementation)
-
-When choosing projection, a set of nets is made available to the user by name.
-The nets are tied to the projection, as the order of the triangles are important.
+When choosing a projection, a set of nets is available to the user by name.
+The nets are tied to the projection, as the ordering of the triangles matters.
 The net parameter can be omitted to use the default net.
 
 Parameters

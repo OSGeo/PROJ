@@ -89,7 +89,7 @@ struct Mat4 {
 
 // Apply an affine 4x4 to a 3D point (treated as (v.x, v.y, v.z, 1)). Assumes
 // the bottom row is [0, 0, 0, 1] (true affine, no perspective divide).
-inline Vec3 vec3_applyMat4(const Mat4 &m, const Vec3 &v) {
+inline Vec3 vec3_apply_mat4(const Mat4 &m, const Vec3 &v) {
     return {
         m.m[0][0] * v.x + m.m[0][1] * v.y + m.m[0][2] * v.z + m.m[0][3],
         m.m[1][0] * v.x + m.m[1][1] * v.y + m.m[1][2] * v.z + m.m[1][3],

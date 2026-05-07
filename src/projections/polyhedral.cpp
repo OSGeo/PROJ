@@ -41,7 +41,6 @@
 
 using polyhedral::pj_polyhedral_data;
 
-// Shared forward projection
 static PJ_XY polyhedral_fwd(PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0, 0.0};
     auto *Q = static_cast<pj_polyhedral_data *>(P->opaque);
@@ -63,7 +62,6 @@ static PJ_XY polyhedral_fwd(PJ_LP lp, PJ *P) {
     return xy;
 }
 
-// Shared inverse projection
 static PJ_LP polyhedral_inv(PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0, 0.0};
     auto *Q = static_cast<pj_polyhedral_data *>(P->opaque);
@@ -136,10 +134,8 @@ PJ *PJ_PROJECTION(dsea) {
     P->opaque = Q;
     P->destructor = polyhedral_destructor;
 
-    // +net= selects the unfolding tree. The `a5` net additionally shifts
-    // orient_lon by -93° to match the LONGITUDE_OFFSET=93° rotation used by
-    // the A5 reference codebase; F0's centroid still sits at the geographic
-    // pole, so orient_lat and azi are unchanged.
+    // +net= selects the unfolding tree. The `a5` net shifts orient_lon by
+    // -93° to match the LONGITUDE_OFFSET used by the A5 reference codebase.
     const char *net_name = pj_param(P->ctx, P->params, "snet").s;
     const int(*parents)[12] = &nets::dsea::dsea;
     double default_orient_lon = -36.0;
@@ -164,12 +160,8 @@ PJ *PJ_PROJECTION(dsea) {
 
     const auto net = polyhedral::unfold_net(polyhedra::dodecahedron, *parents);
     polyhedral::load_meshes(Q, polyhedra::dodecahedron, net);
-    // The dodecahedron data has V0 on +z and V1 on the +x meridian, so
-    // orient_lat / orient_lon directly specify V0's geographic position
-    // and +azi is the bearing from V0 toward V1. The defaults below
-    // (orient_lat ≈ atan((3+√5)/4), orient_lon = -36°, azi varying per net)
-    // rotate the polyhedron so F0's centroid sits at the geographic north
-    // pole, with the V0-V1 edge midpoint on the prime meridian.
+    // Defaults rotate the polyhedron so F0's centroid sits at the geographic
+    // north pole. orient_lat = atan((1+2A)/2) places V0 on the F0 axis.
     using polyhedra::dodecahedron_constants::A;
     const double default_orient_lat =
         std::atan((1 + 2 * A) / 2.0) * 180.0 / M_PI;
@@ -191,8 +183,7 @@ PJ *PJ_PROJECTION(isea2) {
     const auto net =
         polyhedral::unfold_net(polyhedra::icosahedron, nets::isea::isea);
     polyhedral::load_meshes(Q, polyhedra::icosahedron, net);
-    // Standard Snyder ISEA orientation: V0 (the icosahedron's north-pole
-    // seed vertex) sits at lat ≈ 58.28°N, lon = 11.25°E.
+    // Standard Snyder ISEA orientation: V0 at lat ≈ 58.28°N, lon = 11.25°E.
     const polyhedral::PolyhedralDefaults d = {58.282525588539, 11.25, 0.0};
     return polyhedral_setup(P, d);
 }

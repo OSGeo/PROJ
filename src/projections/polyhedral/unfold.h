@@ -36,7 +36,7 @@ inline Vec3 face_normal(const Vec3 (&vertices)[NV_p], const int (&face)[NFV]) {
 // that the face's directed edge from slot idx_a to slot idx_b is aligned
 // with the 2D edge net_vertex_a → net_vertex_b.
 template <int NV_p, int NF, int NFV>
-inline Mat4 mat4_rigidTransform(const Mesh<NV_p, NF, NFV> &polyhedron, int f,
+inline Mat4 mat4_rigid_transform(const Mesh<NV_p, NF, NFV> &polyhedron, int f,
                                 int idx_a, int idx_b, const Vec3 &net_vertex_a,
                                 const Vec3 &net_vertex_b) {
     const Vec3 poly_vertex_a = polyhedron.vertices[polyhedron.faces[f][idx_a]];
@@ -95,11 +95,11 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
     int root = 0;
     while (parents[root] != -1)
         root++;
-    const Mat4 root_face_to_plane = mat4_rigidTransform(
+    const Mat4 root_face_to_plane = mat4_rigid_transform(
         polyhedron, root, 0, 1, {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0});
     for (int k = 0; k < NFV; k++) {
         Vec3 face_vertex = polyhedron.vertices[polyhedron.faces[root][k]];
-        net.vertices[n_verts] = vec3_applyMat4(root_face_to_plane, face_vertex);
+        net.vertices[n_verts] = vec3_apply_mat4(root_face_to_plane, face_vertex);
         net.faces[root][k] = n_verts++;
     }
 
@@ -132,7 +132,7 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
         // Place face onto net using shared edge for orientation
         const int na = net.faces[p][ia_p];
         const int nb = net.faces[p][ib_p];
-        const Mat4 face_to_plane = mat4_rigidTransform(
+        const Mat4 face_to_plane = mat4_rigid_transform(
             polyhedron, c, ia_c, ib_c, net.vertices[na], net.vertices[nb]);
         for (int k = 0; k < NFV; k++) {
             if (k == ia_c) {
@@ -142,7 +142,7 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
             } else {
                 Vec3 face_vertex = polyhedron.vertices[polyhedron.faces[c][k]];
                 net.vertices[n_verts] =
-                    vec3_applyMat4(face_to_plane, face_vertex);
+                    vec3_apply_mat4(face_to_plane, face_vertex);
                 net.faces[c][k] = n_verts++;
             }
         }

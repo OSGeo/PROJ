@@ -31,28 +31,26 @@ struct pj_polyhedral_data {
     double orient[3][3];
     double orient_inv[3][3];
 
-    // Translation in projected space so that the geographic point
-    // (P->phi0, P->lam0) lands at (0, 0). +x_0/+y_0 stack on top via PROJ
-    // core. Both zero unless +lat_0 / +lon_0 was supplied.
+    // Translation so that (P->phi0, P->lam0) lands at (0, 0). Zero unless
+    // +lat_0 / +lon_0 was supplied; +x_0/+y_0 stack on top via PROJ core.
     double x_offset;
     double y_offset;
 
-    // Authalic latitude conversion (ellipsoidal case only; apa is null for
-    // spheres, where geodetic and authalic latitudes coincide).
+    // Authalic latitude state (ellipsoidal case only; apa is null on spheres).
     double *apa;
     double qp;
 };
 
-// Per-projection orientation defaults applied when the user does not specify
-// +orient_lat / +orient_lon / +azi.
+// Orientation defaults used when the user does not supply +orient_lat /
+// +orient_lon / +azi.
 struct PolyhedralDefaults {
     double orient_lat_deg;
     double orient_lon_deg;
     double azi_deg;
 };
 
-// Build triangle data from a polyhedron + matching net.
-// The `meta` Conway operation is used to cut up the faces
+// Build triangle data from a polyhedron + matching net by applying the Conway
+// `meta` operation to both.
 template <int NV_p, int NV_n, int NF, int NFV>
 inline void load_meshes(pj_polyhedral_data *Q,
                         const Mesh<NV_p, NF, NFV> &polyhedron,
@@ -74,9 +72,9 @@ inline void load_meshes(pj_polyhedral_data *Q,
     }
 }
 
-// Build rotation matrix from three angles (degrees):
-//   lat, lon: the geographic point to rotate to the north pole
-//   az:       an azimuthal (z-axis) rotation applied after the above
+// Build rotation matrix that takes the geographic point (lat, lon) to the
+// north pole, followed by an azimuthal rotation about the z-axis. All angles
+// are in degrees.
 inline void set_orient_from_angles(pj_polyhedral_data *Q, double lat_deg,
                                    double lon_deg, double az_deg) {
     const double lat = lat_deg * DEG_TO_RAD;
@@ -123,9 +121,9 @@ inline int find_triangle(const pj_polyhedral_data *Q, const Vec3 &v) {
     return -1;
 }
 
-// Convert geodetic lon/lat to unit vector, applying orientation rotation.
-// In the ellipsoidal case the latitude is first converted to the authalic
-// latitude so that equal-area properties are preserved on the sphere.
+// Convert geodetic lon/lat to a unit vector and apply the orientation
+// rotation. On an ellipsoid, latitude is first mapped to the authalic
+// latitude so that equal-area is preserved on the sphere.
 inline Vec3 lonlat_to_cart(const pj_polyhedral_data *Q, const PJ *P, double lam,
                            double phi) {
     double auth_lat = phi;
@@ -157,18 +155,11 @@ inline void cart_to_lonlat(const pj_polyhedral_data *Q, const PJ *P,
     lam = adjlon(std::atan2(gy, gx));
 }
 
-// Read +orient_lat / +orient_lon / +azi (with the supplied defaults) and
-// build the orientation matrix. +lat_0 / +lon_0 are loaded into
-// P->phi0 / P->lam0 by PROJ core (init.cpp); if they are non-zero, run the
-// forward projection on that point once and store the result as the
-// projected-space offset so (lat_0, lon_0) maps to (0, 0).
-//
-// Authalic-latitude state (Q->apa, Q->qp) must already be initialized
-// because the offset computation uses lonlat_to_cart on the ellipsoid.
-//
-// Returns false (with proj_log_error already called) if (lat_0, lon_0) does
-// not lie within the polyhedron's coverage and so cannot be used as the
-// projected origin.
+// Read +orient_lat / +orient_lon / +azi (falling back to the supplied
+// defaults) and build the orientation matrix. If +lat_0 / +lon_0 is set,
+// project that point once and cache the result as a projected-space offset
+// so (lat_0, lon_0) maps to (0, 0). Authalic-latitude state must already be
+// initialized. Returns false if (lat_0, lon_0) lies outside the polyhedron.
 inline bool apply_polyhedral_params(pj_polyhedral_data *Q, PJ *P,
                                     const PolyhedralDefaults &d) {
     double orient_lat = d.orient_lat_deg;
@@ -188,9 +179,8 @@ inline bool apply_polyhedral_params(pj_polyhedral_data *Q, PJ *P,
     if (P->phi0 == 0.0 && P->lam0 == 0.0)
         return true;
 
-    // PROJ core (src/fwd.cpp) subtracts P->lam0 from the input longitude
-    // before calling polyhedral_fwd, so we mirror that here by passing lam=0.
-    // The offset is therefore the projection of (phi0, lam=0).
+    // PROJ core subtracts P->lam0 before calling polyhedral_fwd, so the
+    // offset is the projection of (phi0, lam=0).
     Vec3 v = lonlat_to_cart(Q, P, 0.0, P->phi0);
     int tri_idx = find_triangle(Q, v);
     if (tri_idx < 0) {

@@ -6,11 +6,9 @@
  *
  ******************************************************************************
  * Derived from A5 (Apache-2.0).
- *
  * https://github.com/felixpalmer/a5
+ * (modules/projections/polyhedral.ts)
  *
- * modules/projections/polyhedral.ts
-
  * Copyright (c) A5 contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,7 +55,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************
  *
- * Closed from equations adapted from:
+ * Closed-form equations adapted from:
  * https://brsr.github.io/2021/08/31/snyder-equal-area.html
  *
  ****************************************************************************/
