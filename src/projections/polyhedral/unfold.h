@@ -37,8 +37,8 @@ inline Vec3 face_normal(const Vec3 (&vertices)[NV_p], const int (&face)[NFV]) {
 // with the 2D edge net_vertex_a → net_vertex_b.
 template <int NV_p, int NF, int NFV>
 inline Mat4 mat4_rigid_transform(const Mesh<NV_p, NF, NFV> &polyhedron, int f,
-                                int idx_a, int idx_b, const Vec3 &net_vertex_a,
-                                const Vec3 &net_vertex_b) {
+                                 int idx_a, int idx_b, const Vec3 &net_vertex_a,
+                                 const Vec3 &net_vertex_b) {
     const Vec3 poly_vertex_a = polyhedron.vertices[polyhedron.faces[f][idx_a]];
     const Vec3 poly_vertex_b = polyhedron.vertices[polyhedron.faces[f][idx_b]];
 
@@ -99,7 +99,8 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
         polyhedron, root, 0, 1, {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0});
     for (int k = 0; k < NFV; k++) {
         Vec3 face_vertex = polyhedron.vertices[polyhedron.faces[root][k]];
-        net.vertices[n_verts] = vec3_apply_mat4(root_face_to_plane, face_vertex);
+        net.vertices[n_verts] =
+            vec3_apply_mat4(root_face_to_plane, face_vertex);
         net.faces[root][k] = n_verts++;
     }
 

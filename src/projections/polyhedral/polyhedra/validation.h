@@ -14,8 +14,8 @@
 namespace polyhedra {
 
 template <int NV, int NF, int NFV>
-constexpr bool all_vertices_on_unit_sphere(
-    const polyhedral::Mesh<NV, NF, NFV> &m) {
+constexpr bool
+all_vertices_on_unit_sphere(const polyhedral::Mesh<NV, NF, NFV> &m) {
     constexpr double tol = 1e-12;
     for (int i = 0; i < NV; i++) {
         const auto &v = m.vertices[i];
@@ -27,8 +27,8 @@ constexpr bool all_vertices_on_unit_sphere(
 }
 
 template <int NV, int NF, int NFV>
-constexpr bool face_indices_well_formed(
-    const polyhedral::Mesh<NV, NF, NFV> &m) {
+constexpr bool
+face_indices_well_formed(const polyhedral::Mesh<NV, NF, NFV> &m) {
     for (int f = 0; f < NF; f++) {
         for (int k = 0; k < NFV; k++) {
             if (m.faces[f][k] < 0 || m.faces[f][k] >= NV)

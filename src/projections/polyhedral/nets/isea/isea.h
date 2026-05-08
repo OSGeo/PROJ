@@ -28,9 +28,9 @@ namespace nets {
 namespace isea {
 
 constexpr int isea[20] = {
-    -1,  6,  7,  8,  9, // F0 root; F1..F4 north cap, hung off upper band
-     0, 10, 11, 12, 13, // F5 child of F0; F6..F9 chained via lower band
-     5,  6,  7,  8,  9, // F10 child of F5; F11..F14 chained via upper band
+    -1, 6,  7,  8,  9,  // F0 root; F1..F4 north cap, hung off upper band
+    0,  10, 11, 12, 13, // F5 child of F0; F6..F9 chained via lower band
+    5,  6,  7,  8,  9,  // F10 child of F5; F11..F14 chained via upper band
     10, 11, 12, 13, 14, // F15..F19 south cap, hung off lower band
 };
 

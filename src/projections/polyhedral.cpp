@@ -118,7 +118,8 @@ PJ *PJ_PROJECTION(tsea) {
     P->opaque = Q;
     P->destructor = polyhedral_destructor;
 
-    const auto net = polyhedral::unfold_net(polyhedra::tetrahedron, nets::tsea::tsea);
+    const auto net =
+        polyhedral::unfold_net(polyhedra::tetrahedron, nets::tsea::tsea);
     polyhedral::load_meshes(Q, polyhedra::tetrahedron, net);
     const polyhedral::PolyhedralDefaults d = {90.0, 0.0, 0.0};
     return polyhedral_setup(P, d);
@@ -153,8 +154,8 @@ PJ *PJ_PROJECTION(dsea) {
         } else {
             proj_log_error(P, _("invalid +net (expected dsea, a5, crescent, "
                                 "or flower)"));
-            return polyhedral_destructor(
-                P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            return polyhedral_destructor(P,
+                                         PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
     }
 
