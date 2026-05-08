@@ -53,6 +53,11 @@ enum class DefaultOrigin {
 };
 
 // Defaults supplied per-projection; user params override these where present.
+//
+// orient_lat_deg is in *authalic* latitude — this is the frame the rotation
+// operates in (the unit sphere is the authalic sphere for equal-area
+// projections). User-supplied +orient_lat is geodetic and gets converted to
+// authalic before use. On a sphere the two are identical.
 struct PolyhedralDefaults {
     double orient_lat_deg;
     double orient_lon_deg;
@@ -115,9 +120,10 @@ inline Face2D face_reference_point(const pj_polyhedral_data *Q, int face_idx,
     return {sum_x / nfv, sum_y / nfv};
 }
 
-// Build rotation matrix that takes the geographic point (lat, lon) to the
-// north pole, followed by an azimuthal rotation about the z-axis. All angles
-// are in degrees.
+// Build rotation matrix that takes the (lat, lon) point on the authalic unit
+// sphere to the north pole, followed by an azimuthal rotation about the
+// z-axis. All angles are in degrees; lat is authalic latitude (callers must
+// convert from geodetic if needed).
 inline void set_orient_from_angles(pj_polyhedral_data *Q, double lat_deg,
                                    double lon_deg, double az_deg) {
     const double lat = lat_deg * DEG_TO_RAD;
@@ -203,11 +209,22 @@ inline void cart_to_lonlat(const pj_polyhedral_data *Q, const PJ *P,
 // offset so the chosen geographic anchor lands at (0, 0).
 inline bool apply_polyhedral_params(pj_polyhedral_data *Q, PJ *P,
                                     const PolyhedralDefaults &d) {
+    // Default is authalic; user input is geodetic and converted below.
     double orient_lat = d.orient_lat_deg;
     double orient_lon = d.orient_lon_deg;
     double azi = d.azi_deg;
-    if (pj_param(P->ctx, P->params, "torient_lat").i)
-        orient_lat = pj_param(P->ctx, P->params, "dorient_lat").f;
+    if (pj_param(P->ctx, P->params, "torient_lat").i) {
+        const double user_lat_deg =
+            pj_param(P->ctx, P->params, "dorient_lat").f;
+        if (P->es != 0.0) {
+            const double phi = user_lat_deg * DEG_TO_RAD;
+            const double auth = pj_authalic_lat(
+                phi, std::sin(phi), std::cos(phi), Q->apa, P, Q->qp);
+            orient_lat = auth / DEG_TO_RAD;
+        } else {
+            orient_lat = user_lat_deg;
+        }
+    }
     if (pj_param(P->ctx, P->params, "torient_lon").i)
         orient_lon = pj_param(P->ctx, P->params, "dorient_lon").f;
     if (pj_param(P->ctx, P->params, "tazi").i)

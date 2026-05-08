@@ -185,7 +185,10 @@ PJ *PJ_PROJECTION(isea2) {
         polyhedral::unfold_net(polyhedra::icosahedron, nets::isea::isea);
     polyhedral::load_meshes(Q, polyhedra::icosahedron, net);
 
-    // Standard Snyder ISEA orientation: V0 at lat ≈ 58.28°N. Legacy +proj=isea
+    // Standard Snyder ISEA orientation: V0 at authalic latitude arctan(φ) ≈
+    // 58.28°N (φ = golden ratio). On WGS84 this corresponds to ~58.40°
+    // geodetic — PolyhedralDefaults stores the authalic value; user
+    // +orient_lat is geodetic and converted internally. Legacy +proj=isea
     // uses orient_lon = 11.25° on a sphere and 11.20° on an ellipsoid.
     const bool sphere = (P->es == 0.0);
     double orient_lat = 58.282525588539;
