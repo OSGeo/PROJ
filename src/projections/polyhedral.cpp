@@ -172,7 +172,7 @@ PJ *PJ_PROJECTION(dsea) {
 }
 
 PROJ_HEAD(isea2, "Icosahedral Snyder Equal Area (generalized)")
-"\n\tSph&Ell\n\torient_lat= orient_lon= azi= lat_0= lon_0=";
+"\n\tSph&Ell\n\torient= orient_lat= orient_lon= azi= lat_0= lon_0=";
 PJ *PJ_PROJECTION(isea2) {
     auto *Q = static_cast<pj_polyhedral_data *>(
         calloc(1, sizeof(pj_polyhedral_data)));
@@ -188,8 +188,28 @@ PJ *PJ_PROJECTION(isea2) {
     // Standard Snyder ISEA orientation: V0 at lat ≈ 58.28°N. Legacy +proj=isea
     // uses orient_lon = 11.25° on a sphere and 11.20° on an ellipsoid.
     const bool sphere = (P->es == 0.0);
-    const double orient_lon = sphere ? 11.25 : 11.20;
-    polyhedral::PolyhedralDefaults d = {58.282525588539, orient_lon, 0.0};
+    double orient_lat = 58.282525588539;
+    double orient_lon = sphere ? 11.25 : 11.20;
+    double azi = 0.0;
+
+    // +orient= shorthand for two named orientations from legacy +proj=isea.
+    // Individual +orient_lat / +orient_lon / +azi still override.
+    const char *orient_name = pj_param(P->ctx, P->params, "sorient").s;
+    if (orient_name != nullptr) {
+        if (strcmp(orient_name, "isea") == 0) {
+            // Defaults above already match.
+        } else if (strcmp(orient_name, "pole") == 0) {
+            orient_lat = 90.0;
+            orient_lon = 0.0;
+            azi = 0.0;
+        } else {
+            proj_log_error(P, _("invalid +orient (expected isea or pole)"));
+            return polyhedral_destructor(P,
+                                         PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
+    }
+
+    polyhedral::PolyhedralDefaults d = {orient_lat, orient_lon, azi};
 
     // For drop-in compatibility with legacy +proj=isea, the default projected
     // origin is the bbox center (mid-width, mid-height) of icosahedron face F7
