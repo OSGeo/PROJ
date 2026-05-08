@@ -95,24 +95,20 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
             authFactory->createCoordinateReferenceSystem("4179"), // Pulkovo 42
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             ctxt);
-        ASSERT_EQ(list.size(), 4U);
+        ASSERT_EQ(list.size(), 3U);
         // Romania has a larger area than Poland (given our approx formula)
-        EXPECT_EQ(
-            list[0]->nameStr(),
-            "Pulkovo 1942(58) to ETRS89-ROU [ETRF2000] (4)"); // Romania - 10m
-        EXPECT_EQ(list[0]->getEPSGCode(), 15994);             // Romania - 3m
-        EXPECT_EQ(list[1]->getEPSGCode(), 15993);             // Romania - 10m
-        EXPECT_EQ(list[2]->getEPSGCode(), 1644);              // Poland - 1m
-        EXPECT_EQ(list[3]->nameStr(),
+        EXPECT_EQ(list[0]->getEPSGCode(), 15993); // Romania - 10m
+        EXPECT_EQ(list[1]->getEPSGCode(), 1644);  // Poland - 1m
+        EXPECT_EQ(list[2]->nameStr(),
                   "Ballpark geographic offset from Pulkovo 1942(58) to ETRS89");
 
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
             "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 "
-            "+step +proj=cart +ellps=krass +step +proj=helmert +x=2.3287 "
-            "+y=-147.0425 +z=-92.0802 +rx=0.3092483 +ry=-0.32482185 "
-            "+rz=-0.49729934 +s=5.68906266 +convention=coordinate_frame +step "
+            "+step +proj=cart +ellps=krass +step +proj=helmert +x=68.1564 "
+            "+y=32.7756 +z=80.2249 +rx=2.20333014 +ry=2.19256447 "
+            "+rz=-2.54166911 +s=-0.14155333 +convention=coordinate_frame +step "
             "+inv +proj=cart +ellps=GRS80 +step +proj=pop +v_3 +step "
             "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
             "+order=2,1");
@@ -123,21 +119,18 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4258"),
             authFactory->createCoordinateReferenceSystem("4179"), ctxt);
-        ASSERT_EQ(list.size(), 4U);
+        ASSERT_EQ(list.size(), 3U);
         // Romania has a larger area than Poland (given our approx formula)
-        EXPECT_EQ(
-            list[0]->nameStr(),
-            "Inverse of Pulkovo 1942(58) to ETRS89-ROU [ETRF2000] (4)"); // Romania
-                                                                         // -
-                                                                         // 10m
+        EXPECT_EQ(list[0]->nameStr(),
+                  "Inverse of Pulkovo 1942(58) to ETRS89 (3)"); // Romania - 10m
 
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
             "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 "
-            "+step +proj=cart +ellps=GRS80 +step +inv +proj=helmert +x=2.3287 "
-            "+y=-147.0425 +z=-92.0802 +rx=0.3092483 +ry=-0.32482185 "
-            "+rz=-0.49729934 +s=5.68906266 +convention=coordinate_frame +step "
+            "+step +proj=cart +ellps=GRS80 +step +inv +proj=helmert +x=68.1564 "
+            "+y=32.7756 +z=80.2249 +rx=2.20333014 +ry=2.19256447 "
+            "+rz=-2.54166911 +s=-0.14155333 +convention=coordinate_frame +step "
             "+inv +proj=cart +ellps=krass +step +proj=pop +v_3 +step "
             "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
             "+order=2,1");
@@ -215,9 +208,8 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4179"),
             authFactory->createCoordinateReferenceSystem("4258"), ctxt);
-        ASSERT_EQ(list.size(), 2U);
-        EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
-        EXPECT_EQ(list[1]->getEPSGCode(), 15993); // Romania - 10m
+        ASSERT_EQ(list.size(), 1U);
+        EXPECT_EQ(list[0]->getEPSGCode(), 15993); // Romania - 10m
     }
     {
         auto ctxt = CoordinateOperationContext::create(
@@ -228,9 +220,8 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4179"),
             authFactory->createCoordinateReferenceSystem("4258"), ctxt);
-        ASSERT_EQ(list.size(), 2U);
-        EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
-        EXPECT_EQ(list[1]->getEPSGCode(), 15993); // Romania - 10m
+        ASSERT_EQ(list.size(), 1U);
+        EXPECT_EQ(list[0]->getEPSGCode(), 15993); // Romania - 10m
     }
     {
         auto ctxt = CoordinateOperationContext::create(
@@ -1519,7 +1510,7 @@ TEST(operation, geogCRS_without_id_to_geogCRS_3D_context) {
     auto list =
         CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
     ASSERT_GE(list.size(), 1U);
-    auto wkt2 = "GEOGCRS[\"Amersfoort\",\n"
+    auto wkt2 = "GEOGCRS[\"unnamed\",\n"
                 "    DATUM[\"Amersfoort\",\n"
                 "        ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,\n"
                 "            LENGTHUNIT[\"metre\",1]]],\n"
@@ -12363,9 +12354,10 @@ TEST(operation, createOperation_ETRS89_to_Amersfoort) {
             // Amersfoort
             authFactoryEPSG->createCoordinateReferenceSystem("4289"), ctxt);
         ASSERT_GE(list.size(), 1U);
-        // We check that we use the most
+        // We check that we go through ETRS89-NLD [AGRS2010] to use the most
         // precise "Amersfoort to ETRS89-NLD [AGRS2010] (9)" operation.
         EXPECT_EQ(list[0]->nameStr(),
+                  "ETRS89 to ETRS89-NLD [AGRS2010] + "
                   "Inverse of Amersfoort to ETRS89-NLD [AGRS2010] (9)");
     }
     {
@@ -12375,9 +12367,10 @@ TEST(operation, createOperation_ETRS89_to_Amersfoort) {
             // ETRS89
             authFactoryEPSG->createCoordinateReferenceSystem("4258"), ctxt);
         ASSERT_GE(list.size(), 1U);
-        // We check that we use the most
+        // We check that we go through ETRS89-NLD [AGRS2010] to use the most
         // precise "Amersfoort to ETRS89-NLD [AGRS2010] (9)" operation.
         EXPECT_EQ(list[0]->nameStr(),
-                  "Amersfoort to ETRS89-NLD [AGRS2010] (9)");
+                  "Amersfoort to ETRS89-NLD [AGRS2010] (9) + "
+                  "Inverse of ETRS89 to ETRS89-NLD [AGRS2010]");
     }
 }
