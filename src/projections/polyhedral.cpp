@@ -184,19 +184,19 @@ PJ *PJ_PROJECTION(isea2) {
     const auto net =
         polyhedral::unfold_net(polyhedra::icosahedron, nets::isea::isea);
     polyhedral::load_meshes(Q, polyhedra::icosahedron, net);
+
     // Standard Snyder ISEA orientation: V0 at lat ≈ 58.28°N. Legacy +proj=isea
-    // uses orient_lon = 11.25° on a sphere and 11.20° on an ellipsoid; preserve
-    // that split when the user explicitly drops to a sphere via +ellps=sphere
-    // or +f=0.
-    //
+    // uses orient_lon = 11.25° on a sphere and 11.20° on an ellipsoid.
+    const bool sphere = (P->es == 0.0);
+    const double orient_lon = sphere ? 11.25 : 11.20;
+    polyhedral::PolyhedralDefaults d = {58.282525588539, orient_lon, 0.0};
+
     // For drop-in compatibility with legacy +proj=isea, the default projected
     // origin is the bbox center (mid-width, mid-height) of icosahedron face F7
     // — the central upper-band face — rather than its centroid. This matches
     // legacy ISEA's 4×5 strip-layout geometric center, which sits inside F7
     // but not at any face's centroid. Other polyhedra default to the centroid
     // of face 0 (root of the unfold).
-    const double orient_lon = (P->es == 0.0) ? 11.25 : 11.20;
-    polyhedral::PolyhedralDefaults d = {58.282525588539, orient_lon, 0.0};
     d.default_face_index = 7;
     d.default_origin = polyhedral::DefaultOrigin::FaceBboxCenter;
     return polyhedral_setup(P, d);
