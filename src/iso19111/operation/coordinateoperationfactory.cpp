@@ -4280,7 +4280,8 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
     // "MGI to ETRS89 (8)" operation, that is now "MGI to ETRS89-AUT [2002] (8)"
     const bool srcIsETRS89 = sourceCRS->nameStr() == "ETRS89";
     const bool dstIsETRS89 = targetCRS->nameStr() == "ETRS89";
-    if (geodSrc && geodDst && (srcIsETRS89 != dstIsETRS89)) {
+    if (geodSrc && geodDst && (srcIsETRS89 || dstIsETRS89) &&
+        !(srcIsETRS89 && dstIsETRS89)) {
         const auto &authFactory = context.context->getAuthorityFactory();
         const auto gridAvailabilityUse =
             context.context->getGridAvailabilityUse();

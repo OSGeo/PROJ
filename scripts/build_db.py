@@ -1172,9 +1172,6 @@ def fill_alias(proj_db_cursor):
     proj_db_cursor.execute("SELECT DISTINCT object_code, alias, coord_op_name FROM epsg.epsg_alias, epsg.epsg_coordoperation ON coord_op_code = object_code WHERE object_table_name = 'epsg_coordoperation' AND epsg_coordoperation.deprecated = 0")
     for row in proj_db_cursor.fetchall():
         code, alt_name, new_name = row
-        # We could potentially ingest all records, but the only use of them for
-        # now is to workaround effects of the creation of national ETRS89-XXX
-        # datums. See https://github.com/OSGeo/PROJ/pull/4736 for more details
         if "ETRS89" not in alt_name:
             # print('Ignoring alias %s for coordinate operation %s %s' % (alt_name, code, new_name))
             continue
