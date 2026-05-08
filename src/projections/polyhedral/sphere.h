@@ -17,6 +17,7 @@
 #include "proj_internal.h"
 
 #include <cmath>
+#include <limits>
 
 namespace polyhedral {
 
@@ -24,6 +25,8 @@ constexpr int MAX_TRIANGLES = 120;
 
 struct pj_polyhedral_data {
     int n_triangles;
+    int face_vertex_count; // NFV: 3 for triangular faces, 5 for pentagonal
+    int num_faces;
 
     SphericalTriangle sph_tris[MAX_TRIANGLES];
     FaceTriangle face_tris[MAX_TRIANGLES];
@@ -31,8 +34,9 @@ struct pj_polyhedral_data {
     double orient[3][3];
     double orient_inv[3][3];
 
-    // Translation so that (P->phi0, P->lam0) lands at (0, 0). Zero unless
-    // +lat_0 / +lon_0 was supplied; +x_0/+y_0 stack on top via PROJ core.
+    // Translation in projected space so the geographic anchor named by
+    // +lat_0 / +lon_0 (or its dynamic default) lands at (0, 0).
+    // +x_0/+y_0 stack on top via PROJ core.
     double x_offset;
     double y_offset;
 
@@ -41,12 +45,20 @@ struct pj_polyhedral_data {
     double qp;
 };
 
-// Orientation defaults used when the user does not supply +orient_lat /
-// +orient_lon / +azi.
+// Projected origin location on chosen reference face when the user does not
+// supply +lat_0 / +lon_0.
+enum class DefaultOrigin {
+    FaceCentroid,   // arithmetic mean of the face's outer vertices in the net
+    FaceBboxCenter, // axis-aligned bbox center of the face's outer vertices
+};
+
+// Defaults supplied per-projection; user params override these where present.
 struct PolyhedralDefaults {
     double orient_lat_deg;
     double orient_lon_deg;
     double azi_deg;
+    int default_face_index = 0;
+    DefaultOrigin default_origin = DefaultOrigin::FaceCentroid;
 };
 
 // Build triangle data from a polyhedron + matching net by applying the Conway
@@ -62,6 +74,8 @@ inline void load_meshes(pj_polyhedral_data *Q,
     conway_meta<ConwayMode::Plane>(net.vertices, net.faces, face);
 
     Q->n_triangles = N;
+    Q->face_vertex_count = NFV;
+    Q->num_faces = NF;
     for (int i = 0; i < N; i++) {
         Q->sph_tris[i] = {sph[i][0], sph[i][1], sph[i][2]};
         Q->face_tris[i] = {
@@ -70,6 +84,35 @@ inline void load_meshes(pj_polyhedral_data *Q,
             {face[i][2].x, face[i][2].y},
         };
     }
+}
+
+// Reference point on face_idx in the unfolded planar net (centroid or bbox
+// center)
+inline Face2D face_reference_point(const pj_polyhedral_data *Q, int face_idx,
+                                   DefaultOrigin kind) {
+    const int nfv = Q->face_vertex_count;
+    const int fan_size = 2 * nfv;
+    double sum_x = 0.0, sum_y = 0.0;
+    double min_x = std::numeric_limits<double>::infinity();
+    double max_x = -std::numeric_limits<double>::infinity();
+    double min_y = std::numeric_limits<double>::infinity();
+    double max_y = -std::numeric_limits<double>::infinity();
+    for (int k = 0; k < nfv; k++) {
+        const Face2D &v = Q->face_tris[fan_size * face_idx + 2 * k].c;
+        sum_x += v.x;
+        sum_y += v.y;
+        if (v.x < min_x)
+            min_x = v.x;
+        if (v.x > max_x)
+            max_x = v.x;
+        if (v.y < min_y)
+            min_y = v.y;
+        if (v.y > max_y)
+            max_y = v.y;
+    }
+    if (kind == DefaultOrigin::FaceBboxCenter)
+        return {0.5 * (min_x + max_x), 0.5 * (min_y + max_y)};
+    return {sum_x / nfv, sum_y / nfv};
 }
 
 // Build rotation matrix that takes the geographic point (lat, lon) to the
@@ -155,11 +198,9 @@ inline void cart_to_lonlat(const pj_polyhedral_data *Q, const PJ *P,
     lam = adjlon(std::atan2(gy, gx));
 }
 
-// Read +orient_lat / +orient_lon / +azi (falling back to the supplied
-// defaults) and build the orientation matrix. If +lat_0 / +lon_0 is set,
-// project that point once and cache the result as a projected-space offset
-// so (lat_0, lon_0) maps to (0, 0). Authalic-latitude state must already be
-// initialized. Returns false if (lat_0, lon_0) lies outside the polyhedron.
+// Read +orient_lat / +orient_lon / +azi / +lat_0 / +lon_0 (falling back to
+// derived defaults) and build the orientation matrix plus the projected-space
+// offset so the chosen geographic anchor lands at (0, 0).
 inline bool apply_polyhedral_params(pj_polyhedral_data *Q, PJ *P,
                                     const PolyhedralDefaults &d) {
     double orient_lat = d.orient_lat_deg;
@@ -174,23 +215,43 @@ inline bool apply_polyhedral_params(pj_polyhedral_data *Q, PJ *P,
 
     set_orient_from_angles(Q, orient_lat, orient_lon, azi);
 
+    // Bypass PROJ core's automatic +lon_0 subtraction. +lat_0/+lon_0 names a
+    // geographic point that must be applied through orient, not a plain
+    // longitude shift on the input.
+    P->lam0 = 0.0;
+    P->phi0 = 0.0;
     Q->x_offset = 0.0;
     Q->y_offset = 0.0;
-    if (P->phi0 == 0.0 && P->lam0 == 0.0)
-        return true;
 
-    // PROJ core subtracts P->lam0 before calling polyhedral_fwd, so the
-    // offset is the projection of (phi0, lam=0).
-    Vec3 v = lonlat_to_cart(Q, P, 0.0, P->phi0);
-    int tri_idx = find_triangle(Q, v);
-    if (tri_idx < 0) {
-        proj_log_error(P, _("+lat_0 / +lon_0 lies outside the polyhedron's "
-                            "coverage; cannot be used as projected origin"));
-        return false;
+    const bool user_lat_0 = pj_param(P->ctx, P->params, "tlat_0").i != 0;
+    const bool user_lon_0 = pj_param(P->ctx, P->params, "tlon_0").i != 0;
+
+    if (user_lat_0 || user_lon_0) {
+        // User-supplied geographic anchor: project it through the full orient.
+        const double lat_0 =
+            user_lat_0 ? pj_param(P->ctx, P->params, "rlat_0").f : 0.0;
+        const double lon_0 =
+            user_lon_0 ? pj_param(P->ctx, P->params, "rlon_0").f : 0.0;
+        Vec3 v = lonlat_to_cart(Q, P, lon_0, lat_0);
+        int tri_idx = find_triangle(Q, v);
+        if (tri_idx < 0) {
+            proj_log_error(P,
+                           _("+lat_0 / +lon_0 lies outside the polyhedron's "
+                             "coverage; cannot be used as projected origin"));
+            return false;
+        }
+        Face2D r = snyder_fwd(v, Q->sph_tris[tri_idx], Q->face_tris[tri_idx]);
+        Q->x_offset = r.x;
+        Q->y_offset = r.y;
+        return true;
     }
-    Face2D r = snyder_fwd(v, Q->sph_tris[tri_idx], Q->face_tris[tri_idx]);
-    Q->x_offset = r.x;
-    Q->y_offset = r.y;
+
+    // Default anchor: a planar reference point on the chosen face. This is
+    // already in projected coords (the unfolded net), so use it directly.
+    const Face2D ref =
+        face_reference_point(Q, d.default_face_index, d.default_origin);
+    Q->x_offset = ref.x;
+    Q->y_offset = ref.y;
     return true;
 }
 
