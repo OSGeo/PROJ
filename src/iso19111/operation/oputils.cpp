@@ -309,6 +309,11 @@ util::PropertyMap createPropertiesForInverse(const CoordinateOperation *op,
                    forwardName != buildOpName(opType, sourceCRS, targetCRS)) {
             if (forwardName.find(" + ") != std::string::npos) {
                 name = INVERSE_OF + '\'' + forwardName + '\'';
+            } else if (starts_with(forwardName, INVERSE_OF)) {
+                name = forwardName.substr(INVERSE_OF.size());
+                if (!name.empty() && name.front() == '\'' &&
+                    name.back() == '\'')
+                    name = name.substr(1, name.size() - 2);
             } else {
                 name = INVERSE_OF + forwardName;
             }
