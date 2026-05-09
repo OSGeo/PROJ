@@ -4082,11 +4082,11 @@ CoordinateOperationFactory::Private::createOperationsEnsembleCRSToOtherGeodCRS(
     const auto getNatureOf = [](const crs::GeodeticCRS &crs) -> std::string {
         if (dynamic_cast<const crs::GeographicCRS *>(&crs) != nullptr) {
             if (crs.coordinateSystem()->axisList().size() == 2)
-                return "geographic2D";
+                return CRS_SUBTYPE_GEOG_2D;
             else
-                return "geographic3D";
+                return CRS_SUBTYPE_GEOG_3D;
         } else {
-            return "geodetic";
+            return CRS_SUBTYPE_GEOCENTRIC;
         }
     };
 
@@ -4094,14 +4094,19 @@ CoordinateOperationFactory::Private::createOperationsEnsembleCRSToOtherGeodCRS(
     const auto srcEnsemble = geodSrc->datumEnsemble();
     assert(srcEnsemble);
     const auto &dstDomains = geodDst->domains();
+    const auto &dstExtent = dstDomains[0]->domainOfValidity();
+    if (!dstExtent) {
+        return {};
+    }
+
     const auto &areaOfInterest = context.context->getAreaOfInterest();
     const bool is3D = geodSrc->coordinateSystem()->axisList().size() == 3 &&
                       geodDst->coordinateSystem()->axisList().size() == 3;
-    const char *intermediateType = is3D ? "geographic 3D" : "geographic 2D";
-
     std::vector<CoordinateOperationNNPtr> newOps;
-    const auto &dstExtent = dstDomains[0]->domainOfValidity();
-    if (dstExtent) {
+    for (int iter = 0; iter < (is3D ? 2 : 1); ++iter) {
+        const char *intermediateType =
+            is3D ? (iter == 0 ? CRS_SUBTYPE_GEOG_3D : CRS_SUBTYPE_GEOCENTRIC)
+                 : CRS_SUBTYPE_GEOG_2D;
         for (const auto &srcDatumCandidate : srcEnsemble->datums()) {
             const auto &srcDatumDomains = srcDatumCandidate->domains();
             if (srcDatumDomains.empty())
@@ -4125,8 +4130,29 @@ CoordinateOperationFactory::Private::createOperationsEnsembleCRSToOtherGeodCRS(
                             srcDatumCandidate.as_nullable())),
                     std::string(), intermediateType);
             for (const auto &srcDatumGeogCRS : srcDatumGeogCRSList) {
-                auto ops = createOperations(srcDatumGeogCRS, sourceEpoch,
-                                            targetCRS, targetEpoch, context);
+
+                std::vector<CoordinateOperationNNPtr> ops;
+                std::vector<CoordinateOperationNNPtr> opsLastConversion;
+                if (getNatureOf(*(srcDatumGeogCRS.get())) ==
+                        CRS_SUBTYPE_GEOCENTRIC &&
+                    getNatureOf(*geodDst) == CRS_SUBTYPE_GEOG_3D) {
+                    auto tmpList = authFactory->createGeodeticCRSFromDatum(
+                        NN_CHECK_ASSERT(geodDst->datum()), std::string(),
+                        CRS_SUBTYPE_GEOCENTRIC);
+                    if (!tmpList.empty()) {
+                        ops = createOperations(srcDatumGeogCRS, sourceEpoch,
+                                               tmpList.front(), targetEpoch,
+                                               context);
+                        opsLastConversion =
+                            createOperations(tmpList.front(), targetEpoch,
+                                             targetCRS, targetEpoch, context);
+                    }
+                }
+                if (ops.empty()) {
+                    opsLastConversion.clear();
+                    ops = createOperations(srcDatumGeogCRS, sourceEpoch,
+                                           targetCRS, targetEpoch, context);
+                }
                 if (getNatureOf(*(srcDatumGeogCRS.get())) ==
                         getNatureOf(*geodSrc) &&
                     srcDatumGeogCRS->coordinateSystem()->_isEquivalentTo(
@@ -4142,6 +4168,12 @@ CoordinateOperationFactory::Private::createOperationsEnsembleCRSToOtherGeodCRS(
                                     util::IComparable::Criterion::EQUIVALENT)) {
                                 newOp->setInterpolationCRS(sourceCRS);
                             }
+                            if (!opsLastConversion.empty()) {
+                                newOp = ConcatenatedOperation::
+                                    createComputeMetadata(
+                                        {newOp, opsLastConversion.front()},
+                                        context.disallowEmptyIntersection());
+                            }
                             setCRSs(newOp.get(), sourceCRS, targetCRS);
                             newOps.push_back(newOp);
                         }
@@ -4150,20 +4182,55 @@ CoordinateOperationFactory::Private::createOperationsEnsembleCRSToOtherGeodCRS(
                     // Expected to get only one as this is a null
                     // transformation between an ensemble and one
                     // of its member
-                    const auto opsFirst =
-                        createOperations(sourceCRS, sourceEpoch,
-                                         srcDatumGeogCRS, sourceEpoch, context);
+                    std::vector<CoordinateOperationNNPtr> opsFirstConversion;
+                    std::vector<CoordinateOperationNNPtr> opsFirst;
+                    if (getNatureOf(*(srcDatumGeogCRS.get())) ==
+                            CRS_SUBTYPE_GEOCENTRIC &&
+                        getNatureOf(*geodSrc) == CRS_SUBTYPE_GEOG_3D) {
+                        auto tmpList = authFactory->createGeodeticCRSFromDatum(
+                            geodSrc->datumNonNull(
+                                authFactory->databaseContext()),
+                            std::string(), CRS_SUBTYPE_GEOCENTRIC);
+                        if (!tmpList.empty()) {
+                            opsFirstConversion = createOperations(
+                                sourceCRS, sourceEpoch, tmpList.front(),
+                                sourceEpoch, context);
+                            context
+                                .inCreateOperationsWithDatumPivotAntiRecursion =
+                                false;
+                            opsFirst = createOperations(
+                                tmpList.front(), sourceEpoch, srcDatumGeogCRS,
+                                sourceEpoch, context);
+                            context
+                                .inCreateOperationsWithDatumPivotAntiRecursion =
+                                true;
+                        }
+                    }
+                    if (opsFirst.empty()) {
+                        opsFirstConversion.clear();
+                        opsFirst = createOperations(sourceCRS, sourceEpoch,
+                                                    srcDatumGeogCRS,
+                                                    sourceEpoch, context);
+                    }
                     if (!opsFirst.empty() &&
                         !opsFirst.front()->hasBallparkTransformation()) {
                         const auto &opFirst = opsFirst.front();
                         for (const auto &op : ops) {
                             if (!op->hasBallparkTransformation()) {
-                                newOps.push_back(
-                                    ConcatenatedOperation::
-                                        createComputeMetadata(
-                                            {opFirst, op},
-                                            context
-                                                .disallowEmptyIntersection()));
+                                std::vector<CoordinateOperationNNPtr> tmp;
+                                if (!opsFirstConversion.empty()) {
+                                    tmp.push_back(opsFirstConversion.front());
+                                }
+                                tmp.push_back(opFirst);
+                                tmp.push_back(op);
+                                if (!opsLastConversion.empty()) {
+                                    tmp.push_back(opsLastConversion.front());
+                                }
+                                auto newOp = ConcatenatedOperation::
+                                    createComputeMetadata(
+                                        tmp,
+                                        context.disallowEmptyIntersection());
+                                newOps.push_back(newOp);
                             }
                         }
                     }

@@ -1718,7 +1718,8 @@ tests:
 - comment: Quick check of NKG transformations
   args: -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpark
   out: |
-    Candidate operations found: 1
+    Candidate operations found: 2
+    EPSG:10894, ITRF2014 to ETRS89-DNK (1), 0.006 m, Denmark - onshore and offshore., time-dependent operation
     NKG:ITRF2014_TO_DK, ITRF2014 to ETRS89(DK), 0.01 m, Denmark - onshore and offshore., time-dependent operation
 - args: --dump-db-structure
   head: 5
