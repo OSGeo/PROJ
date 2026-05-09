@@ -865,6 +865,7 @@ struct PrecomputedOpCharacteristics {
     bool isApprox_ = false;
     bool hasBallparkVertical_ = false;
     bool isNullTransformation_ = false;
+    bool hasXYZGridshift_ = false;
 
     // 3 below tests are for ETRS89-XXX to ETRS89-YYY following
     // recommendations of IOGP 373-07-7 to use ETRF2000 hub
@@ -877,7 +878,7 @@ struct PrecomputedOpCharacteristics {
                                  double area, bool isPROJExportable,
                                  bool hasGrids, bool gridsAvailable,
                                  bool gridsKnown, size_t stepCount,
-                                 size_t projStepCount)
+                                 size_t projStepCount, bool hasXYZGridshift)
         : area_(area), accuracy_(getAccuracy(op)),
           isPROJExportable_(isPROJExportable), hasGrids_(hasGrids),
           gridsAvailable_(gridsAvailable), gridsKnown_(gridsKnown),
@@ -887,6 +888,7 @@ struct PrecomputedOpCharacteristics {
               op->nameStr().find(BALLPARK_VERTICAL_TRANSFORMATION) !=
               std::string::npos),
           isNullTransformation_(isNullTransformation(op->nameStr())),
+          hasXYZGridshift_(hasXYZGridshift),
           is_ETRS89_XXX_to_ETRS89_YYY_(
               starts_with(op->sourceCRS()->nameStr().c_str(), "ETRS89-") &&
               starts_with(op->targetCRS()->nameStr().c_str(), "ETRS89-")),
@@ -1020,6 +1022,13 @@ struct SortFunction {
             if (iterA->second.hasGrids_ && !iterB->second.hasGrids_) {
                 return false;
             }
+        }
+
+        if (iterA->second.hasXYZGridshift_ && !iterB->second.hasXYZGridshift_) {
+            return true;
+        }
+        if (!iterA->second.hasXYZGridshift_ && iterB->second.hasXYZGridshift_) {
+            return false;
         }
 
         // Follow recommendations of IOGP 373-07-7 to use ETRF2000 hub if
@@ -1485,6 +1494,7 @@ struct FilterResults {
             bool isPROJExportable = false;
             auto formatter = io::PROJStringFormatter::create();
             size_t projStepCount = 0;
+            bool hasXYZGridshift = false;
             try {
                 const auto str = op->exportToPROJString(formatter.get());
                 // Grids might be missing, but at least this is something
@@ -1497,6 +1507,8 @@ struct FilterResults {
                     auto formatter2 = io::PROJStringFormatter::create();
                     formatter2->ingestPROJString(str);
                     projStepCount = formatter2->getStepCount();
+                } else {
+                    hasXYZGridshift = true;
                 }
             } catch (const std::exception &) {
             }
@@ -1519,11 +1531,12 @@ struct FilterResults {
                       << " ";
             std::cerr << "isNull=" << isNullTransformation(op->nameStr())
                       << " ";
+            std::cerr << "hasXYZGridshift=" << hasXYZGridshift << " ";
             std::cerr << std::endl;
 #endif
             map[op.get()] = PrecomputedOpCharacteristics(
                 op, area, isPROJExportable, hasGrids, gridsAvailable,
-                gridsKnown, stepCount, projStepCount);
+                gridsKnown, stepCount, projStepCount, hasXYZGridshift);
         }
 
         // Sort !
@@ -4313,8 +4326,6 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
         // We don't want to "improve" the result set for those transformations
         // where heuristics have been painfully tuned over the years to give
         // expected results...
-        !(sourceCRS->nameStr() == "NTF" && targetCRS->nameStr() == "ETRS89") &&
-        !(sourceCRS->nameStr() == "ETRS89" && targetCRS->nameStr() == "NTF") &&
         !((sourceCRS->nameStr() == "GDA94" ||
            sourceCRS->nameStr() == "GDA2020") &&
           targetCRS->nameStr() == "WGS 84") &&
@@ -4409,6 +4420,15 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
                             for (const auto &op : ops) {
                                 if (!op->hasBallparkTransformation()) {
                                     auto newOp = op->shallowClone();
+                                    auto interpolationCRS =
+                                        newOp->interpolationCRS();
+                                    if (interpolationCRS &&
+                                        interpolationCRS->_isEquivalentTo(
+                                            srcDatumGeogCRS.get(),
+                                            util::IComparable::Criterion::
+                                                EQUIVALENT)) {
+                                        newOp->setInterpolationCRS(sourceCRS);
+                                    }
                                     setCRSs(newOp.get(), sourceCRS, targetCRS);
                                     res.push_back(newOp);
                                 }
@@ -4479,6 +4499,15 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
                             for (const auto &op : ops) {
                                 if (!op->hasBallparkTransformation()) {
                                     auto newOp = op->shallowClone();
+                                    auto interpolationCRS =
+                                        newOp->interpolationCRS();
+                                    if (interpolationCRS &&
+                                        interpolationCRS->_isEquivalentTo(
+                                            dstDatumGeogCRS.get(),
+                                            util::IComparable::Criterion::
+                                                EQUIVALENT)) {
+                                        newOp->setInterpolationCRS(targetCRS);
+                                    }
                                     setCRSs(newOp.get(), sourceCRS, targetCRS);
                                     res.push_back(newOp);
                                 }
@@ -4508,6 +4537,8 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
                 }
             }
         }
+
+        doFilterAndCheckPerfectOp = !res.empty();
     }
 
     if (doFilterAndCheckPerfectOp) {

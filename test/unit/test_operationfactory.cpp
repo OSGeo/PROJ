@@ -284,25 +284,52 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
             authFactory->createCoordinateReferenceSystem("4275"), // NTF
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             ctxt);
-        ASSERT_EQ(list.size(), 2U);
-        EXPECT_EQ(
-            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-            "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 "
-            "+step +proj=cart +ellps=clrk80ign +step +proj=helmert +x=-168 "
-            "+y=-60 +z=320 +step +inv +proj=cart +ellps=GRS80 +step +proj=pop "
-            "+v_3 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step "
-            "+proj=axisswap +order=2,1");
+        ASSERT_EQ(list.size(), 3U);
+
+        EXPECT_EQ(list[0]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=push +v_3 "
+                  "+step +proj=cart +ellps=clrk80ign "
+                  "+step +proj=helmert +x=-168 +y=-60 +z=320 "
+                  "+step +inv +proj=cart +ellps=GRS80 "
+                  "+step +proj=pop +v_3 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
+
         EXPECT_EQ(list[1]->exportToPROJString(
                       PROJStringFormatter::create(
                           PROJStringFormatter::Convention::PROJ_5,
                           authFactory->databaseContext())
                           .get()),
-                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step "
-                  "+proj=hgridshift +grids=fr_ign_ntf_r93.tif +step "
-                  "+proj=unitconvert "
-                  "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=push +v_3 "
+                  "+step +proj=cart +ellps=clrk80ign "
+                  "+step +proj=xyzgridshift +grids=fr_ign_gr3df97a.tif "
+                  "+grid_ref=output_crs +ellps=GRS80 "
+                  "+step +inv +proj=cart +ellps=GRS80 "
+                  "+step +proj=pop +v_3 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
+
+        EXPECT_EQ(list[2]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=hgridshift +grids=fr_ign_ntf_r93.tif "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
     }
     {
         auto ctxt =
@@ -314,14 +341,51 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
             authFactory->createCoordinateReferenceSystem("4275"), // NTF
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             ctxt);
-        ASSERT_EQ(list.size(), 2U);
-        EXPECT_EQ(
-            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-            "+proj=unitconvert +xy_in=deg +xy_out=rad +step "
-            "+proj=hgridshift +grids=fr_ign_ntf_r93.tif +step "
-            "+proj=unitconvert "
-            "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+        ASSERT_EQ(list.size(), 3U);
+        EXPECT_EQ(list[0]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=push +v_3 "
+                  "+step +proj=cart +ellps=clrk80ign "
+                  "+step +proj=xyzgridshift +grids=fr_ign_gr3df97a.tif "
+                  "+grid_ref=output_crs +ellps=GRS80 "
+                  "+step +inv +proj=cart +ellps=GRS80 "
+                  "+step +proj=pop +v_3 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
+
+        EXPECT_EQ(list[1]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=hgridshift +grids=fr_ign_ntf_r93.tif "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
+
+        EXPECT_EQ(list[2]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=push +v_3 "
+                  "+step +proj=cart +ellps=clrk80ign "
+                  "+step +proj=helmert +x=-168 +y=-60 +z=320 "
+                  "+step +inv +proj=cart +ellps=GRS80 "
+                  "+step +proj=pop +v_3 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
     }
     {
         auto ctxt =
@@ -333,14 +397,51 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             authFactory->createCoordinateReferenceSystem("4275"), // NTF
             ctxt);
-        ASSERT_EQ(list.size(), 2U);
-        EXPECT_EQ(
-            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-            "+proj=unitconvert +xy_in=deg +xy_out=rad +step +inv "
-            "+proj=hgridshift +grids=fr_ign_ntf_r93.tif +step "
-            "+proj=unitconvert "
-            "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+        ASSERT_EQ(list.size(), 3U);
+        EXPECT_EQ(list[0]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=push +v_3 "
+                  "+step +proj=cart +ellps=GRS80 "
+                  "+step +inv +proj=xyzgridshift +grids=fr_ign_gr3df97a.tif "
+                  "+grid_ref=output_crs +ellps=GRS80 "
+                  "+step +inv +proj=cart +ellps=clrk80ign "
+                  "+step +proj=pop +v_3 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
+
+        EXPECT_EQ(list[1]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +inv +proj=hgridshift +grids=fr_ign_ntf_r93.tif "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
+
+        EXPECT_EQ(list[2]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=push +v_3 "
+                  "+step +proj=cart +ellps=GRS80 "
+                  "+step +proj=helmert +x=168 +y=60 +z=-320 "
+                  "+step +inv +proj=cart +ellps=clrk80ign "
+                  "+step +proj=pop +v_3 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
     }
 }
 
