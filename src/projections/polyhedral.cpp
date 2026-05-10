@@ -156,12 +156,24 @@ PJ *PJ_PROJECTION(dsea) {
         }
     }
 
-    polyhedral::load_meshes(Q, polyhedra::dodecahedron, *parents);
     // Defaults rotate the polyhedron so F0's centroid sits at the geographic
     // north pole. orient_lat = atan((1+2A)/2) places V0 on the F0 axis.
     using polyhedra::dodecahedron_constants::A;
     const double default_orient_lat =
         std::atan((1 + 2 * A) / 2.0) * 180.0 / M_PI;
+
+    // The unfold's "north-up" rotation needs to use geographic north, not
+    // polyhedron +z (V0) — under these defaults they differ by ~37°. The
+    // third column of the orient matrix is geographic +z expressed in
+    // polyhedron coordinates: (-cos(azi)cos(lat), -sin(azi)cos(lat), sin(lat)).
+    const double lat_rad = default_orient_lat * DEG_TO_RAD;
+    const double azi_rad = default_azi * DEG_TO_RAD;
+    const polyhedral::Vec3 up_dir = {
+        -std::cos(azi_rad) * std::cos(lat_rad),
+        -std::sin(azi_rad) * std::cos(lat_rad),
+        std::sin(lat_rad)};
+    polyhedral::load_meshes(Q, polyhedra::dodecahedron, *parents, up_dir);
+
     const polyhedral::PolyhedralDefaults d = {default_orient_lat,
                                               default_orient_lon, default_azi};
     return polyhedral_setup(P, d);

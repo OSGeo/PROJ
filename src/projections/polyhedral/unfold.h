@@ -87,7 +87,8 @@ inline constexpr Vec3 z{0.0, 0.0, 1.0};
 // centred on the rotation axis the slot[0] vertex is placed up instead.
 template <int NV_p, int NF, int NFV>
 inline Mesh<unfolded_vertex_count<NF, NFV>(), NF, NFV>
-unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
+unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
+           const Vec3 &up_dir = z) {
     constexpr int NV_n = unfolded_vertex_count<NF, NFV>();
     Mesh<NV_n, NF, NFV> net{};
     int n_verts = 0;
@@ -97,9 +98,11 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
     while (parents[root] != -1)
         root++;
 
-    // Place the root face "north-up": find the in-plane direction that
-    // matches geographic north (+z projected onto the face), then orient so
-    // that direction lands on +y. Polar fallback (face on the rotation
+    // Place the root face "up-direction-up": project up_dir onto the root
+    // face's plane, then orient so that direction lands on +y. up_dir is
+    // typically geographic north expressed in polyhedron coordinates (the
+    // third column of the orient matrix), so the root face comes out with
+    // true geographic north up. Polar fallback (face on the rotation
     // axis): aim from the centroid out toward slot[0] instead.
 
     // Destination in 2d net (origin and unit step in +y)
@@ -110,9 +113,9 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
         face_centroid(polyhedron.vertices, polyhedron.faces[root]);
     const Vec3 normal = vec3_normalize(origin_poly);
 
-    // Vector in north direction constrained in the face plane
-    const Vec3 step_poly =
-        vec3_subtract(z, vec3_scale(normal, vec3_dot(z, normal)));
+    // Vector in up_dir direction constrained to the face plane
+    const Vec3 step_poly = vec3_subtract(
+        up_dir, vec3_scale(normal, vec3_dot(up_dir, normal)));
     Vec3 offset_poly;
     if (vec3_length(step_poly) < 1e-12)
         // Fallback to 1st vertex at pole

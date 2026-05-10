@@ -70,11 +70,16 @@ struct PolyhedralDefaults {
 };
 
 // Build triangle data from a polyhedron and the unfold-tree `parents` array.
+// `up_dir` is the direction (in polyhedron coordinates) that should appear
+// "up" on the root face of the unfolded net — usually the geographic +z
+// direction expressed in polyhedron coords (the third column of the orient
+// matrix); defaults to polyhedron +z.
 template <int NV_p, int NF, int NFV>
 inline void load_meshes(pj_polyhedral_data *Q,
                         const Mesh<NV_p, NF, NFV> &polyhedron,
-                        const int (&parents)[NF]) {
-    const auto net = unfold_net(polyhedron, parents);
+                        const int (&parents)[NF],
+                        const Vec3 &up_dir = z) {
+    const auto net = unfold_net(polyhedron, parents, up_dir);
     constexpr int N = 2 * NFV * NF;
     Vec3 sph[N][3];
     Vec3 face[N][3];
