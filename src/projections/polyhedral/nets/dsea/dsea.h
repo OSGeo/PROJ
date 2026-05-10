@@ -32,12 +32,24 @@ namespace dsea {
 // F0 (north pole) off F1 (Europe), F11 (south pole) off F2 (Africa).
 constexpr int dsea[12] = {1, 2, -1, 2, 3, 4, 5, 8, 9, 10, 1, 2};
 
-// The other layouts are the originals re-rooted at F2 (parent pointers
-// reversed along the F2 → F0 path in the original tree); their visual
-// "shape" is otherwise unchanged.
-constexpr int a5[12] = {1, 2, -1, 4, 2, 3, 8, 5, 7, 10, 11, 6};
-constexpr int crescent[12] = {3, 3, -1, 4, 2, 3, 4, 5, 6, 1, 2, 4};
-constexpr int flower[12] = {9, 0, -1, 0, 11, 0, 11, 0, 11, 10, 11, 2};
+// A5 net (re-rooted at F3 — the Middle East face — to match the A5
+// reference codebase's coordinate origin). The visual shape is the same as
+// the published A5 layout; only the parent pointers along the F3 → F0 path
+// of the original tree are reversed.
+constexpr int a5[12] = {1, 2, 4, 5, 3, -1, 8, 5, 7, 10, 11, 6};
+
+// Crescent: central spine F0 → F1 → F2 → F11 (north pole → UK/Europe →
+// Africa → south pole). Two symmetric "crescent" arcs extend out from F1
+// and F2: one through the upper row (F1 → F3 → F5 → F7 → F9) and one
+// through the lower row (F2 → F4 → F6 → F8 → F10).
+constexpr int crescent[12] = {1, -1, 1, 1, 2, 3, 4, 9, 10, 1, 2, 2};
+
+// Flower: F2 (Africa) at the centre. Both polar caps hang via Africa —
+// F11 (south pole) directly off F2, F0 (north pole) via F1 (Europe). F0's
+// four other petals (F3, F5, F7, F9) hang off F0; F11's four other petals
+// (F4, F6, F8, F10) hang off F11. This avoids routing the polar caps
+// through the Americas (as the original flower did).
+constexpr int flower[12] = {1, -1, 1, 0, 11, 0, 11, 0, 11, 0, 11, 2};
 
 } // namespace dsea
 } // namespace nets
