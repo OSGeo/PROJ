@@ -2,8 +2,9 @@
  *
  * Project:  PROJ
  * Purpose:  Net layout for the TSEA projection — the regular tetrahedron
- *           unfolded into a "star" net (root face surrounded by its three
- *           neighbours).
+ *           unfolded into a "star" net with the south-cap face (F3) at the
+ *           centre and its three V0-touching neighbours (F0, F1, F2) as
+ *           petals.
  * Author:   Felix Palmer
  *
  ****************************************************************************/
@@ -14,7 +15,7 @@
 namespace nets {
 namespace tsea {
 
-constexpr int tsea[4] = {-1, 0, 0, 0};
+constexpr int tsea[4] = {3, 3, 3, -1};
 
 } // namespace tsea
 } // namespace nets

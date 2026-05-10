@@ -4,8 +4,9 @@
  * Purpose:  Regular tetrahedron inscribed in the unit sphere, oriented with
  *           one vertex at the north pole. The remaining three vertices sit
  *           at latitude -arcsin(1/3) ≈ -19.47°, separated by 120° in
- *           longitude (0°, +120°, -120°). Face 0 is the bottom triangle
- *           opposite the apex — the natural root for a "star" net.
+ *           longitude (0°, +120°, -120°). Faces are listed top-to-bottom:
+ *           F0..F2 are the three faces sharing V0 (CCW around V0, with V0
+ *           in slot 0), and F3 is the south-cap face opposite V0.
  * Author:   Felix Palmer
  *
  ****************************************************************************/
@@ -30,12 +31,13 @@ constexpr polyhedral::Mesh<4, 4, 3> mesh = {
         {-0.5 * A, B, -1.0 / 3.0},
         {-0.5 * A, -B, -1.0 / 3.0},
     },
-    // Faces
+    // Faces (CCW from outside). F0..F2 share V0, in CCW order around it;
+    // F3 is the south-cap face opposite V0.
     {
-        {3, 2, 1},
         {0, 1, 2},
-        {1, 0, 3},
-        {2, 3, 0},
+        {0, 2, 3},
+        {0, 3, 1},
+        {3, 2, 1},
     },
 };
 
