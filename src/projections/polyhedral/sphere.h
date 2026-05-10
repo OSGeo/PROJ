@@ -35,7 +35,8 @@ struct pj_polyhedral_data {
     double orient[3][3];
     double orient_inv[3][3];
 
-    int root_face_index; // unfold-tree root; default reference face for lat_0/lon_0
+    int root_face_index; // unfold-tree root; default reference face for
+                         // lat_0/lon_0
 
     // Translation in projected space so the geographic anchor named by
     // +lat_0 / +lon_0 (or its dynamic default) lands at (0, 0).

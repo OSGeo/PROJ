@@ -41,8 +41,7 @@ inline Mat4 mat4_rigid_transform(const Vec3 &normal, const Vec3 &poly_a,
                                  const Vec3 &net_b) {
     const Vec3 u = vec3_normalize(vec3_subtract(poly_b, poly_a));
     const Vec3 v = vec3_cross(normal, u);
-    const Vec3 edge_direction =
-        vec3_normalize(vec3_subtract(net_b, net_a));
+    const Vec3 edge_direction = vec3_normalize(vec3_subtract(net_b, net_a));
     const Vec3 r0 = vec3_subtract(vec3_scale(u, edge_direction.x),
                                   vec3_scale(v, edge_direction.y));
     const Vec3 r1 = vec3_add(vec3_scale(u, edge_direction.y),
@@ -105,12 +104,11 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
     const Vec3 z{0.0, 0.0, 1.0};
     Vec3 up_3d = vec3_subtract(z, vec3_scale(normal, vec3_dot(z, normal)));
     if (vec3_length(up_3d) < 1e-12)
-        up_3d = vec3_subtract(
-            polyhedron.vertices[polyhedron.faces[root][0]], c_3d);
+        up_3d =
+            vec3_subtract(polyhedron.vertices[polyhedron.faces[root][0]], c_3d);
 
-    const Mat4 root_face_to_plane =
-        mat4_rigid_transform(normal, c_3d, {0.0, 0.0, 0.0},
-                             vec3_add(c_3d, up_3d), {0.0, 1.0, 0.0});
+    const Mat4 root_face_to_plane = mat4_rigid_transform(
+        normal, c_3d, {0.0, 0.0, 0.0}, vec3_add(c_3d, up_3d), {0.0, 1.0, 0.0});
     for (int k = 0; k < NFV; k++) {
         Vec3 face_vertex = polyhedron.vertices[polyhedron.faces[root][k]];
         net.vertices[n_verts] =
@@ -150,9 +148,9 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
         const Vec3 normal_c =
             face_normal(polyhedron.vertices, polyhedron.faces[c]);
         const Mat4 face_to_plane = mat4_rigid_transform(
-            normal_c,
-            polyhedron.vertices[polyhedron.faces[c][ia_c]], net.vertices[na],
-            polyhedron.vertices[polyhedron.faces[c][ib_c]], net.vertices[nb]);
+            normal_c, polyhedron.vertices[polyhedron.faces[c][ia_c]],
+            net.vertices[na], polyhedron.vertices[polyhedron.faces[c][ib_c]],
+            net.vertices[nb]);
         for (int k = 0; k < NFV; k++) {
             if (k == ia_c) {
                 net.faces[c][k] = na;
