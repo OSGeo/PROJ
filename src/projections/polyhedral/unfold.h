@@ -25,13 +25,9 @@ template <int NF, int NFV> constexpr int unfolded_vertex_count() {
     return NFV + (NFV - 2) * (NF - 1);
 }
 
-template <int NV, int NFV>
-inline Vec3 face_normal(const Vec3 (&vertices)[NV], const int (&face)[NFV]) {
-    const Vec3 v0 = vertices[face[0]];
-    return vec3_normalize(vec3_cross(vec3_subtract(vertices[face[1]], v0),
-                                     vec3_subtract(vertices[face[2]], v0)));
-}
-
+// For a regular face inscribed on the unit sphere centred at the origin, the
+// face's outward unit normal is just the centroid direction, so we don't
+// need a separate face_normal helper.
 template <int NV, int NFV>
 inline Vec3 face_centroid(const Vec3 (&vertices)[NV], const int (&face)[NFV]) {
     Vec3 c{0.0, 0.0, 0.0};
@@ -70,6 +66,9 @@ inline double polygon_area_2d(const Vec3 *verts, const int (&face)[NFV]) {
     return std::fabs(a) * 0.5;
 }
 
+// Unit vector in Z
+inline constexpr Vec3 z{0.0, 0.0, 1.0};
+
 // Unfold a polyhedron Mesh into a planar net Mesh.
 //
 // `parents[i]` is the index of face i's parent in the unfolding tree, or -1
@@ -102,19 +101,27 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
     // matches geographic north (+z projected onto the face), then orient so
     // that direction lands on +y. Polar fallback (face on the rotation
     // axis): aim from the centroid out toward slot[0] instead.
-    const Vec3 normal =
-        face_normal(polyhedron.vertices, polyhedron.faces[root]);
-    const Vec3 c_3d =
-        face_centroid(polyhedron.vertices, polyhedron.faces[root]);
 
-    const Vec3 z{0.0, 0.0, 1.0};
-    Vec3 up_3d = vec3_subtract(z, vec3_scale(normal, vec3_dot(z, normal)));
-    if (vec3_length(up_3d) < 1e-12)
-        up_3d =
-            vec3_subtract(polyhedron.vertices[polyhedron.faces[root][0]], c_3d);
+    // Destination in 2d net (origin and unit step in +y)
+    const Vec3 origin_net = {0.0, 0.0, 0.0};
+    const Vec3 offset_net = {0.0, 1.0, 0.0};
+
+    const Vec3 origin_poly =
+        face_centroid(polyhedron.vertices, polyhedron.faces[root]);
+    const Vec3 normal = vec3_normalize(origin_poly);
+
+    // Vector in north direction constrained in the face plane
+    const Vec3 step_poly =
+        vec3_subtract(z, vec3_scale(normal, vec3_dot(z, normal)));
+    Vec3 offset_poly;
+    if (vec3_length(step_poly) < 1e-12)
+        // Fallback to 1st vertex at pole
+        offset_poly = polyhedron.vertices[polyhedron.faces[root][0]];
+    else
+        offset_poly = vec3_add(origin_poly, step_poly);
 
     const Mat4 root_face_to_plane = mat4_rigid_transform(
-        normal, c_3d, {0.0, 0.0, 0.0}, vec3_add(c_3d, up_3d), {0.0, 1.0, 0.0});
+        normal, origin_poly, origin_net, offset_poly, offset_net);
     for (int k = 0; k < NFV; k++) {
         Vec3 face_vertex = polyhedron.vertices[polyhedron.faces[root][k]];
         net.vertices[n_verts] =
@@ -151,8 +158,8 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
         // Place face onto net using shared edge for orientation
         const int na = net.faces[p][ia_p];
         const int nb = net.faces[p][ib_p];
-        const Vec3 normal_c =
-            face_normal(polyhedron.vertices, polyhedron.faces[c]);
+        const Vec3 normal_c = vec3_normalize(
+            face_centroid(polyhedron.vertices, polyhedron.faces[c]));
         const Mat4 face_to_plane = mat4_rigid_transform(
             normal_c, polyhedron.vertices[polyhedron.faces[c][ia_c]],
             net.vertices[na], polyhedron.vertices[polyhedron.faces[c][ib_c]],
