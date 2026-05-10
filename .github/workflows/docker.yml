@@ -160,6 +160,8 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ matrix.dockerfile }}
+          build-args: |
+            PROJ_GITHUB_SHA=${{ github.sha }}
           platforms: linux/${{ steps.prep.outputs.ARCH }}
           tags: ${{ steps.prep_tags.outputs.tags }}
           labels: |

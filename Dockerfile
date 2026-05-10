@@ -7,6 +7,8 @@ LABEL maintainer="Howard Butler <howard@hobu.co>"
 
 ARG DESTDIR="/build"
 
+ARG PROJ_GITHUB_SHA
+
 # Setup build env
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-missing --no-install-recommends \
