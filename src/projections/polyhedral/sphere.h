@@ -69,16 +69,24 @@ struct PolyhedralDefaults {
     DefaultOrigin default_origin = DefaultOrigin::FaceCentroid;
 };
 
+// Geographic +z (the orient frame's "up") expressed in polyhedron
+// coordinates — the third column of the orient rotation matrix. The unfold
+// uses this so the root face comes out with true geographic north up.
+inline Vec3 orient_up_in_poly(const PolyhedralDefaults &d) {
+    const double lat = d.orient_lat_deg * DEG_TO_RAD;
+    const double az = d.azi_deg * DEG_TO_RAD;
+    return {-std::cos(az) * std::cos(lat), -std::sin(az) * std::cos(lat),
+            std::sin(lat)};
+}
+
 // Build triangle data from a polyhedron and the unfold-tree `parents` array.
-// `up_dir` is the direction (in polyhedron coordinates) that should appear
-// "up" on the root face of the unfolded net — usually the geographic +z
-// direction expressed in polyhedron coords (the third column of the orient
-// matrix); defaults to polyhedron +z.
+// The unfold orients the root face so that geographic north (derived from
+// the orient defaults) lands on +y in the net.
 template <int NV_p, int NF, int NFV>
 inline void load_meshes(pj_polyhedral_data *Q,
                         const Mesh<NV_p, NF, NFV> &polyhedron,
-                        const int (&parents)[NF], const Vec3 &up_dir = z) {
-    const auto net = unfold_net(polyhedron, parents, up_dir);
+                        const int (&parents)[NF], const PolyhedralDefaults &d) {
+    const auto net = unfold_net(polyhedron, parents, orient_up_in_poly(d));
     constexpr int N = 2 * NFV * NF;
     Vec3 sph[N][3];
     Vec3 face[N][3];
