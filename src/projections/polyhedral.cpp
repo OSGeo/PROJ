@@ -30,7 +30,6 @@
 #include "polyhedral/polyhedra/icosahedron.h"
 #include "polyhedral/polyhedra/tetrahedron.h"
 #include "polyhedral/sphere.h"
-#include "polyhedral/unfold.h"
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -118,9 +117,7 @@ PJ *PJ_PROJECTION(tsea) {
     P->opaque = Q;
     P->destructor = polyhedral_destructor;
 
-    const auto net =
-        polyhedral::unfold_net(polyhedra::tetrahedron, nets::tsea::tsea);
-    polyhedral::load_meshes(Q, polyhedra::tetrahedron, net);
+    polyhedral::load_meshes(Q, polyhedra::tetrahedron, nets::tsea::tsea);
     const polyhedral::PolyhedralDefaults d = {90.0, 0.0, 0.0};
     return polyhedral_setup(P, d);
 }
@@ -159,8 +156,7 @@ PJ *PJ_PROJECTION(dsea) {
         }
     }
 
-    const auto net = polyhedral::unfold_net(polyhedra::dodecahedron, *parents);
-    polyhedral::load_meshes(Q, polyhedra::dodecahedron, net);
+    polyhedral::load_meshes(Q, polyhedra::dodecahedron, *parents);
     // Defaults rotate the polyhedron so F0's centroid sits at the geographic
     // north pole. orient_lat = atan((1+2A)/2) places V0 on the F0 axis.
     using polyhedra::dodecahedron_constants::A;
@@ -181,9 +177,7 @@ PJ *PJ_PROJECTION(isea2) {
     P->opaque = Q;
     P->destructor = polyhedral_destructor;
 
-    const auto net =
-        polyhedral::unfold_net(polyhedra::icosahedron, nets::isea::isea);
-    polyhedral::load_meshes(Q, polyhedra::icosahedron, net);
+    polyhedral::load_meshes(Q, polyhedra::icosahedron, nets::isea::isea);
 
     // Standard Snyder ISEA orientation: V0 at authalic latitude arctan(φ) ≈
     // 58.28°N (φ = golden ratio). On WGS84 this corresponds to ~58.40°
@@ -215,12 +209,11 @@ PJ *PJ_PROJECTION(isea2) {
     polyhedral::PolyhedralDefaults d = {orient_lat, orient_lon, azi};
 
     // For drop-in compatibility with legacy +proj=isea, the default projected
-    // origin is the bbox center (mid-width, mid-height) of icosahedron face F7
-    // — the central upper-band face — rather than its centroid. This matches
-    // legacy ISEA's 4×5 strip-layout geometric center, which sits inside F7
-    // but not at any face's centroid. Other polyhedra default to the centroid
-    // of face 0 (root of the unfold).
-    d.default_face_index = 7;
+    // origin is the bbox center (mid-width, mid-height) of the unfold's root
+    // face — the "South Africa" upper-band face F7 — rather than its
+    // centroid. This matches legacy ISEA's 4×5 strip-layout geometric centre,
+    // which sits inside F7 but not at its centroid. Other polyhedra default
+    // to the centroid of the root face.
     d.default_origin = polyhedral::DefaultOrigin::FaceBboxCenter;
     return polyhedral_setup(P, d);
 }

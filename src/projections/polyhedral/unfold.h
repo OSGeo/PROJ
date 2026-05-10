@@ -32,30 +32,23 @@ inline Vec3 face_normal(const Vec3 (&vertices)[NV_p], const int (&face)[NFV]) {
                                      vec3_subtract(vertices[face[2]], v0)));
 }
 
-// Rigid transform mapping the polyhedron face f onto the 2D plane (z=0) such
-// that the face's directed edge from slot idx_a to slot idx_b is aligned
-// with the 2D edge net_vertex_a → net_vertex_b.
-template <int NV_p, int NF, int NFV>
-inline Mat4 mat4_rigid_transform(const Mesh<NV_p, NF, NFV> &polyhedron, int f,
-                                 int idx_a, int idx_b, const Vec3 &net_vertex_a,
-                                 const Vec3 &net_vertex_b) {
-    const Vec3 poly_vertex_a = polyhedron.vertices[polyhedron.faces[f][idx_a]];
-    const Vec3 poly_vertex_b = polyhedron.vertices[polyhedron.faces[f][idx_b]];
-
-    // Face local unit vectors
-    const Vec3 normal = face_normal(polyhedron.vertices, polyhedron.faces[f]);
-    const Vec3 u = vec3_normalize(vec3_subtract(poly_vertex_b, poly_vertex_a));
+// Rigid transform from a polyhedron face's plane to the 2D plane (z=0),
+// sending poly_a → net_a and orienting poly_a→poly_b along net_a→net_b.
+// poly_a and poly_b must lie on the face plane; only the direction of
+// net_b − net_a is used (the 2D distance is derived from the 3D one).
+inline Mat4 mat4_rigid_transform(const Vec3 &normal, const Vec3 &poly_a,
+                                 const Vec3 &net_a, const Vec3 &poly_b,
+                                 const Vec3 &net_b) {
+    const Vec3 u = vec3_normalize(vec3_subtract(poly_b, poly_a));
     const Vec3 v = vec3_cross(normal, u);
-
-    // Transform the face-local frame (u, v) into the net plane.
     const Vec3 edge_direction =
-        vec3_normalize(vec3_subtract(net_vertex_b, net_vertex_a));
+        vec3_normalize(vec3_subtract(net_b, net_a));
     const Vec3 r0 = vec3_subtract(vec3_scale(u, edge_direction.x),
                                   vec3_scale(v, edge_direction.y));
     const Vec3 r1 = vec3_add(vec3_scale(u, edge_direction.y),
                              vec3_scale(v, edge_direction.x));
-    const double t0 = net_vertex_a.x - vec3_dot(r0, poly_vertex_a);
-    const double t1 = net_vertex_a.y - vec3_dot(r1, poly_vertex_a);
+    const double t0 = net_a.x - vec3_dot(r0, poly_a);
+    const double t1 = net_a.y - vec3_dot(r1, poly_a);
     return {{{r0.x, r0.y, r0.z, t0},
              {r1.x, r1.y, r1.z, t1},
              {0.0, 0.0, 0.0, 0.0},
@@ -83,7 +76,9 @@ inline double polygon_area_2d(const Vec3 *verts, const int (&face)[NFV]) {
 //
 // The resulting net is auto-scaled so its total area equals 4π (i.e. the
 // area of the unit sphere) and translated so the root face's centroid lies
-// at the origin, with the first edge along the x-axis.
+// at the origin. The root face is laid out "north-up": geographic north
+// (+z), projected onto its face plane, points along +y; for a root face
+// centred on the rotation axis the slot[0] vertex is placed up instead.
 template <int NV_p, int NF, int NFV>
 inline Mesh<unfolded_vertex_count<NF, NFV>(), NF, NFV>
 unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
@@ -95,8 +90,27 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
     int root = 0;
     while (parents[root] != -1)
         root++;
-    const Mat4 root_face_to_plane = mat4_rigid_transform(
-        polyhedron, root, 0, 1, {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0});
+
+    // Place the root face "north-up": find the in-plane direction that
+    // matches geographic north (+z projected onto the face), then orient so
+    // that direction lands on +y. Polar fallback (face on the rotation
+    // axis): aim from the centroid out toward slot[0] instead.
+    const Vec3 normal =
+        face_normal(polyhedron.vertices, polyhedron.faces[root]);
+    Vec3 c_3d{0.0, 0.0, 0.0};
+    for (int k = 0; k < NFV; k++)
+        c_3d = vec3_add(c_3d, polyhedron.vertices[polyhedron.faces[root][k]]);
+    c_3d = vec3_scale(c_3d, 1.0 / NFV);
+
+    const Vec3 z{0.0, 0.0, 1.0};
+    Vec3 up_3d = vec3_subtract(z, vec3_scale(normal, vec3_dot(z, normal)));
+    if (vec3_length(up_3d) < 1e-12)
+        up_3d = vec3_subtract(
+            polyhedron.vertices[polyhedron.faces[root][0]], c_3d);
+
+    const Mat4 root_face_to_plane =
+        mat4_rigid_transform(normal, c_3d, {0.0, 0.0, 0.0},
+                             vec3_add(c_3d, up_3d), {0.0, 1.0, 0.0});
     for (int k = 0; k < NFV; k++) {
         Vec3 face_vertex = polyhedron.vertices[polyhedron.faces[root][k]];
         net.vertices[n_verts] =
@@ -133,8 +147,12 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
         // Place face onto net using shared edge for orientation
         const int na = net.faces[p][ia_p];
         const int nb = net.faces[p][ib_p];
+        const Vec3 normal_c =
+            face_normal(polyhedron.vertices, polyhedron.faces[c]);
         const Mat4 face_to_plane = mat4_rigid_transform(
-            polyhedron, c, ia_c, ib_c, net.vertices[na], net.vertices[nb]);
+            normal_c,
+            polyhedron.vertices[polyhedron.faces[c][ia_c]], net.vertices[na],
+            polyhedron.vertices[polyhedron.faces[c][ib_c]], net.vertices[nb]);
         for (int k = 0; k < NFV; k++) {
             if (k == ia_c) {
                 net.faces[c][k] = na;

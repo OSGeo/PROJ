@@ -12,6 +12,7 @@
 
 #include "conway.h"
 #include "snyder.h"
+#include "unfold.h"
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -33,6 +34,8 @@ struct pj_polyhedral_data {
 
     double orient[3][3];
     double orient_inv[3][3];
+
+    int root_face_index; // unfold-tree root; default reference face for lat_0/lon_0
 
     // Translation in projected space so the geographic anchor named by
     // +lat_0 / +lon_0 (or its dynamic default) lands at (0, 0).
@@ -62,16 +65,15 @@ struct PolyhedralDefaults {
     double orient_lat_deg;
     double orient_lon_deg;
     double azi_deg;
-    int default_face_index = 0;
     DefaultOrigin default_origin = DefaultOrigin::FaceCentroid;
 };
 
-// Build triangle data from a polyhedron + matching net by applying the Conway
-// `meta` operation to both.
-template <int NV_p, int NV_n, int NF, int NFV>
+// Build triangle data from a polyhedron and the unfold-tree `parents` array.
+template <int NV_p, int NF, int NFV>
 inline void load_meshes(pj_polyhedral_data *Q,
                         const Mesh<NV_p, NF, NFV> &polyhedron,
-                        const Mesh<NV_n, NF, NFV> &net) {
+                        const int (&parents)[NF]) {
+    const auto net = unfold_net(polyhedron, parents);
     constexpr int N = 2 * NFV * NF;
     Vec3 sph[N][3];
     Vec3 face[N][3];
@@ -81,6 +83,9 @@ inline void load_meshes(pj_polyhedral_data *Q,
     Q->n_triangles = N;
     Q->face_vertex_count = NFV;
     Q->num_faces = NF;
+    Q->root_face_index = 0;
+    while (Q->root_face_index < NF && parents[Q->root_face_index] != -1)
+        Q->root_face_index++;
     for (int i = 0; i < N; i++) {
         Q->sph_tris[i] = {sph[i][0], sph[i][1], sph[i][2]};
         Q->face_tris[i] = {
@@ -263,10 +268,9 @@ inline bool apply_polyhedral_params(pj_polyhedral_data *Q, PJ *P,
         return true;
     }
 
-    // Default anchor: a planar reference point on the chosen face. This is
-    // already in projected coords (the unfolded net), so use it directly.
+    // Default anchor: a planar reference point on the unfold's root face.
     const Face2D ref =
-        face_reference_point(Q, d.default_face_index, d.default_origin);
+        face_reference_point(Q, Q->root_face_index, d.default_origin);
     Q->x_offset = ref.x;
     Q->y_offset = ref.y;
     return true;
