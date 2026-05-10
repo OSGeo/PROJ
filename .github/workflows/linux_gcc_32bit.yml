@@ -34,4 +34,4 @@ jobs:
           restore-keys: ${{ runner.os }}-cache-gcc32bit-
 
       - name: Run
-        run: docker run -e CI -e WORK_DIR="$PWD" -v $PWD:$PWD ubuntu:20.04 $PWD/.github/workflows/linux_gcc_32bit/start.sh
+        run: docker run -e PROJ_GITHUB_SHA=${{ github.sha }} -e CI -e WORK_DIR="$PWD" -v $PWD:$PWD ubuntu:20.04 $PWD/.github/workflows/linux_gcc_32bit/start.sh

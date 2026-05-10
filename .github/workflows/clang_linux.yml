@@ -54,4 +54,4 @@ jobs:
           restore-keys: ${{ runner.os }}-cache-clang-${{ matrix.id }}-
 
       - name: Run
-        run: docker run -e CI -e TRAVIS_BUILD_DIR="$PWD" -e PROJ_CMAKE_BUILD_OPTIONS="$PROJ_CMAKE_BUILD_OPTIONS" -e WORK_DIR="$PWD" -e TRAVIS_OS_NAME=linux -e BUILD_NAME=linux_clang -v $PWD:$PWD ubuntu:20.04 $PWD/.github/workflows/clang_linux/start.sh
+        run: docker run -e PROJ_GITHUB_SHA=${{ github.sha }} -e CI -e TRAVIS_BUILD_DIR="$PWD" -e PROJ_CMAKE_BUILD_OPTIONS="$PROJ_CMAKE_BUILD_OPTIONS" -e WORK_DIR="$PWD" -e TRAVIS_OS_NAME=linux -e BUILD_NAME=linux_clang -v $PWD:$PWD ubuntu:20.04 $PWD/.github/workflows/clang_linux/start.sh
