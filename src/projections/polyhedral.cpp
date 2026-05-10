@@ -108,7 +108,7 @@ static PJ *polyhedral_setup(PJ *P, const polyhedral::PolyhedralDefaults &d) {
 }
 
 PROJ_HEAD(tsea, "Tetrahedral Snyder Equal Area")
-"\n\tSph&Ell\n\torient_lat= orient_lon= azi= lat_0= lon_0=";
+"\n\tSph&Ell\n\tnet= orient_lat= orient_lon= azi= lat_0= lon_0=";
 PJ *PJ_PROJECTION(tsea) {
     auto *Q = static_cast<pj_polyhedral_data *>(
         calloc(1, sizeof(pj_polyhedral_data)));
@@ -117,7 +117,21 @@ PJ *PJ_PROJECTION(tsea) {
     P->opaque = Q;
     P->destructor = polyhedral_destructor;
 
-    polyhedral::load_meshes(Q, polyhedra::tetrahedron, nets::tsea::tsea);
+    const char *net_name = pj_param(P->ctx, P->params, "snet").s;
+    const int(*parents)[4] = &nets::tsea::tsea;
+    if (net_name != nullptr) {
+        if (strcmp(net_name, "tsea") == 0) {
+            parents = &nets::tsea::tsea;
+        } else if (strcmp(net_name, "star") == 0) {
+            parents = &nets::tsea::star;
+        } else {
+            proj_log_error(P, _("invalid +net (expected tsea or star)"));
+            return polyhedral_destructor(P,
+                                         PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
+    }
+
+    polyhedral::load_meshes(Q, polyhedra::tetrahedron, *parents);
     const polyhedral::PolyhedralDefaults d = {90.0, 0.0, 0.0};
     return polyhedral_setup(P, d);
 }

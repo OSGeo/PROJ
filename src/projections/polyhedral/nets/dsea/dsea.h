@@ -33,7 +33,7 @@ namespace dsea {
 //   Left:   F8 → F3 → F7 → F2 → F6 → F1   (L → U → L → U → L → U)
 // The two polar caps hang symmetrically above and below the central column:
 // F0 (north pole) off F3 (Europe), F11 (south pole) off F8 (Africa).
-constexpr int dsea[12] = {3, 6, 7, 8, 8, 9, 2, 3, -1, 4, 5, 8};
+constexpr int dsea[12] = {3, 6, 7, -1, 8, 9, 2, 3, 3, 4, 5, 8};
 
 // A5 net (re-rooted to match the A5 reference codebase's coordinate origin).
 // The visual shape is the same as the published A5 layout; only the parent
