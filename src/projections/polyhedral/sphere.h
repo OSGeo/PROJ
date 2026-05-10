@@ -77,8 +77,7 @@ struct PolyhedralDefaults {
 template <int NV_p, int NF, int NFV>
 inline void load_meshes(pj_polyhedral_data *Q,
                         const Mesh<NV_p, NF, NFV> &polyhedron,
-                        const int (&parents)[NF],
-                        const Vec3 &up_dir = z) {
+                        const int (&parents)[NF], const Vec3 &up_dir = z) {
     const auto net = unfold_net(polyhedron, parents, up_dir);
     constexpr int N = 2 * NFV * NF;
     Vec3 sph[N][3];

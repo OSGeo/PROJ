@@ -114,8 +114,8 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
     const Vec3 normal = vec3_normalize(origin_poly);
 
     // Vector in up_dir direction constrained to the face plane
-    const Vec3 step_poly = vec3_subtract(
-        up_dir, vec3_scale(normal, vec3_dot(up_dir, normal)));
+    const Vec3 step_poly =
+        vec3_subtract(up_dir, vec3_scale(normal, vec3_dot(up_dir, normal)));
     Vec3 offset_poly;
     if (vec3_length(step_poly) < 1e-12)
         // Fallback to 1st vertex at pole

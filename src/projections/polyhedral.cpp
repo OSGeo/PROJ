@@ -168,10 +168,9 @@ PJ *PJ_PROJECTION(dsea) {
     // polyhedron coordinates: (-cos(azi)cos(lat), -sin(azi)cos(lat), sin(lat)).
     const double lat_rad = default_orient_lat * DEG_TO_RAD;
     const double azi_rad = default_azi * DEG_TO_RAD;
-    const polyhedral::Vec3 up_dir = {
-        -std::cos(azi_rad) * std::cos(lat_rad),
-        -std::sin(azi_rad) * std::cos(lat_rad),
-        std::sin(lat_rad)};
+    const polyhedral::Vec3 up_dir = {-std::cos(azi_rad) * std::cos(lat_rad),
+                                     -std::sin(azi_rad) * std::cos(lat_rad),
+                                     std::sin(lat_rad)};
     polyhedral::load_meshes(Q, polyhedra::dodecahedron, *parents, up_dir);
 
     const polyhedral::PolyhedralDefaults d = {default_orient_lat,
