@@ -55,22 +55,26 @@ constexpr polyhedral::Mesh<20, 12, 5> mesh = {
         {-2.0 / 3.0, 0.0, -(4 * A - 1) / 3.0},
         {-(4 * A - 1) / 3.0, -B, -1.0 / 3.0},
     },
-    // Faces (CCW from outside). Ordered to match the canonical DSEA net
-    // unfolding: F0 is the first 5 vertices, F1..F10 zig-zag around the
-    // middle band so the default parents tree is a simple chain
-    // {-1, 0, 1, …, 9}, and F11 is the last 5 vertices.
+    // Faces (CCW from outside). Ordered top-to-bottom, then left-to-right
+    // within each band, so the unfolded DSEA net comes out as:
+    //   F0                            (north polar cap, around V0)
+    //   F1  F2  F3  F4  F5            (upper band: N.Pacific, N.America,
+    //                                   Europe, India, Asia)
+    //   F6  F7  F8  F9  F10           (lower band: S.Pacific, S.Atlantic,
+    //                                   S.Africa, Indian, S.Pacific E)
+    //   F11                           (south polar cap, around V17)
     {
         {0, 1, 2, 3, 4},
-        {0, 5, 10, 6, 1},
-        {6, 10, 15, 16, 11},
-        {1, 6, 11, 7, 2},
-        {7, 11, 16, 17, 12},
-        {2, 7, 12, 8, 3},
-        {8, 12, 17, 18, 13},
         {3, 8, 13, 9, 4},
-        {9, 13, 18, 19, 14},
         {0, 4, 9, 14, 5},
+        {0, 5, 10, 6, 1},
+        {1, 6, 11, 7, 2},
+        {2, 7, 12, 8, 3},
+        {9, 13, 18, 19, 14},
         {5, 14, 19, 15, 10},
+        {6, 10, 15, 16, 11},
+        {7, 11, 16, 17, 12},
+        {8, 12, 17, 18, 13},
         {15, 19, 18, 17, 16},
     },
 };
