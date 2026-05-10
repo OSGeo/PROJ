@@ -250,17 +250,6 @@ fi
 # Helper functions to extract some info from PROJ in C and C++
 log_step "6.5 Creating C Wrapper Functions"
 
-# --- Determine Git Revision ---
-GIT_REV=""
-if [ -n "${GITHUB_SHA}" ]; then
-    GIT_REV="${GITHUB_SHA}"
-else
-    if git rev-parse HEAD >/dev/null 2>&1; then
-        GIT_REV=$(git rev-parse HEAD)
-    fi
-fi
-echo "GIT_REV=${GIT_REV}"
-
 WRAPPER_FILE="${TEMP_BUILD_DIR}/proj_wrappers.cpp"
 WRAPPER_OBJ_FILE="${TEMP_BUILD_DIR}/proj_wrappers.o"
 
@@ -319,10 +308,6 @@ const char* get_compilation_date() {
     return "$DDD" ;
 }
 
-const char* get_build_git_revision() {
-    return "${GIT_REV}";
-}
-
 int get_ptr_size() {
     return sizeof(void*);
 }
@@ -349,7 +334,7 @@ FINAL_LIBS="${INSTALL_DIR}/lib/libproj.a \
             ${WRAPPER_OBJ_FILE}"
 
 # include all exported symbols
-echo -e "_malloc\n_free\n_get_compilation_date\n_get_build_git_revision\n_get_ptr_size" > ${INSTALL_DIR}/exported_symbols.txt
+echo -e "_malloc\n_free\n_get_compilation_date\n_get_ptr_size" > ${INSTALL_DIR}/exported_symbols.txt
 grep "^proj_\|^geod_" ${PROJ_SRC_DIR}/scripts/reference_exported_symbols.txt | grep -v "(" | sed 's/^/_/' >> ${INSTALL_DIR}/exported_symbols.txt
 head ${INSTALL_DIR}/exported_symbols.txt
 
