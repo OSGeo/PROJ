@@ -25,11 +25,19 @@ template <int NF, int NFV> constexpr int unfolded_vertex_count() {
     return NFV + (NFV - 2) * (NF - 1);
 }
 
-template <int NV_p, int NFV>
-inline Vec3 face_normal(const Vec3 (&vertices)[NV_p], const int (&face)[NFV]) {
+template <int NV, int NFV>
+inline Vec3 face_normal(const Vec3 (&vertices)[NV], const int (&face)[NFV]) {
     const Vec3 v0 = vertices[face[0]];
     return vec3_normalize(vec3_cross(vec3_subtract(vertices[face[1]], v0),
                                      vec3_subtract(vertices[face[2]], v0)));
+}
+
+template <int NV, int NFV>
+inline Vec3 face_centroid(const Vec3 (&vertices)[NV], const int (&face)[NFV]) {
+    Vec3 c{0.0, 0.0, 0.0};
+    for (int k = 0; k < NFV; k++)
+        c = vec3_add(c, vertices[face[k]]);
+    return vec3_scale(c, 1.0 / NFV);
 }
 
 // Rigid transform from a polyhedron face's plane to the 2D plane (z=0),
@@ -96,10 +104,8 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
     // axis): aim from the centroid out toward slot[0] instead.
     const Vec3 normal =
         face_normal(polyhedron.vertices, polyhedron.faces[root]);
-    Vec3 c_3d{0.0, 0.0, 0.0};
-    for (int k = 0; k < NFV; k++)
-        c_3d = vec3_add(c_3d, polyhedron.vertices[polyhedron.faces[root][k]]);
-    c_3d = vec3_scale(c_3d, 1.0 / NFV);
+    const Vec3 c_3d =
+        face_centroid(polyhedron.vertices, polyhedron.faces[root]);
 
     const Vec3 z{0.0, 0.0, 1.0};
     Vec3 up_3d = vec3_subtract(z, vec3_scale(normal, vec3_dot(z, normal)));
@@ -177,10 +183,7 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF]) {
     const double scale = std::sqrt(4.0 * M_PI / total_area);
 
     // Translate so the root face's centroid is at origin, then scale.
-    Vec3 centroid{0.0, 0.0, 0.0};
-    for (int k = 0; k < NFV; k++)
-        centroid = vec3_add(centroid, net.vertices[net.faces[root][k]]);
-    centroid = vec3_scale(centroid, 1.0 / NFV);
+    const Vec3 centroid = face_centroid(net.vertices, net.faces[root]);
     for (int i = 0; i < NV_n; i++)
         net.vertices[i] =
             vec3_scale(vec3_subtract(net.vertices[i], centroid), scale);
