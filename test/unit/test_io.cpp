@@ -10201,31 +10201,137 @@ TEST(io, projstringformatter_helmert_7_param_noop) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projstringformatter_merge_consecutive_helmert_3_param) {
-    auto fmt = PROJStringFormatter::create();
-    fmt->addStep("helmert");
-    fmt->addParam("x", 10);
-    fmt->addParam("y", 20);
-    fmt->addParam("z", 30);
-    fmt->addStep("helmert");
-    fmt->addParam("x", -1);
-    fmt->addParam("y", -2);
-    fmt->addParam("z", -3);
-    EXPECT_EQ(fmt->toString(), "+proj=helmert +x=9 +y=18 +z=27");
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+
+        fmt->addStep("helmert");
+        fmt->addParam("x", -1);
+        fmt->addParam("y", -2);
+        fmt->addParam("z", -3);
+        EXPECT_EQ(fmt->toString(), "+proj=helmert +x=9 +y=18 +z=27");
+    }
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", -10);
+        fmt->addParam("y", -20);
+        fmt->addParam("z", -30);
+        EXPECT_EQ(fmt->toString(), "+proj=helmert +x=20 +y=40 +z=60");
+    }
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+
+        fmt->addStep("helmert");
+        fmt->addParam("x", -10);
+        fmt->addParam("y", -20);
+        fmt->addParam("z", -30);
+        EXPECT_EQ(fmt->toString(), "+proj=helmert +x=-20 +y=-40 +z=-60");
+    }
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(io, projstringformatter_merge_consecutive_helmert_3_param_noop) {
-    auto fmt = PROJStringFormatter::create();
-    fmt->addStep("helmert");
-    fmt->addParam("x", 10);
-    fmt->addParam("y", 20);
-    fmt->addParam("z", 30);
-    fmt->addStep("helmert");
-    fmt->addParam("x", -10);
-    fmt->addParam("y", -20);
-    fmt->addParam("z", -30);
-    EXPECT_EQ(fmt->toString(), "+proj=noop");
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+
+        fmt->addStep("helmert");
+        fmt->addParam("x", -10);
+        fmt->addParam("y", -20);
+        fmt->addParam("z", -30);
+        EXPECT_EQ(fmt->toString(), "+proj=noop");
+    }
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", -10);
+        fmt->addParam("y", -20);
+        fmt->addParam("z", -30);
+        EXPECT_EQ(fmt->toString(), "+proj=noop");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projstringformatter_merge_consecutive_helmert_7_param_noop) {
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", 1);
+        fmt->addParam("ry", 2);
+        fmt->addParam("rz", 3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "position_vector");
+
+        fmt->addStep("helmert");
+        fmt->addParam("x", -10);
+        fmt->addParam("y", -20);
+        fmt->addParam("z", -30);
+        fmt->addParam("rx", -1);
+        fmt->addParam("ry", -2);
+        fmt->addParam("rz", -3);
+        fmt->addParam("s", -4);
+        fmt->addParam("convention", "position_vector");
+        EXPECT_EQ(fmt->toString(), "+proj=noop");
+    }
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", 1);
+        fmt->addParam("ry", 2);
+        fmt->addParam("rz", 3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "position_vector");
+
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", -10);
+        fmt->addParam("y", -20);
+        fmt->addParam("z", -30);
+        fmt->addParam("rx", -1);
+        fmt->addParam("ry", -2);
+        fmt->addParam("rz", -3);
+        fmt->addParam("s", -4);
+        fmt->addParam("convention", "position_vector");
+        EXPECT_EQ(fmt->toString(), "+proj=noop");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -10242,6 +10348,7 @@ TEST(io, projstringformatter_merge_inverted_helmert_with_opposite_conventions) {
         fmt->addParam("rz", 3);
         fmt->addParam("s", 4);
         fmt->addParam("convention", "position_vector");
+
         fmt->addStep("helmert");
         fmt->setCurrentStepInverted(true);
         fmt->addParam("x", 10);
@@ -10266,7 +10373,33 @@ TEST(io, projstringformatter_merge_inverted_helmert_with_opposite_conventions) {
         fmt->addParam("ry", 2);
         fmt->addParam("rz", 3);
         fmt->addParam("s", 4);
+        fmt->addParam("convention", "position_vector");
+
+        fmt->addStep("helmert");
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", -1);
+        fmt->addParam("ry", -2);
+        fmt->addParam("rz", -3);
+        fmt->addParam("s", 4);
         fmt->addParam("convention", "coordinate_frame");
+        EXPECT_EQ(fmt->toString(), "+proj=noop");
+    }
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", 1);
+        fmt->addParam("ry", 2);
+        fmt->addParam("rz", 3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "coordinate_frame");
+
         fmt->addStep("helmert");
         fmt->addParam("x", 10);
         fmt->addParam("y", 20);
@@ -10291,6 +10424,7 @@ TEST(io, projstringformatter_merge_inverted_helmert_with_opposite_conventions) {
         fmt->addParam("rz", 3);
         fmt->addParam("s", 4);
         fmt->addParam("convention", "position_vector");
+
         fmt->addStep("helmert");
         // fmt->setCurrentStepInverted(true); <== CAUSE
         fmt->addParam("x", 10);
@@ -10316,6 +10450,7 @@ TEST(io, projstringformatter_merge_inverted_helmert_with_opposite_conventions) {
         fmt->addParam("rz", 3);
         fmt->addParam("s", 4);
         fmt->addParam("convention", "position_vector");
+
         fmt->addStep("helmert");
         fmt->setCurrentStepInverted(true);
         fmt->addParam("x", 10);
@@ -10341,6 +10476,7 @@ TEST(io, projstringformatter_merge_inverted_helmert_with_opposite_conventions) {
         fmt->addParam("rz", 3);
         fmt->addParam("s", 4);
         fmt->addParam("convention", "position_vector");
+
         fmt->addStep("helmert");
         fmt->setCurrentStepInverted(true);
         fmt->addParam("x", -10); // <== CAUSE
@@ -10366,6 +10502,7 @@ TEST(io, projstringformatter_merge_inverted_helmert_with_opposite_conventions) {
         fmt->addParam("rz", 2);
         fmt->addParam("s", 4);
         fmt->addParam("convention", "position_vector");
+
         fmt->addStep("helmert");
         fmt->setCurrentStepInverted(true);
         fmt->addParam("x", 10);

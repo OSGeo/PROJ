@@ -9495,7 +9495,6 @@ const std::string &PROJStringFormatter::toString() const {
             }
 
             if (curStep.name == "helmert" && prevStep.name == "helmert" &&
-                !curStep.inverted && !prevStep.inverted &&
                 curStepParamCount == 3 &&
                 curStepParamCount == prevStepParamCount) {
                 std::map<std::string, double> leftParamsMap;
@@ -9520,12 +9519,18 @@ const std::string &PROJStringFormatter::toString() const {
                     rightParamsMap.find(y) != rightParamsMap.end() &&
                     rightParamsMap.find(z) != rightParamsMap.end()) {
 
-                    const double xSum = leftParamsMap[x] + rightParamsMap[x];
-                    const double ySum = leftParamsMap[y] + rightParamsMap[y];
-                    const double zSum = leftParamsMap[z] + rightParamsMap[z];
+                    const double signLeft = prevStep.inverted ? -1 : 1;
+                    const double signRight = curStep.inverted ? -1 : 1;
+                    const double xSum = signLeft * leftParamsMap[x] +
+                                        signRight * rightParamsMap[x];
+                    const double ySum = signLeft * leftParamsMap[y] +
+                                        signRight * rightParamsMap[y];
+                    const double zSum = signLeft * leftParamsMap[z] +
+                                        signRight * rightParamsMap[z];
                     if (xSum == 0.0 && ySum == 0.0 && zSum == 0.0) {
                         deletePrevAndCurIter();
                     } else {
+                        prevStep.inverted = false;
                         prevStep.paramValues[0] =
                             Step::KeyValue("x", internal::toString(xSum));
                         prevStep.paramValues[1] =
@@ -9542,7 +9547,7 @@ const std::string &PROJStringFormatter::toString() const {
 
             // Helmert followed by its inverse is a no-op
             if (curStep.name == "helmert" && prevStep.name == "helmert" &&
-                !curStep.inverted && !prevStep.inverted &&
+                (curStep.inverted == prevStep.inverted) &&
                 curStepParamCount == prevStepParamCount) {
                 std::set<std::string> leftParamsSet;
                 std::set<std::string> rightParamsSet;
