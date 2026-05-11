@@ -71,8 +71,11 @@ inline constexpr Vec3 z{0.0, 0.0, 1.0};
 
 // Unfold a polyhedron Mesh into a planar net Mesh.
 //
-// `parents[i]` is the index of face i's parent in the unfolding tree, or -1
-// if i is the root. Exactly one entry must be -1.
+// Faces are referenced by 1-based IDs F1..F_NF (matching Snyder's paper
+// numbering). `parents[i]` holds the parent of face F(i+1) in the unfolding
+// tree as a 1-based face ID, or 0 if F(i+1) is the root. Exactly one entry
+// must be 0. The C array indexing stays 0-based; only the values it stores
+// are 1-based.
 //
 // The polyhedron faces must have consistent CCW winding from the outside.
 // Each child face is hinged about its shared edge with its parent; the
@@ -93,9 +96,9 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
     Mesh<NV_n, NF, NFV> net{};
     int n_verts = 0;
 
-    // Find and place root face
+    // Find and place root face (the entry whose 1-based parent ID is 0).
     int root = 0;
-    while (parents[root] != -1)
+    while (parents[root] != 0)
         root++;
 
     // Place the root face "up-direction-up": project up_dir onto the root
@@ -132,17 +135,18 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
         net.faces[root][k] = n_verts++;
     }
 
-    // Initialize queue with direct children of parent face
+    // Initialize queue with direct children of parent face. `root` is a
+    // 0-based array index; `parents[i]` is a 1-based face ID.
     int queue[NF];
     int q_head = 0, q_tail = 0;
     for (int i = 0; i < NF; i++)
-        if (parents[i] == root)
+        if (parents[i] == root + 1)
             queue[q_tail++] = i;
 
     // Hinge each child onto its parent at the shared edge.
     while (q_head < q_tail) {
         const int c = queue[q_head++];
-        const int p = parents[c];
+        const int p = parents[c] - 1;
 
         // Find shared edge
         int ia_c = -1, ib_c = -1, ia_p = -1, ib_p = -1;
@@ -180,9 +184,9 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
             }
         }
 
-        // Append children of this face to queue
+        // Append children of this face to queue (parents[i] is 1-based).
         for (int i = 0; i < NF; i++)
-            if (parents[i] == c)
+            if (parents[i] == c + 1)
                 queue[q_tail++] = i;
     }
 

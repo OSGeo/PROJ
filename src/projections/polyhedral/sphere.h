@@ -97,7 +97,7 @@ inline void load_meshes(pj_polyhedral_data *Q,
     Q->face_vertex_count = NFV;
     Q->num_faces = NF;
     Q->root_face_index = 0;
-    while (Q->root_face_index < NF && parents[Q->root_face_index] != -1)
+    while (Q->root_face_index < NF && parents[Q->root_face_index] != 0)
         Q->root_face_index++;
     for (int i = 0; i < N; i++) {
         Q->sph_tris[i] = {sph[i][0], sph[i][1], sph[i][2]};
