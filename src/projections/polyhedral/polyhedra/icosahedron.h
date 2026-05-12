@@ -47,10 +47,10 @@ constexpr polyhedral::Mesh<12, 20, 3> mesh = {
         {0.0, 0.0, -1.0},
     },
     // Faces (CCW from outside). Ordered north to south, in groups of 5
-    //   F0..F4   north cap (around V0)
-    //   F5..F9   upper band (down-pointing)
-    //   F10..F14 lower band (up-pointing)
-    //   F15..F19 south cap (around V11)
+    //   F1..F5   north cap (around V0)
+    //   F6..F10  upper band (down-pointing)
+    //   F11..F15 lower band (up-pointing)
+    //   F16..F20 south cap (around V11)
     {
         {0, 1, 2},  {0, 2, 3},  {0, 3, 4},  {0, 4, 5},   {0, 5, 1},
         {1, 6, 2},  {2, 7, 3},  {3, 8, 4},  {4, 9, 5},   {5, 10, 1},

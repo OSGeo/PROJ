@@ -170,8 +170,8 @@ PJ *PJ_PROJECTION(dsea) {
         }
     }
 
-    // Defaults rotate the polyhedron so F0's centroid sits at the geographic
-    // north pole. orient_lat = atan((1+2A)/2) places V0 on the F0 axis.
+    // Defaults rotate the polyhedron so F1's centroid sits at the geographic
+    // north pole. orient_lat = atan((1+2A)/2) places V0 on the F1 axis.
     using polyhedra::dodecahedron_constants::A;
     const double default_orient_lat =
         std::atan((1 + 2 * A) / 2.0) * 180.0 / M_PI;
@@ -220,9 +220,9 @@ PJ *PJ_PROJECTION(isea2) {
 
     // For drop-in compatibility with legacy +proj=isea, the default projected
     // origin is the bbox center (mid-width, mid-height) of the unfold's root
-    // face — the "South Africa" upper-band face F7 — rather than its
+    // face — the "South Africa" upper-band face F8 — rather than its
     // centroid. This matches legacy ISEA's 4×5 strip-layout geometric centre,
-    // which sits inside F7 but not at its centroid. Other polyhedra default
+    // which sits inside F8 but not at its centroid. Other polyhedra default
     // to the centroid of the root face.
     const polyhedral::PolyhedralDefaults d = {
         orient_lat, orient_lon, azi, polyhedral::DefaultOrigin::FaceBboxCenter};

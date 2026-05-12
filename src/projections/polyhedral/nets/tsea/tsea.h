@@ -8,15 +8,12 @@
  *           (the unfold root).
  *
  *           The default `tsea` net is Snyder's Figure 8 horizontal strip
- *           F1 — F2 — F4 — F3 (North America — Europe/Africa — south cap —
- *           Asia/Australia), but rerooted at F4 so the projected (0, 0)
- *           lands on the south-cap face (Antarctica) — more central than
- *           Snyder's original F1 (West-coast-of-Mexico) origin. The strip
- *           shape and shared edges are identical to Snyder's figure; only
- *           the choice of root face moves.
+ *           F1 — F2 — F3 — F4 (North America — Europe/Africa — south cap —
+ *           Asia/Australia), rerooted at F3 so the projected (0, 0) lands
+ *           on the south-cap face (Antarctica).
  *
- *           The `star` net is the alternative layout — F4 (south cap) at
- *           the centre with its three V0-touching neighbours (F1, F2, F3)
+ *           The `star` net is the alternative layout — F3 (south cap) at
+ *           the centre with its three V0-touching neighbours (F1, F2, F4)
  *           hung off each of its edges in a three-way fan.
  * Author:   Felix Palmer
  *
@@ -28,8 +25,8 @@
 namespace nets {
 namespace tsea {
 
-constexpr int tsea[4] = {2, 4, 4, 0};
-constexpr int star[4] = {4, 4, 4, 0};
+constexpr int tsea[4] = {2, 3, 0, 3};
+constexpr int star[4] = {3, 3, 0, 3};
 
 } // namespace tsea
 } // namespace nets

@@ -57,12 +57,12 @@ constexpr polyhedral::Mesh<20, 12, 5> mesh = {
     },
     // Faces (CCW from outside). Ordered top-to-bottom, then left-to-right
     // within each band, so the unfolded DSEA net comes out as:
-    //   F0                            (north polar cap, around V0)
-    //   F1  F2  F3  F4  F5            (upper band: N.Pacific, N.America,
+    //   F1                            (north polar cap, around V0)
+    //   F2  F3  F4  F5  F6            (upper band: N.Pacific, N.America,
     //                                   Europe, India, Asia)
-    //   F6  F7  F8  F9  F10           (lower band: S.Pacific, S.Atlantic,
+    //   F7  F8  F9  F10 F11           (lower band: S.Pacific, S.Atlantic,
     //                                   S.Africa, Indian, S.Pacific E)
-    //   F11                           (south polar cap, around V17)
+    //   F12                           (south polar cap, around V17)
     {
         {0, 1, 2, 3, 4},
         {3, 8, 13, 9, 4},
