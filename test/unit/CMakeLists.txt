@@ -268,6 +268,17 @@ add_test(NAME test_polyhedral COMMAND test_polyhedral)
 set_property(TEST test_polyhedral
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
 
+# Utility (not a test) used by test/render_layout.py to dump the unfolded
+# face polygons of a polyhedral projection. Reaches into internal headers,
+# so it lives here next to test_polyhedral rather than being exposed via
+# the public libproj API.
+add_executable(print_polyhedral_layout
+  print_polyhedral_layout.cpp)
+target_link_libraries(print_polyhedral_layout
+  PRIVATE ${PROJ_LIBRARIES})
+target_include_directories(print_polyhedral_layout
+  PRIVATE ${CMAKE_SOURCE_DIR}/src/projections)
+
 if (Threads_FOUND AND CMAKE_USE_PTHREADS_INIT AND NOT APPLE)
 add_definitions(-DPROJ_HAS_PTHREADS)
 add_executable(test_fork
