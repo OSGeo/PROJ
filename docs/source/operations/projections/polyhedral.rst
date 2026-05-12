@@ -89,38 +89,19 @@ Parameters
 
 .. option:: +net=<name>
 
-    Selects the planar unfolding (net). The accepted values depend on the
-    projection:
+    Selects the planar unfolding (net).
 
-.. option:: +orient_lat=<value>
+    The accepted values and defaults depend on the projection
 
-    Geodetic latitude of the polyhedron's first vertex, in degrees.
+.. include:: ../options/orient_lat.rst
 
-    *Default depends on the projection.*
+.. include:: ../options/orient_lon.rst
 
-.. option:: +orient_lon=<value>
+.. include:: ../options/azi.rst
 
-    Longitude of the polyhedron's first vertex, in degrees.
+.. include:: ../options/lat_0_polyhedral.rst
 
-    *Default depends on the projection.*
-
-.. option:: +azi=<value>
-
-    Azimuth from the first vertex to the second, in degrees. Together with
-    ``+orient_lat`` and ``+orient_lon`` this fully constrains the 3D pose of
-    the polyhedron on the sphere.
-
-    *Default depends on the projection.*
-
-.. include:: ../options/lat_0.rst
-
-For polyhedral projections, ``+lat_0`` / ``+lon_0`` specify the geographic
-point that should land at the projected origin ``(0, 0)``. They translate
-the projected output without rotating the polyhedron — the triangle edges
-stay where ``+orient_*`` placed them. ``+x_0`` / ``+y_0`` are applied on top
-of this translation.
-
-.. include:: ../options/lon_0.rst
+.. include:: ../options/lon_0_polyhedral.rst
 
 .. include:: ../options/x_0.rst
 
