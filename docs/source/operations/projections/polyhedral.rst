@@ -22,9 +22,9 @@ sub-triangle, and the planar results are laid out according to a *net* — a
 
 Three projection aliases are registered:
 
-- ``tsea`` :ref:`tsea`
-- ``dsea`` :ref:`dsea`
-- ``isea`` :ref:`isea`
+- :ref:`tsea` — Tetrahedral Snyder Equal Area
+- :ref:`dsea` — Dodecahedral Snyder Equal Area
+- :ref:`isea` — Icosahedral Snyder Equal Area
 
 Triangles
 ********************************************************************************
@@ -110,26 +110,3 @@ Parameters
 .. include:: ../options/ellps.rst
 
 .. include:: ../options/R.rst
-
-Examples:
-
-.. figure:: ./images/polyhedral_tsea.png
-   :width: 500 px
-   :align: center
-   :alt:   TSEA
-
-   proj-string: ``+proj=tsea``
-
-.. figure:: ./images/polyhedral_isea.png
-   :width: 500 px
-   :align: center
-   :alt:   ISEA
-
-   proj-string: ``+proj=isea``
-
-.. figure:: ./images/polyhedral_dsea_flower.png
-   :width: 500 px
-   :align: center
-   :alt:   DSEA Flower
-
-   proj-string: ``+proj=dsea +net=flower``
