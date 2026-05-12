@@ -1,7 +1,7 @@
-.. _isea:
+.. _isea_legacy:
 
 ********************************************************************************
-Icosahedral Snyder Equal Area
+Icosahedral Snyder Equal Area (legacy)
 ********************************************************************************
 
 Snyder's Icosahedral Equal Area map projection on an icosahedron polyhedral globe

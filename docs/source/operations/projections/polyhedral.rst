@@ -73,11 +73,11 @@ selected by name using the `+net` parameter, e.g. `+proj=tsea +net=star`
 
 The defaults for ``+orient_lat`` / ``+orient_lon`` / ``+azi`` rotate each
 polyhedron into a sensible default pose (e.g. centred on Europe / Africa for
-``dsea``; matching Snyder's published Figure 12 for ``isea2``). When
+``dsea``; matching Snyder's published Figure 12 for ``isea``). When
 ``+lat_0`` / ``+lon_0`` are not supplied, the projected origin (0, 0) lands
-on the centroid of the unfold's root face — except for ``isea2``, which
-defaults to the bounding-box centre of the root face to match the legacy
-``+proj=isea`` layout exactly.
+on the centroid of the unfold's root face — except for ``isea``, which
+uses the bounding-box centre of the root face instead so the unfolded net
+sits centred in the output.
 
 Parameters
 ********************************************************************************
@@ -125,7 +125,7 @@ Examples:
    :align: center
    :alt:   ISEA
 
-   proj-string: ``+proj=isea2``
+   proj-string: ``+proj=isea``
 
 .. figure:: ./images/polyhedral_dsea_flower.png
    :width: 500 px

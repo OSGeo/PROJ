@@ -49,9 +49,9 @@ static const ProjConfig proj_strings[] = {
     {"+proj=dsea +R=1", 1e-13},
     {"+proj=dsea +ellps=WGS84", 1e-13},
     {"+proj=dsea +R=1 +lat_0=10 +lon_0=20", 1e-11},
-    {"+proj=isea2 +R=1", 1e-13},
-    {"+proj=isea2 +ellps=WGS84", 1e-13},
-    {"+proj=isea2 +R=1 +lat_0=10 +lon_0=20", 1e-11},
+    {"+proj=isea +R=1", 1e-13},
+    {"+proj=isea +ellps=WGS84", 1e-13},
+    {"+proj=isea +R=1 +lat_0=10 +lon_0=20", 1e-11},
 };
 
 static void roundtrip_test(const char *proj_string, double tolerance) {

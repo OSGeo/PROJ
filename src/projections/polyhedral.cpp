@@ -181,9 +181,9 @@ PJ *PJ_PROJECTION(dsea) {
     return polyhedral_setup(P, d);
 }
 
-PROJ_HEAD(isea2, "Icosahedral Snyder Equal Area (generalized)")
+PROJ_HEAD(isea, "Icosahedral Snyder Equal Area")
 "\n\tSph&Ell\n\torient= orient_lat= orient_lon= azi= lat_0= lon_0=";
-PJ *PJ_PROJECTION(isea2) {
+PJ *PJ_PROJECTION(isea) {
     auto *Q = static_cast<pj_polyhedral_data *>(
         calloc(1, sizeof(pj_polyhedral_data)));
     if (nullptr == Q)
@@ -194,14 +194,14 @@ PJ *PJ_PROJECTION(isea2) {
     // Standard Snyder ISEA orientation: V0 at authalic latitude arctan(φ) ≈
     // 58.28°N (φ = golden ratio). On WGS84 this corresponds to ~58.40°
     // geodetic — PolyhedralDefaults stores the authalic value; user
-    // +orient_lat is geodetic and converted internally. Legacy +proj=isea
+    // +orient_lat is geodetic and converted internally. +proj=isea_legacy
     // uses orient_lon = 11.25° on a sphere and 11.20° on an ellipsoid.
     const bool sphere = (P->es == 0.0);
     double orient_lat = 58.282525588539;
     double orient_lon = sphere ? 11.25 : 11.20;
     double azi = 0.0;
 
-    // +orient= shorthand for two named orientations from legacy +proj=isea.
+    // +orient= shorthand for two named orientations from +proj=isea_legacy.
     // Individual +orient_lat / +orient_lon / +azi still override.
     const char *orient_name = pj_param(P->ctx, P->params, "sorient").s;
     if (orient_name != nullptr) {
@@ -218,7 +218,7 @@ PJ *PJ_PROJECTION(isea2) {
         }
     }
 
-    // For drop-in compatibility with legacy +proj=isea, the default projected
+    // For drop-in compatibility with +proj=isea_legacy, the default projected
     // origin is the bbox center (mid-width, mid-height) of the unfold's root
     // face — the "South Africa" upper-band face F8 — rather than its
     // centroid. This matches legacy ISEA's 4×5 strip-layout geometric centre,

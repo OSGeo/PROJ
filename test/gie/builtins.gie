@@ -3130,7 +3130,7 @@ expect  0.000898315284   0.000000000000
 ===============================================================================
 
 -------------------------------------------------------------------------------
-operation +proj=isea   +a=6400000
+operation +proj=isea_legacy   +a=6400000
 -------------------------------------------------------------------------------
 tolerance 0.2 mm
 accept  2 1
@@ -3149,12 +3149,12 @@ accept  -2 -1
 expect  -1575486.353772019501776 3234352.695310209877789
 roundtrip 1
 
-operation +proj=isea   +mode=hex +resolution=31
+operation +proj=isea_legacy   +mode=hex +resolution=31
 accept  0 0
 expect  failure
 
 -------------------------------------------------------------------------------
-operation +proj=isea +R=6371007.18091875
+operation +proj=isea_legacy +R=6371007.18091875
 -------------------------------------------------------------------------------
 tolerance 0.2 mm
 
@@ -3191,7 +3191,7 @@ expect -837334.699958428042009 8323409.759132191538811
 roundtrip 1
 
 -------------------------------------------------------------------------------
-operation +proj=isea +R=6371007.18091875 +orient=pole
+operation +proj=isea_legacy +R=6371007.18091875 +orient=pole
 -------------------------------------------------------------------------------
 tolerance 0.2 mm
 
@@ -3356,18 +3356,18 @@ expect -663460.15390426 -2932991.72938417
 roundtrip 1
 
 ===============================================================================
-# Icosahedral Snyder Equal Area (generalized)
+# Icosahedral Snyder Equal Area
 # 	Sph&Ell
 ===============================================================================
 
 -------------------------------------------------------------------------------
-# At default settings on a sphere, +proj=isea2 reproduces +proj=isea: the
+# At default settings on a sphere, +proj=isea reproduces +proj=isea_legacy: the
 # projected origin is the geographic point that legacy ISEA places at (0, 0) —
-# the bbox center of icosahedron face F7 (the central upper-band face), which
+# the bbox center of icosahedron face F8 (the central upper-band face), which
 # corresponds to (lon=11.25°E, lat≈-30.0945°S) under the default orientation.
 # On an ellipsoid, +orient_lon defaults to 11.20° instead of 11.25°.
 -------------------------------------------------------------------------------
-operation +proj=isea2 +R=6371007.18091875
+operation +proj=isea +R=6371007.18091875
 -------------------------------------------------------------------------------
 tolerance 0.2 mm
 
@@ -3389,7 +3389,7 @@ roundtrip 1
 
 -------------------------------------------------------------------------------
 # +lat_0 / +lon_0 pan the projected output: (lat_0, lon_0) lands at (0, 0).
-operation +proj=isea2 +R=6371007.18091875 +lat_0=49 +lon_0=2
+operation +proj=isea +R=6371007.18091875 +lat_0=49 +lon_0=2
 -------------------------------------------------------------------------------
 tolerance 0.2 mm
 

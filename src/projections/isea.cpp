@@ -959,7 +959,7 @@ static struct isea_pt isea_forward(struct pj_isea_data *g,
  * Proj 4 integration code follows
  */
 
-PROJ_HEAD(isea, "Icosahedral Snyder Equal Area") "\n\tSph";
+PROJ_HEAD(isea_legacy, "Icosahedral Snyder Equal Area (legacy)") "\n\tSph";
 
 static PJ_XY isea_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
@@ -987,7 +987,7 @@ static PJ_XY isea_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 static PJ_LP isea_s_inverse(PJ_XY xy, PJ *P);
 
-PJ *PJ_PROJECTION(isea) {
+PJ *PJ_PROJECTION(isea_legacy) {
     char *opt;
     struct pj_isea_data *Q = static_cast<struct pj_isea_data *>(
         calloc(1, sizeof(struct pj_isea_data)));
@@ -1302,7 +1302,7 @@ class ISEAPlanarProjection {
     }
 };
 
-// Orientation symmetric to equator (+proj=isea)
+// Orientation symmetric to equator (+proj=isea_legacy)
 /* Sets the orientation of the icosahedron such that the north and the south
  * poles are mapped to the edge midpoints of the icosahedron. The equator is
  * thus mapped symmetrically.
@@ -1311,7 +1311,7 @@ static ISEAPlanarProjection standardISEA(
     /* DEG_TO_RAD * (90 - 58.282525589) = 31.7174744114613 */
     {(E_RAD + F_RAD) / 2, DEG_TO_RAD * -11.25});
 
-// Polar orientation (+proj=isea +orient=pole)
+// Polar orientation (+proj=isea_legacy +orient=pole)
 /*
  * One corner of the icosahedron is, by default, facing to the north pole, and
  * one to the south pole. The provided orientation is relative to the default
@@ -1375,7 +1375,7 @@ static PJ_LP isea_s_inverse(PJ_XY xy, PJ *P) {
     ISEAPlanarProjection *p = Q->p;
 
     if (p) {
-        // Default origin of +proj=isea is different (OGC:1534 is
+        // Default origin of +proj=isea_legacy is different (OGC:1534 is
         // +x_0=19186144.870934911 +y_0=-3323137.7717836285)
         PJ_XY input{xy.x * P->a + Q->xo, xy.y * P->a + Q->yo};
         GeoPoint result;

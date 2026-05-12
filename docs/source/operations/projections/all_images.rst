@@ -644,12 +644,12 @@ List of all projection images
 ********************************************************************************
 
 
-:ref:`isea`
+:ref:`isea_legacy`
 
 .. figure:: ./images/isea.png
    :width: 500 px
    :align: center
-   :alt:   isea
+   :alt:   isea_legacy
 
 
 ********************************************************************************
