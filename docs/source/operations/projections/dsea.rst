@@ -44,7 +44,7 @@ Nets
 dsea (default)
 --------------------------------------------------------------------------------
 
-Snyder's layout (Figure 6)
+Snyder's layout (Figure 11).
 
 .. figure:: ./images/dsea_net.png
    :width: 500 px

@@ -44,8 +44,7 @@ Nets
 tsea (default)
 --------------------------------------------------------------------------------
 
-Snyder's layout (Figure 8), rerooted on the south-cap face so the projected
-origin lands on Antarctica.
+Snyder's layout (Figure 8).
 
 .. figure:: ./images/tsea_net.png
    :width: 500 px

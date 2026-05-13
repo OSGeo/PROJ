@@ -47,7 +47,7 @@ that net are available via ``+orient=``.
 isea (default)
 --------------------------------------------------------------------------------
 
-Snyder's published orientation.
+Snyder's layout (Figure 12).
 
 .. figure:: ./images/isea_net.png
    :width: 500 px
