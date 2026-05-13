@@ -272,6 +272,7 @@ doxygennamespace
 doxygenpage
 doxygenstruct
 doxygentypedef
+dsea
 duplicateBreak
 d'utilisation
 dx
@@ -672,6 +673,7 @@ naptrans
 natearth
 natively
 nd
+neighbours
 nell
 netcdf
 netCDF
@@ -963,6 +965,7 @@ tradeoff
 tran
 triangulations
 triaxial
+tsea
 Trimetric
 Tripel
 Triptychial

@@ -53,10 +53,11 @@ Each polyhedral projection is built from two compact definitions:
 - A *net*: a parent tree over the faces. The indexing is 1-based, with `0`
   reserved as the marker for the root face (that which has no parent).
   For example, `{2, 3, 0, 3}` means:
-   - the 1st face has the **2nd face** as its parent
-   - the 2nd face has the **3rd face** as its parent
-   - the 3rd face has the **no face** as its parent (root)
-   - the 4th face has the **3rd face** as its parent
+
+  - the 1st face has the **2nd face** as its parent
+  - the 2nd face has the **3rd face** as its parent
+  - the 3rd face has the **no face** as its parent (root)
+  - the 4th face has the **3rd face** as its parent
 
 .. figure:: ./images/polyhedral_tsea_layout.png
    :width: 500 px

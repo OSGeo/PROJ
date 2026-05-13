@@ -263,7 +263,7 @@ target_link_libraries(test_polyhedral
   PRIVATE GTest::gtest
   PRIVATE ${PROJ_LIBRARIES})
 target_include_directories(test_polyhedral
-  PRIVATE ${CMAKE_SOURCE_DIR}/src/projections)
+  PRIVATE ${PROJECT_SOURCE_DIR}/src/projections)
 add_test(NAME test_polyhedral COMMAND test_polyhedral)
 set_property(TEST test_polyhedral
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
@@ -277,7 +277,7 @@ add_executable(print_polyhedral_layout
 target_link_libraries(print_polyhedral_layout
   PRIVATE ${PROJ_LIBRARIES})
 target_include_directories(print_polyhedral_layout
-  PRIVATE ${CMAKE_SOURCE_DIR}/src/projections)
+  PRIVATE ${PROJECT_SOURCE_DIR}/src/projections)
 
 if (Threads_FOUND AND CMAKE_USE_PTHREADS_INIT AND NOT APPLE)
 add_definitions(-DPROJ_HAS_PTHREADS)
