@@ -16,6 +16,7 @@
 
 #include "proj_internal.h"
 
+#include <cassert>
 #include <cmath>
 
 namespace polyhedral {
@@ -164,6 +165,7 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
                 }
             }
         }
+        assert(ia_c >= 0 && ib_c >= 0 && ia_p >= 0 && ib_p >= 0);
 
         // Place face onto net using shared edge for orientation
         const int na = net.faces[p][ia_p];
