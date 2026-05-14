@@ -106,17 +106,6 @@ namespace io {
 
 //! @cond Doxygen_Suppress
 
-// CRS subtypes
-#define GEOG_2D "geographic 2D"
-#define GEOG_3D "geographic 3D"
-#define GEOCENTRIC "geocentric"
-#define OTHER "other"
-#define PROJECTED "projected"
-#define DERIVED_PROJECTED "derived projected"
-#define ENGINEERING "engineering"
-#define VERTICAL "vertical"
-#define COMPOUND "compound"
-
 #define GEOG_2D_SINGLE_QUOTED "'geographic 2D'"
 #define GEOG_3D_SINGLE_QUOTED "'geographic 3D'"
 #define GEOCENTRIC_SINGLE_QUOTED "'geocentric'"
@@ -2520,12 +2509,12 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
     identifyOrInsert(self, coordinateSystem, "GEODETIC_CRS", authName, code,
                      csAuthName, csCode, sqlStatements);
 
-    const char *type = GEOG_2D;
+    const char *type = CRS_SUBTYPE_GEOG_2D;
     if (coordinateSystem->axisList().size() == 3) {
         if (dynamic_cast<const crs::GeographicCRS *>(crs.get())) {
-            type = GEOG_3D;
+            type = CRS_SUBTYPE_GEOG_3D;
         } else {
-            type = GEOCENTRIC;
+            type = CRS_SUBTYPE_GEOCENTRIC;
         }
     }
 
@@ -5538,7 +5527,8 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
 
         auto ellipsoidalCS =
             util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(cs);
-        if ((type == GEOG_2D || type == GEOG_3D) && ellipsoidalCS) {
+        if ((type == CRS_SUBTYPE_GEOG_2D || type == CRS_SUBTYPE_GEOG_3D) &&
+            ellipsoidalCS) {
             auto crsRet = crs::GeographicCRS::create(
                 props, datum, datumEnsemble, NN_NO_CHECK(ellipsoidalCS));
             d->context()->d->cache(cacheKey, crsRet);
@@ -5546,7 +5536,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         }
 
         auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
-        if (type == GEOCENTRIC && geocentricCS) {
+        if (type == CRS_SUBTYPE_GEOCENTRIC && geocentricCS) {
             auto crsRet = crs::GeodeticCRS::create(props, datum, datumEnsemble,
                                                    NN_NO_CHECK(geocentricCS));
             d->context()->d->cache(cacheKey, crsRet);
@@ -5554,7 +5544,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         }
 
         auto sphericalCS = util::nn_dynamic_pointer_cast<cs::SphericalCS>(cs);
-        if (type == OTHER && sphericalCS) {
+        if (type == CRS_SUBTYPE_OTHER && sphericalCS) {
             auto crsRet = crs::GeodeticCRS::create(props, datum, datumEnsemble,
                                                    NN_NO_CHECK(sphericalCS));
             d->context()->d->cache(cacheKey, crsRet);
@@ -6214,23 +6204,23 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
                                            code);
     }
     const auto &type = res.front()[0];
-    if (type == GEOG_2D || type == GEOG_3D || type == GEOCENTRIC ||
-        type == OTHER) {
+    if (type == CRS_SUBTYPE_GEOG_2D || type == CRS_SUBTYPE_GEOG_3D ||
+        type == CRS_SUBTYPE_GEOCENTRIC || type == CRS_SUBTYPE_OTHER) {
         return createGeodeticCRS(code);
     }
-    if (type == VERTICAL) {
+    if (type == CRS_SUBTYPE_VERTICAL) {
         return createVerticalCRS(code);
     }
-    if (type == PROJECTED) {
+    if (type == CRS_SUBTYPE_PROJECTED) {
         return createProjectedCRS(code);
     }
-    if (type == DERIVED_PROJECTED) {
+    if (type == CRS_SUBTYPE_DERIVED_PROJECTED) {
         return createDerivedProjectedCRS(code);
     }
-    if (type == ENGINEERING) {
+    if (type == CRS_SUBTYPE_ENGINEERING) {
         return createEngineeringCRS(code);
     }
-    if (allowCompound && type == COMPOUND) {
+    if (allowCompound && type == CRS_SUBTYPE_COMPOUND) {
         return createCompoundCRS(code);
     }
     throw FactoryException("unhandled CRS type: " + type);
@@ -9060,23 +9050,23 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
         info.code = row[1];
         info.name = row[2];
         const auto &type = row[3];
-        if (type == GEOG_2D) {
+        if (type == CRS_SUBTYPE_GEOG_2D) {
             info.type = AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS;
-        } else if (type == GEOG_3D) {
+        } else if (type == CRS_SUBTYPE_GEOG_3D) {
             info.type = AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS;
-        } else if (type == GEOCENTRIC) {
+        } else if (type == CRS_SUBTYPE_GEOCENTRIC) {
             info.type = AuthorityFactory::ObjectType::GEOCENTRIC_CRS;
-        } else if (type == OTHER) {
+        } else if (type == CRS_SUBTYPE_OTHER) {
             info.type = AuthorityFactory::ObjectType::GEODETIC_CRS;
-        } else if (type == PROJECTED) {
+        } else if (type == CRS_SUBTYPE_PROJECTED) {
             info.type = AuthorityFactory::ObjectType::PROJECTED_CRS;
-        } else if (type == VERTICAL) {
+        } else if (type == CRS_SUBTYPE_VERTICAL) {
             info.type = AuthorityFactory::ObjectType::VERTICAL_CRS;
-        } else if (type == COMPOUND) {
+        } else if (type == CRS_SUBTYPE_COMPOUND) {
             info.type = AuthorityFactory::ObjectType::COMPOUND_CRS;
-        } else if (type == ENGINEERING) {
+        } else if (type == CRS_SUBTYPE_ENGINEERING) {
             info.type = AuthorityFactory::ObjectType::ENGINEERING_CRS;
-        } else if (type == DERIVED_PROJECTED) {
+        } else if (type == CRS_SUBTYPE_DERIVED_PROJECTED) {
             info.type = AuthorityFactory::ObjectType::DERIVED_PROJECTED_CRS;
         }
         info.deprecated = row[4] == "1";
@@ -9450,17 +9440,22 @@ AuthorityFactory::createObjectsFromNameEx(
                     res.emplace_back(TableType("geodetic_crs", std::string()));
                     break;
                 case ObjectType::GEOCENTRIC_CRS:
-                    res.emplace_back(TableType("geodetic_crs", GEOCENTRIC));
+                    res.emplace_back(
+                        TableType("geodetic_crs", CRS_SUBTYPE_GEOCENTRIC));
                     break;
                 case ObjectType::GEOGRAPHIC_CRS:
-                    res.emplace_back(TableType("geodetic_crs", GEOG_2D));
-                    res.emplace_back(TableType("geodetic_crs", GEOG_3D));
+                    res.emplace_back(
+                        TableType("geodetic_crs", CRS_SUBTYPE_GEOG_2D));
+                    res.emplace_back(
+                        TableType("geodetic_crs", CRS_SUBTYPE_GEOG_3D));
                     break;
                 case ObjectType::GEOGRAPHIC_2D_CRS:
-                    res.emplace_back(TableType("geodetic_crs", GEOG_2D));
+                    res.emplace_back(
+                        TableType("geodetic_crs", CRS_SUBTYPE_GEOG_2D));
                     break;
                 case ObjectType::GEOGRAPHIC_3D_CRS:
-                    res.emplace_back(TableType("geodetic_crs", GEOG_3D));
+                    res.emplace_back(
+                        TableType("geodetic_crs", CRS_SUBTYPE_GEOG_3D));
                     break;
                 case ObjectType::PROJECTED_CRS:
                     res.emplace_back(TableType("projected_crs", std::string()));
@@ -10591,62 +10586,6 @@ AuthorityFactory::getPointMotionOperationsFor(
                     code, usePROJAlternativeGridNames));
         if (pmo) {
             res.emplace_back(NN_NO_CHECK(pmo));
-        }
-    }
-    return res;
-}
-
-// ---------------------------------------------------------------------------
-
-std::vector<operation::CoordinateOperationNNPtr>
-AuthorityFactory::getOperationsFromAlias(const std::string &crs1Name,
-                                         const std::string &crs2Name,
-                                         bool usePROJAlternativeGridNames,
-                                         bool discardIfMissingGrid,
-                                         bool considerKnownGridsAsAvailable,
-                                         bool discardSuperseded) const {
-    std::string sql("SELECT alias.auth_name, alias.code FROM alias_name alias "
-                    "JOIN coordinate_operation_view cov "
-                    "ON alias.table_name = cov.table_name "
-                    "AND alias.auth_name = cov.auth_name "
-                    "AND alias.code = cov.code "
-                    "WHERE alias.table_name IN ('grid_transformation', "
-                    "'helmert_transformation', 'other_transformation', "
-                    "'concatenated_operation') "
-                    "AND (alt_name LIKE ? OR alt_name LIKE ?) "
-                    "AND NOT (alt_name LIKE ? OR alt_name LIKE ? OR alt_name "
-                    "LIKE ? OR alt_name LIKE ?) "
-                    "AND cov.deprecated = 0");
-    if (discardSuperseded) {
-        sql += " AND NOT EXISTS (SELECT 1 FROM supersession ss WHERE "
-               "ss.superseded_table_name = cov.table_name AND "
-               "ss.superseded_auth_name = cov.auth_name AND "
-               "ss.superseded_code = cov.code AND "
-               "ss.superseded_table_name = ss.replacement_table_name AND "
-               "ss.same_source_target_crs = 1)";
-    }
-    ListOfParams params{
-        std::string(crs1Name).append(" to ").append(crs2Name).append("%"),
-        std::string(crs2Name).append(" to ").append(crs1Name).append("%"),
-        //  If looking for "MGI to ETRS89", don't match "ETRS89 to ETRS89-XXX"
-        std::string(crs1Name).append(" to ").append(crs1Name).append("-%"),
-        std::string(crs2Name).append(" to ").append(crs2Name).append("-%"),
-        // If looking for "MGI to ETRS89", don't match "MGI to ETRS89-XXX" (not
-        // an actual example, but just in case)
-        std::string(crs1Name).append(" to ").append(crs2Name).append("-%"),
-        std::string(crs2Name).append(" to ").append(crs1Name).append("-%"),
-    };
-
-    std::vector<operation::CoordinateOperationNNPtr> res;
-    auto sqlRes = d->run(sql, params);
-    for (const auto &row : sqlRes) {
-        const auto &auth_name = row[0];
-        const auto &code = row[1];
-        auto op = d->createFactory(auth_name)->createCoordinateOperation(
-            code, usePROJAlternativeGridNames);
-        if (!discardIfMissingGrid ||
-            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
-            res.emplace_back(op);
         }
     }
     return res;

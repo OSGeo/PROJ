@@ -66,12 +66,8 @@ FOR EACH ROW BEGIN
                       AND g1.source_crs_code = g2.source_crs_code
                       AND g1.target_crs_auth_name = g2.target_crs_auth_name
                       AND g1.target_crs_code = g2.target_crs_code
-                      WHERE g1.auth_name = 'PROJ'
-                      AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%'
-                      AND g1.code != 'ED50_TO_ETRS89_CATALONIA'
-                      AND g2.auth_name = 'EPSG'
-                      AND g2.deprecated = 0 AND
-                      ((g1.interpolation_crs_auth_name IS NULL AND g2.interpolation_crs_auth_name IS NULL) OR
+                      WHERE g1.auth_name = 'PROJ' AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%' AND g2.auth_name = 'EPSG' AND g2.deprecated = 0 AND (
+                      (g1.interpolation_crs_auth_name IS NULL AND g2.interpolation_crs_auth_name IS NULL) OR
                       (g1.interpolation_crs_auth_name IS NOT NULL AND g2.interpolation_crs_auth_name IS NOT NULL AND
                        g1.interpolation_crs_auth_name = g2.interpolation_crs_auth_name AND
                        g1.interpolation_crs_code = g2.interpolation_crs_code)))

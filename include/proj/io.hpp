@@ -1339,14 +1339,6 @@ class PROJ_GCC_DLL AuthorityFactory {
         const metadata::ExtentPtr &intersectingExtent2,
         bool skipIntermediateExtentIntersection = false) const;
 
-    PROJ_INTERNAL std::vector<operation::CoordinateOperationNNPtr>
-    getOperationsFromAlias(const std::string &crs1Name,
-                           const std::string &crs2Name,
-                           bool usePROJAlternativeGridNames,
-                           bool discardIfMissingGrid,
-                           bool considerKnownGridsAsAvailable,
-                           bool discardSuperseded) const;
-
     typedef std::pair<common::IdentifiedObjectNNPtr, std::string>
         PairObjectName;
     PROJ_INTERNAL std::list<PairObjectName>
