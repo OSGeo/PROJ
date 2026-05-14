@@ -32,7 +32,7 @@ See :ref:`polyhedral` for the shared theory.
 +---------------------+----------------------------------------------------------+
 
 
-.. figure:: ./images/dsea_net.png
+.. figure:: ./images/dsea.png
    :width: 500 px
    :align: center
    :alt:   Dodecahedral Snyder Equal Area
@@ -43,25 +43,16 @@ See :ref:`polyhedral` for the shared theory.
 Nets
 ################################################################################
 
-dsea (default)
---------------------------------------------------------------------------------
-
-Snyder's layout (Figure 11).
-
-.. figure:: ./images/dsea_net.png
-   :width: 500 px
-   :align: center
-   :alt:   DSEA default net
-
-   proj-string: ``+proj=dsea``
+The default net (shown above) follows Snyder's Figure 11. Three alternative
+unfoldings are available via ``+net=``:
 
 a5
 --------------------------------------------------------------------------------
 
-Layout used by the `A5 index <https://a5geo.org>`_. First 8 faces contain the
-majority of the populated land mass.
+Layout used by the `A5 index <https://a5geo.org>`_. The first 8 faces contain
+the majority of the populated land mass.
 
-.. figure:: ./images/dsea_a5_net.png
+.. figure:: ./images/dsea_a5.png
    :width: 500 px
    :align: center
    :alt:   DSEA A5 net
@@ -71,7 +62,7 @@ majority of the populated land mass.
 crescent
 --------------------------------------------------------------------------------
 
-.. figure:: ./images/dsea_crescent_net.png
+.. figure:: ./images/dsea_crescent.png
    :width: 500 px
    :align: center
    :alt:   DSEA crescent net
@@ -81,7 +72,7 @@ crescent
 flower
 --------------------------------------------------------------------------------
 
-.. figure:: ./images/dsea_flower_net.png
+.. figure:: ./images/dsea_flower.png
    :width: 500 px
    :align: center
    :alt:   DSEA flower net

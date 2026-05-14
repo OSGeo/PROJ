@@ -32,7 +32,7 @@ See :ref:`polyhedral` for the shared theory.
 +---------------------+----------------------------------------------------------+
 
 
-.. figure:: ./images/tsea_net.png
+.. figure:: ./images/tsea.png
    :width: 500 px
    :align: center
    :alt:   Tetrahedral Snyder Equal Area
@@ -43,29 +43,18 @@ See :ref:`polyhedral` for the shared theory.
 Nets
 ################################################################################
 
-tsea (default)
---------------------------------------------------------------------------------
+The default net (shown above) follows Snyder's Figure 8. An alternative
+``+net=star`` layout is also available:
 
-Snyder's layout (Figure 8).
-
-.. figure:: ./images/tsea_net.png
-   :width: 500 px
-   :align: center
-   :alt:   TSEA default net
-
-   proj-string: ``+proj=tsea``
-
-star
---------------------------------------------------------------------------------
-
-South-cap face at the centre, with its three neighbours fanned around it.
-
-.. figure:: ./images/tsea_star_net.png
+.. figure:: ./images/tsea_star.png
    :width: 500 px
    :align: center
    :alt:   TSEA star net
 
    proj-string: ``+proj=tsea +net=star``
+
+In the ``star`` layout the south-cap face sits at the centre, with its three
+neighbours fanned around it.
 
 
 Parameters

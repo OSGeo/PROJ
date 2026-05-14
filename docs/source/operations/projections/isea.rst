@@ -30,7 +30,7 @@ See :ref:`polyhedral` for the shared theory.
 +---------------------+----------------------------------------------------------+
 
 
-.. figure:: ./images/isea_net.png
+.. figure:: ./images/isea.png
    :width: 500 px
    :align: center
    :alt:   Icosahedral Snyder Equal Area
@@ -38,30 +38,14 @@ See :ref:`polyhedral` for the shared theory.
    proj-string: ``+proj=isea``
 
 
-Nets
+Orientations
 ################################################################################
 
-``isea`` ships a single net (Snyder's Figure 12). Two named orientations of
-that net are available via ``+orient=``.
+``isea`` ships a single net (Snyder's Figure 12, shown above). A second named
+orientation is available via ``+orient=pole``, which places one icosahedron
+vertex on the geographic north pole:
 
-isea (default)
---------------------------------------------------------------------------------
-
-Snyder's layout (Figure 12).
-
-.. figure:: ./images/isea_net.png
-   :width: 500 px
-   :align: center
-   :alt:   ISEA default orientation
-
-   proj-string: ``+proj=isea``
-
-pole
---------------------------------------------------------------------------------
-
-One icosahedron vertex placed on the geographic north pole.
-
-.. figure:: ./images/isea_pole_net.png
+.. figure:: ./images/isea_pole.png
    :width: 500 px
    :align: center
    :alt:   ISEA pole orientation

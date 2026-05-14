@@ -270,6 +270,54 @@
         "type": "poly"
     },
     {
+        "filename": "dsea.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "dsea",
+        "projstring": "+proj=dsea",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
+        "filename": "dsea_a5.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "dsea_a5",
+        "projstring": "+proj=dsea +net=a5",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
+        "filename": "dsea_crescent.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "dsea_crescent",
+        "projstring": "+proj=dsea +net=crescent",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
+        "filename": "dsea_flower.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "dsea_flower",
+        "projstring": "+proj=dsea +net=flower",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
         "filename": "airocean.png",
         "latmax": 90,
         "latmin": -90,
@@ -643,6 +691,18 @@
         "lonmin": -180,
         "name": "isea",
         "projstring": "+proj=isea",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
+        "filename": "isea_pole.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "isea_pole",
+        "projstring": "+proj=isea +orient=pole",
         "res": "low",
         "type": "line",
         "delta_cut": 1e6
@@ -1503,6 +1563,30 @@
         "projstring": "+proj=tpers +h=5500000 +lat_0=40",
         "res": "low",
         "type": "poly"
+    },
+    {
+        "filename": "tsea.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "tsea",
+        "projstring": "+proj=tsea",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
+        "filename": "tsea_star.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "tsea_star",
+        "projstring": "+proj=tsea +net=star",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "ups.png",

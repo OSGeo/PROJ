@@ -6,10 +6,10 @@ Polyhedral Snyder Equal Area
 
 .. versionadded:: 9.9
 
-.. figure:: ./images/polyhedral_title.png
+.. figure:: ./images/dsea_a5.png
    :width: 800 px
    :align: center
-   :alt:   Polyhedral projection (DSEA A5)
+   :alt:   Polyhedral projection (DSEA A5 net)
 
 The polyhedral Snyder equal-area projection maps the sphere onto the faces of
 a polyhedron using the method described in :cite:`Snyder1992`. The projection
@@ -60,11 +60,6 @@ Each polyhedral projection is built from two compact definitions:
   - the 2nd face has the **3rd face** as its parent
   - the 3rd face has the **no face** as its parent (root)
   - the 4th face has the **3rd face** as its parent
-
-.. figure:: ./images/polyhedral_tsea_layout.png
-   :width: 500 px
-   :align: center
-   :alt:   TSEA layout
 
 Projection specifications
 ********************************************************************************
