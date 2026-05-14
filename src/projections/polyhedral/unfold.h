@@ -139,9 +139,11 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
     // 0-based array index; `parents[i]` is a 1-based face ID.
     int queue[NF];
     int q_head = 0, q_tail = 0;
-    for (int i = 0; i < NF; i++)
+    for (int i = 0; i < NF; i++) {
         if (parents[i] == root + 1)
             queue[q_tail++] = i;
+        }
+    }  
 
     // Hinge each child onto its parent at the shared edge.
     while (q_head < q_tail) {
@@ -150,8 +152,8 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
 
         // Find shared edge
         int ia_c = -1, ib_c = -1, ia_p = -1, ib_p = -1;
-        for (int kc = 0; kc < NFV; kc++)
-            for (int kp = 0; kp < NFV; kp++)
+        for (int kc = 0; kc < NFV; kc++) {
+            for (int kp = 0; kp < NFV; kp++) {
                 if (polyhedron.faces[c][kc] == polyhedron.faces[p][kp]) {
                     if (ia_c == -1) {
                         ia_c = kc;
@@ -161,6 +163,8 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
                         ib_p = kp;
                     }
                 }
+            }
+        }
 
         // Place face onto net using shared edge for orientation
         const int na = net.faces[p][ia_p];
@@ -185,9 +189,10 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
         }
 
         // Append children of this face to queue (parents[i] is 1-based).
-        for (int i = 0; i < NF; i++)
+        for (int i = 0; i < NF; i++) {
             if (parents[i] == c + 1)
                 queue[q_tail++] = i;
+        }
     }
 
     // Rescale so the net's total area equals the unit sphere's (4π).
