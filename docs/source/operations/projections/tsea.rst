@@ -4,6 +4,8 @@
 Tetrahedral Snyder Equal Area
 ********************************************************************************
 
+.. versionadded:: 9.9
+
 Snyder's equal-area mapping :cite:`Snyder1992` applied to the four faces of a
 regular tetrahedron and unfolded into a planar net.
 
