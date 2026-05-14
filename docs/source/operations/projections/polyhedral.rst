@@ -4,6 +4,8 @@
 Polyhedral Snyder Equal Area
 ********************************************************************************
 
+.. versionadded:: 9.9
+
 .. figure:: ./images/polyhedral_title.png
    :width: 800 px
    :align: center
