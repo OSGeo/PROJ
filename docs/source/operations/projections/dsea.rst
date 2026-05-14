@@ -4,6 +4,8 @@
 Dodecahedral Snyder Equal Area
 ********************************************************************************
 
+.. versionadded:: 9.9
+
 Snyder's equal-area mapping :cite:`Snyder1992` applied to the twelve pentagonal
 faces of a regular dodecahedron and unfolded into a planar net.
 
