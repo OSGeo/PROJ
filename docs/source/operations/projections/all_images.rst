@@ -308,7 +308,7 @@ List of all projection images
 .. figure:: ./images/dsea_a5.png
    :width: 500 px
    :align: center
-   :alt:   dsea (a5 net)
+   :alt:   dsea
 
 
 ********************************************************************************
@@ -319,7 +319,7 @@ List of all projection images
 .. figure:: ./images/dsea_crescent.png
    :width: 500 px
    :align: center
-   :alt:   dsea (crescent net)
+   :alt:   dsea
 
 
 ********************************************************************************
@@ -330,7 +330,7 @@ List of all projection images
 .. figure:: ./images/dsea_flower.png
    :width: 500 px
    :align: center
-   :alt:   dsea (flower net)
+   :alt:   dsea
 
 
 ********************************************************************************
@@ -704,7 +704,7 @@ List of all projection images
 .. figure:: ./images/isea_pole.png
    :width: 500 px
    :align: center
-   :alt:   isea (pole orientation)
+   :alt:   isea
 
 
 ********************************************************************************
@@ -1551,7 +1551,7 @@ List of all projection images
 .. figure:: ./images/tsea_star.png
    :width: 500 px
    :align: center
-   :alt:   tsea (star net)
+   :alt:   tsea
 
 
 ********************************************************************************
