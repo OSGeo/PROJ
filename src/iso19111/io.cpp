@@ -12327,7 +12327,6 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
                                "q,"                         // urm5
                                "path,lsat,"                 // lsat
                                "W,M,"                       // hammer
-                               "aperture,resolution,"       // isea
                                )) {
                     double value = getNumericValue(param.value, &hasError);
                     values.push_back(ParameterValue::create(

@@ -194,14 +194,14 @@ PJ *PJ_PROJECTION(isea) {
     // Standard Snyder ISEA orientation: V0 at authalic latitude arctan(φ) ≈
     // 58.28°N (φ = golden ratio). On WGS84 this corresponds to ~58.40°
     // geodetic — PolyhedralDefaults stores the authalic value; user
-    // +orient_lat is geodetic and converted internally. +proj=isea_legacy
-    // uses orient_lon = 11.25° on a sphere and 11.20° on an ellipsoid.
+    // +orient_lat is geodetic and converted internally. orient_lon = 11.25°
+    // on a sphere and 11.20° on an ellipsoid matches Snyder's Figure 12.
     const bool sphere = (P->es == 0.0);
     double orient_lat = 58.282525588539;
     double orient_lon = sphere ? 11.25 : 11.20;
     double azi = 0.0;
 
-    // +orient= shorthand for two named orientations from +proj=isea_legacy.
+    // +orient= shorthand for the two named orientations from Snyder's paper.
     // Individual +orient_lat / +orient_lon / +azi still override.
     const char *orient_name = pj_param(P->ctx, P->params, "sorient").s;
     if (orient_name != nullptr) {
@@ -218,12 +218,11 @@ PJ *PJ_PROJECTION(isea) {
         }
     }
 
-    // For drop-in compatibility with +proj=isea_legacy, the default projected
-    // origin is the bbox center (mid-width, mid-height) of the unfold's root
-    // face — the "South Africa" upper-band face F8 — rather than its
-    // centroid. This matches legacy ISEA's 4×5 strip-layout geometric centre,
-    // which sits inside F8 but not at its centroid. Other polyhedra default
-    // to the centroid of the root face.
+    // Default projected origin is the bbox center (mid-width, mid-height) of
+    // the unfold's root face — the "South Africa" upper-band face F8 — rather
+    // than its centroid. This places the geometric centre of the 4×5 strip
+    // layout at (0, 0). Other polyhedra default to the centroid of the root
+    // face.
     const polyhedral::PolyhedralDefaults d = {
         orient_lat, orient_lon, azi, polyhedral::DefaultOrigin::FaceBboxCenter};
     polyhedral::load_meshes(Q, polyhedra::icosahedron, nets::isea::isea, d);
