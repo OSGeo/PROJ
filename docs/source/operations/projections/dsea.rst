@@ -44,7 +44,7 @@ Nets
 ################################################################################
 
 The default net (shown above) follows Snyder's Figure 11. Three alternative
-unfoldings are available via ``+net=``:
+nets are available via ``+net=``:
 
 a5
 --------------------------------------------------------------------------------

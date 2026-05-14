@@ -10,7 +10,6 @@ airocean
 Airocean
 aitoff
 Aitoff
-akisation
 Albers
 Alegre
 Aleksejenko
@@ -238,7 +237,6 @@ Deakin
 Deallocate
 deallocated
 Deault
-Decakis
 decimalyear
 decimalyears
 decimeter
@@ -456,8 +454,6 @@ helmert
 Helmert
 hemi
 Hernando
-hexakis
-Hexakis
 hgridshift
 Himmelscharten
 hoc
@@ -774,7 +770,6 @@ poder
 Poder
 polewards
 Polyconic
-polyhedra
 Polyhedra
 polynormal
 pre
