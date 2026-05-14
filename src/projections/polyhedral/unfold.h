@@ -142,8 +142,7 @@ unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
     for (int i = 0; i < NF; i++) {
         if (parents[i] == root + 1)
             queue[q_tail++] = i;
-        }
-    }  
+    }
 
     // Hinge each child onto its parent at the shared edge.
     while (q_head < q_tail) {
