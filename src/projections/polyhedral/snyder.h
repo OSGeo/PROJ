@@ -63,8 +63,8 @@
 #ifndef SNYDER_H
 #define SNYDER_H
 
+#include "sphere.h"
 #include "vec3.h"
-#include "vec3_helpers.h"
 
 namespace polyhedral {
 

@@ -35,8 +35,6 @@
 #include <algorithm>
 #include <cmath>
 
-namespace polyhedral {
-
 struct Vec3 {
     double x, y, z;
 };
@@ -96,7 +94,5 @@ inline Vec3 vec3_apply_mat4(const Mat4 &m, const Vec3 &v) {
         m.m[2][0] * v.x + m.m[2][1] * v.y + m.m[2][2] * v.z + m.m[2][3],
     };
 }
-
-} // namespace polyhedral
 
 #endif // VEC3_H

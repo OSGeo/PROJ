@@ -1,7 +1,9 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Higher-level 3D vector helpers for spherical geometry.
+ * Purpose:  Spherical geometry helpers on 3D unit vectors —
+ *           slerp, spherical triangle area, scalar triple/quadruple
+ *           products for great-circle math.
  * Author:   Felix Palmer
  *
  ******************************************************************************
@@ -25,15 +27,13 @@
  * limitations under the License.
  ****************************************************************************/
 
-#ifndef VEC3_HELPERS_H
-#define VEC3_HELPERS_H
+#ifndef SPHERE_H
+#define SPHERE_H
 
 #include "vec3.h"
 
 #include <algorithm>
 #include <cmath>
-
-namespace polyhedral {
 
 // Numerically stable angular distance measure.
 // Returns a value proportional to sin(angle/2) between a and b.
@@ -97,6 +97,4 @@ inline double safe_acos(double x) {
     return std::acos(1.0 - 2.0 * x * x);
 }
 
-} // namespace polyhedral
-
-#endif // VEC3_HELPERS_H
+#endif // SPHERE_H

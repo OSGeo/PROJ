@@ -29,7 +29,7 @@
 #include "polyhedral/polyhedra/dodecahedron.h"
 #include "polyhedral/polyhedra/icosahedron.h"
 #include "polyhedral/polyhedra/tetrahedron.h"
-#include "polyhedral/sphere.h"
+#include "polyhedral/state.h"
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -44,7 +44,7 @@ static PJ_XY polyhedral_fwd(PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0, 0.0};
     auto *Q = static_cast<pj_polyhedral_data *>(P->opaque);
 
-    polyhedral::Vec3 v = polyhedral::lonlat_to_cart(Q, P, lp.lam, lp.phi);
+    Vec3 v = polyhedral::lonlat_to_cart(Q, P, lp.lam, lp.phi);
 
     int tri_idx = polyhedral::find_triangle(Q, v);
     if (tri_idx < 0) {
@@ -72,7 +72,7 @@ static PJ_LP polyhedral_inv(PJ_XY xy, PJ *P) {
         polyhedral::Barycentric bary =
             polyhedral::face_to_barycentric({x, y}, Q->face_tris[i]);
         if (bary.u >= -1e-10 && bary.v >= -1e-10 && bary.w >= -1e-10) {
-            polyhedral::Vec3 v =
+            Vec3 v =
                 polyhedral::snyder_inv({x, y}, Q->face_tris[i], Q->sph_tris[i]);
             polyhedral::cart_to_lonlat(Q, P, v, lp.lam, lp.phi);
             return lp;

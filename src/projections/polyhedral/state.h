@@ -1,14 +1,15 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Spherical coordinate helpers for polyhedral projections —
- *           triangle containment, lon/lat ↔ cartesian with orientation.
+ * Purpose:  Polyhedral projection runtime state — `pj_polyhedral_data`
+ *           struct, mesh loading, orientation, triangle containment, and
+ *           lon/lat ↔ cartesian conversion with orientation applied.
  * Author:   Felix Palmer
  *
  ****************************************************************************/
 
-#ifndef POLYHEDRAL_SPHERE_H
-#define POLYHEDRAL_SPHERE_H
+#ifndef POLYHEDRAL_STATE_H
+#define POLYHEDRAL_STATE_H
 
 #include "conway.h"
 #include "snyder.h"
@@ -291,4 +292,4 @@ inline bool apply_polyhedral_params(pj_polyhedral_data *Q, PJ *P,
 
 } // namespace polyhedral
 
-#endif // POLYHEDRAL_SPHERE_H
+#endif // POLYHEDRAL_STATE_H
