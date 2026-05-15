@@ -220,7 +220,7 @@ inline void cart_to_lonlat(const pj_polyhedral_data *Q, const PJ *P,
     double auth_lat = aasin(P->ctx, gz);
     phi = (P->es != 0.0) ? pj_authalic_lat_inverse(auth_lat, Q->apa, P, Q->qp)
                          : auth_lat;
-    lam = adjlon(std::atan2(gy, gx));
+    lam = adjlon(aatan2(gy, gx));
 }
 
 // Read +orient_lat / +orient_lon / +azi / +lat_0 / +lon_0 (falling back to
