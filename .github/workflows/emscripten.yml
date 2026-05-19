@@ -35,7 +35,7 @@ jobs:
       - name: Run docker build
         run: |
           docker run --user $(id -u):$(id -g) --rm \
-            -e GITHUB_SHA=${{ github.sha }} \
+            -e PROJ_GITHUB_SHA=${{ github.sha }} \
             -v "$PWD":/build/proj_src \
             -v "$PWD"/wasm_out:/build/install \
             proj-emscripten-builder

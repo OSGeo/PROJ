@@ -51,4 +51,54 @@ if(EXISTS ${AUTOCONF_PROJ_CONFIG_H})
     "before CMake's build.")
 endif()
 
+# Get the git hash to write it in the release message.
+set(PROJ_GIT_HASH "")
+if(DEFINED ENV{PROJ_GITHUB_SHA})
+    string(SUBSTRING "$ENV{PROJ_GITHUB_SHA}" 0 7 PROJ_GIT_HASH)
+else()
+    find_package(Git QUIET)
+    if(Git_FOUND AND EXISTS "${PROJ_SOURCE_DIR}/.git")
+        # Get the short hash
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+            WORKING_DIRECTORY "${PROJ_SOURCE_DIR}"
+            RESULT_VARIABLE GIT_REV_RESULT
+            OUTPUT_VARIABLE PROJ_GIT_HASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+
+        if(GIT_REV_RESULT EQUAL 0)
+            # Check if the working directory is dirty
+            execute_process(
+                COMMAND ${GIT_EXECUTABLE} status --porcelain --untracked-files=no
+                WORKING_DIRECTORY "${PROJ_SOURCE_DIR}"
+                RESULT_VARIABLE GIT_STATUS_RESULT
+                OUTPUT_VARIABLE GIT_STATUS_OUTPUT
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                ERROR_QUIET
+            )
+
+            # If the command succeeds and outputs anything, the tree is dirty
+            if(GIT_STATUS_RESULT EQUAL 0 AND NOT GIT_STATUS_OUTPUT STREQUAL "")
+                string(APPEND PROJ_GIT_HASH "*")
+            endif()
+        else()
+            set(PROJ_GIT_HASH "")
+        endif()
+    endif()
+endif()
+if(PROJ_GIT_HASH)
+    add_compile_definitions(PROJ_GIT_HASH=\"${PROJ_GIT_HASH}\")
+endif()
+message(PROJ_GIT_HASH=\"${PROJ_GIT_HASH}\")
+
+# Tell CMake to re-configure if the Git HEAD or index changes
+if(Git_FOUND AND EXISTS "${PROJ_SOURCE_DIR}/.git")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+        "${PROJ_SOURCE_DIR}/.git/HEAD" # for the hash
+        "${PROJ_SOURCE_DIR}/.git/index" # for the *
+    )
+endif()
+
 configure_file(cmake/proj_config.cmake.in src/proj_config.h)
