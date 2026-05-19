@@ -1088,6 +1088,12 @@ INSERT INTO "compound_crs" VALUES('EPSG','11452','GR96 + GLLAT(2025) depth',NULL
 INSERT INTO "usage" VALUES('EPSG','25756','compound_crs','EPSG','11452','EPSG','4776','EPSG','1272');
 INSERT INTO "compound_crs" VALUES('EPSG','11453','GR96 + GLMSL(2025) depth',NULL,'EPSG','4747','EPSG','11451',0);
 INSERT INTO "usage" VALUES('EPSG','25757','compound_crs','EPSG','11453','EPSG','4776','EPSG','1272');
+INSERT INTO "compound_crs" VALUES('EPSG','11460','NZGD2000 / New Zealand Transverse Mercator 2000 + NZVD2016 height',NULL,'EPSG','2193','EPSG','7839',0);
+INSERT INTO "usage" VALUES('EPSG','25773','compound_crs','EPSG','11460','EPSG','1175','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','11465','Dart+26 Grid + Malin Head height',NULL,'EPSG','11464','EPSG','5731',0);
+INSERT INTO "usage" VALUES('EPSG','26016','compound_crs','EPSG','11465','EPSG','4858','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','11470','SZCTW Grid + ODN height',NULL,'EPSG','11469','EPSG','5701',0);
+INSERT INTO "usage" VALUES('EPSG','26034','compound_crs','EPSG','11470','EPSG','4863','EPSG','1144');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89-NOR [EUREF89] + SVD2006 height',NULL,'EPSG','10875','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);

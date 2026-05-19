@@ -823,6 +823,8 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1458','GLMSL','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1456','GLMSL(2025)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1459','GLLAT','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1457','GLLAT(2025)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1460','Dart-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1461','SZCTW-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -8560,3 +8562,7 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6697','JGD2011 + JGD2011 
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','11317','JGD2024 (vertical) - OHt','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','11454','GLLAT ensemble depth','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','11455','GLMSL ensemble depth','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','11464','ETRS89 / Dart+26 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','11465','ETRS89 / Dart+26 SnakeGrid + Malin Head height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','11470','ETRS89 / SZCTW SnakeGrid + Newlyn height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','11469','ETRS89 / SZCTW SnakeGrid','EPSG');
