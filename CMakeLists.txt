@@ -493,11 +493,12 @@ endif()
 ################################################################################
 # pkg-config support
 ################################################################################
-configure_proj_pc()
+option(USE_PKGCONFIG_REQUIRES "Use 'Requires' instead 'Libs' in proj.pc" ON)
+set(GENERATED_INSTALL_FILE_DIR "" CACHE PATH
+  "Directory where generated install files will persist.")
+mark_as_advanced(GENERATED_INSTALL_FILE_DIR)
 
-install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+configure_and_install_proj_pc("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
 ################################################################################
 # "make dist" workalike
