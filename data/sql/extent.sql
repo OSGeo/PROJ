@@ -3832,3 +3832,5 @@ INSERT INTO "extent" VALUES('EPSG','4852','Chile - Tierra del Fuego east of 72°
 INSERT INTO "extent" VALUES('EPSG','4853','Japan - offshore and onshore mainland and outlying islands','Japan - offshore and onshore mainland and outlying islands (Tokara Islands and south, and Hachijo-jima and south).',20.88,46.05,122.38,147.86,0);
 INSERT INTO "extent" VALUES('EPSG','4854','Japan - offshore and onshore outlying islands','Japan - offshore and onshore outlying islands (Tokara Islands and south, and Hachijo-jima and south).',20.88,33.93,122.38,146.0,0);
 INSERT INTO "extent" VALUES('EPSG','4855','Wallis and Futuna - Futuna and Alofi','Wallis and Futuna - Futuna and Alofi - onshore.',-14.42,-14.18,-178.24,-177.94,0);
+INSERT INTO "extent" VALUES('EPSG','4858','Ireland - Dublin area','Ireland - on or related to the DART+ rail project from Dublin city centre to Drogheda, Greystones, Hazelhatch and Kilcock.',53.1,53.8,-6.75,-6.0,0);
+INSERT INTO "extent" VALUES('EPSG','4863','UK - Sizewell','United Kingdom (UK) - Sizewell power station site and  rail and road routes related to the site.',52.13,52.38,1.35,1.7,0);
