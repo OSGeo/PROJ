@@ -44,6 +44,10 @@ JavaScript
 `proj-wasm <https://github.com/willcohen/clj-proj#javascript--clojurescript>`_:
 ES6 module with WASM-compiled PROJ for Node.js and browsers
 
+`wasm-proj <https://github.com/jjimenezshaw/wasm-proj>`_:
+JavaScript library to easily use PROJ compiled in webassembly in the browser.
+Includes `webpages using the library <https://jjimenezshaw.github.io/wasm-proj/>`_.
+
 Julia
 =====
 `Proj.jl <https://github.com/JuliaGeo/Proj.jl>`_:
