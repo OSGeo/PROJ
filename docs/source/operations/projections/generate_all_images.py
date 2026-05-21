@@ -9,6 +9,11 @@ exceptions = {
     "peirce_q_square" : "peirce_q",
     "peirce_q_diamond" : "peirce_q",
     "peirce_q_horizontal" : "peirce_q",
+    "dsea_a5" : "dsea",
+    "dsea_crescent" : "dsea",
+    "dsea_flower" : "dsea",
+    "isea_pole" : "isea",
+    "tsea_star" : "tsea",
 }
 
 with open(all_images_path, 'w') as all_images:
