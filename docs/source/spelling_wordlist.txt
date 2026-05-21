@@ -1017,6 +1017,7 @@ vto
 vunits
 Warmerdam
 Wdocumentation
+webassembly
 webmerc
 Webmercator
 webpage
