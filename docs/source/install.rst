@@ -144,12 +144,8 @@ Alternatively, one can also check out the master branch or any other revision fr
 Note that some sections below presume an unpacked release tarball, and
 some say to use a git checkout.
 
-The following guides show how to compile and install the software using CMake.
-
-  .. note::
-
-    Support for Autotools was maintained until PROJ 8.2 (see :ref:`RFC7`).
-    PROJ 9.0 and later releases only support builds using CMake.
+As of PROJ 9.0, the only build system is CMake.  (The last release
+with Autotools was 8.2.)
 
 
 Requirements
