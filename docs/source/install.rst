@@ -4,10 +4,19 @@
 Installation
 ================================================================================
 
-These pages describe how to install PROJ on your computer without compiling it
-yourself. Below are guides for installing on Windows, Linux and Mac OS X. This
-is a good place to get started if this is your first time using PROJ. More
-advanced users may want to compile the software themselves.
+These pages describe how to install PROJ on your computer, covering a
+variety of operating systems.
+
+There is a section for using package management systems.  If PROJ is
+available for a package management system you already use, and you
+wish to run the release of PROJ offered by that system (usually that's
+fine), this is is the easiest path.
+
+There is a second section for building from source.  This section can
+be followed if there is no binary package available for your
+operating and CPU combination or if you wish to install a different
+version, including the tip of master in git, or pending fixes.  It is
+of course also useful to those creating packages.
 
 Installation from package management systems
 ################################################################################
@@ -130,6 +139,10 @@ Compilation and installation from source code
 
 The classic way of installing PROJ is via the source code distribution. The
 most recent version is available from the :ref:`download page<current_release>`.
+Alternatively, one can also check out the master branch or any other revision from GitHub.
+
+Note that some sections below presume an unpacked release tarball, and
+some say to use a git checkout.
 
 The following guides show how to compile and install the software using CMake.
 
