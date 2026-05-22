@@ -229,6 +229,11 @@ endif()
 add_executable(test_defmodel
   main.cpp
   test_defmodel.cpp)
+if(NLOHMANN_JSON STREQUAL "external")
+  target_compile_definitions(test_defmodel PRIVATE EXTERNAL_NLOHMANN_JSON)
+  target_link_libraries(test_defmodel
+    PRIVATE $<BUILD_INTERFACE:nlohmann_json::nlohmann_json>)
+endif()
 target_link_libraries(test_defmodel
   PRIVATE GTest::gtest
   PRIVATE ${PROJ_LIBRARIES})
@@ -239,6 +244,11 @@ set_property(TEST test_defmodel
 add_executable(test_tinshift
   main.cpp
   test_tinshift.cpp)
+if(NLOHMANN_JSON STREQUAL "external")
+  target_compile_definitions(test_tinshift PRIVATE EXTERNAL_NLOHMANN_JSON)
+  target_link_libraries(test_tinshift
+    PRIVATE $<BUILD_INTERFACE:nlohmann_json::nlohmann_json>)
+endif()
 target_link_libraries(test_tinshift
   PRIVATE GTest::gtest
   PRIVATE ${PROJ_LIBRARIES})
