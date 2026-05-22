@@ -147,6 +147,9 @@ some say to use a git checkout.
 As of PROJ 9.0, the only build system is CMake.  (The last release
 with Autotools was 8.2.)
 
+Packagers and others with similar policy constraints should note that
+an outdated vendored copy of nlohmann/json may be used and that
+GoogleTest may be downloaded at build time (details below).
 
 Requirements
 --------------------------------------------------------------------------------
@@ -160,7 +163,7 @@ Build requirements
 - SQLite3 >= 3.11: headers and library for target architecture, and sqlite3 executable for build architecture
 - libtiff >= 4.0 (optional but recommended to enable reading of grid formats based on GeoTIFF. Only basic TIFF support is required; optional features like WebP or ZStd are not needed.)
 - curl >= 7.29.0 (optional but recommended to support automatic downloading of remote grid files during runtime, allowing PROJ to fetch required transformation data on demand.)
-- JSON for Modern C++ (nlohmann/json) >= 3.7.0
+- JSON for Modern C++ (nlohmann/json) >= 3.7.0 (a vendored 3.9.1 will be used if not found; use `-DNLOHMANN_JSON_ORIGIN=EXTERNAL` to prevent this)
 
 
 .. _test_requirements:
@@ -168,7 +171,7 @@ Build requirements
 Test requirements
 +++++++++++++++++
 
-These are only required if testing is built (see :option:`BUILD_TESTING`, default ON)
+If :option:`BUILD_TESTING` is ON (the default), test programs will be be compiled at build time, and the following additional dependencies are required:
 
 - GoogleTest (GTest) >= 1.8.1; if not found and :option:`TESTING_USE_NETWORK` is ON, then version 1.15.2 is fetched from GitHub and locally installed
 - Python >= 3.7
