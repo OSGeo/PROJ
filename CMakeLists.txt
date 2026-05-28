@@ -129,8 +129,8 @@ endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
   # Intel CXX compiler based on clang defaults to -ffast-math, which
   # breaks std::isinf(), std::isnan(), etc.
-  set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -fno-fast-math)
-  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-fast-math)
+  string(APPEND CMAKE_C_FLAGS " -fno-fast-math")
+  string(APPEND CMAKE_CXX_FLAGS " -fno-fast-math")
 endif ()
 
 # Add other supported compiler flags
