@@ -4,10 +4,19 @@
 Installation
 ================================================================================
 
-These pages describe how to install PROJ on your computer without compiling it
-yourself. Below are guides for installing on Windows, Linux and Mac OS X. This
-is a good place to get started if this is your first time using PROJ. More
-advanced users may want to compile the software themselves.
+These pages describe how to install PROJ on your computer, covering a
+variety of operating systems.
+
+There is a section for using package management systems.  If PROJ is
+available for a package management system you already use, and you
+wish to run the release of PROJ offered by that system (usually that's
+fine), this is is the easiest path.
+
+There is a second section for building from source.  This section can
+be followed if there is no binary package available for your
+operating and CPU combination or if you wish to install a different
+version, including the tip of master in git, or pending fixes.  It is
+of course also useful to those creating packages.
 
 Installation from package management systems
 ################################################################################
@@ -130,14 +139,17 @@ Compilation and installation from source code
 
 The classic way of installing PROJ is via the source code distribution. The
 most recent version is available from the :ref:`download page<current_release>`.
+Alternatively, one can also check out the master branch or any other revision from GitHub.
 
-The following guides show how to compile and install the software using CMake.
+Note that some sections below presume an unpacked release tarball, and
+some say to use a git checkout.
 
-  .. note::
+As of PROJ 9.0, the only build system is CMake.  (The last release
+with Autotools was 8.2.)
 
-    Support for Autotools was maintained until PROJ 8.2 (see :ref:`RFC7`).
-    PROJ 9.0 and later releases only support builds using CMake.
-
+Packagers and others with similar policy constraints should note that
+an outdated vendored copy of nlohmann/json may be used and that
+GoogleTest may be downloaded at build time (details below).
 
 Requirements
 --------------------------------------------------------------------------------
@@ -151,7 +163,7 @@ Build requirements
 - SQLite3 >= 3.11: headers and library for target architecture, and sqlite3 executable for build architecture
 - libtiff >= 4.0 (optional but recommended to enable reading of grid formats based on GeoTIFF. Only basic TIFF support is required; optional features like WebP or ZStd are not needed.)
 - curl >= 7.29.0 (optional but recommended to support automatic downloading of remote grid files during runtime, allowing PROJ to fetch required transformation data on demand.)
-- JSON for Modern C++ (nlohmann/json) >= 3.7.0
+- JSON for Modern C++ (nlohmann/json) >= 3.7.0 (a vendored 3.9.1 will be used if not found; use `-DNLOHMANN_JSON_ORIGIN=EXTERNAL` to prevent this)
 
 
 .. _test_requirements:
@@ -159,7 +171,7 @@ Build requirements
 Test requirements
 +++++++++++++++++
 
-These are only required if testing is built (see :option:`BUILD_TESTING`, default ON)
+If :option:`BUILD_TESTING` is ON (the default), test programs will be be compiled at build time, and the following additional dependencies are required:
 
 - GoogleTest (GTest) >= 1.8.1; if not found and :option:`TESTING_USE_NETWORK` is ON, then version 1.15.2 is fetched from GitHub and locally installed
 - Python >= 3.7
