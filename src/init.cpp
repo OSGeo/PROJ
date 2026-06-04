@@ -247,11 +247,13 @@ static paralist *get_init(PJ_CONTEXT *ctx, const char *key,
         if (strncmp(xkey, "epsg:", 5) == 0) {
             exists = ctx->epsg_file_exists;
             if (exists < 0) {
-                exists = pj_find_file(ctx, initname, unused, sizeof(unused));
+                exists = pj_find_file(ctx, initname, unused, sizeof(unused),
+                                      /* disable_network = */ true);
                 ctx->epsg_file_exists = exists;
             }
         } else {
-            exists = pj_find_file(ctx, initname, unused, sizeof(unused));
+            exists = pj_find_file(ctx, initname, unused, sizeof(unused),
+                                  /* disable_network = */ true);
         }
 
         if (!exists) {

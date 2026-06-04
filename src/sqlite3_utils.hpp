@@ -69,6 +69,8 @@ class SQLite3VFS {
                                                  size_t bufferSize);
 #endif
 
+    static std::unique_ptr<SQLite3VFS> createNetwork(PJ_CONTEXT *ctx);
+
     const char *name() const;
     sqlite3_vfs *raw() { return &(vfs_->base); }
 };

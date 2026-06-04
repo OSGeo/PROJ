@@ -1936,10 +1936,12 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
  *                          will receive the full filename on success.
  *                          Will be zero-terminated.
  * @param out_full_filename_size size of out_full_filename.
+ * @param disable_network whether network access must be disabled
  * @return 1 if the file was found, 0 otherwise.
  */
 int pj_find_file(PJ_CONTEXT *ctx, const char *short_filename,
-                 char *out_full_filename, size_t out_full_filename_size) {
+                 char *out_full_filename, size_t out_full_filename_size,
+                 bool disable_network) {
     const auto iter = ctx->lookupedFiles.find(short_filename);
     if (iter != ctx->lookupedFiles.end()) {
         if (iter->second.empty()) {
@@ -1952,11 +1954,11 @@ int pj_find_file(PJ_CONTEXT *ctx, const char *short_filename,
     }
     const bool old_network_enabled =
         proj_context_is_network_enabled(ctx) != FALSE;
-    if (old_network_enabled)
+    if (disable_network && old_network_enabled)
         proj_context_set_enable_network(ctx, false);
     auto file = NS_PROJ::FileManager::open_resource_file(
         ctx, short_filename, out_full_filename, out_full_filename_size);
-    if (old_network_enabled)
+    if (disable_network && old_network_enabled)
         proj_context_set_enable_network(ctx, true);
     if (file) {
         ctx->lookupedFiles[short_filename] = out_full_filename;
