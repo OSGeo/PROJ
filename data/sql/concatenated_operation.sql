@@ -20,7 +20,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','5242','S-JTSK (Ferro) to WGS
 INSERT INTO "usage" VALUES('EPSG','9314','concatenated_operation','EPSG','5242','EPSG','1079','EPSG','1252');
 INSERT INTO "concatenated_operation" VALUES('EPSG','5838','Lisbon (Lisbon) to WGS 84 (2)','','EPSG','4803','EPSG','4326',2.0,'OGP-Prt 2009',0);
 INSERT INTO "usage" VALUES('EPSG','9511','concatenated_operation','EPSG','5838','EPSG','1294','EPSG','1042');
-INSERT INTO "concatenated_operation" VALUES('EPSG','6714','Tokyo to JGD2011 (1)','See Tokyo to JGD2011 (2) (code 6740) for areas other than northern Honshu.','EPSG','4301','EPSG','6668',0.3,'OGP-Jpn N Honshu',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','6714','Tokyo to JGD2024 (1)','See Tokyo to JGD2024 (2) (code 6740) for areas other than northern Honshu.  On adoption of JGD2024 (vertical) with effect from 1st April 2025, the name of the target CRS was changed from JGD2011 to JGD2024; there is no change of definition or of coordinate values.','EPSG','4301','EPSG','6668',0.3,'OGP-Jpn N Honshu',0);
 INSERT INTO "usage" VALUES('EPSG','9742','concatenated_operation','EPSG','6714','EPSG','4170','EPSG','1142');
 INSERT INTO "concatenated_operation" VALUES('EPSG','6739','NAD27 to NAD83(HARN) (22)','May be taken as approximate transformation NAD27 to WGS 84 - see code 8622.','EPSG','4267','EPSG','4152',0.2,'NGS-Usa SD',0);
 INSERT INTO "usage" VALUES('EPSG','9755','concatenated_operation','EPSG','6739','EPSG','1410','EPSG','1032');

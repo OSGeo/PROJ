@@ -715,7 +715,16 @@ def fill_helmert_transformation(proj_db_cursor):
             assert param_code[13] == 1046
             assert param_code[14] == 1047
             assert param_uom_code[7] == param_uom_code[8]
-            assert param_uom_code[7] == param_uom_code[9]
+            if param_uom_code[7] == param_uom_code[9]:
+                pass
+            elif param_value[7] == 0 and param_value[9] == 0:
+                # EPSG 12.057. Occurs for 11485, 'ITRF2020 to NATRF2022e2020 (1)'
+                # where Rate of change of X and Y axis translation are mm/year
+                # but for Z axis, it is metre/year. But as all are 0 that doesn't
+                # matter
+                print("Not same unit for Helmert transformation", (code, name, param_uom_code))
+            else:
+                assert param_uom_code[7] == param_uom_code[9], (code, name, param_uom_code)
             assert param_uom_code[10] == param_uom_code[11]
             assert param_uom_code[10] == param_uom_code[12]
             for i in range(15):
