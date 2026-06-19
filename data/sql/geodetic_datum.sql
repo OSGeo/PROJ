@@ -450,9 +450,9 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1396','Bonaire',NULL,'EPSG','7022','
 INSERT INTO "usage" VALUES('EPSG','22166','geodetic_datum','EPSG','1396','EPSG','3822','EPSG','1056');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1397','Bonaire 2004',NULL,'EPSG','7019','EPSG','8901',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','22170','geodetic_datum','EPSG','1397','EPSG','3822','EPSG','1178');
-INSERT INTO "geodetic_datum" VALUES('EPSG','1399','International Terrestrial Reference Frame 2020-u2023',NULL,'EPSG','7019','EPSG','8901','2015-01-01',2015.0,NULL,NULL,NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1399','International Terrestrial Reference Frame 2020-u2023',NULL,'EPSG','7019','EPSG','8901','2015-01-01',2015.0,NULL,NULL,NULL,1);
 INSERT INTO "usage" VALUES('EPSG','22373','geodetic_datum','EPSG','1399','EPSG','1262','EPSG','1027');
-INSERT INTO "geodetic_datum" VALUES('EPSG','1400','IGb20',NULL,'EPSG','7019','EPSG','8901','2015-01-01',2015.0,NULL,NULL,NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1400','IGb20',NULL,'EPSG','7019','EPSG','8901','2015-01-01',2015.0,NULL,NULL,NULL,1);
 INSERT INTO "usage" VALUES('EPSG','22362','geodetic_datum','EPSG','1400','EPSG','1262','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1401','Uganda Geodetic Reference Frame',NULL,'EPSG','7019','EPSG','8901','March 2011',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','22456','geodetic_datum','EPSG','1401','EPSG','1241','EPSG','1181');
@@ -484,7 +484,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1419','Greenland Reference 1996 (202
 INSERT INTO "usage" VALUES('EPSG','23455','geodetic_datum','EPSG','1419','EPSG','1107','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1420','Greenland Reference 1996 (1996)',NULL,'EPSG','7019','EPSG','8901','1996-08-14',NULL,NULL,NULL,1996.62,0);
 INSERT INTO "usage" VALUES('EPSG','23616','geodetic_datum','EPSG','1420','EPSG','1107','EPSG','1027');
-INSERT INTO "geodetic_datum" VALUES('EPSG','1422','North American Terrestrial Reference Frame of 2022',NULL,'EPSG','7019','EPSG','8901','2025-06-16',NULL,NULL,NULL,2020.0,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1422','North American Terrestrial Reference Frame of 2022 epoch 2020.00',NULL,'EPSG','7019','EPSG','8901','2027-01-01',NULL,NULL,NULL,2020.0,0);
 INSERT INTO "usage" VALUES('EPSG','23622','geodetic_datum','EPSG','1422','EPSG','4803','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1425','OSNet v2009',NULL,'EPSG','7019','EPSG','8901','2016-01-01',NULL,NULL,NULL,2009.756,0);
 INSERT INTO "usage" VALUES('EPSG','23923','geodetic_datum','EPSG','1425','EPSG','1264','EPSG','1295');
@@ -540,6 +540,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1460','Dart+26 Intermediate Referenc
 INSERT INTO "usage" VALUES('EPSG','26014','geodetic_datum','EPSG','1460','EPSG','4858','EPSG','1141');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1461','SZCTW Intermediate Reference Frame',NULL,'EPSG','7019','EPSG','8901',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','26035','geodetic_datum','EPSG','1461','EPSG','4863','EPSG','1144');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1462','SIRGAS-Chile 2025',NULL,'EPSG','7019','EPSG','8901','2025-04-29',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','26670','geodetic_datum','EPSG','1462','EPSG','1066','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,'EPSG','7001','EPSG','8901',NULL,NULL,NULL,NULL,NULL,1);
 INSERT INTO "usage" VALUES('EPSG','13422','geodetic_datum','EPSG','6001','EPSG','1263','EPSG','1213');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,'EPSG','7002','EPSG','8901',NULL,NULL,NULL,NULL,NULL,1);

@@ -451,7 +451,7 @@ tests:
     DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast west of 44°W and north of 40°N.
     DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast west of 44°W and north of 40°N.
     DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, United States (USA) - CONUS including EEZ - onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS.
-    DERIVED_FROM(EPSG):8555, NAD27 to NAD83 (7), 0.15 m, United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS).
+    DERIVED_FROM(EPSG):8555, NAD27 to NAD83 (7), 0.15 m, United States (USA) - conterminous (contiguous) lower 48 states (CONUS) onshore, Gulf of Mexico offshore continental shelf (GoM OCS).
     DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, United States (USA) - Alaska including EEZ.
     DERIVED_FROM(EPSG):8549, NAD27 to NAD83 (8), 0.5 m, United States (USA) - Alaska.
     DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec.
@@ -628,7 +628,7 @@ tests:
     -------------------------------------
     Operation No. 4:
 
-    DERIVED_FROM(EPSG):8555, NAD27 to NAD83 (7), 0.15 m, United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS).
+    DERIVED_FROM(EPSG):8555, NAD27 to NAD83 (7), 0.15 m, United States (USA) - conterminous (contiguous) lower 48 states (CONUS) onshore, Gulf of Mexico offshore continental shelf (GoM OCS).
 
     PROJ string:
     +proj=pipeline
@@ -675,7 +675,7 @@ tests:
         OPERATIONACCURACY[0.15],
         USAGE[
             SCOPE["Geodesy."],
-            AREA["United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS)."],
+            AREA["United States (USA) - conterminous (contiguous) lower 48 states (CONUS) onshore, Gulf of Mexico offshore continental shelf (GoM OCS)."],
             BBOX[23.82,-124.79,49.38,-66.91]],
         ID["DERIVED_FROM(EPSG)",8555],
         REMARK["NADCON5 method expects longitudes 0-360°; source and target CRS longitudes in range ±180°. Accuracy at 67% confidence level is 0.15m onshore, 1m nearshore and undetermined farther offshore. For application in Gulf of Mexico refer to IOGP report 373-26."]]
@@ -1242,7 +1242,7 @@ tests:
     -------------------------------------
     Operation No. 1:
 
-    unknown id, Inverse of NAD83(2011) to NAVD88 height (3), 0.015 m, United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming.
+    unknown id, Inverse of NAD83(2011) to NAVD88 height (3), 0.015 m, United States (USA) - conterminous (contiguous) lower 48 states (CONUS) - onshore.
 
     PROJ string:
     +proj=pipeline
