@@ -205,7 +205,7 @@ static PJ_LP som_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
 }
 
 static PJ *som_setup(PJ *P) {
-    double esc, ess, lam;
+    double esc, ess;
     struct pj_som_data *Q = static_cast<struct pj_som_data *>(P->opaque);
     Q->sa = sin(Q->alf);
     Q->ca = cos(Q->alf);
@@ -222,9 +222,9 @@ static PJ *som_setup(PJ *P) {
     Q->rlm2 = Q->rlm + M_TWOPI;
     Q->a2 = Q->a4 = Q->b = Q->c1 = Q->c3 = 0.;
     seraz0(0., 1., P);
-    for (lam = 9.; lam <= 81.0001; lam += 18.)
+    for (int lam = 9; lam <= 81; lam += 18)
         seraz0(lam, 4., P);
-    for (lam = 18; lam <= 72.0001; lam += 18.)
+    for (int lam = 18; lam <= 72; lam += 18)
         seraz0(lam, 2., P);
     seraz0(90., 1., P);
     Q->a2 /= 30.;
