@@ -30,7 +30,7 @@ jobs:
 
       - name: Checkout code
         if: steps.check_branch.outputs.run == 'true'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
 
       - name: Tag
         if: steps.check_branch.outputs.run == 'true'
