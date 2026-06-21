@@ -1036,6 +1036,7 @@ proj_crs_get_sub_crs
 proj_crs_has_point_motion_operation
 proj_crs_info_list_destroy
 proj_crs_is_derived
+proj_crs_is_dynamic
 proj_crs_promote_to_3D
 proj_cs_get_axis_count
 proj_cs_get_axis_info
