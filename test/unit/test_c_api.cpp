@@ -1069,11 +1069,10 @@ TEST_F(CApi, proj_create_from_database) {
         EXPECT_EQ(proj_dynamic_datum_get_frame_reference_epoch(m_ctxt, datum),
                   2005.0);
     }
-#ifdef no_more_dynamic_vertical_datum
     {
-        // Norway Normal Null 2000
+        // RH2000 height
         auto datum = proj_create_from_database(
-            m_ctxt, "EPSG", "1096", PJ_CATEGORY_DATUM, false, nullptr);
+            m_ctxt, "EPSG", "5208", PJ_CATEGORY_DATUM, false, nullptr);
         ASSERT_NE(datum, nullptr);
         ObjectKeeper keeper(datum);
         EXPECT_EQ(proj_get_type(datum),
@@ -1081,7 +1080,6 @@ TEST_F(CApi, proj_create_from_database) {
         EXPECT_EQ(proj_dynamic_datum_get_frame_reference_epoch(m_ctxt, datum),
                   2000.0);
     }
-#endif
     {
         auto op = proj_create_from_database(m_ctxt, "EPSG", "16031",
                                             PJ_CATEGORY_COORDINATE_OPERATION,
@@ -7726,6 +7724,71 @@ TEST_F(CApi, proj_crs_add_horizontal_derived_conversion) {
         EXPECT_EQ(proj_crs_add_horizontal_derived_conversion(
                       m_ctxt, "my derived crs", geog_crs, conv, cs),
                   nullptr);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_crs_is_dynamic) {
+
+    {
+        // ITRF2020
+        auto crs = proj_create_from_database(m_ctxt, "EPSG", "9990",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper(crs);
+
+        EXPECT_TRUE(proj_crs_is_dynamic(m_ctxt, crs));
+    }
+
+    {
+        // ETRS89
+        auto crs = proj_create_from_database(m_ctxt, "EPSG", "4258",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper(crs);
+
+        EXPECT_FALSE(proj_crs_is_dynamic(m_ctxt, crs));
+    }
+
+    {
+        // RH2000 height
+        auto crs = proj_create_from_database(m_ctxt, "EPSG", "5613",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper(crs);
+
+        EXPECT_TRUE(proj_crs_is_dynamic(m_ctxt, crs));
+    }
+
+    {
+        // EGM2008 height
+        auto crs = proj_create_from_database(m_ctxt, "EPSG", "3855",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper(crs);
+
+        EXPECT_FALSE(proj_crs_is_dynamic(m_ctxt, crs));
+    }
+
+    {
+        // WGS 84 / Pseudo-Mercator +  EGM2008 geoid height
+        auto crs = proj_create_from_database(m_ctxt, "EPSG", "6871",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper(crs);
+
+        EXPECT_FALSE(proj_crs_is_dynamic(m_ctxt, crs));
+    }
+
+    {
+        // ETRS89-SWE [SWEREF 99] + RH2000 height
+        auto crs = proj_create_from_database(m_ctxt, "EPSG", "5628",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper(crs);
+
+        EXPECT_TRUE(proj_crs_is_dynamic(m_ctxt, crs));
     }
 }
 

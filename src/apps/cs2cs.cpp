@@ -63,10 +63,12 @@ static PJ *transformation = nullptr;
 
 static bool srcIsLongLat = false;
 static double srcToRadians = 0.0;
+static bool srcIsDynamic = false;
 
 static bool destIsLongLat = false;
 static double destToRadians = 0.0;
 static bool destIsLatLong = false;
+static bool destIsDynamic = false;
 
 static int reversein = 0, /* != 0 reverse input arguments */
     reverseout = 0,       /* != 0 reverse output arguments */
@@ -153,8 +155,19 @@ static void process(FILE *fid)
         /* is forward verbatim from the input.                               */
         char *before_time = s;
         double t = strtod(s, &s);
-        if (s == before_time)
+        if (s == before_time) {
             t = HUGE_VAL;
+            if (srcIsDynamic) {
+                fprintf(
+                    stderr,
+                    "Input coordinates lack a coordinate epoch, whereas the "
+                    "source CRS is dynamic. Results might be inaccurate.\n");
+            } else if (destIsDynamic) {
+                fprintf(stderr, "Input coordinates lack a coordinate epoch, "
+                                "whereas the destination CRS is dynamic. "
+                                "Results might be inaccurate.\n");
+            }
+        }
         s = before_time;
 
         if (data.v == HUGE_VAL)
@@ -925,6 +938,8 @@ int main(int argc, char **argv) {
         }
         proj_destroy(src);
         src = srcMetadata;
+    } else if (proj_crs_is_dynamic(nullptr, src)) {
+        srcIsDynamic = true;
     }
 
     if (!targetEpoch.empty()) {
@@ -943,6 +958,8 @@ int main(int argc, char **argv) {
         }
         proj_destroy(dst);
         dst = dstMetadata;
+    } else if (proj_crs_is_dynamic(nullptr, dst)) {
+        destIsDynamic = true;
     }
 
     std::string authorityOption; /* keep this variable in this outer scope ! */

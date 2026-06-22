@@ -1087,7 +1087,9 @@ tests:
   in: |
     59.4967 -117.61748 329.396
     59.4967 -117.61748 329.396 1988
-  out: |
+  stderr: |
+    Input coordinates lack a coordinate epoch, whereas the source CRS is dynamic. Results might be inaccurate.
+  stdout: |
     59.4967 -117.61748 329.396	59.4967002	-117.6174799 329.3845529
     59.4967 -117.61748 329.396	59.4967002	-117.6174799 329.3845529 1988
 - comment: Check ob_tran with o_proj=longlat (#1525)
@@ -1129,12 +1131,16 @@ tests:
 - comment: Test effect of --authority (GH-2442) - use the EPSG:8076 operation
   args: ITRF96 ITRF2014
   in: 49 2
-  out: |
+  stderr: |
+    Input coordinates lack a coordinate epoch, whereas the source CRS is dynamic. Results might be inaccurate.
+  stdout: |
     49d0'0.002"N	2dE 0.018
 - comment: Test effect of --authority (GH-2442) - a no-op
   args: --authority PROJ ITRF96 ITRF2014
   in: 49 2
-  out: |
+  stderr: |
+    Input coordinates lack a coordinate epoch, whereas the source CRS is dynamic. Results might be inaccurate.
+  stdout: |
     49dN	2dE 0.000
 - comment: Test effect of --accuracy
   env:
