@@ -12220,6 +12220,38 @@ TEST(operation, createOperation_ETRS89_XXX_to_ETRS89_YYY_using_ETRF2000) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, createOperation_NAD83_2011_to_NATRF2022_do_not_use_ITRF2020) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // NAD83(2011)
+        authFactoryEPSG->createCoordinateReferenceSystem("6318"),
+        // NATRF2022e2020
+        authFactoryEPSG->createCoordinateReferenceSystem("10968"), ctxt);
+    ASSERT_EQ(list.size(), 2U);
+
+    EXPECT_STREQ(list[0]->nameStr().c_str(),
+                 "NAD83(2011) to WGS 84 (1) + "
+                 "Inverse of NATRF2022e2020 to WGS 84 (1)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+
+    EXPECT_STREQ(
+        list[1]->nameStr().c_str(),
+        "Ballpark geographic offset from NAD83(2011) to NATRF2022e2020");
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, createOperation_time_dependent_helmert_directly_from_database) {
     auto dbContext = DatabaseContext::create();
     auto factory = AuthorityFactory::create(dbContext, "EPSG");
