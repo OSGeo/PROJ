@@ -7751,6 +7751,10 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         starts_with(sourceCRS->nameStr(), "NAD83(CSRS)") &&
         starts_with(targetCRS->nameStr(), "NAD83(CSRS)");
 
+    const bool canUseDynamicIntermediate =
+        sourceCRS->isDynamic(/* considerWGS84AsDynamic = */ false) ||
+        targetCRS->isDynamic(/* considerWGS84AsDynamic = */ false);
+
     if (allowedIntermediateObjectType == ObjectType::GEOGRAPHIC_CRS) {
         const auto &sourceGeogCRS =
             dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
@@ -7939,7 +7943,8 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         res = filterOutSuperseded(std::move(res));
     }
 
-    const auto checkPivot = [ETRFtoETRF, NAD83_CSRS_to_NAD83_CSRS, &sourceCRS,
+    const auto checkPivot = [ETRFtoETRF, NAD83_CSRS_to_NAD83_CSRS,
+                             canUseDynamicIntermediate, &sourceCRS,
                              &targetCRS](const crs::CRSPtr &intermediateCRS) {
         // Make sure that ETRF2000 to ETRF2014 doesn't go through ITRF9x or
         // ITRF>2014
@@ -7967,6 +7972,11 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         if (NAD83_CSRS_to_NAD83_CSRS && intermediateCRS &&
             (intermediateCRS->nameStr() == "NAD83" ||
              intermediateCRS->nameStr() == "WGS 84")) {
+            return false;
+        }
+
+        if (!canUseDynamicIntermediate &&
+            intermediateCRS->isDynamic(/* considerWGS84AsDynamic = */ false)) {
             return false;
         }
 
@@ -8325,6 +8335,10 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         // link to a datum.
         return listTmp;
     }
+
+    const bool canUseDynamicIntermediate =
+        sourceCRS->isDynamic(/* considerWGS84AsDynamic = */ false) ||
+        targetCRS->isDynamic(/* considerWGS84AsDynamic = */ false);
 
     ListOfParams params;
     const auto BuildSQLPart = [this, NAD83_CSRS_to_NAD83_CSRS,
@@ -8689,6 +8703,11 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         const auto &op2Source = op2NN->sourceCRS();
         const auto &op2Target = op2NN->targetCRS();
         if (!(op1Source && op1Target && op2Source && op2Target)) {
+            continue;
+        }
+
+        if (!canUseDynamicIntermediate &&
+            op1Target->isDynamic(/* considerWGS84AsDynamic = */ false)) {
             continue;
         }
 
