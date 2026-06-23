@@ -2157,36 +2157,7 @@ int proj_crs_is_dynamic(PJ_CONTEXT *ctx, const PJ *crs) {
         proj_log_error(ctx, __FUNCTION__, "Object is not a CRS");
         return false;
     }
-
-    const auto singleCRSIsDynamic = [](const CRS *singleCRS) {
-        if (auto geodCRS = singleCRS->extractGeodeticCRSRaw()) {
-            const auto &datum = geodCRS->datum();
-            if (dynamic_cast<const DynamicGeodeticReferenceFrame *>(
-                    datum.get()))
-                return true;
-        } else if (auto vertCRS =
-                       dynamic_cast<const VerticalCRS *>(singleCRS)) {
-            const auto &datum = vertCRS->datum();
-            if (dynamic_cast<const DynamicVerticalReferenceFrame *>(
-                    datum.get()))
-                return true;
-        }
-
-        return false;
-    };
-
-    if (dynamic_cast<const SingleCRS *>(l_crs)) {
-        return singleCRSIsDynamic(l_crs);
-    } else if (auto compoundCRS = dynamic_cast<const CompoundCRS *>(l_crs)) {
-        const auto components = compoundCRS->componentReferenceSystems();
-        for (const auto &comp : components) {
-            if (singleCRSIsDynamic(comp.get())) {
-                return true;
-            }
-        }
-    }
-
-    return false;
+    return l_crs->isDynamic(/* considerWGS84AsDynamic = */ false);
 }
 
 // ---------------------------------------------------------------------------
