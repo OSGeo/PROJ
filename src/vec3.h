@@ -36,7 +36,7 @@
 #include <cmath>
 
 struct Vec3 {
-    double x, y, z;
+    double x = 0.0, y = 0.0, z = 0.0;
 };
 
 inline double vec3_dot(const Vec3 &a, const Vec3 &b) {
@@ -82,7 +82,10 @@ inline double vec3_angle(const Vec3 &a, const Vec3 &b) {
 }
 
 struct Mat4 {
-    double m[4][4];
+    double m[4][4] = {{1.0, 0.0, 0.0, 0.0},
+                      {0.0, 1.0, 0.0, 0.0},
+                      {0.0, 0.0, 1.0, 0.0},
+                      {0.0, 0.0, 0.0, 1.0}};
 };
 
 // Apply an affine 4x4 to a 3D point (treated as (v.x, v.y, v.z, 1)). Assumes
