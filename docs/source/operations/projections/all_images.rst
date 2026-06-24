@@ -644,6 +644,17 @@ List of all projection images
 ********************************************************************************
 
 
+:ref:`interrupted`
+
+.. figure:: ./images/interrupted.png
+   :width: 500 px
+   :align: center
+   :alt:   interrupted
+
+
+********************************************************************************
+
+
 :ref:`isea`
 
 .. figure:: ./images/isea.png
