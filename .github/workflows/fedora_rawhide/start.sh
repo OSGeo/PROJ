@@ -3,6 +3,9 @@
 set -e
 
 dnf install -y cmake clang ccache ninja-build sqlite-devel libtiff-devel libcurl-devel diffutils wget
+# For this build, install nlohmann-json so that the "use external"
+# branch is tested; the other builds use the vendored copy.
+dnf install -y nlohmann-json-devel
 
 cd "$WORK_DIR"
 
