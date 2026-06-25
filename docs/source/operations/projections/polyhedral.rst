@@ -1,7 +1,9 @@
+:orphan:
+
 .. _polyhedral:
 
 ********************************************************************************
-Polyhedral Snyder Equal Area
+Polyhedral Snyder Equal Area projections
 ********************************************************************************
 
 .. versionadded:: 9.9
@@ -11,9 +13,13 @@ Polyhedral Snyder Equal Area
    :align: center
    :alt:   Polyhedral projection (DSEA A5 net)
 
-The polyhedral Snyder equal-area projection maps the sphere onto the faces of
-a polyhedron using the method described in :cite:`Snyder1992`. The projection
-is area-preserving and supports both forward and inverse transforms on either
+This page describes the theory shared by the :ref:`tsea`, :ref:`dsea` and
+:ref:`isea` projections. It is not a projection in its own right — there is no
+``+proj=polyhedral`` operation.
+
+The polyhedral Snyder equal-area projections map the sphere onto the faces of
+a polyhedron using the method described in :cite:`Snyder1992`. The mapping is
+area-preserving and supports both forward and inverse transforms on either
 a sphere or an ellipsoid (input geodetic latitudes are converted to authalic
 latitudes internally so the equal-area property is preserved).
 
@@ -22,7 +28,7 @@ sub-triangles, Snyder's equal-area mapping is applied independently on each
 sub-triangle, and the planar results are laid out according to a *net* — a
 2D unfolding of the polyhedron.
 
-Three projection aliases are registered:
+Three projections use this construction:
 
 - :ref:`tsea` — Tetrahedral Snyder Equal Area
 - :ref:`dsea` — Dodecahedral Snyder Equal Area
@@ -39,7 +45,7 @@ that fan out from a single face centre, so the sub-triangles meeting at the
 apex tile a complete polyhedral face.
 
 The planar triangles can be chosen with any consistent shape, as long as the
-edges around the shared apex match the way the corresponding edges meet on
+edges around the shared apex match the way the corresponding edges meet on
 the sphere. The freedom in choosing this planar shape — together with the
 freedom in choosing how to glue the faces together — is what defines a
 *net*.
