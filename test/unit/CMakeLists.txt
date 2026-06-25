@@ -256,6 +256,18 @@ add_test(NAME test_misc COMMAND test_misc)
 set_property(TEST test_misc
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
 
+add_executable(test_polyhedral
+  main.cpp
+  test_polyhedral.cpp)
+target_link_libraries(test_polyhedral
+  PRIVATE GTest::gtest
+  PRIVATE ${PROJ_LIBRARIES})
+target_include_directories(test_polyhedral
+  PRIVATE ${PROJECT_SOURCE_DIR}/src/projections)
+add_test(NAME test_polyhedral COMMAND test_polyhedral)
+set_property(TEST test_polyhedral
+  PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+
 if (Threads_FOUND AND CMAKE_USE_PTHREADS_INIT AND NOT APPLE)
 add_definitions(-DPROJ_HAS_PTHREADS)
 add_executable(test_fork

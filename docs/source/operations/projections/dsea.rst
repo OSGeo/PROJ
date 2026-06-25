@@ -1,15 +1,17 @@
-.. _isea:
+.. _dsea:
 
 ********************************************************************************
-Icosahedral Snyder Equal Area
+Dodecahedral Snyder Equal Area
 ********************************************************************************
 
-Snyder's equal-area mapping :cite:`Snyder1992` applied to the twenty triangular
-faces of a regular icosahedron and unfolded into a planar net.
+.. versionadded:: 9.9
 
-The icosahedron is subdivided into 20 × 6 = 120 right sub-triangles, and each
-sub-triangle is mapped independently using the area-preserving Snyder
-construction.
+Snyder's equal-area mapping :cite:`Snyder1992` applied to the twelve pentagonal
+faces of a regular dodecahedron and unfolded into a planar net.
+
+The dodecahedron is subdivided into 12 × 10 = 120 right sub-triangles,
+and each sub-triangle is mapped independently using the area-preserving
+Snyder construction.
 
 See :ref:`polyhedral` for the shared theory.
 
@@ -20,7 +22,7 @@ See :ref:`polyhedral` for the shared theory.
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Alias**           | isea                                                     |
+| **Alias**           | dsea                                                     |
 +---------------------+----------------------------------------------------------+
 | **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
@@ -30,27 +32,52 @@ See :ref:`polyhedral` for the shared theory.
 +---------------------+----------------------------------------------------------+
 
 
-.. figure:: ./images/isea.png
+.. figure:: ./images/dsea.png
    :width: 500 px
    :align: center
-   :alt:   Icosahedral Snyder Equal Area
+   :alt:   Dodecahedral Snyder Equal Area
 
-   proj-string: ``+proj=isea``
+   proj-string: ``+proj=dsea``
 
 
-Orientations
+Nets
 ################################################################################
 
-``isea`` ships a single net (Snyder's Figure 12, shown above). A second named
-orientation is available via ``+orient=pole``, which places one icosahedron
-vertex on the geographic north pole:
+The default net (shown above) follows Snyder's Figure 11. Three alternative
+nets are available via ``+net=``:
 
-.. figure:: ./images/isea_pole.png
+a5
+--------------------------------------------------------------------------------
+
+Layout used by the `A5 index <https://a5geo.org>`_. The first 8 faces contain
+the majority of the populated land mass.
+
+.. figure:: ./images/dsea_a5.png
    :width: 500 px
    :align: center
-   :alt:   ISEA pole orientation
+   :alt:   DSEA A5 net
 
-   proj-string: ``+proj=isea +orient=pole``
+   proj-string: ``+proj=dsea +net=a5``
+
+crescent
+--------------------------------------------------------------------------------
+
+.. figure:: ./images/dsea_crescent.png
+   :width: 500 px
+   :align: center
+   :alt:   DSEA crescent net
+
+   proj-string: ``+proj=dsea +net=crescent``
+
+flower
+--------------------------------------------------------------------------------
+
+.. figure:: ./images/dsea_flower.png
+   :width: 500 px
+   :align: center
+   :alt:   DSEA flower net
+
+   proj-string: ``+proj=dsea +net=flower``
 
 
 Parameters
@@ -59,25 +86,24 @@ Parameters
 .. note::
     All parameters are optional.
 
-.. option:: +orient=<name>
+.. option:: +net=<name>
 
-    Shorthand for two named orientations. Accepted values: ``isea``, ``pole``.
-    Equivalent to setting ``+orient_lat`` / ``+orient_lon`` / ``+azi``
-    explicitly; individual ``+orient_*`` parameters still override.
+    Selects the planar unfolding. Accepted values: ``dsea``, ``a5``,
+    ``crescent``, ``flower``.
 
-    *Defaults to* ``isea``.
+    *Defaults to* ``dsea``.
 
 .. include:: ../options/orient_lat.rst
 
-*Defaults to ~58.40° geodetic (arctan(φ) ≈ 58.2825° authalic).*
+*Defaults to* ``atan((1 + 2·cos(36°))/2) ≈ 52.6226°``.
 
 .. include:: ../options/orient_lon.rst
 
-*Defaults to 11.25° on a sphere, 11.20° on an ellipsoid.*
+*Defaults to −36.0 (or −129.0 when* ``+net=a5`` *).*
 
 .. include:: ../options/azi.rst
 
-*Defaults to 0.0.*
+*Defaults to 240.0.*
 
 .. include:: ../options/lat_0_polyhedral.rst
 

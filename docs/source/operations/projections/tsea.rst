@@ -1,13 +1,15 @@
-.. _isea:
+.. _tsea:
 
 ********************************************************************************
-Icosahedral Snyder Equal Area
+Tetrahedral Snyder Equal Area
 ********************************************************************************
 
-Snyder's equal-area mapping :cite:`Snyder1992` applied to the twenty triangular
-faces of a regular icosahedron and unfolded into a planar net.
+.. versionadded:: 9.9
 
-The icosahedron is subdivided into 20 × 6 = 120 right sub-triangles, and each
+Snyder's equal-area mapping :cite:`Snyder1992` applied to the four faces of a
+regular tetrahedron and unfolded into a planar net.
+
+The tetrahedron is subdivided into 4 × 6 = 24 right sub-triangles, and each
 sub-triangle is mapped independently using the area-preserving Snyder
 construction.
 
@@ -20,7 +22,7 @@ See :ref:`polyhedral` for the shared theory.
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Alias**           | isea                                                     |
+| **Alias**           | tsea                                                     |
 +---------------------+----------------------------------------------------------+
 | **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
@@ -30,27 +32,29 @@ See :ref:`polyhedral` for the shared theory.
 +---------------------+----------------------------------------------------------+
 
 
-.. figure:: ./images/isea.png
+.. figure:: ./images/tsea.png
    :width: 500 px
    :align: center
-   :alt:   Icosahedral Snyder Equal Area
+   :alt:   Tetrahedral Snyder Equal Area
 
-   proj-string: ``+proj=isea``
+   proj-string: ``+proj=tsea``
 
 
-Orientations
+Nets
 ################################################################################
 
-``isea`` ships a single net (Snyder's Figure 12, shown above). A second named
-orientation is available via ``+orient=pole``, which places one icosahedron
-vertex on the geographic north pole:
+The default net (shown above) follows Snyder's Figure 8. An alternative
+``+net=star`` layout is also available:
 
-.. figure:: ./images/isea_pole.png
+.. figure:: ./images/tsea_star.png
    :width: 500 px
    :align: center
-   :alt:   ISEA pole orientation
+   :alt:   TSEA star net
 
-   proj-string: ``+proj=isea +orient=pole``
+   proj-string: ``+proj=tsea +net=star``
+
+In the ``star`` layout the south-cap face sits at the centre, with its three
+neighbours fanned around it.
 
 
 Parameters
@@ -59,21 +63,19 @@ Parameters
 .. note::
     All parameters are optional.
 
-.. option:: +orient=<name>
+.. option:: +net=<name>
 
-    Shorthand for two named orientations. Accepted values: ``isea``, ``pole``.
-    Equivalent to setting ``+orient_lat`` / ``+orient_lon`` / ``+azi``
-    explicitly; individual ``+orient_*`` parameters still override.
+    Selects the planar unfolding. Accepted values: ``tsea``, ``star``.
 
-    *Defaults to* ``isea``.
+    *Defaults to* ``tsea``.
 
 .. include:: ../options/orient_lat.rst
 
-*Defaults to ~58.40° geodetic (arctan(φ) ≈ 58.2825° authalic).*
+*Defaults to 90.0.*
 
 .. include:: ../options/orient_lon.rst
 
-*Defaults to 11.25° on a sphere, 11.20° on an ellipsoid.*
+*Defaults to 0.0.*
 
 .. include:: ../options/azi.rst
 
