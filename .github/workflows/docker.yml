@@ -45,7 +45,7 @@ jobs:
       PUSH_PACKAGES: ${{ github.repository_owner == 'OSGeo' && github.event_name != 'pull_request' && (matrix.container == 'proj' || (matrix.container == 'proj-docs' && github.ref_name == 'master')) }}
       CONTAINER: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v7.0.0
       - name: Lint
         id: lint
         run: |
@@ -53,7 +53,7 @@ jobs:
           echo "event_name" ${{ github.event_name }}
           echo "ref" ${{ github.ref }}
       - name: Set up Docker
-        uses: docker/setup-docker-action@v5
+        uses: docker/setup-docker-action@v5.2.0
         with:
           daemon-config: |
             {
@@ -115,7 +115,7 @@ jobs:
           echo "ARCH=$ARCH" >> $GITHUB_OUTPUT
 
       - name: Build docs image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v7.2.0
         if: matrix.container == 'proj-docs'
         with:
           push: ${{ env.PUSH_PACKAGES == 'true' }}
@@ -152,7 +152,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Build image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v7.2.0
         id: push
         if: matrix.container == 'proj'
         with:
@@ -174,7 +174,7 @@ jobs:
             org.opencontainers.image.created=${{ steps.prep.outputs.BUILD_DATE }}
       - name: Generate artifact attestation
         if: ${{ env.PUSH_PACKAGES == 'true' && matrix.container  == 'proj' }}
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@v4.1.0
         with:
           subject-name: ghcr.io/osgeo/proj
           subject-digest: ${{ steps.push.outputs.digest }}
