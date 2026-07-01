@@ -5,6 +5,7 @@
  * Author:   Gerald Evenden (1995)
  *           Drazen Tutic, Lovro Gradiser (2015) - add inverse
  *           Thomas Knudsen (2016) - revise/add regression tests
+ *           Robert Kleffner (2026) - closed-form Aitoff inverse
  *
  ******************************************************************************
  * Copyright (c) 1995, Gerald Evenden
@@ -79,31 +80,83 @@ static PJ_XY aitoff_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return (xy);
 }
 
-/***********************************************************************************
+/******************************************************************************
  *
- * Inverse functions added by Drazen Tutic and Lovro Gradiser based on paper:
+ * Closed-form inverse of the Aitoff projection.
  *
- * I.Özbug Biklirici and Cengizhan Ipbüker. A General Algorithm for the Inverse
- * Transformation of Map Projections Using Jacobian Matrices. In Proceedings of
- *the Third International Symposium Mathematical & Computational Applications,
- * pages 175{182, Turkey, September 2002.
+ * Squaring and adding the forward equations cancels phi and lambda from the
+ * right-hand side and leaves the identity
  *
- * Expected accuracy is defined by EPSILON = 1e-12. Should be appropriate for
- * most applications of Aitoff and Winkel Tripel projections.
+ *     (x/2)^2 + y^2 = alpha^2,   alpha = acos(cos(phi) * cos(lambda/2)),
  *
- * Longitudes of 180W and 180E can be mixed in solution obtained.
+ * so alpha follows directly from (x, y) and the inverse needs no iteration:
  *
- * Inverse for Aitoff projection in poles is undefined, longitude value of 0 is
- *assumed.
+ *     alpha  = sqrt((x/2)^2 + y^2)
+ *     phi    = asin(y * sin(alpha) / alpha)
+ *     lambda = 2 * atan2((x/2) * sin(alpha), alpha * cos(alpha))
  *
- * Contact : dtutic at geof.hr
- * Date: 2015-02-16
+ * The atan2 form yields longitudes in [-pi, pi], which removes the 180W/180E
+ * ambiguity of the iterative solver, and the poles need no special case.
  *
- ************************************************************************************/
+ * See R. Kleffner, "Aitoff has a closed-form inverse" (2026),
+ * https://flatsphere.dev/blog/aitoff-has-closed-form-inverse/ , and the earlier
+ * structural closed form in J. Kunimune's Map-Projections,
+ * https://github.com/jkunimune/Map-Projections .
+ *
+ *****************************************************************************/
+
+/* Returns false, leaving *lp untouched, when (x, y) lies outside the bounding
+ * ellipse x^2 + 4*y^2 = pi^2 and therefore has no preimage on the sphere. */
+static bool aitoff_s_inverse_closed(PJ_XY xy, PJ *P, PJ_LP *lp) {
+    if (xy.x * xy.x + 4. * xy.y * xy.y > M_PI * M_PI)
+        return false;
+    const double half_x = 0.5 * xy.x;
+    const double alpha = sqrt(half_x * half_x + xy.y * xy.y);
+    if (alpha < 1e-9) {
+        /* limit at the origin: (phi, lambda) -> (y, x) as alpha -> 0 */
+        lp->phi = xy.y;
+        lp->lam = xy.x;
+        return true;
+    }
+    const double sin_alpha = sin(alpha);
+    lp->phi = aasin(P->ctx, xy.y * sin_alpha / alpha);
+    lp->lam = 2. * atan2(half_x * sin_alpha, alpha * cos(alpha));
+    return true;
+}
+
+/******************************************************************************
+ *
+ * Inverse of the Aitoff and Winkel Tripel projections.
+ *
+ * Aitoff uses the closed form above. Winkel Tripel is the average of the Aitoff
+ * and equirectangular projections and has no closed-form inverse, so it is
+ * solved with the Jacobian-matrix Newton-Raphson method of Bildirici and
+ * Ipbuker (2002), contributed by Drazen Tutic and Lovro Gradiser (2015). The
+ * iteration converges to EPSILON = 1e-12, appropriate for most applications of
+ * the projection.
+ *
+ * Reference:
+ *   I. O. Bildirici and C. Ipbuker (2002). A General Algorithm for the Inverse
+ *   Transformation of Map Projections Using Jacobian Matrices. Proceedings of
+ *   the Third International Symposium on Mathematical and Computational
+ *   Applications, pp. 175-182, Turkey.
+ *
+ * Contact: dtutic at geof.hr, 2015-02-16
+ *
+ *****************************************************************************/
 
 static PJ_LP aitoff_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
     struct pj_aitoff_data *Q = static_cast<struct pj_aitoff_data *>(P->opaque);
+
+    if (Q->mode == pj_aitoff_ns::AITOFF) {
+        if (!aitoff_s_inverse_closed(xy, P, &lp)) {
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+            lp.lam = lp.phi = HUGE_VAL;
+        }
+        return lp;
+    }
+
     int iter, MAXITER = 10, round = 0, MAXROUND = 20;
     double EPSILON = 1e-12, D, C, f1, f2, f1p, f1l, f2p, f2l, dp, dl, sl, sp,
            cp, cl, x, y;
@@ -165,9 +218,6 @@ static PJ_LP aitoff_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             lp.phi -=
                 2. * (lp.phi +
                       M_PI_2); /* correct if symmetrical solution for Aitoff */
-        if ((fabs(fabs(lp.phi) - M_PI_2) < EPSILON) &&
-            (Q->mode == pj_aitoff_ns::AITOFF))
-            lp.lam = 0.; /* if pole in Aitoff, return longitude of 0 */
 
         /* calculate x,y coordinates with solution obtained */
         if ((D = acos(cos(lp.phi) * cos(C = 0.5 * lp.lam))) !=
