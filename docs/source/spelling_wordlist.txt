@@ -541,6 +541,7 @@ Kavraisky
 Kavrayskiy
 Kilometer
 kinematically
+Kleffner
 kmi
 Kolb
 Komsta
@@ -551,6 +552,7 @@ krovak
 Krovak
 Krüger
 Kumul
+Kunimune
 Laborde
 labrd
 laea
