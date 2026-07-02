@@ -16,7 +16,7 @@ The idea to use an icosahedron came later in 1954, and it wasn't until 1978 that
 was formally mathematically defined :cite:`Gray1995`.
 
 +---------------------+----------------------------------------------------------+
-| **Classification**  | Polyhedral, equal area                                   |
+| **Classification**  | Polyhedral                                               |
 +---------------------+----------------------------------------------------------+
 | **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
