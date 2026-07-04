@@ -52,7 +52,9 @@ The forward projection is
 
     y &= \sin\phi \; \frac{\alpha}{\sin\alpha}
 
-The Aitoff inverse has a closed form, so no iteration is required:
+The inverse is the spherical azimuthal equidistant inverse of
+:cite:`Snyder1987`, p. 196, applied to :math:`(x/2, y)`, with the recovered
+longitude doubled:
 
 .. math::
 
@@ -65,8 +67,6 @@ The Aitoff inverse has a closed form, so no iteration is required:
 Further reading
 ################################################################################
 
-#. Kleffner, R. (2026). "Aitoff has a closed-form inverse" :cite:`Kleffner2026`,
-   which derives the inverse above and benchmarks it against the iterative
-   method.
-#. Kunimune, J. *Map-Projections* :cite:`KunimuneMapProjections`, an earlier
-   implementation using an equivalent structural decomposition.
+#. Kunimune, J. *Map-Projections* :cite:`KunimuneMapProjections`, which
+   implements the same inverse via a pre- and post-scaled azimuthal
+   equidistant inverse.

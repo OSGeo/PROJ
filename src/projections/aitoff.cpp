@@ -56,7 +56,6 @@ FORWARD(aitoff_s_forward); /* spheroid */
 static PJ_XY aitoff_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
     struct pj_aitoff_data *Q = static_cast<struct pj_aitoff_data *>(P->opaque);
-    double c, d;
 
 #if 0
     // Likely domain of validity for wintri in +over mode. Should be confirmed
@@ -66,13 +65,21 @@ static PJ_XY aitoff_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
         return xy;
     }
 #endif
-    c = 0.5 * lp.lam;
-    d = acos(cos(lp.phi) * cos(c));
-    if (d != 0.0) { /* basic Aitoff */
-        xy.x = 2. * d * cos(lp.phi) * sin(c) * (xy.y = 1. / sin(d));
-        xy.y *= d * sin(lp.phi);
-    } else
-        xy.x = xy.y = 0.;
+    const double sin_half_lam = sin(0.5 * lp.lam);
+    const double cos_half_lam = cos(0.5 * lp.lam);
+    const double sin_phi = sin(lp.phi);
+    const double cos_phi = cos(lp.phi);
+    /* basic Aitoff; alpha is the angular distance to (phi, lam/2). Computing
+     * it with atan2 keeps relative accuracy near the origin, where acos of
+     * its cosine returns 0 for any alpha below ~1.5e-8. */
+    const double cos_alpha = cos_phi * cos_half_lam;
+    const double t = cos_phi * sin_half_lam;
+    const double sin_alpha = sqrt(t * t + sin_phi * sin_phi);
+    /* alpha / sin(alpha), with limit 1 at the origin */
+    const double A =
+        sin_alpha == 0 ? 1. : atan2(sin_alpha, cos_alpha) / sin_alpha;
+    xy.x = 2. * t * A;
+    xy.y = sin_phi * A;
     if (Q->mode == pj_aitoff_ns::WINKEL_TRIPEL) {
         xy.x = (xy.x + lp.lam * Q->cosphi1) * 0.5;
         xy.y = (xy.y + lp.phi) * 0.5;
@@ -82,45 +89,37 @@ static PJ_XY aitoff_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 
 /******************************************************************************
  *
- * Closed-form inverse of the Aitoff projection.
+ * Closed-form inverse of the Aitoff projection. Short form equations are:
  *
- * Squaring and adding the forward equations cancels phi and lambda from the
- * right-hand side and leaves the identity
- *
- *     (x/2)^2 + y^2 = alpha^2,   alpha = acos(cos(phi) * cos(lambda/2)),
- *
- * so alpha follows directly from (x, y) and the inverse needs no iteration:
- *
- *     alpha  = sqrt((x/2)^2 + y^2)
+ *     alpha  = hypot(x/2, y)      (angular distance to (phi, lambda/2))
  *     phi    = asin(y * sin(alpha) / alpha)
  *     lambda = 2 * atan2((x/2) * sin(alpha), alpha * cos(alpha))
  *
- * The atan2 form yields longitudes in [-pi, pi], which removes the 180W/180E
- * ambiguity of the iterative solver, and the poles need no special case.
+ * atan2 places lambda/2 in (-pi, pi]. The domain of the inverse is therefore
+ * the whole ellipse x^2 + 4*y^2 <= (2*pi)^2, on which the sphere is double
+ * covered; longitudes beyond +/-pi are returned only with +over. The poles
+ * need no special case.
  *
- * See R. Kleffner, "Aitoff has a closed-form inverse" (2026),
- * https://flatsphere.dev/blog/aitoff-has-closed-form-inverse/ , and the earlier
- * structural closed form in J. Kunimune's Map-Projections,
- * https://github.com/jkunimune/Map-Projections .
+ * Reference:
+ *   J. P. Snyder (1987). Map Projections -- A Working Manual. USGS
+ *   Professional Paper 1395, pp. 195-197.
  *
  *****************************************************************************/
 
-/* Returns false, leaving *lp untouched, when (x, y) lies outside the bounding
- * ellipse x^2 + 4*y^2 = pi^2 and therefore has no preimage on the sphere. */
-static bool aitoff_s_inverse_closed(PJ_XY xy, PJ *P, PJ_LP *lp) {
-    if (xy.x * xy.x + 4. * xy.y * xy.y > M_PI * M_PI)
-        return false;
+/* Returns false, leaving *lp untouched, when (x, y) is outside the ellipse
+ * x^2 + 4*y^2 = (2*pi)^2 and so has no preimage. */
+static bool aitoff_s_inverse_closed(PJ_XY xy, PJ_LP *lp) {
     const double half_x = 0.5 * xy.x;
-    const double alpha = sqrt(half_x * half_x + xy.y * xy.y);
-    if (alpha < 1e-9) {
-        /* limit at the origin: (phi, lambda) -> (y, x) as alpha -> 0 */
-        lp->phi = xy.y;
-        lp->lam = xy.x;
-        return true;
-    }
+    const double alpha = hypot(half_x, xy.y);
     const double sin_alpha = sin(alpha);
-    lp->phi = aasin(P->ctx, xy.y * sin_alpha / alpha);
-    lp->lam = 2. * atan2(half_x * sin_alpha, alpha * cos(alpha));
+    const double cos_alpha = cos(alpha);
+    /* Testing sin_alpha is needed because with long doubles sin(M_PI) < 0. */
+    if (alpha > M_PI || sin_alpha < 0)
+        return false;
+    /* The asin argument is guaranteed to lie in [-1, 1]: hypot(a, b) >= |b|
+     * and 0 <= sin_alpha <= 1. */
+    lp->phi = alpha == 0.0 ? xy.y : asin((xy.y / alpha) * sin_alpha);
+    lp->lam = 2. * atan2(half_x * sin_alpha, alpha * cos_alpha);
     return true;
 }
 
@@ -128,12 +127,11 @@ static bool aitoff_s_inverse_closed(PJ_XY xy, PJ *P, PJ_LP *lp) {
  *
  * Inverse of the Aitoff and Winkel Tripel projections.
  *
- * Aitoff uses the closed form above. Winkel Tripel is the average of the Aitoff
- * and equirectangular projections and has no closed-form inverse, so it is
- * solved with the Jacobian-matrix Newton-Raphson method of Bildirici and
- * Ipbuker (2002), contributed by Drazen Tutic and Lovro Gradiser (2015). The
- * iteration converges to EPSILON = 1e-12, appropriate for most applications of
- * the projection.
+ * Aitoff uses the closed form above. Winkel Tripel, the mean of the Aitoff and
+ * equirectangular projections, has no known closed-form inverse; it is inverted
+ * with the Newton-Raphson method of Bildirici and Ipbuker (2002), added by
+ * Drazen Tutic and Lovro Gradiser (2015). Expected accuracy is defined by
+ * EPSILON = 1e-12, appropriate for most applications of the projection.
  *
  * Reference:
  *   I. O. Bildirici and C. Ipbuker (2002). A General Algorithm for the Inverse
@@ -150,7 +148,7 @@ static PJ_LP aitoff_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     struct pj_aitoff_data *Q = static_cast<struct pj_aitoff_data *>(P->opaque);
 
     if (Q->mode == pj_aitoff_ns::AITOFF) {
-        if (!aitoff_s_inverse_closed(xy, P, &lp)) {
+        if (!aitoff_s_inverse_closed(xy, &lp)) {
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             lp.lam = lp.phi = HUGE_VAL;
         }

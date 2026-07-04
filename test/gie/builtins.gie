@@ -470,6 +470,10 @@ expect  -223379.458811696 111706.742883853
 accept  -2 -1
 expect  -223379.458811696 -111706.742883853
 
+# About 0.1 m from the origin; an acos-based forward collapses this to 0,0
+accept  0.0000011459155903 0.0000005729577951
+expect  0.128 0.064
+
 direction inverse
 accept  200 100
 expect  0.001790493 0.000895247
@@ -480,7 +484,7 @@ expect  -0.001790493 0.000895247
 accept  -200 -100
 expect  -0.001790493 -0.000895247
 
-# Closed-form inverse: explicit interior points (projected x,y from the forward)
+# Inverse at interior points; input x/y computed with the forward projection
 direction inverse
 accept  2783578.563317653 4512225.413913478
 expect  30 40
@@ -489,11 +493,15 @@ expect  -75 20
 accept  8983838.624520272 -8054689.356660859
 expect  150 -60
 
-# Points outside the bounding ellipse x^2 + 4 y^2 = (pi R)^2 have no preimage
-accept  40000000 0
+# The origin
+accept  0 0
+expect  0 0
+
+# Points outside the bounding ellipse x^2 + 4 y^2 = (2 pi R)^2 have no preimage
+accept  41000000 0
 expect  failure errno coord_transfm_outside_projection_domain
 
-# Round-trip stability across the domain, including the poles and antimeridian
+# Round trips, including at the poles and the antimeridian
 direction forward
 accept  30 40
 roundtrip 100
@@ -506,6 +514,24 @@ roundtrip 100
 accept  0 90
 roundtrip 100
 accept  180 0
+roundtrip 100
+
+-------------------------------------------------------------------------------
+operation +proj=aitoff   +R=6400000   +over
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+# With +over, the domain extends to the full ellipse with semiaxes 2 pi R and
+# pi R, on which the sphere is double covered
+direction inverse
+accept  23003371.041774839 6193033.156583068
+expect  240 25
+accept  -15044905.474035570 -12624174.634360289
+expect  -300 -40
+
+direction forward
+accept  240 25
+roundtrip 100
+accept  -300 -40
 roundtrip 100
 
 
@@ -8310,6 +8336,10 @@ accept  -2 1
 expect  -223390.801533485 111703.907505745
 accept  -2 -1
 expect  -223390.801533485 -111703.907505745
+
+# About 0.1 m from the origin; an acos-based forward loses the Aitoff term
+accept  0.0000011459155903 0.0000005729577951
+expect  0.128 0.064
 
 direction inverse
 accept  200 100
