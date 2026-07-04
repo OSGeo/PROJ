@@ -66,19 +66,17 @@ static PJ_XY aitoff_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     }
 #endif
     const double sin_half_lam = sin(0.5 * lp.lam);
-    const double cos_half_lam = cos(0.5 * lp.lam);
     const double sin_phi = sin(lp.phi);
     const double cos_phi = cos(lp.phi);
-    /* basic Aitoff; alpha is the angular distance to (phi, lam/2). Computing
-     * it with atan2 keeps relative accuracy near the origin, where acos of
-     * its cosine returns 0 for any alpha below ~1.5e-8. */
-    const double cos_alpha = cos_phi * cos_half_lam;
-    const double t = cos_phi * sin_half_lam;
-    const double sin_alpha = sqrt(t * t + sin_phi * sin_phi);
+    /* basic Aitoff; computing it with atan2 (instead of standard acos)
+     * keeps relative accuracy near the origin. */
+    const double sin_alpha = hypot(cos_phi * sin_half_lam, sin_phi);
     /* alpha / sin(alpha), with limit 1 at the origin */
     const double A =
-        sin_alpha == 0 ? 1. : atan2(sin_alpha, cos_alpha) / sin_alpha;
-    xy.x = 2. * t * A;
+        sin_alpha == 0
+            ? 1.
+            : atan2(sin_alpha, cos_phi * cos(0.5 * lp.lam)) / sin_alpha;
+    xy.x = 2. * cos_phi * sin_half_lam * A;
     xy.y = sin_phi * A;
     if (Q->mode == pj_aitoff_ns::WINKEL_TRIPEL) {
         xy.x = (xy.x + lp.lam * Q->cosphi1) * 0.5;
