@@ -133,6 +133,34 @@ accept  180     0
 expect  failure errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
+# Spherical accuracy near the projection center and near the antipode, where a
+# forward using acos can be off by hundreds of metres just outside the antipodal
+# cutoff. Expected values cross-checked against spherical geodesics.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +R=6400000 +lat_0=0
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0.000011459155902616 0.000005729577951308
+expect  1.28 0.64
+roundtrip 100
+accept  179.99994270422047 0
+expect  20106186.5829747 0
+roundtrip 100
+
+-------------------------------------------------------------------------------
+operation +proj=aeqd +R=6400000 +lat_0=40
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0.000011459155902616 40.000005729577951
+expect  0.980536805 0.640000063
+accept  30 60
+expect  1662323.920096250 2560502.459379668
+roundtrip 100
+accept  179.99 -39.99
+expect  12227589.751270 15958961.844794
+roundtrip 100
+
+-------------------------------------------------------------------------------
 # Test equatorial aspect of the ellipsoidal azimuthal equidistant. Test data from
 # Snyder pp. 196-197, table 30.
 -------------------------------------------------------------------------------
