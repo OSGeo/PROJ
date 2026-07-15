@@ -589,6 +589,24 @@ static const ParamMapping *const paramsGeographicTopocentric[] = {
     &paramLatTopoOrigin, &paramLongTopoOrigin, &paramHeightTopoOriginWithH0,
     nullptr};
 
+static const ParamMapping paramInitialLongitude = {
+    EPSG_NAME_PARAMETER_INITIAL_LONGITUDE,
+    EPSG_CODE_PARAMETER_INITIAL_LONGITUDE, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, lon_0};
+
+static const ParamMapping paramZoneWidth = {
+    EPSG_NAME_PARAMETER_ZONE_WIDTH, EPSG_CODE_PARAMETER_ZONE_WIDTH, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, "width"};
+
+static const ParamMapping *const paramsTransverseMercatorZoned[] = {
+    &paramLatitudeNatOrigin,
+    &paramInitialLongitude,
+    &paramZoneWidth,
+    &paramScaleFactor,
+    &paramFalseEasting,
+    &paramFalseNorthing,
+    nullptr};
+
 static const MethodMapping gProjectionMethodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
      "Transverse_Mercator", "tmerc", nullptr, paramsNatOriginScaleK},
@@ -942,6 +960,10 @@ static const MethodMapping gProjectionMethodMappings[] = {
     {EPSG_NAME_METHOD_GEOGRAPHIC_TOPOCENTRIC,
      EPSG_CODE_METHOD_GEOGRAPHIC_TOPOCENTRIC, nullptr, nullptr, nullptr,
      paramsGeographicTopocentric},
+
+    {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR_ZONED_GRID_SYSTEM,
+     EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_ZONED_GRID_SYSTEM, nullptr,
+     "tmerczoned", nullptr, paramsTransverseMercatorZoned},
 };
 
 const MethodMapping *getProjectionMethodMappings(size_t &nElts) {
@@ -1072,6 +1094,7 @@ const struct MethodNameCode methodNameCodesList[] = {
     METHOD_NAME_CODE(
         GEOCENTRIC_TRANSLATIONS_BY_GRID_GTG_AND_GEOCENTRIC_TRANSLATIONS_NEU_VELOCITIES_GTG),
     METHOD_NAME_CODE(GEOCENTRIC_TRANSLATIONS_USING_NEU_VELOCITY_GRID_GTG),
+    METHOD_NAME_CODE(TRANSVERSE_MERCATOR_ZONED_GRID_SYSTEM),
 };
 
 const MethodNameCode *getMethodNameCodes(size_t &nElts) {
@@ -1164,6 +1187,8 @@ const struct ParamNameCode gParamNameCodes[] = {
     PARAM_NAME_CODE(POINT_MOTION_VELOCITY_NORTH_GRID_FILE),
     PARAM_NAME_CODE(SOURCE_EPOCH),
     PARAM_NAME_CODE(TARGET_EPOCH),
+    PARAM_NAME_CODE(INITIAL_LONGITUDE),
+    PARAM_NAME_CODE(ZONE_WIDTH),
 };
 
 const ParamNameCode *getParamNameCodes(size_t &nElts) {
