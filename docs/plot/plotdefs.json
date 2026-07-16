@@ -1472,6 +1472,18 @@
         "type": "poly"
     },
     {
+        "filename": "tmerczoned.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "tmerczoned",
+        "projstring": "+proj=tmerczoned +width=6",
+        "res": "med",
+        "type": "line",
+        "delta_cut": 1e5
+    },
+    {
         "filename": "tobmerc.png",
         "latmax": 80,
         "latmin": -80,
