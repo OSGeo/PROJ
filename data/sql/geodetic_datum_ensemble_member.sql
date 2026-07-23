@@ -58,9 +58,10 @@ INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6258','EPSG','1034',
 INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6258','EPSG','1214',54);
 INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6258','EPSG','6765',55);
 INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6258','EPSG','6619',56);
-INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6258','EPSG','1449',57);
-INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6258','EPSG','1453',58);
-INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6258','EPSG','1403',59);
+INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6258','EPSG','1453',57);
+INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6258','EPSG','1403',58);
+INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6258','EPSG','1463',59);
+INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6258','EPSG','6151',60);
 INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6326','EPSG','1166',1);
 INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6326','EPSG','1152',2);
 INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6326','EPSG','1153',3);

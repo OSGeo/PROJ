@@ -95,7 +95,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','8245','NAD27 to WGS 84 (26)'
 INSERT INTO "usage" VALUES('EPSG','10450','concatenated_operation','EPSG','8245','EPSG','1061','EPSG','1252');
 INSERT INTO "concatenated_operation" VALUES('EPSG','8263','MGI (Ferro) to WGS 84 (1)','Accuracy estimate is not available.','EPSG','4805','EPSG','4326',NULL,'DMA-balk',1);
 INSERT INTO "usage" VALUES('EPSG','10458','concatenated_operation','EPSG','8263','EPSG','2370','EPSG','1160');
-INSERT INTO "concatenated_operation" VALUES('EPSG','8363','ETRS89 + Baltic 1957 height to ETRS89 + EVRF2007 height (1)','Recommended method for transforming coordinates between Baltic 1957 height and EVRF2007 height and vice-versa in Slovakia. Compound transformation using two separate quasigeoid models (DVRM05 and DMQSK2014E).','EPSG','8360','EPSG','7423',0.05,'UGKK-Svk',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','8363','ETRS89 + Baltic 1957 height to ETRS89 + EVRF2007 height (1)','Recommended method for transforming coordinates between Baltic 1957 height and EVRF2007 height and vice-versa in Slovakia. Compound transformation using two separate quasigeoid models (DVRM05 and DMQSK2014E).','EPSG','8360','EPSG','7423',0.05,'UGKK-Svk',1);
 INSERT INTO "usage" VALUES('EPSG','10510','concatenated_operation','EPSG','8363','EPSG','1211','EPSG','1059');
 INSERT INTO "concatenated_operation" VALUES('EPSG','8386','Old Hawaiian to WGS 84 (1)','Approximation at the +/- 1m level assuming that NAD83 is equivalent to WGS 84.','EPSG','4135','EPSG','4326',NULL,'EPSG-Usa Hi',1);
 INSERT INTO "usage" VALUES('EPSG','10523','concatenated_operation','EPSG','8386','EPSG','1334','EPSG','1252');
@@ -451,7 +451,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','9336','NAD27 to NAD83(CSRS)v
 INSERT INTO "usage" VALUES('EPSG','14011','concatenated_operation','EPSG','9336','EPSG','2376','EPSG','1151');
 INSERT INTO "concatenated_operation" VALUES('EPSG','9337','NTF (Paris) to ETRS89-FRA [RGF93 v1] (1)','See transformation code 7811 for an alternative which uses the NTv2 method as an emulation of the geocentric interpolation in the second step.','EPSG','4807','EPSG','4171',1.0,'IOGP-Fra',0);
 INSERT INTO "usage" VALUES('EPSG','14012','concatenated_operation','EPSG','9337','EPSG','3694','EPSG','1041');
-INSERT INTO "concatenated_operation" VALUES('EPSG','9499','ETRS89 to GHA height (2)','This concatenated operation gives the same result as the Hoehen-Grid plus offset from ETRS89 to GHA height. Hoehen-Grid plus is implemented in BEV-Transformator using MGI (CRS 4312) as the interpolation CRS for the grid.','EPSG','4937','EPSG','5778',0.07,'BEV-Aut',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','9499','ETRS89 to GHA height (2)','This concatenated operation gives the same result as the Hoehen-Grid plus offset from ETRS89 to GHA height. Hoehen-Grid plus is implemented in BEV-Transformator using MGI (CRS 4312) as the interpolation CRS for the grid.','EPSG','4937','EPSG','5778',0.07,'BEV-Aut',1);
 INSERT INTO "usage" VALUES('EPSG','14958','concatenated_operation','EPSG','9499','EPSG','1037','EPSG','1133');
 INSERT INTO "concatenated_operation" VALUES('EPSG','9683','ITRF2014 to GDA94 (2)','See ITRF2014 to GDA94 (1) (CT 9682) for conformal-only alternative (i.e. without distortion modelling).','EPSG','9000','EPSG','4283',0.06,'ICSM-Aus Conf+Dist',0);
 INSERT INTO "usage" VALUES('EPSG','14962','concatenated_operation','EPSG','9683','EPSG','2575','EPSG','1234');
@@ -531,7 +531,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','10894','ITRF2014 to ETRS89-D
 INSERT INTO "usage" VALUES('EPSG','24010','concatenated_operation','EPSG','10894','EPSG','1080','EPSG','1027');
 INSERT INTO "concatenated_operation" VALUES('EPSG','10895','ITRF2020 to ETRS89-DNK (1)','The coordinate epoch (in years) of the coordinates referenced to the source CRS (ITRF2020) is user-defined input and is used as the source epoch in step 2.','EPSG','9988','EPSG','10890',0.006,'NKG2020',0);
 INSERT INTO "usage" VALUES('EPSG','24011','concatenated_operation','EPSG','10895','EPSG','1080','EPSG','1027');
-INSERT INTO "concatenated_operation" VALUES('EPSG','11005','SVD2006 height to SVD2024 height (1)','Accuracy is RMS of the accuracies of the two concatenated operation steps.','EPSG','20000','EPSG','10999',1.4,'NMA-Sjm SV',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','11005','SVD2006 height to SVD2024 height (1)','Accuracy is RMS of the accuracies of the two concatenated operation steps.','EPSG','20000','EPSG','10999',1.4,'NMA-Sjm SV',1);
 INSERT INTO "usage" VALUES('EPSG','24141','concatenated_operation','EPSG','11005','EPSG','4831','EPSG','1059');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11066','ITRF2020 to ETRS89-GBR [OSNet v2009] (1)','Accuracy is approximately 1cm at the ETRS89-GBR [OSNet v2009] anchor epoch of 2009.756 but deteriorates with time due to tectonic deformation and/or glacial isostatic adjustment. Scale difference in ppb and scale difference rate in ppb/yr where 1/billion = 1E-9 or nm/m.','EPSG','9988','EPSG','11007',0.1,'IOGP-Gbr 2009',0);
 INSERT INTO "usage" VALUES('EPSG','24569','concatenated_operation','EPSG','11066','EPSG','1264','EPSG','1026');
@@ -551,7 +551,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','11310','ITRF2020 to ETRS89-C
 INSERT INTO "usage" VALUES('EPSG','25091','concatenated_operation','EPSG','11310','EPSG','1286','EPSG','1026');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11315','ITRF2020 to ETRS89-LVA [LKS-2020] (1)','The coordinate epoch (in years) of the coordinates referenced to the source CRS (ITRF2020) is user-defined and is used as the source epoch in step 2. For coordinates originating before 2021-02-07, the NKG2008 transformation should be used.','EPSG','9988','EPSG','10303',0.006,'NKG2020',0);
 INSERT INTO "usage" VALUES('EPSG','25133','concatenated_operation','EPSG','11315','EPSG','1139','EPSG','1027');
-INSERT INTO "concatenated_operation" VALUES('EPSG','11398','NN2000:2018 height to NN2000:2025 height (1)','Height difference derived through difference in geoid separation models.','EPSG','5941','EPSG','11394',0.03,'IOGP-Nor 2025',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','11398','NN2000:2018 height to NN2000:2025 height (1)','Height difference derived through difference in geoid separation models.','EPSG','5941','EPSG','11394',0.03,'IOGP-Nor 2025',1);
 INSERT INTO "usage" VALUES('EPSG','25497','concatenated_operation','EPSG','11398','EPSG','1352','EPSG','1059');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11441','JGD2024 to JGD2024 (vertical) height (2)','This concatenated operation is the path recommended by GSI for deriving JGD2024 (vertical) height from GNSS-derived ellipsoidal height in accordance with Survey Act requirements, as using the JPGEO2024 geoid separation model directly (JGD2024 to JGD2024 (vertical) height (1), CT code 11334) is not aligned with Survey Act requirements for coordinates to be at epoch 2011.395.','EPSG','6667','EPSG','11317',0.04,'GSI-Jpn',0);
 INSERT INTO "usage" VALUES('EPSG','25734','concatenated_operation','EPSG','11441','EPSG','3263','EPSG','1181');
@@ -563,6 +563,10 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','11528','ETRS89-SVK [SKTRF09]
 INSERT INTO "usage" VALUES('EPSG','26526','concatenated_operation','EPSG','11528','EPSG','1211','EPSG','1027');
 INSERT INTO "concatenated_operation" VALUES('EPSG','11529','S-JTSK to ETRS89-SVK [SKTRF09] (6)','Recommended method of a transformation from S-JTSK to ETRS89 in Slovakia. For reverse transformation see ETRS89-SVK [SKTRF09] to S-JTSK (5) (code 11528). Both together replace S-JTSK to ETRS89 (4) (code 4827).','EPSG','4156','EPSG','11076',0.06,'UGKK-Sk JTSK03',0);
 INSERT INTO "usage" VALUES('EPSG','26527','concatenated_operation','EPSG','11529','EPSG','1211','EPSG','1027');
+INSERT INTO "concatenated_operation" VALUES('EPSG','12091','SVD2006 height to SVD2024 height (1)','Height difference derived through difference in geoid separation models. Accuracy is RMS of the accuracies of the two concatenated operation steps.','EPSG','20000','EPSG','10999',1.4,'NMA-Sjm SV',0);
+INSERT INTO "usage" VALUES('EPSG','27108','concatenated_operation','EPSG','12091','EPSG','4831','EPSG','1059');
+INSERT INTO "concatenated_operation" VALUES('EPSG','12092','NN2000:2018 height to NN2000:2025 height (1)','Height difference derived through difference in geoid separation models.','EPSG','5941','EPSG','11394',0.03,'IOGP-Nor 2025',0);
+INSERT INTO "usage" VALUES('EPSG','27105','concatenated_operation','EPSG','12092','EPSG','1352','EPSG','1059');
 INSERT INTO "concatenated_operation" VALUES('EPSG','12172','ITRF2020 to ETRS89-CHE [CHTRS95] (1)','','EPSG','9988','EPSG','4932',0.1,'IOGP-Che 1995',0);
 INSERT INTO "usage" VALUES('EPSG','26948','concatenated_operation','EPSG','12172','EPSG','1286','EPSG','1026');
 INSERT INTO "concatenated_operation" VALUES('EPSG','12191','ITRF2020 to ETRS89-GRC [HTRS07] (2)','Accuracy is approximately 2cm at the ETRS89-GRC [HTRS07] anchor epoch of 2007.5, but deteriorates with time due to tectonic deformation and/or volcanic eruption. Velocities in southern Greece exceed 3 cm/year relative to ETRS89, with co-seismic displacements of several cm and up to 40cm.','EPSG','9988','EPSG','11091',0.8,'IOGP-Grc 2007',0);

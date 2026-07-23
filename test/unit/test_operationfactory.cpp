@@ -1050,7 +1050,8 @@ TEST(operation, vertCRS_to_geogCRS_context) {
 }
 
 // ---------------------------------------------------------------------------
-
+#if no_longer_work_since_epsg_13_001
+// See https://github.com/OSGeo/PROJ/pull/4803
 TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), std::string());
@@ -1066,6 +1067,7 @@ TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_context) {
             authFactoryEPSG->createCoordinateReferenceSystem("4937"),
             // ETRS89 + Baltic 1957 height (now deprecated)
             authFactoryEPSG->createCoordinateReferenceSystem("8360"), ctxt);
+
         ASSERT_GE(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -1092,6 +1094,7 @@ TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_context) {
                   "Inverse of 'ETRS89 to ETRS89 + Baltic 1957 height (1)'");
     }
 }
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -6077,10 +6080,12 @@ TEST(operation,
             NN_NO_CHECK(src), dst, ctxt);
         ASSERT_GE(list.size(), 1U);
         EXPECT_EQ(list[0]->nameStr(), "Inverse of British National Grid + "
-                                      "OSGB36 to ETRS89 (2) + "
-                                      "Inverse of ETRS89 to ODN height (2) + "
-                                      "ETRS89 to WGS 84 (1) + "
-                                      "WGS 84 to EGM96 height (1)");
+                                      "OSGB36 to ETRS89-GBR [OSNet v2009] (2) "
+                                      "+ "
+                                      "Inverse of ETRS89-GBR [OSNet v2009] to "
+                                      "ODN height (2) + "
+                                      "ETRS89-GBR [OSNet v2009] to WGS 84 (1) "
+                                      "+ WGS 84 to EGM96 height (1)");
         const char *expected_proj =
             "+proj=pipeline "
             "+step +inv +proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 "
@@ -6101,9 +6106,10 @@ TEST(operation,
             dst, NN_NO_CHECK(src), ctxt);
         ASSERT_GE(list.size(), 1U);
         EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM96 height (1) + "
-                                      "Inverse of ETRS89 to WGS 84 (1) + "
-                                      "ETRS89 to ODN height (2) + "
-                                      "Inverse of OSGB36 to ETRS89 (2) + "
+                                      "Inverse of ETRS89-GBR [OSNet v2009] to "
+                                      "WGS 84 (1) + ETRS89-GBR [OSNet v2009] "
+                                      "to ODN height (2) + Inverse of OSGB36 "
+                                      "to ETRS89-GBR [OSNet v2009] (2) + "
                                       "British National Grid");
         const char *expected_proj =
             "+proj=pipeline "
@@ -6461,6 +6467,8 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
+#if no_longer_work_since_epsg_13_001
+// See https://github.com/OSGeo/PROJ/pull/4803
 TEST(
     operation,
     compoundCRS_to_compoundCRS_concatenated_operation_with_two_vert_transformation) {
@@ -6478,8 +6486,8 @@ TEST(
             authFactoryEPSG->createCoordinateReferenceSystem("8360"),
             // ETRS89 + EVRF2007 height
             authFactoryEPSG->createCoordinateReferenceSystem("7423"), ctxt);
-        ASSERT_GE(list.size(), 2U);
 
+        ASSERT_GE(list.size(), 2U);
         // For Czechia
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -6513,9 +6521,12 @@ TEST(
                   "EVRF2007 height (1)'");
     }
 }
+#endif
 
 // ---------------------------------------------------------------------------
 
+#if no_longer_work_since_epsg_13_001
+// See https://github.com/OSGeo/PROJ/pull/4803
 TEST(
     operation,
     compoundCRS_to_compoundCRS_concatenated_operation_with_two_vert_transformation_and_different_source_dest_interp) {
@@ -6558,6 +6569,7 @@ TEST(
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
 }
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -6703,9 +6715,11 @@ TEST(operation, compoundCRS_to_compoundCRS_WGS84_EGM2008_to_RD_new_NAP_height) {
 
     EXPECT_FALSE(list[0]->hasBallparkTransformation());
     EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM2008 height (1) + "
-                                  "Inverse of ETRS89 to WGS 84 (1) + "
-                                  "ETRS89 to NAP height (2) + "
-                                  "Inverse of Amersfoort to ETRS89 (9) + RD");
+                                  "Inverse of ETRS89-NLD [AGRS2010] to "
+                                  "WGS 84 (1) + "
+                                  "ETRS89-NLD [AGRS2010] to NAP height (2) + "
+                                  "Inverse of Amersfoort to "
+                                  "ETRS89-NLD [AGRS2010] (9) + RD");
     EXPECT_EQ(
         list[0]->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline "
@@ -6722,25 +6736,31 @@ TEST(operation, compoundCRS_to_compoundCRS_WGS84_EGM2008_to_RD_new_NAP_height) {
 
     EXPECT_FALSE(list[1]->hasBallparkTransformation());
     EXPECT_EQ(list[1]->nameStr(), "Inverse of WGS 84 to EGM2008 height (1) + "
-                                  "Inverse of ETRS89 to WGS 84 (1) + "
-                                  "ETRS89 to NAP height (2) + "
-                                  "Inverse of Amersfoort to ETRS89 (8) + RD");
+                                  "Inverse of ETRS89-NLD [AGRS2010] to "
+                                  "WGS 84 (1) + "
+                                  "ETRS89-NLD [AGRS2010] to NAP height (2) + "
+                                  "Inverse of Amersfoort to "
+                                  "ETRS89-NLD [AGRS2010] (8) + RD");
     ASSERT_EQ(list[1]->coordinateOperationAccuracies().size(), 1U);
     EXPECT_EQ(list[1]->coordinateOperationAccuracies()[0]->value(), "1.373");
 
     // Using not available "WGS 84 to EGM2008 height (2)" with 1' EGM2008 grid
     EXPECT_FALSE(list[2]->hasBallparkTransformation());
     EXPECT_EQ(list[2]->nameStr(), "Inverse of WGS 84 to EGM2008 height (2) + "
-                                  "Inverse of ETRS89 to WGS 84 (1) + "
-                                  "ETRS89 to NAP height (2) + "
-                                  "Inverse of Amersfoort to ETRS89 (9) + RD");
+                                  "Inverse of ETRS89-NLD [AGRS2010] to "
+                                  "WGS 84 (1) + "
+                                  "ETRS89-NLD [AGRS2010] to NAP height (2) + "
+                                  "Inverse of Amersfoort to "
+                                  "ETRS89-NLD [AGRS2010] (9) + RD");
 
     // Using not available "WGS 84 to EGM2008 height (2)" with 1' EGM2008 grid
     EXPECT_FALSE(list[3]->hasBallparkTransformation());
     EXPECT_EQ(list[3]->nameStr(), "Inverse of WGS 84 to EGM2008 height (2) + "
-                                  "Inverse of ETRS89 to WGS 84 (1) + "
-                                  "ETRS89 to NAP height (2) + "
-                                  "Inverse of Amersfoort to ETRS89 (8) + RD");
+                                  "Inverse of ETRS89-NLD [AGRS2010] to "
+                                  "WGS 84 (1) + "
+                                  "ETRS89-NLD [AGRS2010] to NAP height (2) + "
+                                  "Inverse of Amersfoort to "
+                                  "ETRS89-NLD [AGRS2010] (8) + RD");
 }
 
 // ---------------------------------------------------------------------------
@@ -6993,9 +7013,9 @@ TEST(operation,
             NN_NO_CHECK(src), dst, ctxt);
         ASSERT_GE(list.size(), 1U);
         EXPECT_EQ(list[0]->nameStr(),
-                  "BD72 to ETRS89 (3) + "
-                  "Inverse of ETRS89 to Ostend height (1) + "
-                  "ETRS89 to WGS 84 (1) + "
+                  "BD72 to ETRS89-BEL [BEREF2011] (3) + "
+                  "Inverse of ETRS89-BEL [BEREF2011] to Ostend height (1) + "
+                  "ETRS89-BEL [BEREF2011] to WGS 84 (1) + "
                   "WGS 84 to EGM96 height (1)");
         const char *expected_proj =
             "+proj=pipeline "
@@ -7017,9 +7037,12 @@ TEST(operation,
             dst, NN_NO_CHECK(src), ctxt);
         ASSERT_GE(list.size(), 1U);
         EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM96 height (1) + "
-                                      "Inverse of ETRS89 to WGS 84 (1) + "
-                                      "ETRS89 to Ostend height (1) + "
-                                      "Inverse of BD72 to ETRS89 (3)");
+                                      "Inverse of ETRS89-BEL [BEREF2011] "
+                                      "to WGS 84 (1) + "
+                                      "ETRS89-BEL [BEREF2011] to "
+                                      "Ostend height (1) + "
+                                      "Inverse of BD72 to "
+                                      "ETRS89-BEL [BEREF2011] (3)");
         const char *expected_proj =
             "+proj=pipeline "
             "+step +proj=axisswap +order=2,1 "
@@ -9417,8 +9440,10 @@ TEST(operation, compoundCRS_to_geogCRS_3D_Amersfoort_NAP_height_to_Amersfoort) {
     // I'm not sure this is absolutely correct, but we do not certainly
     // a purely 2D grid-based horizontal transformation to be used when
     // going back from ETRS89 to Amersfoort.
-    EXPECT_EQ(list[0]->nameStr(), "Inverse of RD + Inverse of ETRS89 to NAP "
-                                  "height (2) using Amersfoort to ETRS89 (8)");
+    EXPECT_EQ(list[0]->nameStr(), "Inverse of RD + "
+                                  "Inverse of ETRS89-NLD [AGRS2010] to NAP "
+                                  "height (2) using Amersfoort to "
+                                  "ETRS89-NLD [AGRS2010] (8)");
     EXPECT_EQ(
         list[0]->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline "
