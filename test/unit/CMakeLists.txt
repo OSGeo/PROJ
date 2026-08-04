@@ -266,6 +266,16 @@ add_test(NAME test_misc COMMAND test_misc)
 set_property(TEST test_misc
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
 
+add_executable(test_tmerczoned
+  main.cpp
+  test_tmerczoned.cpp)
+target_link_libraries(test_tmerczoned
+  PRIVATE GTest::gtest
+  PRIVATE ${PROJ_LIBRARIES})
+add_test(NAME test_tmerczoned COMMAND test_tmerczoned)
+set_property(TEST test_tmerczoned
+  PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+
 if (Threads_FOUND AND CMAKE_USE_PTHREADS_INIT AND NOT APPLE)
 add_definitions(-DPROJ_HAS_PTHREADS)
 add_executable(test_fork
