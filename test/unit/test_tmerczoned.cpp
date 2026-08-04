@@ -2,6 +2,8 @@
 
 #include "gtest_include.h"
 
+namespace {
+
 void test_all_zones(const char *target, const PJ_COORD expected_geographic,
                     const PJ_COORD expected_projected) {
     auto P =
@@ -31,6 +33,8 @@ void test_all_zones(const char *target, const PJ_COORD expected_geographic,
 
     proj_destroy(P);
 }
+
+} // namespace
 
 TEST(tmerczoned, west_boundary_equator_32600) {
     PJ_COORD test;
