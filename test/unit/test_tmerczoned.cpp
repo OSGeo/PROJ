@@ -28,6 +28,8 @@ void test_all_zones(const char *target, const PJ_COORD expected_geographic,
                     expected_geographic.lp.phi + (zone - 1) * zone_width,
                     1e-10);
     }
+
+    proj_destroy(P);
 }
 
 TEST(tmerczoned, west_boundary_equator_32600) {
