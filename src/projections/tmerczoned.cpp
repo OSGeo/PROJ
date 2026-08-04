@@ -41,7 +41,7 @@ static PJ_XY tmerczoned_forward(PJ_LP lp, PJ *P) {
     // We want to nudge the calc slightly to bias the lower bound to be
     // inclusive and upper bound exclusive. It is not specified in IOGP Guidance
     // Note 7-2, but the use of `floor` suggests this is the intent.
-    constexpr double eps = 1e-12 * DEG_TO_RAD;
+    constexpr double eps = 1e-12;
 
     // Initial Longitude is already accounted for.
     int zone = static_cast<int>(lp.lam / Q->zoneWidth + eps) + 1;
