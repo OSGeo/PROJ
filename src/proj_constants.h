@@ -952,6 +952,49 @@
 
 /* ------------------------------------------------------------------------ */
 
+#define EPSG_CODE_METHOD_SEISMIC_BIN_GRID_I_EQ_J_PLUS_90 9666
+#define EPSG_NAME_METHOD_SEISMIC_BIN_GRID_I_EQ_J_PLUS_90                       \
+    "P6 I=J+90 seismic bin grid coordinate operation"
+
+#define EPSG_CODE_METHOD_SEISMIC_BIN_GRID_I_EQ_J_MINUS_90 1049
+#define EPSG_NAME_METHOD_SEISMIC_BIN_GRID_I_EQ_J_MINUS_90                      \
+    "P6 I=J-90 seismic bin grid coordinate operation"
+
+#define EPSG_NAME_PARAMETER_BIN_GRID_ORIGIN_I "Bin grid origin I"
+#define EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_I 8733
+
+#define EPSG_NAME_PARAMETER_BIN_GRID_ORIGIN_J "Bin grid origin J"
+#define EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_J 8734
+
+#define EPSG_NAME_PARAMETER_BIN_GRID_ORIGIN_EASTING "Bin grid origin Easting"
+#define EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_EASTING 8735
+
+#define EPSG_NAME_PARAMETER_BIN_GRID_ORIGIN_NORTHING "Bin grid origin Northing"
+#define EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_NORTHING 8736
+
+#define EPSG_NAME_PARAMETER_SCALE_FACTOR_OF_BIN_GRID "Scale factor of bin grid"
+#define EPSG_CODE_PARAMETER_SCALE_FACTOR_OF_BIN_GRID 8737
+
+#define EPSG_NAME_PARAMETER_BIN_WIDTH_ON_I_AXIS "Bin width on I-axis"
+#define EPSG_CODE_PARAMETER_BIN_WIDTH_ON_I_AXIS 8738
+
+#define EPSG_NAME_PARAMETER_BIN_WIDTH_ON_J_AXIS "Bin width on J-axis"
+#define EPSG_CODE_PARAMETER_BIN_WIDTH_ON_J_AXIS 8739
+
+#define EPSG_NAME_PARAMETER_MAP_GRID_BEARING_OF_BIN_GRID_J_AXIS                \
+    "Map grid bearing of bin grid J-axis"
+#define EPSG_CODE_PARAMETER_MAP_GRID_BEARING_OF_BIN_GRID_J_AXIS 8740
+
+#define EPSG_NAME_PARAMETER_BIN_NODE_INCREMENT_ON_I_AXIS                       \
+    "Bin node increment on I-axis"
+#define EPSG_CODE_PARAMETER_BIN_NODE_INCREMENT_ON_I_AXIS 8741
+
+#define EPSG_NAME_PARAMETER_BIN_NODE_INCREMENT_ON_J_AXIS                       \
+    "Bin node increment on J-axis"
+#define EPSG_CODE_PARAMETER_BIN_NODE_INCREMENT_ON_J_AXIS 8742
+
+/* ------------------------------------------------------------------------ */
+
 #define EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_2D 9843
 #define EPSG_NAME_METHOD_AXIS_ORDER_REVERSAL_2D "Axis Order Reversal (2D)"
 

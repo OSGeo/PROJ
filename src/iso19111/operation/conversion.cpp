@@ -3778,6 +3778,11 @@ void Conversion::_exportToPROJString(
         methodEPSGCode == EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION;
     const bool isSimilarity =
         methodEPSGCode == EPSG_CODE_METHOD_SIMILARITY_TRANSFORMATION;
+    // Those methods deal themselves with the unit and axis order of the map
+    // grid they are based on, and emit bin numbers, which are unit-less.
+    const bool isSeismicBinGrid =
+        methodEPSGCode == EPSG_CODE_METHOD_SEISMIC_BIN_GRID_I_EQ_J_PLUS_90 ||
+        methodEPSGCode == EPSG_CODE_METHOD_SEISMIC_BIN_GRID_I_EQ_J_MINUS_90;
     const bool isGeographicGeocentric =
         methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC;
     const bool isGeographicOffsets =
@@ -3788,8 +3793,9 @@ void Conversion::_exportToPROJString(
         methodEPSGCode == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL;
     const bool applySourceCRSModifiers =
         !isZUnitConversion && !isAffineParametric && !isSimilarity &&
-        !isAxisOrderReversal(methodEPSGCode) && !isGeographicGeocentric &&
-        !isGeographicOffsets && !isHeightDepthReversal;
+        !isSeismicBinGrid && !isAxisOrderReversal(methodEPSGCode) &&
+        !isGeographicGeocentric && !isGeographicOffsets &&
+        !isHeightDepthReversal;
     bool applyTargetCRSModifiers = applySourceCRSModifiers;
 
     if (formatter->getCRSExport()) {

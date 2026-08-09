@@ -6448,3 +6448,219 @@ TEST(operation, operation_geocen_translations_NEU_velocities_gtg) {
               "+proj=deformation +t_epoch=2000 +grids=eur_nkg_nkgrf17vel.tif "
               "+ellps=GRS80");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, export_of_seismic_bin_grid_I_eq_J_plus_90) {
+
+    // EPSG:6918 "EPSG example of georeferencing I=J+90 local bin grid", whose
+    // parameters are those of the worked example of EPSG guidance note 7-2,
+    // section 2.4.3.3.
+    auto wkt =
+        "COORDINATEOPERATION[\"EPSG example of georeferencing I=J+90 local bin "
+        "grid\",\n"
+        "    VERSION[\"P6/11 I = J+90\"],\n"
+        "    SOURCECRS[\n"
+        "        PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+        "            BASEGEOGCRS[\"WGS 84\",\n"
+        "                DATUM[\"World Geodetic System 1984\",\n"
+        "                    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                        LENGTHUNIT[\"metre\",1]]],\n"
+        "                PRIMEM[\"Greenwich\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                ID[\"EPSG\",4326]],\n"
+        "            CONVERSION[\"UTM zone 31N\",\n"
+        "                METHOD[\"Transverse Mercator\",\n"
+        "                    ID[\"EPSG\",9807]],\n"
+        "                PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8801]],\n"
+        "                PARAMETER[\"Longitude of natural origin\",3,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8802]],\n"
+        "                PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "                    SCALEUNIT[\"unity\",1],\n"
+        "                    ID[\"EPSG\",8805]],\n"
+        "                PARAMETER[\"False easting\",500000,\n"
+        "                    LENGTHUNIT[\"metre\",1],\n"
+        "                    ID[\"EPSG\",8806]],\n"
+        "                PARAMETER[\"False northing\",0,\n"
+        "                    LENGTHUNIT[\"metre\",1],\n"
+        "                    ID[\"EPSG\",8807]]],\n"
+        "            CS[Cartesian,2],\n"
+        "                AXIS[\"(E)\",east,\n"
+        "                    ORDER[1],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                AXIS[\"(N)\",north,\n"
+        "                    ORDER[2],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",32631]]],\n"
+        "    TARGETCRS[\n"
+        "        ENGCRS[\"EPSG example I=J+90 local bin grid (integer "
+        "values)\",\n"
+        "            EDATUM[\"Bin grid origin\"],\n"
+        "            CS[ordinal,2],\n"
+        "                AXIS[\"bin grid I (I)\",columnPositive,\n"
+        "                    ORDER[1]],\n"
+        "                AXIS[\"bin grid J (J)\",rowPositive,\n"
+        "                    ORDER[2]],\n"
+        "            ID[\"EPSG\",32764]]],\n"
+        "    METHOD[\"P6 I=J+90 seismic bin grid coordinate operation\",\n"
+        "        ID[\"EPSG\",9666]],\n"
+        "    PARAMETER[\"Bin grid origin I\",1,\n"
+        "        SCALEUNIT[\"bin\",1],\n"
+        "        ID[\"EPSG\",8733]],\n"
+        "    PARAMETER[\"Bin grid origin J\",1,\n"
+        "        SCALEUNIT[\"bin\",1],\n"
+        "        ID[\"EPSG\",8734]],\n"
+        "    PARAMETER[\"Bin grid origin Easting\",456781,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8735]],\n"
+        "    PARAMETER[\"Bin grid origin Northing\",5836723,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8736]],\n"
+        "    PARAMETER[\"Scale factor of bin grid\",0.99984,\n"
+        "        SCALEUNIT[\"unity\",1],\n"
+        "        ID[\"EPSG\",8737]],\n"
+        "    PARAMETER[\"Bin width on I-axis\",25,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8738]],\n"
+        "    PARAMETER[\"Bin width on J-axis\",12.5,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8739]],\n"
+        "    PARAMETER[\"Map grid bearing of bin grid J-axis\",20,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8740]],\n"
+        "    PARAMETER[\"Bin node increment on I-axis\",1,\n"
+        "        SCALEUNIT[\"bin\",1],\n"
+        "        ID[\"EPSG\",8741]],\n"
+        "    PARAMETER[\"Bin node increment on J-axis\",1,\n"
+        "        SCALEUNIT[\"bin\",1],\n"
+        "        ID[\"EPSG\",8742]],\n"
+        "    ID[\"EPSG\",6918]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+
+    // With those coefficients, map grid easting/northing (456781, 5836723)
+    // maps to bin (1, 1) and (464855.62, 5837055.90) to bin (300, 247), which
+    // are the values of the worked example of EPSG guidance note 7-2.
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=affine +xoff=62692.7547606425 +s11=0.0375937198266086 "
+              "+s12=-0.0136829950122287 +yoff=-451347.522624406 "
+              "+s21=0.0273659900244574 +s22=0.0751874396532172");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, export_of_seismic_bin_grid_I_eq_J_minus_90) {
+
+    // EPSG:6919 "EPSG example of georeferencing I=J-90 local bin grid", whose
+    // parameters are those of the worked example of EPSG guidance note 7-2,
+    // section 2.4.3.3. Its source CRS is expressed in US survey foot, which
+    // exercises the unit conversion of the map grid.
+    auto wkt =
+        "COORDINATEOPERATION[\"EPSG example of georeferencing I=J-90 local bin "
+        "grid\",\n"
+        "    VERSION[\"P6/11 I = J-90\"],\n"
+        "    SOURCECRS[\n"
+        "        PROJCRS[\"NAD27 / BLM 16N (ftUS)\",\n"
+        "            BASEGEOGCRS[\"NAD27\",\n"
+        "                DATUM[\"North American Datum 1927\",\n"
+        "                    ELLIPSOID[\"Clarke 1866\",6378206.4,"
+        "294.978698213,\n"
+        "                        LENGTHUNIT[\"metre\",1]]],\n"
+        "                PRIMEM[\"Greenwich\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                ID[\"EPSG\",4267]],\n"
+        "            CONVERSION[\"BLM zone 16N (US survey foot)\",\n"
+        "                METHOD[\"Transverse Mercator\",\n"
+        "                    ID[\"EPSG\",9807]],\n"
+        "                PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8801]],\n"
+        "                PARAMETER[\"Longitude of natural origin\",-87,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8802]],\n"
+        "                PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "                    SCALEUNIT[\"unity\",1],\n"
+        "                    ID[\"EPSG\",8805]],\n"
+        "                PARAMETER[\"False easting\",1640416.67,\n"
+        "                    LENGTHUNIT[\"US survey foot\","
+        "0.304800609601219],\n"
+        "                    ID[\"EPSG\",8806]],\n"
+        "                PARAMETER[\"False northing\",0,\n"
+        "                    LENGTHUNIT[\"US survey foot\","
+        "0.304800609601219],\n"
+        "                    ID[\"EPSG\",8807]]],\n"
+        "            CS[Cartesian,2],\n"
+        "                AXIS[\"(E)\",east,\n"
+        "                    ORDER[1],\n"
+        "                    LENGTHUNIT[\"US survey foot\","
+        "0.304800609601219]],\n"
+        "                AXIS[\"(N)\",north,\n"
+        "                    ORDER[2],\n"
+        "                    LENGTHUNIT[\"US survey foot\","
+        "0.304800609601219]],\n"
+        "            ID[\"EPSG\",32066]]],\n"
+        "    TARGETCRS[\n"
+        "        ENGCRS[\"EPSG example I=J-90 local bin grid (integer "
+        "values)\",\n"
+        "            EDATUM[\"Bin grid origin\"],\n"
+        "            CS[ordinal,2],\n"
+        "                AXIS[\"bin grid I (I)\",columnNegative,\n"
+        "                    ORDER[1]],\n"
+        "                AXIS[\"bin grid J (J)\",rowPositive,\n"
+        "                    ORDER[2]],\n"
+        "            ID[\"EPSG\",32765]]],\n"
+        "    METHOD[\"P6 I=J-90 seismic bin grid coordinate operation\",\n"
+        "        ID[\"EPSG\",1049]],\n"
+        "    PARAMETER[\"Bin grid origin I\",5000,\n"
+        "        SCALEUNIT[\"bin\",1],\n"
+        "        ID[\"EPSG\",8733]],\n"
+        "    PARAMETER[\"Bin grid origin J\",0,\n"
+        "        SCALEUNIT[\"bin\",1],\n"
+        "        ID[\"EPSG\",8734]],\n"
+        "    PARAMETER[\"Bin grid origin Easting\",871200,\n"
+        "        LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "        ID[\"EPSG\",8735]],\n"
+        "    PARAMETER[\"Bin grid origin Northing\",10280160,\n"
+        "        LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "        ID[\"EPSG\",8736]],\n"
+        "    PARAMETER[\"Scale factor of bin grid\",1,\n"
+        "        SCALEUNIT[\"unity\",1],\n"
+        "        ID[\"EPSG\",8737]],\n"
+        "    PARAMETER[\"Bin width on I-axis\",82.5,\n"
+        "        LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "        ID[\"EPSG\",8738]],\n"
+        "    PARAMETER[\"Bin width on J-axis\",41.25,\n"
+        "        LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "        ID[\"EPSG\",8739]],\n"
+        "    PARAMETER[\"Map grid bearing of bin grid J-axis\",340,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8740]],\n"
+        "    PARAMETER[\"Bin node increment on I-axis\",1,\n"
+        "        SCALEUNIT[\"bin\",1],\n"
+        "        ID[\"EPSG\",8741]],\n"
+        "    PARAMETER[\"Bin node increment on J-axis\",1,\n"
+        "        SCALEUNIT[\"bin\",1],\n"
+        "        ID[\"EPSG\",8742]],\n"
+        "    ID[\"EPSG\",6919]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+
+    // With those coefficients, map grid easting/northing (871200, 10280160)
+    // ftUS maps to bin (5000, 0) and (890972.63, 10298199.29) ftUS to bin
+    // (4700, 247), which are the values of the worked example of EPSG
+    // guidance note 7-2.
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=us-ft +xy_out=m "
+              "+step +proj=affine +xoff=57541.6000950241 "
+              "+s11=-0.0373693924043851 +s12=-0.0136013465078097 "
+              "+yoff=-226962.970754743 +s21=-0.0272026930156193 "
+              "+s22=0.0747387848087701");
+}

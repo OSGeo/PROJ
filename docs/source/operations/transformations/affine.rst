@@ -49,6 +49,38 @@ This can be used to implement:
       be rotated to coincide with the axes of the target CRS, counter-clockwise
       being positive
 
+- EPSG "P6 I=J+90 seismic bin grid coordinate operation" of code 9666 and
+  "P6 I=J-90 seismic bin grid coordinate operation" of code 1049, which convert
+  from the easting/northing of a map grid to the I/J bin numbers of a seismic
+  bin grid, by setting:
+
+    * s11 to :math:`\pm s_I \cos \theta`
+    * s12 to :math:`\mp s_I \sin \theta`
+    * s21 to :math:`s_J \sin \theta`
+    * s22 to :math:`s_J \cos \theta`
+    * xoff to :math:`I_0 - (s11 \times E_0 + s12 \times N_0)`
+    * yoff to :math:`J_0 - (s21 \times E_0 + s22 \times N_0)`
+
+  where:
+
+    * :math:`s_I = Inc_I / (k \times M_I)` and :math:`s_J = Inc_J / (k \times M_J)`
+      are the number of bin grid units per map grid unit along the I and J axes,
+      with :math:`M_I` and :math:`M_J` the bin widths on the I and J axes,
+      :math:`Inc_I` and :math:`Inc_J` the bin node increments on the I and J
+      axes, and :math:`k` the scale factor of the bin grid.
+    * :math:`I_0` and :math:`J_0` are the bin grid coordinates of the origin
+      point of the bin grid, and :math:`E_0` and :math:`N_0` its easting and
+      northing in the map grid.
+    * :math:`\theta` is the map grid bearing of the bin grid J-axis, clockwise
+      being positive.
+    * the upper sign of :math:`\pm` and :math:`\mp` applies to the
+      right-handed method 9666 (I = J+90°) and the lower one to the
+      left-handed method 1049 (I = J-90°).
+
+  :math:`M_I`, :math:`M_J`, :math:`E_0` and :math:`N_0` must all be expressed
+  in the same linear unit as the easting and northing fed to the affine
+  operation.
+
 Examples
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
