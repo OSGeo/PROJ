@@ -3404,7 +3404,8 @@ bool SingleOperation::exportToPROJStringGeneric(
         const double N0 =
             parameterValueNumeric(EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_NORTHING,
                                   common::UnitOfMeasure::METRE);
-        const double k = parameterValueNumericAsSI(
+        // Point scale factor of the map grid at a chosen reference point.
+        const double SF = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_SCALE_FACTOR_OF_BIN_GRID);
         const double binWidthI =
             parameterValueNumeric(EPSG_CODE_PARAMETER_BIN_WIDTH_ON_I_AXIS,
@@ -3420,15 +3421,15 @@ bool SingleOperation::exportToPROJStringGeneric(
         const double incJ = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_BIN_NODE_INCREMENT_ON_J_AXIS);
 
-        if (k == 0.0 || binWidthI == 0.0 || binWidthJ == 0.0) {
+        if (SF == 0.0 || binWidthI == 0.0 || binWidthJ == 0.0) {
             throw io::FormattingException(
                 "Invalid seismic bin grid operation: the scale factor of the "
                 "bin grid and the bin widths must be non-zero");
         }
 
         // Number of bin grid units per map grid unit, along each bin grid axis.
-        const double scaleI = incI / (k * binWidthI);
-        const double scaleJ = incJ / (k * binWidthJ);
+        const double scaleI = incI / (SF * binWidthI);
+        const double scaleJ = incJ / (SF * binWidthJ);
 
         // The I=J-90 (left-handed) method only differs from the I=J+90
         // (right-handed) one by the sign of the I-axis.
@@ -3458,7 +3459,12 @@ bool SingleOperation::exportToPROJStringGeneric(
         }
 
         // The target CRS holds bin numbers, which are unit-less, so no unit
-        // conversion is applied on the output of the affine step.
+        // conversion is applied on the output of the affine step. Bin numbers
+        // are not rounded either: EPSG defines bin grid coordinate systems
+        // with a real datatype (e.g. EPSG:1051) as well as with an integer one
+        // (e.g. EPSG:32760), so whether they are whole values is a property of
+        // the bin grid coordinate system, not of these methods. Rounding here
+        // would also make the operation non-invertible.
         formatter->addStep("affine");
         formatter->addParam("xoff", xoff);
         formatter->addParam("s11", s11);
