@@ -360,7 +360,7 @@ INSERT INTO "extent" VALUES('EPSG','1378','USA - Delaware','United States (USA) 
 INSERT INTO "extent" VALUES('EPSG','1379','USA - Florida','United States (USA) - Florida.',24.41,31.01,-87.63,-79.97,0);
 INSERT INTO "extent" VALUES('EPSG','1380','USA - Georgia','United States (USA) - Georgia.',30.35,35.01,-85.61,-80.75,0);
 INSERT INTO "extent" VALUES('EPSG','1381','USA - Idaho','United States (USA) - Idaho.',41.99,49.01,-117.24,-111.04,0);
-INSERT INTO "extent" VALUES('EPSG','1382','USA - Illinois','United States (USA) - Illinois.',36.97,42.51,-91.52,-87.02,0);
+INSERT INTO "extent" VALUES('EPSG','1382','USA - Illinois','United States (USA) - Illinois.',36.97,42.51,-91.52,-87.01,0);
 INSERT INTO "extent" VALUES('EPSG','1383','USA - Indiana','United States (USA) - Indiana.',37.77,41.77,-88.1,-84.78,0);
 INSERT INTO "extent" VALUES('EPSG','1384','USA - Iowa','United States (USA) - Iowa.',40.36,43.51,-96.65,-90.14,0);
 INSERT INTO "extent" VALUES('EPSG','1385','USA - Kansas','United States (USA) - Kansas.',36.99,40.01,-102.06,-94.58,0);
@@ -3842,5 +3842,14 @@ INSERT INTO "extent" VALUES('EPSG','4860','Svalbard - onshore and offshore - wes
 INSERT INTO "extent" VALUES('EPSG','4861','USA - Arkansas - SPCS83 - N','United States (USA) - Arkansas - counties of Baxter; Benton; Boone; Carroll; Clay; Cleburne; Conway; Craighead; Crawford; Crittenden; Cross; Faulkner; Franklin; Fulton; Greene; Independence; Izard; Jackson; Johnson; Lawrence; Logan; Madison; Marion; Mississippi; Newton; Perry; Poinsett; Pope; Pulaski; Randolph; Scott; Searcy; Sebastian; Sharp; St Francis; Stone; Van Buren; Washington; White; Woodruff; Yell.',34.48,36.5,-94.62,-89.64,0);
 INSERT INTO "extent" VALUES('EPSG','4862','USA - Arkansas - SPCS83 - S','United States (USA) - Arkansas - counties Arkansas; Ashley; Bradley; Calhoun; Chicot; Clark; Cleveland; Columbia; Dallas; Desha; Drew; Garland; Grant; Hempstead; Hot Spring; Howard; Jefferson; Lafayette; Lee; Lincoln; Little River; Lonoke; Miller; Monroe; Montgomery; Nevada; Ouachita; Phillips; Pike; Polk; Prairie; Saline; Sevier; Union.',33.0,35.1,-94.49,-90.4,0);
 INSERT INTO "extent" VALUES('EPSG','4863','UK - Sizewell','United Kingdom (UK) - Sizewell power station site and  rail and road routes related to the site.',52.13,52.38,1.35,1.7,0);
+INSERT INTO "extent" VALUES('EPSG','4864','USA - Illinois - St Clair','United States (USA) - Illinois - St Clair county.',38.21,38.67,-90.27,-89.7,0);
+INSERT INTO "extent" VALUES('EPSG','4865','USA - Illinois - Madison','United States (USA) - Illinois - Madison county',38.65,39.0,-90.28,-89.59,0);
+INSERT INTO "extent" VALUES('EPSG','4866','USA - Illinois - Monroe','United States (USA) - Illinois - Monroe county.',38.08,38.53,-90.38,-89.89,0);
+INSERT INTO "extent" VALUES('EPSG','4867','USA - Illinois - Calhoun','United States (USA) - Illinois - Calhoun county.',38.86,39.41,-90.94,-90.45,0);
+INSERT INTO "extent" VALUES('EPSG','4868','USA - Illinois - Greene, Jersey','United States (USA) - Illinois - counties of Greene and Jersey.',38.92,39.53,-90.63,-90.14,0);
+INSERT INTO "extent" VALUES('EPSG','4869','USA - Illinois - Clinton, Washington','United States (USA) - Illinois - counties of Clinton and Washington.',38.21,38.75,-89.71,-89.13,0);
+INSERT INTO "extent" VALUES('EPSG','4870','USA - Illinois - Randolph','United States (USA) - Illinois - Randolph county.',37.79,38.23,-90.21,-89.59,0);
+INSERT INTO "extent" VALUES('EPSG','4871','USA - Illinois - Marion','United States (USA) - Illinois - Marion county.',38.47,38.83,-89.15,-88.69,0);
+INSERT INTO "extent" VALUES('EPSG','4872','USA - Illinois - Bond','United States (USA) - Illinois - Bond county.',38.74,39.03,-89.64,-89.25,0);
 INSERT INTO "extent" VALUES('EPSG','4880','Greece - onshore west of 28°51''E','Greece - onshore west of 28°51''E.',34.75,41.75,19.57,28.3,0);
 INSERT INTO "extent" VALUES('EPSG','4881','Greece - onshore east of 28°51''E','Greece - onshore east of 28°51''E - Kastellorizo.',36.05,36.19,29.42,29.69,0);
