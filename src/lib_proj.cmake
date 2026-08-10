@@ -60,6 +60,7 @@ set(SRC_LIBPROJ_PROJECTIONS
   projections/tcea.cpp
   projections/times.cpp
   projections/tmerc.cpp
+  projections/tmerczoned.cpp
   projections/tobmerc.cpp
   projections/airy.cpp
   projections/aitoff.cpp

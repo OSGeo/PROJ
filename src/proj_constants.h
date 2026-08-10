@@ -281,6 +281,10 @@
 #define PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_DIAMOND                       \
     "Peirce Quincuncial (Diamond)"
 
+#define EPSG_NAME_METHOD_TRANSVERSE_MERCATOR_ZONED_GRID_SYSTEM                 \
+    "Transverse Mercator Zoned Grid System"
+#define EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_ZONED_GRID_SYSTEM 9824
+
 /* ------------------------------------------------------------------------ */
 
 /* Projection parameters */
@@ -401,6 +405,12 @@
 #define EPSG_NAME_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT                     \
     "Projection plane origin height"
 #define EPSG_CODE_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT 1039
+
+#define EPSG_NAME_PARAMETER_INITIAL_LONGITUDE "Initial longitude"
+#define EPSG_CODE_PARAMETER_INITIAL_LONGITUDE 8830
+
+#define EPSG_NAME_PARAMETER_ZONE_WIDTH "Zone width"
+#define EPSG_CODE_PARAMETER_ZONE_WIDTH 8831
 
 /* ------------------------------------------------------------------------ */
 

@@ -1447,6 +1447,17 @@ List of all projection images
 ********************************************************************************
 
 
+:ref:`tmerczoned`
+
+.. figure:: ./images/tmerczoned.png
+   :width: 500 px
+   :align: center
+   :alt:   tmerczoned
+
+
+********************************************************************************
+
+
 :ref:`tobmerc`
 
 .. figure:: ./images/tobmerc.png
