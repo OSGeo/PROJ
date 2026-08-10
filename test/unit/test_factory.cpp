@@ -1445,18 +1445,7 @@ TEST(factory, AuthorityFactory_build_all_concatenated) {
     EXPECT_LT(setConcatenatedNoDeprecated.size(), setConcatenated.size());
     for (const auto &code : setConcatenated) {
         if (in(code, {"8422", "8481", "8482", "8565", "8566", "8572", "9731",
-                      // concatenated operation 11005 'SVD2006 height to SVD2024
-                      // height (1)' chains together:
-                      //- 10107: "ETRS89 to ETRS89 + SVD2006 height (1)"
-                      // - and 11004: "ETRS89-NOR [EUREF89] to ETRS89-NOR
-                      // [EUREF89] + SVD2024 height (1)"
-                      "11005",
-                      // concatenated operation 11398 'NN2000:2018 height to
-                      // NN2000:2025 height (1)' chains together:
-                      // - 9593: "ETRS89 to ETRS89 + NN2000:2018 height (1)"
-                      // - and 11396: "ETRS89-NOR [EUREF89] to ETRS89-NOR
-                      // [EUREF89] + NN2000:2025 height (1)"
-                      "11398", "11206"})) {
+                      "11005", "11398", "11206"})) {
             EXPECT_THROW(factory->createCoordinateOperation(code, false),
                          FactoryException)
                 << code;
