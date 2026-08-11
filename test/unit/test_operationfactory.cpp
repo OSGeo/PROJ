@@ -6790,7 +6790,7 @@ TEST(
             NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
         ASSERT_GE(list.size(), 1U);
         EXPECT_EQ(list[0]->nameStr(),
-                  "Inverse of NAD83(CSRS)v6 to CGVD28 height (1) + "
+                  "Inverse of NAD83(CSRS)v6 to CGVD28 height (2) + "
                   "NAD83(CSRS)v6 to CGVD2013(CGG2013) height (1) "
                   "using Ballpark geographic offset "
                   "from NAD83(CSRS) to NAD83(CSRS)v6");

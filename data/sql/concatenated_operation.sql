@@ -461,7 +461,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','9687','GDA94 to WGS 84 (G176
 INSERT INTO "usage" VALUES('EPSG','14964','concatenated_operation','EPSG','9687','EPSG','2575','EPSG','1234');
 INSERT INTO "concatenated_operation" VALUES('EPSG','9731','ETRS89 to ETRS89 + Catania 1965 height (1)','','EPSG','4937','EPSG','9724',0.035,'IGM-Ita 2005 Sicily',1);
 INSERT INTO "usage" VALUES('EPSG','15285','concatenated_operation','EPSG','9731','EPSG','2340','EPSG','1270');
-INSERT INTO "concatenated_operation" VALUES('EPSG','9750','ETRS89-ITA [RDN2008] to Catania 1965 height (1)','','EPSG','6705','EPSG','9721',0.035,'IGM-Ita 2005 Sicily',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','9750','ETRS89 to Catania 1965 height (1)','','EPSG','4937','EPSG','9721',0.035,'IGM-Ita 2005 Sicily',1);
 INSERT INTO "usage" VALUES('EPSG','15385','concatenated_operation','EPSG','9750','EPSG','2340','EPSG','1133');
 INSERT INTO "concatenated_operation" VALUES('EPSG','10146','INAGeoid2020 v1 height to INAGeoid v2 height (1)','In central Java INAGeoid2020 v2 height minus INAGeoid2020 v1 height is approximately +0.2m (v1 surface is above the v2 surface). This difference varies significantly across Indonesia.','EPSG','9471','EPSG','20036',0.2,'BIG-Idn 2022',1);
 INSERT INTO "usage" VALUES('EPSG','18452','concatenated_operation','EPSG','10146','EPSG','1122','EPSG','1178');
@@ -571,3 +571,5 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','12172','ITRF2020 to ETRS89-C
 INSERT INTO "usage" VALUES('EPSG','26948','concatenated_operation','EPSG','12172','EPSG','1286','EPSG','1026');
 INSERT INTO "concatenated_operation" VALUES('EPSG','12191','ITRF2020 to ETRS89-GRC [HTRS07] (2)','Accuracy is approximately 2cm at the ETRS89-GRC [HTRS07] anchor epoch of 2007.5, but deteriorates with time due to tectonic deformation and/or volcanic eruption. Velocities in southern Greece exceed 3 cm/year relative to ETRS89, with co-seismic displacements of several cm and up to 40cm.','EPSG','9988','EPSG','11091',0.8,'IOGP-Grc 2007',0);
 INSERT INTO "usage" VALUES('EPSG','27009','concatenated_operation','EPSG','12191','EPSG','1106','EPSG','1026');
+INSERT INTO "concatenated_operation" VALUES('EPSG','12261','ETRS89-ITA [RDN2008] to Catania 1965 height (2)','This operation is reversible because both steps are reversible. Replaces non-reversible ETRS89 to Catania 1965 height (1) (code 9750).','EPSG','6705','EPSG','9721',0.035,'IGM-Ita 2005 Sicily',0);
+INSERT INTO "usage" VALUES('EPSG','27230','concatenated_operation','EPSG','12261','EPSG','2340','EPSG','1270');
