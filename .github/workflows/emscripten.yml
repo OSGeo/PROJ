@@ -59,3 +59,32 @@ jobs:
             -v "$PWD"/out_node:/opt/node/tests \
             node:24-alpine \
             node /opt/node/tests/proj.ems.tests.js
+
+      - name: Deploy ssh key (wasm_proj)
+        if: ${{ github.event_name == 'push' && github.ref_name == 'master' && github.repository == 'OSGeo/PROJ' }}
+        shell: bash -l {0}
+        env:
+          WASM_PROJ_DEPLOY_SSH_KEY: ${{ secrets.WASM_PROJ_DEPLOY_SSH_KEY }}   # zizmor: ignore[secrets-outside-env]
+        run: |
+          mkdir $HOME/.ssh && echo "${WASM_PROJ_DEPLOY_SSH_KEY}" > $HOME/.ssh/id_rsa
+          chmod 700 $HOME/.ssh && chmod 600 $HOME/.ssh/id_rsa
+          ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
+          eval `ssh-agent -s`
+          ssh-add $HOME/.ssh/id_rsa
+
+      - name: Deploy to wasm-proj/master pages
+        if: ${{ github.event_name == 'push' && github.ref_name == 'master' && github.repository == 'OSGeo/PROJ' }}
+        shell: bash -l {0}
+        run: |
+          set -x
+          set -e
+          git clone -b pages git@github.com:jjimenezshaw/wasm-proj.git wasm_proj_pages
+          cp wasm_out/projModule.* wasm_proj_pages/master/wasm/
+          cd wasm_proj_pages
+          git config user.email "proj-master-updater@example.com"
+          git config user.name "Automatic PROJ updater"
+          git remote -v
+          git rev-parse --abbrev-ref HEAD
+          git add -A
+          git commit -m "Update wasm with OSGeo/PROJ commit $GITHUB_SHA"
+          git push -f origin pages
