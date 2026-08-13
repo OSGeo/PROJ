@@ -69,11 +69,11 @@
 namespace polyhedral {
 
 struct Face2D {
-    double x, y;
+    double x = 0.0, y = 0.0;
 };
 
 struct Barycentric {
-    double u, v, w;
+    double u = 0.0, v = 0.0, w = 0.0;
 };
 
 struct FaceTriangle {
@@ -84,7 +84,7 @@ struct SphericalTriangle {
     Vec3 a, b, c;
 };
 
-inline Barycentric face_to_barycentric(Face2D p, FaceTriangle tri) {
+inline Barycentric face_to_barycentric(Face2D p, const FaceTriangle &tri) {
     double d31[2] = {tri.a.x - tri.c.x, tri.a.y - tri.c.y};
     double d23[2] = {tri.c.x - tri.b.x, tri.c.y - tri.b.y};
     double d3p[2] = {p.x - tri.c.x, p.y - tri.c.y};
@@ -96,7 +96,8 @@ inline Barycentric face_to_barycentric(Face2D p, FaceTriangle tri) {
     return {b0, b1, b2};
 }
 
-inline Face2D barycentric_to_face(Barycentric b, FaceTriangle tri) {
+inline Face2D barycentric_to_face(const Barycentric &b,
+                                  const FaceTriangle &tri) {
     return {b.u * tri.a.x + b.v * tri.b.x + b.w * tri.c.x,
             b.u * tri.a.y + b.v * tri.b.y + b.w * tri.c.y};
 }
