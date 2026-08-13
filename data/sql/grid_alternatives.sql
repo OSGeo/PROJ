@@ -102,6 +102,9 @@ VALUES
 ('chgeo2004_ETRS.agr','ch_swisstopo_chgeo2004_ETRS89_LHN95.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ch_swisstopo_chgeo2004_ETRS89_LHN95.tif',1,1,NULL),
 ('chgeo2004_htrans_ETRS.agr','ch_swisstopo_chgeo2004_ETRS89_LN02.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ch_swisstopo_chgeo2004_ETRS89_LN02.tif',1,1,NULL),
 
+-- co_igac - Instituto Geográfico Agustín Codazzi (IGAC)
+('QgeoidCOL2023.txt','co_igac_QGeoidCOL2023.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/co_igac_QGeoidCOL2023.tif',1,1,NULL),
+
 -- cz_cuzk - ČÚZK
 ('CR2005_GTX.gtx','cz_cuzk_CR-2005.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/cz_cuzk_CR-2005.tif',1,1,NULL),
 ('cz_cuzk_table_-y-x_3_v1710.tif','cz_cuzk_table_-y-x_3_v1710.tif',NULL,'GTiff','gridshift',0,NULL,'https://cdn.proj.org/cz_cuzk_table_-y-x_3_v1710.tif',1,1,NULL),
