@@ -35,7 +35,7 @@ set(SRC_LIBPROJ_PROJECTIONS
   projections/bipc.cpp
   projections/bonne.cpp
   projections/eqdc.cpp
-  projections/isea.cpp
+  projections/polyhedral.cpp
   projections/ccon.cpp
   projections/imw_p.cpp
   projections/krovak.cpp
