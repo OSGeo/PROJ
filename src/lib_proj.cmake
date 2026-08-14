@@ -135,6 +135,7 @@ set(SRC_LIBPROJ_PROJECTIONS
   projections/eqearth.cpp
   projections/col_urban.cpp
   projections/spilhaus.cpp
+  projections/hourglass.cpp
 )
 
 set(SRC_LIBPROJ_CONVERSIONS
