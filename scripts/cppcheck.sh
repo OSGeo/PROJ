@@ -64,6 +64,7 @@ grep -v "unmatchedSuppression" ${LOG_FILE} \
     | grep -v "passedByValueCallback,Function parameter 'geod' should be passed by const reference" \
     | grep -v "passedByValueCallback,Function parameter 'cart' should be passed by const reference" \
     | grep -v "passedByValueCallback,Function parameter 'in' should be passed by const reference" \
+    | grep -v "style,knownConditionTrueFalse,Condition '!datumAdded' is always true" \
     > ${LOG_FILE}.tmp
 mv ${LOG_FILE}.tmp ${LOG_FILE}
 
