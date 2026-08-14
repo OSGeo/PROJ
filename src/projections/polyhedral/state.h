@@ -26,35 +26,35 @@ namespace polyhedral {
 constexpr int MAX_TRIANGLES = 120;
 
 struct pj_polyhedral_data {
-    int n_triangles;
-    int face_vertex_count; // NFV: 3 for triangular faces, 5 for pentagonal
-    int num_faces;
+    int n_triangles = 0;
+    int face_vertex_count = 0; // NFV: 3 for triangular faces, 5 for pentagonal
+    int num_faces = 0;
 
     SphericalTriangle sph_tris[MAX_TRIANGLES];
     FaceTriangle face_tris[MAX_TRIANGLES];
 
-    double orient[3][3];
-    double orient_inv[3][3];
+    double orient[3][3] = {};
+    double orient_inv[3][3] = {};
 
-    int root_face_index; // unfold-tree root; default reference face for
-                         // lat_0/lon_0
+    int root_face_index = 0; // unfold-tree root; default reference face for
+                             // lat_0/lon_0
 
     // Translation in projected space so the geographic anchor named by
     // +lat_0 / +lon_0 (or its dynamic default) lands at (0, 0).
     // +x_0/+y_0 stack on top via PROJ core.
-    double x_offset;
-    double y_offset;
+    double x_offset = 0.0;
+    double y_offset = 0.0;
 
     // Authalic latitude state (ellipsoidal case only; apa is null on spheres).
-    double *apa;
-    double qp;
+    double *apa = nullptr;
+    double qp = 0.0;
 
     // Linear scale applied to the (unit-net) projected coordinates so the
     // result is expressed on the authalic sphere. PROJ's core then multiplies
     // by P->a, yielding an absolute scale of a*rq = R_authalic and thus true
     // equal area on the ellipsoid. rq = sqrt(0.5*qp) = R_authalic/a on an
     // ellipsoid, and exactly 1 on a sphere (leaving the +R path unchanged).
-    double rq;
+    double rq = 1.0;
 };
 
 // Projected origin location on chosen reference face when the user does not
@@ -71,9 +71,9 @@ enum class DefaultOrigin {
 // projections). User-supplied +orient_lat is geodetic and gets converted to
 // authalic before use. On a sphere the two are identical.
 struct PolyhedralDefaults {
-    double orient_lat_deg;
-    double orient_lon_deg;
-    double azi_deg;
+    double orient_lat_deg = 0.0;
+    double orient_lon_deg = 0.0;
+    double azi_deg = 0.0;
     DefaultOrigin default_origin = DefaultOrigin::FaceCentroid;
 };
 

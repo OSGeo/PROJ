@@ -18,7 +18,7 @@ template <int NumVertices, int NumFaces, int NumFaceVertices> struct Mesh {
     // List of vertices as 3D vectors
     Vec3 vertices[NumVertices];
     // Faces, indexing above vertices
-    int faces[NumFaces][NumFaceVertices];
+    int faces[NumFaces][NumFaceVertices] = {};
 };
 
 // ConwayMode:
