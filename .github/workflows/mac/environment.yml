@@ -6,6 +6,7 @@ dependencies:
   - conda
   - mamba
   - compilers
+  - compiler-rt
   - ninja
   - cmake
   - pkg-config
