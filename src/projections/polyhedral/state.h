@@ -90,16 +90,20 @@ inline Vec3 orient_up_in_poly(const PolyhedralDefaults &d) {
 // Build triangle data from a polyhedron and the unfold-tree `parents` array.
 // The unfold orients the root face so that geographic north (derived from
 // the orient defaults) lands on +y in the net.
+//
+// dual=true transforms the polyhedron to its dual, while retaining its net
 template <int NV_p, int NF, int NFV>
 inline void load_meshes(pj_polyhedral_data *Q,
                         const Mesh<NV_p, NF, NFV> &polyhedron,
-                        const int (&parents)[NF], const PolyhedralDefaults &d) {
+                        const int (&parents)[NF], const PolyhedralDefaults &d,
+                        bool dual = false) {
     const auto net = unfold_net(polyhedron, parents, orient_up_in_poly(d));
     constexpr int N = 2 * NFV * NF;
     Vec3 sph[N][3];
     Vec3 face[N][3];
-    conway_meta<ConwayMode::Sphere>(polyhedron.vertices, polyhedron.faces, sph);
-    conway_meta<ConwayMode::Plane>(net.vertices, net.faces, face);
+    conway_meta<ConwayMode::Sphere>(polyhedron.vertices, polyhedron.faces, sph,
+                                    dual);
+    conway_meta<ConwayMode::Plane>(net.vertices, net.faces, face, dual);
 
     Q->n_triangles = N;
     Q->face_vertex_count = NFV;
@@ -121,15 +125,19 @@ inline void load_meshes(pj_polyhedral_data *Q,
 // center)
 inline Face2D face_reference_point(const pj_polyhedral_data *Q, int face_idx,
                                    DefaultOrigin kind) {
-    const int nfv = Q->face_vertex_count;
-    const int fan_size = 2 * nfv;
+    static_assert(sizeof(FaceTriangle) == 3 * sizeof(Face2D),
+                  "FaceTriangle must be three packed Face2D");
+    const int fan_size = 2 * Q->face_vertex_count;
+    const int n = 3 * fan_size;
+    const auto *corner =
+        reinterpret_cast<const Face2D *>(&Q->face_tris[fan_size * face_idx]);
     double sum_x = 0.0, sum_y = 0.0;
     double min_x = std::numeric_limits<double>::infinity();
     double max_x = -std::numeric_limits<double>::infinity();
     double min_y = std::numeric_limits<double>::infinity();
     double max_y = -std::numeric_limits<double>::infinity();
-    for (int k = 0; k < nfv; k++) {
-        const Face2D &v = Q->face_tris[fan_size * face_idx + 2 * k].c;
+    for (int i = 0; i < n; i++) {
+        const Face2D &v = corner[i];
         sum_x += v.x;
         sum_y += v.y;
         if (v.x < min_x)
@@ -143,7 +151,7 @@ inline Face2D face_reference_point(const pj_polyhedral_data *Q, int face_idx,
     }
     if (kind == DefaultOrigin::FaceBboxCenter)
         return {0.5 * (min_x + max_x), 0.5 * (min_y + max_y)};
-    return {sum_x / nfv, sum_y / nfv};
+    return {sum_x / n, sum_y / n};
 }
 
 // Build rotation matrix that takes the (lat, lon) point on the authalic unit

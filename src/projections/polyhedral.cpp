@@ -139,9 +139,14 @@ PJ *PJ_PROJECTION(tsea) {
     return polyhedral_setup(P, d);
 }
 
+static PJ *icosahedron_family_setup(PJ *P, bool dual);
+
 PROJ_HEAD(dsea, "Dodecahedral Snyder Equal Area")
-"\n\tSph&Ell\n\tnet= orient_lat= orient_lon= azi= lat_0= lon_0=";
+"\n\tSph&Ell\n\tnet= dual orient_lat= orient_lon= azi= lat_0= lon_0=";
 PJ *PJ_PROJECTION(dsea) {
+    if (pj_param(P->ctx, P->params, "bdual").i)
+        return icosahedron_family_setup(P, true);
+
     auto *Q = static_cast<pj_polyhedral_data *>(
         calloc(1, sizeof(pj_polyhedral_data)));
     if (nullptr == Q)
@@ -184,9 +189,8 @@ PJ *PJ_PROJECTION(dsea) {
     return polyhedral_setup(P, d);
 }
 
-PROJ_HEAD(isea, "Icosahedral Snyder Equal Area")
-"\n\tSph&Ell\n\torient= orient_lat= orient_lon= azi= lat_0= lon_0=";
-PJ *PJ_PROJECTION(isea) {
+// Shared setup for icosahedral projections (ISEA, IVEA)
+static PJ *icosahedron_family_setup(PJ *P, bool dual) {
     auto *Q = static_cast<pj_polyhedral_data *>(
         calloc(1, sizeof(pj_polyhedral_data)));
     if (nullptr == Q)
@@ -228,6 +232,16 @@ PJ *PJ_PROJECTION(isea) {
     // face.
     const polyhedral::PolyhedralDefaults d = {
         orient_lat, orient_lon, azi, polyhedral::DefaultOrigin::FaceBboxCenter};
-    polyhedral::load_meshes(Q, polyhedra::icosahedron, nets::isea::isea, d);
+    polyhedral::load_meshes(Q, polyhedra::icosahedron, nets::isea::isea, d,
+                            dual);
     return polyhedral_setup(P, d);
 }
+
+PROJ_HEAD(isea, "Icosahedral Snyder Equal Area")
+"\n\tSph&Ell\n\torient= orient_lat= orient_lon= azi= lat_0= lon_0=";
+PJ *PJ_PROJECTION(isea) { return icosahedron_family_setup(P, false); }
+
+// IVEA is the DSEA projection unfolded on an icosahedral net
+PROJ_HEAD(ivea, "Icosahedral Vertex Equal Area")
+"\n\tSph&Ell\n\torient= orient_lat= orient_lon= azi= lat_0= lon_0=";
+PJ *PJ_PROJECTION(ivea) { return icosahedron_family_setup(P, true); }

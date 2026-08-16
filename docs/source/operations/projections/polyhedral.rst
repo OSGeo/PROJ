@@ -13,9 +13,9 @@ Polyhedral Snyder Equal Area projections
    :align: center
    :alt:   Polyhedral projection (DSEA A5 net)
 
-This page describes the theory shared by the :ref:`tsea`, :ref:`dsea` and
-:ref:`isea` projections. It is not a projection in its own right — there is no
-``+proj=polyhedral`` operation.
+This page describes the theory shared by the :ref:`tsea`, :ref:`dsea`,
+:ref:`isea` and :ref:`ivea` projections. It is not a projection in its own
+right — there is no ``+proj=polyhedral`` operation.
 
 The polyhedral Snyder equal-area projections map the sphere onto the faces of
 a polyhedron using the method described in :cite:`Snyder1992`. The mapping is
@@ -28,11 +28,12 @@ sub-triangles, Snyder's equal-area mapping is applied independently on each
 sub-triangle, and the planar results are laid out according to a *net* — a
 2D unfolding of the polyhedron.
 
-Three projections use this construction:
+Four projections use this construction:
 
 - :ref:`tsea`
 - :ref:`dsea`
 - :ref:`isea`
+- :ref:`ivea`
 
 Triangles
 ********************************************************************************

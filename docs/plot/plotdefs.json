@@ -719,6 +719,30 @@
         "delta_cut": 1e6
     },
     {
+        "filename": "ivea.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "ivea",
+        "projstring": "+proj=ivea",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
+        "filename": "ivea_pole.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "ivea_pole",
+        "projstring": "+proj=ivea +orient=pole",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
         "filename": "kav5.png",
         "latmax": 90,
         "latmin": -90,

@@ -26,10 +26,14 @@ template <int NumVertices, int NumFaces, int NumFaceVertices> struct Mesh {
 // - Plane: scale centroid to the arithmetic mean (for nets)
 enum class ConwayMode { Sphere, Plane };
 
+// Conway meta operation (m = kda). Optional dual operation applied first (md =
+// kdad) Geometrically this subdivides each face with n vertices into 2n
+// triangles in a fan Emitted vertex order: [center, midpoint, vertex]
 template <ConwayMode Mode, int NumVertices, int NumFaces, int NumFaceVertices>
 inline void conway_meta(const Vec3 (&vertices)[NumVertices],
                         const int (&faces)[NumFaces][NumFaceVertices],
-                        Vec3 (&out)[2 * NumFaceVertices * NumFaces][3]) {
+                        Vec3 (&out)[2 * NumFaceVertices * NumFaces][3],
+                        bool dual = false) {
     constexpr int FanSize = 2 * NumFaceVertices;
     for (int i = 0; i < NumFaces; i++) {
         Vec3 fan[FanSize];
@@ -51,9 +55,14 @@ inline void conway_meta(const Vec3 (&vertices)[NumVertices],
         }
 
         for (int k = 0; k < FanSize; k++) {
-            out[FanSize * i + k][0] = center;
-            out[FanSize * i + k][1] = fan[(k + 1) % FanSize];
-            out[FanSize * i + k][2] = fan[k];
+            Vec3 *tri = out[FanSize * i + k];
+            const bool even = (k % 2) == 0;
+            const Vec3 &vertex = fan[even ? k : (k + 1) % FanSize];
+            const Vec3 &midpoint = fan[even ? (k + 1) % FanSize : k];
+            // Dual operation just swaps vertices with face centers
+            tri[0] = dual ? vertex : center;
+            tri[1] = midpoint;
+            tri[2] = dual ? center : vertex;
         }
     }
 }

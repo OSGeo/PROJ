@@ -1,17 +1,23 @@
-.. _dsea:
+.. _ivea:
 
 ********************************************************************************
-Dodecahedral Snyder Equal Area
+Icosahedral Vertex Equal Area
 ********************************************************************************
 
 .. versionadded:: 9.9
 
-Snyder's equal-area mapping :cite:`Snyder1992` applied to the twelve pentagonal
-faces of a regular dodecahedron and unfolded into a planar net.
+Alias for ``+proj=dsea +dual``. Drop-in improved version of :ref:`isea`, with
+less obvious cusps. Functionally equivalent to performing a Snyder equal-area
+projection using a dodecahedron (:ref:`dsea`), but then unfolding onto an
+icosahedral net.
 
-The dodecahedron is subdivided into 12 × 10 = 120 right sub-triangles,
-and each sub-triangle is mapped independently using the area-preserving
-Snyder construction.
+Snyder's equal-area mapping :cite:`Snyder1992` applied to the twelve pentagonal
+faces of a regular dodecahedron. Each face is subdivided into 10 spherical right
+sub-triangles, yielding a total of 120.
+
+The icosahedron is unfolded into a planar net and subdivided into 20 × 6 = 120
+right sub-triangles. Each sub-triangle is mapped independently using the
+area-preserving Snyder construction to the 120 dodecahedral spherical triangles.
 
 See :ref:`polyhedral` for the shared theory.
 
@@ -22,7 +28,7 @@ See :ref:`polyhedral` for the shared theory.
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Alias**           | dsea                                                     |
+| **Alias**           | ivea                                                     |
 +---------------------+----------------------------------------------------------+
 | **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
@@ -32,62 +38,28 @@ See :ref:`polyhedral` for the shared theory.
 +---------------------+----------------------------------------------------------+
 
 
-.. figure:: ./images/dsea.png
-   :width: 500 px
-   :align: center
-   :alt:   Dodecahedral Snyder Equal Area
-
-   proj-string: ``+proj=dsea``
-
-
-Nets
-################################################################################
-
-The default net (shown above) follows Snyder's Figure 11. Three alternative
-nets are available via ``+net=``, and ``+dual`` unfolds the same mapping onto
-the dual, icosahedral, net (equivalent to :ref:`ivea`):
-
-a5
---------------------------------------------------------------------------------
-
-Layout used by the `A5 index <https://a5geo.org>`_. The first 8 faces contain
-the majority of the populated land mass.
-
-.. figure:: ./images/dsea_a5.png
-   :width: 500 px
-   :align: center
-   :alt:   DSEA A5 net
-
-   proj-string: ``+proj=dsea +net=a5``
-
-crescent
---------------------------------------------------------------------------------
-
-.. figure:: ./images/dsea_crescent.png
-   :width: 500 px
-   :align: center
-   :alt:   DSEA crescent net
-
-   proj-string: ``+proj=dsea +net=crescent``
-
-flower
---------------------------------------------------------------------------------
-
-.. figure:: ./images/dsea_flower.png
-   :width: 500 px
-   :align: center
-   :alt:   DSEA flower net
-
-   proj-string: ``+proj=dsea +net=flower``
-
-dual
---------------------------------------------------------------------------------
 .. figure:: ./images/ivea.png
    :width: 500 px
    :align: center
-   :alt:   DSEA dual net
+   :alt:   Icosahedral Vertex Equal Area
 
-   proj-string: ``+proj=dsea +dual``
+   proj-string: ``+proj=ivea``
+
+
+Orientations
+################################################################################
+
+``ivea`` ships a single net (Snyder's Figure 12, shown above). A second named
+orientation is available via ``+orient=pole``, which places one icosahedron
+vertex on the geographic north pole:
+
+.. figure:: ./images/ivea_pole.png
+   :width: 500 px
+   :align: center
+   :alt:   IVEA pole orientation
+
+   proj-string: ``+proj=ivea +orient=pole``
+
 
 Parameters
 ################################################################################
@@ -95,30 +67,25 @@ Parameters
 .. note::
     All parameters are optional.
 
-.. option:: +net=<name>
+.. option:: +orient=<name>
 
-    Selects the planar unfolding. Accepted values: ``dsea``, ``a5``,
-    ``crescent``, ``flower``.
+    Shorthand for two named orientations. Accepted values: ``isea``, ``pole``.
+    Equivalent to setting ``+orient_lat`` / ``+orient_lon`` / ``+azi``
+    explicitly; individual ``+orient_*`` parameters still override.
 
-    *Defaults to* ``dsea``.
-
-.. option:: +dual
-
-    Unfolds onto dual icosahedron net. All options will be interpreted
-    as if ``+proj=isea`` were specified. See also :ref:`ivea`
-
+    *Defaults to* ``isea``.
 
 .. include:: ../options/orient_lat.rst
 
-*Defaults to* :math:`\arctan \frac{1 + 2\cos 36^\circ}{2} \approx 52.6226^\circ`.
+*Defaults to ~58.40° geodetic (arctan(φ) ≈ 58.2825° authalic).*
 
 .. include:: ../options/orient_lon.rst
 
-*Defaults to −36.0 (or −129.0 when* ``+net=a5`` *).*
+*Defaults to 11.25° on a sphere, 11.20° on an ellipsoid.*
 
 .. include:: ../options/azi_polyhedral.rst
 
-*Defaults to 240.0.*
+*Defaults to 0.0.*
 
 .. include:: ../options/lat_0_polyhedral.rst
 

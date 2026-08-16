@@ -13,6 +13,7 @@ exceptions = {
     "dsea_crescent" : "dsea",
     "dsea_flower" : "dsea",
     "isea_pole" : "isea",
+    "ivea_pole" : "ivea",
     "tsea_triangle" : "tsea",
 }
 
