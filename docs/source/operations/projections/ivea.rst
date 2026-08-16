@@ -19,6 +19,11 @@ The icosahedron is unfolded into a planar net and subdivided into 20 × 6 = 120
 right sub-triangles. Each sub-triangle is mapped independently using the
 area-preserving Snyder construction to the 120 dodecahedral spherical triangles.
 
+This is fully equivalent to using the icosahedron directly, but changing the
+vertex from which the great circles originate from the center of the faces to
+the vertices, described as the Vertex-oriented great circle projection in
+:cite:`vanLeeuwen2006`.
+
 See :ref:`polyhedral` for the shared theory.
 
 +---------------------+----------------------------------------------------------+
