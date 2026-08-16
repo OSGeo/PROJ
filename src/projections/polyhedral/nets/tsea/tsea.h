@@ -22,11 +22,13 @@
 #ifndef NETS_TSEA_TSEA_H
 #define NETS_TSEA_TSEA_H
 
+#include "../parent_tree.h"
+
 namespace nets {
 namespace tsea {
 
-constexpr int tsea[4] = {2, 3, 0, 3};
-constexpr int triangle[4] = {3, 3, 0, 3};
+constexpr ParentTree<4> tsea = {{2, 3, 0, 3}};
+constexpr ParentTree<4> triangle = {{3, 3, 0, 3}};
 
 } // namespace tsea
 } // namespace nets

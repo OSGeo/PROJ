@@ -121,7 +121,7 @@ PJ *PJ_PROJECTION(tsea) {
     P->destructor = polyhedral_destructor;
 
     const char *net_name = pj_param(P->ctx, P->params, "snet").s;
-    const int(*parents)[4] = &nets::tsea::tsea;
+    const auto *parents = &nets::tsea::tsea;
     if (net_name != nullptr) {
         if (strcmp(net_name, "tsea") == 0) {
             parents = &nets::tsea::tsea;
@@ -157,7 +157,7 @@ PJ *PJ_PROJECTION(dsea) {
     // +net= selects the unfolding tree. The `a5` net shifts orient_lon by
     // -93° to match the LONGITUDE_OFFSET used by the A5 reference codebase.
     const char *net_name = pj_param(P->ctx, P->params, "snet").s;
-    const int(*parents)[12] = &nets::dsea::dsea;
+    const auto *parents = &nets::dsea::dsea;
     double default_orient_lon = -36.0;
     double default_azi = 240.0;
     if (net_name != nullptr) {

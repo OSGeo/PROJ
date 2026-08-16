@@ -12,6 +12,7 @@
 #define POLYHEDRAL_STATE_H
 
 #include "conway.h"
+#include "nets/parent_tree.h"
 #include "snyder.h"
 #include "unfold.h"
 
@@ -95,8 +96,8 @@ inline Vec3 orient_up_in_poly(const PolyhedralDefaults &d) {
 template <int NV_p, int NF, int NFV>
 inline void load_meshes(pj_polyhedral_data *Q,
                         const Mesh<NV_p, NF, NFV> &polyhedron,
-                        const int (&parents)[NF], const PolyhedralDefaults &d,
-                        bool dual = false) {
+                        const nets::ParentTree<NF> &parents,
+                        const PolyhedralDefaults &d, bool dual = false) {
     const auto net = unfold_net(polyhedron, parents, orient_up_in_poly(d));
     constexpr int N = 2 * NFV * NF;
     Vec3 sph[N][3];

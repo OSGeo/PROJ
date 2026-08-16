@@ -35,16 +35,18 @@
 #ifndef NETS_ISEA_ISEA_H
 #define NETS_ISEA_ISEA_H
 
+#include "../parent_tree.h"
+
 namespace nets {
 namespace isea {
 
-constexpr int isea[20] = {
+constexpr ParentTree<20> isea = {{
     6, 7, 8, 9, 10,     // F1..F5 north cap, hung off upper band
     11, 12, 0, 13, 14,  // F6, F7 climb back to F1; F8 is root; F9, F10 chain on
     7, 8, 8, 9, 10,     // F11..F15 lower band — left of F8 climbs back, right
                         // chains forward
     11, 12, 13, 14, 15, // F16..F20 south cap, hung off lower band
-};
+}};
 
 } // namespace isea
 } // namespace nets

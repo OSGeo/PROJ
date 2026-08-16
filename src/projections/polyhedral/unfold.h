@@ -12,6 +12,7 @@
 #define POLYHEDRAL_UNFOLD_H
 
 #include "conway.h"
+#include "nets/parent_tree.h"
 #include "vec3.h"
 
 #include "proj_internal.h"
@@ -91,8 +92,8 @@ inline constexpr Vec3 z{0.0, 0.0, 1.0};
 // centred on the rotation axis the slot[0] vertex is placed up instead.
 template <int NV_p, int NF, int NFV>
 inline Mesh<unfolded_vertex_count<NF, NFV>(), NF, NFV>
-unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron, const int (&parents)[NF],
-           const Vec3 &up_dir = z) {
+unfold_net(const Mesh<NV_p, NF, NFV> &polyhedron,
+           const nets::ParentTree<NF> &parents, const Vec3 &up_dir = z) {
     constexpr int NV_n = unfolded_vertex_count<NF, NFV>();
     Mesh<NV_n, NF, NFV> net{};
     int n_verts = 0;

@@ -23,6 +23,8 @@
 #ifndef NETS_DSEA_DSEA_H
 #define NETS_DSEA_DSEA_H
 
+#include "../parent_tree.h"
+
 namespace nets {
 namespace dsea {
 
@@ -35,25 +37,25 @@ namespace dsea {
 //   Left:   F9 → F4 → F8 → F3 → F7 → F2   (L → U → L → U → L → U)
 // The two polar caps hang symmetrically above and below the central column:
 // F1 (north pole) off F4 (Europe), F12 (south pole) off F9 (Africa).
-constexpr int dsea[12] = {4, 7, 8, 0, 9, 10, 3, 4, 4, 5, 6, 9};
+constexpr ParentTree<12> dsea = {{4, 7, 8, 0, 9, 10, 3, 4, 4, 5, 6, 9}};
 
 // A5 net (re-rooted to match the A5 reference codebase's coordinate origin).
 // The visual shape is the same as the published A5 layout; only the parent
 // pointers along the path to the new root are reversed.
-constexpr int a5[12] = {4, 6, 8, 9, 6, 0, 2, 12, 10, 5, 7, 11};
+constexpr ParentTree<12> a5 = {{4, 6, 8, 9, 6, 0, 2, 12, 10, 5, 7, 11}};
 
 // Crescent: central spine F1 → F4 → F9 → F12 (north pole → UK/Europe →
 // Africa → south pole). Two symmetric "crescent" arcs extend out from F4
 // and F9: one through the upper row (F4 → F5 → F6 → F2 → F3) and one
 // through the lower row (F9 → F10 → F11 → F7 → F8).
-constexpr int crescent[12] = {4, 3, 4, 0, 4, 5, 8, 9, 4, 9, 10, 9};
+constexpr ParentTree<12> crescent = {{4, 3, 4, 0, 4, 5, 8, 9, 4, 9, 10, 9}};
 
 // Flower: F4 (Europe) at the centre, with F1 (north pole) as one petal and
 // F9 (Africa) as the link down to the south pole. F1's four other petals
 // (F2, F3, F5, F6) hang off F1; F12's four other petals (F7, F8, F10, F11)
 // hang off F12. This routes the polar caps through Africa rather than
 // through the Americas.
-constexpr int flower[12] = {4, 1, 1, 0, 1, 1, 12, 12, 4, 12, 12, 9};
+constexpr ParentTree<12> flower = {{4, 1, 1, 0, 1, 1, 12, 12, 4, 12, 12, 9}};
 
 } // namespace dsea
 } // namespace nets
