@@ -17,10 +17,12 @@ require_grid    us_nga_egm08_25.tif
 accept          55.0            12.0            10.0
 expect          55.0            12.0            -27.8257
 
-################
+#################
 #### Belgium ####
 #################
+## contact: gdoc (at) ngi.be
 
+#### planar (old) ####
 crs_src         EPSG:31370      # BD72 / Belgian Lambert 72
 crs_dst         EPSG:3812       # ETRS89-BEL [BEREF2002] / Belgian Lambert 2008
 tolerance       0.1 mm
@@ -28,6 +30,34 @@ require_grid    be_ign_bd72lb72_etrs89lb08.tif
 
 accept          149186.41       170810.74
 expect          649186.03701863 670811.16949360
+
+#### planar (new) ####
+crs_src         EPSG:31370      # BD72 / Belgian Lambert 72
+crs_dst         EPSG:11219      # ETRS89-BEL [BEREF2011] / Belgian Lambert 2008
+tolerance       0.1 mm
+require_grid    be_ign_bd72lb72_etrs89lb08.tif
+
+accept          149186.41       170810.74
+expect          649186.03701863 670811.16949360
+
+#### heights (new) ####
+crs_src         EPSG:11214      # ETRS89-BEL [BEREF2011]
+crs_dst         EPSG:11512      # ETRS89-BEL [BEREF2011] / Ostend heights
+tolerance       0.1 mm
+require_grid    be_ign_hBG18.tif
+
+accept          50.22054332  4.663484651  354.6988105
+expect          50.22054332  4.663484651  310.9250
+
+#### heights (old) ####
+crs_src         EPSG:4937     # ETRS89
+crs_dst         EPSG:9907     # ETRS89 / Ostend heights
+tolerance       0.1 mm
+require_grid    be_ign_hBG18.tif
+
+accept          50.22054332  4.663484651  354.6988105
+expect          50.22054332  4.663484651  310.9250
+
 
 ###################
 #### Catalonia ####
