@@ -38,7 +38,7 @@ See :ref:`polyhedral` for the shared theory.
    proj-string: ``+proj=isea``
 
 
-Orientations
+Nets & Orientations
 ################################################################################
 
 ``isea`` ships a single net (Snyder's Figure 12, shown above). A second named
