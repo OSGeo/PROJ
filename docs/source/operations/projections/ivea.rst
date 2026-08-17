@@ -1,7 +1,7 @@
 .. _ivea:
 
 ********************************************************************************
-Icosahedral Vertex Equal Area
+Icosahedral Vertex-oriented great circle Equal Area
 ********************************************************************************
 
 .. versionadded:: 9.9
