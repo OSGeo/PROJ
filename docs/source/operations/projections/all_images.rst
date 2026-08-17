@@ -712,6 +712,17 @@ List of all projection images
 
 :ref:`isea`
 
+.. figure:: ./images/isea_dual.png
+   :width: 500 px
+   :align: center
+   :alt:   isea
+
+
+********************************************************************************
+
+
+:ref:`isea`
+
 .. figure:: ./images/isea_pole.png
    :width: 500 px
    :align: center
@@ -1582,6 +1593,17 @@ List of all projection images
 :ref:`tsea`
 
 .. figure:: ./images/tsea.png
+   :width: 500 px
+   :align: center
+   :alt:   tsea
+
+
+********************************************************************************
+
+
+:ref:`tsea`
+
+.. figure:: ./images/tsea_dual.png
    :width: 500 px
    :align: center
    :alt:   tsea

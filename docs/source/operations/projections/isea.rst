@@ -42,8 +42,13 @@ Orientations
 ################################################################################
 
 ``isea`` ships a single net (Snyder's Figure 12, shown above). A second named
-orientation is available via ``+orient=pole``, which places one icosahedron
-vertex on the geographic north pole:
+orientation is available via ``+orient=pole``, and ``+dual`` unfolds the same
+mapping onto a dodecahedral net (the same layout as ``+proj=dsea``):
+
+pole
+--------------------------------------------------------------------------------
+
+Places one icosahedron vertex on the geographic north pole.
 
 .. figure:: ./images/isea_pole.png
    :width: 500 px
@@ -52,12 +57,28 @@ vertex on the geographic north pole:
 
    proj-string: ``+proj=isea +orient=pole``
 
+dual
+--------------------------------------------------------------------------------
+
+Unfolds the ISEA mapping onto a dodecahedral net.
+
+.. figure:: ./images/isea_dual.png
+   :width: 500 px
+   :align: center
+   :alt:   ISEA dual net
+
+   proj-string: ``+proj=isea +dual``
 
 Parameters
 ################################################################################
 
 .. note::
     All parameters are optional.
+
+.. option:: +dual
+
+    Unfolds onto dual dodecahedron net. All options will be interpreted
+    as if ``+proj=dsea`` were specified.
 
 .. option:: +orient=<name>
 

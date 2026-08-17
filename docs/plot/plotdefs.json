@@ -743,6 +743,18 @@
         "delta_cut": 1e6
     },
     {
+        "filename": "isea_dual.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "isea_dual",
+        "projstring": "+proj=isea +dual",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
         "filename": "kav5.png",
         "latmax": 90,
         "latmin": -90,
@@ -1631,6 +1643,18 @@
         "lonmin": -180,
         "name": "tsea_triangle",
         "projstring": "+proj=tsea +net=triangle",
+        "res": "low",
+        "type": "line",
+        "delta_cut": 1e6
+    },
+    {
+        "filename": "tsea_dual.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "tsea_dual",
+        "projstring": "+proj=tsea +dual",
         "res": "low",
         "type": "line",
         "delta_cut": 1e6

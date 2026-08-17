@@ -13,8 +13,10 @@ exceptions = {
     "dsea_crescent" : "dsea",
     "dsea_flower" : "dsea",
     "isea_pole" : "isea",
+    "isea_dual" : "isea",
     "ivea_pole" : "ivea",
     "tsea_triangle" : "tsea",
+    "tsea_dual" : "tsea",
 }
 
 with open(all_images_path, 'w') as all_images:
