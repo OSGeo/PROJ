@@ -1,4 +1,5 @@
 #include "proj.h"
+#include <math.h>
 
 #include "gtest_include.h"
 
@@ -13,6 +14,8 @@ void test_all_zones(const char *target, const PJ_COORD expected_geographic,
     constexpr double easting_offset = 1e6;
 
     auto in_fwd = expected_geographic;
+    in_fwd.v[2] = 0;
+    in_fwd.v[3] = HUGE_VAL;
     for (int zone = 1; zone < 61; ++zone) {
         // Offset the test longitude to the specific zone.
         in_fwd.lp.phi = expected_geographic.lp.phi + (zone - 1) * zone_width;
@@ -40,6 +43,8 @@ TEST(tmerczoned, west_boundary_equator_32600) {
     PJ_COORD test;
     test.lp.lam = 0.0;
     test.lp.phi = -180.0;
+    test.v[2] = 0;
+    test.v[3] = HUGE_VAL;
 
     PJ_COORD expected;
     expected.xy.x = 166021.4431;
@@ -52,6 +57,8 @@ TEST(tmerczoned, west_boundary_high_latitude_32600) {
     PJ_COORD test;
     test.lp.lam = 80.0;
     test.lp.phi = -180.0;
+    test.v[2] = 0;
+    test.v[3] = HUGE_VAL;
 
     PJ_COORD expected;
     expected.xy.x = 441867.7849;
@@ -64,6 +71,8 @@ TEST(tmerczoned, east_boundary_equator_32600) {
     PJ_COORD test;
     test.lp.lam = 0.0;
     test.lp.phi = -174.000000001;
+    test.v[2] = 0;
+    test.v[3] = HUGE_VAL;
 
     PJ_COORD expected;
     expected.xy.x = 833978.5568;
@@ -76,6 +85,8 @@ TEST(tmerczoned, east_boundary_high_latitude_32600) {
     PJ_COORD test;
     test.lp.lam = 80.0;
     test.lp.phi = -174.000000001;
+    test.v[2] = 0;
+    test.v[3] = HUGE_VAL;
 
     PJ_COORD expected;
     expected.xy.x = 558132.2151;
@@ -88,6 +99,8 @@ TEST(tmerczoned, west_boundary_equator_32700) {
     PJ_COORD test;
     test.lp.lam = 0.0;
     test.lp.phi = -180.0;
+    test.v[2] = 0;
+    test.v[3] = HUGE_VAL;
 
     PJ_COORD expected;
     expected.xy.x = 166021.4431;
@@ -100,6 +113,8 @@ TEST(tmerczoned, west_boundary_low_latitude_32700) {
     PJ_COORD test;
     test.lp.lam = -80.0;
     test.lp.phi = -180.0;
+    test.v[2] = 0;
+    test.v[3] = HUGE_VAL;
 
     PJ_COORD expected;
     expected.xy.x = 441867.7849;
@@ -112,6 +127,8 @@ TEST(tmerczoned, east_boundary_equator_32700) {
     PJ_COORD test;
     test.lp.lam = 0.0;
     test.lp.phi = -174.000000001;
+    test.v[2] = 0;
+    test.v[3] = HUGE_VAL;
 
     PJ_COORD expected;
     expected.xy.x = 833978.5568;
@@ -124,6 +141,8 @@ TEST(tmerczoned, east_boundary_low_latitude_32700) {
     PJ_COORD test;
     test.lp.lam = -80.0;
     test.lp.phi = -174.000000001;
+    test.v[2] = 0;
+    test.v[3] = HUGE_VAL;
 
     PJ_COORD expected;
     expected.xy.x = 558132.2151;
