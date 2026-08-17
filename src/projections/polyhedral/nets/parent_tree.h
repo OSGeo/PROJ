@@ -17,6 +17,7 @@ namespace nets {
 template <int NF> struct ParentTree {
     int indices[NF];
 
+    // cppcheck-suppress noExplicitConstructor
     constexpr ParentTree(const int (&p)[NF]) : indices{} {
         int roots = 0;
         for (int i = 0; i < NF; i++) {

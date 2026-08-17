@@ -571,6 +571,7 @@ lcc
 lcca
 ld
 leac
+Leeuwen
 len
 Levallois
 levelling
@@ -911,6 +912,7 @@ stereographic
 Stereographic
 stockholm
 Storebælt
+Strebe
 Strecha
 strided
 struct
