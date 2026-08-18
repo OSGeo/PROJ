@@ -39,63 +39,57 @@ void test_all_zones(const char *target, const PJ_COORD expected_geographic,
 } // namespace
 
 TEST(tmerczoned, west_boundary_equator_32600) {
-    const PJ_COORD test = proj_coord(0, -180.0, 0, HUGE_VAL);
-    const PJ_COORD expected = proj_coord(166021.4431, 0, 0, HUGE_VAL);
+    const auto test = proj_coord(0, -180.0, 0, HUGE_VAL);
+    const auto expected = proj_coord(166021.4431, 0, 0, HUGE_VAL);
 
     test_all_zones("epsg:32600", test, expected);
 }
 
 TEST(tmerczoned, west_boundary_high_latitude_32600) {
-    const PJ_COORD test = proj_coord(80.0, -180.0, 0, HUGE_VAL);
-    const PJ_COORD expected =
-        proj_coord(441867.7849, 8883084.9559, 0, HUGE_VAL);
+    const auto test = proj_coord(80.0, -180.0, 0, HUGE_VAL);
+    const auto expected = proj_coord(441867.7849, 8883084.9559, 0, HUGE_VAL);
 
     test_all_zones("epsg:32600", test, expected);
 }
 
 TEST(tmerczoned, east_boundary_equator_32600) {
-    const PJ_COORD test = proj_coord(0, -174.000000001, 0, HUGE_VAL);
-    const PJ_COORD expected = proj_coord(833978.5568, 0, 0, HUGE_VAL);
+    const auto test = proj_coord(0, -174.000000001, 0, HUGE_VAL);
+    const auto expected = proj_coord(833978.5568, 0, 0, HUGE_VAL);
 
     test_all_zones("epsg:32600", test, expected);
 }
 
 TEST(tmerczoned, east_boundary_high_latitude_32600) {
-    const PJ_COORD test = proj_coord(80.0, -174.000000001, 0, HUGE_VAL);
-    const PJ_COORD expected =
-        proj_coord(558132.2151, 8883084.9559, 0, HUGE_VAL);
+    const auto test = proj_coord(80.0, -174.000000001, 0, HUGE_VAL);
+    const auto expected = proj_coord(558132.2151, 8883084.9559, 0, HUGE_VAL);
 
     test_all_zones("epsg:32600", test, expected);
 }
 
 TEST(tmerczoned, west_boundary_equator_32700) {
-    const PJ_COORD test = proj_coord(0, -180.0, 0, HUGE_VAL);
-    const PJ_COORD expected =
-        proj_coord(166021.4431, 10000000.0000, 0, HUGE_VAL);
+    const auto test = proj_coord(0, -180.0, 0, HUGE_VAL);
+    const auto expected = proj_coord(166021.4431, 10000000.0000, 0, HUGE_VAL);
 
     test_all_zones("epsg:32700", test, expected);
 }
 
 TEST(tmerczoned, west_boundary_low_latitude_32700) {
-    const PJ_COORD test = proj_coord(-80.0, -180.0, 0, HUGE_VAL);
-    const PJ_COORD expected =
-        proj_coord(441867.7849, 1116915.0441, 0, HUGE_VAL);
+    const auto test = proj_coord(-80.0, -180.0, 0, HUGE_VAL);
+    const auto expected = proj_coord(441867.7849, 1116915.0441, 0, HUGE_VAL);
 
     test_all_zones("epsg:32700", test, expected);
 }
 
 TEST(tmerczoned, east_boundary_equator_32700) {
-    const PJ_COORD test = proj_coord(0, -174.000000001, 0, HUGE_VAL);
-    const PJ_COORD expected =
-        proj_coord(833978.5568, 10000000.0000, 0, HUGE_VAL);
+    const auto test = proj_coord(0, -174.000000001, 0, HUGE_VAL);
+    const auto expected = proj_coord(833978.5568, 10000000.0000, 0, HUGE_VAL);
 
     test_all_zones("epsg:32700", test, expected);
 }
 
 TEST(tmerczoned, east_boundary_low_latitude_32700) {
-    const PJ_COORD test = proj_coord(-80.0, -174.000000001, 0, HUGE_VAL);
-    const PJ_COORD expected =
-        proj_coord(558132.2151, 1116915.0441, 0, HUGE_VAL);
+    const auto test = proj_coord(-80.0, -174.000000001, 0, HUGE_VAL);
+    const auto expected = proj_coord(558132.2151, 1116915.0441, 0, HUGE_VAL);
 
     test_all_zones("epsg:32700", test, expected);
 }
