@@ -126,11 +126,9 @@ PJ *PJ_PROJECTION(tsea) {
     const char *net_name = pj_param(P->ctx, P->params, "snet").s;
     const auto *parents = &nets::tsea::tsea;
     if (net_name != nullptr) {
-        if (strcmp(net_name, "tsea") == 0) {
-            parents = &nets::tsea::tsea;
-        } else if (strcmp(net_name, "triangle") == 0) {
+        if (strcmp(net_name, "triangle") == 0) {
             parents = &nets::tsea::triangle;
-        } else {
+        } else if (strcmp(net_name, "tsea") != 0) {
             proj_log_error(P, _("invalid +net (expected tsea or triangle)"));
             return polyhedral_destructor(P,
                                          PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
@@ -168,16 +166,14 @@ static PJ *dodecahedron_family_setup(PJ *P, bool dual) {
     double default_orient_lon = -36.0;
     double default_azi = 240.0;
     if (net_name != nullptr) {
-        if (strcmp(net_name, "dsea") == 0) {
-            parents = &nets::dsea::dsea;
-        } else if (strcmp(net_name, "a5") == 0) {
+        if (strcmp(net_name, "a5") == 0) {
             parents = &nets::dsea::a5;
             default_orient_lon = -36.0 - 93.0;
         } else if (strcmp(net_name, "crescent") == 0) {
             parents = &nets::dsea::crescent;
         } else if (strcmp(net_name, "flower") == 0) {
             parents = &nets::dsea::flower;
-        } else {
+        } else if (strcmp(net_name, "dsea") != 0) {
             proj_log_error(P, _("invalid +net (expected dsea, a5, crescent, "
                                 "or flower)"));
             return polyhedral_destructor(P,
