@@ -1,15 +1,28 @@
-.. _isea:
+.. _ivea:
 
 ********************************************************************************
-Icosahedral Snyder Equal Area
+Icosahedral Vertex-oriented great circle Equal Area
 ********************************************************************************
 
-Snyder's equal-area mapping :cite:`Snyder1992` applied to the twenty triangular
-faces of a regular icosahedron and unfolded into a planar net.
+.. versionadded:: 9.9
 
-The icosahedron is subdivided into 20 × 6 = 120 right sub-triangles, and each
-sub-triangle is mapped independently using the area-preserving Snyder
-construction.
+Alias for ``+proj=dsea +dual``. Drop-in improved version of :ref:`isea`, with
+less obvious cusps. Functionally equivalent to performing a Snyder equal-area
+projection using a dodecahedron (:ref:`dsea`), but then unfolding onto an
+icosahedral net.
+
+Snyder's equal-area mapping :cite:`Snyder1992` applied to the twelve pentagonal
+faces of a regular dodecahedron. Each face is subdivided into 10 spherical right
+sub-triangles, yielding a total of 120.
+
+The icosahedron is unfolded into a planar net and subdivided into 20 × 6 = 120
+right sub-triangles. Each sub-triangle is mapped independently using the
+area-preserving Snyder construction to the 120 dodecahedral spherical triangles.
+
+This is fully equivalent to using the icosahedron directly, but changing the
+vertex from which the great circles originate from the center of the faces to
+the vertices, described as the Vertex-oriented great circle projection in
+:cite:`vanLeeuwen2006`.
 
 See :ref:`polyhedral` for the shared theory.
 
@@ -20,7 +33,7 @@ See :ref:`polyhedral` for the shared theory.
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Alias**           | isea                                                     |
+| **Alias**           | ivea                                                     |
 +---------------------+----------------------------------------------------------+
 | **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
@@ -30,55 +43,34 @@ See :ref:`polyhedral` for the shared theory.
 +---------------------+----------------------------------------------------------+
 
 
-.. figure:: ./images/isea.png
+.. figure:: ./images/ivea.png
    :width: 500 px
    :align: center
-   :alt:   Icosahedral Snyder Equal Area
+   :alt:   Icosahedral Vertex Equal Area
 
-   proj-string: ``+proj=isea``
+   proj-string: ``+proj=ivea``
 
 
-Nets & Orientations
+Orientations
 ################################################################################
 
-``isea`` ships a single net (Snyder's Figure 12, shown above). A second named
-orientation is available via ``+orient=pole``, and ``+dual`` unfolds the same
-mapping onto a dodecahedral net (the same layout as ``+proj=dsea``):
+``ivea`` ships a single net (Snyder's Figure 12, shown above). A second named
+orientation is available via ``+orient=pole``, which places one icosahedron
+vertex on the geographic north pole:
 
-pole
---------------------------------------------------------------------------------
-
-Places one icosahedron vertex on the geographic north pole.
-
-.. figure:: ./images/isea_pole.png
+.. figure:: ./images/ivea_pole.png
    :width: 500 px
    :align: center
-   :alt:   ISEA pole orientation
+   :alt:   IVEA pole orientation
 
-   proj-string: ``+proj=isea +orient=pole``
+   proj-string: ``+proj=ivea +orient=pole``
 
-dual
---------------------------------------------------------------------------------
-
-Unfolds the ISEA mapping onto a dodecahedral net.
-
-.. figure:: ./images/isea_dual.png
-   :width: 500 px
-   :align: center
-   :alt:   ISEA dual net
-
-   proj-string: ``+proj=isea +dual``
 
 Parameters
 ################################################################################
 
 .. note::
     All parameters are optional.
-
-.. option:: +dual
-
-    Unfolds onto dual dodecahedron net. All options will be interpreted
-    as if ``+proj=dsea`` were specified.
 
 .. option:: +orient=<name>
 

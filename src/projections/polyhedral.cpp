@@ -111,8 +111,11 @@ static PJ *polyhedral_setup(PJ *P, const polyhedral::PolyhedralDefaults &d) {
 }
 
 PROJ_HEAD(tsea, "Tetrahedral Snyder Equal Area")
-"\n\tSph&Ell\n\tnet= orient_lat= orient_lon= azi= lat_0= lon_0=";
+"\n\tSph&Ell\n\tnet= dual orient_lat= orient_lon= azi= lat_0= lon_0=";
 PJ *PJ_PROJECTION(tsea) {
+    // The tetrahedron is self-dual
+    const bool dual = pj_param(P->ctx, P->params, "bdual").i != 0;
+
     auto *Q = static_cast<pj_polyhedral_data *>(
         calloc(1, sizeof(pj_polyhedral_data)));
     if (nullptr == Q)
@@ -121,7 +124,7 @@ PJ *PJ_PROJECTION(tsea) {
     P->destructor = polyhedral_destructor;
 
     const char *net_name = pj_param(P->ctx, P->params, "snet").s;
-    const int(*parents)[4] = &nets::tsea::tsea;
+    const auto *parents = &nets::tsea::tsea;
     if (net_name != nullptr) {
         if (strcmp(net_name, "tsea") == 0) {
             parents = &nets::tsea::tsea;
@@ -135,13 +138,22 @@ PJ *PJ_PROJECTION(tsea) {
     }
 
     const polyhedral::PolyhedralDefaults d = {90.0, 0.0, 0.0};
-    polyhedral::load_meshes(Q, polyhedra::tetrahedron, *parents, d);
+    polyhedral::load_meshes(Q, polyhedra::tetrahedron, *parents, d, dual);
     return polyhedral_setup(P, d);
 }
 
+static PJ *dodecahedron_family_setup(PJ *P, bool dual);
+static PJ *icosahedron_family_setup(PJ *P, bool dual);
+
 PROJ_HEAD(dsea, "Dodecahedral Snyder Equal Area")
-"\n\tSph&Ell\n\tnet= orient_lat= orient_lon= azi= lat_0= lon_0=";
+"\n\tSph&Ell\n\tnet= dual orient_lat= orient_lon= azi= lat_0= lon_0=";
 PJ *PJ_PROJECTION(dsea) {
+    if (pj_param(P->ctx, P->params, "bdual").i)
+        return icosahedron_family_setup(P, true);
+    return dodecahedron_family_setup(P, false);
+}
+
+static PJ *dodecahedron_family_setup(PJ *P, bool dual) {
     auto *Q = static_cast<pj_polyhedral_data *>(
         calloc(1, sizeof(pj_polyhedral_data)));
     if (nullptr == Q)
@@ -152,7 +164,7 @@ PJ *PJ_PROJECTION(dsea) {
     // +net= selects the unfolding tree. The `a5` net shifts orient_lon by
     // -93° to match the LONGITUDE_OFFSET used by the A5 reference codebase.
     const char *net_name = pj_param(P->ctx, P->params, "snet").s;
-    const int(*parents)[12] = &nets::dsea::dsea;
+    const auto *parents = &nets::dsea::dsea;
     double default_orient_lon = -36.0;
     double default_azi = 240.0;
     if (net_name != nullptr) {
@@ -180,13 +192,11 @@ PJ *PJ_PROJECTION(dsea) {
         std::atan((1 + 2 * A) / 2.0) * 180.0 / M_PI;
     const polyhedral::PolyhedralDefaults d = {default_orient_lat,
                                               default_orient_lon, default_azi};
-    polyhedral::load_meshes(Q, polyhedra::dodecahedron, *parents, d);
+    polyhedral::load_meshes(Q, polyhedra::dodecahedron, *parents, d, dual);
     return polyhedral_setup(P, d);
 }
 
-PROJ_HEAD(isea, "Icosahedral Snyder Equal Area")
-"\n\tSph&Ell\n\torient= orient_lat= orient_lon= azi= lat_0= lon_0=";
-PJ *PJ_PROJECTION(isea) {
+static PJ *icosahedron_family_setup(PJ *P, bool dual) {
     auto *Q = static_cast<pj_polyhedral_data *>(
         calloc(1, sizeof(pj_polyhedral_data)));
     if (nullptr == Q)
@@ -228,6 +238,20 @@ PJ *PJ_PROJECTION(isea) {
     // face.
     const polyhedral::PolyhedralDefaults d = {
         orient_lat, orient_lon, azi, polyhedral::DefaultOrigin::FaceBboxCenter};
-    polyhedral::load_meshes(Q, polyhedra::icosahedron, nets::isea::isea, d);
+    polyhedral::load_meshes(Q, polyhedra::icosahedron, nets::isea::isea, d,
+                            dual);
     return polyhedral_setup(P, d);
 }
+
+PROJ_HEAD(isea, "Icosahedral Snyder Equal Area")
+"\n\tSph&Ell\n\tnet= dual orient= orient_lat= orient_lon= azi= lat_0= lon_0=";
+PJ *PJ_PROJECTION(isea) {
+    if (pj_param(P->ctx, P->params, "bdual").i)
+        return dodecahedron_family_setup(P, true);
+    return icosahedron_family_setup(P, false);
+}
+
+// IVEA is the DSEA projection unfolded on an icosahedral net (+proj=dsea +dual)
+PROJ_HEAD(ivea, "Icosahedral Vertex Equal Area")
+"\n\tSph&Ell\n\torient= orient_lat= orient_lon= azi= lat_0= lon_0=";
+PJ *PJ_PROJECTION(ivea) { return icosahedron_family_setup(P, true); }

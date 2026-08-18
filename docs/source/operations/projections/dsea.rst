@@ -44,7 +44,8 @@ Nets
 ################################################################################
 
 The default net (shown above) follows Snyder's Figure 11. Three alternative
-nets are available via ``+net=``:
+nets are available via ``+net=``, and ``+dual`` unfolds the same mapping onto
+the dual, icosahedral, net (equivalent to :ref:`ivea`):
 
 a5
 --------------------------------------------------------------------------------
@@ -79,6 +80,14 @@ flower
 
    proj-string: ``+proj=dsea +net=flower``
 
+dual
+--------------------------------------------------------------------------------
+.. figure:: ./images/ivea.png
+   :width: 500 px
+   :align: center
+   :alt:   DSEA dual net
+
+   proj-string: ``+proj=dsea +dual``
 
 Parameters
 ################################################################################
@@ -92,6 +101,12 @@ Parameters
     ``crescent``, ``flower``.
 
     *Defaults to* ``dsea``.
+
+.. option:: +dual
+
+    Unfolds onto dual icosahedron net. All options will be interpreted
+    as if ``+proj=isea`` were specified. See also :ref:`ivea`
+
 
 .. include:: ../options/orient_lat.rst
 

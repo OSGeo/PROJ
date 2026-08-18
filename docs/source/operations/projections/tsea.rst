@@ -44,7 +44,14 @@ Nets
 ################################################################################
 
 The default net (shown above) follows Snyder's Figure 8. An alternative
-``+net=triangle`` layout is also available:
+``+net=triangle`` layout is available, and ``+dual`` maps onto the
+tetrahedron's vertices rather than its faces:
+
+triangle
+--------------------------------------------------------------------------------
+
+The south-cap face sits at the centre, with its three neighbours fanned around
+it.
 
 .. figure:: ./images/tsea_triangle.png
    :width: 500 px
@@ -53,9 +60,17 @@ The default net (shown above) follows Snyder's Figure 8. An alternative
 
    proj-string: ``+proj=tsea +net=triangle``
 
-In the ``triangle`` layout the south-cap face sits at the centre, with its three
-neighbours fanned around it.
+dual
+--------------------------------------------------------------------------------
 
+The tetrahedron is self-dual, so the net keeps the same outline.
+
+.. figure:: ./images/tsea_dual.png
+   :width: 500 px
+   :align: center
+   :alt:   TSEA dual net
+
+   proj-string: ``+proj=tsea +dual``
 
 Parameters
 ################################################################################
@@ -68,6 +83,10 @@ Parameters
     Selects the planar unfolding. Accepted values: ``tsea``, ``triangle``.
 
     *Defaults to* ``tsea``.
+
+.. option:: +dual
+
+    Unfolds onto self-dual tetrahedron net.
 
 .. include:: ../options/orient_lat.rst
 
