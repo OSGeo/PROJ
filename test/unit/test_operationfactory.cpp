@@ -6525,8 +6525,6 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
-#if no_longer_work_since_epsg_13_001
-// See https://github.com/OSGeo/PROJ/pull/4803
 TEST(
     operation,
     compoundCRS_to_compoundCRS_concatenated_operation_with_two_vert_transformation_and_different_source_dest_interp) {
@@ -6553,10 +6551,13 @@ TEST(
     auto list = CoordinateOperationFactory::create()->createOperations(
         NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
     ASSERT_GE(list.size(), 1U);
-    EXPECT_EQ(list[0]->nameStr(), "BD72 to ETRS89 (3) + "
-                                  "Inverse of ETRS89 to Ostend height (1) + "
-                                  "ETRS89 to NAP height (2) + "
-                                  "Inverse of Amersfoort to ETRS89 (9)");
+    EXPECT_EQ(list[0]->nameStr(),
+              "BD72 to ETRS89-BEL [BEREF2011] (3) + "
+              "Inverse of ETRS89-BEL [BEREF2011] to Ostend height (1) + "
+              "Inverse of Amersfoort to ETRS89 (9) + "
+              "Amersfoort to ETRS89-NLD [AGRS2010] (9) + "
+              "ETRS89-NLD [AGRS2010] to NAP height (2) + "
+              "Inverse of Amersfoort to ETRS89-NLD [AGRS2010] (9)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
               "+step +proj=axisswap +order=2,1 "
@@ -6569,7 +6570,6 @@ TEST(
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
 }
-#endif
 
 // ---------------------------------------------------------------------------
 
