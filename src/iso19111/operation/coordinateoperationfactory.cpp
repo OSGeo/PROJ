@@ -7657,6 +7657,8 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         }
     }
 
+    std::set<std::string> setInterpolationCRSName;
+    std::vector<crs::CRSNNPtr> vectorInterpolationCRS;
     for (const auto &verticalTransform : verticalTransforms) {
 
         auto interpolationCRS =
@@ -7666,6 +7668,21 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 std::static_pointer_cast<crs::SingleCRS>(interpTransformCRS);
             if (interpTransformSingleCRS) {
                 interpolationCRS = NN_NO_CHECK(interpTransformSingleCRS);
+                if (setInterpolationCRSName.insert(interpolationCRS->nameStr())
+                        .second) {
+                    auto interpolationCRS3D =
+                        interpolationCRS->promoteTo3D(std::string(), dbContext);
+                    if (!interpolationCRS3D->identifiers().empty()) {
+                        // Helps for BD72 + Ostend height to Amersfoort + NAP
+                        // height where we have a Ostend height to NAP height
+                        // concatenated vertical transformation using ETRS89
+                        // Using ETRS89 3D to do BD72 + Ostend height to ETRS89
+                        // 3D and ETRS89 3D to Amersfoort + NAP height leads to
+                        // better results
+                        vectorInterpolationCRS.push_back(
+                            std::move(interpolationCRS3D));
+                    }
+                }
             }
         } else {
             auto compSrc0BoundCrs =
@@ -7778,6 +7795,41 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
             for (const auto &opHoriz : opsHoriz) {
                 res.emplace_back(createHorizNullVerticalPROJBased(
                     sourceCRS, targetCRS, opHoriz, verticalTransform));
+            }
+        }
+    }
+
+    // For BD72 + Ostend height to Amersfoort + NAP height using ETRS89 as
+    // intermediate
+    for (const auto &interpolationCRS : vectorInterpolationCRS) {
+        const auto hasBallparkLambda = [](const CoordinateOperationNNPtr &op) {
+            return op->hasBallparkTransformation();
+        };
+        auto opsSrcToGeog = createOperations(
+            sourceCRS, sourceEpoch, interpolationCRS, sourceEpoch, context);
+        opsSrcToGeog.erase(std::remove_if(opsSrcToGeog.begin(),
+                                          opsSrcToGeog.end(),
+                                          hasBallparkLambda),
+                           opsSrcToGeog.end());
+        if (!opsSrcToGeog.empty()) {
+            auto opsGeogToTarget = createOperations(
+                interpolationCRS, targetEpoch, targetCRS, targetEpoch, context);
+            opsGeogToTarget.erase(std::remove_if(opsGeogToTarget.begin(),
+                                                 opsGeogToTarget.end(),
+                                                 hasBallparkLambda),
+                                  opsGeogToTarget.end());
+            if (!opsGeogToTarget.empty()) {
+                for (const auto &op1 : opsSrcToGeog) {
+                    for (const auto &op2 : opsGeogToTarget) {
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {op1, op2},
+                                    context.disallowEmptyIntersection()));
+                        } catch (const std::exception &) {
+                        }
+                    }
+                }
             }
         }
     }
