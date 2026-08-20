@@ -1024,6 +1024,8 @@ const struct MethodNameCode methodNameCodesList[] = {
     METHOD_NAME_CODE(LONGITUDE_ROTATION),
     METHOD_NAME_CODE(AFFINE_PARAMETRIC_TRANSFORMATION),
     METHOD_NAME_CODE(SIMILARITY_TRANSFORMATION),
+    METHOD_NAME_CODE(SEISMIC_BIN_GRID_I_EQ_J_PLUS_90),
+    METHOD_NAME_CODE(SEISMIC_BIN_GRID_I_EQ_J_MINUS_90),
     METHOD_NAME_CODE(COORDINATE_FRAME_GEOCENTRIC),
     METHOD_NAME_CODE(COORDINATE_FRAME_FULL_MATRIX_GEOCENTRIC),
     METHOD_NAME_CODE(COORDINATE_FRAME_GEOGRAPHIC_2D),
@@ -1177,6 +1179,16 @@ const struct ParamNameCode gParamNameCodes[] = {
     PARAM_NAME_CODE(ORDINATE_1_EVAL_POINT),
     PARAM_NAME_CODE(ORDINATE_2_EVAL_POINT),
     PARAM_NAME_CODE(ORDINATE_3_EVAL_POINT),
+    PARAM_NAME_CODE(BIN_GRID_ORIGIN_I),
+    PARAM_NAME_CODE(BIN_GRID_ORIGIN_J),
+    PARAM_NAME_CODE(BIN_GRID_ORIGIN_EASTING),
+    PARAM_NAME_CODE(BIN_GRID_ORIGIN_NORTHING),
+    PARAM_NAME_CODE(SCALE_FACTOR_OF_BIN_GRID),
+    PARAM_NAME_CODE(BIN_WIDTH_ON_I_AXIS),
+    PARAM_NAME_CODE(BIN_WIDTH_ON_J_AXIS),
+    PARAM_NAME_CODE(MAP_GRID_BEARING_OF_BIN_GRID_J_AXIS),
+    PARAM_NAME_CODE(BIN_NODE_INCREMENT_ON_I_AXIS),
+    PARAM_NAME_CODE(BIN_NODE_INCREMENT_ON_J_AXIS),
     PARAM_NAME_CODE(GEOCENTRIC_TRANSLATION_FILE),
     PARAM_NAME_CODE(INCLINATION_IN_LATITUDE),
     PARAM_NAME_CODE(INCLINATION_IN_LONGITUDE),
@@ -1289,6 +1301,69 @@ static const ParamMapping paramRotationAngleOfSourceCRSAxes = {
 static const ParamMapping *const paramsSimilarityTransformation[] = {
     &paramOrdinate1EvalPointTargetCRS, &paramOrdinate2EvalPointTargetCRS,
     &paramScaleFactorForSourceCRSAxes, &paramRotationAngleOfSourceCRSAxes,
+    nullptr};
+
+static const ParamMapping paramBinGridOriginI = {
+    EPSG_NAME_PARAMETER_BIN_GRID_ORIGIN_I,
+    EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_I, nullptr,
+    common::UnitOfMeasure::Type::SCALE, nullptr};
+
+static const ParamMapping paramBinGridOriginJ = {
+    EPSG_NAME_PARAMETER_BIN_GRID_ORIGIN_J,
+    EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_J, nullptr,
+    common::UnitOfMeasure::Type::SCALE, nullptr};
+
+static const ParamMapping paramBinGridOriginEasting = {
+    EPSG_NAME_PARAMETER_BIN_GRID_ORIGIN_EASTING,
+    EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_EASTING, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramBinGridOriginNorthing = {
+    EPSG_NAME_PARAMETER_BIN_GRID_ORIGIN_NORTHING,
+    EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_NORTHING, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramScaleFactorOfBinGrid = {
+    EPSG_NAME_PARAMETER_SCALE_FACTOR_OF_BIN_GRID,
+    EPSG_CODE_PARAMETER_SCALE_FACTOR_OF_BIN_GRID, nullptr,
+    common::UnitOfMeasure::Type::SCALE, nullptr};
+
+static const ParamMapping paramBinWidthOnIAxis = {
+    EPSG_NAME_PARAMETER_BIN_WIDTH_ON_I_AXIS,
+    EPSG_CODE_PARAMETER_BIN_WIDTH_ON_I_AXIS, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramBinWidthOnJAxis = {
+    EPSG_NAME_PARAMETER_BIN_WIDTH_ON_J_AXIS,
+    EPSG_CODE_PARAMETER_BIN_WIDTH_ON_J_AXIS, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramMapGridBearingOfBinGridJAxis = {
+    EPSG_NAME_PARAMETER_MAP_GRID_BEARING_OF_BIN_GRID_J_AXIS,
+    EPSG_CODE_PARAMETER_MAP_GRID_BEARING_OF_BIN_GRID_J_AXIS, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping paramBinNodeIncrementOnIAxis = {
+    EPSG_NAME_PARAMETER_BIN_NODE_INCREMENT_ON_I_AXIS,
+    EPSG_CODE_PARAMETER_BIN_NODE_INCREMENT_ON_I_AXIS, nullptr,
+    common::UnitOfMeasure::Type::SCALE, nullptr};
+
+static const ParamMapping paramBinNodeIncrementOnJAxis = {
+    EPSG_NAME_PARAMETER_BIN_NODE_INCREMENT_ON_J_AXIS,
+    EPSG_CODE_PARAMETER_BIN_NODE_INCREMENT_ON_J_AXIS, nullptr,
+    common::UnitOfMeasure::Type::SCALE, nullptr};
+
+static const ParamMapping *const paramsSeismicBinGrid[] = {
+    &paramBinGridOriginI,
+    &paramBinGridOriginJ,
+    &paramBinGridOriginEasting,
+    &paramBinGridOriginNorthing,
+    &paramScaleFactorOfBinGrid,
+    &paramBinWidthOnIAxis,
+    &paramBinWidthOnJAxis,
+    &paramMapGridBearingOfBinGridJAxis,
+    &paramBinNodeIncrementOnIAxis,
+    &paramBinNodeIncrementOnJAxis,
     nullptr};
 
 static const ParamMapping paramXTranslation = {
@@ -1606,6 +1681,14 @@ static const MethodMapping gOtherMethodMappings[] = {
     {EPSG_NAME_METHOD_SIMILARITY_TRANSFORMATION,
      EPSG_CODE_METHOD_SIMILARITY_TRANSFORMATION, nullptr, nullptr, nullptr,
      paramsSimilarityTransformation},
+
+    {EPSG_NAME_METHOD_SEISMIC_BIN_GRID_I_EQ_J_PLUS_90,
+     EPSG_CODE_METHOD_SEISMIC_BIN_GRID_I_EQ_J_PLUS_90, nullptr, nullptr,
+     nullptr, paramsSeismicBinGrid},
+
+    {EPSG_NAME_METHOD_SEISMIC_BIN_GRID_I_EQ_J_MINUS_90,
+     EPSG_CODE_METHOD_SEISMIC_BIN_GRID_I_EQ_J_MINUS_90, nullptr, nullptr,
+     nullptr, paramsSeismicBinGrid},
 
     {PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION, 0, nullptr, nullptr,
      nullptr, paramsPoleRotationGRIBConvention},

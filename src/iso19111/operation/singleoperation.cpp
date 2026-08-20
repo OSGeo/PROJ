@@ -3386,6 +3386,96 @@ bool SingleOperation::exportToPROJStringGeneric(
         return true;
     }
 
+    if (methodEPSGCode == EPSG_CODE_METHOD_SEISMIC_BIN_GRID_I_EQ_J_PLUS_90 ||
+        methodEPSGCode == EPSG_CODE_METHOD_SEISMIC_BIN_GRID_I_EQ_J_MINUS_90) {
+        // EPSG guidance note 7-2, section 2.4.3.3.
+        // Note that EPSG orders those operations from the map grid (source
+        // CRS) to the bin grid (target CRS), whereas the formulas of the
+        // guidance note are written in the opposite direction. Consequently
+        // what is implemented below is the reverse formula of the guidance
+        // note.
+        const double I0 =
+            parameterValueNumericAsSI(EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_I);
+        const double J0 =
+            parameterValueNumericAsSI(EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_J);
+        const double E0 =
+            parameterValueNumeric(EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_EASTING,
+                                  common::UnitOfMeasure::METRE);
+        const double N0 =
+            parameterValueNumeric(EPSG_CODE_PARAMETER_BIN_GRID_ORIGIN_NORTHING,
+                                  common::UnitOfMeasure::METRE);
+        // Point scale factor of the map grid at a chosen reference point.
+        const double SF = parameterValueNumericAsSI(
+            EPSG_CODE_PARAMETER_SCALE_FACTOR_OF_BIN_GRID);
+        const double binWidthI =
+            parameterValueNumeric(EPSG_CODE_PARAMETER_BIN_WIDTH_ON_I_AXIS,
+                                  common::UnitOfMeasure::METRE);
+        const double binWidthJ =
+            parameterValueNumeric(EPSG_CODE_PARAMETER_BIN_WIDTH_ON_J_AXIS,
+                                  common::UnitOfMeasure::METRE);
+        const double theta = parameterValueNumeric(
+            EPSG_CODE_PARAMETER_MAP_GRID_BEARING_OF_BIN_GRID_J_AXIS,
+            common::UnitOfMeasure::RADIAN);
+        const double incI = parameterValueNumericAsSI(
+            EPSG_CODE_PARAMETER_BIN_NODE_INCREMENT_ON_I_AXIS);
+        const double incJ = parameterValueNumericAsSI(
+            EPSG_CODE_PARAMETER_BIN_NODE_INCREMENT_ON_J_AXIS);
+
+        if (SF == 0.0 || binWidthI == 0.0 || binWidthJ == 0.0) {
+            throw io::FormattingException(
+                "Invalid seismic bin grid operation: the scale factor of the "
+                "bin grid and the bin widths must be non-zero");
+        }
+
+        // Number of bin grid units per map grid unit, along each bin grid axis.
+        const double scaleI = incI / (SF * binWidthI);
+        const double scaleJ = incJ / (SF * binWidthJ);
+
+        // The I=J-90 (left-handed) method only differs from the I=J+90
+        // (right-handed) one by the sign of the I-axis.
+        const double signI =
+            (methodEPSGCode == EPSG_CODE_METHOD_SEISMIC_BIN_GRID_I_EQ_J_PLUS_90)
+                ? 1.0
+                : -1.0;
+
+        const double s11 = signI * scaleI * cos(theta);
+        const double s12 = -signI * scaleI * sin(theta);
+        const double s21 = scaleJ * sin(theta);
+        const double s22 = scaleJ * cos(theta);
+
+        // The map grid coordinates of the bin grid origin must map to
+        // (I0, J0), hence those offsets.
+        const double xoff = I0 - (s11 * E0 + s12 * N0);
+        const double yoff = J0 - (s21 * E0 + s22 * N0);
+
+        // Bring the map grid coordinates to easting/northing in metre, as
+        // assumed by the above coefficients.
+        auto sourceCRSProj =
+            dynamic_cast<const crs::ProjectedCRS *>(sourceCRS().get());
+        if (sourceCRSProj) {
+            formatter->startInversion();
+            sourceCRSProj->addUnitConvertAndAxisSwap(formatter, false);
+            formatter->stopInversion();
+        }
+
+        // The target CRS holds bin numbers, which are unit-less, so no unit
+        // conversion is applied on the output of the affine step. Bin numbers
+        // are not rounded either: EPSG defines bin grid coordinate systems
+        // with a real datatype (e.g. EPSG:1051) as well as with an integer one
+        // (e.g. EPSG:32760), so whether they are whole values is a property of
+        // the bin grid coordinate system, not of these methods. Rounding here
+        // would also make the operation non-invertible.
+        formatter->addStep("affine");
+        formatter->addParam("xoff", xoff);
+        formatter->addParam("s11", s11);
+        formatter->addParam("s12", s12);
+        formatter->addParam("yoff", yoff);
+        formatter->addParam("s21", s21);
+        formatter->addParam("s22", s22);
+
+        return true;
+    }
+
     if (isAxisOrderReversal(methodEPSGCode)) {
         formatter->addStep("axisswap");
         formatter->addParam("order", "2,1");
