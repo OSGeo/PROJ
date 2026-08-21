@@ -125,49 +125,30 @@ static PJ_XY aeqd_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
     struct pj_aeqd_data *Q = static_cast<struct pj_aeqd_data *>(P->opaque);
 
-    if (Q->mode == pj_aeqd_ns::EQUIT) {
-        const double cosphi = cos(lp.phi);
-        const double sinphi = sin(lp.phi);
-        const double coslam = cos(lp.lam);
-        const double sinlam = sin(lp.lam);
-
-        xy.y = cosphi * coslam;
-
-        if (fabs(fabs(xy.y) - 1.) < TOL) {
-            if (xy.y < 0.) {
-                proj_errno_set(
-                    P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
-                return xy;
-            } else
-                return aeqd_e_forward(lp, P);
-        } else {
-            xy.y = acos(xy.y);
-            xy.y /= sin(xy.y);
-            xy.x = xy.y * cosphi * sinlam;
-            xy.y *= sinphi;
-        }
-    } else if (Q->mode == pj_aeqd_ns::OBLIQ) {
+    if (Q->mode == pj_aeqd_ns::EQUIT || Q->mode == pj_aeqd_ns::OBLIQ) {
         const double cosphi = cos(lp.phi);
         const double sinphi = sin(lp.phi);
         const double coslam = cos(lp.lam);
         const double sinlam = sin(lp.lam);
         const double cosphi_x_coslam = cosphi * coslam;
 
-        xy.y = Q->sinph0 * sinphi + Q->cosph0 * cosphi_x_coslam;
+        /* c is the angular distance to (phi, lam). Deriving sin(c) with
+         * hypot and c with atan2 keeps the forward accurate near the
+         * antipode and near the center compared to using the customary
+         * acos formulation. */
+        const double cosc = Q->sinph0 * sinphi + Q->cosph0 * cosphi_x_coslam;
+        const double t = Q->cosph0 * sinphi - Q->sinph0 * cosphi_x_coslam;
+        const double sinc = hypot(cosphi * sinlam, t);
 
-        if (fabs(fabs(xy.y) - 1.) < TOL) {
-            if (xy.y < 0.) {
-                proj_errno_set(
-                    P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
-                return xy;
-            } else
-                return aeqd_e_forward(lp, P);
-        } else {
-            xy.y = acos(xy.y);
-            xy.y /= sin(xy.y);
-            xy.x = xy.y * cosphi * sinlam;
-            xy.y *= Q->cosph0 * sinphi - Q->sinph0 * cosphi_x_coslam;
+        if (cosc < TOL - 1.) {
+            /* the point opposite the projection center is undefined */
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+            return xy;
         }
+        /* c / sin(c), with limit 1 at the projection center */
+        const double k = sinc == 0 ? 1. : atan2(sinc, cosc) / sinc;
+        xy.x = k * cosphi * sinlam;
+        xy.y = k * t;
     } else {
         double coslam = cos(lp.lam);
         double sinlam = sin(lp.lam);
