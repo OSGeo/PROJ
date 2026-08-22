@@ -7,8 +7,7 @@ set(HAS_NETWORK OFF)  # evaluate if ON below
 
 if(TESTING_USE_NETWORK)
   if(NOT CMAKE_REQUIRED_QUIET)
-    # CMake 3.17+ use CHECK_START/CHECK_PASS/CHECK_FAIL
-    message(STATUS "Checking if network is available")
+    message(CHECK_START "Checking if network is available")
   endif()
   set(NO_CONNECTION 1)
   find_program(HAS_CURL curl)
@@ -45,11 +44,11 @@ if(TESTING_USE_NETWORK)
   if(NO_CONNECTION EQUAL 0)
     set(HAS_NETWORK ON)
     if(NOT CMAKE_REQUIRED_QUIET)
-      message(STATUS "Checking if network is available - yes")
+      message(CHECK_PASS "Checking if network is available - yes")
     endif()
   else()
     if(NOT CMAKE_REQUIRED_QUIET)
-      message(STATUS
+      message(CHECK_FAIL
         "Checking if network is available - no; skipping network-dependent tests."
       )
     endif()

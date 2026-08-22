@@ -9,7 +9,7 @@
 ################################################################################
 # General settings
 ################################################################################
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.22.1)
 
 project(PROJ
   DESCRIPTION "PROJ coordinate transformation software library"
@@ -239,17 +239,7 @@ if(DEFINED SQLITE3_LIBRARY)
 endif()
 
 find_package(SQLite3 3.11 REQUIRED)
-
 if(NOT TARGET SQLite3::SQLite3) # CMake < 4.3
-  # Remove after CMake version bump to 3.18+
-  get_target_property(IS_SQLITE3_IMPORTED SQLite::SQLite3 IMPORTED)
-  if(IS_SQLITE3_IMPORTED AND CMAKE_VERSION VERSION_LESS "3.18")
-    set_target_properties(SQLite::SQLite3 PROPERTIES IMPORTED_GLOBAL TRUE)
-    message(DEPRECATION "If your project consumes PROJ as a subdirectory \
-      and also uses either the SQLite3::SQLite3 or SQLite::SQLite3 target, \
-      make sure you have your own call to find_package.\nThese targets \
-      will no longer be available to the global CMake scope once PROJ bumps to CMake v3.18+.")
-  endif()
   add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
 endif()
 
@@ -389,10 +379,9 @@ endif()
 
 include(CheckCSourceCompiles)
 function (is_sharp_embed_available res)
-    if (NOT EMSCRIPTEN AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.21 AND
+    if (NOT EMSCRIPTEN AND
         ((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0) OR
          (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.0)))
-        # CMAKE_C_STANDARD=23 only supported since CMake 3.21
         set(TEST_SHARP_EMBED
           "static const unsigned char embedded[] = {\n#embed __FILE__\n};\nint main() { (void)embedded; return 0;}"
         )

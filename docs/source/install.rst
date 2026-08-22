@@ -159,7 +159,7 @@ Build requirements
 
 - C99 compiler
 - C++17 compiler
-- CMake >= 3.16
+- CMake >= 3.22.1
 - SQLite3 >= 3.11: headers and library for target architecture, and sqlite3 executable for build architecture
 - libtiff >= 4.0 (optional but recommended to enable reading of grid formats based on GeoTIFF. Only basic TIFF support is required; optional features like WebP or ZStd are not needed.)
 - curl >= 7.29.0 (optional but recommended to support automatic downloading of remote grid files during runtime, allowing PROJ to fetch required transformation data on demand.)
