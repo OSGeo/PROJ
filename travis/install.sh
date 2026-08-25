@@ -265,7 +265,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     if [ "$BUILD_NAME" != "linux_clang" ]; then
         # build with grids and coverage
         if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-            cmake \
+            LDFLAGS="$LDFLAGS -fprofile-arcs -ftest-coverage" cmake \
               -D CMAKE_BUILD_TYPE=Debug \
               -D USE_CCACHE=${USE_CCACHE} \
               -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
