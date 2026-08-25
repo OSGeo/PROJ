@@ -11,10 +11,24 @@
 ################################################################################
 cmake_minimum_required(VERSION 3.16)
 
+# Workaround for CMake 3.22.1: remove -Werror from CXXFLAGS
+# TODO: CMake 3.24 should use set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+string(FIND "$ENV{CXXFLAGS}" "-Werror" FIND_CXXFLAGS_WERROR)
+if(FIND_CXXFLAGS_WERROR GREATER_EQUAL 0)
+  string(REPLACE "-Werror " " " _tmp_CXXFLAGS "$ENV{CXXFLAGS} ")
+  set(_prev_CXXFLAGS "$ENV{CXXFLAGS}")
+  set(ENV{CXXFLAGS} "${_tmp_CXXFLAGS}")
+endif()
+
 project(PROJ
   DESCRIPTION "PROJ coordinate transformation software library"
   LANGUAGES C CXX
 )
+
+# Workaround for CMake 3.22.1: restore CXXFLAGS to CMAKE_CXX_FLAGS
+if(FIND_CXXFLAGS_WERROR GREATER_EQUAL 0)
+  set(CMAKE_CXX_FLAGS "${_prev_CXXFLAGS}")
+endif()
 
 # Only interpret if() arguments as variables or keywords when unquoted
 cmake_policy(SET CMP0054 NEW)
