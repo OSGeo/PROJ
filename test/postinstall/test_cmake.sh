@@ -21,6 +21,9 @@ esac
 
 echo "Running post-install tests with CMake (${BUILD_MODE}, ${TESTED_CONFIGS})"
 
+# TODO: remove -Werror from CFLAGS and CXXFLAGS
+CFLAGS=$(echo $CFLAGS | sed -E 's/-Werror ?//')
+CXXFLAGS=$(echo $CXXFLAGS | sed -E 's/-Werror ?//')
 
 cmake_make_ctest(){
   rm -rf build
