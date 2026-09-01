@@ -24,14 +24,17 @@ echo "Running post-install tests with CMake (${BUILD_MODE}, ${TESTED_CONFIGS})"
 
 cmake_make_ctest(){
   rm -rf build
-  mkdir build
-  cd build
 
-  cmake -DCMAKE_PREFIX_PATH=${prefix} -DUSE_PROJ_NAME=$1 ..
-  VERBOSE=1 make
-  ctest --output-on-failure
+  cmake \
+    -D CMAKE_PREFIX_PATH=${prefix} \
+    -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
+    -D USE_PROJ_NAME=$1 \
+    -S . -B build
 
-  cd ..
+  cmake --build build --verbose
+
+  (cd build && ctest --output-on-failure)
+
   rm -rf build
 }
 

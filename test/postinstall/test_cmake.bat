@@ -63,15 +63,17 @@ Goto :EOF
 
 :cmake_build_ctest
 If exist build Rd /s /q build || Exit /B 1
-Md build
+
+cmake ^
+  -D CMAKE_BUILD_TYPE=Release ^
+  -D CMAKE_COMPILE_WARNING_AS_ERROR=ON ^
+  -D CMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ^
+  -D CMAKE_PREFIX_PATH=%CMAKE_PREFIX_PATH% ^
+  -D USE_PROJ_NAME=%1 ^
+  -S . -B build || Exit /B 1
+
+cmake --build build --config Release || Exit /B 1
 Cd build
-
-cmake -DCMAKE_BUILD_TYPE=Release ^
-  -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ^
-  -DCMAKE_PREFIX_PATH=%CMAKE_PREFIX_PATH% ^
-  -DUSE_PROJ_NAME=%1 .. || Exit /B 1
-
-cmake --build . --config Release || Exit /B 1
 ctest --output-on-failure -C Release || Exit /B 1
 
 Cd ..

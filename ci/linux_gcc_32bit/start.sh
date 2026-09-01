@@ -6,29 +6,31 @@ export TRAVIS_OS_NAME=linux
 export BUILD_NAME=linux_gcc_32bit
 export TRAVIS_BUILD_DIR="$WORK_DIR"
 
+GCC_VERSION=12
+
 ARCH=i386
 
 dpkg --add-architecture i386
 apt-get update -y
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends  -o APT::Immediate-Configure=0  \
-    autoconf automake libtool make cmake ccache pkg-config python3-pip sqlite3 tar zip curl \
-    gcc-multilib g++-multilib g++ jq dpkg-dev \
-    libsqlite3-dev:$ARCH \
+    autoconf automake libtool make cmake ccache pkg-config sqlite3 tar zip curl ca-certificates jq \
+    python3-pytest python3-ruamel.yaml python3-jsonschema \
+    gcc-$GCC_VERSION-multilib g++-$GCC_VERSION-multilib g++-$GCC_VERSION \
+    libsqlite3-dev:$ARCH libgtest-dev:$ARCH \
     libtiff-dev:$ARCH libwebp-dev:$ARCH libzstd-dev:$ARCH \
     libcurl4-openssl-dev:$ARCH libnghttp2-dev:$ARCH libidn2-dev:$ARCH librtmp-dev:$ARCH libssh-dev:$ARCH \
     libpsl-dev:$ARCH libssl-dev:$ARCH libkrb5-dev:$ARCH comerr-dev:$ARCH libldap2-dev:$ARCH libbrotli-dev:$ARCH
 
-export PATH=$HOME/.local/bin:$PATH
-python3 -m pip config --user set global.progress_bar off
-python3 -m pip install --user jsonschema ruamel.yaml
+LIBDIR=/usr/lib/i386-linux-gnu
+INCDIR=/usr/include/i386-linux-gnu
 
-export CXXFLAGS='-m32 -D_GLIBCXX_ASSERTIONS'
-export CFLAGS='-m32'
-export TIFF_CFLAGS=-I/usr/include/i386-linux-gnu
-export TIFF_LIBS="-L/usr/lib/i386-linux-gnu -ltiff"
-export SQLITE3_CFLAGS=-I/usr/include/i386-linux-gnu
-export SQLITE3_LIBS="-L/usr/lib/i386-linux-gnu -lsqlite3"
+export CXXFLAGS="-m32 -D_GLIBCXX_ASSERTIONS"
+export CFLAGS="-m32"
+export TIFF_CFLAGS="-I$INCDIR"
+export TIFF_LIBS="-L$LIBDIR -ltiff"
+export SQLITE3_CFLAGS="-I$INCDIR"
+export SQLITE3_LIBS="-L$LIBDIR -lsqlite3"
 
 export PKG_CONFIG=i686-linux-gnu-pkg-config
 
@@ -43,7 +45,7 @@ fi
 
 ccache -M 500M
 
-CFLAGS="-Werror $CFLAGS" CXXFLAGS="-Werror $CXXFLAGS" CMAKE_BUILD_TYPE=RelWithDebInfo ./ci/install.sh
+CC="gcc-$GCC_VERSION" CXX="g++-$GCC_VERSION" CMAKE_BUILD_TYPE=RelWithDebInfo ./ci/install.sh
 
 echo "Saving ccache..."
 rm -f "$WORK_DIR/ccache.tar.gz"

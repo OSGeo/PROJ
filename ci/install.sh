@@ -32,6 +32,8 @@ if test "x${CMAKE_BUILD_TYPE}" = "x"; then
     CMAKE_BUILD_TYPE=Release
 fi
 
+cmake --version
+
 # For some odd reason the tar xzvf $TAR_FILENAME doesn't work on Travis-CI ...
 if test "$TRAVIS" = ""; then
     echo "Make dist tarball, and check consistency"
@@ -58,7 +60,8 @@ mkdir shared_build
 cd shared_build
 cmake \
   -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
-  -DCMAKE_UNITY_BUILD=ON \
+  -D CMAKE_UNITY_BUILD=ON \
+  -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
   -D USE_CCACHE=${USE_CCACHE} \
   ${PROJ_CMAKE_BUILD_OPTIONS:-} \
   -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
@@ -109,6 +112,7 @@ cd static_build
 # and INSTALL_LEGACY_CMAKE_FILES=OFF (both are independent from static build particularities)
 cmake \
   -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+  -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
   -D USE_CCACHE=${USE_CCACHE} \
   -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
   -D BUILD_SHARED_LIBS=OFF \
@@ -267,6 +271,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
         if [ "$TRAVIS_OS_NAME" == "osx" ]; then
             LDFLAGS="$LDFLAGS -fprofile-arcs -ftest-coverage" cmake \
               -D CMAKE_BUILD_TYPE=Debug \
+              -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
               -D USE_CCACHE=${USE_CCACHE} \
               -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
               -D CMAKE_C_FLAGS="--coverage" \
@@ -275,6 +280,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
         else
             LDFLAGS="$LDFLAGS -lgcov" cmake \
               -D CMAKE_BUILD_TYPE=Debug \
+              -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
               -D USE_CCACHE=${USE_CCACHE} \
               -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
               -D CMAKE_C_FLAGS="$CFLAGS --coverage" \
@@ -284,6 +290,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     else
         cmake \
           -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+          -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
           -D USE_CCACHE=${USE_CCACHE} \
           -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
           . ;

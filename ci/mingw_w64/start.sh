@@ -98,13 +98,13 @@ ln -s /usr/$MINGW_ARCH/bin/libsqlite3-0.dll $WINE_SYSDIR
 rm -rf build
 mkdir build
 cd build
-cmake -G "Unix Makefiles" \
+cmake \
+    -G "Unix Makefiles" \
     -D CMAKE_SYSTEM_NAME=Windows \
     -D CMAKE_CROSSCOMPILING_EMULATOR=/usr/bin/wine64 \
     -D CMAKE_C_COMPILER=/usr/bin/${MINGW_ARCH}-gcc \
     -D CMAKE_CXX_COMPILER=/usr/bin/${MINGW_ARCH}-g++ \
-    -D CMAKE_C_FLAGS="-Werror" \
-    -D CMAKE_CXX_FLAGS="-Werror" \
+    -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
     -D CMAKE_BUILD_TYPE=Release \
     -D CMAKE_FIND_ROOT_PATH=/usr/${MINGW_ARCH} \
     -D CMAKE_INSTALL_PREFIX=/tmp/proj_install \
