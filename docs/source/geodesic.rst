@@ -23,7 +23,7 @@ points.  In this figure, we have :math:`\lambda_{12}=\lambda_2-\lambda_1`.
     .. raw:: html
 
        <center>
-         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Geodesic_problem_on_an_ellipsoid.svg/320px-Geodesic_problem_on_an_ellipsoid.svg.png"
+         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Geodesic_problem_on_an_ellipsoid.svg/330px-Geodesic_problem_on_an_ellipsoid.svg.png"
               alt="Figure from wikipedia"
               width="320">
        </center>
