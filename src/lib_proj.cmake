@@ -310,7 +310,7 @@ source_group("CMake Files" FILES CMakeLists.txt)
 
 # Embed PROJ_DATA data files location
 if(EMBED_PROJ_DATA_PATH)
-  add_definitions(-DPROJ_DATA="${PROJ_DATA_PATH}")
+  add_definitions(-DPROJ_DATA="${CMAKE_INSTALL_FULL_DATADIR}/proj")
 endif()
 
 

@@ -304,7 +304,7 @@ endif()
 
 ################################################################################
 
-option(EMBED_PROJ_DATA_PATH "Whether the PROJ_DATA_PATH should be embedded" ON)
+option(EMBED_PROJ_DATA_PATH "Whether the PROJ_DATA path should be embedded" ON)
 
 if(DEFINED PROJ_LIB_ENV_VAR_TRIED_LAST)
   set(PROJ_DATA_ENV_VAR_TRIED_LAST ${PROJ_LIB_ENV_VAR_TRIED_LAST})
@@ -364,8 +364,6 @@ string(TOLOWER "${PROJECT_NAME}" PROJECT_NAME)
 include(GNUInstallDirs)
 
 set(PROJECT_NAME "${PROJECT_NAME_ORIGINAL}")
-
-set(PROJ_DATA_PATH "${CMAKE_INSTALL_FULL_DATADIR}/proj")
 
 ################################################################################
 # Tests
