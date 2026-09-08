@@ -5716,6 +5716,66 @@ TEST(operation, normalizeForVisualization) {
             "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
     }
 
+    // Source(geographic 3D) and target(vertical): the vertical CRS has no
+    // horizontal axes, so the horizontal coordinates it passes through must
+    // follow the source axis order. No residual axisswap must remain.
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        // ETRS89 (geographic 3D)
+        auto src = authFactory->createCoordinateReferenceSystem("4937");
+        // NN54 height
+        auto dst = authFactory->createCoordinateReferenceSystem("5776");
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            src, dst, ctxt);
+        ASSERT_GE(list.size(), 1U);
+        auto op = list[0];
+        // Without normalization the operation carries its own axis swaps.
+        EXPECT_TRUE(
+            op->exportToPROJString(
+                  PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5,
+                      authFactory->databaseContext())
+                      .get())
+                .find("+proj=axisswap +order=2,1") != std::string::npos);
+        auto opNormalized = op->normalizeForVisualization();
+        EXPECT_FALSE(opNormalized->_isEquivalentTo(op.get()));
+        const auto projString = opNormalized->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get());
+        EXPECT_TRUE(projString.find("+proj=axisswap +order=2,1") ==
+                    std::string::npos)
+            << projString;
+        EXPECT_TRUE(projString.find("+proj=vgridshift") != std::string::npos)
+            << projString;
+    }
+
+    // Reverse of above: source(vertical) and target(geographic 3D)
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        // NN54 height
+        auto src = authFactory->createCoordinateReferenceSystem("5776");
+        // ETRS89 (geographic 3D)
+        auto dst = authFactory->createCoordinateReferenceSystem("4937");
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            src, dst, ctxt);
+        ASSERT_GE(list.size(), 1U);
+        auto op = list[0];
+        auto opNormalized = op->normalizeForVisualization();
+        EXPECT_FALSE(opNormalized->_isEquivalentTo(op.get()));
+        const auto projString = opNormalized->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get());
+        EXPECT_TRUE(projString.find("+proj=axisswap +order=2,1") ==
+                    std::string::npos)
+            << projString;
+        EXPECT_TRUE(projString.find("+proj=vgridshift") != std::string::npos)
+            << projString;
+    }
+
     // Source(boundCRS) and target(geographic) must be inverted
     {
         auto src = BoundCRS::createFromTOWGS84(
