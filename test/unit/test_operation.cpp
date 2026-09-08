@@ -5732,11 +5732,10 @@ TEST(operation, normalizeForVisualization) {
         auto op = list[0];
         // Without normalization the operation carries its own axis swaps.
         EXPECT_TRUE(
-            op->exportToPROJString(
-                  PROJStringFormatter::create(
-                      PROJStringFormatter::Convention::PROJ_5,
-                      authFactory->databaseContext())
-                      .get())
+            op->exportToPROJString(PROJStringFormatter::create(
+                                       PROJStringFormatter::Convention::PROJ_5,
+                                       authFactory->databaseContext())
+                                       .get())
                 .find("+proj=axisswap +order=2,1") != std::string::npos);
         auto opNormalized = op->normalizeForVisualization();
         EXPECT_FALSE(opNormalized->_isEquivalentTo(op.get()));
