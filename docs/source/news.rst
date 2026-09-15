@@ -3,6 +3,69 @@
 News
 ###############################################################################
 
+9.9.0
+++++++++++++++++++++
+*September 15th 2026*
+
+Updates
+-------
+
+* Operations
+
+  * ``tinshift``: support TIN GeoPackage files (`#4603 <https://github.com/OSGeo/PROJ/issues/4603>`_)
+
+  * Optimize ``+step +proj=helmert +inv +x=X +y=Y +z=Z +step +proj=helmert +inv +x=-X +y=-Y +z=-Z`` as ``+proj=noop`` (`#4775 <https://github.com/OSGeo/PROJ/issues/4775>`_)
+
+  * Optimization: replace iterative Aitoff inverse with closed-form inverse (`#4796 <https://github.com/OSGeo/PROJ/issues/4796>`_)
+
+  * Adds implementation of Transverse Mercator Zoned Grid System (supporting EPSG:32600 and EPSG:32700) (`#4805 <https://github.com/OSGeo/PROJ/issues/4805>`_)
+
+  * Add seismic bin grid operation methods (EPSG:9666 and EPSG:1049) (`#4807 <https://github.com/OSGeo/PROJ/issues/4807>`_)
+
+  * IVEA: DSEA projection onto icosahedron net (`#4817 <https://github.com/OSGeo/PROJ/issues/4817>`_)
+
+* API
+
+  * Add :c:func:`proj_create_linear_3D_affine_parametric_conversion()` (`#4682 <https://github.com/OSGeo/PROJ/issues/4682>`_)
+
+  * Optimize :c:func:`fwd_prepare()` (`#4712 <https://github.com/OSGeo/PROJ/issues/4712>`_)
+
+  * Add support for ``DerivedProjectedCRS`` registration (`#4727 <https://github.com/OSGeo/PROJ/issues/4727>`_)
+
+  * C++ API: :cpp:func:`CartesianCS::create()`: by default check that all axis have the same unit (`#4728 <https://github.com/OSGeo/PROJ/issues/4728>`_)
+
+  * :cpp:func:`createOperations()`: tune `geod_crs_of_datum_ensemble` <--> `geod_crs_of_another_datum` (`#4773 <https://github.com/OSGeo/PROJ/issues/4773>`_)
+
+  * add :c:func:`proj_crs_is_dynamic()`, and ``cs2cs``: warn when source/destination CRS is dynamic, but no epoch is provided (`#4792 <https://github.com/OSGeo/PROJ/issues/4792>`_)
+
+  * :cpp:func:`createOperations()`: add heuristics to make BD72 + Ostend height to Amersfoort + NAP height lead to optimal result again (`#4821 <https://github.com/OSGeo/PROJ/issues/4821>`_)
+
+  * Make sure that WKT2 export of CRS imported from PROJ.4 strings or WKT1 is identical (`#4844 <https://github.com/OSGeo/PROJ/issues/4844>`_)
+
+* CMake
+
+  * Only add CPack related options when PROJ is the top level project. (`#4722 <https://github.com/OSGeo/PROJ/issues/4722>`_)
+
+  * Increase CMake minimum version from 3.16 to 3.22.1 (`#4824 <https://github.com/OSGeo/PROJ/issues/4824>`_)
+
+  * Replace :envvar:`PROJ_DATA_PATH` with ``${CMAKE_INSTALL_DATADIR}/proj`` (`#4843 <https://github.com/OSGeo/PROJ/issues/4843>`_)
+
+  * Define ``target_compile_features`` with C/C++ standards (`#4847 <https://github.com/OSGeo/PROJ/issues/4847>`_)
+
+* Database
+
+  * Update to EPSG v13.102 (`#4829 <https://github.com/OSGeo/PROJ/issues/4829>`_)
+
+Bug Fixes
+---------
+
+* Refactor time parsing with thread-safe localtime and leap year fix (`#4692 <https://github.com/OSGeo/PROJ/issues/4692>`_)
+
+* Make sure `projinfo --crs-extent-use none` works as expected (`#4699 <https://github.com/OSGeo/PROJ/issues/4699>`_)
+
+* Fix SQLite3 version check so it is done by `find_package` (`#4753 <https://github.com/OSGeo/PROJ/issues/4753>`_)
+
+
 9.8.1
 ++++++++++++++++++++
 *April 10th 2026*
