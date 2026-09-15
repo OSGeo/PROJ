@@ -29,7 +29,7 @@ version = "9.9"
 release = "9.9.0"
 
 # PROJ-data version
-data_version = "1.24"
+data_version = "1.25"
 
 today_date = date.today() # or use a specific date
 #today_date = date(2026, 3, 1)
