@@ -1351,6 +1351,12 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
     if (sizeBytes == 0)
         return 0;
 
+    if (m_pos >= m_props.size)
+        return 0;
+
+    sizeBytes = static_cast<size_t>(std::min(
+        static_cast<unsigned long long>(sizeBytes), m_props.size - m_pos));
+
     auto iterOffset = m_pos;
     while (sizeBytes) {
         const auto chunkIdxToDownload = iterOffset / DOWNLOAD_CHUNK_SIZE;
@@ -1455,10 +1461,13 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
                                           std::move(chunk));
             }
         }
-        const size_t nToCopy = static_cast<size_t>(
-            std::min(static_cast<unsigned long long>(sizeBytes),
-                     region.size() - (iterOffset - offsetToDownload)));
-        memcpy(buffer, region.data() + iterOffset - offsetToDownload, nToCopy);
+        const auto offsetInRegion =
+            static_cast<size_t>(iterOffset - offsetToDownload);
+        if (offsetInRegion >= region.size())
+            break;
+        const size_t nToCopy =
+            std::min(sizeBytes, region.size() - offsetInRegion);
+        memcpy(buffer, region.data() + offsetInRegion, nToCopy);
         buffer = static_cast<char *>(buffer) + nToCopy;
         iterOffset += nToCopy;
         sizeBytes -= nToCopy;
