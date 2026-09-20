@@ -1434,9 +1434,9 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
                 return 0;
             }
 
-            const auto nExpectedMinRead = static_cast<size_t>(std::min(
-                static_cast<unsigned long long>(DOWNLOAD_CHUNK_SIZE),
-                m_props.size - offsetToDownload));
+            const auto nExpectedMinRead = static_cast<size_t>(
+                std::min(static_cast<unsigned long long>(DOWNLOAD_CHUNK_SIZE),
+                         m_props.size - offsetToDownload));
             if (nRead < nExpectedMinRead) {
                 pj_log(m_ctx, PJ_LOG_ERROR,
                        "Short response reading %s at offset %llu: got %llu "
