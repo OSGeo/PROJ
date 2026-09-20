@@ -936,9 +936,13 @@ bool IdentifiedObject::_isEquivalentTo(
         }
         // TODO test id etc
     } else {
-        if (!metadata::Identifier::isEquivalentName(
-                nameStr().c_str(), otherIdObj->nameStr().c_str())) {
-            return hasEquivalentNameToUsingAlias(otherIdObj, dbContext);
+        const auto &l_name = nameStr();
+        const auto &otherName = otherIdObj->nameStr();
+        if (!metadata::Identifier::isEquivalentName(l_name.c_str(),
+                                                    otherName.c_str()) &&
+            !hasEquivalentNameToUsingAlias(otherIdObj, dbContext)) {
+            return (l_name == "unknown" && otherName == "unnamed") ||
+                   (l_name == "unnamed" && otherName == "unknown");
         }
     }
     return true;

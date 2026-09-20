@@ -25,19 +25,19 @@ include(CheckCXXCompilerFlag)
 # Make CMAKE_CXX_STANDARD available as cache option overridable by user
 set(CMAKE_CXX_STANDARD 17
   CACHE STRING "C++ standard version to use (default is 17)")
-message(STATUS "Requiring C++${CMAKE_CXX_STANDARD}")
+message(CHECK_START "Requiring C++${CMAKE_CXX_STANDARD}")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-message(STATUS "Requiring C++${CMAKE_CXX_STANDARD} - done")
+message(CHECK_PASS "done")
 
 # Set C99 version
 # Make CMAKE_C_STANDARD available as cache option overridable by user
 set(CMAKE_C_STANDARD 99
   CACHE STRING "C standard version to use (default is 99)")
-message(STATUS "Requiring C${CMAKE_C_STANDARD}")
+message(CHECK_START "Requiring C${CMAKE_C_STANDARD}")
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
-message(STATUS "Requiring C${CMAKE_C_STANDARD} - done")
+message(CHECK_PASS "done")
 
 # Set global -fvisibility=hidden
 set(CMAKE_C_VISIBILITY_PRESET hidden)
@@ -166,7 +166,7 @@ message(STATUS "Configuring PROJ:")
 #PROJ version information
 ################################################################################
 include(ProjVersion)
-proj_version(MAJOR 9 MINOR 9 PATCH 0)
+proj_version(MAJOR 9 MINOR 10 PATCH 0)
 set(PROJ_SOVERSION 25)
 set(PROJ_BUILD_VERSION "${PROJ_SOVERSION}.${PROJ_VERSION}")
 

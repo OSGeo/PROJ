@@ -2601,7 +2601,7 @@ TEST(crs, projectedCRS_from_WKT1_ESRI_as_WKT1_ESRI_s_jtsk03_krovak_east_north) {
         "            ID[\"EPSG\",1201]],\n"
         "        PRIMEM[\"Greenwich\",0,\n"
         "            ANGLEUNIT[\"Degree\",0.0174532925199433]]],\n"
-        "    CONVERSION[\"unnamed\",\n"
+        "    CONVERSION[\"unknown\",\n"
         "        METHOD[\"Krovak (North Orientated)\",\n"
         "            ID[\"EPSG\",1041]],\n"
         "        PARAMETER[\"Latitude of projection centre\",49.5,\n"
@@ -8158,4 +8158,24 @@ TEST(crs, ETRF2000_PL_CS92) {
         EXPECT_EQ(res.front().first.get(), crs.get());
         EXPECT_EQ(res.front().second, 100);
     }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, identical_after_import_from_proj4_and_wkt1_export) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=lcc +lat_0=25 +lon_0=-95 +lat_1=25 +lat_2=25 +a=6371229 "
+        "+b=6371229 +units=m +no_defs +type=crs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    auto wkt1 = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+    auto obj2 = WKTParser().createFromWKT(wkt1);
+    auto crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj2);
+    EXPECT_STREQ(
+        crs->exportToWKT(
+               WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get())
+            .c_str(),
+        crs2->exportToWKT(
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get())
+            .c_str());
 }

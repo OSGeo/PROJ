@@ -5089,7 +5089,7 @@ TEST(operation,
     bool found = false;
     for (const auto &op : list) {
         if (op->nameStr() ==
-            "Inverse of unnamed + "
+            "Inverse of unknown + "
             "Transformation from NAD83 to WGS84 + "
             "Inverse of NAD83(2011) to WGS 84 (1) + "
             "Conversion from NAVD88 height (ftUS) to NAVD88 height + "

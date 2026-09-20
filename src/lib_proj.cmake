@@ -392,6 +392,12 @@ add_library(proj
 )
 add_library(PROJ::proj ALIAS proj)
 
+target_compile_features(proj
+  PUBLIC
+    c_std_${CMAKE_C_STANDARD}
+    cxx_std_${CMAKE_CXX_STANDARD}
+)
+
 if(MSVC OR MINGW)
     target_compile_definitions(proj PRIVATE -DNOMINMAX)
 endif()

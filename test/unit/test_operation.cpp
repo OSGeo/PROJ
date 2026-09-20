@@ -2958,7 +2958,7 @@ TEST(operation, wkt1_import_mercator_variant_A) {
 
     auto conversion = crs->derivingConversion();
     auto convRef = Conversion::createMercatorVariantA(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(0),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), Angle(0),
         Angle(1), Scale(2), Length(3), Length(4));
 
     EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create().get()),
@@ -3190,7 +3190,7 @@ TEST(operation, webmerc_import_from_GDAL_wkt1) {
     auto convGot = crs->derivingConversion();
 
     EXPECT_EQ(convGot->exportToWKT(WKTFormatter::create().get()),
-              "CONVERSION[\"unnamed\",\n"
+              "CONVERSION[\"unknown\",\n"
               "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
               "        ID[\"EPSG\",1024]],\n"
               "    PARAMETER[\"Latitude of natural origin\",0,\n"
@@ -3272,7 +3272,7 @@ TEST(operation, webmerc_import_from_GDAL_wkt1_EPSG_3785_deprecated) {
     auto convGot = crs->derivingConversion();
 
     EXPECT_EQ(convGot->exportToWKT(WKTFormatter::create().get()),
-              "CONVERSION[\"unnamed\",\n"
+              "CONVERSION[\"unknown\",\n"
               "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
               "        ID[\"EPSG\",1024]],\n"
               "    PARAMETER[\"Latitude of natural origin\",0,\n"
@@ -3386,7 +3386,7 @@ TEST(operation, webmerc_import_from_broken_esri_WGS_84_Pseudo_Mercator) {
     auto convGot = crs->derivingConversion();
 
     EXPECT_EQ(convGot->exportToWKT(WKTFormatter::create().get()),
-              "CONVERSION[\"unnamed\",\n"
+              "CONVERSION[\"unknown\",\n"
               "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
               "        ID[\"EPSG\",1024]],\n"
               "    PARAMETER[\"Latitude of natural origin\",0,\n"
@@ -3822,7 +3822,7 @@ TEST(operation, wkt1_import_polar_stereographic_variantA) {
 
     auto conversion = crs->derivingConversion();
     auto convRef = Conversion::createPolarStereographicVariantA(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(-90),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), Angle(-90),
         Angle(2), Scale(3), Length(4), Length(5));
 
     EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create().get()),
@@ -3851,7 +3851,7 @@ TEST(operation, wkt1_import_polar_stereographic_variantB) {
 
     auto conversion = crs->derivingConversion();
     auto convRef = Conversion::createPolarStereographicVariantB(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(-70),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), Angle(-70),
         Angle(2), Length(4), Length(5));
 
     EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create().get()),

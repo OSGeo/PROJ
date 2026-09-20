@@ -193,6 +193,7 @@ copenhagen
 Corrego
 Corriente
 corrigendum
+CPack
 cpp
 cppcheck
 crast
@@ -592,6 +593,7 @@ Lidberg
 likeno
 linters
 lisbon
+localtime
 lon
 longlat
 lonlat

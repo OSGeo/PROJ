@@ -2738,6 +2738,14 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
         direction = &AxisDirection::UNSPECIFIED;
     }
 
+    // Set common axis abbreviations for WKT1
+    if (abbreviation.empty()) {
+        if (axisName == AxisName::Easting)
+            abbreviation = AxisAbbreviation::E;
+        else if (axisName == AxisName::Northing)
+            abbreviation = AxisAbbreviation::N;
+    }
+
     if (!direction) {
         throw ParsingException(
             concat("unhandled axis direction: ", children[1]->GP()->value()));
@@ -4135,8 +4143,8 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     return Conversion::create(
                PropertyMap().set(IdentifiedObject::NAME_KEY,
                                  esriProjectionName == "Gauss_Kruger"
-                                     ? "unnnamed (Gauss Kruger)"
-                                     : "unnamed"),
+                                     ? "unknown (Gauss Kruger)"
+                                     : "unknown"),
                propertiesMethod, parameters, values)
         ->identify();
 }
@@ -4273,7 +4281,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
         if (latitudeOfOrigin.unit() != UnitOfMeasure::NONE &&
             scaleFactor.getSIValue() == 1.0) {
             return Conversion::createPolarStereographicVariantB(
-                PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
                 Angle(latitudeOfOrigin.value(), latitudeOfOrigin.unit()),
                 Angle(centralMeridian.value(), centralMeridian.unit()),
                 Length(falseEasting.value(), falseEasting.unit()),
@@ -4285,7 +4293,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                           UnitOfMeasure::DEGREE)) -
                       90.0) < 1e-10) {
             return Conversion::createPolarStereographicVariantA(
-                PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
                 Angle(latitudeOfOrigin.value(), latitudeOfOrigin.unit()),
                 Angle(centralMeridian.value(), centralMeridian.unit()),
                 Scale(scaleFactor.value(), scaleFactor.unit()),
@@ -4543,7 +4551,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
     }
 
     return Conversion::create(
-               PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+               PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
                propertiesMethod, parameters, values)
         ->identify();
 }
@@ -4553,7 +4561,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
 static ProjectedCRSNNPtr createPseudoMercator(const PropertyMap &props,
                                               const cs::CartesianCSNNPtr &cs) {
     auto conversion = Conversion::createPopularVisualisationPseudoMercator(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(0),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), Angle(0),
         Angle(0), Length(0), Length(0));
     return ProjectedCRS::create(props, GeographicCRS::EPSG_4326, conversion,
                                 cs);
@@ -7630,7 +7638,7 @@ static CRSNNPtr importFromWMSAUTO(const std::string &text) {
         };
 
         return crs::ProjectedCRS::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
             crs::GeographicCRS::EPSG_4326, getConversion(),
             cs::CartesianCS::createEastingNorthing(getUnits()));
 
@@ -12367,7 +12375,7 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
                 if (geogCRS) {
                     return DerivedGeographicCRS::create(
                         PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                          "unnamed"),
+                                          "unknown"),
                         NN_NO_CHECK(geogCRS), NN_NO_CHECK(conv),
                         buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap,
                                            false));

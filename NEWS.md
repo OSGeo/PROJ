@@ -1,5 +1,65 @@
 # PROJ Release Notes
 
+## 9.9.0
+
+### Updates
+
+#### Operations
+
+* `tinshift`: support TIN GeoPackage files (#4603)
+
+* Optimize `+step +proj=helmert +inv +x=X +y=Y +z=Z +step +proj=helmert +inv +x=-X +y=-Y +z=-Z` as `+proj=noop` (#4775)
+
+* Optimization: replace iterative Aitoff inverse with closed-form inverse (#4796)
+
+* Adds implementation of Transverse Mercator Zoned Grid System (supporting EPSG:32600 and EPSG:32700) (#4805)
+
+* Add seismic bin grid operation methods (EPSG:9666 and EPSG:1049) (#4807)
+
+* IVEA: DSEA projection onto icosahedron net (#4817)
+
+#### API
+
+* Add `proj_create_linear_3D_affine_parametric_conversion()` (#4682)
+
+* Optimize `fwd_prepare()` (#4712)
+
+* Add support for `DerivedProjectedCRS` registration (#4727)
+
+* C++ API: CartesianCS::create(): by default check that all axis have the same unit (#4728)
+
+* `createOperations()`: tune `geod_crs_of_datum_ensemble` <--> `geod_crs_of_another_datum` (#4773)
+
+* add `proj_crs_is_dynamic()`, and `cs2cs`: warn when source/destination CRS is dynamic, but no epoch is provided (#4792)
+
+* `createOperations()`: add heuristics to make BD72 + Ostend height to Amersfoort + NAP height lead to optimal result again (#4821)
+
+* Make sure that WKT2 export of CRS imported from PROJ.4 strings or WKT1 is identical (#4844)
+
+#### CMake
+
+* Only add CPack related options when PROJ is the top level project. (#4722)
+
+* Increase CMake minimum version from 3.16 to 3.22.1 (#4824)
+
+* Replace PROJ_DATA_PATH with ${CMAKE_INSTALL_DATADIR}/proj (#4843)
+
+* Define `target_compile_features` with C/C++ standards (#4847)
+
+#### Database
+
+* Database: update to EPSG v13.102 (#4829)
+
+
+### Bug Fixes
+
+* Refactor time parsing with thread-safe localtime and leap year fix (#4692)
+
+* Make sure `projinfo --crs-extent-use none` works as expected (#4699)
+
+* Fix SQLite3 version check so it is done by `find_package` (#4753)
+
+
 ## 9.8.1
 
 ### Warning
