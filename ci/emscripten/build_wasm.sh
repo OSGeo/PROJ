@@ -36,6 +36,20 @@ mkdir -p ${TEMP_BUILD_DIR}
 # and some other.
 EM_PTHREADS_FLAGS="-pthread -matomics -mbulk-memory -fexceptions"
 
+cmake --version
+
+# cmake-diagnostics added with CMake 4.4
+# https://cmake.org/cmake/help/v4.4/manual/cmake-diagnostics.7.html
+CMAKE_MAJOR_MINOR=$(cmake --version | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+cmp_44=$(printf "4.4\n${CMAKE_MAJOR_MINOR}\n")
+sorted_44=$(echo "$cmp_44" | sort -V)
+if [ "$cmp_44" = "$sorted_44" ]; then  # CMake 4.4 or later
+    cmake_diagnostics=author
+else  # Before CMake 4.4
+    cmake_diagnostics=dev
+fi
+CMAKE_OPTIONS="-Werror=${cmake_diagnostics} --log-level=VERBOSE"
+
 # --- Utility Functions ---
 
 function log_step {
@@ -44,19 +58,25 @@ function log_step {
     echo ""
 }
 
-function configure_cmake {
-    # Use emcmake wrapper to correctly configure the toolchain
+function configure_cmake_c {
+    # Use emcmake wrapper to correctly configure the toolchain for C
     emcmake cmake "$@" \
+        ${CMAKE_OPTIONS} \
         -G Ninja \
         -D CMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
         -D CMAKE_BUILD_TYPE=Release \
         -D BUILD_SHARED_LIBS=OFF \
         -D CMAKE_C_FLAGS="${EM_PTHREADS_FLAGS}" \
-        -D CMAKE_CXX_FLAGS="${EM_PTHREADS_FLAGS}" \
         -D CMAKE_FIND_ROOT_PATH="${INSTALL_DIR}" \
         -D CMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
         -D CMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
         -D CMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
+}
+
+function configure_cmake_c_cxx {
+    # Use emcmake wrapper to correctly configure the toolchain for C and C++
+    configure_cmake_c "$@" \
+        -D CMAKE_CXX_FLAGS="${EM_PTHREADS_FLAGS}"
 }
 
 function build_and_install {
@@ -112,7 +132,7 @@ else
     mkdir -p build_wasm
     cd build_wasm
 
-    configure_cmake .. -DZLIB_BUILD_EXAMPLES=OFF
+    configure_cmake_c .. -DZLIB_BUILD_EXAMPLES=OFF
     build_and_install
 
     # Handle case where Zlib installs as libzlibstatic.a instead of libz.a
@@ -145,7 +165,7 @@ else
 
     # Configure minimal LibTIFF: No JPEG, No LZMA, No WebP, No ZSTD.
     # Only Zlib support enabled.
-    configure_cmake .. \
+    configure_cmake_c_cxx .. \
         -D tiff-tools=OFF \
         -D tiff-tests=OFF \
         -D tiff-contrib=OFF \
@@ -231,7 +251,7 @@ else
     cd ${PROJ_BUILD_WASM_DIR}
 
     # Configure PROJ
-    configure_cmake ${PROJ_SRC_DIR} \
+    configure_cmake_c_cxx ${PROJ_SRC_DIR} \
         -D BUILD_TESTING=OFF \
         -D BUILD_APPS=OFF \
         -D ENABLE_TIFF=ON \

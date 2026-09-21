@@ -1,9 +1,13 @@
 #!/bin/sh
 set -e
 
-mkdir build
-cd build
+cmake \
+    -G Ninja \
+    -D CMAKE_BUILD_TYPE=Release \
+    -D BUILD_TESTING=OFF \
+    -D CMAKE_INSTALL_PREFIX=$HOME/.local \
+    -S . -B build
 
-cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
+cmake --build build
 
-ninja install
+cmake --install build

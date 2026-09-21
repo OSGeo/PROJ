@@ -19,13 +19,24 @@ case $3 in
   exit 1 ;;
 esac
 
+# CMake command options options differ since CMake 4.4
+CMAKE_MAJOR_MINOR=$(cmake --version | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+cmp_44=$(printf "4.4\n${CMAKE_MAJOR_MINOR}\n")
+sorted_44=$(echo "$cmp_44" | sort -V)
+if [ "$cmp_44" = "$sorted_44" ]; then  # CMake 4.4 or later
+    CMAKE_OPTIONS="-Werror=author -Wno-error=deprecated --log-level=VERBOSE"
+else  # Before CMake 4.4 - no way to supress "deprecated", so just warn
+    CMAKE_OPTIONS="-Wdev --log-level=VERBOSE"
+fi
+
+
 echo "Running post-install tests with CMake (${BUILD_MODE}, ${TESTED_CONFIGS})"
 
 
 cmake_make_ctest(){
   rm -rf build
 
-  cmake \
+  cmake ${CMAKE_OPTIONS} \
     -D CMAKE_PREFIX_PATH=${prefix} \
     -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
     -D USE_PROJ_NAME=$1 \

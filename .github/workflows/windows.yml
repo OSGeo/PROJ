@@ -32,6 +32,7 @@ jobs:
         BUILD_SHARED_LIBS: ${{ matrix.BUILD_SHARED_LIBS }}
         BUILD_TYPE: ${{ matrix.BUILD_TYPE }}
         CMAKE_GENERATOR: Ninja
+        CMAKE_OPTIONS: "-Werror=dev --log-level=VERBOSE"
 
     steps:
 
@@ -69,13 +70,11 @@ jobs:
             mkdir %PROJ_DB_CACHE_DIR%
             set PATH=%VCPKG_INSTALLED%\bin;%VCPKG_INSTALLED%\tools;%PATH%
             set PROJ_BUILD=%GITHUB_WORKSPACE%\build
-            mkdir %PROJ_BUILD%
-            cd %PROJ_BUILD%
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
             :: Not directly linked to BUILD_SHARED_LIBS, but a way to test different C++ standard versions
             if "${{ env.BUILD_SHARED_LIBS }}"=="ON" (set CMAKE_CXX_STANDARD="-DCMAKE_CXX_STANDARD=20")
             if "${{ env.BUILD_TYPE }}"=="Release" (set CMAKE_UNITY_BUILD_OPT="-DCMAKE_UNITY_BUILD=ON")
-            cmake ^
+            cmake ${{ env.CMAKE_OPTIONS }} ^
               -D CMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" ^
               -D BUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" ^
               -D EXPORT_PDB="ON" ^
@@ -84,9 +83,10 @@ jobs:
               -D CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
               -D CMAKE_INSTALL_PREFIX="%PROJ_DIR%" ^
               -D PROJ_DB_CACHE_DIR=%PROJ_DB_CACHE_DIR% ^
-              %CMAKE_UNITY_BUILD_OPT% ..
-            ninja -v
-            ninja install
+              %CMAKE_UNITY_BUILD_OPT% ^
+              -S . -B %PROJ_BUILD%
+            cmake --build %PROJ_BUILD%
+            cmake --install %PROJ_BUILD%
             dir %PROJ_DIR%\bin
 
       - name: Run tests
@@ -134,6 +134,8 @@ jobs:
         BUILD_SHARED_LIBS: ${{ matrix.BUILD_SHARED_LIBS }}
         BUILD_TYPE: Release
         CMAKE_GENERATOR: "MSYS Makefiles"
+        CMAKE_OPTIONS: "-Werror=dev --log-level=VERBOSE"
+        CMAKE_BUILD_PARALLEL_LEVEL: 2
 
     steps:
 
@@ -168,10 +170,7 @@ jobs:
             ccache -s
             PROJ_BUILD=${GITHUB_WORKSPACE}/build
             PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
-            mkdir ${PROJ_BUILD}
-            cd ${PROJ_BUILD}
-
-            cmake \
+            cmake ${{ env.CMAKE_OPTIONS }} \
               -D CMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
               -D BUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} \
               -D CMAKE_INSTALL_PREFIX="${PROJ_DIR}" \
@@ -183,15 +182,15 @@ jobs:
               -D CMAKE_CXX_STANDARD=20 \
               -D EMBED_RESOURCE_FILES=ON \
               -D USE_ONLY_EMBEDDED_RESOURCE_FILES=ON \
-              ..
-            make -j 2
+              -S . -B ${PROJ_BUILD}
+            cmake --build ${PROJ_BUILD}
 
       - name: Seond build with EMBED_RESOURCE_FILES=OFF and USE_ONLY_EMBEDDED_RESOURCE_FILES=OFF
         run: |
             PROJ_BUILD=${GITHUB_WORKSPACE}/build
             PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
             cd ${PROJ_BUILD}
-            cmake \
+            cmake ${{ env.CMAKE_OPTIONS }} \
               -D CMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
               -D BUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} \
               -D CMAKE_INSTALL_PREFIX="${PROJ_DIR}" \
@@ -204,8 +203,8 @@ jobs:
               -D EMBED_RESOURCE_FILES=OFF \
               -D USE_ONLY_EMBEDDED_RESOURCE_FILES=OFF \
               ..
-            make -j 2
-            make install
+            cmake --build ${PROJ_BUILD}
+            cmake --install ${PROJ_BUILD}
             ls ${PROJ_DIR}/bin
             ccache -s
 

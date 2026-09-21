@@ -13,8 +13,8 @@ if test "x${NPROC}" = "x"; then
         NPROC=2;
     fi
 fi
-echo "NPROC=${NPROC}"
-export MAKEFLAGS="-j ${NPROC}"
+export CMAKE_BUILD_PARALLEL_LEVEL=${NPROC}
+export CTEST_PARALLEL_LEVEL=${NPROC}
 
 # Use ccache if it's available
 if command -v ccache &> /dev/null
@@ -34,31 +34,43 @@ fi
 
 cmake --version
 
-# For some odd reason the tar xzvf $TAR_FILENAME doesn't work on Travis-CI ...
-if test "$TRAVIS" = ""; then
-    echo "Make dist tarball, and check consistency"
-    mkdir build_dist
-    cd build_dist
-    cmake -D BUILD_TESTING=OFF ..
-    make dist
-
-    TAR_FILENAME=$(ls *.tar.gz)
-    TAR_DIRECTORY=$(basename $TAR_FILENAME .tar.gz)
-    mkdir ../build_from_dist
-    cd ../build_from_dist
-    tar xvzf ../build_dist/$TAR_FILENAME
-
-    # continue build from dist tarball
-    cd $TAR_DIRECTORY
+# cmake-diagnostics added with CMake 4.4
+# https://cmake.org/cmake/help/v4.4/manual/cmake-diagnostics.7.html
+CMAKE_MAJOR_MINOR=$(cmake --version | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+cmp_44=$(printf "4.4\n${CMAKE_MAJOR_MINOR}\n")
+sorted_44=$(echo "$cmp_44" | sort -V)
+if [ "$cmp_44" = "$sorted_44" ]; then  # CMake 4.4 or later
+    cmake_diagnostics=author
+else  # Before CMake 4.4
+    cmake_diagnostics=dev
 fi
+CMAKE_OPTIONS="-Werror=${cmake_diagnostics} --log-level=VERBOSE"
+
+if test "$TRAVIS" != ""; then
+    # For some odd reason the tar xzvf $TAR_FILENAME doesn't work on Travis-CI ...
+    echo "Travis-CI install not fully supported"
+    exit 1
+fi
+
+echo "Make dist tarball, and check consistency"
+cmake ${CMAKE_OPTIONS} -D BUILD_TESTING=OFF -S . -B build_dist
+cmake --build build_dist --target dist
+
+cd build_dist
+TAR_FILENAME=$(ls *.tar.gz)
+TAR_DIRECTORY=$(basename $TAR_FILENAME .tar.gz)
+mkdir ../build_from_dist
+cd ../build_from_dist
+tar xvzf ../build_dist/$TAR_FILENAME
+
+# continue build from dist tarball
+cd $TAR_DIRECTORY
 
 # There's a nasty #define CS in a Solaris system header. Avoid being caught about that again
 CXXFLAGS="-DCS=do_not_use_CS_for_solaris_compat $CXXFLAGS"
 
 echo "Build shared ${CMAKE_BUILD_TYPE} configuration from generated tarball"
-mkdir shared_build
-cd shared_build
-cmake \
+cmake ${CMAKE_OPTIONS} \
   -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D CMAKE_UNITY_BUILD=ON \
   -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
@@ -68,12 +80,16 @@ cmake \
   -D BUILD_SHARED_LIBS=ON \
   -D BUILD_EXAMPLES=ON \
   -D CMAKE_INSTALL_PREFIX=/tmp/proj_shared_install_from_dist \
-  ..
-make
+  -S . -B shared_build
+
+cmake --build shared_build
+
+cd shared_build
 
 # Test adding non-official file to DB
-cp data/proj.db /tmp
-cat ../data/sql/transformations_czechia_extra.sql | sqlite3 /tmp/proj.db
+# TODO: update with new example? (transformations_czechia_extra.sql is now included)
+# cp data/proj.db /tmp
+# cat ../data/sql/transformations_czechia.sql | sqlite3 /tmp/proj.db
 
 if [ "$(uname)" == "Linux" -a -f lib/libproj.so ]; then
 if objdump -TC "lib/libproj.so" | grep "elf64-x86-64">/dev/null; then
@@ -85,7 +101,7 @@ fi
 fi
 
 ctest --output-on-failure
-make install
+cmake --install .
 # find /tmp/proj_shared_install_from_dist
 $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_shared_install_from_dist shared
 if [ "$BUILD_NAME" != "osx" ]; then
@@ -96,21 +112,18 @@ else
 fi
 
 # Test install and uninstall targets with DESTDIR
-make install DESTDIR=/tmp/destdir
-make uninstall DESTDIR=/tmp/destdir
+cmake --build . --target install DESTDIR=/tmp/destdir
+cmake --build . --target uninstall DESTDIR=/tmp/destdir
 if [ ! -z "$(ls -A /tmp/destdir/tmp/proj_shared_install_from_dist)" ]; then
     echo "Directory /tmp/destdir/tmp/proj_shared_install_from_dist should be empty, but its content is:"
     find /tmp/destdir/tmp/proj_shared_install_from_dist
     exit 1
 fi
+cd ..
 
 echo "Build static ${CMAKE_BUILD_TYPE} configuration from generated tarball"
-cd ..
-mkdir static_build
-cd static_build
-# Also test setting CMAKE_INSTALL_INCLUDEDIR/CMAKE_INSTALL_LIBDIR/CMAKE_INSTALL_BINDIR to absolute directories
-# and INSTALL_LEGACY_CMAKE_FILES=OFF (both are independent from static build particularities)
-cmake \
+# Also test setting INSTALL_LEGACY_CMAKE_FILES=OFF (independent from static build particularities)
+cmake ${CMAKE_OPTIONS} \
   -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
   -D USE_CCACHE=${USE_CCACHE} \
@@ -118,14 +131,16 @@ cmake \
   -D BUILD_SHARED_LIBS=OFF \
   -D INSTALL_LEGACY_CMAKE_FILES=OFF \
   -D CMAKE_INSTALL_PREFIX=/tmp/proj_static_install_from_dist \
-  -D CMAKE_INSTALL_INCLUDEDIR=/tmp/proj_static_install_from_dist/include \
-  -D CMAKE_INSTALL_LIBDIR=/tmp/proj_static_install_from_dist/lib \
-  -D CMAKE_INSTALL_BINDIR=/tmp/proj_static_install_from_dist/bin \
-  ..
-make
+  -S . -B static_build
+
+cmake --build static_build
+
+cd static_build
 
 ctest --output-on-failure
-make install
+
+cmake --install .
+
 # find /tmp/proj_static_install_from_dist
 $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_static_install_from_dist static PROJ_CONFIG
 if [ "$BUILD_NAME" != "osx" ]; then
@@ -137,8 +152,9 @@ fi
 
 # Re-run by unsetting CMAKE_INSTALL_INCLUDEDIR/CMAKE_INSTALL_LIBDIR/CMAKE_INSTALL_BINDIR
 # so that later test which involve renaming/moving the installation prefix work.
-cmake -UCMAKE_INSTALL_INCLUDEDIR -UCMAKE_INSTALL_LIBDIR -UCMAKE_INSTALL_BINDIR ..
-make install
+echo "Build static again, unsetting a few options"
+cmake ${CMAKE_OPTIONS} -U CMAKE_INSTALL_INCLUDEDIR -U CMAKE_INSTALL_LIBDIR -U CMAKE_INSTALL_BINDIR ..
+cmake --install .
 
 echo "Run PROJJSON tests only with shared configuration"
 
@@ -246,30 +262,30 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     echo '#include "proj.h"' > mytest.c
     echo 'int main() { proj_info(); return 0; }' >> mytest.c
 
-    echo 'cmake_minimum_required(VERSION 3.9)' > CMakeLists.txt
+    echo 'cmake_minimum_required(VERSION 3.22.1)' > CMakeLists.txt
     echo 'project(mytest)' >> CMakeLists.txt
     echo 'add_subdirectory(external/PROJ)' >> CMakeLists.txt
     echo 'add_executable(mytest mytest.c)' >> CMakeLists.txt
     echo 'target_include_directories(mytest PRIVATE $<TARGET_PROPERTY:PROJ::proj,INTERFACE_INCLUDE_DIRECTORIES>)' >> CMakeLists.txt
     echo 'target_link_libraries(mytest PRIVATE PROJ::proj)' >> CMakeLists.txt
 
-    mkdir build_cmake
-    cd build_cmake
-    cmake -D USE_CCACHE=${USE_CCACHE} -D PROJ_DB_CACHE_DIR=$HOME/.ccache ..
-    make
+    cmake ${CMAKE_OPTIONS} \
+        -D BUILD_TESTING=OFF \
+        -D USE_CCACHE=${USE_CCACHE} \
+        -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
+        -S . -B build_cmake
+
+    cmake --build build_cmake
 
     # return to root
-    cd ../..
-    if test "$TRAVIS" = ""; then
-        cd ../..
-    fi
+    cd ../../..
 
     echo "Build coverage as in-source build"
     # There's an issue with the clang on Travis + coverage + cpp code
     if [ "$BUILD_NAME" != "linux_clang" ]; then
         # build with grids and coverage
         if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-            LDFLAGS="$LDFLAGS -fprofile-arcs -ftest-coverage" cmake \
+            LDFLAGS="$LDFLAGS -fprofile-arcs -ftest-coverage" cmake ${CMAKE_OPTIONS} \
               -D CMAKE_BUILD_TYPE=Debug \
               -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
               -D USE_CCACHE=${USE_CCACHE} \
@@ -278,7 +294,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
               -D CMAKE_CXX_FLAGS="--coverage" \
               . ;
         else
-            LDFLAGS="$LDFLAGS -lgcov" cmake \
+            LDFLAGS="$LDFLAGS -lgcov" cmake ${CMAKE_OPTIONS} \
               -D CMAKE_BUILD_TYPE=Debug \
               -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
               -D USE_CCACHE=${USE_CCACHE} \
@@ -288,14 +304,14 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
               . ;
         fi
     else
-        cmake \
+        cmake ${CMAKE_OPTIONS} \
           -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
           -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
           -D USE_CCACHE=${USE_CCACHE} \
           -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
           . ;
     fi
-    make
+    cmake --build .
     ctest --output-on-failure
 fi
 

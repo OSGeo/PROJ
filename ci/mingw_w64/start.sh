@@ -55,10 +55,10 @@ export CC="$MINGW_ARCH-gcc"
 export CXX="$MINGW_ARCH-g++"
 export LD=$MINGW_ARCH-ld
 
-UNAME="$(uname)" || UNAME=""
-NPROC=$(nproc);
-echo "NPROC=${NPROC}"
+NPROC=$(nproc)
 export MAKEFLAGS="-j ${NPROC}"
+export CMAKE_BUILD_PARALLEL_LEVEL=${NPROC}
+export CTEST_PARALLEL_LEVEL=${NPROC}
 
 # prepare wine environment
 export WINE_PREFIX="$HOME/.wine"
@@ -94,11 +94,29 @@ tar xzf sqlite-autoconf-3330000.tar.gz
 CFLAGS="-DSQLITE_DQS=0" ./configure --host=$MINGW_ARCH --prefix=/usr/$MINGW_ARCH && make && sudo make install)
 ln -s /usr/$MINGW_ARCH/bin/libsqlite3-0.dll $WINE_SYSDIR
 
+cmake --version
+
+# cmake-diagnostics added with CMake 4.4
+# https://cmake.org/cmake/help/v4.4/manual/cmake-diagnostics.7.html
+CMAKE_MAJOR_MINOR=$(cmake --version | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+cmp_44=$(printf "4.4\n${CMAKE_MAJOR_MINOR}\n")
+sorted_44=$(echo "$cmp_44" | sort -V)
+if [ "$cmp_44" = "$sorted_44" ]; then  # CMake 4.4 or later
+    cmake_diagnostics=author
+else  # Before CMake 4.4
+    cmake_diagnostics=dev
+fi
+CMAKE_OPTIONS="-Werror=${cmake_diagnostics} --log-level=VERBOSE"
+
+# CMAKE_COMPILE_WARNING_AS_ERROR added with CMake 3.24 -- add "-Werror" for older versions
+cmp_324=$(printf "3.24\n${CMAKE_MAJOR_MINOR}\n")
+sorted_324=$(echo "$cmp_324" | sort -V)
+if [ "$cmp_324" != "$sorted_324" ]; then  # Before CMake 3.24
+    CMAKE_OPTIONS="${CMAKE_OPTIONS} -D CMAKE_C_FLAGS=\"-Werror\" -D CMAKE_CXX_FLAGS=\"-Werror\""
+fi
+
 # build proj
-rm -rf build
-mkdir build
-cd build
-cmake \
+cmake ${CMAKE_OPTIONS} \
     -G "Unix Makefiles" \
     -D CMAKE_SYSTEM_NAME=Windows \
     -D CMAKE_CROSSCOMPILING_EMULATOR=/usr/bin/wine64 \
@@ -112,14 +130,18 @@ cmake \
     -D BUILD_PROJSYNC=OFF \
     -D USE_CCACHE=ON \
     -D PROJ_DB_CACHE_DIR=$HOME/.ccache \
-    ..
-make
+    -S . -B build
+
+cmake --build build
+
+(cd build &&
 # Run a subset of tests that should pass
 ctest --output-on-failure -R "proj_test_cpp_api|geodesic-test|proj_errno_string_test|proj_angular_io_test|proj_context_test|pj_phi2_test|gie_self_tests|test_network|test_defmodel|test_tinshift|test_misc|test_fork"
 # TODO: fix failing tests with .gie files; see #2168 and run
 # PROJ_DATA=./data/for_tests wine64 ./bin/gie.exe ../test/gie/more_builtins.gie
+)
 
-make install
+cmake --install build
 
 ccache -s
 

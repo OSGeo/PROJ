@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22.1)
 project(C_APP LANGUAGES C)
 
 set(USE_PROJ_NAME "PROJ"
