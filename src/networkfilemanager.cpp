@@ -1351,6 +1351,12 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
     if (sizeBytes == 0)
         return 0;
 
+    if (m_pos >= m_props.size)
+        return 0;
+
+    sizeBytes = static_cast<size_t>(std::min(
+        static_cast<unsigned long long>(sizeBytes), m_props.size - m_pos));
+
     auto iterOffset = m_pos;
     while (sizeBytes) {
         const auto chunkIdxToDownload = iterOffset / DOWNLOAD_CHUNK_SIZE;
@@ -1428,6 +1434,20 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
                 return 0;
             }
 
+            const auto nExpectedMinRead = static_cast<size_t>(
+                std::min(static_cast<unsigned long long>(DOWNLOAD_CHUNK_SIZE),
+                         m_props.size - offsetToDownload));
+            if (nRead < nExpectedMinRead) {
+                pj_log(m_ctx, PJ_LOG_ERROR,
+                       "Short response reading %s at offset %llu: got %llu "
+                       "bytes, expected at least %llu bytes",
+                       m_url.c_str(), offsetToDownload,
+                       static_cast<unsigned long long>(nRead),
+                       static_cast<unsigned long long>(nExpectedMinRead));
+                proj_context_errno_set(m_ctx, PROJ_ERR_OTHER_NETWORK_ERROR);
+                return 0;
+            }
+
             if (!m_hasChanged) {
                 FileProperties props;
                 if (get_props_from_headers(m_ctx, m_handle, props)) {
@@ -1455,16 +1475,33 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
                                           std::move(chunk));
             }
         }
-        const size_t nToCopy = static_cast<size_t>(
-            std::min(static_cast<unsigned long long>(sizeBytes),
-                     region.size() - (iterOffset - offsetToDownload)));
-        memcpy(buffer, region.data() + iterOffset - offsetToDownload, nToCopy);
+        const auto offsetInRegion =
+            static_cast<size_t>(iterOffset - offsetToDownload);
+        if (offsetInRegion >= region.size()) {
+            pj_log(m_ctx, PJ_LOG_ERROR,
+                   "Short response reading %s at offset %llu: got %llu bytes, "
+                   "expected at least %llu bytes",
+                   m_url.c_str(), offsetToDownload,
+                   static_cast<unsigned long long>(region.size()),
+                   static_cast<unsigned long long>(offsetInRegion + 1));
+            proj_context_errno_set(m_ctx, PROJ_ERR_OTHER_NETWORK_ERROR);
+            return 0;
+        }
+        const size_t nToCopy =
+            std::min(sizeBytes, region.size() - offsetInRegion);
+        memcpy(buffer, region.data() + offsetInRegion, nToCopy);
         buffer = static_cast<char *>(buffer) + nToCopy;
         iterOffset += nToCopy;
         sizeBytes -= nToCopy;
         if (region.size() < static_cast<size_t>(DOWNLOAD_CHUNK_SIZE) &&
             sizeBytes != 0) {
-            break;
+            pj_log(m_ctx, PJ_LOG_ERROR,
+                   "Short response reading %s at offset %llu: got %llu bytes, "
+                   "expected more data",
+                   m_url.c_str(), offsetToDownload,
+                   static_cast<unsigned long long>(region.size()));
+            proj_context_errno_set(m_ctx, PROJ_ERR_OTHER_NETWORK_ERROR);
+            return 0;
         }
     }
 
