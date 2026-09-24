@@ -393,7 +393,7 @@ add_library(proj
 add_library(PROJ::proj ALIAS proj)
 
 target_compile_features(proj
-  PUBLIC
+  PRIVATE
     c_std_${CMAKE_C_STANDARD}
     cxx_std_${CMAKE_CXX_STANDARD}
 )
