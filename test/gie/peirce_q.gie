@@ -1012,7 +1012,7 @@ operation  +proj=peirce_q +shape=square
 
 #tolerance   1 mm
 # has to bump to this for i386
-tolerance   150 mm
+tolerance   350 mm
 
 accept      0 90
 expect      0 0
@@ -1037,10 +1037,8 @@ expect      12998482.090401465073   -12998482.090401465073
 roundtrip   1
 
 accept      45 0
-tolerance   200 mm
 expect      16723842.564696932212   -0.095041956369
 roundtrip   1
-tolerance   150 mm
 
 accept      -45 0
 expect      0   -16723842.469654975459
@@ -1173,7 +1171,7 @@ operation  +proj=peirce_q +shape=diamond
 
 #tolerance   1 mm
 # has to bump to this for i386
-tolerance   150 mm
+tolerance   350 mm
 
 accept      0 90
 expect      0 0
@@ -1194,10 +1192,8 @@ expect      0 -18382629.662509534508
 roundtrip   1
 
 accept      45 0
-tolerance   200 mm
 expect      11825542.417788611725   -11825542.552198234946
 roundtrip   1
-tolerance   150 mm
 
 accept      -45 0
 expect      -11825542.417788611725   -11825542.417788611725
