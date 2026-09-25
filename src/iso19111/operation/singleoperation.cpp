@@ -422,10 +422,20 @@ CoordinateOperation::normalizeForVisualization() const {
         throw util::UnsupportedOperationException(
             "Cannot retrieve source or target CRS");
     }
-    const bool swapSource =
-        l_sourceCRS->mustAxisOrderBeSwitchedForVisualization();
-    const bool swapTarget =
-        l_targetCRS->mustAxisOrderBeSwitchedForVisualization();
+    bool swapSource = l_sourceCRS->mustAxisOrderBeSwitchedForVisualization();
+    bool swapTarget = l_targetCRS->mustAxisOrderBeSwitchedForVisualization();
+
+    // A CRS without horizontal axes lets horizontal coordinates pass through
+    // in the axis order of the other end, so both ends must be swapped
+    // together to avoid leaving a residual axis swap in the pipeline.
+    const bool sourceHasNoHorizontalAxes = l_sourceCRS->hasNoHorizontalAxes();
+    const bool targetHasNoHorizontalAxes = l_targetCRS->hasNoHorizontalAxes();
+    if (targetHasNoHorizontalAxes && !sourceHasNoHorizontalAxes) {
+        swapTarget = swapSource;
+    } else if (sourceHasNoHorizontalAxes && !targetHasNoHorizontalAxes) {
+        swapSource = swapTarget;
+    }
+
     auto l_this = NN_NO_CHECK(std::dynamic_pointer_cast<CoordinateOperation>(
         shared_from_this().as_nullable()));
     if (!swapSource && !swapTarget) {
