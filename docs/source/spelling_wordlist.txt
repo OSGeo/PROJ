@@ -425,6 +425,8 @@ gridcatalog
 gridded
 Gridded
 Gridname
+gridNorthPoleLatitude
+gridNorthPoleLongitude
 gridshift
 gridshifting
 gridshifts
@@ -701,6 +703,7 @@ normalizing
 northamerica
 northing
 northings
+northPoleGridLongitude
 Norting
 norwegian
 NRCAN
@@ -838,6 +841,7 @@ Rittri
 Rivière
 robustify
 rome
+rotationAngle
 rouault
 roundtrip
 Roundtrip
