@@ -12,6 +12,12 @@ cd "$WORK_DIR"
 if test -f "$WORK_DIR/ccache.tar.gz"; then
     echo "Restoring ccache..."
     (cd $HOME && tar xzf "$WORK_DIR/ccache.tar.gz")
+    # temporary fix to move previous .cache to .ccache
+    if [ -d "$HOME/.cache" ] && [ ! -d "$HOME/.ccache" ]; then
+        mv "$HOME/.cache" "$HOME/.ccache"
+    fi
+else
+    mkdir -p $HOME/.ccache
 fi
 
 export CCACHE_CPP2=yes
@@ -59,4 +65,4 @@ ccache -s
 
 echo "Saving ccache..."
 rm -f "$WORK_DIR/ccache.tar.gz"
-(cd $HOME && tar czf "$WORK_DIR/ccache.tar.gz" .cache)
+(cd $HOME && tar czf "$WORK_DIR/ccache.tar.gz" .ccache)
