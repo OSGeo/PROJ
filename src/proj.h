@@ -1606,13 +1606,13 @@ typedef struct {
 
 /** Type of Cartesian 2D coordinate system. */
 typedef enum {
-    /** Easting-Norting */
+    /** Easting-Northing */
     PJ_CART2D_EASTING_NORTHING,
     /** Northing-Easting */
     PJ_CART2D_NORTHING_EASTING,
-    /** North Pole Easting/SOUTH-Norting/SOUTH */
+    /** North Pole Easting/SOUTH-Northing/SOUTH */
     PJ_CART2D_NORTH_POLE_EASTING_SOUTH_NORTHING_SOUTH,
-    /** South Pole Easting/NORTH-Norting/NORTH */
+    /** South Pole Easting/NORTH-Northing/NORTH */
     PJ_CART2D_SOUTH_POLE_EASTING_NORTH_NORTHING_NORTH,
     /** Westing-southing */
     PJ_CART2D_WESTING_SOUTHING,
