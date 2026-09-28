@@ -80,7 +80,7 @@ proj_add_gie_test("spilhaus" "gie/spilhaus.gie")
 proj_add_gie_test("epsg_no_grid" "gie/epsg_no_grid.gie")
 
 if(CURL_ENABLED AND RUN_NETWORK_DEPENDENT_TESTS)
-proj_add_gie_network_dependent_test("tinshift_gpkg_network" "gie/tinshift_gpkg_network.gie")
+proj_add_gie_network_dependent_test("tinshift_gpkg_network" "gie/tinshift_gpkg_network.gie" 2.0)
 endif()
 
 if(TIFF_ENABLED)
@@ -89,12 +89,12 @@ proj_add_gie_test("geotiff_grids" "gie/geotiff_grids.gie")
 proj_add_gie_test("defmodel" "gie/defmodel.gie")
 proj_add_gie_test("gridshift" "gie/gridshift.gie")
 # Does not really require the network, but test running with PROJ_NETWORK=ON
-proj_add_gie_network_dependent_test("gridshift_network_enabled" "gie/gridshift.gie")
+proj_add_gie_network_dependent_test("gridshift_network_enabled" "gie/gridshift.gie" 2.0)
 endif()
 
 if(TIFF_ENABLED AND CURL_ENABLED AND RUN_NETWORK_DEPENDENT_TESTS)
-proj_add_gie_network_dependent_test("nkg" "gie/nkg.gie")
-proj_add_gie_network_dependent_test("epsg_grid" "gie/epsg_grid.gie")
+proj_add_gie_network_dependent_test("nkg" "gie/nkg.gie" 3.0)
+proj_add_gie_network_dependent_test("epsg_grid" "gie/epsg_grid.gie" 4.0)
 endif()
 
 # GIGS tests. Uncommented tests are expected to fail due to issues with
