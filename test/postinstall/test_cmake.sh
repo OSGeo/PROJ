@@ -44,7 +44,7 @@ cmake_make_ctest(){
 
   cmake --build build --verbose
 
-  (cd build && ctest --output-on-failure)
+  ctest --test-dir build --output-on-failure
 
   rm -rf build
 }

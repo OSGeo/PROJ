@@ -172,8 +172,11 @@ target_link_libraries(proj_test_cpp_api
   PRIVATE SQLite3::SQLite3
   PRIVATE ${PROJ_LIBRARIES})
 add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)
-set_property(TEST proj_test_cpp_api
-  PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+set_tests_properties(proj_test_cpp_api
+  PROPERTIES
+    ENVIRONMENT "${PROJ_TEST_ENVIRONMENT}"
+    COST 95.0
+)
 if(TIFF_ENABLED)
   target_compile_definitions(proj_test_cpp_api PRIVATE -DTIFF_ENABLED)
 endif()
@@ -193,8 +196,11 @@ target_link_libraries(gie_self_tests
   PRIVATE ${PROJ_LIBRARIES})
   
 add_test(NAME gie_self_tests COMMAND gie_self_tests)
-set_property(TEST gie_self_tests
-  PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+set_tests_properties(gie_self_tests
+  PROPERTIES
+    ENVIRONMENT "${PROJ_TEST_ENVIRONMENT}"
+    COST 3.0
+)
 if(TIFF_ENABLED)
   target_compile_definitions(gie_self_tests PRIVATE -DTIFF_ENABLED)
 endif()
@@ -211,9 +217,12 @@ target_link_libraries(test_network
   PRIVATE SQLite3::SQLite3
   PRIVATE ${PROJ_LIBRARIES})
 if(TIFF_ENABLED)
-add_test(NAME test_network COMMAND test_network)
-set_property(TEST test_network
-  PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+  add_test(NAME test_network COMMAND test_network)
+  set_tests_properties(test_network
+    PROPERTIES
+      ENVIRONMENT "${PROJ_TEST_ENVIRONMENT}"
+      COST 10.0
+  )
 endif()
 
 add_executable(test_defmodel
@@ -278,14 +287,17 @@ add_test(NAME test_polyhedral COMMAND test_polyhedral)
 set_property(TEST test_polyhedral
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
 
-if (Threads_FOUND AND CMAKE_USE_PTHREADS_INIT AND NOT APPLE)
-add_definitions(-DPROJ_HAS_PTHREADS)
-add_executable(test_fork
-  test_fork.c)
-target_link_libraries(test_fork
-  PRIVATE ${PROJ_LIBRARIES}
-  PRIVATE ${CMAKE_THREAD_LIBS_INIT})
-add_test(NAME test_fork COMMAND test_fork)
-set_property(TEST test_fork
-  PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT AND NOT APPLE)
+  add_definitions(-DPROJ_HAS_PTHREADS)
+  add_executable(test_fork
+    test_fork.c)
+  target_link_libraries(test_fork
+    PRIVATE ${PROJ_LIBRARIES}
+    PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME test_fork COMMAND test_fork)
+  set_tests_properties(test_fork
+    PROPERTIES
+      ENVIRONMENT "${PROJ_TEST_ENVIRONMENT}"
+      COST 12.0
+  )
 endif()

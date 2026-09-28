@@ -73,8 +73,7 @@ cmake ^
   -S . -B build || Exit /B 1
 
 cmake --build build --config Release || Exit /B 1
-Cd build
-ctest --output-on-failure -C Release || Exit /B 1
 
-Cd ..
+ctest --test-dir build --output-on-failure -C Release || Exit /B 1
+
 Rd /s /q build

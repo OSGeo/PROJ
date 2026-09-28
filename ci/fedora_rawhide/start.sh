@@ -49,7 +49,7 @@ CC=clang CXX=clang++ cmake ${CMAKE_OPTIONS} \
 
 cmake --build build
 
-(cd build && ctest --output-on-failure)
+ctest --test-dir build --output-on-failure
 rm -rf build
 
 # Try EMBED_RESOURCE_DIRECTORY option

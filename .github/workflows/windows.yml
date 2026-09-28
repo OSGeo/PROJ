@@ -98,8 +98,7 @@ jobs:
             export PATH=${VCPKG_INSTALLED}/bin:${PATH}
             export PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
             export PROJ_BUILD=${GITHUB_WORKSPACE}/build
-            cd ${PROJ_BUILD}
-            ctest --output-on-failure -C "${{ env.BUILD_TYPE }}"
+            ctest --test-dir ${PROJ_BUILD} --output-on-failure -C "${{ env.BUILD_TYPE }}"
 
       - name: Post install checks
         shell: cmd
