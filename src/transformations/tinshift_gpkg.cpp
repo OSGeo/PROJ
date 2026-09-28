@@ -216,7 +216,12 @@ void TINShiftGeopackageFile::getMetadata() {
 
     json j;
     try {
-        j = json::parse(metadata);
+        j = json::parse(metadata, [](int depth, json::parse_event_t, json &) {
+            if (depth >= 128)
+                throw TINShiftGeopackageException(
+                    "Too deep nesting in JSON metadata content");
+            return true;
+        });
     } catch (const std::exception &e) {
         throw TINShiftGeopackageException(
             std::string("Cannot parse JSON metadata: ").append(e.what()));
