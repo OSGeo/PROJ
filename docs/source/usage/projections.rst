@@ -44,7 +44,7 @@ Units
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Horizontal coordinate system units can be specified using the ``+units`` keyword
-with a symbolic me for a unit (i.e. ``us-ft``).
+with a symbolic name for a unit (i.e. ``us-ft``).
 Alternatively the translation to meters can be
 specified with the ``+to_meter`` keyword (i.e. 0.304800609601219 for US feet).  The
 ``-lu`` argument to :program:`cs2cs` or :program:`proj` can be used to list
