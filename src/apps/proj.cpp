@@ -1,4 +1,5 @@
 /* <<<< Cartographic projection filter program >>>> */
+#define FROM_PROJ_CPP
 #include "proj.h"
 #include "emess.h"
 #include "proj_experimental.h"
@@ -11,6 +12,7 @@
 #include <string.h>
 
 #include <proj/crs.hpp>
+#include <proj/internal/internal.hpp>
 
 #include <string>
 #include <vector>
@@ -607,25 +609,13 @@ int main(int argc, char **argv) {
                                          NS_PROJ::cs::AxisDirection::NORTH ||
                                      dir0 ==
                                          NS_PROJ::cs::AxisDirection::SOUTH)) {
-                                    const auto startsWith =
-                                        [](const std::string &name,
-                                           const char *prefix) {
-                                            for (size_t i = 0; prefix[i]; ++i) {
-                                                if (i >= name.size() ||
-                                                    tolower(static_cast<
-                                                            unsigned char>(
-                                                        name[i])) !=
-                                                        prefix[i]) {
-                                                    return false;
-                                                }
-                                            }
-                                            return true;
-                                        };
                                     swapAxisCrs =
-                                        startsWith(axisList[0]->nameStr(),
-                                                   "northing") &&
-                                        startsWith(axisList[1]->nameStr(),
-                                                   "easting");
+                                        NS_PROJ::internal::ci_starts_with(
+                                            axisList[0]->nameStr().c_str(),
+                                            "northing") &&
+                                        NS_PROJ::internal::ci_starts_with(
+                                            axisList[1]->nameStr().c_str(),
+                                            "easting");
                                 } else {
                                     swapAxisCrs =
                                         dir0 ==
