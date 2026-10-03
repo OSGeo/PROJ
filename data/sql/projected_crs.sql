@@ -9337,6 +9337,10 @@ INSERT INTO "projected_crs" VALUES('EPSG','25932','Malongo 1987 / UTM zone 32S',
 INSERT INTO "usage" VALUES('EPSG','6530','projected_crs','EPSG','25932','EPSG','3180','EPSG','1136');
 INSERT INTO "projected_crs" VALUES('EPSG','26001','WGS 84 / LAEA Mozambique',NULL,'EPSG','4400','EPSG','4326','EPSG','26000',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','27395','projected_crs','EPSG','26001','EPSG','1167','EPSG','1162');
+INSERT INTO "projected_crs" VALUES('EPSG','26002','CSRN2025 (NAD83 2011) / UTM zone 10N',NULL,'EPSG','4400','EPSG','10910','EPSG','16010',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','29411','projected_crs','EPSG','26002','EPSG','4885','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','26003','CSRN2025 (NAD83 2011) / UTM zone 11N',NULL,'EPSG','4400','EPSG','10910','EPSG','16011',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','29412','projected_crs','EPSG','26003','EPSG','4886','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','26191','Merchich / Nord Maroc',NULL,'EPSG','4499','EPSG','4261','EPSG','18131',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6531','projected_crs','EPSG','26191','EPSG','1703','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','26192','Merchich / Sud Maroc',NULL,'EPSG','4499','EPSG','4261','EPSG','18132',NULL,0);
