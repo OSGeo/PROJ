@@ -2126,15 +2126,19 @@ bool NTv2Grid::valueAt(int x, int y, bool compensateNTConvention,
 
     const std::vector<float> *pBuffer = m_cache->get(m_gridIdx, y);
     if (pBuffer == nullptr) {
+        // there are 4 components: lat shift, long shift, lat error, long error
+        // m_width is an int that can be large enough for 4 * m_width to
+        // overflow, so compute the line size in size_t and resize the buffer
+        // to the exact number of elements that will be read into it.
+        const size_t nLineSizeInBytes =
+            4 * sizeof(float) * static_cast<size_t>(m_width);
         try {
-            m_buffer.resize(4 * m_width);
+            m_buffer.resize(nLineSizeInBytes / sizeof(float));
         } catch (const std::exception &e) {
             pj_log(m_ctx, PJ_LOG_ERROR, _("Exception %s"), e.what());
             return false;
         }
 
-        const size_t nLineSizeInBytes = 4 * sizeof(float) * m_width;
-        // there are 4 components: lat shift, long shift, lat error, long error
         m_fp->seek(m_offset +
                    nLineSizeInBytes * static_cast<unsigned long long>(y));
         if (m_fp->read(&m_buffer[0], nLineSizeInBytes) != nLineSizeInBytes) {
@@ -2143,18 +2147,19 @@ bool NTv2Grid::valueAt(int x, int y, bool compensateNTConvention,
             return false;
         }
         // Remove lat and long error
-        for (int i = 1; i < m_width; ++i) {
+        for (size_t i = 1; i < static_cast<size_t>(m_width); ++i) {
             m_buffer[2 * i] = m_buffer[4 * i];
             m_buffer[2 * i + 1] = m_buffer[4 * i + 1];
         }
-        m_buffer.resize(2 * m_width);
+        m_buffer.resize(m_buffer.size() / 2);
         if (m_mustSwap) {
-            swap_words(&m_buffer[0], sizeof(float), 2 * m_width);
+            swap_words(&m_buffer[0], sizeof(float), m_buffer.size());
         }
         // NTv2 is organized from east to west !
-        for (int i = 0; i < m_width / 2; ++i) {
-            std::swap(m_buffer[2 * i], m_buffer[2 * (m_width - 1 - i)]);
-            std::swap(m_buffer[2 * i + 1], m_buffer[2 * (m_width - 1 - i) + 1]);
+        const size_t nWidth = m_buffer.size() / 2;
+        for (size_t i = 0; i < nWidth / 2; ++i) {
+            std::swap(m_buffer[2 * i], m_buffer[2 * (nWidth - 1 - i)]);
+            std::swap(m_buffer[2 * i + 1], m_buffer[2 * (nWidth - 1 - i) + 1]);
         }
 
         try {
@@ -2167,11 +2172,13 @@ bool NTv2Grid::valueAt(int x, int y, bool compensateNTConvention,
     const std::vector<float> &buffer = pBuffer ? *pBuffer : m_buffer;
 
     /* convert seconds to radians */
-    latShift = static_cast<float>(buffer[2 * x] * ((M_PI / 180.0) / 3600.0));
+    latShift = static_cast<float>(
+        buffer[2 * static_cast<size_t>(x)] * ((M_PI / 180.0) / 3600.0));
     // west longitude positive convention !
     longShift =
         (compensateNTConvention ? -1 : 1) *
-        static_cast<float>(buffer[2 * x + 1] * ((M_PI / 180.0) / 3600.0));
+        static_cast<float>(buffer[2 * static_cast<size_t>(x) + 1] *
+                           ((M_PI / 180.0) / 3600.0));
     return true;
 }
 
