@@ -3853,3 +3853,5 @@ INSERT INTO "extent" VALUES('EPSG','4871','USA - Illinois - Marion','United Stat
 INSERT INTO "extent" VALUES('EPSG','4872','USA - Illinois - Bond','United States (USA) - Illinois - Bond county.',38.74,39.03,-89.64,-89.25,0);
 INSERT INTO "extent" VALUES('EPSG','4880','Greece - onshore west of 28°51''E','Greece - onshore west of 28°51''E.',34.75,41.75,19.57,28.3,0);
 INSERT INTO "extent" VALUES('EPSG','4881','Greece - onshore east of 28°51''E','Greece - onshore east of 28°51''E - Kastellorizo.',36.05,36.19,29.42,29.69,0);
+INSERT INTO "extent" VALUES('EPSG','4885','USA - California - west of 120°W','United States (USA) - California west of 120°W.',33.84,42.01,-124.49,-120.0,0);
+INSERT INTO "extent" VALUES('EPSG','4886','USA - California - east of 120°W','United States (USA) - California east of 120°W.',32.52,39.0,-120.0,-114.13,0);
