@@ -374,6 +374,8 @@ INSERT INTO "vertical_crs" VALUES('EPSG','8053','MSL depth (ftUS)',NULL,'EPSG','
 INSERT INTO "usage" VALUES('EPSG','5603','vertical_crs','EPSG','8053','EPSG','1245','EPSG','1199');
 INSERT INTO "vertical_crs" VALUES('EPSG','8089','ISH2004 height',NULL,'EPSG','6499','EPSG','1190',0);
 INSERT INTO "usage" VALUES('EPSG','5616','vertical_crs','EPSG','8089','EPSG','4662','EPSG','1178');
+INSERT INTO "vertical_crs" VALUES('EPSG','8228','NAVD88 height (ft)',NULL,'EPSG','1030','EPSG','5103',0);
+INSERT INTO "usage" VALUES('EPSG','5736','vertical_crs','EPSG','8228','EPSG','4464','EPSG','1144');
 INSERT INTO "vertical_crs" VALUES('EPSG','8266','GVR2000 height',NULL,'EPSG','6499','EPSG','1199',0);
 INSERT INTO "usage" VALUES('EPSG','5758','vertical_crs','EPSG','8266','EPSG','4461','EPSG','1153');
 INSERT INTO "vertical_crs" VALUES('EPSG','8267','GVR2016 height',NULL,'EPSG','6499','EPSG','1200',0);
@@ -586,8 +588,6 @@ INSERT INTO "vertical_crs" VALUES('EPSG','7968','NGVD29 height (m)',NULL,'EPSG',
 INSERT INTO "usage" VALUES('EPSG','5569','vertical_crs','EPSG','7968','EPSG','1323','EPSG','1203');
 INSERT INTO "vertical_crs" VALUES('EPSG','7976','HKPD depth',NULL,'EPSG','6498','EPSG','5135',0);
 INSERT INTO "usage" VALUES('EPSG','5570','vertical_crs','EPSG','7976','EPSG','3334','EPSG','1203');
-INSERT INTO "vertical_crs" VALUES('EPSG','8228','NAVD88 height (ft)',NULL,'EPSG','1030','EPSG','5103',0);
-INSERT INTO "usage" VALUES('EPSG','5736','vertical_crs','EPSG','8228','EPSG','4464','EPSG','1144');
 INSERT INTO "vertical_crs" VALUES('EPSG','8358','Baltic 1957 depth',NULL,'EPSG','6498','EPSG','1202',0);
 INSERT INTO "usage" VALUES('EPSG','5804','vertical_crs','EPSG','8358','EPSG','1306','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','10364','Cascais depth',NULL,'EPSG','6498','EPSG','5178',0);
