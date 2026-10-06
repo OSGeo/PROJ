@@ -938,6 +938,8 @@ int main(int argc, char **argv) {
         }
         proj_destroy(src);
         src = srcMetadata;
+    } else if (PJ_TYPE_COORDINATE_METADATA == proj_get_type(src)) {
+        srcIsDynamic = false; // do not show any warning
     } else if (proj_crs_is_dynamic(nullptr, src)) {
         srcIsDynamic = true;
     }
@@ -958,6 +960,8 @@ int main(int argc, char **argv) {
         }
         proj_destroy(dst);
         dst = dstMetadata;
+    } else if (PJ_TYPE_COORDINATE_METADATA == proj_get_type(dst)) {
+        destIsDynamic = false; // do not show any warning
     } else if (proj_crs_is_dynamic(nullptr, dst)) {
         destIsDynamic = true;
     }
