@@ -544,6 +544,14 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1462','SIRGAS-Chile 2025',NULL,'EPSG
 INSERT INTO "usage" VALUES('EPSG','26670','geodetic_datum','EPSG','1462','EPSG','1066','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1463','ETRS89-LUX [2025]',NULL,'EPSG','7019','EPSG','8901','2026-01-01',NULL,NULL,NULL,2025.83,0);
 INSERT INTO "usage" VALUES('EPSG','26677','geodetic_datum','EPSG','1463','EPSG','1146','EPSG','1295');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1468','Geocentric Datum of Malaysia 2000 (Revision 2006)',NULL,'EPSG','7019','EPSG','8901','2007-07-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','29626','geodetic_datum','EPSG','1468','EPSG','1151','EPSG','1181');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1469','Geocentric Datum of Malaysia 2000 (Revision 2009)',NULL,'EPSG','7019','EPSG','8901','2009-05-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','29625','geodetic_datum','EPSG','1469','EPSG','1151','EPSG','1027');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1470','Geocentric Datum of Malaysia 2000 (Revision 2016)',NULL,'EPSG','7019','EPSG','8901','2016-11-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','30247','geodetic_datum','EPSG','1470','EPSG','1151','EPSG','1178');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1471','Geocentric Datum of Malaysia 2020',NULL,'EPSG','7019','EPSG','8901','2021-10-15',NULL,NULL,NULL,2020.0,0);
+INSERT INTO "usage" VALUES('EPSG','29623','geodetic_datum','EPSG','1471','EPSG','1151','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,'EPSG','7001','EPSG','8901',NULL,NULL,NULL,NULL,NULL,1);
 INSERT INTO "usage" VALUES('EPSG','13422','geodetic_datum','EPSG','6001','EPSG','1263','EPSG','1213');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,'EPSG','7002','EPSG','8901',NULL,NULL,NULL,NULL,NULL,1);
@@ -1298,7 +1306,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','6740','Parametry Zemli 1990',NULL,'E
 INSERT INTO "usage" VALUES('EPSG','13799','geodetic_datum','EPSG','6740','EPSG','1262','EPSG','1177');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6741','Faroe Datum 1954',NULL,'EPSG','7022','EPSG','8901','1954-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13800','geodetic_datum','EPSG','6741','EPSG','3248','EPSG','1181');
-INSERT INTO "geodetic_datum" VALUES('EPSG','6742','Geodetic Datum of Malaysia 2000',NULL,'EPSG','7019','EPSG','8901','2003-08-01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','6742','Geocentric Datum of Malaysia 2000',NULL,'EPSG','7019','EPSG','8901','2003-08-23',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13801','geodetic_datum','EPSG','6742','EPSG','1151','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6743','Karbala 1979',NULL,'EPSG','7012','EPSG','8901','1979-01-01',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13802','geodetic_datum','EPSG','6743','EPSG','3625','EPSG','1027');
