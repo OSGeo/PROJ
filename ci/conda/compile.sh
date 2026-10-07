@@ -13,12 +13,12 @@ if grep -q "ubuntu" <<< "$GHA_CI_PLATFORM"; then
     ARCH="64"
 fi
 
-if grep -q "macos-15" <<< "$GHA_CI_PLATFORM"; then
-    CONDA_PLAT="osx"
-    ARCH="arm64"
-elif grep -q "macos-15-intel" <<< "$GHA_CI_PLATFORM"; then
+if grep -q "macos-15-intel" <<< "$GHA_CI_PLATFORM"; then
     CONDA_PLAT="osx"
     ARCH="64"
+elif grep -q "macos-15" <<< "$GHA_CI_PLATFORM"; then
+    CONDA_PLAT="osx"
+    ARCH="arm64"
 fi
 
 rattler-build build \
