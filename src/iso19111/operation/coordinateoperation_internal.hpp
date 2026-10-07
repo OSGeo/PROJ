@@ -163,9 +163,7 @@ class InverseTransformation : public Transformation,
         return InverseCoordinateOperation::_exportToPROJString(formatter);
     }
 
-    void _exportToJSON(io::JSONFormatter *formatter) const override {
-        Transformation::_exportToJSON(formatter);
-    }
+    void _exportToJSON(io::JSONFormatter *formatter) const override;
 
     bool _isEquivalentTo(
         const util::IComparable *other,
