@@ -24,8 +24,7 @@ jobs:
         include:
           - platform: "macos-15-intel"
             architecture: "x64"
-          # macOS-14 is a M1 ARM64 MacOS runner: https://github.blog/changelog/2024-01-30-github-actions-introducing-the-new-m1-macos-runner-available-to-open-source/
-          - platform: "macOS-14"
+          - platform: "macos-15"
             architecture: "arm64"
 
     runs-on: ${{ matrix.platform }}
