@@ -606,6 +606,36 @@ The direct case is handled by the ``createOperationsVertToVert`` method.
     +proj=pipeline +step +proj=axisswap +order=1,2,-3 +step +proj=unitconvert +z_in=us-ft +z_out=m +step +proj=vgridshift +grids=vertconw.gtx +multiplier=0.001
 
 
+Engineering CRS to any other CRS
+---------------------------------------------------------------------------------
+
+An engineering CRS (site or plant grid) is generally only related to another
+CRS through a registered operation, typically a Similarity transformation to a
+projected CRS. When there is no direct operation between the engineering CRS
+and the target CRS, each registered operation from (or to) the engineering CRS
+is chained with the operations between its other end and the target CRS.
+The target CRS may be any CRS reachable from that intermediate CRS (another
+projection zone, geographic 2D/3D, geocentric, another datum). Unless CRS
+extents are ignored (``--crs-extent-use none``), the registered operation must
+intersect the area of use of the target CRS.
+This is implemented by the ``createOperationsEngineeringWithIntermediate``
+method. It is not used when intermediate CRS are disallowed
+(``--pivot-crs never``).
+
+.. code-block:: shell
+
+    $ projinfo -s EPSG:11378 -t EPSG:4277 -o PROJ --single-line
+
+    Candidate operations found: 1
+    -------------------------------------
+    Operation No. 1:
+
+    unknown id, Inverse of OSGB36 / British National Grid to Heathrow Airport Grid (1) + Inverse of British National Grid, 0 m, UK - Heathrow airport and surrounding area.
+
+    PROJ string:
+    +proj=pipeline +step +inv +proj=affine +xoff=-504786.4675 +s11=0.999912071814854 +s12=0.0263656990790156 +yoff=-156728.1037 +s21=-0.0263656990790156 +s22=0.999912071814854 +step +inv +proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
+
+
 Compound CRS to a Geographic CRS
 ---------------------------------------------------------------------------------
 
