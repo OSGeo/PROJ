@@ -837,6 +837,11 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6151','CHTRS95','EPSG')
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1449','CHTRF95','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1464','COLGVD2023','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1464','COLGVD2023 (QgeoidCOL2023)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1471','GDM2020','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6742','Geodetic Datum of Malaysia 2000','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1469','GDM2000 (2009)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1468','GDM2000 (2006)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1470','GDM2000 (2016)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -4016,8 +4021,8 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3368','IGN Astro 1960 / 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3369','IGN Astro 1960 / UTM 30N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3376','GDM2000 / E Malaysia RSO','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3378','GDM2000 / Melaka Grid','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3381','GDM2000 / Terengganu','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3383','GDM2000 / Kedah Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3381','GDM2000 / Terengganu Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3383','GDM2000 / Kedah and Perlis Grid','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3388','Pulkovo 1942 / Caspian','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3396','PD/83 / 3GK zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3397','PD/83 / 3GK zone 4','EPSG');
@@ -8677,3 +8682,14 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','12216','ETRS89 + MSL NL d
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','12215','ETRS89 + LAT NL depth','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','12293','ETRS89 / Lambert 2008 + Oostende height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','12293','ETRS89 / Belgian Lambert 2008 + Ostend height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25300','GDM2000 (2006) / Melaka Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25311','GDM2000 (2006) / Kedah Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25320','GDM2020 / Kedah Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','25315','GDM2020 / Melaka Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3377','GDM2000 / Johor Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3379','GDM2000 / Pahang Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3380','GDM2000 / Selangor Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','12462','GDM2000 / Sembilan and Melaka Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3382','GDM2000 / Pinang Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3384','GDM2000 / Perak Grid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3385','GDM2000 / Kelantan Grid','EPSG');
