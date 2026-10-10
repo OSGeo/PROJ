@@ -11653,6 +11653,42 @@ TEST(operation, createOperation_point_motion_operation_nkg) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, createOperation_coordinate_metadata_normalizeForVisualization) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    // ITRF2014
+    auto sourceCRS = factory->createCoordinateReferenceSystem("9000");
+    auto crs_2025 = CoordinateMetadata::create(sourceCRS, 2025.0, dbContext);
+    // GDA2020
+    auto targetCRS = factory->createCoordinateReferenceSystem("7844");
+    auto ctxt = CoordinateOperationContext::create(
+        AuthorityFactory::create(dbContext, std::string()), nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        crs_2025, targetCRS, ctxt);
+    ASSERT_GE(list.size(), 1U);
+
+    auto op = list[0]->normalizeForVisualization();
+    ASSERT_TRUE(op->sourceCoordinateEpoch().has_value());
+    EXPECT_EQ(op->sourceCoordinateEpoch()->coordinateEpoch().value(), 2025.0);
+    EXPECT_FALSE(op->targetCoordinateEpoch().has_value());
+    EXPECT_EQ(
+        op->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline "
+        "+step +proj=set +v_4=2025 "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=cart +ellps=GRS80 "
+        "+step +proj=helmert +x=0 +y=0 +z=0 +rx=0 +ry=0 +rz=0 +s=0 "
+        "+dx=0 +dy=0 +dz=0 +drx=0.00150379 +dry=0.00118346 "
+        "+drz=0.00120716 +ds=0 +t_epoch=2020 +convention=coordinate_frame "
+        "+step +inv +proj=cart +ellps=GRS80 "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+        "+step +proj=set +v_4=2025");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation,
      createOperation_compound_to_compound_with_point_motion_operation) {
     auto dbContext = DatabaseContext::create();

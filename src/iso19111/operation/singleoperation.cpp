@@ -487,8 +487,11 @@ CoordinateOperation::normalizeForVisualization() const {
         }
     }
 
-    return ConcatenatedOperation::create(properties, flattenOps,
-                                         coordinateOperationAccuracies());
+    auto op = ConcatenatedOperation::create(properties, flattenOps,
+                                            coordinateOperationAccuracies());
+    op->setSourceCoordinateEpoch(sourceCoordinateEpoch());
+    op->setTargetCoordinateEpoch(targetCoordinateEpoch());
+    return op;
 }
 
 // ---------------------------------------------------------------------------
