@@ -563,6 +563,7 @@ struct CoordinateOperationFactory::Private {
         bool inCreateOperationsGeogToVertWithAlternativeGeog = false;
         bool inCreateOperationsGeogToVertWithIntermediateVert = false;
         bool inCreateOperationsVertToVertWithIntermediateVert = false;
+        bool inCreateOperationsEngineeringWithIntermediate = false;
         bool skipHorizontalTransformation = false;
         int nRecLevelCreateOperations = 0;
         std::map<std::pair<io::AuthorityFactory::ObjectType, std::string>,
@@ -673,6 +674,13 @@ struct CoordinateOperationFactory::Private {
         const util::optional<common::DataEpoch> &targetEpoch,
         const crs::VerticalCRS *vertSrc, const crs::VerticalCRS *vertDst,
         Context &context);
+
+    static std::vector<CoordinateOperationNNPtr>
+    createOperationsEngineeringWithIntermediate(
+        const crs::CRSNNPtr &sourceCRS,
+        const util::optional<common::DataEpoch> &sourceEpoch,
+        const crs::CRSNNPtr &targetCRS,
+        const util::optional<common::DataEpoch> &targetEpoch, Context &context);
 
     static void createOperationsFromDatabaseWithVertCRS(
         const crs::CRSNNPtr &sourceCRS,
@@ -4417,6 +4425,19 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
                                            geodDst, context);
             doFilterAndCheckPerfectOp = !res.empty();
         }
+    } else if (res.empty() &&
+               !context.inCreateOperationsEngineeringWithIntermediate &&
+               context.context->getAllowUseIntermediateCRS() !=
+                   CoordinateOperationContext::IntermediateCRSUse::NEVER) {
+        if (dynamic_cast<const crs::EngineeringCRS *>(sourceCRS.get())) {
+            res = createOperationsEngineeringWithIntermediate(
+                sourceCRS, sourceEpoch, targetCRS, targetEpoch, context);
+        }
+        if (res.empty() &&
+            dynamic_cast<const crs::EngineeringCRS *>(targetCRS.get())) {
+            res = applyInverse(createOperationsEngineeringWithIntermediate(
+                targetCRS, targetEpoch, sourceCRS, sourceEpoch, context));
+        }
     }
 
     bool foundInstantiableOp = false;
@@ -5129,6 +5150,65 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
                 res.emplace_back(concat);
             } else {
                 res.emplace_back(op);
+            }
+        }
+    }
+
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+// Chain registered operations between an engineering CRS and an intermediate
+// CRS with the operations from that intermediate CRS to the target CRS.
+// e.g. Heathrow Airport Grid (EPSG:11378) to OSGB36 (EPSG:4277):
+//   11378 ->(inverse of EPSG:11388)-> 27700 ->(inverse projection)-> 4277
+std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
+    createOperationsEngineeringWithIntermediate(
+        const crs::CRSNNPtr &sourceCRS, // engineering CRS
+        const util::optional<common::DataEpoch> &sourceEpoch,
+        const crs::CRSNNPtr &targetCRS,
+        const util::optional<common::DataEpoch> &targetEpoch,
+        Private::Context &context) {
+
+    ENTER_FUNCTION();
+
+    std::vector<CoordinateOperationNNPtr> res;
+
+    struct AntiRecursionGuard {
+        Context &context;
+
+        explicit AntiRecursionGuard(Context &contextIn) : context(contextIn) {
+            assert(!context.inCreateOperationsEngineeringWithIntermediate);
+            context.inCreateOperationsEngineeringWithIntermediate = true;
+        }
+
+        ~AntiRecursionGuard() {
+            context.inCreateOperationsEngineeringWithIntermediate = false;
+        }
+    };
+    AntiRecursionGuard guard(context);
+
+    // Operations ending at the engineering CRS, inverted to start from it.
+    // Unless the CRS extent use is NONE, they must intersect the target CRS
+    // area of use.
+    const auto opsFirst =
+        applyInverse(findOpsInRegistryDirectTo(sourceCRS, context));
+    for (const auto &opFirst : opsFirst) {
+        const auto intermCRS = opFirst->targetCRS();
+        if (!intermCRS ||
+            intermCRS->_isEquivalentTo(
+                targetCRS.get(), util::IComparable::Criterion::EQUIVALENT)) {
+            continue;
+        }
+        const auto opsSecond =
+            createOperations(NN_NO_CHECK(intermCRS), sourceEpoch, targetCRS,
+                             targetEpoch, context);
+        for (const auto &opSecond : opsSecond) {
+            try {
+                res.emplace_back(ConcatenatedOperation::createComputeMetadata(
+                    {opFirst, opSecond}, context.disallowEmptyIntersection()));
+            } catch (const InvalidOperationEmptyIntersection &) {
             }
         }
     }
