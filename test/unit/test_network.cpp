@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "filemanager.hpp"
 #include "proj_internal.h"
 #include <proj.h>
 
@@ -167,9 +168,13 @@ TEST(networking, basic) {
     P = proj_create(ctx, pipeline);
 #ifdef CURL_ENABLED
     if (networkAccessOK) {
-        ASSERT_NE(P, nullptr);
+        if (P == nullptr) {
+            proj_context_destroy(ctx);
+            FAIL() << "proj_create() returned nullptr with network access";
+        }
     } else {
-        ASSERT_EQ(P, nullptr);
+        EXPECT_EQ(P, nullptr);
+        proj_destroy(P);
         proj_context_destroy(ctx);
         return;
     }
@@ -911,6 +916,88 @@ TEST(networking, simul_read_range_error) {
         exchange.events.emplace_back(std::move(event));
     }
     proj_destroy(P);
+
+    ASSERT_TRUE(exchange.allConsumedAndNoError());
+
+    proj_context_destroy(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(networking, simul_short_range_response) {
+    auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
+    proj_context_set_enable_network(ctx, true);
+    ExchangeWithCallback exchange;
+    ASSERT_TRUE(proj_context_set_network_callbacks(ctx, open_cbk, close_cbk,
+                                                   get_header_value_cbk,
+                                                   read_range_cbk, &exchange));
+
+    const char *url = "https://foo/short_range_response.tif";
+
+    {
+        std::unique_ptr<OpenEvent> event(new OpenEvent());
+        event->ctx = ctx;
+        event->url = url;
+        event->offset = 0;
+        event->size_to_read = 16384;
+        event->response.resize(16384);
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Content-Range";
+        event->value = "bytes=0-16383/10000000";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Last-Modified";
+        event->value = "some_date";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "ETag";
+        event->value = "some_etag";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+
+    auto file =
+        NS_PROJ::FileManager::open(ctx, url, NS_PROJ::FileAccess::READ_ONLY);
+    ASSERT_NE(file, nullptr);
+    ASSERT_TRUE(exchange.allConsumedAndNoError());
+
+    std::vector<unsigned char> buffer(100);
+
+    {
+        std::unique_ptr<ReadRangeEvent> event(new ReadRangeEvent());
+        event->ctx = ctx;
+        event->offset = 524288;
+        event->size_to_read = 16384;
+        event->response.resize(100);
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+
+    proj_log_func(ctx, nullptr, silent_logger);
+    ASSERT_TRUE(file->seek(524288));
+    ASSERT_EQ(file->read(buffer.data(), buffer.size()), 0U);
+
+    {
+        std::unique_ptr<CloseEvent> event(new CloseEvent());
+        event->ctx = ctx;
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    file.reset();
 
     ASSERT_TRUE(exchange.allConsumedAndNoError());
 
