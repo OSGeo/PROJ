@@ -3429,7 +3429,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     // the area of validity... Not totally sure the behavior we try to preserve
     // here with the particular case is fundamentally better than the general
     // case. The general case is needed typically for the RGNC91-93 -> RGNC15
-    // transformation where we we need to actually use a transformation between
+    // transformation where we need to actually use a transformation between
     // RGNC91-93 (lon-lat) -> RGNC15 (lon-lat), and not chain 2 no-op
     // transformations RGNC91-93 -> WGS 84 and RGNC15 -> WGS84.
 
