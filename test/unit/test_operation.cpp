@@ -6025,6 +6025,89 @@ TEST(operation, export_of_Cartesian_Grid_Offsets_with_EngineeringCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation,
+     export_of_Cartesian_Grid_Offsets_with_EngineeringCRS_northing_easting) {
+
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // Maturin Grid: (north, east)
+    auto engCRS = authFactory->createCoordinateReferenceSystem("5803");
+    // PSAD56 / UTM zone 20N: (east, north)
+    auto projCRS = authFactory->createCoordinateReferenceSystem("24820");
+
+    {
+        auto transf = Transformation::createCartesianGridOffsets(
+            PropertyMap(), engCRS, projCRS, Length(478000), Length(1078000),
+            {});
+        EXPECT_EQ(
+            transf->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline +step +proj=axisswap +order=2,1 "
+            "+step +proj=affine +xoff=478000 +yoff=1078000");
+        EXPECT_EQ(transf->inverse()->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=pipeline "
+                  "+step +proj=affine +xoff=-478000 +yoff=-1078000 "
+                  "+step +proj=axisswap +order=2,1");
+        EXPECT_EQ(transf->normalizeForVisualization()->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=affine +xoff=478000 +yoff=1078000");
+    }
+
+    {
+        auto transf = Transformation::createCartesianGridOffsets(
+            PropertyMap(), projCRS, engCRS, Length(-478000), Length(-1078000),
+            {});
+        EXPECT_EQ(
+            transf->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +proj=affine +xoff=-478000 +yoff=-1078000 "
+            "+step +proj=axisswap +order=2,1");
+        EXPECT_EQ(transf->normalizeForVisualization()->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=affine +xoff=-478000 +yoff=-1078000");
+    }
+
+    {
+        auto transf = Transformation::createCartesianGridOffsets(
+            PropertyMap(), engCRS, engCRS, Length(10), Length(20), {});
+        EXPECT_EQ(
+            transf->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline +step +proj=axisswap +order=2,1 "
+            "+step +proj=affine +xoff=10 +yoff=20 "
+            "+step +proj=axisswap +order=2,1");
+        EXPECT_EQ(transf->normalizeForVisualization()->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=affine +xoff=10 +yoff=20");
+    }
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(engCRS,
+                                                                        engCRS);
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=noop");
+    }
+
+    {
+        // Astra Minas Grid: (north, west)
+        auto engCRSNorthWest =
+            authFactory->createCoordinateReferenceSystem("5800");
+        auto transf = Transformation::createCartesianGridOffsets(
+            PropertyMap(), engCRSNorthWest, projCRS, Length(478000),
+            Length(1078000), {});
+        EXPECT_EQ(
+            transf->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline +step +proj=axisswap +order=-2,1 "
+            "+step +proj=affine +xoff=478000 +yoff=1078000");
+        EXPECT_EQ(transf->normalizeForVisualization()->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=pipeline +step +proj=axisswap +order=-2,1 "
+                  "+step +proj=affine +xoff=478000 +yoff=1078000");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, Geographic3DToGravityRelatedHeight) {
 
     auto wkt =

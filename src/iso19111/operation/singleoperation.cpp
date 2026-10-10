@@ -4104,25 +4104,33 @@ bool SingleOperation::exportToPROJStringGeneric(
                     "Can apply Cartesian grid offsets only to ProjectedCRS or "
                     "EngineeringCRS");
             }
+            return engineeringCRS;
         };
 
         auto l_sourceCRS = sourceCRS();
         auto sourceCRSProj =
             dynamic_cast<const crs::ProjectedCRS *>(l_sourceCRS.get());
+        const crs::EngineeringCRS *sourceCRSEng = nullptr;
         if (!sourceCRSProj) {
-            checkIfCompatEngineeringCRS(l_sourceCRS);
+            sourceCRSEng = checkIfCompatEngineeringCRS(l_sourceCRS);
         }
 
         auto l_targetCRS = targetCRS();
         auto targetCRSProj =
             dynamic_cast<const crs::ProjectedCRS *>(l_targetCRS.get());
+        const crs::EngineeringCRS *targetCRSEng = nullptr;
         if (!targetCRSProj) {
-            checkIfCompatEngineeringCRS(l_targetCRS);
+            targetCRSEng = checkIfCompatEngineeringCRS(l_targetCRS);
         }
 
         if (sourceCRSProj) {
             formatter->startInversion();
             sourceCRSProj->addUnitConvertAndAxisSwap(formatter, false);
+            formatter->stopInversion();
+        } else {
+            formatter->startInversion();
+            crs::ProjectedCRS::addUnitConvertAndAxisSwap(
+                sourceCRSEng->coordinateSystem()->axisList(), formatter, false);
             formatter->stopInversion();
         }
 
@@ -4134,6 +4142,9 @@ bool SingleOperation::exportToPROJStringGeneric(
 
         if (targetCRSProj) {
             targetCRSProj->addUnitConvertAndAxisSwap(formatter, false);
+        } else {
+            crs::ProjectedCRS::addUnitConvertAndAxisSwap(
+                targetCRSEng->coordinateSystem()->axisList(), formatter, false);
         }
 
         return true;
