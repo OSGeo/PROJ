@@ -2430,6 +2430,40 @@ TEST(crs, projectedCRS_as_WKT1_ESRI) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_spherical_methods_as_WKT1_ESRI) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+
+    EXPECT_EQ(
+        factory->createProjectedCRS("3410")->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        "PROJCS[\"NSIDC_EASE_Grid_Global\",GEOGCS[\"NSIDC_Authalic_Sphere\","
+        "DATUM[\"NSIDC_International_1924_Authalic_Sphere\","
+        "SPHEROID[\"Sphere_International_1924_Authalic\",6371228.0,0.0]],"
+        "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Behrmann\"],PARAMETER[\"False_Easting\",0.0],"
+        "PARAMETER[\"False_Northing\",0.0],"
+        "PARAMETER[\"Central_Meridian\",0.0],"
+        "PARAMETER[\"Standard_Parallel_1\",30.0],UNIT[\"Meter\",1.0]]");
+
+    EXPECT_EQ(
+        factory->createProjectedCRS("3408")->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        "PROJCS[\"NSIDC_EASE_Grid_North\",GEOGCS[\"NSIDC_Authalic_Sphere\","
+        "DATUM[\"NSIDC_International_1924_Authalic_Sphere\","
+        "SPHEROID[\"Sphere_International_1924_Authalic\",6371228.0,0.0]],"
+        "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Lambert_Azimuthal_Equal_Area\"],"
+        "PARAMETER[\"False_Easting\",0.0],"
+        "PARAMETER[\"False_Northing\",0.0],"
+        "PARAMETER[\"Central_Meridian\",0.0],"
+        "PARAMETER[\"Latitude_Of_Origin\",90.0],UNIT[\"Meter\",1.0]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs,
      projectedCRS_3D_as_WKT1_GDAL_with_ellipsoidal_height_as_vertical_crs) {
     auto dbContext = DatabaseContext::create();
