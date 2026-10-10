@@ -1151,6 +1151,37 @@ TEST(operation, transformation_inverse) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, transformation_inverse_helmert_json_export) {
+
+    // The inverse of a Helmert transformation must survive a PROJJSON round
+    // trip: the export writes the approximate inverse, as the WKT export does,
+    // rather than the forward parameters.
+    auto transf = Transformation::createPositionVector(
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
+        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, std::vector<PositionalAccuracyNNPtr>());
+    auto inv = transf->inverse();
+
+    auto fromJSON =
+        nn_dynamic_pointer_cast<CoordinateOperation>(createFromUserInput(
+            inv->exportToJSON(JSONFormatter::create().get()), nullptr));
+    ASSERT_TRUE(fromJSON != nullptr);
+    auto fromWKT =
+        nn_dynamic_pointer_cast<CoordinateOperation>(createFromUserInput(
+            inv->exportToWKT(WKTFormatter::create().get()), nullptr));
+    ASSERT_TRUE(fromWKT != nullptr);
+
+    auto projString =
+        fromJSON->exportToPROJString(PROJStringFormatter::create().get());
+    EXPECT_EQ(projString,
+              fromWKT->exportToPROJString(PROJStringFormatter::create().get()));
+    EXPECT_NE(projString.find("+proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 +ry=-5 "
+                              "+rz=-6 +s=-7 +convention=position_vector"),
+              std::string::npos)
+        << projString;
+}
+
+// ---------------------------------------------------------------------------
+
 static VerticalCRSNNPtr createVerticalCRS() {
     PropertyMap propertiesVDatum;
     propertiesVDatum.set(Identifier::CODESPACE_KEY, "EPSG")

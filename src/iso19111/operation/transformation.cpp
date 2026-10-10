@@ -1818,6 +1818,19 @@ void InverseTransformation::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+void InverseTransformation::_exportToJSON(io::JSONFormatter *formatter) const {
+
+    auto approxInverse = createApproximateInverseIfPossible(
+        util::nn_dynamic_pointer_cast<Transformation>(forwardOperation_).get());
+    if (approxInverse) {
+        approxInverse->_exportToJSON(formatter);
+    } else {
+        Transformation::_exportToJSON(formatter);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateOperationNNPtr InverseTransformation::_shallowClone() const {
     auto op = InverseTransformation::nn_make_shared<InverseTransformation>(
         inverseAsTransformation()->shallowClone());
