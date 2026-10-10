@@ -3123,6 +3123,13 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
                                        const ESRIParamMapping *&esriParams) {
     esriParams = nullptr;
     esriMethodName = nullptr;
+    if (methodEPSGCode ==
+        EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL) {
+        methodEPSGCode = EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA;
+    } else if (methodEPSGCode ==
+               EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL) {
+        methodEPSGCode = EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA;
+    }
     const auto *esriMapping = getESRIMapping(methodName, methodEPSGCode);
     const auto l_targetCRS = conv->targetCRS();
     if (esriMapping) {
