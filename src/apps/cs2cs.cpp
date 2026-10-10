@@ -102,7 +102,7 @@ using namespace NS_PROJ::internal;
 /*                                                                      */
 /*      File processing function.                                       */
 /************************************************************************/
-static void process(FILE *fid)
+static void process(FILE *fid, bool showPipeline)
 
 {
     char line[MAX_LINE + 3], *s, pline[40];
@@ -110,6 +110,8 @@ static void process(FILE *fid)
     int nLineNumber = 0;
 
     while (true) {
+        std::string pipeline;
+        std::string description;
         double z;
         ++nLineNumber;
         ++emess_dat.File_line;
@@ -203,6 +205,15 @@ static void process(FILE *fid)
             data.u = coord.xyz.x;
             data.v = coord.xyz.y;
             z = coord.xyz.z;
+            if (showPipeline) {
+                auto op = proj_trans_get_last_used_operation(transformation);
+                auto pinfo = proj_pj_info(op);
+                description = pinfo.description;
+                const char *options[] = {"MULTILINE=YES", nullptr};
+                pipeline = proj_as_proj_string(
+                    nullptr, op, PJ_PROJ_STRING_TYPE::PJ_PROJ_5, options);
+                proj_destroy(op);
+            }
         }
 
         if (data.u == HUGE_VAL) /* error output */
@@ -263,6 +274,9 @@ static void process(FILE *fid)
             printf("%s", s);
         else
             printf("\n");
+        if (!pipeline.empty()) {
+            printf("%s\n%s\n", description.c_str(), pipeline.c_str());
+        }
         fflush(stdout);
     }
 }
@@ -433,6 +447,7 @@ int main(int argc, char **argv) {
     bool onlyBestSet = false;
     bool errorIfBestTransformationNotAvailable = false;
     bool promoteTo3D = false;
+    bool showPipeline = false;
     std::string sourceEpoch;
     std::string targetEpoch;
 
@@ -518,6 +533,8 @@ int main(int argc, char **argv) {
             errorIfBestTransformationNotAvailable = false;
         } else if (strcmp(*argv, "--3d") == 0) {
             promoteTo3D = true;
+        } else if (strcmp(*argv, "--show-pipeline") == 0) {
+            showPipeline = true;
         } else if (strcmp(*argv, "--s_epoch") == 0) {
             ++argv;
             --argc;
@@ -938,6 +955,8 @@ int main(int argc, char **argv) {
         }
         proj_destroy(src);
         src = srcMetadata;
+    } else if (PJ_TYPE_COORDINATE_METADATA == proj_get_type(src)) {
+        srcIsDynamic = false; // do not show any warning
     } else if (proj_crs_is_dynamic(nullptr, src)) {
         srcIsDynamic = true;
     }
@@ -958,6 +977,8 @@ int main(int argc, char **argv) {
         }
         proj_destroy(dst);
         dst = dstMetadata;
+    } else if (PJ_TYPE_COORDINATE_METADATA == proj_get_type(dst)) {
+        destIsDynamic = false; // do not show any warning
     } else if (proj_crs_is_dynamic(nullptr, dst)) {
         destIsDynamic = true;
     }
@@ -1034,7 +1055,7 @@ int main(int argc, char **argv) {
             emess_dat.File_name = *eargv;
         }
         emess_dat.File_line = 0;
-        process(fid);
+        process(fid, showPipeline);
         fclose(fid);
         emess_dat.File_name = nullptr;
     }
