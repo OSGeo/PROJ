@@ -157,7 +157,7 @@ paragraph for more details.
     the appropriate coordinate operation by comparing the input coordinates with
     the area of use of the candidate coordinate operations.
 
-    Starting with PROJ 9.10, if the source or target CRS is an engineering CRS,
+    Starting with PROJ 9.9.1, if the source or target CRS is an engineering CRS,
     the area of use of the candidate coordinate operations cannot be expressed in
     its coordinates. Only the first candidate coordinate operation is then used,
     or, unless ONLY_BEST=YES is set, the first one whose grids are available.
