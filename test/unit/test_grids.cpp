@@ -292,6 +292,24 @@ TEST_F(GridTest, GenericShiftGridSet_gtiff_valuesAt_tiled_optim) {
 
 // ---------------------------------------------------------------------------
 
+// GDAL_METADATA with a sample index equal to samplesPerPixel used to write one
+// element past the end of the scale/offset vectors. Opening the grid must
+// ignore the out-of-range entry while still applying the valid one (sample 0,
+// scale 2).
+TEST_F(GridTest, GenericShiftGridSet_gtiff_metadata_sample_out_of_range) {
+    auto gridSet = NS_PROJ::GenericShiftGridSet::open(
+        m_ctxt, "tests/test_gtiff_metadata_sample_out_of_range.tif");
+    ASSERT_NE(gridSet, nullptr);
+    auto grid = gridSet->gridAt(0.5 / 180 * M_PI, 0.5 / 180 * M_PI);
+    ASSERT_NE(grid, nullptr);
+    EXPECT_EQ(grid->samplesPerPixel(), 1);
+    float out = -1.0f;
+    EXPECT_TRUE(grid->valueAt(0, 0, 0, out));
+    EXPECT_EQ(out, 14.0f); // bottom-left pixel 7 * scale 2
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(GridTest, GenericShiftGridSet_gtiff_with_subgrid) {
     auto gridSet = NS_PROJ::GenericShiftGridSet::open(
         m_ctxt, "tests/test_hgrid_with_subgrid.tif");
