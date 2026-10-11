@@ -613,6 +613,37 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
         (errorIfBestTransformationNotAvailable ||
          warnIfBestTransformationNotAvailable) &&
         !proj_context_is_network_enabled(ctx);
+
+    // Candidate areas of use cannot be expressed in engineering CRS
+    // coordinates, so keep only the best-ranked instantiable candidate.
+    const bool hasEngineeringEnd =
+        proj_get_type(source_crs) == PJ_TYPE_ENGINEERING_CRS ||
+        proj_get_type(target_crs) == PJ_TYPE_ENGINEERING_CRS;
+    if (P != nullptr && op_count > 1 && hasEngineeringEnd) {
+        if (mayNeedToReRunWithDiscardMissing &&
+            !errorIfBestTransformationNotAvailable &&
+            !proj_coordoperation_is_instantiable(ctx, P)) {
+            for (int i = 1; i < op_count; ++i) {
+                ctx->debug_level = PJ_LOG_NONE;
+                PJ *candidate = proj_list_get(ctx, op_list, i);
+                ctx->debug_level = old_debug_level;
+                if (candidate &&
+                    proj_coordoperation_is_instantiable(ctx, candidate)) {
+                    pj_warn_about_missing_grid(P);
+                    proj_destroy(P);
+                    P = candidate;
+                    P->warnIfBestTransformationNotAvailable =
+                        warnIfBestTransformationNotAvailable;
+                    P->skipNonInstantiable =
+                        warnIfBestTransformationNotAvailable;
+                    break;
+                }
+                proj_destroy(candidate);
+            }
+        }
+        op_count = 1;
+    }
+
     int singleOpIsInstanciable = -1;
     if (P != nullptr && op_count == 1 && mayNeedToReRunWithDiscardMissing) {
         singleOpIsInstanciable = proj_coordoperation_is_instantiable(ctx, P);
@@ -622,7 +653,8 @@ PJ *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, const PJ *source_crs,
     if (P == nullptr ||
         (op_count == 1 && (!mayNeedToReRunWithDiscardMissing ||
                            errorIfBestTransformationNotAvailable ||
-                           singleOpIsInstanciable == static_cast<int>(true)))) {
+                           singleOpIsInstanciable == static_cast<int>(true) ||
+                           hasEngineeringEnd))) {
         proj_list_destroy(op_list);
         ctx->forceOver = false;
 

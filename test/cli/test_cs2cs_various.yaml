@@ -1518,3 +1518,33 @@ tests:
   in: 16.248285304 -61.484212843 53.073
   out: |
     661991.318	1796999.201 93.846
+- comment: >
+    Test engineering CRS to geographic CRS of another datum, through the
+    projected CRS of its registered operation (Heathrow Airport Grid to WGS 84).
+    The best candidate uses a missing grid, so the next one is used
+  tmpdir:
+    copy:
+    - $PROJ_DATA/proj.db
+  env:
+    PROJ_DATA: $tmpdir
+    PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY: YES
+  args: -d 8 EPSG:11378 EPSG:4326
+  in: 1000 2000
+  out: |
+    51.43759295	-0.54404867 0.00000000
+- comment: >
+    Test engineering CRS to projected CRS of another datum, through the
+    projected CRS of its registered operation (Christmas Island Grid 1985 to
+    WGS 84 / UTM zone 48S)
+  args: -d 3 EPSG:6715 EPSG:32748
+  in: 19000 61000
+  out: |
+    569015.000	8841001.000 0.000
+- comment: >
+    Test engineering CRS with rotated axes to projected CRS of another datum,
+    through the projected CRS of its registered operation (Tombak LNG Plant
+    Grid to WGS 84 / UTM zone 39N)
+  args: -d 3 EPSG:5817 EPSG:32639
+  in: 15000 9500
+  out: |
+    615155.392	3063886.662 0.000

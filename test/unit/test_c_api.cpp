@@ -4990,6 +4990,57 @@ TEST_F(CApi, proj_create_crs_to_crs_from_pj_ballpark_filter) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_create_crs_to_crs_engineering_crs) {
+    // Requires uk_os_OSTN15_NTv2_OSGBtoETRS.tif to be missing
+    if (proj_context_is_network_enabled(m_ctxt)) {
+        return;
+    }
+
+    // Heathrow Airport Grid to WGS 84 has several candidates. The best one
+    // uses a missing grid, so the next one is used.
+    auto P = proj_create_crs_to_crs(m_ctxt, "EPSG:11378", "EPSG:4326", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    EXPECT_EQ(std::string(proj_get_name(P)),
+              "Inverse of OSGB36 / British National Grid to Heathrow Airport "
+              "Grid (1) + Inverse of British National Grid + OSGB36 to WGS 84 "
+              "(6)");
+
+    // Same as EPSG:11378 -> EPSG:27700, followed by OSGB36 to WGS 84 (6)
+    PJ_COORD c = proj_coord(1000, 2000, 0, 0);
+    c = proj_trans(P, PJ_FWD, c);
+    EXPECT_NEAR(c.xy.x, 51.4375929457, 1e-10);
+    EXPECT_NEAR(c.xy.y, -0.5440486683, 1e-10);
+
+    auto Pinv =
+        proj_create_crs_to_crs(m_ctxt, "EPSG:4326", "EPSG:11378", nullptr);
+    ObjectKeeper keeper_Pinv(Pinv);
+    ASSERT_NE(Pinv, nullptr);
+    EXPECT_EQ(std::string(proj_get_name(Pinv)),
+              "Inverse of OSGB36 to WGS 84 (6) + British National Grid + "
+              "OSGB36 / British National Grid to Heathrow Airport Grid (1)");
+    const PJ_COORD cInv = proj_trans(P, PJ_INV, c);
+    c = proj_trans(Pinv, PJ_FWD, c);
+    EXPECT_NEAR(c.xy.x, cInv.xy.x, 1e-8);
+    EXPECT_NEAR(c.xy.y, cInv.xy.y, 1e-8);
+
+    {
+        auto src = proj_create(m_ctxt, "EPSG:11378");
+        ObjectKeeper keeper_src(src);
+        ASSERT_NE(src, nullptr);
+        auto dst = proj_create(m_ctxt, "EPSG:4326");
+        ObjectKeeper keeper_dst(dst);
+        ASSERT_NE(dst, nullptr);
+        const char *const options[] = {"ONLY_BEST=YES", nullptr};
+        auto P2 =
+            proj_create_crs_to_crs_from_pj(m_ctxt, src, dst, nullptr, options);
+        ObjectKeeper keeper_P2(P2);
+        EXPECT_EQ(P2, nullptr);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_create_crs_to_crs_coordinate_metadata_in_src) {
 
     auto P =
