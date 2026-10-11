@@ -2460,6 +2460,21 @@ TEST(crs, projectedCRS_spherical_methods_as_WKT1_ESRI) {
         "PARAMETER[\"False_Northing\",0.0],"
         "PARAMETER[\"Central_Meridian\",0.0],"
         "PARAMETER[\"Latitude_Of_Origin\",90.0],UNIT[\"Meter\",1.0]]");
+
+    for (const int code : {3410, 3408}) {
+        auto wkt = factory->createProjectedCRS(std::to_string(code))
+                       ->exportToWKT(
+                           WKTFormatter::create(
+                               WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                               .get());
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(
+            WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt));
+        ASSERT_TRUE(crs != nullptr) << wkt;
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1U) << wkt;
+        EXPECT_EQ(res.front().first->getEPSGCode(), code);
+        EXPECT_EQ(res.front().second, 100);
+    }
 }
 
 // ---------------------------------------------------------------------------
