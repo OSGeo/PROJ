@@ -943,6 +943,16 @@ bool CRS::mustAxisOrderBeSwitchedForVisualization() const {
             derivedProjCRS->coordinateSystem()->axisList());
     }
 
+    if (const EngineeringCRS *engCRS =
+            dynamic_cast<const EngineeringCRS *>(this)) {
+        const auto cartCS = dynamic_cast<const cs::CartesianCS *>(
+            engCRS->coordinateSystem().get());
+        if (cartCS) {
+            return mustAxisOrderBeSwitchedForVisualizationInternal(
+                cartCS->axisList());
+        }
+    }
+
     return false;
 }
 
@@ -1145,6 +1155,41 @@ CRSNNPtr CRS::applyAxisOrderReversal(const char *nameSuffix) const {
             derivedProjCRS->derivingConversion(), cs));
     }
 
+    if (const DerivedEngineeringCRS *derivedEngCRS =
+            dynamic_cast<const DerivedEngineeringCRS *>(this)) {
+        if (dynamic_cast<const cs::CartesianCS *>(
+                derivedEngCRS->coordinateSystem().get())) {
+            const auto &axisList =
+                derivedEngCRS->coordinateSystem()->axisList();
+            auto cs =
+                axisList.size() == 2
+                    ? cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                              axisList[0])
+                    : cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                              axisList[0], axisList[2]);
+            return util::nn_static_pointer_cast<CRS>(
+                DerivedEngineeringCRS::create(
+                    createProperties(), derivedEngCRS->baseCRS(),
+                    derivedEngCRS->derivingConversion(), cs));
+        }
+    }
+
+    if (const EngineeringCRS *engCRS =
+            dynamic_cast<const EngineeringCRS *>(this)) {
+        if (dynamic_cast<const cs::CartesianCS *>(
+                engCRS->coordinateSystem().get())) {
+            const auto &axisList = engCRS->coordinateSystem()->axisList();
+            auto cs =
+                axisList.size() == 2
+                    ? cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                              axisList[0])
+                    : cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                              axisList[0], axisList[2]);
+            return util::nn_static_pointer_cast<CRS>(EngineeringCRS::create(
+                createProperties(), engCRS->datum(), cs));
+        }
+    }
+
     throw util::UnsupportedOperationException(
         "axis order reversal not supported on this type of CRS");
 }
@@ -1182,6 +1227,16 @@ CRSNNPtr CRS::normalizeForVisualization() const {
             dynamic_cast<const DerivedProjectedCRS *>(this)) {
         const auto &axisList = derivedProjCRS->coordinateSystem()->axisList();
         if (mustAxisOrderBeSwitchedForVisualizationInternal(axisList)) {
+            return applyAxisOrderReversal(NORMALIZED_AXIS_ORDER_SUFFIX_STR);
+        }
+    }
+
+    if (const EngineeringCRS *engCRS =
+            dynamic_cast<const EngineeringCRS *>(this)) {
+        const auto cartCS = dynamic_cast<const cs::CartesianCS *>(
+            engCRS->coordinateSystem().get());
+        if (cartCS && mustAxisOrderBeSwitchedForVisualizationInternal(
+                          cartCS->axisList())) {
             return applyAxisOrderReversal(NORMALIZED_AXIS_ORDER_SUFFIX_STR);
         }
     }

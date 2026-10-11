@@ -7801,6 +7801,124 @@ TEST(crs, normalizeForVisualization_derivedprojected) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, engineeringCRS_normalizeForVisualization) {
+
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+
+    const auto northAxis = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Northing"), "N",
+        AxisDirection::NORTH, UnitOfMeasure::METRE);
+    const auto eastAxis = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Easting"), "E",
+        AxisDirection::EAST, UnitOfMeasure::METRE);
+    const auto upAxis = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Height"), "H",
+        AxisDirection::UP, UnitOfMeasure::METRE);
+
+    // Maturin Grid: (north, east)
+    {
+        const auto crs = factory->createCoordinateReferenceSystem("5803");
+        const auto engCRS = nn_dynamic_pointer_cast<EngineeringCRS>(crs);
+        ASSERT_TRUE(engCRS != nullptr);
+        const auto normalized = nn_dynamic_pointer_cast<EngineeringCRS>(
+            crs->normalizeForVisualization());
+        ASSERT_TRUE(normalized != nullptr);
+        EXPECT_EQ(normalized->nameStr(),
+                  "Maturin Grid (with axis order normalized for "
+                  "visualization)");
+        EXPECT_TRUE(dynamic_cast<CartesianCS *>(
+                        normalized->coordinateSystem().get()) != nullptr);
+        const auto &axisList = normalized->coordinateSystem()->axisList();
+        ASSERT_EQ(axisList.size(), 2U);
+        EXPECT_EQ(axisList[0]->direction(), AxisDirection::EAST);
+        EXPECT_EQ(axisList[1]->direction(), AxisDirection::NORTH);
+        EXPECT_TRUE(normalized->datum()->isEquivalentTo(engCRS->datum().get()));
+        EXPECT_EQ(normalized->normalizeForVisualization().get(),
+                  static_cast<const CRS *>(normalized.get()));
+    }
+
+    // Christmas Island Grid 1985: (east, north)
+    // Astra Minas Grid: (north, west)
+    // Tombak LNG plant: (northEast, northWest)
+    for (const char *code : {"6715", "5800", "5817"}) {
+        const auto crs = factory->createCoordinateReferenceSystem(code);
+        EXPECT_EQ(crs->normalizeForVisualization().get(), crs.get()) << code;
+    }
+
+    // 3D (north, east, up)
+    {
+        const auto crs = EngineeringCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Engineering CRS"),
+            EngineeringDatum::create(PropertyMap().set(
+                IdentifiedObject::NAME_KEY, "Engineering datum")),
+            CartesianCS::create(PropertyMap(), northAxis, eastAxis, upAxis));
+        const auto normalized = nn_dynamic_pointer_cast<EngineeringCRS>(
+            crs->normalizeForVisualization());
+        ASSERT_TRUE(normalized != nullptr);
+        const auto &axisList = normalized->coordinateSystem()->axisList();
+        ASSERT_EQ(axisList.size(), 3U);
+        EXPECT_EQ(axisList[0]->direction(), AxisDirection::EAST);
+        EXPECT_EQ(axisList[1]->direction(), AxisDirection::NORTH);
+        EXPECT_EQ(axisList[2]->direction(), AxisDirection::UP);
+    }
+
+    // Non-Cartesian CS
+    {
+        const auto crs = EngineeringCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Engineering CRS"),
+            EngineeringDatum::create(PropertyMap().set(
+                IdentifiedObject::NAME_KEY, "Engineering datum")),
+            OrdinalCS::create(PropertyMap(), {northAxis, eastAxis}));
+        EXPECT_EQ(crs->normalizeForVisualization().get(),
+                  static_cast<const CRS *>(crs.get()));
+    }
+
+    // DerivedEngineeringCRS: (north, east)
+    {
+        auto derivingConversion = Conversion::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
+            std::vector<OperationParameterNNPtr>{},
+            std::vector<ParameterValueNNPtr>{});
+        const auto crs = DerivedEngineeringCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              "Derived EngineeringCRS"),
+            createEngineeringCRS(), derivingConversion,
+            CartesianCS::createNorthingEasting(UnitOfMeasure::METRE));
+        const auto normalized = nn_dynamic_pointer_cast<DerivedEngineeringCRS>(
+            crs->normalizeForVisualization());
+        ASSERT_TRUE(normalized != nullptr);
+        const auto &axisList = normalized->coordinateSystem()->axisList();
+        ASSERT_EQ(axisList.size(), 2U);
+        EXPECT_EQ(axisList[0]->direction(), AxisDirection::EAST);
+        EXPECT_EQ(axisList[1]->direction(), AxisDirection::NORTH);
+        EXPECT_TRUE(normalized->baseCRS()->isEquivalentTo(
+            crs->baseCRS().get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(normalized->derivingConversion()->nameStr(), "unnamed");
+    }
+
+    // CompoundCRS with a (north, east) engineering horizontal component
+    {
+        const auto crs = CompoundCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Compound"),
+            {factory->createCoordinateReferenceSystem("5803"),
+             factory->createCoordinateReferenceSystem("5714")});
+        const auto normalized = nn_dynamic_pointer_cast<CompoundCRS>(
+            crs->normalizeForVisualization());
+        ASSERT_TRUE(normalized != nullptr);
+        const auto horizCRS = nn_dynamic_pointer_cast<EngineeringCRS>(
+            normalized->componentReferenceSystems()[0]);
+        ASSERT_TRUE(horizCRS != nullptr);
+        const auto &axisList = horizCRS->coordinateSystem()->axisList();
+        ASSERT_EQ(axisList.size(), 2U);
+        EXPECT_EQ(axisList[0]->direction(), AxisDirection::EAST);
+        EXPECT_EQ(axisList[1]->direction(), AxisDirection::NORTH);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projected_normalizeForVisualization_do_not_mess_deriving_conversion) {
 
     auto authFactory =
