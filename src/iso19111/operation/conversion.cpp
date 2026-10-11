@@ -3123,16 +3123,6 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
                                        const ESRIParamMapping *&esriParams) {
     esriParams = nullptr;
     esriMethodName = nullptr;
-    // ESRI WKT has no spherical variant of these methods (the sphere comes
-    // from the datum), so use the mapping of the ellipsoidal method, as
-    // selectSphericalOrEllipsoidal() does on import.
-    if (methodEPSGCode ==
-        EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL) {
-        methodEPSGCode = EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA;
-    } else if (methodEPSGCode ==
-               EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL) {
-        methodEPSGCode = EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA;
-    }
     const auto *esriMapping = getESRIMapping(methodName, methodEPSGCode);
     const auto l_targetCRS = conv->targetCRS();
     if (esriMapping) {
@@ -3218,8 +3208,11 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
             } else {
                 esriMethodName = "Stereographic_South_Pole";
             }
-        } else if (esriMapping->epsg_code ==
-                   EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA) {
+        } else if (
+            esriMapping->epsg_code ==
+                EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA ||
+            esriMapping->epsg_code ==
+                EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL) {
             if (std::abs(conv->parameterValueNumeric(
                              EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
                              common::UnitOfMeasure::DEGREE) -
