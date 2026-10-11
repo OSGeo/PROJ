@@ -946,6 +946,31 @@ bool CRS::mustAxisOrderBeSwitchedForVisualization() const {
     return false;
 }
 
+// ---------------------------------------------------------------------------
+
+/** Return whether this CRS declares no horizontal axes.
+ *
+ * Coordinate operations involving such a CRS just pass horizontal coordinates
+ * through, so their axis order is dictated by the other end of the operation
+ * rather than by this CRS.
+ */
+bool CRS::hasNoHorizontalAxes() const {
+
+    if (dynamic_cast<const VerticalCRS *>(this)) {
+        return true;
+    }
+
+    if (const CompoundCRS *compoundCRS =
+            dynamic_cast<const CompoundCRS *>(this)) {
+        const auto &comps = compoundCRS->componentReferenceSystems();
+        if (!comps.empty()) {
+            return comps[0]->hasNoHorizontalAxes();
+        }
+    }
+
+    return false;
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
