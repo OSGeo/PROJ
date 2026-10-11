@@ -3123,6 +3123,9 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
                                        const ESRIParamMapping *&esriParams) {
     esriParams = nullptr;
     esriMethodName = nullptr;
+    // ESRI WKT has no spherical variant of these methods (the sphere comes
+    // from the datum), so use the mapping of the ellipsoidal method, as
+    // selectSphericalOrEllipsoidal() does on import.
     if (methodEPSGCode ==
         EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL) {
         methodEPSGCode = EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA;
