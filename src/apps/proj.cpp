@@ -1,4 +1,5 @@
 /* <<<< Cartographic projection filter program >>>> */
+#define FROM_PROJ_CPP
 #include "proj.h"
 #include "emess.h"
 #include "proj_experimental.h"
@@ -11,7 +12,9 @@
 #include <string.h>
 
 #include <proj/crs.hpp>
+#include <proj/internal/internal.hpp>
 
+#include <string>
 #include <vector>
 
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__WIN32__)
@@ -553,15 +556,6 @@ int main(int argc, char **argv) {
                 }
             }
             if (type == PJ_TYPE_PROJECTED_CRS) {
-                try {
-                    auto crs = dynamic_cast<const NS_PROJ::crs::ProjectedCRS *>(
-                        P->iso_obj.get());
-                    auto &dir =
-                        crs->coordinateSystem()->axisList()[0]->direction();
-                    swapAxisCrs = dir == NS_PROJ::cs::AxisDirection::NORTH ||
-                                  dir == NS_PROJ::cs::AxisDirection::SOUTH;
-                } catch (...) {
-                }
                 auto geodetic_crs = proj_get_source_crs(ctx, P);
                 assert(geodetic_crs);
                 auto pm = proj_get_prime_meridian(ctx, geodetic_crs);
@@ -597,6 +591,44 @@ int main(int argc, char **argv) {
                 proj_destroy(cs);
                 Proj = proj_create_crs_to_crs_from_pj(ctx, geogCRSNormalized, P,
                                                       nullptr, nullptr);
+                auto targetCRS =
+                    Proj ? proj_get_target_crs(ctx, Proj) : nullptr;
+                if (targetCRS) {
+                    try {
+                        if (proj_get_type(targetCRS) == PJ_TYPE_PROJECTED_CRS) {
+                            const auto *crs = dynamic_cast<
+                                const NS_PROJ::crs::ProjectedCRS *>(
+                                targetCRS->iso_obj.get());
+                            if (crs) {
+                                const auto &axisList =
+                                    crs->coordinateSystem()->axisList();
+                                const auto &dir0 = axisList[0]->direction();
+                                const auto &dir1 = axisList[1]->direction();
+                                if (dir0 == dir1 &&
+                                    (dir0 ==
+                                         NS_PROJ::cs::AxisDirection::NORTH ||
+                                     dir0 ==
+                                         NS_PROJ::cs::AxisDirection::SOUTH)) {
+                                    swapAxisCrs =
+                                        NS_PROJ::internal::ci_starts_with(
+                                            axisList[0]->nameStr().c_str(),
+                                            "northing") &&
+                                        NS_PROJ::internal::ci_starts_with(
+                                            axisList[1]->nameStr().c_str(),
+                                            "easting");
+                                } else {
+                                    swapAxisCrs =
+                                        dir0 ==
+                                            NS_PROJ::cs::AxisDirection::NORTH ||
+                                        dir0 ==
+                                            NS_PROJ::cs::AxisDirection::SOUTH;
+                                }
+                            }
+                        }
+                    } catch (...) {
+                    }
+                    proj_destroy(targetCRS);
+                }
 
                 auto conversion = proj_crs_get_coordoperation(ctx, P);
                 auto projCS = proj_create_cartesian_2D_cs(
