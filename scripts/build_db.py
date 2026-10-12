@@ -1145,8 +1145,8 @@ def fill_alias(proj_db_cursor):
         if not match:
             print('Cannot find datum %s in geodetic_datum or vertical_datum' % (code))
 
-    # Skip ISO Geodetic Register code (1046)
-    proj_db_cursor.execute("SELECT DISTINCT object_code, alias, naming_system_code FROM epsg.epsg_alias WHERE object_table_name = 'epsg_coordinatereferencesystem' AND naming_system_code != 1046")
+    # Skip ISO Geodetic Register code (1046) and NGS SPCS2022 zone code (1066)
+    proj_db_cursor.execute("SELECT DISTINCT object_code, alias, naming_system_code FROM epsg.epsg_alias WHERE object_table_name = 'epsg_coordinatereferencesystem' AND naming_system_code NOT IN (1046, 1066)")
     for row in proj_db_cursor.fetchall():
         code, alt_name, naming_system_code = row
         if int(code) > 60000000:
