@@ -40,7 +40,7 @@ Steps for updating proj.db with the latest EPSG data:
 
 4. Verify output of the script and fix any errors it may report
 5. Update version number in `data/sql/metadata.sql`
-6. Update the `PROJ_DB_SQL_EXPECTED_MD5` in `data/CmakeLists.txt`:
+6. Update the hash in `data/sql/proj.db.sql.expected.md5`:
 
     Build PROJ with CMake to get the new hash. Update the hash and
     build again to verify that the hash is correct.
