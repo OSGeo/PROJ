@@ -125,7 +125,7 @@ from the first operation of the list:
   :dedent: 4
 
 We can now transform a point with the :cpp:func:`osgeo::proj::operation::CoordinateTransformer::transform`
-method. Note that the the expected input values should be passed in the order
+method. Note that the expected input values should be passed in the order
 and the unit of the successive axis of the input CRS. Similarly the values
 returned in the v[] array of the output PJ_COORD are in the order and the unit
 of the successive axis of the output CRS. For coordinate operations involving a

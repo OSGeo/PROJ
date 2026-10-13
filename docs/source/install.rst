@@ -10,7 +10,7 @@ variety of operating systems.
 There is a section for using package management systems.  If PROJ is
 available for a package management system you already use, and you
 wish to run the release of PROJ offered by that system (usually that's
-fine), this is is the easiest path.
+fine), this is the easiest path.
 
 There is a second section for building from source.  This section can
 be followed if there is no binary package available for your
@@ -171,7 +171,7 @@ Build requirements
 Test requirements
 +++++++++++++++++
 
-If :option:`BUILD_TESTING` is ON (the default), test programs will be be compiled at build time, and the following additional dependencies are required:
+If :option:`BUILD_TESTING` is ON (the default), test programs will be compiled at build time, and the following additional dependencies are required:
 
 - GoogleTest (GTest) >= 1.8.1; if not found and :option:`TESTING_USE_NETWORK` is ON, then version 1.15.2 is fetched from GitHub and locally installed
 - Python >= 3.7

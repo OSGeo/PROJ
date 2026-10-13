@@ -47,7 +47,7 @@ originally handwritten on paper maps and further copied by hand. The projection
 fit to existing maps during first software development in DOS era. Many years later
 it is still de facto standard grid in Polish geobotanical research.
 
-The ATPOL coordinates can be achieved with with the following parameters:
+The ATPOL coordinates can be achieved with the following parameters:
 
 ::
 

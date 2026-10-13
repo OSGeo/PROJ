@@ -13,7 +13,7 @@ struct EMESS {
 /* for emess procedure */
 struct EMESS emess_dat = {nullptr, nullptr, 0};
 
-#else /* for for calling procedures */
+#else /* for calling procedures */
 
 extern struct EMESS emess_dat;
 
