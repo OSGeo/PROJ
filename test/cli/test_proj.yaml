@@ -19,3 +19,49 @@ tests:
   args: EPSG:5972 -S
   in: 9 0
   out: "500000.00\t0.00\t<0.9996 0.9996 0.9992 0 0.9996 0.9996>"
+- comment: Test easting/northing labels on Arctic polar CRS
+  args: -V EPSG:3413
+  in: -45 80
+  grep: "Easting|Northing"
+  out: "Easting (x):   0.00\nNorthing (y):  -1085920.30"
+- comment: Test easting/northing labels on Antarctic polar CRS
+  args: -V EPSG:3031
+  in: 0 -80
+  grep: "Easting|Northing"
+  out: "Easting (x):   0.00\nNorthing (y):  1089179.46"
+- comment: Test UPS north-axis labels
+  args: -V EPSG:32661
+  in: 0 0
+  grep: "Easting|Northing"
+  out: "Northing (y):  -10637318.50\nEasting (x):   2000000.00"
+- comment: Test axis labels on custom WKT canonicalized by CRS name
+  args: >-
+    -V 'PROJCRS["WGS 84 / UPS North (N,E)",BASEGEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World Geodetic System 1984 (G2139)"],MEMBER["World Geodetic System 1984 (G2296)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],ID["EPSG",4326]],CONVERSION["Universal Polar Stereographic North",METHOD["Polar Stereographic (variant A)",ID["EPSG",9810]],PARAMETER["Latitude of natural origin",90,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8801]],PARAMETER["Longitude of natural origin",0,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8802]],PARAMETER["Scale factor at natural origin",0.994,SCALEUNIT["unity",1],ID["EPSG",8805]],PARAMETER["False easting",2000000,LENGTHUNIT["metre",1],ID["EPSG",8806]],PARAMETER["False northing",2000000,LENGTHUNIT["metre",1],ID["EPSG",8807]]],CS[Cartesian,2],AXIS["northing (N)",south,MERIDIAN[180,ANGLEUNIT["degree",0.0174532925199433]],ORDER[1],LENGTHUNIT["metre",1]],AXIS["other (E)",south,MERIDIAN[90,ANGLEUNIT["degree",0.0174532925199433]],ORDER[2],LENGTHUNIT["metre",1]],USAGE[SCOPE["Military survey."],AREA["Northern hemisphere - north of 60°N onshore and offshore, including Arctic."],BBOX[60,-180,90,180]]]'
+  in: 0 0
+  grep: "Easting|Northing"
+  out: "Northing (y):  -10637318.50\nEasting (x):   2000000.00"
+- comment: Test UPS North (E,N) axis labels
+  args: -V EPSG:5041
+  in: 0 0
+  grep: "Easting|Northing"
+  out: "Easting (x):   2000000.00\nNorthing (y):  -10637318.50"
+- comment: Test UPS south-axis labels
+  args: -V EPSG:32761
+  in: 0 0
+  grep: "Easting|Northing"
+  out: "Northing (y):  14637318.50\nEasting (x):   2000000.00"
+- comment: Test UPS South (E,N) axis labels
+  args: -V EPSG:5042
+  in: 0 0
+  grep: "Easting|Northing"
+  out: "Easting (x):   2000000.00\nNorthing (y):  14637318.50"
+- comment: Test verbose labels on west/east Swiss CRS
+  args: -V EPSG:21781
+  in: 7 46
+  grep: "Easting|Northing"
+  out: "Easting (x):   565948.04\nNorthing (y):  94232.45"
+- comment: Test verbose labels on southing/westing CRS with differing directions
+  args: -V EPSG:2065
+  in: 0 0
+  grep: "Easting|Northing"
+  out: "Northing (y):  6690755.72\nEasting (x):   3511150.39"
