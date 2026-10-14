@@ -786,7 +786,7 @@ tests:
         USAGE[
             SCOPE["Geodesy."],
             AREA["United States (USA) - Alaska."],
-            BBOX[51.3,172.42,71.4,-129.99]],
+            BBOX[51.17,172.34,71.44,-129.97]],
         ID["DERIVED_FROM(EPSG)",8549],
         REMARK["Uses NADCON5 method which expects longitudes positive east in range 0-360°; source and target CRSs have longitudes positive east in range -180° to +180°. Accuracy at 67% confidence level is 0.5m onshore, 5m nearshore and undetermined farther offshore."]]
 
