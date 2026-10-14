@@ -8135,23 +8135,25 @@ TEST(operation, compoundCRS_of_projCRS_to_geogCRS_3D_context) {
     // Check that unit conversion is OK
     auto op_proj =
         list[0]->exportToPROJString(PROJStringFormatter::create().get());
-    EXPECT_EQ(op_proj,
-              "+proj=pipeline "
-              "+step +proj=unitconvert +xy_in=us-ft +xy_out=m "
-              "+step +inv +proj=lcc +lat_0=39.3333333333333 +lon_0=-122 "
-              "+lat_1=41.6666666666667 +lat_2=40 +x_0=2000000.0001016 "
-              "+y_0=500000.0001016 +ellps=GRS80 "
-              "+step +proj=hgridshift +grids=us_noaa_cnhpgn.tif "
-              "+step +proj=gridshift +no_z_transform "
-              "+grids=us_noaa_nadcon5_nad83_harn_nad83_fbn_conus.tif "
-              "+step +proj=unitconvert +z_in=us-ft +z_out=m "
-              "+step +proj=vgridshift +grids=us_noaa_geoid03_conus.tif "
-              "+multiplier=1 "
-              "+step +inv +proj=gridshift "
-              "+grids=us_noaa_nadcon5_nad83_harn_nad83_fbn_conus.tif "
-              "+step +inv +proj=hgridshift +grids=us_noaa_cnhpgn.tif "
-              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
-              "+step +proj=axisswap +order=2,1");
+    EXPECT_EQ(
+        op_proj,
+        "+proj=pipeline "
+        "+step +proj=unitconvert +xy_in=us-ft +xy_out=m "
+        "+step +inv +proj=lcc +lat_0=39.3333333333333 +lon_0=-122 "
+        "+lat_1=41.6666666666667 +lat_2=40 +x_0=2000000.0001016 "
+        "+y_0=500000.0001016 +ellps=GRS80 "
+        "+step +proj=gridshift "
+        "+grids=us_noaa_nadcon5_nad83_1986_nad83_harn_conus.tif "
+        "+step +proj=gridshift +no_z_transform "
+        "+grids=us_noaa_nadcon5_nad83_harn_nad83_fbn_conus.tif "
+        "+step +proj=unitconvert +z_in=us-ft +z_out=m "
+        "+step +proj=vgridshift +grids=us_noaa_geoid03_conus.tif +multiplier=1 "
+        "+step +inv +proj=gridshift "
+        "+grids=us_noaa_nadcon5_nad83_harn_nad83_fbn_conus.tif "
+        "+step +inv +proj=gridshift "
+        "+grids=us_noaa_nadcon5_nad83_1986_nad83_harn_conus.tif "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+        "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
