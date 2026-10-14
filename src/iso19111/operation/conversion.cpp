@@ -3208,8 +3208,11 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
             } else {
                 esriMethodName = "Stereographic_South_Pole";
             }
-        } else if (esriMapping->epsg_code ==
-                   EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA) {
+        } else if (
+            esriMapping->epsg_code ==
+                EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA ||
+            esriMapping->epsg_code ==
+                EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL) {
             if (std::abs(conv->parameterValueNumeric(
                              EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
                              common::UnitOfMeasure::DEGREE) -
