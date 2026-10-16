@@ -470,6 +470,12 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1407','EUREF89',NULL,'EPSG','7019','
 INSERT INTO "usage" VALUES('EPSG','23762','geodetic_datum','EPSG','1407','EPSG','1182','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1408','Xrail84',NULL,'EPSG','7030','EPSG','8901',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','23812','geodetic_datum','EPSG','1408','EPSG','4822','EPSG','1297');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1409','Caribbean Terrestrial Reference Frame of 2022 epoch 2020.00',NULL,'EPSG','7019','EPSG','8901','2027-01-01',NULL,NULL,NULL,2020.0,0);
+INSERT INTO "usage" VALUES('EPSG','30195','geodetic_datum','EPSG','1409','EPSG','2251','EPSG','1027');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1410','Pacific Terrestrial Reference Frame of 2022 epoch 2020.00',NULL,'EPSG','7019','EPSG','8901','2025-06-16',NULL,NULL,NULL,2020.0,0);
+INSERT INTO "usage" VALUES('EPSG','27413','geodetic_datum','EPSG','1410','EPSG','4884','EPSG','1027');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1411','Mariana Terrestrial Reference Frame of 2022 epoch 2020.00',NULL,'EPSG','7019','EPSG','8901','2027-01-01',NULL,NULL,NULL,2020.0,0);
+INSERT INTO "usage" VALUES('EPSG','27408','geodetic_datum','EPSG','1411','EPSG','4883','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1412','ETRS89-DNK',NULL,'EPSG','7019','EPSG','8901','2019-01-01',NULL,NULL,NULL,2015.829,0);
 INSERT INTO "usage" VALUES('EPSG','23440','geodetic_datum','EPSG','1412','EPSG','1080','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1413','Asse geodetic datum 2025',NULL,'EPSG','7004','EPSG','8901',NULL,NULL,NULL,NULL,NULL,0);
