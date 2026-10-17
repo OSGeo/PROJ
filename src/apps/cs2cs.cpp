@@ -63,12 +63,12 @@ static PJ *transformation = nullptr;
 
 static bool srcIsLongLat = false;
 static double srcToRadians = 0.0;
-static bool srcIsDynamic = false;
+static bool srcIsDynamicNotCoordinateMetadata = false;
 
 static bool destIsLongLat = false;
 static double destToRadians = 0.0;
 static bool destIsLatLong = false;
-static bool destIsDynamic = false;
+static bool destIsDynamicNotCoordinateMetadata = false;
 
 static int reversein = 0, /* != 0 reverse input arguments */
     reverseout = 0,       /* != 0 reverse output arguments */
@@ -157,12 +157,12 @@ static void process(FILE *fid)
         double t = strtod(s, &s);
         if (s == before_time) {
             t = HUGE_VAL;
-            if (srcIsDynamic) {
+            if (srcIsDynamicNotCoordinateMetadata) {
                 fprintf(
                     stderr,
                     "Input coordinates lack a coordinate epoch, whereas the "
                     "source CRS is dynamic. Results might be inaccurate.\n");
-            } else if (destIsDynamic) {
+            } else if (destIsDynamicNotCoordinateMetadata) {
                 fprintf(stderr, "Input coordinates lack a coordinate epoch, "
                                 "whereas the destination CRS is dynamic. "
                                 "Results might be inaccurate.\n");
@@ -938,8 +938,10 @@ int main(int argc, char **argv) {
         }
         proj_destroy(src);
         src = srcMetadata;
+    } else if (PJ_TYPE_COORDINATE_METADATA == proj_get_type(src)) {
+        srcIsDynamicNotCoordinateMetadata = false;
     } else if (proj_crs_is_dynamic(nullptr, src)) {
-        srcIsDynamic = true;
+        srcIsDynamicNotCoordinateMetadata = true;
     }
 
     if (!targetEpoch.empty()) {
@@ -958,8 +960,10 @@ int main(int argc, char **argv) {
         }
         proj_destroy(dst);
         dst = dstMetadata;
+    } else if (PJ_TYPE_COORDINATE_METADATA == proj_get_type(dst)) {
+        destIsDynamicNotCoordinateMetadata = false;
     } else if (proj_crs_is_dynamic(nullptr, dst)) {
-        destIsDynamic = true;
+        destIsDynamicNotCoordinateMetadata = true;
     }
 
     std::string authorityOption; /* keep this variable in this outer scope ! */
