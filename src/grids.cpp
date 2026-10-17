@@ -589,7 +589,7 @@ GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
                 const auto role = tag.substr(rolePos, endQuote - rolePos);
                 if (role == "offset") {
                     if (sample >= 0 &&
-                        static_cast<unsigned>(sample) <= m_samplesPerPixel) {
+                        static_cast<unsigned>(sample) < m_samplesPerPixel) {
                         try {
                             if (m_adfOffset.empty()) {
                                 m_adfOffset.resize(m_samplesPerPixel);
@@ -601,7 +601,7 @@ GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
                     }
                 } else if (role == "scale") {
                     if (sample >= 0 &&
-                        static_cast<unsigned>(sample) <= m_samplesPerPixel) {
+                        static_cast<unsigned>(sample) < m_samplesPerPixel) {
                         try {
                             if (m_adfOffset.empty()) {
                                 m_adfOffset.resize(m_samplesPerPixel);
