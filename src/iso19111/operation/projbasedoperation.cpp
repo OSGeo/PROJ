@@ -263,7 +263,29 @@ void PROJBasedOperation::_exportToJSON(
 
 void PROJBasedOperation::_exportToPROJString(
     io::PROJStringFormatter *formatter) const {
+
     if (projStringExportable_) {
+
+        double sourceYear =
+            sourceCoordinateEpoch().has_value()
+                ? getRoundedEpochInDecimalYear(
+                      sourceCoordinateEpoch()->coordinateEpoch().convertToUnit(
+                          common::UnitOfMeasure::YEAR))
+                : 0;
+        double targetYear =
+            targetCoordinateEpoch().has_value()
+                ? getRoundedEpochInDecimalYear(
+                      targetCoordinateEpoch()->coordinateEpoch().convertToUnit(
+                          common::UnitOfMeasure::YEAR))
+                : 0;
+        if (sourceYear > 0 && targetYear == 0)
+            targetYear = sourceYear;
+        else if (targetYear > 0 && sourceYear == 0)
+            sourceYear = targetYear;
+        if (sourceYear > 0) {
+            formatter->addStep("set");
+            formatter->addParam("v_4", sourceYear);
+        }
         if (inverse_) {
             formatter->startInversion();
         }
@@ -271,6 +293,12 @@ void PROJBasedOperation::_exportToPROJString(
         if (inverse_) {
             formatter->stopInversion();
         }
+
+        if (targetYear > 0) {
+            formatter->addStep("set");
+            formatter->addParam("v_4", targetYear);
+        }
+
         return;
     }
 

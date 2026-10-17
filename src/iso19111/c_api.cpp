@@ -2147,6 +2147,8 @@ int proj_crs_is_derived(PJ_CONTEXT *ctx, const PJ *crs) {
  * @since 9.9
  */
 int proj_crs_is_dynamic(PJ_CONTEXT *ctx, const PJ *crs) {
+    if (nullptr == ctx)
+        ctx = pj_get_default_ctx();
     if (!crs) {
         proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
