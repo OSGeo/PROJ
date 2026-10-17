@@ -338,12 +338,15 @@ echo -e "_malloc\n_free\n_get_compilation_date\n_get_ptr_size" > ${INSTALL_DIR}/
 grep "^proj_\|^geod_" ${PROJ_SRC_DIR}/scripts/reference_exported_symbols.txt | grep -v "(" | sed 's/^/_/' >> ${INSTALL_DIR}/exported_symbols.txt
 head ${INSTALL_DIR}/exported_symbols.txt
 
+# Increase INITIAL_MEMORY if you get error message
+# wasm-ld: error: initial memory too small, xxx bytes needed
 emcc -v ${FINAL_LIBS} \
     -o ${INSTALL_DIR}/projModule.js \
     -O3 \
     -lembind \
     -s STACK_OVERFLOW_CHECK=1 \
     -s STACK_SIZE=5MB \
+    -s INITIAL_MEMORY=18MB \
     -s NO_DISABLE_EXCEPTION_CATCHING \
     -s FETCH=1 \
     -s USE_PTHREADS=1 \
