@@ -107,29 +107,30 @@ static double ell_int_5(double phi) {
     return phi * (y * d1 - d2 + 0.5 * C0);
 }
 
-// Copied from cephes
-// See https://github.com/scipy/xsf/blob/main/include/xsf/cephes/ellpj.h
-// Removed m for other cases
-// Returns true on success, returns false immediately if non-convergent
-// Removed std:: from trig functions since math.h is used instead of cmath
+// Based on Cephes ellpj.c by Stephen L. Moshier:
+// https://www.netlib.org/cephes/ellf.tgz
+// https://www.netlib.org/cephes/readme
+// Original code is copyrighted by Stephen L. Moshier and used freely
+// without any express or implied warranties.
+//
+// Adapted for the fixed parameter m = 0.5.
+// Returns false if the iteration does not converge.
 static bool ellpj_5(double u, double &sn, double &cn, double &dn) {
     constexpr double m = 0.5;
-    // https://github.com/scipy/xsf/blob/main/include/xsf/cephes/const.h
-    constexpr double MACHEP =
-        1.1102230246251565404236316680908203125E-16; // 2**-53
+    constexpr double MACHEP = 1.11022302462515654042E-16; // 2**-53
 
-    double ai, b, phi, t, twon, dnfac;
+    double ai, b, phi, t, twon;
     double a[9] = {0.0}, c[9] = {0.0};
     int i;
 
-    /* A. G. M. scale. See DLMF 22.20(ii) */
+    /*	A. G. M. scale		*/
     a[0] = 1.0;
     b = sqrt(1.0 - m);
     c[0] = sqrt(m);
     twon = 1.0;
     i = 0;
 
-    while (abs(c[i] / a[i]) > MACHEP) {
+    while (fabs(c[i] / a[i]) > MACHEP) {
         if (i > 7) {
             return false;
         }
@@ -150,16 +151,12 @@ static bool ellpj_5(double u, double &sn, double &cn, double &dn) {
         phi = (asin(t) + phi) / 2.0;
     } while (--i);
 
-    sn = sin(phi);
-    t = cos(phi);
-    cn = t;
-    dnfac = cos(phi - b);
-    /* See discussion after DLMF 22.20.5 */
-    if (abs(dnfac) < 0.1) {
-        dn = sqrt(1 - m * (sn) * (sn));
-    } else {
-        dn = t / dnfac;
-    }
+    t = sin(phi);
+    sn = t;
+    cn = cos(phi);
+    /* Thanks to Hartmut Henkel for reporting a bug here:  */
+    dn = sqrt(1.0 - m * t * t);
+
     return true;
 }
 
