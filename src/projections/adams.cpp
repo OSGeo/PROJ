@@ -147,7 +147,6 @@ static bool ellpj_5(double u, double &sn, double &cn, double &dn) {
     phi = twon * a[i] * u;
     do {
         t = c[i] * sin(phi) / a[i];
-        b = phi;
         phi = (asin(t) + phi) / 2.0;
     } while (--i);
 
