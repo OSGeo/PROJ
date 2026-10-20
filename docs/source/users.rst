@@ -62,6 +62,8 @@ Public organizations
 Private organizations
 ---------------------
 
+- `dataHabibi <https://datahabibi.ae/>`_ Dubai housing price forecasts and rental yields; its Python data pipeline uses PROJ through pyproj to compute geodesic areas of community boundaries
+
 (add yourself here if you are a direct user of PROJ API or utilities)
 
 Sponsors
