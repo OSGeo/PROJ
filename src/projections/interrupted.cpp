@@ -187,7 +187,7 @@ PJ *PJ_PROJECTION(interrupted) {
         x_start = x_end;
     }
 
-    // Add some marging to the last gore
+    // Add some margin to the last gore
     Q->lam_borders.back() += 1.;
     Q->x_borders.back() += 100.;
 

@@ -133,7 +133,7 @@ built-in ellipsoid definitions. Default is GRS80 if not given.
     ============   =================================    ============================
 
 If size and shape are given as ``+ellps=xxx``, later shape and size parameters
-are are taken into account as modifiers for the built-in ellipsoid definition.
+are taken into account as modifiers for the built-in ellipsoid definition.
 
 While this may seem strange, it is in accordance with historical PROJ
 behavior. It can e.g. be used to define coordinates on the ellipsoid
