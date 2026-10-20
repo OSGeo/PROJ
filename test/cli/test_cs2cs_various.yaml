@@ -1548,3 +1548,21 @@ tests:
   in: 15000 9500
   out: |
     615155.392	3063886.662 0.000
+- comment: >
+    Test coordinate metadata as src (ITRF2014 to NAD83(2011))
+  args: -d 7 EPSG:7912@2010 EPSG:6319
+  in: 40 -100 0
+  out: |
+    39.9999937	-99.9999885 0.9635281
+- comment: >
+    Test coordinate metadata as src (NAD83(2011) to ITRF2014)
+  args: -d 7 EPSG:6319 EPSG:7912@2010
+  in: 40 -100 0
+  out: |
+    40.0000063	-100.0000115 -0.9635276
+- comment: >
+    Test coordinate metadata as src (ITRF2014 to ETRF2000)
+  args: -d 7 EPSG:7912@2010 EPSG:7931@2025
+  in: 40 10 0
+  out: |
+    39.9999964	9.9999951 0.0130780
