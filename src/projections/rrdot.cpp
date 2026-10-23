@@ -19,7 +19,8 @@ struct pj_rrdot_data {
     double dist;
     double radius;
     double height;
-    double ndotv_vdott;
+    double ndotv;
+    double vdott;
     double vmag;
 };
 } // anonymous namespace
@@ -67,7 +68,8 @@ static PJ_LPZ rrdot_inverse3d(PJ_XYZ xyz, PJ *P) {
 
         /* Compute TCN scale factors */
         double gamma = xyz.x * cos_theta;
-        double alpha = (-xyz.x * xyz.y / Q->vmag) - gamma * Q->ndotv_vdott;
+        double alpha =
+            ((-xyz.x * xyz.y / Q->vmag) - gamma * Q->ndotv) / Q->vdott;
         a = xyz.x * sin_theta;
         double beta = -Q->side * sqrt(a * a - alpha * alpha);
 
@@ -201,12 +203,12 @@ static PJ *pj_rrdot_setup(PJ *P) { /* general initialization */
     /* Precompute dot factors */
     Q->vmag = sqrt(Q->vxyz.x * Q->vxyz.x + Q->vxyz.y * Q->vxyz.y +
                    Q->vxyz.z * Q->vxyz.z);
-    Q->ndotv_vdott = (Q->nhat.x * Q->vxyz.x + Q->nhat.y * Q->vxyz.y +
-                      Q->nhat.z * Q->vxyz.z) /
-                     Q->vmag;
-    Q->ndotv_vdott /= (Q->that.x * Q->vxyz.x + Q->that.y * Q->vxyz.y +
-                       Q->that.z * Q->vxyz.z) /
-                      Q->vmag;
+    Q->ndotv = (Q->nhat.x * Q->vxyz.x + Q->nhat.y * Q->vxyz.y +
+                Q->nhat.z * Q->vxyz.z) /
+               Q->vmag;
+    Q->vdott = (Q->that.x * Q->vxyz.x + Q->that.y * Q->vxyz.y +
+                Q->that.z * Q->vxyz.z) /
+               Q->vmag;
 
     P->fwd3d = rrdot_forward3d;
     P->inv3d = rrdot_inverse3d;
