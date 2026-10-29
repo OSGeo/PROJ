@@ -152,6 +152,7 @@ osgeo::proj::crs::DerivedVerticalCRS::create(osgeo::proj::util::PropertyMap cons
 osgeo::proj::crs::DerivedVerticalCRS::~DerivedVerticalCRS()
 osgeo::proj::crs::EngineeringCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::EngineeringDatum> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystem> > const&)
 osgeo::proj::crs::EngineeringCRS::datum() const
+osgeo::proj::crs::EngineeringCRS::demoteTo2D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::EngineeringCRS::~EngineeringCRS()
 osgeo::proj::crs::GeodeticCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::GeodeticReferenceFrame> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CartesianCS> > const&)
 osgeo::proj::crs::GeodeticCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::GeodeticReferenceFrame> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::SphericalCS> > const&)
