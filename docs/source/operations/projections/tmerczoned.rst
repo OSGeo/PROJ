@@ -44,7 +44,7 @@ Parameters
 
 .. option:: +lon_0=<value>
 
-    Defines the initial longitude which is the the western limit of zone 1.
+    Defines the initial longitude which is the western limit of zone 1.
 
 .. option:: +width=<value>
 
