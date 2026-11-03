@@ -7049,6 +7049,20 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
             "+towgs84=-168,-60,320,0,0,0,0 +no_defs +type=crs");
     }
     {
+        // IG05/12 Intermediate CRS: EPSG only defines WGS 84 to IG05/12
+        // Intermediate CRS (EPSG:9189), so +towgs84 must be its inverse
+        auto crs_6990 = factory->createCoordinateReferenceSystem("6990");
+        auto bound = crs_6990->createBoundCRSToWGS84IfPossible(
+            dbContext, CoordinateOperationContext::IntermediateCRSUse::NEVER);
+        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(
+            boundCRS->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=longlat +ellps=GRS80 "
+            "+towgs84=23.772,17.49,17.859,-0.3132,-1.85274,1.67299,-5.4262 "
+            "+no_defs +type=crs");
+    }
+    {
         // WGS 84 + EGM2008 height
         auto obj = createFromUserInput("EPSG:4326+3855", dbContext);
         auto crs = nn_dynamic_pointer_cast<CRS>(obj);

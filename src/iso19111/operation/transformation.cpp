@@ -75,6 +75,12 @@ namespace operation {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+static CoordinateOperationPtr
+createApproximateInverseIfPossible(const Transformation *op);
+
+// ---------------------------------------------------------------------------
+
 struct Transformation::Private {
 
     TransformationPtr forwardOperation_{};
@@ -194,6 +200,22 @@ Transformation::demoteTo2D(const std::string &,
 std::vector<double> Transformation::getTOWGS84Parameters(
     bool canThrowException) const // throw(io::FormattingException)
 {
+    // An InverseTransformation keeps the parameter values of its forward
+    // operation, so use the approximate inverse, as _exportToWKT() does.
+    if (auto inverse = dynamic_cast<const InverseTransformation *>(this)) {
+        const auto approxInverse = createApproximateInverseIfPossible(
+            inverse->inverseAsTransformation().get());
+        const auto approxTransf =
+            dynamic_cast<const Transformation *>(approxInverse.get());
+        if (approxTransf) {
+            return approxTransf->getTOWGS84Parameters(canThrowException);
+        }
+        if (!canThrowException)
+            return {};
+        throw io::FormattingException(
+            "Transformation cannot be formatted as WKT1 TOWGS84 parameters");
+    }
+
     // GDAL WKT1 assumes EPSG:9606 / Position Vector convention
 
     bool sevenParamsTransform = false;
