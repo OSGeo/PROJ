@@ -87,5 +87,13 @@ build_fuzzer proj_crs_to_crs_fuzzer test/fuzzers/proj_crs_to_crs_fuzzer.cpp
 echo "[libfuzzer]" > $OUT/proj_crs_to_crs_fuzzer.options
 echo "max_len = 10000" >> $OUT/proj_crs_to_crs_fuzzer.options
 
+build_fuzzer proj_grid_fuzzer test/fuzzers/proj_grid_fuzzer.cpp
+
+echo "[libfuzzer]" > $OUT/proj_grid_fuzzer.options
+echo "max_len = 1048576" >> $OUT/proj_grid_fuzzer.options
+
+python3 test/fuzzers/generate_grid_seeds.py $OUT/proj_grid_fuzzer_seed_corpus.zip data/tests
+cp test/fuzzers/proj_grid_fuzzer.dict $OUT
+
 cp -r data/* $OUT
 cp -r build/data/* $OUT
