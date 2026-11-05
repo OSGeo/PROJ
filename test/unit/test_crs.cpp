@@ -7723,6 +7723,36 @@ TEST(crs, promoteTo3D_and_demoteTo2D) {
         EXPECT_TRUE(demoted->demoteTo2D(std::string(), nullptr)
                         ->isEquivalentTo(demoted.get()));
     }
+    {
+        auto wkt = "LOCAL_CS[\"Engineering CRS (ft)\",\n"
+                   "    LOCAL_DATUM[\"Engineering datum\",12345],\n"
+                   "    UNIT[\"foot\",0.3048],\n"
+                   "    AXIS[\"Northing\",NORTH],\n"
+                   "    AXIS[\"Easting\",EAST]]";
+
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto crs3D = crs->promoteTo3D(std::string(), dbContext);
+        auto crs3DAsEngineering =
+            nn_dynamic_pointer_cast<EngineeringCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsEngineering != nullptr);
+        const auto &axes = crs3DAsEngineering->coordinateSystem()->axisList();
+        ASSERT_EQ(axes.size(), 3U);
+        EXPECT_EQ(axes[2].get()->unit().conversionToSI(), 0.3048);
+        EXPECT_EQ(axes[0].get()->direction(), AxisDirection::NORTH);
+        EXPECT_EQ(axes[1].get()->direction(), AxisDirection::EAST);
+        EXPECT_EQ(axes[2].get()->direction(), AxisDirection::UP);
+        EXPECT_EQ(axes[2].get()->nameStr(), "Up");
+        EXPECT_EQ(axes[2].get()->abbreviation(), "Z");
+
+        auto demoted = crs3DAsEngineering->demoteTo2D(std::string(), dbContext);
+        EXPECT_EQ(demoted->coordinateSystem()->axisList().size(), 2U);
+        EXPECT_TRUE(demoted->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_TRUE(demoted->demoteTo2D(std::string(), nullptr)
+                        ->isEquivalentTo(demoted.get()));
+    }
 }
 
 // ---------------------------------------------------------------------------

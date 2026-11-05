@@ -1393,6 +1393,8 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                           const io::DatabaseContextPtr &dbContext) const {
 
     common::UnitOfMeasure uom = common::UnitOfMeasure::METRE;
+    std::string name = cs::AxisName::Ellipsoidal_height;
+    std::string abbr = cs::AxisAbbreviation::h;
     if (auto projCRS = dynamic_cast<const ProjectedCRS *>(this)) {
         const auto &axisList = projCRS->coordinateSystem()->axisList();
         assert(!axisList.empty());
@@ -1405,12 +1407,17 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
             assert(!axisList.empty());
             uom = axisList[0]->unit();
         }
+    } else if (auto engCRS = dynamic_cast<const EngineeringCRS *>(this)) {
+        const auto &axisList = engCRS->coordinateSystem()->axisList();
+        assert(!axisList.empty());
+        uom = axisList[0]->unit();
+        name = "Up";
+        abbr = cs::AxisAbbreviation::Z;
     }
 
     auto upAxis = cs::CoordinateSystemAxis::create(
-        util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                cs::AxisName::Ellipsoidal_height),
-        cs::AxisAbbreviation::h, cs::AxisDirection::UP, uom);
+        util::PropertyMap().set(IdentifiedObject::NAME_KEY, name), abbr,
+        cs::AxisDirection::UP, uom);
     return promoteTo3D(newName, dbContext, upAxis);
 }
 
@@ -1570,6 +1577,18 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
         }
     }
 
+    else if (auto engCRS = dynamic_cast<const EngineeringCRS *>(this)) {
+        const auto &axisList = engCRS->coordinateSystem()->axisList();
+        if (axisList.size() == 2) {
+            auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
+                                              axisList[1],
+                                              verticalAxisIfNotAlreadyPresent);
+
+            return util::nn_static_pointer_cast<CRS>(EngineeringCRS::create(
+                createProperties(), engCRS->datum(), std::move(cs)));
+        }
+    }
+
     return NN_NO_CHECK(
         std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
 }
@@ -1628,6 +1647,10 @@ CRSNNPtr CRS::demoteTo2D(const std::string &newName,
         if (components.size() >= 2) {
             return components[0];
         }
+    }
+
+    else if (auto engCRS = dynamic_cast<const EngineeringCRS *>(this)) {
+        return engCRS->demoteTo2D(newName, dbContext);
     }
 
     return NN_NO_CHECK(
@@ -7246,6 +7269,35 @@ EngineeringCRS::create(const util::PropertyMap &properties,
     crs->setProperties(properties);
 
     return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a variant of this CRS "demoted" to a 2D one, if not already
+ * the case.
+ *
+ *
+ * @param newName Name of the new CRS. If empty, nameStr() will be used.
+ * @return a new CRS demoted to 2D, or the current one if already 2D or not
+ * applicable.
+ * @since 9.9.1
+ */
+EngineeringCRSNNPtr
+EngineeringCRS::demoteTo2D(const std::string &newName,
+                           const io::DatabaseContextPtr &) const {
+
+    const auto &axisList = coordinateSystem()->axisList();
+    if (axisList.size() == 3) {
+        auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
+                                          axisList[1]);
+        return EngineeringCRS::create(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    !newName.empty() ? newName : nameStr()),
+            datum(), cs);
+    }
+
+    return NN_NO_CHECK(std::dynamic_pointer_cast<EngineeringCRS>(
+        shared_from_this().as_nullable()));
 }
 
 // ---------------------------------------------------------------------------
