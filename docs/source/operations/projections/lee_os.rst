@@ -7,7 +7,7 @@ Lee Oblated Stereographic
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Azimuthal                                                |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
+| **Available forms** | Forward and inverse, spherical only                      |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
@@ -33,7 +33,12 @@ Parameters
 
 .. note:: All parameters are optional for the projection.
 
+The projection uses a sphere with the semi-major axis of the specified ellipsoid
+as its radius. The eccentricity of the ellipsoid is ignored.
+
 .. include:: ../options/ellps.rst
+
+.. include:: ../options/R.rst
 
 .. include:: ../options/x_0.rst
 
