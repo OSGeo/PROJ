@@ -600,6 +600,10 @@ PJ PROJ_DLL *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx,
                                             const char *const *options);
 /*! @endcond */
 PJ PROJ_DLL *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj);
+int PROJ_DLL proj_ellipsoid_from_proj_string(PJ_CONTEXT *ctx,
+                                             const char *definition,
+                                             double *out_semi_major_metre,
+                                             double *out_eccentricity_squared);
 /*! @cond Doxygen_Suppress */
 void PROJ_DLL proj_assign_context(PJ *pj, PJ_CONTEXT *ctx);
 PJ PROJ_DLL *proj_destroy(PJ *P);
