@@ -7,7 +7,7 @@ Modified Stereographic of 48 U.S.
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Azimuthal                                                |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
+| **Available forms** | Forward and inverse, spherical only                      |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | The lower 48 states of the U.S.                          |
 +---------------------+----------------------------------------------------------+
@@ -33,7 +33,8 @@ Parameters
 
 .. note:: All parameters are optional for the projection.
 
-.. include:: ../options/ellps.rst
+The projection uses a sphere with a fixed radius of 6370997 m. Ellipsoid and
+radius parameters do not change this radius.
 
 .. include:: ../options/x_0.rst
 
