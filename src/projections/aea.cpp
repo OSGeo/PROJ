@@ -98,7 +98,7 @@ static PJ_LP aea_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoid/spheroid, inverse */
         lp.phi = Q->rho / Q->dd;
         if (Q->ellips) {
             const double qs = (Q->c - lp.phi * lp.phi) / Q->n;
-            if (fabs(Q->ec - fabs(qs)) > TOL7) {
+            if (fabs(qs) < Q->qp || fabs(Q->ec - fabs(qs)) > TOL7) {
                 if (fabs(qs) > 2) {
                     proj_errno_set(
                         P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
