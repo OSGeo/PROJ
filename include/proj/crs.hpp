@@ -806,6 +806,9 @@ class PROJ_GCC_DLL EngineeringCRS : virtual public SingleCRS {
            const datum::EngineeringDatumNNPtr &datumIn,
            const cs::CoordinateSystemNNPtr &csIn);
 
+    PROJ_DLL EngineeringCRSNNPtr demoteTo2D(
+        const std::string &newName, const io::DatabaseContextPtr &) const;
+
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
