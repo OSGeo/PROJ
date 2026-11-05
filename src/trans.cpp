@@ -44,6 +44,12 @@ inline bool pj_coord_has_nans(PJ_COORD coo) {
 }
 
 /**************************************************************************************/
+#ifndef PROJLITE
+// CRS-to-CRS factory results may contain multiple database-derived candidates.
+// This helper checks each candidate's source/destination area of use, then
+// prefers the most accurate applicable operation (with instantiability and
+// area-size tie breakers). PROJLITE creates one explicit core PJ instead of
+// this candidate list, so it has no selection problem to solve.
 int pj_get_suggested_operation(PJ_CONTEXT *,
                                const std::vector<PJCoordOperation> &opList,
                                const int iExcluded[2], bool skipNonInstantiable,
@@ -174,8 +180,15 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
 
     return iBest;
 }
+#endif
 
 /**************************************************************************************/
+#ifndef PROJLITE
+// A selected ISO 19111 operation can fail because one or more of its datum
+// grids are unavailable. This helper queries the database-backed grid metadata
+// API to name those resources and apply ONLY_BEST warning/error policy. A
+// PROJLITE PJ is an explicit core operation and has no candidate-operation
+// metadata for this diagnostic to inspect.
 void pj_warn_about_missing_grid(PJ *P)
 /**************************************************************************************/
 {
@@ -209,6 +222,7 @@ void pj_warn_about_missing_grid(PJ *P)
                                                     : PJ_LOG_DEBUG,
            msg.c_str());
 }
+#endif
 
 /**************************************************************************************/
 PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
@@ -224,12 +238,20 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
     if (P->inverted)
         direction = pj_opposite_direction(direction);
 
+#ifndef PROJLITE
     if (P->iso_obj != nullptr && !P->iso_obj_is_coordinate_operation) {
         pj_log(P->ctx, PJ_LOG_ERROR, "Object is not a coordinate operation");
         proj_errno_set(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         return proj_coord_error();
     }
+#endif
 
+#ifndef PROJLITE
+    // A full CRS-to-CRS PJ can hold candidates with different areas and grids.
+    // Select the candidate matching this coordinate, retry another candidate
+    // if needed, and report a missing-grid condition according to the policy.
+    // PROJLITE has no database-derived candidate list; the core path below runs
+    // the single explicitly constructed PJ and reports its own transform error.
     if (!P->alternativeCoordinateOperations.empty()) {
         constexpr int N_MAX_RETRY = 2;
         int iExcluded[N_MAX_RETRY] = {-1, -1};
@@ -344,6 +366,7 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_NO_OPERATION);
         return proj_coord_error();
     }
+#endif
 
     P->iCurCoordOp =
         0; // dummy value, to be used by proj_trans_get_last_used_operation()
@@ -360,6 +383,11 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
 }
 
 /*****************************************************************************/
+#ifndef PROJLITE
+// Expose the candidate chosen during the previous proj_trans() call. This is
+// useful only when proj_create_crs_to_crs() supplied a list of alternatives;
+// PROJLITE omits that factory and therefore has no selected-candidate object to
+// return. Its explicit PJ operation is already the operation being executed.
 PJ *proj_trans_get_last_used_operation(PJ *P)
 /******************************************************************************
     Return the operation used during the last invocation of proj_trans().
@@ -375,6 +403,7 @@ object must be freed with proj_destroy().
     return proj_clone(P->ctx,
                       P->alternativeCoordinateOperations[P->iCurCoordOp].pj);
 }
+#endif
 
 /*****************************************************************************/
 int proj_trans_array(PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord) {

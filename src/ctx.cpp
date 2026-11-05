@@ -72,9 +72,15 @@ void proj_assign_context(PJ *pj, PJ_CONTEXT *ctx) {
     if (pj->reassign_context) {
         pj->reassign_context(pj, ctx);
     }
+#ifndef PROJLITE
+    // A full CRS-to-CRS PJ can own multiple candidate PJs selected from
+    // proj.db. Each candidate keeps its own context pointer and can perform
+    // grid/network access, so all children must move with the parent when its
+    // thread-specific context is reassigned. PROJLITE creates no such list.
     for (const auto &alt : pj->alternativeCoordinateOperations) {
         proj_assign_context(alt.pj, ctx);
     }
+#endif
 }
 
 /************************************************************************/
@@ -117,12 +123,18 @@ pj_ctx pj_ctx::createDefault() {
 /*                           get_cpp_context()                            */
 /**************************************************************************/
 
+#ifndef PROJLITE
+// Create the bridge only when an ISO 19111 API needs it. It owns this
+// PJ_CONTEXT's DatabaseContext, configured database paths, and lookup state;
+// delaying construction avoids opening proj.db for ordinary PROJ strings.
+// PROJLITE has no such database APIs or SQLite-backed context to create.
 projCppContext *pj_ctx::get_cpp_context() {
     if (cpp_context == nullptr) {
         cpp_context = new projCppContext(this);
     }
     return cpp_context;
 }
+#endif
 
 /************************************************************************/
 /*                           set_search_paths()                         */
@@ -161,7 +173,16 @@ pj_ctx::pj_ctx(const pj_ctx &other)
       warnIfBestTransformationNotAvailableDefault(
           other.warnIfBestTransformationNotAvailableDefault),
       logger(other.logger), logger_app_data(other.logger_app_data),
+#ifndef PROJLITE
+    // Preserve the configured database paths, but clone the bridge so the
+    // new PJ_CONTEXT owns its own DatabaseContext and connections rather
+    // than sharing state tied to the source context.
       cpp_context(other.cpp_context ? other.cpp_context->clone(this) : nullptr),
+#else
+    // PROJLITE has no database bridge to clone; keep the pointer null so
+    // core-only operations and cleanup do not depend on ISO 19111/SQLite.
+      cpp_context(nullptr),
+#endif
       use_proj4_init_rules(other.use_proj4_init_rules),
       forceOver(other.forceOver), epsg_file_exists(other.epsg_file_exists),
       env_var_proj_data(other.env_var_proj_data),
@@ -199,7 +220,12 @@ PJ_CONTEXT *pj_get_default_ctx()
 
 pj_ctx::~pj_ctx() {
     delete[] c_compat_paths;
+#ifndef PROJLITE
+    // Release the bridge and its DatabaseContext/connections before the
+    // PJ_CONTEXT disappears. PROJLITE never constructs it and therefore must
+    // not link the ISO 19111/SQLite cleanup path.
     proj_context_delete_cpp_context(cpp_context);
+#endif
 }
 
 /************************************************************************/

@@ -27,7 +27,9 @@ if("@CURL_ENABLED@")
 endif()
 cmake_policy(POP)
 
-find_dependency(SQLite3)
+if(NOT @PROJLITE@)
+  find_dependency(SQLite3)
+endif()
 
 if(DEFINED PROJ_CONFIG_FIND_TIFF_DEP)
     find_dependency(TIFF)
@@ -54,7 +56,7 @@ set_variable_from_rel_or_absolute_path("@PROJECT_VARIANT_NAME@_INCLUDE_DIRS" "${
 set_variable_from_rel_or_absolute_path("@PROJECT_VARIANT_NAME@_LIBRARY_DIRS" "${_ROOT}" "@CMAKE_INSTALL_LIBDIR@")
 set_variable_from_rel_or_absolute_path("@PROJECT_VARIANT_NAME@_BINARY_DIRS" "${_ROOT}" "@CMAKE_INSTALL_BINDIR@")
 
-set (@PROJECT_VARIANT_NAME@_LIBRARIES @PROJECT_VARIANT_NAME@::proj)
+set (@PROJECT_VARIANT_NAME@_LIBRARIES @PROJECT_VARIANT_NAME@::@PROJECT_NAME_LOWER@)
 # Read in the exported definition of the library
 include ("${_DIR}/@PROJECT_NAME_LOWER@-targets.cmake")
 if (@INSTALL_LEGACY_CMAKE_FILES@)

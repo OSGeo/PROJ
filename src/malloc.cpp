@@ -190,19 +190,30 @@ PJ *pj_default_destructor(PJ *P, int errlev) { /* Destructor */
 void proj_cleanup() {
     /*****************************************************************************/
 
-    // Close the database context of the default PJ_CONTEXT
     auto ctx = pj_get_default_ctx();
     ctx->iniFileLoaded = false;
+
+#ifndef PROJLITE
+    // Close the default context's ISO 19111 DatabaseContext before clearing
+    // global caches. It owns SQLite connections and is not constructed in
+    // PROJLITE, so the Lite cleanup path has no database object to close.
     auto cpp_context = ctx->cpp_context;
     if (cpp_context) {
         cpp_context->closeDb();
     }
+#endif
 
     pj_clear_initcache();
     FileManager::clearMemoryCache();
     pj_clear_hgridshift_knowngrids_cache();
     pj_clear_vgridshift_knowngrids_cache();
     pj_clear_gridshift_knowngrids_cache();
+
+#ifndef PROJLITE
+    // Clear caches populated by SQLite and proj.db metadata/CRS lookups. The
+    // core init and grid-shift caches above are still cleared in PROJLITE; only
+    // these database-specific caches and their symbols are omitted.
     pj_clear_sqlite_cache();
     pj_clear_proj_info();
+#endif
 }

@@ -1,0 +1,178 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b68ae6639f..08c0a52932 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -126,6 +126,15 @@ if(PROJLITE)
+   set(BUILD_PROJ OFF)
+   set(BUILD_PROJINFO OFF)
+   set(BUILD_PROJSYNC OFF)
++  set(PROJ_OUTPUT_NAME "projlite" CACHE STRING "Name of PROJLITE library" FORCE)
++endif()
++
++if(PROJLITE)
++  set(PROJLITE_PACKAGE_NAME "PROJLITE")
++  set(PROJLITE_PACKAGE_NAME_LOWER "projlite")
++else()
++  set(PROJLITE_PACKAGE_NAME "PROJ")
++  set(PROJLITE_PACKAGE_NAME_LOWER "proj")
+ endif()
+ 
+ include(CheckCXXCompilerFlag)
+@@ -600,7 +609,7 @@ endif()
+ configure_proj_pc()
+ 
+ install(FILES
+-  ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
++  ${CMAKE_CURRENT_BINARY_DIR}/${PROJLITE_PACKAGE_NAME_LOWER}.pc
+   DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+ 
+ ################################################################################
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index 191fd074be..fa2be69157 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -90,11 +90,15 @@ string(COMPARE EQUAL "${PROJECT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" DEFAULT_VAL)
+ option(INSTALL_LEGACY_CMAKE_FILES "Install PROJ4 legacy target CMake files" ${DEFAULT_VAL})
+ 
+ set(PROJECT_LIST ${PROJECT_NAME})
+-if (INSTALL_LEGACY_CMAKE_FILES)
++if(PROJLITE)
++  set(PROJECT_LIST PROJLITE)
++endif()
++if (INSTALL_LEGACY_CMAKE_FILES AND NOT PROJLITE)
+     set(PROJECT_LIST "${PROJECT_LIST}" "${PROJECT_LEGACY_NAME}")
+ endif ()
+ foreach (PROJECT_VARIANT_NAME IN LISTS PROJECT_LIST)
+   string (TOLOWER "${PROJECT_VARIANT_NAME}" PROJECT_VARIANT_LOWER)
++  set (PROJECT_NAME_LOWER "${PROJECT_VARIANT_LOWER}")
+   set (CMAKECONFIGSUBDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_VARIANT_LOWER}")
+   # proj-config.cmake for the install tree.  It's installed in
+   # ${CMAKECONFIGSUBDIR} and @PROJECT_ROOT_DIR@ is the relative
+@@ -117,8 +121,8 @@ foreach (PROJECT_VARIANT_NAME IN LISTS PROJECT_LIST)
+   # Make information about the cmake targets (the library and the tools)
+   # available.
+   install(EXPORT targets
+-    NAMESPACE ${PROJECT_NAME}::
+-    FILE ${PROJECT_NAME_LOWER}-targets.cmake
++    NAMESPACE ${PROJECT_VARIANT_NAME}::
++    FILE ${PROJECT_VARIANT_LOWER}-targets.cmake
+     DESTINATION "${CMAKECONFIGSUBDIR}")
+   if (INSTALL_LEGACY_CMAKE_FILES)
+       install(EXPORT targets
+diff --git a/cmake/ProjUtilities.cmake b/cmake/ProjUtilities.cmake
+index d9cf6f830c..3080b23837 100644
+--- a/cmake/ProjUtilities.cmake
++++ b/cmake/ProjUtilities.cmake
+@@ -53,7 +53,8 @@ function(configure_proj_pc)
+   set_variable_from_rel_or_absolute_path("includedir" "$\{prefix\}" "${CMAKE_INSTALL_INCLUDEDIR}")
+   set_variable_from_rel_or_absolute_path("datarootdir" "$\{prefix\}" "${CMAKE_INSTALL_DATAROOTDIR}")
+   set(datadir "$\{datarootdir\}")
+-  set(PACKAGE "proj")
++  set(PACKAGE "${PROJLITE_PACKAGE_NAME_LOWER}")
++  set(PACKAGE_NAME "${PROJLITE_PACKAGE_NAME}")
+   set(VERSION ${PROJ_VERSION})
+   # Build strings of dependencies (Libs.private, Requires.private)
+   set(EXTRA_LIBS "${CMAKE_THREAD_LIBS_INIT}")
+@@ -66,7 +67,9 @@ function(configure_proj_pc)
+       list(APPEND EXTRA_LIBS "${ARGN}")
+     endif()
+   endmacro()
+-  add_module_or_libs(sqlite3 -lsqlite3)
++  if(NOT PROJLITE)
++    add_module_or_libs(sqlite3 -lsqlite3)
++  endif()
+   if(TIFF_ENABLED)
+     add_module_or_libs(libtiff-4 -ltiff)
+   endif()
+@@ -95,6 +98,6 @@ function(configure_proj_pc)
+ 
+   configure_file(
+     ${CMAKE_CURRENT_SOURCE_DIR}/proj.pc.in
+-    ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
++    ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}.pc
+     @ONLY)
+ endfunction()
+diff --git a/cmake/project-config.cmake.in b/cmake/project-config.cmake.in
+index 4e7f2f9402..9c5aa75d9f 100644
+--- a/cmake/project-config.cmake.in
++++ b/cmake/project-config.cmake.in
+@@ -27,7 +27,9 @@ if("@CURL_ENABLED@")
+ endif()
+ cmake_policy(POP)
+ 
+-find_dependency(SQLite3)
++if(NOT @PROJLITE@)
++  find_dependency(SQLite3)
++endif()
+ 
+ if(DEFINED PROJ_CONFIG_FIND_TIFF_DEP)
+     find_dependency(TIFF)
+@@ -54,7 +56,7 @@ set_variable_from_rel_or_absolute_path("@PROJECT_VARIANT_NAME@_INCLUDE_DIRS" "${
+ set_variable_from_rel_or_absolute_path("@PROJECT_VARIANT_NAME@_LIBRARY_DIRS" "${_ROOT}" "@CMAKE_INSTALL_LIBDIR@")
+ set_variable_from_rel_or_absolute_path("@PROJECT_VARIANT_NAME@_BINARY_DIRS" "${_ROOT}" "@CMAKE_INSTALL_BINDIR@")
+ 
+-set (@PROJECT_VARIANT_NAME@_LIBRARIES @PROJECT_VARIANT_NAME@::proj)
++set (@PROJECT_VARIANT_NAME@_LIBRARIES @PROJECT_VARIANT_NAME@::@PROJECT_NAME_LOWER@)
+ # Read in the exported definition of the library
+ include ("${_DIR}/@PROJECT_NAME_LOWER@-targets.cmake")
+ if (@INSTALL_LEGACY_CMAKE_FILES@)
+diff --git a/data/CMakeLists.txt b/data/CMakeLists.txt
+index 7e9f367920..aeb02e55fc 100644
+--- a/data/CMakeLists.txt
++++ b/data/CMakeLists.txt
+@@ -118,5 +118,5 @@ endif()
+ 
+ install(
+   FILES ${ALL_DATA_FILE}
+-  DESTINATION ${CMAKE_INSTALL_DATADIR}/proj
++  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJLITE_PACKAGE_NAME_LOWER}
+ )
+diff --git a/proj.pc.in b/proj.pc.in
+index c829f0789a..83f5f6108c 100644
+--- a/proj.pc.in
++++ b/proj.pc.in
+@@ -4,7 +4,7 @@ includedir=@includedir@
+ datarootdir=@datarootdir@
+ datadir=@datadir@/@PACKAGE@
+ 
+-Name: PROJ
++Name: @PROJLITE_PACKAGE_NAME@
+ Description: Coordinate transformation software library
+ Requires:
+ Version: @VERSION@
+diff --git a/src/lib_proj.cmake b/src/lib_proj.cmake
+index 076068fe94..89a80c9ad1 100644
+--- a/src/lib_proj.cmake
++++ b/src/lib_proj.cmake
+@@ -397,7 +397,13 @@ add_library(proj
+   ${ALL_LIBPROJ_HEADERS}
+   ${PROJ_RESOURCES}
+ )
+-add_library(PROJ::proj ALIAS proj)
++if(PROJLITE)
++  add_library(PROJLITE::projlite ALIAS proj)
++  set_target_properties(proj PROPERTIES EXPORT_NAME projlite)
++  target_compile_definitions(proj PUBLIC PROJLITE)
++else()
++  add_library(PROJ::proj ALIAS proj)
++endif()
+ 
+ target_compile_features(proj
+   PUBLIC
+@@ -561,10 +567,15 @@ endif()
+ set_target_properties(proj PROPERTIES OUTPUT_NAME ${PROJ_OUTPUT_NAME})
+ 
+ if(WIN32)
++  if(PROJLITE)
++    set(PROJ_ARCHIVE_OUTPUT_NAME projlite)
++  else()
++    set(PROJ_ARCHIVE_OUTPUT_NAME proj)
++  endif()
+   set_target_properties(proj
+     PROPERTIES
+     VERSION "${PROJ_VERSION}"
+-    ARCHIVE_OUTPUT_NAME proj
++    ARCHIVE_OUTPUT_NAME ${PROJ_ARCHIVE_OUTPUT_NAME}
+     CLEAN_DIRECT_OUTPUT 1)
+     if (MINGW AND BUILD_SHARED_LIBS AND APPEND_SOVERSION)
+         set_target_properties(proj PROPERTIES SUFFIX "-${PROJ_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")

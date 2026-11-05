@@ -29,6 +29,9 @@ file(GLOB GEOTIFF_FILES *.tif)
 
 set(ALL_SQL_IN "${CMAKE_CURRENT_BINARY_DIR}/all.sql.in")
 set(PROJ_DB "${CMAKE_CURRENT_BINARY_DIR}/proj.db")
+if(PROJLITE)
+  set(PROJ_DB)
+else()
 include(sql_filelist.cmake)
 
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
@@ -49,6 +52,7 @@ add_custom_command(
 )
 
 add_custom_target(generate_proj_db ALL DEPENDS ${PROJ_DB})
+endif()
 
 if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
   foreach(FILE ${PROJ_INI} ${PROJ_DICTIONARY} ${GRIDSHIFT_FILES})
@@ -111,5 +115,5 @@ endif()
 
 install(
   FILES ${ALL_DATA_FILE}
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/proj
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJLITE_PACKAGE_NAME_LOWER}
 )

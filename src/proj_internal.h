@@ -73,8 +73,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "proj/util.hpp"
+#ifndef PROJLITE
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#endif
 
 #include <cmath>
 #include <string>
@@ -316,6 +319,7 @@ typedef void (*PJ_OPERATOR)(PJ_COORD &, PJ *);
 #define PJD_GRIDSHIFT 3
 #define PJD_WGS84 4 /* WGS84 (or anything considered equivalent) */
 
+#ifndef PROJLITE
 struct PJCoordOperation {
   public:
     int idxInOriginalList;
@@ -445,6 +449,7 @@ struct PJCoordOperation {
         -1; // must be different from 0(=false) and 1(=true)
     mutable int isInstantiableCached = INSTANTIABLE_STATUS_UNKNOWN;
 };
+#endif
 
 enum class TMercAlgo {
     AUTO, // Poder/Engsager if far from central meridian, otherwise
@@ -663,8 +668,10 @@ struct PJconsts {
      ISO-19111 interface
     **************************************************************************************/
 
+#ifndef PROJLITE
     NS_PROJ::util::BaseObjectPtr iso_obj{};
     bool iso_obj_is_coordinate_operation = false;
+#endif
     double coordinateEpoch = 0;
     bool hasCoordinateEpoch = false;
 
@@ -672,8 +679,15 @@ struct PJconsts {
     mutable std::string lastWKT{};
     mutable std::string lastPROJString{};
     mutable std::string lastJSONString{};
+#ifndef PROJLITE
+    // The ISO 19111 C API can query a coordinate operation's required grids
+    // from proj.db. Cache the descriptions and "already queried" state on the
+    // PJ to avoid repeating that database work. PROJLITE omits these API
+    // queries and metadata, so this state and its GridDescription dependency
+    // are not needed in its PJ layout.
     mutable bool gridsNeededAsked = false;
     mutable std::vector<NS_PROJ::operation::GridDescription> gridsNeeded{};
+#endif
 
     // cache pj_get_type() result to help for repeated calls to proj_factors()
     mutable PJ_TYPE type = PJ_TYPE_UNKNOWN;
@@ -681,7 +695,15 @@ struct PJconsts {
     /*************************************************************************************
      proj_create_crs_to_crs() alternative coordinate operations
     **************************************************************************************/
+#ifndef PROJLITE
+    // proj_create_crs_to_crs() can use the database to build several candidate
+    // operations, each with area, accuracy, grid, and instantiability metadata.
+    // proj_trans() selects among those candidates for each coordinate and may
+    // retry another one if a grid is unavailable. PROJLITE accepts an explicit
+    // core operation/pipeline instead; it does not perform database-backed
+    // CRS-to-CRS discovery or per-coordinate candidate selection.
     std::vector<PJCoordOperation> alternativeCoordinateOperations{};
+#endif
     int iCurCoordOp = -1;
     bool errorIfBestTransformationNotAvailable = false;
     bool warnIfBestTransformationNotAvailable =
@@ -992,6 +1014,7 @@ std::string PROJ_DLL pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx);
 // For use by projsync
 std::string PROJ_DLL pj_get_relative_share_proj(PJ_CONTEXT *ctx);
 
+#ifndef PROJLITE
 std::vector<PJCoordOperation>
 pj_create_prepared_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
                               const PJ *target_crs, PJ_OBJ_LIST *op_list);
@@ -1000,26 +1023,35 @@ int pj_get_suggested_operation(PJ_CONTEXT *ctx,
                                const std::vector<PJCoordOperation> &opList,
                                const int iExcluded[2], bool skipNonInstantiable,
                                PJ_DIRECTION direction, PJ_COORD coord);
+#endif
 
 const PJ_UNITS *pj_list_linear_units();
 const PJ_UNITS *pj_list_angular_units();
 
+#ifndef PROJLITE
 void pj_clear_proj_info();
+#endif
 
 void pj_clear_hgridshift_knowngrids_cache();
 void pj_clear_vgridshift_knowngrids_cache();
 void pj_clear_gridshift_knowngrids_cache();
 
+#ifndef PROJLITE
 void pj_clear_sqlite_cache();
+#endif
 
 PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial,
                             double deltaXYTolerance);
 
+#ifndef PROJLITE
 PJ *pj_obj_create(PJ_CONTEXT *ctx, const NS_PROJ::util::BaseObjectNNPtr &objIn);
+#endif
 
 PJ_DIRECTION pj_opposite_direction(PJ_DIRECTION dir);
 
+#ifndef PROJLITE
 void pj_warn_about_missing_grid(PJ *P);
+#endif
 
 /*****************************************************************************/
 /*                                                                           */

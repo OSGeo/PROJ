@@ -53,7 +53,8 @@ function(configure_proj_pc)
   set_variable_from_rel_or_absolute_path("includedir" "$\{prefix\}" "${CMAKE_INSTALL_INCLUDEDIR}")
   set_variable_from_rel_or_absolute_path("datarootdir" "$\{prefix\}" "${CMAKE_INSTALL_DATAROOTDIR}")
   set(datadir "$\{datarootdir\}")
-  set(PACKAGE "proj")
+  set(PACKAGE "${PROJLITE_PACKAGE_NAME_LOWER}")
+  set(PACKAGE_NAME "${PROJLITE_PACKAGE_NAME}")
   set(VERSION ${PROJ_VERSION})
   # Build strings of dependencies (Libs.private, Requires.private)
   set(EXTRA_LIBS "${CMAKE_THREAD_LIBS_INIT}")
@@ -66,7 +67,9 @@ function(configure_proj_pc)
       list(APPEND EXTRA_LIBS "${ARGN}")
     endif()
   endmacro()
-  add_module_or_libs(sqlite3 -lsqlite3)
+  if(NOT PROJLITE)
+    add_module_or_libs(sqlite3 -lsqlite3)
+  endif()
   if(TIFF_ENABLED)
     add_module_or_libs(libtiff-4 -ltiff)
   endif()
@@ -95,6 +98,6 @@ function(configure_proj_pc)
 
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/proj.pc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
+    ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}.pc
     @ONLY)
 endfunction()

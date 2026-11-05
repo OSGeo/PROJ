@@ -26,6 +26,12 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#ifndef PROJLITE
+// The full C API below wraps ISO 19111 C++ objects, WKT/PROJJSON parsers, and
+// database-backed CRS and operation factories. PROJLITE does not build that
+// stack; its #else branch provides only the core PROJ-string constructor and
+// the limited type classifier needed by the pipeline-focused library.
+
 #ifndef FROM_PROJ_CPP
 #define FROM_PROJ_CPP
 #endif
@@ -10155,3 +10161,89 @@ PJ *proj_crs_add_horizontal_derived_conversion(PJ_CONTEXT *ctx,
     }
     return nullptr;
 }
+
+#else
+
+// Keep this branch independent of ISO 19111 and SQLite: include only the core
+// C API declarations and provide the two PROJLITE-compatible functions below.
+
+// PROJ include order is sensitive
+// clang-format off
+#include "proj.h"
+#include "proj_internal.h"
+// clang-format on
+
+/** \brief Create a PJ object from a PROJ definition in PROJLITE.
+ *
+ * This lightweight implementation delegates to the core PROJ-string parser
+ * in pj_create_internal(). It accepts the PROJ definition syntax handled by
+ * that parser, including definitions such as "+proj=..." and pipelines.
+ * Unlike the full ISO 19111 implementation above, it does not dispatch user
+ * input to WKT, PROJJSON, authority-code, or object-name parsers. The full
+ * implementation accepts inputs such as WKT, PROJJSON, "EPSG:4326" and
+ * authority URNs, as well as object names (including compound names), and
+ * creates the corresponding ISO 19111 object. Authority and name lookups may
+ * use proj.db. The returned PJ can retain that ISO object for the richer
+ * inspection and manipulation APIs. PROJLITE callers must instead provide a
+ * definition supported by the core PROJ parser; this function does not
+ * resolve a CRS identifier or construct an ISO 19111 object.
+ *
+ * If ctx is NULL, the default context is used. A NULL text pointer is treated
+ * as API misuse: the context error is set and NULL is returned. Parsing or
+ * construction failures are reported by pj_create_internal(), which also
+ * returns NULL on failure. A successfully returned object must be released
+ * with proj_destroy().
+ *
+ * @param ctx PROJ context, or NULL to use the default context.
+ * @param text PROJ definition to parse; must not be NULL.
+ * @return A newly created PJ object, or NULL on error.
+ */
+PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
+    if (nullptr == ctx)
+        ctx = pj_get_default_ctx();
+    if (nullptr == text) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        return nullptr;
+    }
+    return pj_create_internal(ctx, text);
+}
+
+/** \brief Return the best available type classification for a PROJLITE PJ.
+ *
+ * The full ISO 19111 implementation can classify the wrapped C++ object by
+ * its runtime type. It can distinguish, among others, ellipsoids, prime
+ * meridians, datum and datum-ensemble types, geographic 2D/3D and geocentric
+ * CRSs, projected, vertical, compound, bound and engineering CRSs, conversions,
+ * transformations, concatenated operations, and coordinate metadata.
+ * PROJLITE does not use that classification path, so this implementation
+ * first returns the type already recorded in obj->type. If that field is
+ * unknown, it recognizes the two special core objects indicated by
+ * is_latlong and is_geocent. All remaining objects fall back to
+ * PJ_TYPE_OTHER_COORDINATE_OPERATION.
+ *
+ * This is intentionally a limited classification: the fallback does not prove
+ * that an object is a coordinate operation, and PROJLITE cannot distinguish
+ * the other CRS, datum, or operation subtypes provided by the full ISO 19111
+ * implementation. Unlike the full implementation, which returns
+ * PJ_TYPE_UNKNOWN when there is no ISO object or no recognized runtime type,
+ * this fallback classifies any non-null object without a known type or either
+ * special flag as PJ_TYPE_OTHER_COORDINATE_OPERATION. A NULL object returns
+ * PJ_TYPE_UNKNOWN.
+ *
+ * @param obj PJ object to classify; may be NULL.
+ * @return The recorded type, a type inferred from the core flags, or
+ *         PJ_TYPE_UNKNOWN for a NULL object.
+ */
+PJ_TYPE proj_get_type(const PJ *obj) {
+    if (obj == nullptr)
+        return PJ_TYPE_UNKNOWN;
+    if (obj->type != PJ_TYPE_UNKNOWN)
+        return obj->type;
+    if (obj->is_latlong)
+        return PJ_TYPE_GEOGRAPHIC_2D_CRS;
+    if (obj->is_geocent)
+        return PJ_TYPE_GEOCENTRIC_CRS;
+    return PJ_TYPE_OTHER_COORDINATE_OPERATION;
+}
+
+#endif // PROJLITE

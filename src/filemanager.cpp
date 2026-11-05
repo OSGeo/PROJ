@@ -1229,12 +1229,17 @@ int proj_context_set_fileapi(PJ_CONTEXT *ctx, const PROJ_FILE_API *fileapi,
  * SQLite will be used.
  * @since 7.0
  */
+#ifndef PROJLITE
+// This public setting selects the SQLite VFS used to access proj.db and the
+// persistent grid cache. A PROJLITE build has neither SQLite nor those database
+// files, so exposing a setter would advertise a configuration it cannot honor.
 void proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx, const char *name) {
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
     }
     ctx->custom_sqlite3_vfs_name = name ? name : std::string();
 }
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -1770,6 +1775,10 @@ static void *pj_open_file_with_manager(PJ_CONTEXT *ctx, const char *name,
 
 // ---------------------------------------------------------------------------
 
+#ifndef PROJLITE
+// Centralize access to the context-owned ISO 19111 DatabaseContext. The
+// resource-opening paths below use it for grid aliases and download metadata;
+// PROJLITE omits that database layer and falls back to literal names/URLs.
 static NS_PROJ::io::DatabaseContextPtr getDBcontext(PJ_CONTEXT *ctx) {
     try {
         return ctx->get_cpp_context()->getDatabaseContext().as_nullable();
@@ -1778,6 +1787,7 @@ static NS_PROJ::io::DatabaseContextPtr getDBcontext(PJ_CONTEXT *ctx) {
         return nullptr;
     }
 }
+#endif
 
 /************************************************************************/
 /*                 FileManager::open_resource_file()                    */
@@ -1804,6 +1814,11 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
         !starts_with(name, "https://") && strcmp(name, "proj.db") != 0 &&
         strstr(name, ".tif") == nullptr) {
 
+#ifndef PROJLITE
+    // The requested grid may use an old authority name. proj.db's grid
+    // alternatives table maps it to the preferred resource name; if that
+    // alias file is not found locally, keep the resolved name for the
+    // ordinary network-endpoint fallback below. PROJLITE has no alias table.
         auto dbContext = getDBcontext(ctx);
         if (dbContext) {
             try {
@@ -1828,6 +1843,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
                 return nullptr;
             }
         }
+#endif
     }
     // Retry with the old proj grid name if the file name ends with .tif
     else if (file == nullptr && !is_tilde_slash(name) &&
@@ -1835,6 +1851,10 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
              !starts_with(name, "http://") && !starts_with(name, "https://") &&
              strstr(name, ".tif") != nullptr) {
 
+#ifndef PROJLITE
+    // Preserve compatibility with pre-9.2 .tif grid names by asking
+    // proj.db for the former name. This is only an alias retry; direct file
+    // lookup and the general network path remain available in PROJLITE.
         auto dbContext = getDBcontext(ctx);
         if (dbContext) {
             try {
@@ -1854,6 +1874,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
                 return nullptr;
             }
         }
+#endif
     }
 
     if (file == nullptr && !is_tilde_slash(name) &&
@@ -1862,6 +1883,12 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
         proj_context_is_network_enabled(ctx)) {
 
         std::string remote_file;
+
+#ifndef PROJLITE
+    // For catalogued grids, proj.db provides their package URL and whether
+    // direct download is permitted. If PROJLITE has no catalog entry, the
+    // shared fallback below still builds a URL from the configured endpoint
+    // and requested name, so ordinary network resource reads remain usable.
         auto dbContext = getDBcontext(ctx);
         if (dbContext) {
             try {
@@ -1896,6 +1923,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
                 return nullptr;
             }
         }
+#endif
         if (remote_file.empty()) {
             remote_file = proj_context_get_url_endpoint(ctx);
             if (!remote_file.empty()) {

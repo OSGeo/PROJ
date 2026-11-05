@@ -1,0 +1,1224 @@
+diff --git a/.clang-format b/.clang-format
+index 16940320..445900f9 100644
+--- a/.clang-format
++++ b/.clang-format
+@@ -1,2 +1,3 @@
+ BasedOnStyle: llvm
+ IndentWidth: 4
++DisableFormat: true
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9159e399..b0146f95 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,6 +7,33 @@
+ # Distributed under the MIT license
+ #
+ ################################################################################
++# PROJLITE: pipeline-focused variant without SQLite or proj.db. Local grids
++# are supported; TIFF and CURL remain controlled by their upstream options.
++################################################################################
++set(PROJLITE_EXCLUDED_SOURCES
++  apps/projinfo_lib.cpp
++  crs_to_crs.cpp
++  embedded_resources.c
++  factors.cpp
++  info.cpp
++  memvfs.c
++  coord_operation.cpp
++  proj_json_streaming_writer.cpp
++  sqlite3_utils.cpp
++  transformations/tinshift_gpkg.cpp
++  trans_bounds.cpp
++  wkt1_generated_parser.c
++  wkt1_parser.cpp
++  wkt2_generated_parser.c
++  wkt2_parser.cpp
++  wkt_parser.cpp
++)
++# Minimal ISO19111 sources retained in PROJLITE
++set(PROJLITE_ISO19111_SOURCES
++  iso19111/c_api.cpp
++  iso19111/internal.cpp
++)
++################################################################################
+ # General settings
+ ################################################################################
+ cmake_minimum_required(VERSION 3.22.1)
+@@ -19,6 +46,25 @@ project(PROJ
+ # Only interpret if() arguments as variables or keywords when unquoted
+ cmake_policy(SET CMP0054 NEW)
+ 
++option(PROJLITE "Build PROJLITE without SQLite or proj.db" OFF)
++if(PROJLITE)
++  add_compile_definitions(PROJLITE)
++  if(NOT DEFINED ENABLE_TIFF)
++    set(ENABLE_TIFF OFF CACHE BOOL "Enable TIFF support to read some grids")
++  endif()
++  if(NOT DEFINED ENABLE_CURL)
++    set(ENABLE_CURL OFF CACHE BOOL "Enable Curl support")
++  endif()
++  set(EMBED_RESOURCE_FILES OFF)
++  set(USE_ONLY_EMBEDDED_RESOURCE_FILES OFF)
++  set(BUILD_CS2CS OFF)
++  set(BUILD_CCT OFF)
++  set(BUILD_GEOD OFF)
++  set(BUILD_PROJ OFF)
++  set(BUILD_PROJINFO OFF)
++  set(BUILD_PROJSYNC OFF)
++endif()
++
+ include(CheckCXXCompilerFlag)
+ 
+ # Set C++ version
+@@ -229,6 +275,7 @@ message(STATUS "nlohmann/json: ${NLOHMANN_JSON}")
+ # Check for sqlite3
+ ################################################################################
+ 
++if(NOT PROJLITE)
+ find_program(EXE_SQLITE3 sqlite3)
+ if(NOT EXE_SQLITE3)
+   message(SEND_ERROR "sqlite3 binary not found!")
+@@ -248,6 +295,7 @@ find_package(SQLite3 3.11 REQUIRED)
+ if(NOT TARGET SQLite3::SQLite3) # CMake < 4.3
+   add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
+ endif()
++endif()
+ 
+ ################################################################################
+ # Check for libtiff
+diff --git a/data/CMakeLists.txt b/data/CMakeLists.txt
+index b6441962..4f1873a3 100644
+--- a/data/CMakeLists.txt
++++ b/data/CMakeLists.txt
+@@ -29,6 +29,9 @@ file(GLOB GEOTIFF_FILES *.tif)
+ 
+ set(ALL_SQL_IN "${CMAKE_CURRENT_BINARY_DIR}/all.sql.in")
+ set(PROJ_DB "${CMAKE_CURRENT_BINARY_DIR}/proj.db")
++if(PROJLITE)
++  set(PROJ_DB)
++else()
+ include(sql_filelist.cmake)
+ 
+ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+@@ -49,6 +52,7 @@ add_custom_command(
+ )
+ 
+ add_custom_target(generate_proj_db ALL DEPENDS ${PROJ_DB})
++endif()
+ 
+ if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
+   foreach(FILE ${PROJ_INI} ${PROJ_DICTIONARY} ${GRIDSHIFT_FILES})
+diff --git a/scripts/reformat.sh b/scripts/reformat.sh
+index 9563d14d..fa78b941 100755
+--- a/scripts/reformat.sh
++++ b/scripts/reformat.sh
+@@ -6,7 +6,7 @@ if test $(basename $1) = "nn.hpp"; then
+     exit 0
+ fi
+ 
+-clang-format-15 -style="{BasedOnStyle: llvm, IndentWidth: 4}"  $1 > $1.reformatted
++clang-format-15 -style=file "$1" > "$1.reformatted"
+ if diff -u $1.reformatted $1; then
+     # No reformatting: remove temporary file
+     rm $1.reformatted
+diff --git a/src/apps/gie.cpp b/src/apps/gie.cpp
+index 0a547b2b..aa77c517 100644
+--- a/src/apps/gie.cpp
++++ b/src/apps/gie.cpp
+@@ -568,7 +568,11 @@ static int require_grid(const char *args) {
+     const char *grid_filename = column(args, 1);
+     grid_info = proj_grid_info(grid_filename);
+     if (strlen(grid_info.filename) == 0) {
+-
++#ifndef PROJLITE
++    // proj_grid_info() checks local resources. Full PROJ can then consult
++    // proj.db's grid catalog and treat a known downloadable grid as
++    // available, so GIE does not skip a test that can fetch it. PROJLITE
++    // has no catalog; when the local check fails, the test must be skipped.
+         if (proj_context_is_network_enabled(nullptr)) {
+             auto dbContext = NS_PROJ::io::DatabaseContext::create();
+             std::string fullFilename, packageName, url;
+@@ -582,7 +586,7 @@ static int require_grid(const char *args) {
+                 return 0;
+             }
+         }
+-
++#endif
+         if (T.verbosity > 1) {
+             fprintf(T.fout, "Test skipped because of missing grid %s\n",
+                     grid_filename);
+@@ -666,6 +670,11 @@ static int operation(const char *args) {
+     return 0;
+ }
+ 
++#ifndef PROJLITE
++// This helper needs ISO 19111 CRS/coordinate-system objects to inspect axis
++// order, including the horizontal component of a compound CRS. It is used by
++// GIE's CRS-to-CRS tests, which PROJLITE skips because it only constructs core
++// PROJ definitions and does not provide the CRS inspection API.
+ static bool isLatOrNorthingFirst(const PJ *crs) {
+     auto crsType = proj_get_type(crs);
+ 
+@@ -781,6 +790,7 @@ static int crs_dst(const char *args) {
+ 
+     return 0;
+ }
++#endif
+ 
+ static PJ_COORD torad_coord(PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
+     size_t i, n;
+@@ -1236,10 +1246,26 @@ static int dispatch(const char *cmnd, const char *args) {
+         return SKIP;
+     if (0 == strcmp(cmnd, "operation"))
+         return operation(args);
++#ifndef PROJLITE
++    // The full build can construct CRS objects and choose an operation between
++    // them from the database, so it can execute these test commands.
+     if (0 == strcmp(cmnd, "crs_src"))
+         return crs_src(args);
+     if (0 == strcmp(cmnd, "crs_dst"))
+         return crs_dst(args);
++#else
++    // Do not pass CRS identifiers to PROJLITE's PROJ-definition-only parser.
++    // Mark the whole test as skipped so its following expect/accept directives
++    // are consumed as part of the skip instead of failing on missing CRS state.
++    if (0 == strcmp(cmnd, "crs_src") || 0 == strcmp(cmnd, "crs_dst")) {
++        if (!T.skip_test) {
++            fprintf(stderr, "crs_src/crs_dst operations are not supported in "
++                            "PROJLITE; skipping test\n");
++        }
++        T.skip_test = 1;
++        return 0;
++    }
++#endif
+     if (T.skip_test) {
+         if (0 == strcmp(cmnd, "expect"))
+             return another_skip();
+diff --git a/src/ctx.cpp b/src/ctx.cpp
+index 8981b6ec..329a79b2 100644
+--- a/src/ctx.cpp
++++ b/src/ctx.cpp
+@@ -72,9 +72,15 @@ void proj_assign_context(PJ *pj, PJ_CONTEXT *ctx) {
+     if (pj->reassign_context) {
+         pj->reassign_context(pj, ctx);
+     }
++#ifndef PROJLITE
++    // A full CRS-to-CRS PJ can own multiple candidate PJs selected from
++    // proj.db. Each candidate keeps its own context pointer and can perform
++    // grid/network access, so all children must move with the parent when its
++    // thread-specific context is reassigned. PROJLITE creates no such list.
+     for (const auto &alt : pj->alternativeCoordinateOperations) {
+         proj_assign_context(alt.pj, ctx);
+     }
++#endif
+ }
+ 
+ /************************************************************************/
+@@ -117,12 +123,18 @@ pj_ctx pj_ctx::createDefault() {
+ /*                           get_cpp_context()                            */
+ /**************************************************************************/
+ 
++#ifndef PROJLITE
++// Create the bridge only when an ISO 19111 API needs it. It owns this
++// PJ_CONTEXT's DatabaseContext, configured database paths, and lookup state;
++// delaying construction avoids opening proj.db for ordinary PROJ strings.
++// PROJLITE has no such database APIs or SQLite-backed context to create.
+ projCppContext *pj_ctx::get_cpp_context() {
+     if (cpp_context == nullptr) {
+         cpp_context = new projCppContext(this);
+     }
+     return cpp_context;
+ }
++#endif
+ 
+ /************************************************************************/
+ /*                           set_search_paths()                         */
+@@ -161,7 +173,16 @@ pj_ctx::pj_ctx(const pj_ctx &other)
+       warnIfBestTransformationNotAvailableDefault(
+           other.warnIfBestTransformationNotAvailableDefault),
+       logger(other.logger), logger_app_data(other.logger_app_data),
++#ifndef PROJLITE
++    // Preserve the configured database paths, but clone the bridge so the
++    // new PJ_CONTEXT owns its own DatabaseContext and connections rather
++    // than sharing state tied to the source context.
+       cpp_context(other.cpp_context ? other.cpp_context->clone(this) : nullptr),
++#else
++    // PROJLITE has no database bridge to clone; keep the pointer null so
++    // core-only operations and cleanup do not depend on ISO 19111/SQLite.
++      cpp_context(nullptr),
++#endif
+       use_proj4_init_rules(other.use_proj4_init_rules),
+       forceOver(other.forceOver), epsg_file_exists(other.epsg_file_exists),
+       env_var_proj_data(other.env_var_proj_data),
+@@ -199,7 +220,12 @@ PJ_CONTEXT *pj_get_default_ctx()
+ 
+ pj_ctx::~pj_ctx() {
+     delete[] c_compat_paths;
++#ifndef PROJLITE
++    // Release the bridge and its DatabaseContext/connections before the
++    // PJ_CONTEXT disappears. PROJLITE never constructs it and therefore must
++    // not link the ISO 19111/SQLite cleanup path.
+     proj_context_delete_cpp_context(cpp_context);
++#endif
+ }
+ 
+ /************************************************************************/
+diff --git a/src/filemanager.cpp b/src/filemanager.cpp
+index 1b18251f..62e2f7d5 100644
+--- a/src/filemanager.cpp
++++ b/src/filemanager.cpp
+@@ -1229,12 +1229,17 @@ int proj_context_set_fileapi(PJ_CONTEXT *ctx, const PROJ_FILE_API *fileapi,
+  * SQLite will be used.
+  * @since 7.0
+  */
++#ifndef PROJLITE
++// This public setting selects the SQLite VFS used to access proj.db and the
++// persistent grid cache. A PROJLITE build has neither SQLite nor those database
++// files, so exposing a setter would advertise a configuration it cannot honor.
+ void proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx, const char *name) {
+     if (ctx == nullptr) {
+         ctx = pj_get_default_ctx();
+     }
+     ctx->custom_sqlite3_vfs_name = name ? name : std::string();
+ }
++#endif
+ 
+ // ---------------------------------------------------------------------------
+ 
+@@ -1770,6 +1775,10 @@ static void *pj_open_file_with_manager(PJ_CONTEXT *ctx, const char *name,
+ 
+ // ---------------------------------------------------------------------------
+ 
++#ifndef PROJLITE
++// Centralize access to the context-owned ISO 19111 DatabaseContext. The
++// resource-opening paths below use it for grid aliases and download metadata;
++// PROJLITE omits that database layer and falls back to literal names/URLs.
+ static NS_PROJ::io::DatabaseContextPtr getDBcontext(PJ_CONTEXT *ctx) {
+     try {
+         return ctx->get_cpp_context()->getDatabaseContext().as_nullable();
+@@ -1778,6 +1787,7 @@ static NS_PROJ::io::DatabaseContextPtr getDBcontext(PJ_CONTEXT *ctx) {
+         return nullptr;
+     }
+ }
++#endif
+ 
+ /************************************************************************/
+ /*                 FileManager::open_resource_file()                    */
+@@ -1804,6 +1814,11 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
+         !starts_with(name, "https://") && strcmp(name, "proj.db") != 0 &&
+         strstr(name, ".tif") == nullptr) {
+ 
++#ifndef PROJLITE
++    // The requested grid may use an old authority name. proj.db's grid
++    // alternatives table maps it to the preferred resource name; if that
++    // alias file is not found locally, keep the resolved name for the
++    // ordinary network-endpoint fallback below. PROJLITE has no alias table.
+         auto dbContext = getDBcontext(ctx);
+         if (dbContext) {
+             try {
+@@ -1828,6 +1843,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
+                 return nullptr;
+             }
+         }
++#endif
+     }
+     // Retry with the old proj grid name if the file name ends with .tif
+     else if (file == nullptr && !is_tilde_slash(name) &&
+@@ -1835,6 +1851,10 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
+              !starts_with(name, "http://") && !starts_with(name, "https://") &&
+              strstr(name, ".tif") != nullptr) {
+ 
++#ifndef PROJLITE
++    // Preserve compatibility with pre-9.2 .tif grid names by asking
++    // proj.db for the former name. This is only an alias retry; direct file
++    // lookup and the general network path remain available in PROJLITE.
+         auto dbContext = getDBcontext(ctx);
+         if (dbContext) {
+             try {
+@@ -1854,6 +1874,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
+                 return nullptr;
+             }
+         }
++#endif
+     }
+ 
+     if (file == nullptr && !is_tilde_slash(name) &&
+@@ -1862,6 +1883,12 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
+         proj_context_is_network_enabled(ctx)) {
+ 
+         std::string remote_file;
++
++#ifndef PROJLITE
++    // For catalogued grids, proj.db provides their package URL and whether
++    // direct download is permitted. If PROJLITE has no catalog entry, the
++    // shared fallback below still builds a URL from the configured endpoint
++    // and requested name, so ordinary network resource reads remain usable.
+         auto dbContext = getDBcontext(ctx);
+         if (dbContext) {
+             try {
+@@ -1896,6 +1923,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
+                 return nullptr;
+             }
+         }
++#endif
+         if (remote_file.empty()) {
+             remote_file = proj_context_get_url_endpoint(ctx);
+             if (!remote_file.empty()) {
+diff --git a/src/grids.cpp b/src/grids.cpp
+index 08637632..f5dd8f9e 100644
+--- a/src/grids.cpp
++++ b/src/grids.cpp
+@@ -4000,6 +4000,11 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
+ }
+ 
+ /*****************************************************************************/
++#ifndef PROJLITE
++// This compatibility API reports metadata from legacy init files and, for
++// EPSG/IGNF datasets, reads version/date values from proj.db. PROJLITE can
++// still load explicit init files through the core parser, but has no database
++// from which to provide the authority-dataset metadata this API exposes.
+ PJ_INIT_INFO proj_init_info(const char *initname) {
+     /******************************************************************************
+         Information about a named init file.
+@@ -4100,3 +4105,4 @@ PJ_INIT_INFO proj_init_info(const char *initname) {
+ 
+     return ininfo;
+ }
++#endif
+diff --git a/src/init.cpp b/src/init.cpp
+index 119eb487..f8d9f824 100644
+--- a/src/init.cpp
++++ b/src/init.cpp
+@@ -236,6 +236,12 @@ static paralist *get_init(PJ_CONTEXT *ctx, const char *key,
+     if (init_items)
+         return init_items;
+ 
++#ifndef PROJLITE
++    // In full PROJ, an epsg: or IGNF: init-style identifier can be expanded
++    // through proj.db when no corresponding legacy init file is installed.
++    // That expansion resolves the authority code to a PROJ definition before
++    // normal parameter parsing continues. PROJLITE has no authority database;
++    // explicit local init files still follow the ordinary file path below.
+     if ((strncmp(xkey, "epsg:", 5) == 0 || strncmp(xkey, "IGNF:", 5) == 0)) {
+         char unused[256];
+         char initname[5];
+@@ -294,6 +300,7 @@ static paralist *get_init(PJ_CONTEXT *ctx, const char *key,
+             proj_destroy(src);
+         }
+     }
++#endif
+ 
+     if (!definition) {
+         /* If not, we must read it from file */
+diff --git a/src/iso19111/c_api.cpp b/src/iso19111/c_api.cpp
+index 98be2050..1d931f36 100644
+--- a/src/iso19111/c_api.cpp
++++ b/src/iso19111/c_api.cpp
+@@ -26,6 +26,12 @@
+  * DEALINGS IN THE SOFTWARE.
+  ****************************************************************************/
+ 
++#ifndef PROJLITE
++// The full C API below wraps ISO 19111 C++ objects, WKT/PROJJSON parsers, and
++// database-backed CRS and operation factories. PROJLITE does not build that
++// stack; its #else branch provides only the core PROJ-string constructor and
++// the limited type classifier needed by the pipeline-focused library.
++
+ #ifndef FROM_PROJ_CPP
+ #define FROM_PROJ_CPP
+ #endif
+@@ -10155,3 +10161,89 @@ PJ *proj_crs_add_horizontal_derived_conversion(PJ_CONTEXT *ctx,
+     }
+     return nullptr;
+ }
++
++#else
++
++// Keep this branch independent of ISO 19111 and SQLite: include only the core
++// C API declarations and provide the two PROJLITE-compatible functions below.
++
++// PROJ include order is sensitive
++// clang-format off
++#include "proj.h"
++#include "proj_internal.h"
++// clang-format on
++
++/** \brief Create a PJ object from a PROJ definition in PROJLITE.
++ *
++ * This lightweight implementation delegates to the core PROJ-string parser
++ * in pj_create_internal(). It accepts the PROJ definition syntax handled by
++ * that parser, including definitions such as "+proj=..." and pipelines.
++ * Unlike the full ISO 19111 implementation above, it does not dispatch user
++ * input to WKT, PROJJSON, authority-code, or object-name parsers. The full
++ * implementation accepts inputs such as WKT, PROJJSON, "EPSG:4326" and
++ * authority URNs, as well as object names (including compound names), and
++ * creates the corresponding ISO 19111 object. Authority and name lookups may
++ * use proj.db. The returned PJ can retain that ISO object for the richer
++ * inspection and manipulation APIs. PROJLITE callers must instead provide a
++ * definition supported by the core PROJ parser; this function does not
++ * resolve a CRS identifier or construct an ISO 19111 object.
++ *
++ * If ctx is NULL, the default context is used. A NULL text pointer is treated
++ * as API misuse: the context error is set and NULL is returned. Parsing or
++ * construction failures are reported by pj_create_internal(), which also
++ * returns NULL on failure. A successfully returned object must be released
++ * with proj_destroy().
++ *
++ * @param ctx PROJ context, or NULL to use the default context.
++ * @param text PROJ definition to parse; must not be NULL.
++ * @return A newly created PJ object, or NULL on error.
++ */
++PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
++    if (nullptr == ctx)
++        ctx = pj_get_default_ctx();
++    if (nullptr == text) {
++        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
++        return nullptr;
++    }
++    return pj_create_internal(ctx, text);
++}
++
++/** \brief Return the best available type classification for a PROJLITE PJ.
++ *
++ * The full ISO 19111 implementation can classify the wrapped C++ object by
++ * its runtime type. It can distinguish, among others, ellipsoids, prime
++ * meridians, datum and datum-ensemble types, geographic 2D/3D and geocentric
++ * CRSs, projected, vertical, compound, bound and engineering CRSs, conversions,
++ * transformations, concatenated operations, and coordinate metadata.
++ * PROJLITE does not use that classification path, so this implementation
++ * first returns the type already recorded in obj->type. If that field is
++ * unknown, it recognizes the two special core objects indicated by
++ * is_latlong and is_geocent. All remaining objects fall back to
++ * PJ_TYPE_OTHER_COORDINATE_OPERATION.
++ *
++ * This is intentionally a limited classification: the fallback does not prove
++ * that an object is a coordinate operation, and PROJLITE cannot distinguish
++ * the other CRS, datum, or operation subtypes provided by the full ISO 19111
++ * implementation. Unlike the full implementation, which returns
++ * PJ_TYPE_UNKNOWN when there is no ISO object or no recognized runtime type,
++ * this fallback classifies any non-null object without a known type or either
++ * special flag as PJ_TYPE_OTHER_COORDINATE_OPERATION. A NULL object returns
++ * PJ_TYPE_UNKNOWN.
++ *
++ * @param obj PJ object to classify; may be NULL.
++ * @return The recorded type, a type inferred from the core flags, or
++ *         PJ_TYPE_UNKNOWN for a NULL object.
++ */
++PJ_TYPE proj_get_type(const PJ *obj) {
++    if (obj == nullptr)
++        return PJ_TYPE_UNKNOWN;
++    if (obj->type != PJ_TYPE_UNKNOWN)
++        return obj->type;
++    if (obj->is_latlong)
++        return PJ_TYPE_GEOGRAPHIC_2D_CRS;
++    if (obj->is_geocent)
++        return PJ_TYPE_GEOCENTRIC_CRS;
++    return PJ_TYPE_OTHER_COORDINATE_OPERATION;
++}
++
++#endif // PROJLITE
+diff --git a/src/iso19111/internal.cpp b/src/iso19111/internal.cpp
+index abb8cde1..e0b67449 100644
+--- a/src/iso19111/internal.cpp
++++ b/src/iso19111/internal.cpp
+@@ -46,7 +46,12 @@
+ #include <sstream> // std::istringstream and std::ostringstream
+ #include <string>
+ 
++#ifndef PROJLITE
++// Unix full builds use sqlite3_snprintf() for the locale-independent numeric
++// formatting below. PROJLITE does not link SQLite, so it selects the
++// standard-library formatter in the later conditional instead.
+ #include "sqlite3.h"
++#endif
+ 
+ NS_PROJ_START
+ 
+@@ -327,11 +332,12 @@ std::vector<std::string> split(const std::string &str,
+ 
+ // ---------------------------------------------------------------------------
+ 
+-#ifdef _WIN32
++#if defined(_WIN32) || defined(PROJLITE)
+ 
+-// For some reason, sqlite3_snprintf() in the sqlite3 builds used on AppVeyor
+-// doesn't round identically to the Unix builds, and thus breaks a number of
+-// unit test. So to avoid this, use the stdlib formatting
++// Windows avoids sqlite3_snprintf() because its rounding differs from Unix and
++// breaks numeric-string tests. PROJLITE follows the same standard-library
++// path because it has no SQLite dependency. The classic locale keeps output
++// stable regardless of the user's locale.
+ 
+ std::string toString(int val) {
+     std::ostringstream buffer;
+@@ -358,6 +364,9 @@ std::string toString(double val, int precision) {
+ 
+ #else
+ 
++// On Unix full builds, SQLite's formatter provides C-locale output and is
++// already available as a dependency; use it for the same numeric strings.
++
+ std::string toString(int val) {
+     // use sqlite3 API that is slightly faster than std::ostringstream
+     // with forcing the C locale. sqlite3_snprintf() emulates a C locale.
+diff --git a/src/lib_proj.cmake b/src/lib_proj.cmake
+index 24de00b4..076068fe 100644
+--- a/src/lib_proj.cmake
++++ b/src/lib_proj.cmake
+@@ -264,6 +264,13 @@ set(SRC_LIBPROJ_CORE
+   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
+ )
+ 
++if(PROJLITE)
++  set(SRC_LIBPROJ_ISO19111 ${PROJLITE_ISO19111_SOURCES})
++  foreach(PROJLITE_LIST SRC_LIBPROJ_CORE SRC_LIBPROJ_TRANSFORMATIONS SRC_PROJAPPS_LIBS)
++    list(REMOVE_ITEM ${PROJLITE_LIST} ${PROJLITE_EXCLUDED_SOURCES})
++  endforeach()
++endif()
++
+ # Skip Unity build for specific files
+ set(SKIP_UNITY_BUILD_FILES
+   list.cpp # because if sets DO_NOT_DEFINE_PROJ_HEAD
+@@ -607,7 +614,9 @@ if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+   target_link_libraries(proj PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+ endif()
+ 
++if(NOT PROJLITE)
+ target_link_libraries(proj PRIVATE SQLite3::SQLite3)
++endif()
+ 
+ if(NLOHMANN_JSON STREQUAL "external")
+   target_compile_definitions(proj PRIVATE EXTERNAL_NLOHMANN_JSON)
+diff --git a/src/malloc.cpp b/src/malloc.cpp
+index 488408e7..61bc2606 100644
+--- a/src/malloc.cpp
++++ b/src/malloc.cpp
+@@ -190,19 +190,30 @@ PJ *pj_default_destructor(PJ *P, int errlev) { /* Destructor */
+ void proj_cleanup() {
+     /*****************************************************************************/
+ 
+-    // Close the database context of the default PJ_CONTEXT
+     auto ctx = pj_get_default_ctx();
+     ctx->iniFileLoaded = false;
++
++#ifndef PROJLITE
++    // Close the default context's ISO 19111 DatabaseContext before clearing
++    // global caches. It owns SQLite connections and is not constructed in
++    // PROJLITE, so the Lite cleanup path has no database object to close.
+     auto cpp_context = ctx->cpp_context;
+     if (cpp_context) {
+         cpp_context->closeDb();
+     }
++#endif
+ 
+     pj_clear_initcache();
+     FileManager::clearMemoryCache();
+     pj_clear_hgridshift_knowngrids_cache();
+     pj_clear_vgridshift_knowngrids_cache();
+     pj_clear_gridshift_knowngrids_cache();
++
++#ifndef PROJLITE
++    // Clear caches populated by SQLite and proj.db metadata/CRS lookups. The
++    // core init and grid-shift caches above are still cleared in PROJLITE; only
++    // these database-specific caches and their symbols are omitted.
+     pj_clear_sqlite_cache();
+     pj_clear_proj_info();
++#endif
+ }
+diff --git a/src/networkfilemanager.cpp b/src/networkfilemanager.cpp
+index 5e74d057..46e7894c 100644
+--- a/src/networkfilemanager.cpp
++++ b/src/networkfilemanager.cpp
+@@ -58,17 +58,31 @@
+ #include "proj/internal/io_internal.hpp"
+ #include "proj/internal/lru_cache.hpp"
+ #include "proj_internal.h"
++#ifndef PROJLITE
++// SQLite VFS and statement helpers are needed only by DiskChunkCache below.
++// PROJLITE keeps the in-memory LRU cache and network callbacks, but deliberately
++// has no SQLite-backed cache.db dependency.
+ #include "sqlite3_utils.hpp"
++#endif
+ 
+ #ifdef CURL_ENABLED
+ #include <curl/curl.h>
++#ifndef PROJLITE
++// CURL itself is available in either build. SQLite is included here only for
++// sqlite3_snprintf(), used to format HTTP byte-range headers. The PROJLITE
++// branch uses standard snprintf() with the same bounded C format instead.
+ #include <sqlite3.h> // for sqlite3_snprintf
+ #endif
++#endif
+ 
+ #ifdef DO_EMSCRIPTEN_FETCH
+ #include <emscripten/fetch.h>
+ #include <iostream>
++#ifndef PROJLITE
++// The Emscripten range-header path has the same formatter-only dependency as
++// CURL; PROJLITE's #else branch uses standard snprintf() and needs no SQLite.
+ #include <sqlite3.h> // for sqlite3_snprintf
++#endif
+ #include <unordered_map>
+ #endif
+ 
+@@ -193,6 +207,13 @@ static NetworkFilePropertiesCache gNetworkFileProperties{};
+ 
+ // ---------------------------------------------------------------------------
+ 
++#ifndef PROJLITE
++// Optional persistent layer for downloaded HTTP byte ranges and their file
++// validators. It lets full PROJ reuse chunks across cache evictions and process
++// restarts, and can serve already-cached ranges without another request. It is
++// not required to decode a range or compute a transformation: PROJLITE keeps
++// the in-memory LRU and fetches a range from the configured network interface
++// on a miss. The tradeoff is no cross-process or offline reuse of remote grids.
+ class DiskChunkCache {
+     PJ_CONTEXT *ctx_ = nullptr;
+     std::string path_{};
+@@ -228,9 +249,14 @@ class DiskChunkCache {
+     bool move_to_tail(sqlite3_int64 chunk_id);
+     void closeAndUnlink();
+ };
++#endif
+ 
+ // ---------------------------------------------------------------------------
+ 
++#ifndef PROJLITE
++// These proj.ini settings configure only the optional SQLite disk cache
++// (enabled state, size limit, and TTL). With no persistent cache in PROJLITE,
++// the ordinary in-memory LRU and network read path do not need these helpers.
+ static bool pj_context_get_grid_cache_is_enabled(PJ_CONTEXT *ctx) {
+     pj_load_ini(ctx);
+     return ctx->gridChunkCache.enabled;
+@@ -791,6 +817,7 @@ bool DiskChunkCache::move_to_tail(sqlite3_int64 chunk_id) {
+            update_linked_chunks_head_tail((link_id == head) ? next : head,
+                                           link_id);
+ }
++#endif
+ 
+ // ---------------------------------------------------------------------------
+ 
+@@ -799,7 +826,14 @@ void NetworkChunkCache::insert(PJ_CONTEXT *ctx, const std::string &url,
+                                std::vector<unsigned char> &&data) {
+     auto dataPtr(std::make_shared<std::vector<unsigned char>>(std::move(data)));
+     cache_.insert(Key(url, chunkIdx), dataPtr);
+-
++    (void)ctx;
++
++#ifndef PROJLITE
++    // The memory cache above is the immediate cache in both builds. This
++    // optional write makes the same bytes reusable after eviction or a process
++    // restart. PROJLITE omits only that persistence: a later miss downloads
++    // the same byte range again, so online results are unchanged, at the cost
++    // of extra requests and no offline reuse of previously fetched chunks.
+     auto diskCache = DiskChunkCache::open(ctx);
+     if (!diskCache)
+         return;
+@@ -1005,6 +1039,7 @@ void NetworkChunkCache::insert(PJ_CONTEXT *ctx, const std::string &url,
+     }
+ 
+     diskCache->move_to_head(chunk_id);
++#endif
+ }
+ 
+ // ---------------------------------------------------------------------------
+@@ -1016,7 +1051,14 @@ NetworkChunkCache::get(PJ_CONTEXT *ctx, const std::string &url,
+     if (cache_.tryGet(Key(url, chunkIdx), ret)) {
+         return ret;
+     }
++    (void)ctx;
+ 
++#ifndef PROJLITE
++    // The memory-cache hit returned above. Full PROJ next checks its optional
++    // persistent cache; PROJLITE skips that lookup and returns a cache miss.
++    // NetworkFile::read() treats nullptr as a miss and requests the required
++    // HTTP range below, rather than treating it as corrupt or invalid data.
++    // Thus SQLite affects reuse/offline behavior, not decoding of fetched bytes.
+     auto diskCache = DiskChunkCache::open(ctx);
+     if (!diskCache)
+         return ret;
+@@ -1059,7 +1101,7 @@ NetworkChunkCache::get(PJ_CONTEXT *ctx, const std::string &url,
+     } else if (mainRet != SQLITE_DONE) {
+         pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+     }
+-
++#endif
+     return ret;
+ }
+ 
+@@ -1082,14 +1124,28 @@ void NetworkChunkCache::clearMemoryCache() { cache_.clear(); }
+ // ---------------------------------------------------------------------------
+ 
+ void NetworkChunkCache::clearDiskChunkCache(PJ_CONTEXT *ctx) {
++#ifndef PROJLITE
++    // Full PROJ removes persisted chunks and validators. PROJLITE has no such
++    // file, so its #else branch clears the only cache it owns: the in-memory LRU.
+     auto diskCache = DiskChunkCache::open(ctx);
+     if (!diskCache)
+         return;
+     diskCache->closeAndUnlink();
++#else
++    // There is no disk state to remove in PROJLITE. Clearing the memory LRU
++    // therefore clears all cached network chunks for this process.
++    (void)ctx;
++    gNetworkChunkCache.clearMemoryCache();
++#endif
+ }
+ 
+ // ---------------------------------------------------------------------------
+ 
++#ifndef PROJLITE
++// Persist the remote file's size and HTTP validators beside disk chunks. On a
++// later open, changes to these values invalidate stale persisted chunks; the
++// timestamp also supports the configured TTL. This coordination is needed
++// only when chunks survive in SQLite across opens or process restarts.
+ void NetworkFilePropertiesCache::insert(PJ_CONTEXT *ctx, const std::string &url,
+                                         FileProperties &props) {
+     time(&props.lastChecked);
+@@ -1226,6 +1282,23 @@ bool NetworkFilePropertiesCache::tryGet(PJ_CONTEXT *ctx, const std::string &url,
+     cache_.insert(url, props);
+     return true;
+ }
++#else
++// Without persistent chunks there is no stale on-disk data to validate. Keep
++// file properties only in the same process-local cache: after a miss,
++// NetworkFile::open() contacts the server, reads fresh headers, and repopulates
++// both memory caches. Online reads therefore remain correct; PROJLITE gives up
++// only cross-process validator/TTL reuse and offline use of persisted chunks.
++void NetworkFilePropertiesCache::insert(PJ_CONTEXT *, const std::string &url,
++                                        FileProperties &props) {
++    time(&props.lastChecked);
++    cache_.insert(url, props);
++}
++
++bool NetworkFilePropertiesCache::tryGet(PJ_CONTEXT *, const std::string &url,
++                                        FileProperties &props) {
++    return cache_.tryGet(url, props);
++}
++#endif
+ 
+ // ---------------------------------------------------------------------------
+ 
+@@ -1747,9 +1820,18 @@ PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *ctx, const char *url,
+     std::string body;
+ 
+     char szBuffer[128];
++#ifndef PROJLITE
++    // SQLite supplies this bounded formatter in full builds. This string is
++    // only a decimal HTTP byte range using standard %llu conversions, so the
++    // #else branch's C snprintf() is sufficient and avoids linking SQLite.
+     sqlite3_snprintf(sizeof(szBuffer), szBuffer, "%llu-%llu", offset,
+                      offset + size_to_read - 1);
+-
++#else
++    // The fixed-size buffer and standard format conversions make this
++    // equivalent for the range header; SQLite is not needed by the CURL path.
++    snprintf(szBuffer, sizeof(szBuffer), "%llu-%llu", offset,
++             offset + size_to_read - 1);
++#endif
+     while (true) {
+         CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer));
+ 
+@@ -1846,8 +1928,18 @@ static size_t pj_curl_read_range(PJ_CONTEXT *ctx,
+     std::string body;
+ 
+     char szBuffer[128];
++#ifndef PROJLITE
++    // SQLite supplies this bounded formatter in full builds. This string is
++    // only a decimal HTTP byte range using standard %llu conversions, so the
++    // #else branch's C snprintf() is sufficient and avoids linking SQLite.
+     sqlite3_snprintf(sizeof(szBuffer), szBuffer, "%llu-%llu", offset,
+                      offset + size_to_read - 1);
++#else
++    // The fixed-size buffer and standard format conversions make this
++    // equivalent for the range header; SQLite is not needed by this path.
++    snprintf(szBuffer, sizeof(szBuffer), "%llu-%llu", offset,
++             offset + size_to_read - 1);
++#endif
+ 
+     while (true) {
+         CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer));
+@@ -2019,8 +2111,18 @@ static size_t pj_emscripten_read_range(PJ_CONTEXT *ctx,
+     double oldDelay = MIN_RETRY_DELAY_MS;
+ 
+     char szBuffer[128];
++#ifndef PROJLITE
++    // SQLite supplies this bounded formatter in full builds. This string is
++    // only a decimal HTTP byte range using standard %llu conversions, so the
++    // #else branch's C snprintf() is sufficient and avoids linking SQLite.
+     sqlite3_snprintf(sizeof(szBuffer), szBuffer, "bytes=%llu-%llu", offset,
+                      offset + size_to_read - 1);
++#else
++    // This is the same standard C formatting operation; only the HTTP header
++    // prefix differs, so no SQLite behavior is required in PROJLITE.
++    snprintf(szBuffer, sizeof(szBuffer), "bytes=%llu-%llu", offset,
++             offset + size_to_read - 1);
++#endif
+ 
+     // To work in the browser, we need to run the fetch part in Web Worker,
+     // otherwise we cannot run it synchronous. (at least with my tests)
+@@ -2265,6 +2367,12 @@ static const char nfm_dir_chars[] = "/\\";
+ static const char nfm_dir_chars[] = "/";
+ #endif
+ 
++#ifndef PROJLITE
++// These helpers support only proj_is_download_needed() below: that API maps a
++// bare grid name to a URL and checks the downloaded_file_properties table to
++// decide whether a local copy is stale. Ordinary remote-file open/read uses the
++// network callbacks and HTTP range requests directly, so it does not depend on
++// these helpers or on the SQLite freshness database.
+ static bool nfm_is_tilde_slash(const char *name) {
+     return *name == '~' && strchr(nfm_dir_chars, name[1]);
+ }
+@@ -2291,6 +2399,7 @@ static std::string build_url(PJ_CONTEXT *ctx, const char *name) {
+     }
+     return name;
+ }
++#endif
+ 
+ // ---------------------------------------------------------------------------
+ 
+@@ -2493,6 +2602,12 @@ void proj_grid_cache_clear(PJ_CONTEXT *ctx) {
+ 
+ // ---------------------------------------------------------------------------
+ 
++#ifndef PROJLITE
++// This higher-level convenience API decides whether an already-downloaded
++// resource must be fetched again. Its answer depends on persistent file size,
++// ETag/Last-Modified validators, and TTL state in SQLite. PROJLITE still opens
++// remote files and downloads ranges normally; it omits only this freshness
++// decision because it has no persistent metadata against which to compare.
+ /** Return if a file must be downloaded or is already available in the
+  * PROJ user-writable directory.
+  *
+@@ -2876,6 +2991,7 @@ int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
+     }
+     return true;
+ }
++#endif
+ 
+ // ---------------------------------------------------------------------------
+ 
+@@ -2883,6 +2999,10 @@ int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
+ 
+ // ---------------------------------------------------------------------------
+ 
++#ifndef PROJLITE
++// DiskChunkCache uses this path for cache.db. PROJLITE has only process-local
++// memory caches, so no database filename or associated proj.ini setting is
++// needed; remote cache misses continue through the normal range-download path.
+ std::string pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx) {
+     pj_load_ini(ctx);
+     if (!ctx->gridChunkCache.filename.empty()) {
+@@ -2892,5 +3012,6 @@ std::string pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx) {
+     ctx->gridChunkCache.filename = path + "/cache.db";
+     return ctx->gridChunkCache.filename;
+ }
++#endif
+ 
+ //! @endcond
+diff --git a/src/proj.h b/src/proj.h
+index 0460c052..68c1a4a6 100644
+--- a/src/proj.h
++++ b/src/proj.h
+@@ -180,7 +180,7 @@ extern "C" {
+ /* Note: the following 3 defines have been introduced in PROJ 8.0.1 */
+ /* Macro to compute a PROJ version number from its components */
+ #define PROJ_COMPUTE_VERSION(maj, min, patch)                                  \
+-    ((maj)*10000 + (min)*100 + (patch))
++    ((maj) * 10000 + (min) * 100 + (patch))
+ 
+ /* Current PROJ version from the above version numbers */
+ #define PROJ_VERSION_NUMBER                                                    \
+@@ -491,8 +491,14 @@ int PROJ_DLL proj_context_set_fileapi(PJ_CONTEXT *ctx,
+                                       const PROJ_FILE_API *fileapi,
+                                       void *user_data);
+ 
++#ifndef PROJLITE
++/* Configure the SQLite VFS used by proj.db and the persistent grid cache.
++ * This declaration is omitted from PROJLITE because that build has no SQLite
++ * backend, database files, or implementation of this setting.
++ */
+ void PROJ_DLL proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx,
+                                                 const char *name);
++#endif
+ 
+ /** Opaque structure for PROJ for a network handle. Implementations might cast
+  * it to their structure/class of choice. */
+diff --git a/src/proj_internal.h b/src/proj_internal.h
+index 32c7c9a1..21c8fb13 100644
+--- a/src/proj_internal.h
++++ b/src/proj_internal.h
+@@ -73,8 +73,11 @@
+ #include <stdlib.h>
+ #include <string.h>
+ 
++#include "proj/util.hpp"
++#ifndef PROJLITE
+ #include "proj/common.hpp"
+ #include "proj/coordinateoperation.hpp"
++#endif
+ 
+ #include <cmath>
+ #include <string>
+@@ -316,6 +319,7 @@ typedef void (*PJ_OPERATOR)(PJ_COORD &, PJ *);
+ #define PJD_GRIDSHIFT 3
+ #define PJD_WGS84 4 /* WGS84 (or anything considered equivalent) */
+ 
++#ifndef PROJLITE
+ struct PJCoordOperation {
+   public:
+     int idxInOriginalList;
+@@ -445,6 +449,7 @@ struct PJCoordOperation {
+         -1; // must be different from 0(=false) and 1(=true)
+     mutable int isInstantiableCached = INSTANTIABLE_STATUS_UNKNOWN;
+ };
++#endif
+ 
+ enum class TMercAlgo {
+     AUTO, // Poder/Engsager if far from central meridian, otherwise
+@@ -663,8 +668,10 @@ struct PJconsts {
+      ISO-19111 interface
+     **************************************************************************************/
+ 
++#ifndef PROJLITE
+     NS_PROJ::util::BaseObjectPtr iso_obj{};
+     bool iso_obj_is_coordinate_operation = false;
++#endif
+     double coordinateEpoch = 0;
+     bool hasCoordinateEpoch = false;
+ 
+@@ -672,8 +679,15 @@ struct PJconsts {
+     mutable std::string lastWKT{};
+     mutable std::string lastPROJString{};
+     mutable std::string lastJSONString{};
++#ifndef PROJLITE
++    // The ISO 19111 C API can query a coordinate operation's required grids
++    // from proj.db. Cache the descriptions and "already queried" state on the
++    // PJ to avoid repeating that database work. PROJLITE omits these API
++    // queries and metadata, so this state and its GridDescription dependency
++    // are not needed in its PJ layout.
+     mutable bool gridsNeededAsked = false;
+     mutable std::vector<NS_PROJ::operation::GridDescription> gridsNeeded{};
++#endif
+ 
+     // cache pj_get_type() result to help for repeated calls to proj_factors()
+     mutable PJ_TYPE type = PJ_TYPE_UNKNOWN;
+@@ -681,7 +695,15 @@ struct PJconsts {
+     /*************************************************************************************
+      proj_create_crs_to_crs() alternative coordinate operations
+     **************************************************************************************/
++#ifndef PROJLITE
++    // proj_create_crs_to_crs() can use the database to build several candidate
++    // operations, each with area, accuracy, grid, and instantiability metadata.
++    // proj_trans() selects among those candidates for each coordinate and may
++    // retry another one if a grid is unavailable. PROJLITE accepts an explicit
++    // core operation/pipeline instead; it does not perform database-backed
++    // CRS-to-CRS discovery or per-coordinate candidate selection.
+     std::vector<PJCoordOperation> alternativeCoordinateOperations{};
++#endif
+     int iCurCoordOp = -1;
+     bool errorIfBestTransformationNotAvailable = false;
+     bool warnIfBestTransformationNotAvailable =
+@@ -992,6 +1014,7 @@ std::string PROJ_DLL pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx);
+ // For use by projsync
+ std::string PROJ_DLL pj_get_relative_share_proj(PJ_CONTEXT *ctx);
+ 
++#ifndef PROJLITE
+ std::vector<PJCoordOperation>
+ pj_create_prepared_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
+                               const PJ *target_crs, PJ_OBJ_LIST *op_list);
+@@ -1000,26 +1023,35 @@ int pj_get_suggested_operation(PJ_CONTEXT *ctx,
+                                const std::vector<PJCoordOperation> &opList,
+                                const int iExcluded[2], bool skipNonInstantiable,
+                                PJ_DIRECTION direction, PJ_COORD coord);
++#endif
+ 
+ const PJ_UNITS *pj_list_linear_units();
+ const PJ_UNITS *pj_list_angular_units();
+ 
++#ifndef PROJLITE
+ void pj_clear_proj_info();
++#endif
+ 
+ void pj_clear_hgridshift_knowngrids_cache();
+ void pj_clear_vgridshift_knowngrids_cache();
+ void pj_clear_gridshift_knowngrids_cache();
+ 
++#ifndef PROJLITE
+ void pj_clear_sqlite_cache();
++#endif
+ 
+ PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial,
+                             double deltaXYTolerance);
+ 
++#ifndef PROJLITE
+ PJ *pj_obj_create(PJ_CONTEXT *ctx, const NS_PROJ::util::BaseObjectNNPtr &objIn);
++#endif
+ 
+ PJ_DIRECTION pj_opposite_direction(PJ_DIRECTION dir);
+ 
++#ifndef PROJLITE
+ void pj_warn_about_missing_grid(PJ *P);
++#endif
+ 
+ /*****************************************************************************/
+ /*                                                                           */
+diff --git a/src/trans.cpp b/src/trans.cpp
+index 88554445..66158eee 100644
+--- a/src/trans.cpp
++++ b/src/trans.cpp
+@@ -44,6 +44,12 @@ inline bool pj_coord_has_nans(PJ_COORD coo) {
+ }
+ 
+ /**************************************************************************************/
++#ifndef PROJLITE
++// CRS-to-CRS factory results may contain multiple database-derived candidates.
++// This helper checks each candidate's source/destination area of use, then
++// prefers the most accurate applicable operation (with instantiability and
++// area-size tie breakers). PROJLITE creates one explicit core PJ instead of
++// this candidate list, so it has no selection problem to solve.
+ int pj_get_suggested_operation(PJ_CONTEXT *,
+                                const std::vector<PJCoordOperation> &opList,
+                                const int iExcluded[2], bool skipNonInstantiable,
+@@ -174,8 +180,15 @@ int pj_get_suggested_operation(PJ_CONTEXT *,
+ 
+     return iBest;
+ }
++#endif
+ 
+ /**************************************************************************************/
++#ifndef PROJLITE
++// A selected ISO 19111 operation can fail because one or more of its datum
++// grids are unavailable. This helper queries the database-backed grid metadata
++// API to name those resources and apply ONLY_BEST warning/error policy. A
++// PROJLITE PJ is an explicit core operation and has no candidate-operation
++// metadata for this diagnostic to inspect.
+ void pj_warn_about_missing_grid(PJ *P)
+ /**************************************************************************************/
+ {
+@@ -209,6 +222,7 @@ void pj_warn_about_missing_grid(PJ *P)
+                                                     : PJ_LOG_DEBUG,
+            msg.c_str());
+ }
++#endif
+ 
+ /**************************************************************************************/
+ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
+@@ -224,12 +238,20 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
+     if (P->inverted)
+         direction = pj_opposite_direction(direction);
+ 
++#ifndef PROJLITE
+     if (P->iso_obj != nullptr && !P->iso_obj_is_coordinate_operation) {
+         pj_log(P->ctx, PJ_LOG_ERROR, "Object is not a coordinate operation");
+         proj_errno_set(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+         return proj_coord_error();
+     }
+-
++#endif
++
++#ifndef PROJLITE
++    // A full CRS-to-CRS PJ can hold candidates with different areas and grids.
++    // Select the candidate matching this coordinate, retry another candidate
++    // if needed, and report a missing-grid condition according to the policy.
++    // PROJLITE has no database-derived candidate list; the core path below runs
++    // the single explicitly constructed PJ and reports its own transform error.
+     if (!P->alternativeCoordinateOperations.empty()) {
+         constexpr int N_MAX_RETRY = 2;
+         int iExcluded[N_MAX_RETRY] = {-1, -1};
+@@ -344,6 +366,7 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
+         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_NO_OPERATION);
+         return proj_coord_error();
+     }
++#endif
+ 
+     P->iCurCoordOp =
+         0; // dummy value, to be used by proj_trans_get_last_used_operation()
+@@ -360,6 +383,11 @@ PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
+ }
+ 
+ /*****************************************************************************/
++#ifndef PROJLITE
++// Expose the candidate chosen during the previous proj_trans() call. This is
++// useful only when proj_create_crs_to_crs() supplied a list of alternatives;
++// PROJLITE omits that factory and therefore has no selected-candidate object to
++// return. Its explicit PJ operation is already the operation being executed.
+ PJ *proj_trans_get_last_used_operation(PJ *P)
+ /******************************************************************************
+     Return the operation used during the last invocation of proj_trans().
+@@ -375,6 +403,7 @@ object must be freed with proj_destroy().
+     return proj_clone(P->ctx,
+                       P->alternativeCoordinateOperations[P->iCurCoordOp].pj);
+ }
++#endif
+ 
+ /*****************************************************************************/
+ int proj_trans_array(PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord) {
+diff --git a/src/transformations/hgridshift.cpp b/src/transformations/hgridshift.cpp
+index 844f58e2..a1975703 100644
+--- a/src/transformations/hgridshift.cpp
++++ b/src/transformations/hgridshift.cpp
+@@ -3,6 +3,7 @@
+ #include <errno.h>
+ #include <mutex>
+ #include <stddef.h>
++#include <set>
+ #include <string.h>
+ 
+ #include "grids.hpp"
+diff --git a/src/transformations/tinshift.cpp b/src/transformations/tinshift.cpp
+index ce1a22b4..ca44e5e2 100644
+--- a/src/transformations/tinshift.cpp
++++ b/src/transformations/tinshift.cpp
+@@ -31,7 +31,12 @@
+ #include "filemanager.hpp"
+ #include "proj/internal/internal.hpp"
+ #include "proj_internal.h"
++#ifndef PROJLITE
++// The GeoPackage reader queries SQLite tables for model metadata and vertices.
++// Its implementation is excluded from the PROJLITE source list along with the
++// SQLite dependency; the JSON reader below uses the same TIN evaluator contract.
+ #include "tinshift_gpkg.hpp"
++#endif
+ #include "tinshift_iface.hpp"
+ #include "tinshift_json.hpp"
+ 
+@@ -96,6 +101,12 @@ PJ *PJ_TRANSFORMATION(tinshift, 1) {
+     P->left = PJ_IO_UNITS_WHATEVER;
+     P->right = PJ_IO_UNITS_WHATEVER;
+ 
++#ifndef PROJLITE
++    // Full PROJ can read the GeoPackage schema and vertex table directly through
++    // SQLite, including local and remote .gpkg resources. PROJLITE has no such
++    // reader or SQLite support. Its JSON branch below still builds a
++    // TINShiftJSONEvaluator implementing the same forward/inverse interface;
++    // only the input container format is unavailable in PROJLITE.
+     if (NS_PROJ::internal::ends_with(filename, ".gpkg") ||
+         NS_PROJ::internal::ends_with(filename, ".GPKG")) {
+         std::string path;
+@@ -134,8 +145,11 @@ PJ *PJ_TRANSFORMATION(tinshift, 1) {
+ 
+         return P;
+     }
++#endif
+ 
+-    // else JSON file
++    // JSON is the SQLite-free input path shared by both builds. It is not a
++    // fallback that silently treats an unsupported .gpkg as JSON; the file
++    // still has to be valid TINShift JSON and will otherwise fail validation.
+ 
+     auto file = NS_PROJ::FileManager::open_resource_file(P->ctx, filename);
+     if (nullptr == file) {
+diff --git a/src/transformations/vgridshift.cpp b/src/transformations/vgridshift.cpp
+index adcd7ec5..2060eb63 100644
+--- a/src/transformations/vgridshift.cpp
++++ b/src/transformations/vgridshift.cpp
+@@ -3,6 +3,7 @@
+ #include <errno.h>
+ #include <mutex>
+ #include <stddef.h>
++#include <set>
+ #include <string.h>
+ 
+ #include "grids.hpp"

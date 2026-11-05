@@ -58,17 +58,31 @@
 #include "proj/internal/io_internal.hpp"
 #include "proj/internal/lru_cache.hpp"
 #include "proj_internal.h"
+#ifndef PROJLITE
+// SQLite VFS and statement helpers are needed only by DiskChunkCache below.
+// PROJLITE keeps the in-memory LRU cache and network callbacks, but deliberately
+// has no SQLite-backed cache.db dependency.
 #include "sqlite3_utils.hpp"
+#endif
 
 #ifdef CURL_ENABLED
 #include <curl/curl.h>
+#ifndef PROJLITE
+// CURL itself is available in either build. SQLite is included here only for
+// sqlite3_snprintf(), used to format HTTP byte-range headers. The PROJLITE
+// branch uses standard snprintf() with the same bounded C format instead.
 #include <sqlite3.h> // for sqlite3_snprintf
+#endif
 #endif
 
 #ifdef DO_EMSCRIPTEN_FETCH
 #include <emscripten/fetch.h>
 #include <iostream>
+#ifndef PROJLITE
+// The Emscripten range-header path has the same formatter-only dependency as
+// CURL; PROJLITE's #else branch uses standard snprintf() and needs no SQLite.
 #include <sqlite3.h> // for sqlite3_snprintf
+#endif
 #include <unordered_map>
 #endif
 
@@ -193,6 +207,13 @@ static NetworkFilePropertiesCache gNetworkFileProperties{};
 
 // ---------------------------------------------------------------------------
 
+#ifndef PROJLITE
+// Optional persistent layer for downloaded HTTP byte ranges and their file
+// validators. It lets full PROJ reuse chunks across cache evictions and process
+// restarts, and can serve already-cached ranges without another request. It is
+// not required to decode a range or compute a transformation: PROJLITE keeps
+// the in-memory LRU and fetches a range from the configured network interface
+// on a miss. The tradeoff is no cross-process or offline reuse of remote grids.
 class DiskChunkCache {
     PJ_CONTEXT *ctx_ = nullptr;
     std::string path_{};
@@ -228,9 +249,14 @@ class DiskChunkCache {
     bool move_to_tail(sqlite3_int64 chunk_id);
     void closeAndUnlink();
 };
+#endif
 
 // ---------------------------------------------------------------------------
 
+#ifndef PROJLITE
+// These proj.ini settings configure only the optional SQLite disk cache
+// (enabled state, size limit, and TTL). With no persistent cache in PROJLITE,
+// the ordinary in-memory LRU and network read path do not need these helpers.
 static bool pj_context_get_grid_cache_is_enabled(PJ_CONTEXT *ctx) {
     pj_load_ini(ctx);
     return ctx->gridChunkCache.enabled;
@@ -791,6 +817,7 @@ bool DiskChunkCache::move_to_tail(sqlite3_int64 chunk_id) {
            update_linked_chunks_head_tail((link_id == head) ? next : head,
                                           link_id);
 }
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -799,7 +826,14 @@ void NetworkChunkCache::insert(PJ_CONTEXT *ctx, const std::string &url,
                                std::vector<unsigned char> &&data) {
     auto dataPtr(std::make_shared<std::vector<unsigned char>>(std::move(data)));
     cache_.insert(Key(url, chunkIdx), dataPtr);
+    (void)ctx;
 
+#ifndef PROJLITE
+    // The memory cache above is the immediate cache in both builds. This
+    // optional write makes the same bytes reusable after eviction or a process
+    // restart. PROJLITE omits only that persistence: a later miss downloads
+    // the same byte range again, so online results are unchanged, at the cost
+    // of extra requests and no offline reuse of previously fetched chunks.
     auto diskCache = DiskChunkCache::open(ctx);
     if (!diskCache)
         return;
@@ -1005,6 +1039,7 @@ void NetworkChunkCache::insert(PJ_CONTEXT *ctx, const std::string &url,
     }
 
     diskCache->move_to_head(chunk_id);
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -1016,7 +1051,14 @@ NetworkChunkCache::get(PJ_CONTEXT *ctx, const std::string &url,
     if (cache_.tryGet(Key(url, chunkIdx), ret)) {
         return ret;
     }
+    (void)ctx;
 
+#ifndef PROJLITE
+    // The memory-cache hit returned above. Full PROJ next checks its optional
+    // persistent cache; PROJLITE skips that lookup and returns a cache miss.
+    // NetworkFile::read() treats nullptr as a miss and requests the required
+    // HTTP range below, rather than treating it as corrupt or invalid data.
+    // Thus SQLite affects reuse/offline behavior, not decoding of fetched bytes.
     auto diskCache = DiskChunkCache::open(ctx);
     if (!diskCache)
         return ret;
@@ -1059,7 +1101,7 @@ NetworkChunkCache::get(PJ_CONTEXT *ctx, const std::string &url,
     } else if (mainRet != SQLITE_DONE) {
         pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
     }
-
+#endif
     return ret;
 }
 
@@ -1082,14 +1124,28 @@ void NetworkChunkCache::clearMemoryCache() { cache_.clear(); }
 // ---------------------------------------------------------------------------
 
 void NetworkChunkCache::clearDiskChunkCache(PJ_CONTEXT *ctx) {
+#ifndef PROJLITE
+    // Full PROJ removes persisted chunks and validators. PROJLITE has no such
+    // file, so its #else branch clears the only cache it owns: the in-memory LRU.
     auto diskCache = DiskChunkCache::open(ctx);
     if (!diskCache)
         return;
     diskCache->closeAndUnlink();
+#else
+    // There is no disk state to remove in PROJLITE. Clearing the memory LRU
+    // therefore clears all cached network chunks for this process.
+    (void)ctx;
+    gNetworkChunkCache.clearMemoryCache();
+#endif
 }
 
 // ---------------------------------------------------------------------------
 
+#ifndef PROJLITE
+// Persist the remote file's size and HTTP validators beside disk chunks. On a
+// later open, changes to these values invalidate stale persisted chunks; the
+// timestamp also supports the configured TTL. This coordination is needed
+// only when chunks survive in SQLite across opens or process restarts.
 void NetworkFilePropertiesCache::insert(PJ_CONTEXT *ctx, const std::string &url,
                                         FileProperties &props) {
     time(&props.lastChecked);
@@ -1226,6 +1282,23 @@ bool NetworkFilePropertiesCache::tryGet(PJ_CONTEXT *ctx, const std::string &url,
     cache_.insert(url, props);
     return true;
 }
+#else
+// Without persistent chunks there is no stale on-disk data to validate. Keep
+// file properties only in the same process-local cache: after a miss,
+// NetworkFile::open() contacts the server, reads fresh headers, and repopulates
+// both memory caches. Online reads therefore remain correct; PROJLITE gives up
+// only cross-process validator/TTL reuse and offline use of persisted chunks.
+void NetworkFilePropertiesCache::insert(PJ_CONTEXT *, const std::string &url,
+                                        FileProperties &props) {
+    time(&props.lastChecked);
+    cache_.insert(url, props);
+}
+
+bool NetworkFilePropertiesCache::tryGet(PJ_CONTEXT *, const std::string &url,
+                                        FileProperties &props) {
+    return cache_.tryGet(url, props);
+}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -1747,9 +1820,18 @@ PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *ctx, const char *url,
     std::string body;
 
     char szBuffer[128];
+#ifndef PROJLITE
+    // SQLite supplies this bounded formatter in full builds. This string is
+    // only a decimal HTTP byte range using standard %llu conversions, so the
+    // #else branch's C snprintf() is sufficient and avoids linking SQLite.
     sqlite3_snprintf(sizeof(szBuffer), szBuffer, "%llu-%llu", offset,
                      offset + size_to_read - 1);
-
+#else
+    // The fixed-size buffer and standard format conversions make this
+    // equivalent for the range header; SQLite is not needed by the CURL path.
+    snprintf(szBuffer, sizeof(szBuffer), "%llu-%llu", offset,
+             offset + size_to_read - 1);
+#endif
     while (true) {
         CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer));
 
@@ -1846,8 +1928,18 @@ static size_t pj_curl_read_range(PJ_CONTEXT *ctx,
     std::string body;
 
     char szBuffer[128];
+#ifndef PROJLITE
+    // SQLite supplies this bounded formatter in full builds. This string is
+    // only a decimal HTTP byte range using standard %llu conversions, so the
+    // #else branch's C snprintf() is sufficient and avoids linking SQLite.
     sqlite3_snprintf(sizeof(szBuffer), szBuffer, "%llu-%llu", offset,
                      offset + size_to_read - 1);
+#else
+    // The fixed-size buffer and standard format conversions make this
+    // equivalent for the range header; SQLite is not needed by this path.
+    snprintf(szBuffer, sizeof(szBuffer), "%llu-%llu", offset,
+             offset + size_to_read - 1);
+#endif
 
     while (true) {
         CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer));
@@ -2019,8 +2111,18 @@ static size_t pj_emscripten_read_range(PJ_CONTEXT *ctx,
     double oldDelay = MIN_RETRY_DELAY_MS;
 
     char szBuffer[128];
+#ifndef PROJLITE
+    // SQLite supplies this bounded formatter in full builds. This string is
+    // only a decimal HTTP byte range using standard %llu conversions, so the
+    // #else branch's C snprintf() is sufficient and avoids linking SQLite.
     sqlite3_snprintf(sizeof(szBuffer), szBuffer, "bytes=%llu-%llu", offset,
                      offset + size_to_read - 1);
+#else
+    // This is the same standard C formatting operation; only the HTTP header
+    // prefix differs, so no SQLite behavior is required in PROJLITE.
+    snprintf(szBuffer, sizeof(szBuffer), "bytes=%llu-%llu", offset,
+             offset + size_to_read - 1);
+#endif
 
     // To work in the browser, we need to run the fetch part in Web Worker,
     // otherwise we cannot run it synchronous. (at least with my tests)
@@ -2265,6 +2367,12 @@ static const char nfm_dir_chars[] = "/\\";
 static const char nfm_dir_chars[] = "/";
 #endif
 
+#ifndef PROJLITE
+// These helpers support only proj_is_download_needed() below: that API maps a
+// bare grid name to a URL and checks the downloaded_file_properties table to
+// decide whether a local copy is stale. Ordinary remote-file open/read uses the
+// network callbacks and HTTP range requests directly, so it does not depend on
+// these helpers or on the SQLite freshness database.
 static bool nfm_is_tilde_slash(const char *name) {
     return *name == '~' && strchr(nfm_dir_chars, name[1]);
 }
@@ -2291,6 +2399,7 @@ static std::string build_url(PJ_CONTEXT *ctx, const char *name) {
     }
     return name;
 }
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -2493,6 +2602,12 @@ void proj_grid_cache_clear(PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
+#ifndef PROJLITE
+// This higher-level convenience API decides whether an already-downloaded
+// resource must be fetched again. Its answer depends on persistent file size,
+// ETag/Last-Modified validators, and TTL state in SQLite. PROJLITE still opens
+// remote files and downloads ranges normally; it omits only this freshness
+// decision because it has no persistent metadata against which to compare.
 /** Return if a file must be downloaded or is already available in the
  * PROJ user-writable directory.
  *
@@ -2876,6 +2991,7 @@ int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
     }
     return true;
 }
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -2883,6 +2999,10 @@ int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
 
 // ---------------------------------------------------------------------------
 
+#ifndef PROJLITE
+// DiskChunkCache uses this path for cache.db. PROJLITE has only process-local
+// memory caches, so no database filename or associated proj.ini setting is
+// needed; remote cache misses continue through the normal range-download path.
 std::string pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx) {
     pj_load_ini(ctx);
     if (!ctx->gridChunkCache.filename.empty()) {
@@ -2892,5 +3012,6 @@ std::string pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx) {
     ctx->gridChunkCache.filename = path + "/cache.db";
     return ctx->gridChunkCache.filename;
 }
+#endif
 
 //! @endcond

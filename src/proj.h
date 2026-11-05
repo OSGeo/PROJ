@@ -180,7 +180,7 @@ extern "C" {
 /* Note: the following 3 defines have been introduced in PROJ 8.0.1 */
 /* Macro to compute a PROJ version number from its components */
 #define PROJ_COMPUTE_VERSION(maj, min, patch)                                  \
-    ((maj)*10000 + (min)*100 + (patch))
+    ((maj) * 10000 + (min) * 100 + (patch))
 
 /* Current PROJ version from the above version numbers */
 #define PROJ_VERSION_NUMBER                                                    \
@@ -491,8 +491,14 @@ int PROJ_DLL proj_context_set_fileapi(PJ_CONTEXT *ctx,
                                       const PROJ_FILE_API *fileapi,
                                       void *user_data);
 
+#ifndef PROJLITE
+/* Configure the SQLite VFS used by proj.db and the persistent grid cache.
+ * This declaration is omitted from PROJLITE because that build has no SQLite
+ * backend, database files, or implementation of this setting.
+ */
 void PROJ_DLL proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx,
                                                 const char *name);
+#endif
 
 /** Opaque structure for PROJ for a network handle. Implementations might cast
  * it to their structure/class of choice. */

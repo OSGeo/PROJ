@@ -7,6 +7,33 @@
 # Distributed under the MIT license
 #
 ################################################################################
+# PROJLITE: pipeline-focused variant without SQLite or proj.db. Local grids
+# are supported; TIFF and CURL remain controlled by their upstream options.
+################################################################################
+set(PROJLITE_EXCLUDED_SOURCES
+  apps/projinfo_lib.cpp
+  crs_to_crs.cpp
+  embedded_resources.c
+  factors.cpp
+  info.cpp
+  memvfs.c
+  coord_operation.cpp
+  proj_json_streaming_writer.cpp
+  sqlite3_utils.cpp
+  transformations/tinshift_gpkg.cpp
+  trans_bounds.cpp
+  wkt1_generated_parser.c
+  wkt1_parser.cpp
+  wkt2_generated_parser.c
+  wkt2_parser.cpp
+  wkt_parser.cpp
+)
+# Minimal ISO19111 sources retained in PROJLITE
+set(PROJLITE_ISO19111_SOURCES
+  iso19111/c_api.cpp
+  iso19111/internal.cpp
+)
+################################################################################
 # General settings
 ################################################################################
 cmake_minimum_required(VERSION 3.22.1)
@@ -18,6 +45,34 @@ project(PROJ
 
 # Only interpret if() arguments as variables or keywords when unquoted
 cmake_policy(SET CMP0054 NEW)
+
+option(PROJLITE "Build PROJLITE without SQLite or proj.db" OFF)
+if(PROJLITE)
+  add_compile_definitions(PROJLITE)
+  if(NOT DEFINED ENABLE_TIFF)
+    set(ENABLE_TIFF OFF CACHE BOOL "Enable TIFF support to read some grids")
+  endif()
+  if(NOT DEFINED ENABLE_CURL)
+    set(ENABLE_CURL OFF CACHE BOOL "Enable Curl support")
+  endif()
+  set(EMBED_RESOURCE_FILES OFF)
+  set(USE_ONLY_EMBEDDED_RESOURCE_FILES OFF)
+  set(BUILD_CS2CS OFF)
+  set(BUILD_CCT OFF)
+  set(BUILD_GEOD OFF)
+  set(BUILD_PROJ OFF)
+  set(BUILD_PROJINFO OFF)
+  set(BUILD_PROJSYNC OFF)
+  set(PROJ_OUTPUT_NAME "projlite" CACHE STRING "Name of PROJLITE library" FORCE)
+endif()
+
+if(PROJLITE)
+  set(PROJLITE_PACKAGE_NAME "PROJLITE")
+  set(PROJLITE_PACKAGE_NAME_LOWER "projlite")
+else()
+  set(PROJLITE_PACKAGE_NAME "PROJ")
+  set(PROJLITE_PACKAGE_NAME_LOWER "proj")
+endif()
 
 include(CheckCXXCompilerFlag)
 
@@ -229,6 +284,7 @@ message(STATUS "nlohmann/json: ${NLOHMANN_JSON}")
 # Check for sqlite3
 ################################################################################
 
+if(NOT PROJLITE)
 find_program(EXE_SQLITE3 sqlite3)
 if(NOT EXE_SQLITE3)
   message(SEND_ERROR "sqlite3 binary not found!")
@@ -247,6 +303,7 @@ endif()
 find_package(SQLite3 3.11 REQUIRED)
 if(NOT TARGET SQLite3::SQLite3) # CMake < 4.3
   add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
+endif()
 endif()
 
 ################################################################################
@@ -489,7 +546,7 @@ endif()
 configure_proj_pc()
 
 install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJLITE_PACKAGE_NAME_LOWER}.pc
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
 ################################################################################

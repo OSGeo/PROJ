@@ -31,7 +31,12 @@
 #include "filemanager.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj_internal.h"
+#ifndef PROJLITE
+// The GeoPackage reader queries SQLite tables for model metadata and vertices.
+// Its implementation is excluded from the PROJLITE source list along with the
+// SQLite dependency; the JSON reader below uses the same TIN evaluator contract.
 #include "tinshift_gpkg.hpp"
+#endif
 #include "tinshift_iface.hpp"
 #include "tinshift_json.hpp"
 
@@ -96,6 +101,12 @@ PJ *PJ_TRANSFORMATION(tinshift, 1) {
     P->left = PJ_IO_UNITS_WHATEVER;
     P->right = PJ_IO_UNITS_WHATEVER;
 
+#ifndef PROJLITE
+    // Full PROJ can read the GeoPackage schema and vertex table directly through
+    // SQLite, including local and remote .gpkg resources. PROJLITE has no such
+    // reader or SQLite support. Its JSON branch below still builds a
+    // TINShiftJSONEvaluator implementing the same forward/inverse interface;
+    // only the input container format is unavailable in PROJLITE.
     if (NS_PROJ::internal::ends_with(filename, ".gpkg") ||
         NS_PROJ::internal::ends_with(filename, ".GPKG")) {
         std::string path;
@@ -134,8 +145,11 @@ PJ *PJ_TRANSFORMATION(tinshift, 1) {
 
         return P;
     }
+#endif
 
-    // else JSON file
+    // JSON is the SQLite-free input path shared by both builds. It is not a
+    // fallback that silently treats an unsupported .gpkg as JSON; the file
+    // still has to be valid TINShift JSON and will otherwise fail validation.
 
     auto file = NS_PROJ::FileManager::open_resource_file(P->ctx, filename);
     if (nullptr == file) {

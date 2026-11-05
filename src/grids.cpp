@@ -4000,6 +4000,11 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
 }
 
 /*****************************************************************************/
+#ifndef PROJLITE
+// This compatibility API reports metadata from legacy init files and, for
+// EPSG/IGNF datasets, reads version/date values from proj.db. PROJLITE can
+// still load explicit init files through the core parser, but has no database
+// from which to provide the authority-dataset metadata this API exposes.
 PJ_INIT_INFO proj_init_info(const char *initname) {
     /******************************************************************************
         Information about a named init file.
@@ -4100,3 +4105,4 @@ PJ_INIT_INFO proj_init_info(const char *initname) {
 
     return ininfo;
 }
+#endif

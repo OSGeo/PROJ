@@ -4,7 +4,7 @@ includedir=@includedir@
 datarootdir=@datarootdir@
 datadir=@datadir@/@PACKAGE@
 
-Name: PROJ
+Name: @PROJLITE_PACKAGE_NAME@
 Description: Coordinate transformation software library
 Requires:
 Version: @VERSION@

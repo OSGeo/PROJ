@@ -568,7 +568,11 @@ static int require_grid(const char *args) {
     const char *grid_filename = column(args, 1);
     grid_info = proj_grid_info(grid_filename);
     if (strlen(grid_info.filename) == 0) {
-
+#ifndef PROJLITE
+    // proj_grid_info() checks local resources. Full PROJ can then consult
+    // proj.db's grid catalog and treat a known downloadable grid as
+    // available, so GIE does not skip a test that can fetch it. PROJLITE
+    // has no catalog; when the local check fails, the test must be skipped.
         if (proj_context_is_network_enabled(nullptr)) {
             auto dbContext = NS_PROJ::io::DatabaseContext::create();
             std::string fullFilename, packageName, url;
@@ -582,7 +586,7 @@ static int require_grid(const char *args) {
                 return 0;
             }
         }
-
+#endif
         if (T.verbosity > 1) {
             fprintf(T.fout, "Test skipped because of missing grid %s\n",
                     grid_filename);
@@ -666,6 +670,11 @@ static int operation(const char *args) {
     return 0;
 }
 
+#ifndef PROJLITE
+// This helper needs ISO 19111 CRS/coordinate-system objects to inspect axis
+// order, including the horizontal component of a compound CRS. It is used by
+// GIE's CRS-to-CRS tests, which PROJLITE skips because it only constructs core
+// PROJ definitions and does not provide the CRS inspection API.
 static bool isLatOrNorthingFirst(const PJ *crs) {
     auto crsType = proj_get_type(crs);
 
@@ -781,6 +790,7 @@ static int crs_dst(const char *args) {
 
     return 0;
 }
+#endif
 
 static PJ_COORD torad_coord(PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
     size_t i, n;
@@ -1236,10 +1246,26 @@ static int dispatch(const char *cmnd, const char *args) {
         return SKIP;
     if (0 == strcmp(cmnd, "operation"))
         return operation(args);
+#ifndef PROJLITE
+    // The full build can construct CRS objects and choose an operation between
+    // them from the database, so it can execute these test commands.
     if (0 == strcmp(cmnd, "crs_src"))
         return crs_src(args);
     if (0 == strcmp(cmnd, "crs_dst"))
         return crs_dst(args);
+#else
+    // Do not pass CRS identifiers to PROJLITE's PROJ-definition-only parser.
+    // Mark the whole test as skipped so its following expect/accept directives
+    // are consumed as part of the skip instead of failing on missing CRS state.
+    if (0 == strcmp(cmnd, "crs_src") || 0 == strcmp(cmnd, "crs_dst")) {
+        if (!T.skip_test) {
+            fprintf(stderr, "crs_src/crs_dst operations are not supported in "
+                            "PROJLITE; skipping test\n");
+        }
+        T.skip_test = 1;
+        return 0;
+    }
+#endif
     if (T.skip_test) {
         if (0 == strcmp(cmnd, "expect"))
             return another_skip();

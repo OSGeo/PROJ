@@ -264,6 +264,13 @@ set(SRC_LIBPROJ_CORE
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 
+if(PROJLITE)
+  set(SRC_LIBPROJ_ISO19111 ${PROJLITE_ISO19111_SOURCES})
+  foreach(PROJLITE_LIST SRC_LIBPROJ_CORE SRC_LIBPROJ_TRANSFORMATIONS SRC_PROJAPPS_LIBS)
+    list(REMOVE_ITEM ${PROJLITE_LIST} ${PROJLITE_EXCLUDED_SOURCES})
+  endforeach()
+endif()
+
 # Skip Unity build for specific files
 set(SKIP_UNITY_BUILD_FILES
   list.cpp # because if sets DO_NOT_DEFINE_PROJ_HEAD
@@ -390,7 +397,13 @@ add_library(proj
   ${ALL_LIBPROJ_HEADERS}
   ${PROJ_RESOURCES}
 )
-add_library(PROJ::proj ALIAS proj)
+if(PROJLITE)
+  add_library(PROJLITE::projlite ALIAS proj)
+  set_target_properties(proj PROPERTIES EXPORT_NAME projlite)
+  target_compile_definitions(proj PUBLIC PROJLITE)
+else()
+  add_library(PROJ::proj ALIAS proj)
+endif()
 
 target_compile_features(proj
   PUBLIC
@@ -554,10 +567,15 @@ endif()
 set_target_properties(proj PROPERTIES OUTPUT_NAME ${PROJ_OUTPUT_NAME})
 
 if(WIN32)
+  if(PROJLITE)
+    set(PROJ_ARCHIVE_OUTPUT_NAME projlite)
+  else()
+    set(PROJ_ARCHIVE_OUTPUT_NAME proj)
+  endif()
   set_target_properties(proj
     PROPERTIES
     VERSION "${PROJ_VERSION}"
-    ARCHIVE_OUTPUT_NAME proj
+    ARCHIVE_OUTPUT_NAME ${PROJ_ARCHIVE_OUTPUT_NAME}
     CLEAN_DIRECT_OUTPUT 1)
     if (MINGW AND BUILD_SHARED_LIBS AND APPEND_SOVERSION)
         set_target_properties(proj PROPERTIES SUFFIX "-${PROJ_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -607,7 +625,9 @@ if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
   target_link_libraries(proj PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
+if(NOT PROJLITE)
 target_link_libraries(proj PRIVATE SQLite3::SQLite3)
+endif()
 
 if(NLOHMANN_JSON STREQUAL "external")
   target_compile_definitions(proj PRIVATE EXTERNAL_NLOHMANN_JSON)

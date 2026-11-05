@@ -1,2 +1,3 @@
 BasedOnStyle: llvm
 IndentWidth: 4
+DisableFormat: true

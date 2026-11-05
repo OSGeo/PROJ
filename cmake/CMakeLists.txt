@@ -90,11 +90,15 @@ string(COMPARE EQUAL "${PROJECT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" DEFAULT_VAL)
 option(INSTALL_LEGACY_CMAKE_FILES "Install PROJ4 legacy target CMake files" ${DEFAULT_VAL})
 
 set(PROJECT_LIST ${PROJECT_NAME})
-if (INSTALL_LEGACY_CMAKE_FILES)
+if(PROJLITE)
+  set(PROJECT_LIST PROJLITE)
+endif()
+if (INSTALL_LEGACY_CMAKE_FILES AND NOT PROJLITE)
     set(PROJECT_LIST "${PROJECT_LIST}" "${PROJECT_LEGACY_NAME}")
 endif ()
 foreach (PROJECT_VARIANT_NAME IN LISTS PROJECT_LIST)
   string (TOLOWER "${PROJECT_VARIANT_NAME}" PROJECT_VARIANT_LOWER)
+  set (PROJECT_NAME_LOWER "${PROJECT_VARIANT_LOWER}")
   set (CMAKECONFIGSUBDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_VARIANT_LOWER}")
   # proj-config.cmake for the install tree.  It's installed in
   # ${CMAKECONFIGSUBDIR} and @PROJECT_ROOT_DIR@ is the relative
@@ -117,8 +121,8 @@ foreach (PROJECT_VARIANT_NAME IN LISTS PROJECT_LIST)
   # Make information about the cmake targets (the library and the tools)
   # available.
   install(EXPORT targets
-    NAMESPACE ${PROJECT_NAME}::
-    FILE ${PROJECT_NAME_LOWER}-targets.cmake
+    NAMESPACE ${PROJECT_VARIANT_NAME}::
+    FILE ${PROJECT_VARIANT_LOWER}-targets.cmake
     DESTINATION "${CMAKECONFIGSUBDIR}")
   if (INSTALL_LEGACY_CMAKE_FILES)
       install(EXPORT targets

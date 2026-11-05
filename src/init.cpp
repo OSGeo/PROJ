@@ -236,6 +236,12 @@ static paralist *get_init(PJ_CONTEXT *ctx, const char *key,
     if (init_items)
         return init_items;
 
+#ifndef PROJLITE
+    // In full PROJ, an epsg: or IGNF: init-style identifier can be expanded
+    // through proj.db when no corresponding legacy init file is installed.
+    // That expansion resolves the authority code to a PROJ definition before
+    // normal parameter parsing continues. PROJLITE has no authority database;
+    // explicit local init files still follow the ordinary file path below.
     if ((strncmp(xkey, "epsg:", 5) == 0 || strncmp(xkey, "IGNF:", 5) == 0)) {
         char unused[256];
         char initname[5];
@@ -294,6 +300,7 @@ static paralist *get_init(PJ_CONTEXT *ctx, const char *key,
             proj_destroy(src);
         }
     }
+#endif
 
     if (!definition) {
         /* If not, we must read it from file */

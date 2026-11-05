@@ -46,7 +46,12 @@
 #include <sstream> // std::istringstream and std::ostringstream
 #include <string>
 
+#ifndef PROJLITE
+// Unix full builds use sqlite3_snprintf() for the locale-independent numeric
+// formatting below. PROJLITE does not link SQLite, so it selects the
+// standard-library formatter in the later conditional instead.
 #include "sqlite3.h"
+#endif
 
 NS_PROJ_START
 
@@ -327,11 +332,12 @@ std::vector<std::string> split(const std::string &str,
 
 // ---------------------------------------------------------------------------
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(PROJLITE)
 
-// For some reason, sqlite3_snprintf() in the sqlite3 builds used on AppVeyor
-// doesn't round identically to the Unix builds, and thus breaks a number of
-// unit test. So to avoid this, use the stdlib formatting
+// Windows avoids sqlite3_snprintf() because its rounding differs from Unix and
+// breaks numeric-string tests. PROJLITE follows the same standard-library
+// path because it has no SQLite dependency. The classic locale keeps output
+// stable regardless of the user's locale.
 
 std::string toString(int val) {
     std::ostringstream buffer;
@@ -357,6 +363,9 @@ std::string toString(double val, int precision) {
 }
 
 #else
+
+// On Unix full builds, SQLite's formatter provides C-locale output and is
+// already available as a dependency; use it for the same numeric strings.
 
 std::string toString(int val) {
     // use sqlite3 API that is slightly faster than std::ostringstream

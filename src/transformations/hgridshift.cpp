@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <mutex>
 #include <stddef.h>
+#include <set>
 #include <string.h>
 
 #include "grids.hpp"
