@@ -29,6 +29,12 @@ image. Wide area imaging missions like  Sentinel-1 and NISAR use a time
 dependent coordinate system and this coordinate can be used to describe the 
 imaging geometry of a single slant range line.
 
+The triplet of coordinates in this system represent:
+1. Slant range (one-way) from the platform to the target. This is always
+a positive quantity.
+2. Rate of change of slant range (one-way) from the platform to the target.
+3. Height of the target above the ellipsoid.
+
 See :cite:`NISAR_2023`
 
 
