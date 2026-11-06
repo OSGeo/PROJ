@@ -847,6 +847,9 @@ Roundtrip
 rouss
 Roussilhe
 rpoly
+rrdot
+Rrdot
+RRdot
 Ruffhead
 runtime
 Runtime
