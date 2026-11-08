@@ -2289,10 +2289,24 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
                 ctx, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
             return nullptr;
         }
-        const int columns = static_cast<int>(
-            fabs((extent.east - extent.west) * extent.invResX + 0.5) + 1);
-        const int rows = static_cast<int>(
-            fabs((extent.north - extent.south) * extent.invResY + 0.5) + 1);
+        // Check before casting to int that the grid dimensions derived from
+        // the header extent and resolution cannot overflow int in the
+        // downstream computations (4 * m_width, 4 * sizeof(float) * m_width).
+        const double dfColumns =
+            fabs((extent.east - extent.west) * extent.invResX + 0.5) + 1;
+        const double dfRows =
+            fabs((extent.north - extent.south) * extent.invResY + 0.5) + 1;
+        if (dfColumns > INT_MAX / (4 * sizeof(float)) ||
+            dfRows > INT_MAX / (4 * sizeof(float))) {
+            pj_log(ctx, PJ_LOG_ERROR,
+                   _("Too large grid dimensions (%gx%g) for %s"), dfColumns,
+                   dfRows, filename.c_str());
+            proj_context_errno_set(
+                ctx, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+            return nullptr;
+        }
+        const int columns = static_cast<int>(dfColumns);
+        const int rows = static_cast<int>(dfRows);
         if (columns > largestLine)
             largestLine = columns;
 

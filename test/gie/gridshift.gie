@@ -292,4 +292,13 @@ operation   +proj=gridshift +grids=tests/i_do_not_exist.tif
 expect      failure errno invalid_op_file_not_found_or_invalid
 -------------------------------------------------------------------------------
 
+# Crafted NTv2 grid declaring a width that overflows int in the columns/rows
+# computation (issue #4857): the file must be rejected at load time instead of
+# propagating a truncated width into the line-buffer sizing.
+operation   +proj=hgridshift +grids=tests/test_hgrid_ntv2_oversized_width.gsb
+-------------------------------------------------------------------------------
+accept      -2            0.000004    0
+expect      failure errno invalid_op_file_not_found_or_invalid
+-------------------------------------------------------------------------------
+
 </gie-strict>
