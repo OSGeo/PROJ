@@ -117,6 +117,18 @@ TEST_F(GridTest, HorizontalShiftGridSet_null) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(GridTest, HorizontalShiftGridSet_ntv2_oversized_dimensions) {
+    // test_ntv2_grid_dimensions_overflow.gsb declares a subgrid whose computed
+    // width is 2^30 + 1. Before the dimension check, that width reached the
+    // 4 * m_width (int) line-buffer size in NTv2Grid::valueAt, which overflowed
+    // to a tiny allocation and caused a heap-buffer-overflow on read.
+    EXPECT_EQ(NS_PROJ::HorizontalShiftGridSet::open(
+                  m_ctxt, "tests/test_ntv2_grid_dimensions_overflow.gsb"),
+              nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(GridTest, GenericShiftGridSet_null) {
     auto gridSet = NS_PROJ::GenericShiftGridSet::open(m_ctxt, "null");
     ASSERT_NE(gridSet, nullptr);
