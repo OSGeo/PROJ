@@ -80,7 +80,8 @@ static PJ_LP moll_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
         const double half_s =
             2. * asin(sqrt(0.5 * (Q->C_y - fabs(xy.y)) / Q->C_y));
         const double s = 2. * half_s;
-        lp.lam = xy.x / (Q->C_x * sin(half_s));
+        const double den = Q->C_x * sin(half_s);
+        lp.lam = den == 0. ? 0. : xy.x / den; /* at the pole x is 0 */
         if (fabs(lp.lam) >= M_PI) {
             lp.lam = lp.phi = HUGE_VAL;
             return lp;

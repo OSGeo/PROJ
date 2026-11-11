@@ -239,7 +239,7 @@ static PJ_LP aeqd_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
         xy.y = c_rh * cosc * c0 - xy.y * sinc * s0;
         xy.x *= sinc;
         lp.phi = atan2(n, hypot(xy.x, xy.y));
-        lp.lam = xy.y == 0. ? 0. : atan2(xy.x, xy.y);
+        lp.lam = atan2(xy.x, xy.y);
     } else if (Q->mode == pj_aeqd_ns::N_POLE) {
         lp.phi = M_HALFPI - c_rh;
         lp.lam = atan2(xy.x, -xy.y);

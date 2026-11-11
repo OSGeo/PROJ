@@ -9204,4 +9204,53 @@ direction inverse
 accept  0.0000303 0.0000606
 expect  0.00000000099922995236928417 0.0000000019984599047385683
 
+-------------------------------------------------------------------------------
+# laea inverse: a point 90 deg from the central meridian used to come back
+# with longitude 0, when the cos(lam) term rounds to exactly 0.
+operation +proj=laea +R=1737400 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+direction inverse
+
+accept  2583532.584594128653 -322120.019439637079
+expect  90 -10
+
+-------------------------------------------------------------------------------
+# Mollweide inverse exactly at the poles.
+operation +proj=moll +R=1737400
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+direction inverse
+
+accept  0 2457054.643267015461
+expect  0 90
+
+accept  0 -2457054.643267015461
+expect  0 -90
+
+-------------------------------------------------------------------------------
+# Hammer inverse at the poles and on the outline, which used to be rejected.
+operation +proj=hammer +R=1737400
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+direction inverse
+
+accept  0 2457054.643267015461
+expect  0 90
+
+accept  4914109.286534030922 0
+expect  180 0
+
+accept  -3764426.1118288 1579364.2810148
+expect  -180 40
+
+-------------------------------------------------------------------------------
+operation +proj=hammer +R=1737400 +W=1
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+direction inverse
+
+accept  2419726.4622640 -426663.0612314
+expect  90 -10
+
 </gie-strict>

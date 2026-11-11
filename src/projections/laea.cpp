@@ -223,10 +223,7 @@ static PJ_LP laea_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
         lp.phi -= M_HALFPI;
         break;
     }
-    lp.lam = (xy.y == 0. &&
-              (Q->mode == pj_laea_ns::EQUIT || Q->mode == pj_laea_ns::OBLIQ))
-                 ? 0.
-                 : atan2(xy.x, xy.y);
+    lp.lam = atan2(xy.x, xy.y);
     return (lp);
 }
 

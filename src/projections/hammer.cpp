@@ -1,5 +1,6 @@
 
 
+#include <cmath>
 #include <errno.h>
 #include <math.h>
 
@@ -8,8 +9,6 @@
 
 PROJ_HEAD(hammer, "Hammer & Eckert-Greifendorff")
 "\n\tMisc Sph, \n\tW= M=";
-
-#define EPS 1.0e-10
 
 namespace { // anonymous namespace
 struct pq_hammer {
@@ -47,7 +46,7 @@ static PJ_LP hammer_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     /* z * u = cos(phi) * sin(W * lam), z * v = sin(phi) and
      * c = 2 * z * z - 1 = cos(phi) * cos(W * lam) */
     const double c = 2. * z * z - 1.;
-    if (fabs(c) < EPS) {
+    if (std::isnan(z)) { /* outside the ellipse */
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
@@ -94,5 +93,3 @@ PJ *PJ_PROJECTION(hammer) {
 
     return P;
 }
-
-#undef EPS
