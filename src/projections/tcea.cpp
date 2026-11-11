@@ -24,8 +24,9 @@ static PJ_LP tcea_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     /* t * sin(y) = sin(phi), t * cos(y) = cos(phi) * cos(lam) and
      * x = cos(phi) * sin(lam): atan2() instead of asin(t * sin(y)) keeps the
      * latitude accurate near the poles */
-    lp.phi = atan2(t * sin(xy.y), hypot(xy.x, t * cos(xy.y)));
-    lp.lam = atan2(xy.x, t * cos(xy.y));
+    const double tc = t * cos(xy.y);
+    lp.phi = atan2(t * sin(xy.y), sqrt(xy.x * xy.x + tc * tc));
+    lp.lam = atan2(xy.x, tc);
     return lp;
 }
 

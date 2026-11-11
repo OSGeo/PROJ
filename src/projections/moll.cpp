@@ -35,7 +35,7 @@ static double mollweide_polar_s(double chi) {
             break;
         const double ds = (pj_s_minus_sin_s(s) - w) / d;
         s -= ds;
-        if (fabs(ds) <= 1e-16 * s)
+        if (fabs(ds) <= 1e-12 * s) /* quadratic convergence */
             break;
     }
     return s;

@@ -53,7 +53,7 @@ static PJ_LP hammer_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     } else {
         lp.lam = aatan2(z * u, c) / Q->w;
         /* asin(z * v), but accurate near the poles */
-        lp.phi = atan2(z * v, hypot(z * u, c));
+        lp.phi = atan2(z * v, sqrt(z * u * z * u + c * c));
     }
     return lp;
 }

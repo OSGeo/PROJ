@@ -27,7 +27,7 @@ static PJ_XY eck4_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     int i;
     (void)P;
 
-    if (fabs(lp.phi) > M_HALFPI - 0.5) {
+    if (fabs(lp.phi) > M_HALFPI - 0.1) {
         // Close to the poles the Newton iteration below converges only
         // linearly. With theta = pi/2 - t and chi the colatitude, solve
         // t - sin(2t)/2 + 2 * (1 - cos(t)) = 2 * C_p * sin(chi / 2)^2
@@ -43,7 +43,7 @@ static PJ_XY eck4_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
             const double dt =
                 (0.5 * pj_s_minus_sin_s(2. * t) + 4. * sh2 * sh2 - w) / d;
             t -= dt;
-            if (fabs(dt) <= 1e-16 * t)
+            if (fabs(dt) <= 1e-12 * t) // quadratic convergence
                 break;
         }
         // cos(theta) = sin(t), sin(theta) = cos(t)

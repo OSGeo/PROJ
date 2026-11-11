@@ -29,7 +29,7 @@ static PJ_XY putp2_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     int i;
     (void)P;
 
-    if (fabs(lp.phi) > M_HALFPI - 0.5) {
+    if (fabs(lp.phi) > M_HALFPI - 0.1) {
         /* solve F(pi/3) - F(pi/3 - t) = C_p * (1 - sin|phi|)
          *                             = 2 * C_p * sin(chi / 2)^2 */
         const double sh = sin(0.5 * (M_HALFPI - fabs(lp.phi)));
@@ -46,7 +46,9 @@ static PJ_XY putp2_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
             t -= dt;
             if (t < 0.)
                 t = 0.;
-            if (fabs(dt) <= 1e-16 * t)
+            /* D(t) carries a rounding error of about eps * t, so also stop on
+             * an absolute step */
+            if (fabs(dt) <= 1e-12 * t || fabs(dt) < 1e-15)
                 break;
         }
         /* cos(theta) - 1/2 = 2 * sin(pi/3 - t/2) * sin(t/2) */
