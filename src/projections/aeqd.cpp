@@ -102,7 +102,7 @@ static PJ_XY aeqd_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
         break;
     case pj_aeqd_ns::EQUIT:
     case pj_aeqd_ns::OBLIQ:
-        if (fabs(lp.lam) < EPS10 && fabs(lp.phi - P->phi0) < EPS10) {
+        if (lp.lam == 0. && lp.phi == P->phi0) {
             xy.x = xy.y = 0.;
             break;
         }
@@ -189,7 +189,7 @@ static PJ_LP aeqd_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     struct pj_aeqd_data *Q = static_cast<struct pj_aeqd_data *>(P->opaque);
     double azi1, azi2, s12, lat1, lon1, lat2, lon2;
 
-    if ((s12 = hypot(xy.x, xy.y)) < EPS10) {
+    if ((s12 = hypot(xy.x, xy.y)) == 0.) {
         lp.phi = P->phi0;
         lp.lam = 0.;
         return (lp);

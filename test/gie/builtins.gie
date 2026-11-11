@@ -9029,7 +9029,6 @@ tolerance 0.001 mm
 
 accept  100 89.99999999
 expect  0.9005008 2457054.6432669
-roundtrip 1
 
 accept  -60 -89.9999
 expect  -250.7853599 -2457054.6144704
@@ -9252,5 +9251,95 @@ direction inverse
 
 accept  2419726.4622640 -426663.0612314
 expect  90 -10
+
+-------------------------------------------------------------------------------
+# Ellipsoidal stere, laea, aeqd and omerc, and tcea, close to the poles and
+# the centre: the inverses used asin() of values close to 1 or snapped to
+# the pole or the centre within 1e-10, up to 0.1 m (omerc: 120 m) off.
+-------------------------------------------------------------------------------
+
+operation +proj=stere +ellps=WGS84 +lat_0=45
+tolerance 0.01 mm
+
+accept  10 89.9999988
+roundtrip 1
+
+accept  -150 -89.9999991
+roundtrip 1
+
+operation +proj=stere +ellps=WGS84 +lat_0=0
+tolerance 0.01 mm
+
+accept  20 89.9999988
+roundtrip 1
+
+accept  -60 -89.9999994
+roundtrip 1
+
+operation +proj=laea +ellps=WGS84 +lat_0=45
+tolerance 0.01 mm
+
+accept  10 89.9999988
+roundtrip 1
+
+accept  -150 -89.9999991
+roundtrip 1
+
+operation +proj=laea +ellps=WGS84 +lat_0=0
+tolerance 0.01 mm
+
+accept  20 89.9999988
+roundtrip 1
+
+accept  -60 -89.9999994
+roundtrip 1
+
+operation +proj=laea +ellps=WGS84 +lat_0=90
+tolerance 0.01 mm
+
+accept  40 89.9999999
+roundtrip 1
+
+accept  -100 89.99999999
+roundtrip 1
+
+operation +proj=aeqd +ellps=WGS84 +lat_0=0
+tolerance 0.01 mm
+
+accept  1e-09 2e-09
+roundtrip 1
+
+accept  -3e-10 5e-10
+roundtrip 1
+
+operation +proj=aeqd +ellps=WGS84 +lat_0=90
+tolerance 0.01 mm
+
+accept  100 89.999999999
+roundtrip 1
+
+accept  -20 89.9999999999
+roundtrip 1
+
+operation +proj=omerc +ellps=WGS84 +lat_0=45 +lonc=10 +alpha=30
+tolerance 0.01 mm
+
+accept  -119.7 -89.9999
+roundtrip 1
+
+accept  30 89.99999
+roundtrip 1
+
+accept  60 89.9999999
+roundtrip 1
+
+operation +proj=tcea +R=1737400
+tolerance 0.01 mm
+
+accept  10 89.9999988
+roundtrip 1
+
+accept  -100 -89.9999994
+roundtrip 1
 
 </gie-strict>

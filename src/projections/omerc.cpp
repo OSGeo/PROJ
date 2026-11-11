@@ -48,7 +48,7 @@ static PJ_XY omerc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     struct pj_omerc_data *Q = static_cast<struct pj_omerc_data *>(P->opaque);
     double u, v;
 
-    if (fabs(fabs(lp.phi) - M_HALFPI) > EPS) {
+    if (fabs(lp.phi) != M_HALFPI) {
         const double W = Q->E / pow(pj_tsfn(lp.phi, sin(lp.phi), P->e), Q->B);
         const double one_div_W = 1. / W;
         const double S = .5 * (W - one_div_W);
@@ -101,19 +101,27 @@ static PJ_LP omerc_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     Sp = .5 * (Qp - 1. / Qp);
     Tp = .5 * (Qp + 1. / Qp);
     Vp = sin(Q->BrA * u);
-    Up = (Vp * Q->cosgam + Sp * Q->singam) / Tp;
-    if (fabs(fabs(Up) - 1.) < EPS) {
+    /* (n, w, c) / Tp is a unit vector, n / Tp being Up of the USGS formulas.
+     * sqrt((1 - Up) / (1 + Up)) = h / (Tp + n) = (Tp - n) / h, with
+     * h = hypot(w, c), does not lose precision close to the poles as
+     * 1 - Up did, and the poles are h == 0 (instead of |Up| within 1e-10 of
+     * 1, which also caught points up to about 1e-5 rad from them). */
+    const double n = Vp * Q->cosgam + Sp * Q->singam;
+    const double w = Sp * Q->cosgam - Vp * Q->singam;
+    const double c = cos(Q->BrA * u);
+    const double h = hypot(w, c);
+    if (h == 0.) {
         lp.lam = 0.;
-        lp.phi = Up < 0. ? -M_HALFPI : M_HALFPI;
+        lp.phi = n < 0. ? -M_HALFPI : M_HALFPI;
     } else {
-        lp.phi = Q->E / sqrt((1. + Up) / (1. - Up));
+        Up = n >= 0. ? h / (Tp + n) : (Tp - n) / h;
+        lp.phi = Q->E * Up;
         if ((lp.phi = pj_phi2(P->ctx, pow(lp.phi, 1. / Q->B), P->e)) ==
             HUGE_VAL) {
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
         }
-        lp.lam =
-            -Q->rB * atan2((Sp * Q->cosgam - Vp * Q->singam), cos(Q->BrA * u));
+        lp.lam = -Q->rB * atan2(w, c);
     }
     return lp;
 }

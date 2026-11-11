@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "proj.h"
 #include "proj_internal.h"
 #include <errno.h>
@@ -50,14 +52,20 @@ static PJ_XY laea_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     case pj_laea_ns::EQUIT:
         b = 1. + cosb * coslam;
         break;
-    case pj_laea_ns::N_POLE:
+    case pj_laea_ns::N_POLE: {
         b = M_HALFPI + lp.phi;
-        q = Q->qp - q;
+        /* qp - q = qp * (1 - sin(xi)), without the cancellation close to the
+         * pole */
+        const double h = sin(0.5 * (M_HALFPI - xi));
+        q = 2. * Q->qp * h * h;
         break;
-    case pj_laea_ns::S_POLE:
+    }
+    case pj_laea_ns::S_POLE: {
         b = lp.phi - M_HALFPI;
-        q = Q->qp + q;
+        const double h = sin(0.5 * (M_HALFPI + xi));
+        q = 2. * Q->qp * h * h;
         break;
+    }
     }
     if (fabs(b) < EPS10) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
@@ -78,7 +86,7 @@ static PJ_XY laea_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
         break;
     case pj_laea_ns::N_POLE:
     case pj_laea_ns::S_POLE:
-        if (q >= 1e-15) {
+        if (q > 0.) {
             b = sqrt(q);
             xy.x = b * sinlam;
             xy.y = coslam * (Q->mode == pj_laea_ns::S_POLE ? b : -b);
@@ -142,7 +150,7 @@ static PJ_LP laea_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
         xy.x /= Q->dd;
         xy.y *= Q->dd;
         rho = hypot(xy.x, xy.y);
-        if (rho < EPS10) {
+        if (rho == 0.) {
             lp.lam = 0.;
             lp.phi = P->phi0;
             return lp;
@@ -156,14 +164,21 @@ static PJ_LP laea_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
         cCe = cos(sCe);
         sCe = sin(sCe);
         xy.x *= sCe;
+        /* rho * sin(beta), rho * cos(beta) * cos(lam) and
+         * rho * cos(beta) * sin(lam) of the authalic latitude beta: atan2()
+         * keeps beta accurate near the poles, where asin() did not */
+        double n;
         if (Q->mode == pj_laea_ns::OBLIQ) {
-            ab = cCe * Q->sinb1 + xy.y * sCe * Q->cosb1 / rho;
+            n = rho * cCe * Q->sinb1 + xy.y * sCe * Q->cosb1;
             xy.y = rho * Q->cosb1 * cCe - xy.y * Q->sinb1 * sCe;
         } else {
-            ab = xy.y * sCe / rho;
+            n = xy.y * sCe;
             xy.y = rho * cCe;
         }
-        break;
+        lp.lam = atan2(xy.x, xy.y);
+        lp.phi = pj_authalic_lat_inverse(atan2(n, hypot(xy.x, xy.y)), Q->apa, P,
+                                         Q->qp);
+        return lp;
     }
     case pj_laea_ns::N_POLE:
         xy.y = -xy.y;
@@ -175,13 +190,14 @@ static PJ_LP laea_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
             lp.phi = P->phi0;
             return (lp);
         }
-        ab = 1. - q / Q->qp;
+        /* asin(1 - q / qp), but accurate near the pole */
+        ab = M_HALFPI - 2. * asin(std::min(1., sqrt(0.5 * q / Q->qp)));
         if (Q->mode == pj_laea_ns::S_POLE)
             ab = -ab;
         break;
     }
     lp.lam = atan2(xy.x, xy.y);
-    lp.phi = pj_authalic_lat_inverse(asin(ab), Q->apa, P, Q->qp);
+    lp.phi = pj_authalic_lat_inverse(ab, Q->apa, P, Q->qp);
     return lp;
 }
 

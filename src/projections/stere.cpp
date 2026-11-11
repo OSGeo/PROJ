@@ -148,14 +148,23 @@ static PJ_LP stere_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
         tp = 2. * atan2(rho * Q->cosX1, Q->akm1);
         cosphi = cos(tp);
         sinphi = sin(tp);
-        if (rho == 0.0)
+        if (rho == 0.0) {
             phi_l = asin(cosphi * Q->sinX1);
-        else
-            phi_l = asin(cosphi * Q->sinX1 + (xy.y * sinphi * Q->cosX1 / rho));
-
-        tp = tan(.5 * (M_HALFPI + phi_l));
+            tp = tan(.5 * (M_HALFPI + phi_l));
+            xy.y = rho * Q->cosX1 * cosphi - xy.y * Q->sinX1 * sinphi;
+        } else {
+            /* rho * sin(X), rho * cos(X) * cos(lam) and rho * cos(X) *
+             * sin(lam) of the conformal latitude X: atan2() keeps X accurate
+             * near the poles, where asin() of sin(X) did not, and
+             * tan(pi/4 + X/2) = (r + n) / h = h / (r - n) */
+            const double n = rho * cosphi * Q->sinX1 + xy.y * sinphi * Q->cosX1;
+            xy.y = rho * Q->cosX1 * cosphi - xy.y * Q->sinX1 * sinphi;
+            const double h = hypot(xy.x * sinphi, xy.y);
+            const double r = hypot(n, h);
+            phi_l = atan2(n, h);
+            tp = n >= 0. ? (r + n) / h : h / (r - n);
+        }
         xy.x *= sinphi;
-        xy.y = rho * Q->cosX1 * cosphi - xy.y * Q->sinX1 * sinphi;
         halfpi = M_HALFPI;
         halfe = .5 * P->e;
         break;
