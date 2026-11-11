@@ -184,6 +184,13 @@ static PJ_LP stere_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
         lp.phi =
             2. * atan(tp * pow((1. + sinphi) / (1. - sinphi), halfe)) - halfpi;
         if (fabs(phi_l - lp.phi) < CONV) {
+            /* One more step: each one reduces the error by about e^2, so
+             * that this takes it from up to e^2 * CONV (4e-6 m on WGS84) to
+             * the rounding level, without needing more iterations to reach
+             * a tighter CONV */
+            sinphi = P->e * sin(lp.phi);
+            lp.phi = 2. * atan(tp * pow((1. + sinphi) / (1. - sinphi), halfe)) -
+                     halfpi;
             if (Q->mode == S_POLE)
                 lp.phi = -lp.phi;
             lp.lam = (xy.x == 0. && xy.y == 0.) ? 0. : atan2(xy.x, xy.y);
