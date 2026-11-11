@@ -9128,6 +9128,20 @@ expect  1280370.6769914 2304661.8439085
 accept  -30 89.99999999
 expect  -384110.3074087 2304661.8439147
 
+# The inverse went to the pole for 1 - |sin(theta)| <= 1e-12, up to 0.9 m
+# off here. What is left is the conditioning of y close to the pole line.
+direction inverse
+tolerance 2 mm
+
+accept  384110.57605275407 2304661.8439141596
+expect  29.999999995875196 89.99996999410428
+
+accept  -1536441.4084322732 2304661.843914708
+expect  -119.9999999802652 89.99999499294809
+
+accept  960275.992242531 -2304661.843914661
+expect  74.9999999898539 -89.99998999419914
+
 -------------------------------------------------------------------------------
 # Putnins P2 close to the poles, where the forward Newton iteration converges
 # only linearly and the inverse used asin() of a value close to 1.

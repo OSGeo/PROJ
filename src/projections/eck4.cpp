@@ -82,7 +82,11 @@ static PJ_LP eck4_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
 
     const double sin_theta = xy.y * RC_y;
     const double one_minus_abs_sin_theta = 1.0 - fabs(sin_theta);
-    if (one_minus_abs_sin_theta >= 0.0 && one_minus_abs_sin_theta <= 1e-12) {
+    // Within a few ulps of the pole line, take the pole itself, so that pole
+    // coordinates rounded in the last digits still give the pole. (With
+    // 1e-12 here instead, latitudes within about 4e-5 degrees of the pole
+    // went to the pole, up to 3 m off on the Earth.)
+    if (one_minus_abs_sin_theta >= 0.0 && one_minus_abs_sin_theta <= 1e-15) {
         lp.lam = xy.x / C_x;
         lp.phi = sin_theta > 0 ? M_PI / 2 : -M_PI / 2;
     } else if (fabs(xy.y) > 0.5 * C_y && fabs(xy.y) <= C_y) {
