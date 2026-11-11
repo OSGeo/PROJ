@@ -24,11 +24,13 @@ static PJ_XY lcc_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
     struct pj_lcc_data *Q = static_cast<struct pj_lcc_data *>(P->opaque);
     double rho;
 
-    if (fabs(fabs(lp.phi) - M_HALFPI) < EPS10) {
-        if ((lp.phi * Q->n) <= 0.) {
-            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
-            return xy;
-        }
+    if (fabs(fabs(lp.phi) - M_HALFPI) < EPS10 && (lp.phi * Q->n) <= 0.) {
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+        return xy;
+    }
+    if (fabs(lp.phi) == M_HALFPI) {
+        /* only at the pole itself: within 1e-10 of it, rho = 0 was up to
+         * 0.6 mm off on WGS84 */
         rho = 0.;
     } else {
         rho =

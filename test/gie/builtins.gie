@@ -9342,4 +9342,16 @@ roundtrip 1
 accept  -100 -89.9999994
 roundtrip 1
 
+-------------------------------------------------------------------------------
+# lcc forward close to the pole: rho was set to 0 within 1e-10 of it.
+operation +proj=lcc +lat_1=30 +lat_2=60 +ellps=WGS84
+-------------------------------------------------------------------------------
+tolerance 0.01 mm
+
+accept  179.5 89.999999996
+roundtrip 1
+
+accept  10 89.9999999999
+roundtrip 1
+
 </gie-strict>
