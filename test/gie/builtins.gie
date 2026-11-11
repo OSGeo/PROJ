@@ -8597,6 +8597,58 @@ accept  -200 -100
 expect  -0.001790493 -0.000895247
 
 
+-------------------------------------------------------------------------------
+# Winkel Tripel inverse close to the origin, which used to fail with
+# "Point outside of projection domain" up to about 1e-8 * R from it.
+# Expected values from a 50-digit computation.
+operation +proj=wintri +R=1737400
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+
+accept  0.0000000300 0.0000000200
+expect  0.0007444 0.0006065
+roundtrip 1
+
+accept  -0.0000000200 -0.0000000050
+expect  -0.0004963 -0.0001516
+roundtrip 1
+
+accept  0.0000003000 -0.0000004000
+expect  0.0074442 -0.0121293
+roundtrip 1
+
+accept  0.0000008000 0.0000006000
+expect  0.0198511 0.0181940
+roundtrip 1
+
+accept  0 0.0000000100
+expect  0.0000000 0.0003032
+roundtrip 1
+
+accept  0.0000001000 0
+expect  0.0024814 0.0000000
+roundtrip 1
+
+direction inverse
+
+accept  0.0007444 0.0006065
+expect  0.000000029999318001980394 0.000000020001087990494087
+
+accept  -0.0004963 -0.0001516
+expect  -0.00000002000088866789746 -0.0000000049994475504681017
+
+accept  0.0074442 -0.0121293
+expect  0.00000030000124001926713 -0.00000039999867528952998
+
+accept  0.0198511 0.0181940
+expect  0.00000079999927671831409 0.00000059999966182860581
+
+accept  0.0000000 0.0003032
+expect  0.0 0.0000000099988951009362033
+
+accept  0.0024814 0.0000000
+expect  0.00000010000041333975571 0.0
+
 ===============================================================================
 # Colombia Urbian
 # Test point from IOGP Publication 373-7-2 - Geomatics Guidance Note number 7, part 2 - March 2020

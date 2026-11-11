@@ -157,9 +157,11 @@ static PJ_LP aitoff_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     double EPSILON = 1e-12, D, C, f1, f2, f1p, f1l, f2p, f2l, dp, dl, sl, sp,
            cp, cl, x, y;
 
-    if ((fabs(xy.x) < EPSILON) && (fabs(xy.y) < EPSILON)) {
-        lp.phi = 0.;
-        lp.lam = 0.;
+    if (fabs(xy.x) < 1e-50 && fabs(xy.y) < 1e-50) {
+        /* first order inverse, exact to double precision this close to the
+         * origin, where the Newton-Raphson terms below would underflow */
+        lp.phi = xy.y;
+        lp.lam = 2. * xy.x / (1. + Q->cosphi1);
         return lp;
     }
 
@@ -174,14 +176,16 @@ static PJ_LP aitoff_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             sp = sin(lp.phi);
             cp = cos(lp.phi);
             D = cp * cl;
-            C = 1. - D * D;
+            /* 1 - D * D and acos(D), computed so that they stay accurate
+             * near the origin, where D is close to 1 */
+            C = sp * sp + cp * cp * sl * sl;
             const double denom = pow(C, 1.5);
             if (denom == 0) {
                 proj_errno_set(
                     P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return lp;
             }
-            D = acos(D) / denom;
+            D = atan2(sqrt(C), D) / denom;
             f1 = 2. * D * C * cp * sl;
             f2 = D * C * sp;
             f1p = 2. * (sl * cl * sp * cp / C - D * sp * sl);
@@ -216,17 +220,9 @@ static PJ_LP aitoff_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
                       M_PI_2); /* correct if symmetrical solution for Aitoff */
 
         /* calculate x,y coordinates with solution obtained */
-        if ((D = acos(cos(lp.phi) * cos(C = 0.5 * lp.lam))) !=
-            0.0) { /* Aitoff */
-            y = 1. / sin(D);
-            x = 2. * D * cos(lp.phi) * sin(C) * y;
-            y *= D * sin(lp.phi);
-        } else
-            x = y = 0.;
-        if (Q->mode == pj_aitoff_ns::WINKEL_TRIPEL) {
-            x = (x + lp.lam * Q->cosphi1) * 0.5;
-            y = (y + lp.phi) * 0.5;
-        }
+        const PJ_XY xy_sol = aitoff_s_forward(lp, P);
+        x = xy_sol.x;
+        y = xy_sol.y;
         /* if too far from given values of x,y, repeat with better approximation
          * of phi,lam */
     } while (((fabs(xy.x - x) > EPSILON) || (fabs(xy.y - y) > EPSILON)) &&
