@@ -39,16 +39,22 @@ static PJ_XY hammer_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 static PJ_LP hammer_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
     struct pq_hammer *Q = static_cast<struct pq_hammer *>(P->opaque);
-    double z;
-
-    z = sqrt(1. - 0.25 * Q->w * Q->w * xy.x * xy.x - 0.25 * xy.y * xy.y);
-    if (fabs(2. * z * z - 1.) < EPS) {
+    /* Undo the M scaling of the forward: u = d * cos(phi) * sin(W * lam)
+     * and v = d * sin(phi), with d = sqrt(2 / (1 + cos(phi) * cos(W * lam))) */
+    const double u = xy.x / Q->m;
+    const double v = xy.y / Q->rm;
+    const double z = sqrt(1. - 0.25 * u * u - 0.25 * v * v);
+    /* z * u = cos(phi) * sin(W * lam), z * v = sin(phi) and
+     * c = 2 * z * z - 1 = cos(phi) * cos(W * lam) */
+    const double c = 2. * z * z - 1.;
+    if (fabs(c) < EPS) {
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
     } else {
-        lp.lam = aatan2(Q->w * xy.x * z, 2. * z * z - 1) / Q->w;
-        lp.phi = aasin(P->ctx, z * xy.y);
+        lp.lam = aatan2(z * u, c) / Q->w;
+        /* asin(z * v), but accurate near the poles */
+        lp.phi = atan2(z * v, hypot(z * u, c));
     }
     return lp;
 }

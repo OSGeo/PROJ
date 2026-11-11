@@ -2680,6 +2680,69 @@ operation +proj=hammer   +a=6400000 +W=1
 accept  -180 0
 expect  failure errno coord_transfm_outside_projection_domain
 
+-------------------------------------------------------------------------------
+# Hammer inverse with +M (which the inverse used to ignore), and close to
+# the poles. Expected values from a 50-digit computation.
+operation +proj=hammer +R=1737400 +M=2.0
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+
+accept  30 40
+expect  1477262.2627397 598666.4444100
+roundtrip 1
+
+accept  -120 -60
+expect  -3806452.6856379 -951613.1714095
+roundtrip 1
+
+direction inverse
+
+accept  1477262.2627397 598666.4444100
+expect  30.000000000000469 39.999999999999152
+
+accept  -3806452.6856379 -951613.1714095
+expect  -120.00000000000543 -60.00000000000133
+
+accept  9355858.1914453 102707.2733467
+expect  169.99999999999879 4.9999999999995078
+
+-------------------------------------------------------------------------------
+# Hammer inverse with +M (which the inverse used to ignore), and close to
+# the poles. Expected values from a 50-digit computation.
+operation +proj=hammer +R=1737400 +W=0.25 +M=2.0
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+
+accept  30 40
+expect  1481709.0511364 595331.4317484
+roundtrip 1
+
+direction inverse
+
+accept  1481709.0511364 595331.4317484
+expect  30.000000000000233 39.999999999997771
+
+accept  -1948031.5964949 1134253.4664228
+expect  -149.99999999999956 79.999999999999825
+
+-------------------------------------------------------------------------------
+# Hammer inverse with +M (which the inverse used to ignore), and close to
+# the poles. Expected values from a 50-digit computation.
+operation +proj=hammer +R=1737400
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+
+direction inverse
+
+accept  0.0089701 2457054.6176347
+expect  9.9999468645682858 89.999998799999563
+
+accept  -0.0394210 -2457054.6349975
+expect  -100.00014617641018 -89.999999400000306
+
+accept  0.3282176 2457054.4451702
+expect  45.000012154880814 89.999990000001141
+
 ===============================================================================
 # Hatano Asymmetrical Equal Area
 # 	PCyl, Sph.
