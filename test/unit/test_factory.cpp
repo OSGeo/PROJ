@@ -4323,7 +4323,6 @@ TEST(factory, getUnitList) {
         bool found9101 = false;
         for (const auto &info : list) {
             foundEPSG |= info.authName == "EPSG";
-            foundPROJ |= info.authName == "PROJ";
             if (info.authName == "EPSG" && info.code == "1027") {
                 EXPECT_EQ(info.name, "millimetres per year");
                 EXPECT_EQ(info.category, "linear_per_time");
@@ -4352,6 +4351,13 @@ TEST(factory, getUnitList) {
                 EXPECT_EQ(info.category, "angular");
                 EXPECT_FALSE(info.deprecated);
                 found9101 = true;
+            } else if (info.authName == "PROJ" && info.code == "DM") {
+                EXPECT_EQ(info.name, "decimeter");
+                EXPECT_EQ(info.category, "linear");
+                EXPECT_EQ(info.convFactor, 0.1);
+                EXPECT_EQ(info.projShortName, "dm");
+                EXPECT_FALSE(info.deprecated);
+                foundPROJ = true;
             }
         }
         EXPECT_TRUE(foundEPSG);

@@ -605,7 +605,7 @@ UPDATE unit_of_measure SET proj_short_name = 'deg'       WHERE auth_name = 'EPSG
 UPDATE unit_of_measure SET proj_short_name = 'grad'      WHERE auth_name = 'EPSG' AND code = '9105';
 
 -- PROJ specific units
-INSERT INTO "unit_of_measure" VALUES('PROJ','DM','decimeter','length',0.01,'dm',0);
+INSERT INTO "unit_of_measure" VALUES('PROJ','DM','decimeter','length',0.1,'dm',0);
 INSERT INTO "unit_of_measure" VALUES('PROJ','IN','inch','length',0.0254,'in',0);
 INSERT INTO "unit_of_measure" VALUES('PROJ','US_IN','US survey inch','length',0.025400050800101,'us-in',0);
 INSERT INTO "unit_of_measure" VALUES('PROJ','US_YD','US survey yard','length',0.914401828803658,'us-yd',0);
