@@ -906,6 +906,7 @@ double aacos(PJ_CONTEXT *, double);
 double aasin(PJ_CONTEXT *, double);
 double asqrt(double);
 double aatan2(double, double);
+double pj_s_minus_sin_s(double);
 
 PROJVALUE PROJ_DLL pj_param(PJ_CONTEXT *ctx, paralist *, const char *);
 paralist PROJ_DLL *pj_param_exists(paralist *list, const char *parameter);

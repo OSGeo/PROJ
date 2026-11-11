@@ -35,3 +35,18 @@ double asqrt(double v) { return ((v <= 0) ? 0. : sqrt(v)); }
 double aatan2(double n, double d) {
     return ((fabs(n) < ATOL && fabs(d) < ATOL) ? 0. : atan2(n, d));
 }
+
+/* s - sin(s), accurate also for small |s|, where the subtraction would lose
+ * most of the digits */
+double pj_s_minus_sin_s(double s) {
+    if (fabs(s) < 0.25) {
+        const double s2 = s * s;
+        return s * s2 *
+               (1. / 6 -
+                s2 * (1. / 120 - s2 * (1. / 5040 -
+                                       s2 * (1. / 362880 -
+                                             s2 * (1. / 39916800 -
+                                                   s2 * (1. / 6227020800.))))));
+    }
+    return s - sin(s);
+}

@@ -9054,4 +9054,81 @@ expect  -99.969535155146539 -89.999999399725703
 accept  135.0751701 2457054.6419304
 expect  150.00039651637398 89.999990000039651
 
+-------------------------------------------------------------------------------
+# Eckert IV close to the poles, where the forward Newton iteration converges
+# only linearly and used to stop up to a few hundred metres off on the Moon.
+# Expected values from a 50-digit computation.
+operation +proj=eck4 +R=1737400
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+
+accept  156.2 -89.996
+expect  2000120.8885445 -2304661.8338880
+roundtrip 1
+
+accept  100 89.9999
+expect  1280370.6769914 2304661.8439085
+
+accept  -30 89.99999999
+expect  -384110.3074087 2304661.8439147
+
+-------------------------------------------------------------------------------
+# Putnins P2 close to the poles, where the forward Newton iteration converges
+# only linearly and the inverse used asin() of a value close to 1.
+# Expected values from a 50-digit computation.
+operation +proj=putp2 +R=1737400
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+
+accept  179 89.9996
+expect  52.3680943 2585672.1445711
+roundtrip 1
+
+accept  -100 -89.99999
+expect  -0.7314012 -2585680.7019650
+roundtrip 1
+
+accept  40 89.9999999
+expect  0.0029256 2585680.9191906
+roundtrip 1
+
+direction inverse
+
+accept  0.0087768 2585680.8950544
+expect  9.9999716761299514 89.999998799998678
+
+accept  -0.0438841 -2585680.9082196
+expect  -99.999903186661299 -89.999999399999094
+
+accept  1.0971018 2585680.7019650
+expect  150.00003373813692 89.999990000002154
+
+-------------------------------------------------------------------------------
+# van der Grinten close to the origin, where the direct formulas lost all the
+# digits (or failed), and elsewhere on the map.
+# Expected values from a 50-digit computation.
+operation +proj=vandg +R=1737400
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+
+accept  4.4713834678943275e-08 -6.397547224087468e-09
+expect  0.0013559 -0.0001940
+roundtrip 1
+
+accept  1e-06 1e-06
+expect  0.0303234 0.0303234
+roundtrip 1
+
+accept  0.01 0.01
+expect  303.2335033 303.2335052
+roundtrip 1
+
+accept  -0.3 0.2
+expect  -9096.9938964 6064.6775908
+roundtrip 1
+
+accept  3 -2
+expect  90958.8206779 -60654.3771260
+roundtrip 1
+
 </gie-strict>

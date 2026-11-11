@@ -20,20 +20,6 @@ struct pj_moll_data {
 };
 } // anonymous namespace
 
-/* s - sin(s), accurate also for small s */
-static double s_minus_sin_s(double s) {
-    if (s < 0.25) {
-        const double s2 = s * s;
-        return s * s2 *
-               (1. / 6 -
-                s2 * (1. / 120 - s2 * (1. / 5040 -
-                                       s2 * (1. / 362880 -
-                                             s2 * (1. / 39916800 -
-                                                   s2 * (1. / 6227020800.))))));
-    }
-    return s - sin(s);
-}
-
 /* Mollweide close to the poles. With theta = (pi - s) / 2 and chi the
  * colatitude, 2 * theta + sin(2 * theta) = pi * sin(phi) becomes
  * s - sin(s) = 2 * pi * sin(chi / 2)^2, which can be solved accurately where
@@ -47,7 +33,7 @@ static double mollweide_polar_s(double chi) {
         const double d = 2. * sh2 * sh2; /* 1 - cos(s) */
         if (d == 0.)
             break;
-        const double ds = (s_minus_sin_s(s) - w) / d;
+        const double ds = (pj_s_minus_sin_s(s) - w) / d;
         s -= ds;
         if (fabs(ds) <= 1e-16 * s)
             break;
@@ -99,7 +85,7 @@ static PJ_LP moll_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             lp.lam = lp.phi = HUGE_VAL;
             return lp;
         }
-        const double chi = 2. * asin(sqrt(s_minus_sin_s(s) / (2. * M_PI)));
+        const double chi = 2. * asin(sqrt(pj_s_minus_sin_s(s) / (2. * M_PI)));
         lp.phi = copysign(M_HALFPI - chi, xy.y);
         return lp;
     }

@@ -27,14 +27,38 @@ static PJ_XY vandg_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
         sign = -1;
     if (p2 > 1.)
         p2 = 1.;
-    if (fabs(lp.phi) <= TOL) {
+    if (fabs(lp.phi) <= 1e-40) {
         xy.x = lp.lam;
         xy.y = 0.;
-    } else if (fabs(lp.lam) <= TOL || fabs(p2 - 1.) < TOL) {
+    } else if (fabs(lp.lam) <= 1e-40 || fabs(p2 - 1.) < TOL) {
         xy.x = 0.;
         xy.y = M_PI * tan(.5 * asin(p2));
         if (lp.phi < 0.)
             xy.y = -xy.y;
+    } else if (sign == 1) {
+        // Same values as (29-1) and (29-2) below, rearranged so that no step
+        // subtracts two large terms: close to the origin A, G and P are all
+        // large and the direct formulas lost all the digits (points 1e-6 deg
+        // from the origin even failed).
+        al = .5 * fabs(M_PI / lp.lam - lp.lam / M_PI); // A from (29-3)
+        al2 = al * al;
+        const double s = p2;                   // sin(theta)
+        const double c = sqrt(1. - s * s);     // cos(theta)
+        g = c * (1. + c) / (s * (1. + c - s)); // G from (29-4)
+        const double pp = g * (2. / s - 1.);   // P from (29-5)
+        const double pp2 = pp * pp;
+        g2 = g * g;
+        const double k = al2 * (pp2 - 2. * g + 1.) + pp2 - g2;
+        const double sqrt_k = sqrt(k);
+        const double x_pi = g - pp2 < 0.
+                                ? (pp2 - g2) / (pp * sqrt_k - al * (g - pp2))
+                                : (al * (g - pp2) + pp * sqrt_k) / (pp2 + al2);
+        double y_pi =
+            (al2 * (2. * g - 1.) + g2) / (pp * (al2 + g) + al * sqrt_k);
+        if (y_pi < 0.)
+            y_pi = 0.;
+        xy.x = copysign(M_PI * x_pi, lp.lam);
+        xy.y = copysign(M_PI * y_pi, lp.phi);
     } else {
         al = .5 * sign * fabs(M_PI / lp.lam - lp.lam / M_PI); // A from (29-3)
         al2 = al * al;                                        // A^2
@@ -84,7 +108,11 @@ static PJ_LP vandg_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     if ((ay = fabs(xy.y)) < TOL) {
         lp.phi = 0.;
         t = x2 * x2 + TPISQ * (x2 + HPISQ);
-        lp.lam = fabs(xy.x) <= TOL ? 0. : .5 * (x2 - PISQ + sqrt(t)) / xy.x;
+        // .5 * (x2 - PISQ + sqrt(t)) / x, without the cancellation of
+        // sqrt(t) against PISQ - x2 close to the origin
+        lp.lam = xy.x == 0.  ? 0.
+                 : x2 < PISQ ? TPISQ * xy.x / (sqrt(t) + PISQ - x2)
+                             : .5 * (x2 - PISQ + sqrt(t)) / xy.x;
         return (lp);
     }
     y2 = xy.y * xy.y;             // pi^2 * Y^2
@@ -118,9 +146,14 @@ static PJ_LP vandg_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
         if (xy.y < 0.)
             lp.phi = -lp.phi;
         t = r2 + TPISQ * (x2 - y2 + HPISQ);
-        lp.lam = fabs(xy.x) <= TOL
-                     ? 0.
-                     : .5 * (r - PISQ + (t <= 0. ? 0. : sqrt(t))) / xy.x;
+        // .5 * (r - PISQ + sqrt(t)) / x, without the cancellation of
+        // sqrt(t) against PISQ - r close to the origin: as
+        // t - (PISQ - r)^2 = 4 * PISQ * x2, it is also
+        // 2 * PISQ * x / (sqrt(t) + PISQ - r)
+        const double sqrt_t = t <= 0. ? 0. : sqrt(t);
+        lp.lam = xy.x == 0. ? 0.
+                 : r < PISQ ? TPISQ * xy.x / (sqrt_t + PISQ - r)
+                            : .5 * (r - PISQ + sqrt_t) / xy.x;
     } else {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;

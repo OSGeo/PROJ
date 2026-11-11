@@ -27,6 +27,31 @@ static PJ_XY eck4_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     int i;
     (void)P;
 
+    if (fabs(lp.phi) > M_HALFPI - 0.5) {
+        // Close to the poles the Newton iteration below converges only
+        // linearly. With theta = pi/2 - t and chi the colatitude, solve
+        // t - sin(2t)/2 + 2 * (1 - cos(t)) = 2 * C_p * sin(chi / 2)^2
+        const double sh = sin(0.5 * (M_HALFPI - fabs(lp.phi)));
+        const double w = 2. * C_p * sh * sh;
+        double t = sqrt(w); // >= the root, as the left side is >= t^2
+        for (i = 0; i < 30; ++i) {
+            const double st = sin(t);
+            const double d = 2. * st * (1. + st);
+            if (d == 0.)
+                break;
+            const double sh2 = sin(0.5 * t);
+            const double dt =
+                (0.5 * pj_s_minus_sin_s(2. * t) + 4. * sh2 * sh2 - w) / d;
+            t -= dt;
+            if (fabs(dt) <= 1e-16 * t)
+                break;
+        }
+        // cos(theta) = sin(t), sin(theta) = cos(t)
+        xy.x = C_x * lp.lam * (1. + sin(t));
+        xy.y = copysign(C_y * cos(t), lp.phi);
+        return xy;
+    }
+
     // Newton's iterative method to find theta such as
     // theta + sin(theta) * cos(theta) + 2 * sin(theta) == C_p * sin(phi)
     const double p = C_p * sin(lp.phi);
@@ -60,6 +85,14 @@ static PJ_LP eck4_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     if (one_minus_abs_sin_theta >= 0.0 && one_minus_abs_sin_theta <= 1e-12) {
         lp.lam = xy.x / C_x;
         lp.phi = sin_theta > 0 ? M_PI / 2 : -M_PI / 2;
+    } else if (fabs(xy.y) > 0.5 * C_y && fabs(xy.y) <= C_y) {
+        // Close to the poles: theta = pi/2 - t, with the colatitude chi from
+        // 2 * C_p * sin(chi / 2)^2 = t - sin(2t)/2 + 2 * (1 - cos(t))
+        const double t = 2. * asin(sqrt(0.5 * (C_y - fabs(xy.y)) * RC_y));
+        const double sh = sin(0.5 * t);
+        const double w = 0.5 * pj_s_minus_sin_s(2. * t) + 4. * sh * sh;
+        lp.lam = xy.x / (C_x * (1. + sin(t)));
+        lp.phi = copysign(M_HALFPI - 2. * asin(sqrt(0.5 * w * RC_p)), xy.y);
     } else {
         const double theta = aasin(P->ctx, sin_theta);
         const double cos_theta = cos(theta);
