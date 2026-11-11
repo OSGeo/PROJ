@@ -7457,6 +7457,88 @@ expect -121392.0532 0
 roundtrip 1
 
 -------------------------------------------------------------------------------
+# Moon spherical Transverse Mercator, close to the equator (including
+# |longitudes| > 90), where acos() and asin() used to lose precision.
+# Expected values from a 50-digit computation of
+# x = R * atanh(cos(phi) * sin(lam)), y = R * atan2(sin(phi), cos(phi) * cos(lam))
+operation +proj=tmerc   +R=1737400
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+
+accept  0 -0.000000001
+expect  0 -0.0000303
+roundtrip 1
+
+accept  0 0.000000001
+expect  0 0.0000303
+roundtrip 1
+
+accept  3.5 -0.000000001
+expect  106197.7943388 -0.0000304
+roundtrip 1
+
+accept  2 -0.0000003
+expect  60659.0206290 -0.0091026
+roundtrip 1
+
+accept  1 -0.000001
+expect  30324.8900449 -0.0303280
+roundtrip 1
+
+accept  0.5 0.000004
+expect  15161.8676537 0.1212980
+roundtrip 1
+
+accept  120 -0.000000001
+expect  2288082.6501172 -5458203.0762863
+roundtrip 1
+
+accept  120 0.000000001
+expect  2288082.6501172 5458203.0762863
+roundtrip 1
+
+accept  -150 0.0000001
+expect  -954364.4951660 5458203.0728455
+roundtrip 1
+
+accept  -150 -0.000001
+expect  -954364.4951660 -5458203.0413325
+roundtrip 1
+
+accept  179 -0.000000001
+expect  30324.8900449 -5458203.0763166
+roundtrip 1
+
+# acos() argument rounded to -1 used to give y = 0 instead of +/- pi * R
+accept  172.622541429877 -0.0000009247995698785671
+expect  224329.9961977 -5458203.0480698
+roundtrip 1
+
+accept  172.622541429877 0.0000009247995698785671
+expect  224329.9961977 5458203.0480698
+roundtrip 1
+
+direction inverse
+
+accept  0 -0.0000303
+expect  0 -0.000000001
+
+accept  106197.7943388 -0.0000304
+expect  3.5 -0.000000001
+
+accept  60659.0206290 -0.0091026
+expect  2 -0.0000003
+
+accept  30324.8900449 -0.0303280
+expect  1 -0.000001
+
+accept  2288082.6501172 5458203.0762863
+expect  120 0.000000001
+
+accept  -954364.4951660 -5458203.0413325
+expect  -150 -0.000001
+
+-------------------------------------------------------------------------------
 # Approx tmerc on a almost spherical ellipsoid, lat_0 north hemisphere
 
 operation +proj=tmerc   +a=6400000 +rf=1e12 +k=0.9 +lat_0=40 +approx
