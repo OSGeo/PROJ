@@ -1,6 +1,7 @@
 
 
 #include <errno.h>
+#include <float.h>
 #include <math.h>
 
 #include "proj.h"
@@ -82,17 +83,28 @@ static PJ_LP moll_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
         const double s = 2. * half_s;
         const double den = Q->C_x * sin(half_s);
         lp.lam = den == 0. ? 0. : xy.x / den; /* at the pole x is 0 */
-        if (fabs(lp.lam) >= M_PI) {
+        /* On the outline lam can round to slightly more than pi. Here it
+         * comes from C_y - |y|, whose rounding grows like C_y / (C_y - |y|)
+         * close to the poles: accept that much and clamp */
+        const double tol =
+            4. * DBL_EPSILON * (1. + Q->C_y / (Q->C_y - fabs(xy.y)));
+        if (!(fabs(lp.lam) <= M_PI * (1. + tol))) {
             lp.lam = lp.phi = HUGE_VAL;
             return lp;
         }
+        if (fabs(lp.lam) > M_PI)
+            lp.lam = copysign(M_PI, lp.lam);
         const double chi = 2. * asin(sqrt(pj_s_minus_sin_s(s) / (2. * M_PI)));
         lp.phi = copysign(M_HALFPI - chi, xy.y);
         return lp;
     }
     lp.phi = aasin(P->ctx, xy.y / Q->C_y);
     lp.lam = xy.x / (Q->C_x * cos(lp.phi));
-    if (fabs(lp.lam) < M_PI) {
+    /* on the outline lam can round to slightly more than pi: accept a few
+     * ulps more and clamp */
+    if (fabs(lp.lam) <= M_PI * (1. + 4. * DBL_EPSILON)) {
+        if (fabs(lp.lam) > M_PI)
+            lp.lam = copysign(M_PI, lp.lam);
         lp.phi += lp.phi;
         lp.phi = aasin(P->ctx, (lp.phi + sin(lp.phi)) / Q->C_p);
     } else {

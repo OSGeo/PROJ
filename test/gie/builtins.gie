@@ -8910,6 +8910,39 @@ accept  0.0084250 -3009264.9775096
 expect  10.000054470970441 -89.999999199999667
 
 -------------------------------------------------------------------------------
+# moll inverse on the outline (longitude +/-180): the longitude can round to
+# slightly more than pi there, and the inverse used to reject it. x is the
+# forward image, and the same moved 2 ulps outwards.
+operation +proj=moll +R=6371000
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+direction inverse
+
+accept  -14522376.270226203 5334269.29077383
+expect  -180.0 45.0
+
+accept  -14522376.270226207 5334269.29077383
+expect  -180.0 45.0
+
+accept  11341344.359710105 7001625.456179298
+expect  180.0 61.4
+
+accept  11341344.359710108 7001625.456179298
+expect  180.0 61.4
+
+accept  -7625289.780841103 8163517.681707444
+expect  -180.0 75.0
+
+accept  -7625289.780841105 8163517.681707444
+expect  -180.0 75.0
+
+accept  59437.98584860868 9009905.592261197
+expect  180.0 89.99
+
+accept  59437.985848608696 9009905.592261197
+expect  180.0 89.99
+
+-------------------------------------------------------------------------------
 # gnom in equatorial and oblique mode close to 90 degrees from the centre, where
 # the coordinates are very large and cos(z) from sqrt(1 - sin(z)^2) used to lose
 # its digits (3 mm on the Moon).
