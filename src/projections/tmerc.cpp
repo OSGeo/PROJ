@@ -128,28 +128,11 @@ static PJ_XY tmerc_spherical_fwd(PJ_LP lp, PJ *P) {
     }
 
     xy.x = Q->ml0 * log((1. + b) / (1. - b));
-    if (cosphi == 1.0) {
-        if ((lp.lam < -M_HALFPI || lp.lam > M_HALFPI)) {
-            /* Helps to be able to roundtrip |longitudes| > 90 at lat=0 */
-            /* We could also map to -M_PI ... */
-            xy.y = M_PI;
-        } else {
-            xy.y = 0;
-        }
-    } else {
-        xy.y = cosphi * cos(lp.lam) / sqrt(1. - b * b);
-
-        b = fabs(xy.y);
-        if (b >= 1.) {
-            if ((b - 1.) > EPS10) {
-                proj_errno_set(
-                    P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
-                return xy;
-            } else
-                xy.y = 0.;
-        } else
-            xy.y = acos(xy.y);
-    }
+    /* Same angle as acos(cosphi * cos(lam) / sqrt(1 - b * b)), since
+     * 1 - b * b = sinphi^2 + (cosphi * cos(lam))^2, but without the loss of
+     * precision of acos() near +/-1, i.e. close to the equator.
+     * |longitudes| > 90 at lat=0 give M_PI, which helps to roundtrip them. */
+    xy.y = atan2(fabs(sin(lp.phi)), cosphi * cos(lp.lam));
 
     if (lp.phi < 0.)
         xy.y = -xy.y;
@@ -210,7 +193,9 @@ static PJ_LP tmerc_spherical_inv(PJ_XY xy, PJ *P) {
     /* D, as in equation 8-8 of USGS "Map Projections - A Working Manual" */
     const double D = P->phi0 + xy.y / Q->esp;
     h = cos(D);
-    lp.phi = asin(sqrt((1. - h * h) / (1. + g * g)));
+    /* Same angle as asin(sqrt((1 - h * h) / (1 + g * g))), but without the
+     * loss of precision of 1 - h * h near the equator */
+    lp.phi = atan2(fabs(sin(D)), sqrt(g * g + h * h));
 
     /* Make sure that phi is on the correct hemisphere when false northing is
      * used
