@@ -982,6 +982,9 @@ Various
     :type `direction`: PJ_DIRECTION
     :returns: `int` 1 if output units is expected in degrees, otherwise 0
 
+.. doxygenfunction:: proj_ellipsoid_from_proj_string
+   :project: doxygen_api
+
 
 Setting custom I/O functions
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

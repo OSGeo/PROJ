@@ -655,3 +655,84 @@ int pj_ell_set(PJ_CONTEXT *ctx, paralist *pl, double *a, double *es) {
     *es = B.es;
     return 0;
 }
+
+/***************************************************************************************/
+/** \brief Resolve the ellipsoid described by a PROJ string.
+ *
+ * Only the ellipsoid parameters (+ellps, +R, +a, +b, +rf, +f, +es, +e and the
+ * spherification parameters +R_A, +R_V, +R_a, +R_g, +R_h, +R_lat_a, +R_lat_g
+ * and +R_C) are taken into account. Other parameters are ignored. As in
+ * proj_create(), +R_C uses the conformal radius at latitude 0.
+ *
+ * Unlike proj_create() followed by proj_get_ellipsoid(), the result honours
+ * the spherification parameters. This is the ellipsoid used by the geod
+ * utility.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param definition PROJ string (must not be NULL), e.g. "+ellps=WGS84 +R_A"
+ * @param out_semi_major_metre Pointer to a value to store the semi-major axis
+ * in metre, or NULL
+ * @param out_eccentricity_squared Pointer to a value to store the squared
+ * eccentricity, or NULL
+ * @return TRUE in case of success.
+ * @since 9.10
+ */
+int proj_ellipsoid_from_proj_string(PJ_CONTEXT *ctx, const char *definition,
+                                    double *out_semi_major_metre,
+                                    double *out_eccentricity_squared) {
+    if (nullptr == ctx)
+        ctx = pj_get_default_ctx();
+    if (nullptr == definition) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        return FALSE;
+    }
+
+    /* Make a copy that pj_trim_argc can manipulate */
+    char *args = pj_strdup(definition);
+    if (nullptr == args) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER /*ENOMEM*/);
+        return FALSE;
+    }
+    const size_t argc = pj_trim_argc(args);
+    char **argv = argc ? pj_trim_argv(argc, args) : nullptr;
+
+    paralist *start = nullptr, *last = nullptr;
+    bool ok = argc == 0 || argv != nullptr;
+    for (size_t i = 0; ok && i < argc; i++) {
+        paralist *par = pj_mkparam(argv[i]);
+        if (nullptr == par) {
+            ok = false;
+            break;
+        }
+        if (last)
+            last->next = par;
+        else
+            start = par;
+        last = par;
+    }
+    free(argv);
+    free(args);
+
+    double a = 0, es = 0;
+    if (!ok) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER /*ENOMEM*/);
+    } else if (0 != pj_ell_set(ctx, start, &a, &es)) {
+        ok = false;
+        if (0 == proj_context_errno(ctx))
+            proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    }
+
+    while (start) {
+        paralist *next = start->next;
+        free(start);
+        start = next;
+    }
+
+    if (!ok)
+        return FALSE;
+    if (out_semi_major_metre)
+        *out_semi_major_metre = a;
+    if (out_eccentricity_squared)
+        *out_eccentricity_squared = es;
+    return TRUE;
+}
