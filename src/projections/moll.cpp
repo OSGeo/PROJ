@@ -16,13 +16,57 @@ PROJ_HEAD(wag5, "Wagner V") "\n\tPCyl, Sph";
 namespace { // anonymous namespace
 struct pj_moll_data {
     double C_x, C_y, C_p;
+    bool mollweide; /* p = pi/2: the poles need the special handling below */
 };
 } // anonymous namespace
+
+/* s - sin(s), accurate also for small s */
+static double s_minus_sin_s(double s) {
+    if (s < 0.25) {
+        const double s2 = s * s;
+        return s * s2 *
+               (1. / 6 -
+                s2 * (1. / 120 - s2 * (1. / 5040 -
+                                       s2 * (1. / 362880 -
+                                             s2 * (1. / 39916800 -
+                                                   s2 * (1. / 6227020800.))))));
+    }
+    return s - sin(s);
+}
+
+/* Mollweide close to the poles. With theta = (pi - s) / 2 and chi the
+ * colatitude, 2 * theta + sin(2 * theta) = pi * sin(phi) becomes
+ * s - sin(s) = 2 * pi * sin(chi / 2)^2, which can be solved accurately where
+ * the Newton iteration on theta converges only linearly. */
+static double mollweide_polar_s(double chi) {
+    const double sh = sin(0.5 * chi);
+    const double w = 2. * M_PI * sh * sh;
+    double s = cbrt(6. * w); /* <= the root, as s - sin(s) <= s^3 / 6 */
+    for (int i = 0; i < 20; ++i) {
+        const double sh2 = sin(0.5 * s);
+        const double d = 2. * sh2 * sh2; /* 1 - cos(s) */
+        if (d == 0.)
+            break;
+        const double ds = (s_minus_sin_s(s) - w) / d;
+        s -= ds;
+        if (fabs(ds) <= 1e-16 * s)
+            break;
+    }
+    return s;
+}
 
 static PJ_XY moll_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
     struct pj_moll_data *Q = static_cast<struct pj_moll_data *>(P->opaque);
     int i;
+
+    if (Q->mollweide && fabs(lp.phi) > M_HALFPI - 0.5) {
+        const double s = mollweide_polar_s(M_HALFPI - fabs(lp.phi));
+        /* cos(theta) = sin(s / 2), sin(theta) = cos(s / 2) */
+        xy.x = Q->C_x * lp.lam * sin(0.5 * s);
+        xy.y = copysign(Q->C_y * cos(0.5 * s), lp.phi);
+        return xy;
+    }
 
     const double k = Q->C_p * sin(lp.phi);
     for (i = MAX_ITER; i; --i) {
@@ -43,6 +87,22 @@ static PJ_XY moll_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
 static PJ_LP moll_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
     struct pj_moll_data *Q = static_cast<struct pj_moll_data *>(P->opaque);
+    if (Q->mollweide && fabs(xy.y) > 0.5 * Q->C_y && fabs(xy.y) <= Q->C_y) {
+        /* Close to the poles: cos(s / 2) = |y| / C_y, with s as in
+         * mollweide_polar_s(), and the colatitude chi from
+         * 2 * sin(chi / 2)^2 = (s - sin(s)) / pi */
+        const double half_s =
+            2. * asin(sqrt(0.5 * (Q->C_y - fabs(xy.y)) / Q->C_y));
+        const double s = 2. * half_s;
+        lp.lam = xy.x / (Q->C_x * sin(half_s));
+        if (fabs(lp.lam) >= M_PI) {
+            lp.lam = lp.phi = HUGE_VAL;
+            return lp;
+        }
+        const double chi = 2. * asin(sqrt(s_minus_sin_s(s) / (2. * M_PI)));
+        lp.phi = copysign(M_HALFPI - chi, xy.y);
+        return lp;
+    }
     lp.phi = aasin(P->ctx, xy.y / Q->C_y);
     lp.lam = xy.x / (Q->C_x * cos(lp.phi));
     if (fabs(lp.lam) < M_PI) {
@@ -65,6 +125,7 @@ static PJ *setup(PJ *P, double p) {
     Q->C_x = 2. * r / M_PI;
     Q->C_y = r / sp;
     Q->C_p = p2 + sin(p2);
+    Q->mollweide = p == M_HALFPI;
 
     P->inv = moll_s_inverse;
     P->fwd = moll_s_forward;

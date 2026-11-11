@@ -202,17 +202,19 @@ static PJ_LP laea_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     }
     switch (Q->mode) {
     case pj_laea_ns::EQUIT:
-        lp.phi = fabs(rh) <= EPS10 ? 0. : asin(xy.y * sinz / rh);
+    case pj_laea_ns::OBLIQ: {
+        /* rh * sin(phi), rh * cos(phi) * cos(lam) and rh * cos(phi) *
+         * sin(lam): atan2() keeps the latitude accurate near the poles, where
+         * asin() of sin(phi) did not */
+        const bool equit = Q->mode == pj_laea_ns::EQUIT;
+        const double s0 = equit ? 0. : Q->sinb1;
+        const double c0 = equit ? 1. : Q->cosb1;
+        const double n = rh * cosz * s0 + xy.y * sinz * c0;
+        xy.y = rh * cosz * c0 - xy.y * sinz * s0;
         xy.x *= sinz;
-        xy.y = cosz * rh;
+        lp.phi = rh == 0. ? P->phi0 : atan2(n, hypot(xy.x, xy.y));
         break;
-    case pj_laea_ns::OBLIQ:
-        lp.phi = fabs(rh) <= EPS10
-                     ? P->phi0
-                     : asin(cosz * Q->sinb1 + xy.y * sinz * Q->cosb1 / rh);
-        xy.x *= sinz * Q->cosb1;
-        xy.y = (cosz - sin(lp.phi) * Q->sinb1) * rh;
-        break;
+    }
     case pj_laea_ns::N_POLE:
         xy.y = -xy.y;
         lp.phi = M_HALFPI - lp.phi;

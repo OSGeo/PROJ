@@ -34,11 +34,11 @@ static PJ_XY o_forward(PJ_LP lp, PJ *P) { /* spheroid */
     sinphi = sin(lp.phi);
     cosphi = cos(lp.phi);
     /* Formula (5-8b) of Snyder's "Map projections: a working manual" */
-    lp.lam = adjlon(aatan2(cosphi * sin(lp.lam),
-                           Q->sphip * cosphi * coslam + Q->cphip * sinphi) +
-                    Q->lamp);
-    /* Formula (5-7) */
-    lp.phi = aasin(P->ctx, Q->sphip * sinphi - Q->cphip * cosphi * coslam);
+    const double e = cosphi * sin(lp.lam);
+    const double d = Q->sphip * cosphi * coslam + Q->cphip * sinphi;
+    lp.lam = adjlon(aatan2(e, d) + Q->lamp);
+    /* Formula (5-7), as atan2() to stay accurate near the poles */
+    lp.phi = atan2(Q->sphip * sinphi - Q->cphip * cosphi * coslam, hypot(e, d));
 
     return Q->link->fwd(lp, Q->link);
 }
@@ -50,8 +50,11 @@ static PJ_XY t_forward(PJ_LP lp, PJ *P) { /* spheroid */
 
     cosphi = cos(lp.phi);
     coslam = cos(lp.lam);
-    lp.lam = adjlon(aatan2(cosphi * sin(lp.lam), sin(lp.phi)) + Q->lamp);
-    lp.phi = aasin(P->ctx, -cosphi * coslam);
+    const double e = cosphi * sin(lp.lam);
+    const double d = sin(lp.phi);
+    lp.lam = adjlon(aatan2(e, d) + Q->lamp);
+    /* asin(-cosphi * coslam), but accurate near the poles */
+    lp.phi = atan2(-cosphi * coslam, hypot(e, d));
 
     return Q->link->fwd(lp, Q->link);
 }
@@ -68,11 +71,13 @@ static PJ_LP o_inverse(PJ_XY xy, PJ *P) { /* spheroid */
         coslam = cos(lp.lam);
         sinphi = sin(lp.phi);
         cosphi = cos(lp.phi);
-        /* Formula (5-9) */
-        lp.phi = aasin(P->ctx, Q->sphip * sinphi + Q->cphip * cosphi * coslam);
+        const double e = cosphi * sin(lp.lam);
+        const double d = Q->sphip * cosphi * coslam - Q->cphip * sinphi;
+        /* Formula (5-9), as atan2() to stay accurate near the poles */
+        lp.phi =
+            atan2(Q->sphip * sinphi + Q->cphip * cosphi * coslam, hypot(e, d));
         /* Formula (5-10b) */
-        lp.lam = aatan2(cosphi * sin(lp.lam),
-                        Q->sphip * cosphi * coslam - Q->cphip * sinphi);
+        lp.lam = aatan2(e, d);
     }
     return lp;
 }
@@ -87,8 +92,11 @@ static PJ_LP t_inverse(PJ_XY xy, PJ *P) { /* spheroid */
     if (lp.lam != HUGE_VAL) {
         cosphi = cos(lp.phi);
         t = lp.lam - Q->lamp;
-        lp.lam = aatan2(cosphi * sin(t), -sin(lp.phi));
-        lp.phi = aasin(P->ctx, cosphi * cos(t));
+        const double e = cosphi * sin(t);
+        const double d = -sin(lp.phi);
+        lp.lam = aatan2(e, d);
+        /* asin(cosphi * cos(t)), but accurate near the poles */
+        lp.phi = atan2(cosphi * cos(t), hypot(e, d));
     }
     return lp;
 }

@@ -200,30 +200,29 @@ static PJ_LP stere_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
 
     switch (Q->mode) {
     case EQUIT:
-        if (fabs(rh) <= EPS10)
-            lp.phi = 0.;
-        else
-            lp.phi = asin(xy.y * sinc / rh);
-        if (cosc != 0. || xy.x != 0.)
-            lp.lam = atan2(xy.x * sinc, cosc * rh);
-        break;
-    case OBLIQ:
-        if (fabs(rh) <= EPS10)
+    case OBLIQ: {
+        if (rh == 0.) {
             lp.phi = P->phi0;
-        else
-            lp.phi = asin(cosc * sinph0 + xy.y * sinc * cosph0 / rh);
-        c = cosc - sinph0 * sin(lp.phi);
-        if (c != 0. || xy.x != 0.)
-            lp.lam = atan2(xy.x * sinc * cosph0, c * rh);
+            break;
+        }
+        /* rh * sin(phi), rh * cos(phi) * cos(lam) and rh * cos(phi) *
+         * sin(lam): atan2() keeps the latitude accurate near the poles, where
+         * asin() of sin(phi) did not */
+        const double s0 = Q->mode == EQUIT ? 0. : sinph0;
+        const double c0 = Q->mode == EQUIT ? 1. : cosph0;
+        const double n = rh * cosc * s0 + xy.y * sinc * c0;
+        const double d = rh * cosc * c0 - xy.y * sinc * s0;
+        const double e = xy.x * sinc;
+        lp.phi = atan2(n, hypot(e, d));
+        lp.lam = atan2(e, d);
         break;
+    }
     case N_POLE:
         xy.y = -xy.y;
         PROJ_FALLTHROUGH;
     case S_POLE:
-        if (fabs(rh) <= EPS10)
-            lp.phi = P->phi0;
-        else
-            lp.phi = asin(Q->mode == S_POLE ? -cosc : cosc);
+        /* asin(-/+cos(c)), but accurate close to the pole */
+        lp.phi = Q->mode == S_POLE ? c - M_HALFPI : M_HALFPI - c;
         lp.lam = (xy.x == 0. && xy.y == 0.) ? 0. : atan2(xy.x, xy.y);
         break;
     }

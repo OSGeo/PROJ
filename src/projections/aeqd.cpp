@@ -221,7 +221,7 @@ static PJ_LP aeqd_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             return lp;
         }
         c_rh = M_PI;
-    } else if (c_rh < EPS10) {
+    } else if (c_rh == 0.) {
         lp.phi = P->phi0;
         lp.lam = 0.;
         return (lp);
@@ -229,16 +229,16 @@ static PJ_LP aeqd_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     if (Q->mode == pj_aeqd_ns::OBLIQ || Q->mode == pj_aeqd_ns::EQUIT) {
         sinc = sin(c_rh);
         cosc = cos(c_rh);
-        if (Q->mode == pj_aeqd_ns::EQUIT) {
-            lp.phi = aasin(P->ctx, xy.y * sinc / c_rh);
-            xy.x *= sinc;
-            xy.y = cosc * c_rh;
-        } else {
-            lp.phi = aasin(P->ctx,
-                           cosc * Q->sinph0 + xy.y * sinc * Q->cosph0 / c_rh);
-            xy.y = (cosc - Q->sinph0 * sin(lp.phi)) * c_rh;
-            xy.x *= sinc * Q->cosph0;
-        }
+        /* c_rh * sin(phi), c_rh * cos(phi) * cos(lam) and c_rh * cos(phi) *
+         * sin(lam): atan2() keeps the latitude accurate near the poles, where
+         * asin() of sin(phi) did not */
+        const bool equit = Q->mode == pj_aeqd_ns::EQUIT;
+        const double s0 = equit ? 0. : Q->sinph0;
+        const double c0 = equit ? 1. : Q->cosph0;
+        const double n = c_rh * cosc * s0 + xy.y * sinc * c0;
+        xy.y = c_rh * cosc * c0 - xy.y * sinc * s0;
+        xy.x *= sinc;
+        lp.phi = atan2(n, hypot(xy.x, xy.y));
         lp.lam = xy.y == 0. ? 0. : atan2(xy.x, xy.y);
     } else if (Q->mode == pj_aeqd_ns::N_POLE) {
         lp.phi = M_HALFPI - c_rh;

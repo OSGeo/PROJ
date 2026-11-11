@@ -81,29 +81,25 @@ static PJ_LP gnom_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
     sinz = sin(lp.phi = atan(rh));
     cosz = sqrt(1. - sinz * sinz);
 
-    if (fabs(rh) <= EPS10) {
+    if (rh == 0.) {
         lp.phi = P->phi0;
         lp.lam = 0.;
     } else {
         switch (Q->mode) {
         case pj_gnom_ns::OBLIQ:
-            lp.phi = cosz * Q->sinph0 + xy.y * sinz * Q->cosph0 / rh;
-            if (fabs(lp.phi) >= 1.)
-                lp.phi = lp.phi > 0. ? M_HALFPI : -M_HALFPI;
-            else
-                lp.phi = asin(lp.phi);
-            xy.y = (cosz - Q->sinph0 * sin(lp.phi)) * rh;
-            xy.x *= sinz * Q->cosph0;
-            break;
-        case pj_gnom_ns::EQUIT:
-            lp.phi = xy.y * sinz / rh;
-            if (fabs(lp.phi) >= 1.)
-                lp.phi = lp.phi > 0. ? M_HALFPI : -M_HALFPI;
-            else
-                lp.phi = asin(lp.phi);
-            xy.y = cosz * rh;
+        case pj_gnom_ns::EQUIT: {
+            /* rh * sin(phi), rh * cos(phi) * cos(lam) and rh * cos(phi) *
+             * sin(lam): atan2() keeps the latitude accurate near the poles,
+             * where asin() of sin(phi) did not */
+            const bool equit = Q->mode == pj_gnom_ns::EQUIT;
+            const double s0 = equit ? 0. : Q->sinph0;
+            const double c0 = equit ? 1. : Q->cosph0;
+            const double n = rh * cosz * s0 + xy.y * sinz * c0;
+            xy.y = rh * cosz * c0 - xy.y * sinz * s0;
             xy.x *= sinz;
+            lp.phi = atan2(n, hypot(xy.x, xy.y));
             break;
+        }
         case pj_gnom_ns::S_POLE:
             lp.phi -= M_HALFPI;
             break;

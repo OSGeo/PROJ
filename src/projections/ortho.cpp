@@ -105,7 +105,7 @@ static PJ_LP ortho_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
         sinc = 1.;
     }
     const double cosc = sqrt(1. - sinc * sinc); /* in this range OK */
-    if (fabs(rh) <= EPS10) {
+    if (rh == 0.) {
         lp.phi = P->phi0;
         lp.lam = 0.0;
     } else {
@@ -118,20 +118,19 @@ static PJ_LP ortho_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
             lp.phi = -acos(sinc);
             break;
         case pj_ortho_ns::EQUIT:
-            lp.phi = xy.y * sinc / rh;
+        case pj_ortho_ns::OBLIQ: {
+            /* rh * sin(phi), rh * cos(phi) * cos(lam) and rh * cos(phi) *
+             * sin(lam): atan2() keeps the latitude accurate near the poles,
+             * where asin() of sin(phi) did not */
+            const bool equit = Q->mode == pj_ortho_ns::EQUIT;
+            const double s0 = equit ? 0. : Q->sinph0;
+            const double c0 = equit ? 1. : Q->cosph0;
+            const double n = rh * cosc * s0 + xy.y * sinc * c0;
+            xy.y = rh * cosc * c0 - xy.y * sinc * s0;
             xy.x *= sinc;
-            xy.y = cosc * rh;
-            goto sinchk;
-        case pj_ortho_ns::OBLIQ:
-            lp.phi = cosc * Q->sinph0 + xy.y * sinc * Q->cosph0 / rh;
-            xy.y = (cosc - Q->sinph0 * lp.phi) * rh;
-            xy.x *= sinc * Q->cosph0;
-        sinchk:
-            if (fabs(lp.phi) >= 1.)
-                lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
-            else
-                lp.phi = asin(lp.phi);
+            lp.phi = atan2(n, hypot(xy.x, xy.y));
             break;
+        }
         }
         lp.lam = (xy.y == 0. && (Q->mode == pj_ortho_ns::OBLIQ ||
                                  Q->mode == pj_ortho_ns::EQUIT))
