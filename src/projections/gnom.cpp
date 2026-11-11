@@ -79,7 +79,9 @@ static PJ_LP gnom_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
 
     rh = hypot(xy.x, xy.y);
     sinz = sin(lp.phi = atan(rh));
-    cosz = sqrt(1. - sinz * sinz);
+    /* cos() rather than sqrt(1 - sinz * sinz), which loses the digits close to
+     * 90 degrees from the centre and defeats the atan2() below */
+    cosz = cos(lp.phi);
 
     if (rh == 0.) {
         lp.phi = P->phi0;

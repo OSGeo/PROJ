@@ -8910,6 +8910,30 @@ accept  0.0084250 -3009264.9775096
 expect  10.000054470970441 -89.999999199999667
 
 -------------------------------------------------------------------------------
+# gnom in equatorial and oblique mode close to 90 degrees from the centre, where
+# the coordinates are very large and cos(z) from sqrt(1 - sin(z)^2) used to lose
+# its digits (3 mm on the Moon).
+operation +proj=gnom +R=1737400 +lat_0=0
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+direction inverse
+
+accept  306350.4963 1010813460103227.6
+expect  10.000000000547332 89.999999900000006
+
+accept  -0.0030 -995456932358754.8
+expect  -0.000000098933658650424175 -89.999999900000006
+
+-------------------------------------------------------------------------------
+operation +proj=gnom +R=1737400 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+direction inverse
+
+accept  0.0000 -995456861627286.4
+expect  0.0 -44.999999899999999
+
+-------------------------------------------------------------------------------
 # Spherical ob_tran close to the poles, where asin() used to lose up to a
 # few cm on the Moon. Expected values from a 50-digit computation.
 operation +proj=ob_tran +o_proj=stere +lat_0=90 +o_lat_p=40 +o_lon_p=10 +R=1737400
