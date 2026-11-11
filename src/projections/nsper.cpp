@@ -105,7 +105,7 @@ static PJ_LP nsper_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
         xy.y = bq * Q->cg - bm * Q->sg;
     }
     rh = hypot(xy.x, xy.y);
-    if (fabs(rh) <= EPS10) {
+    if (rh == 0.) {
         lp.lam = 0.;
         lp.phi = P->phi0;
     } else {
@@ -119,21 +119,26 @@ static PJ_LP nsper_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
         cosz = sqrt(1. - sinz * sinz);
         switch (Q->mode) {
         case pj_nsper_ns::OBLIQ:
-            lp.phi = asin(cosz * Q->sinph0 + xy.y * sinz * Q->cosph0 / rh);
-            xy.y = (cosz - Q->sinph0 * sin(lp.phi)) * rh;
-            xy.x *= sinz * Q->cosph0;
-            break;
-        case pj_nsper_ns::EQUIT:
-            lp.phi = asin(xy.y * sinz / rh);
-            xy.y = cosz * rh;
+        case pj_nsper_ns::EQUIT: {
+            /* rh * sin(phi), rh * cos(phi) * cos(lam) and rh * cos(phi) *
+             * sin(lam): atan2() keeps the latitude accurate near the poles,
+             * where asin() of sin(phi) did not */
+            const bool equit = Q->mode == pj_nsper_ns::EQUIT;
+            const double s0 = equit ? 0. : Q->sinph0;
+            const double c0 = equit ? 1. : Q->cosph0;
+            const double n = rh * cosz * s0 + xy.y * sinz * c0;
+            xy.y = rh * cosz * c0 - xy.y * sinz * s0;
             xy.x *= sinz;
+            lp.phi = atan2(n, hypot(xy.x, xy.y));
             break;
+        }
         case pj_nsper_ns::N_POLE:
-            lp.phi = asin(cosz);
+            /* asin(cosz), but accurate close to the pole */
+            lp.phi = atan2(cosz, sinz);
             xy.y = -xy.y;
             break;
         case pj_nsper_ns::S_POLE:
-            lp.phi = -asin(cosz);
+            lp.phi = -atan2(cosz, sinz);
             break;
         }
         lp.lam = atan2(xy.x, xy.y);

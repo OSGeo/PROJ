@@ -9131,4 +9131,77 @@ accept  3 -2
 expect  90958.8206779 -60654.3771260
 roundtrip 1
 
+-------------------------------------------------------------------------------
+# Equal Earth at the poles: MAX_Y used to be 1.3e-14 too small, so that the
+# inverse clamped y and returned 89.9999934 deg instead of the pole.
+operation +proj=eqearth +R=1737400
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+
+accept  10 90
+expect  154781.9398627 2288786.0577601
+roundtrip 1
+
+accept  -140 -90
+expect  -2166947.1580779 -2288786.0577601
+roundtrip 1
+
+direction inverse
+
+accept  154781.9398627 2288786.0577601
+expect  10 90
+
+accept  -2166947.1580779 -2288786.0577601
+expect  -140 -90
+
+-------------------------------------------------------------------------------
+operation +proj=eqearth +ellps=WGS84
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+
+accept  10 90
+roundtrip 1
+
+accept  -140 -90
+roundtrip 1
+
+-------------------------------------------------------------------------------
+# Near-sided perspective inverse close to the poles and to the centre,
+# where asin() and the "rh <= 1e-10" shortcut used to lose up to a few cm on
+# the Moon. Expected values from a 50-digit computation.
+operation +proj=nsper +R=1737400 +lat_0=45 +h=3000000
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+direction inverse
+
+accept  -0.0103703 1050360.7088927
+expect  -150.00011251933574 89.999999199996356
+
+accept  0.0000214 0.0000606
+expect  0.00000000099804836248363533 45.00000000199846
+
+-------------------------------------------------------------------------------
+# Near-sided perspective inverse close to the poles and to the centre,
+# where asin() and the "rh <= 1e-10" shortcut used to lose up to a few cm on
+# the Moon. Expected values from a 50-digit computation.
+operation +proj=nsper +R=1737400 +lat_0=-90 +h=3000000
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+direction inverse
+
+accept  0.0075808 0.0131304
+expect  29.99986917513807 -89.999999500000503
+
+-------------------------------------------------------------------------------
+# Near-sided perspective inverse close to the poles and to the centre,
+# where asin() and the "rh <= 1e-10" shortcut used to lose up to a few cm on
+# the Moon. Expected values from a 50-digit computation.
+operation +proj=nsper +R=1737400 +lat_0=0 +h=3000000
+-------------------------------------------------------------------------------
+tolerance 0.001 mm
+direction inverse
+
+accept  0.0000303 0.0000606
+expect  0.00000000099922995236928417 0.0000000019984599047385683
+
 </gie-strict>

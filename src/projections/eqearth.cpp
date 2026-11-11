@@ -12,6 +12,7 @@ Port to PROJ by Juernjakob Dugge, 16 August 2018
 Added ellipsoidal equations by Bojan Savric, 22 August 2018
 */
 
+#include <algorithm>
 #include <errno.h>
 #include <math.h>
 
@@ -27,7 +28,11 @@ PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl, Sph&Ell";
 #define A4 0.003796
 #define M (sqrt(3.0) / 2.0)
 
-#define MAX_Y 1.3173627591574 /* 90° latitude on a sphere with radius 1 */
+/* 90° latitude on a sphere with radius 1. The value with 13 decimals was
+ * 1.3e-14 too small, so that y within that distance of the pole was clamped:
+ * latitudes from about 89.999993 deg up to the pole all came back as 89.9999934
+ * deg */
+#define MAX_Y 1.3173627591574134
 #define EPS 1e-11
 #define MAX_ITER 12
 
@@ -124,7 +129,8 @@ static PJ_LP eqearth_e_inverse(PJ_XY xy,
         M * xy.x * (A1 + 3 * A2 * y2 + y6 * (7 * A3 + 9 * A4 * y2)) / cos(yc);
 
     /* Latitude (for spheroidal case, this is latitude */
-    lp.phi = asin(sin(yc) / M);
+    /* sin(yc) / M may round to slightly more than 1 at the poles */
+    lp.phi = asin(std::max(-1., std::min(1., sin(yc) / M)));
 
     /* Ellipsoidal case, converting auth. latitude */
     if (P->es != 0.0)
