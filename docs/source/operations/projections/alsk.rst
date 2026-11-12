@@ -36,4 +36,8 @@ Options
 
 .. include:: ../options/y_0.rst
 
+A nonzero ellipsoid eccentricity selects the fixed ellipsoidal form, with
+semi-major axis 6378206.4 m and squared eccentricity 0.00676866. A sphere selects
+the spherical form with a fixed radius of 6370997 m.
+
 .. include:: ../options/ellps.rst
