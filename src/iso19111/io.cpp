@@ -11556,7 +11556,8 @@ PROJStringParser::Private::processAxisSwap(Step &step,
                 throw ParsingException("Unhandled order=" + orderStr);
             }
         }
-    } else if ((step.name == "krovak" || step.name == "mod_krovak") &&
+    } else if (!isGeographic &&
+               (step.name == "krovak" || step.name == "mod_krovak") &&
                hasParamValue(step, "czech")) {
         axis[0] = std::move(west);
         axis[1] = std::move(south);
