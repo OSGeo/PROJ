@@ -33,5 +33,9 @@ jobs:
           key: ${{ runner.os }}-cache-gcc32bit-${{ github.run_id }}
           restore-keys: ${{ runner.os }}-cache-gcc32bit-
 
+      # https://github.com/actions/runner-images/issues/14790
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v5.7.0
+
       - name: Run
         run: docker run -e PROJ_GITHUB_SHA=${{ github.sha }} -e CI -e WORK_DIR="$PWD" -v $PWD:$PWD ubuntu:24.04 $PWD/ci/linux_gcc_32bit/start.sh
