@@ -35,7 +35,9 @@ a positive quantity.
 2. Rate of change of slant range (one-way) from the platform to the target.
 3. Height of the target above the ellipsoid.
 
-See :cite:`NISAR_2023`
+Section 3.5 of :cite:`NISAR_2023` describes the geometry mapping algorithms
+used by the NISAR mission. A reference implementation of these algorithms are
+also available as part of the [ISCE software](https://github.com/isce-framework/isce3).
 
 
 Parameters

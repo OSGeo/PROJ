@@ -35,7 +35,10 @@ static PJ_LPZ rrdot_inverse3d(PJ_XYZ xyz, PJ *P) {
 
     PJ_XYZ pos;
 
-    /* Slant range has to be positive*/
+    /* Input xyz */
+    /* x - Slant range has to be positive  */
+    /* y - Rate of change of slant range    */
+    /* z - Height of target above ellipsoid */
     if (xyz.x <= 0.) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         PJ_LPZ lpz = {std::numeric_limits<double>::quiet_NaN(),
@@ -47,12 +50,16 @@ static PJ_LPZ rrdot_inverse3d(PJ_XYZ xyz, PJ *P) {
     xyz.y *= P->a;
 
     /* This is based on isce-framework rdr2geo algorithm */
+    /* The implementation corresponds to Sec 3.5.1 of NISAR ATBD */
+    /* Forward Mapping Algorithm */
     bool converged = false;
+
+    /* Initialze to target height */
     double h = xyz.z;
 
     for (int i = 0; i < MAX_ITER; i++) {
         /* Slant range has to be positive and greater than relative height of
-         * platform */
+         * platform - else won't intersect surface */
         if ((Q->height - h) >= xyz.x) {
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             PJ_LPZ lpz = {std::numeric_limits<double>::quiet_NaN(),
@@ -60,6 +67,8 @@ static PJ_LPZ rrdot_inverse3d(PJ_XYZ xyz, PJ *P) {
                           std::numeric_limits<double>::quiet_NaN()};
             return lpz;
         }
+
+        /* Section 3.5.1.3 */
         double a = Q->dist;
         double b = Q->radius + h;
         double cos_theta =
@@ -84,13 +93,16 @@ static PJ_LPZ rrdot_inverse3d(PJ_XYZ xyz, PJ *P) {
         /* Convert to llh */
         PJ_LPZ tllh = Q->cart->inv3d(tvec, Q->cart);
 
-        /* Adjust height */
+        /* Adjust height - this is same as DEM interpolation but target height
+         * is provided as input*/
         tllh.z = xyz.z;
         pos = Q->cart->fwd3d(tllh, Q->cart);
         a = sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
+
+        /* Update height for next iteration */
         h = a - Q->radius;
 
-        /* Height for next iteration */
+        /* Check for convergence */
         tvec.x = pos.x - Q->pxyz.x;
         tvec.y = pos.y - Q->pxyz.y;
         tvec.z = pos.z - Q->pxyz.z;
@@ -114,6 +126,9 @@ static PJ_XYZ rrdot_forward3d(PJ_LPZ lpz, PJ *P) {
     struct pj_rrdot_data *Q = static_cast<struct pj_rrdot_data *>(P->opaque);
 
     /* This is pure geometry based on platform and target positions */
+    /* We already know the platform position from the setup - so we */
+    /* skip the Newton-Raphson iterations needed for NISAR */
+    /* Target position is provided as input lpz */
     /* Convert lat long to geocentric coordinates */
     PJ_XYZ xyz = Q->cart->fwd3d(lpz, Q->cart);
 
@@ -136,6 +151,7 @@ static PJ_XYZ rrdot_forward3d(PJ_LPZ lpz, PJ *P) {
     }
 
     /* Slant range, Rdot, Height above Ellipse */
+    /* These are just equations from Section 3.5.1.1 */
     xyz.x = sqrt(rvec.x * rvec.x + rvec.y * rvec.y + rvec.z * rvec.z);
     xyz.y = -(Q->vxyz.x * rvec.x + Q->vxyz.y * rvec.y + Q->vxyz.z * rvec.z) /
             (xyz.x * P->a);
@@ -169,14 +185,19 @@ static PJ *pj_rrdot_setup(PJ *P) { /* general initialization */
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def(P, Q->cart);
 
-    /* Get platform location for height */
+    /* Compute some quantities used later in p->inv */
+    /* These are from Sec 3.5.1.3 of NISAR ATBD */
+    /* Geocentic distance of platform */
     Q->dist = sqrt(Q->pxyz.x * Q->pxyz.x + Q->pxyz.y * Q->pxyz.y +
                    Q->pxyz.z * Q->pxyz.z);
     PJ_XYZ xyz = {Q->pxyz.x / P->a, Q->pxyz.y / P->a, Q->pxyz.z / P->b};
     double fact = 1.0 / sqrt(xyz.x * xyz.x + xyz.y * xyz.y + xyz.z * xyz.z);
+
+    /* Geocentric distance of the nadir point on ellipsoid */
     Q->radius = fact * Q->dist;
     Q->height = (1.0 - fact) * Q->dist;
 
+    /* TCN coordinate system from Section 3.5.1.2 */
     /* nhat is vector to center of ellipsoid */
     Q->nhat.x = -Q->pxyz.x / Q->dist;
     Q->nhat.y = -Q->pxyz.y / Q->dist;
