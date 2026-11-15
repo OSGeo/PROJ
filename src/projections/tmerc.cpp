@@ -10,6 +10,7 @@
  * slower, but more accurate implementation.
  */
 
+#include <cmath>
 #include <errno.h>
 #include <math.h>
 
