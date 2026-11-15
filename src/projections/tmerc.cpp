@@ -127,15 +127,14 @@ static PJ_XY tmerc_spherical_fwd(PJ_LP lp, PJ *P) {
         return xy;
     }
 
-    xy.x = Q->ml0 * log((1. + b) / (1. - b));
+    /* ml0 * atanh(b), written as in exact_e_fwd() to stay accurate when |b|
+     * is close to 1 */
+    xy.x = Q->ml0 * asinh(sin(lp.lam) / hypot(tan(lp.phi), cos(lp.lam)));
     /* Same angle as acos(cosphi * cos(lam) / sqrt(1 - b * b)), since
      * 1 - b * b = sinphi^2 + (cosphi * cos(lam))^2, but without the loss of
      * precision of acos() near +/-1, i.e. close to the equator.
      * |longitudes| > 90 at lat=0 give M_PI, which helps to roundtrip them. */
-    xy.y = atan2(fabs(sin(lp.phi)), cosphi * cos(lp.lam));
-
-    if (lp.phi < 0.)
-        xy.y = -xy.y;
+    xy.y = atan2(sin(lp.phi), cosphi * cos(lp.lam));
     xy.y = Q->esp * (xy.y - P->phi0);
     return xy;
 }
@@ -181,28 +180,20 @@ static PJ_LP approx_e_inv(PJ_XY xy, PJ *P) {
 
 static PJ_LP tmerc_spherical_inv(PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0, 0.0};
-    double h, g;
     const auto *Q = &(static_cast<struct tmerc_data *>(P->opaque)->approx);
 
-    h = exp(xy.x / Q->esp);
-    if (h == 0) {
+    const double g = sinh(xy.x / Q->esp);
+    if (std::isinf(g)) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error().lp;
     }
-    g = .5 * (h - 1. / h);
     /* D, as in equation 8-8 of USGS "Map Projections - A Working Manual" */
     const double D = P->phi0 + xy.y / Q->esp;
-    h = cos(D);
-    /* Same angle as asin(sqrt((1 - h * h) / (1 + g * g))), but without the
-     * loss of precision of 1 - h * h near the equator */
-    lp.phi = atan2(fabs(sin(D)), sqrt(g * g + h * h));
-
-    /* Make sure that phi is on the correct hemisphere when false northing is
-     * used
-     */
-    lp.phi = copysign(lp.phi, D);
-
-    lp.lam = (g != 0.0 || h != 0.0) ? atan2(g, h) : 0.;
+    const double cosD = cos(D);
+    /* Same angle as asin(sqrt((1 - cosD^2) / (1 + g^2))), but without the
+     * loss of precision of 1 - cosD^2 near the equator */
+    lp.phi = atan2(sin(D), hypot(g, cosD));
+    lp.lam = atan2(g, cosD);
     return lp;
 }
 
@@ -228,7 +219,7 @@ static PJ *setup_approx(PJ *P) {
         Q->esp = P->es / (1. - P->es);
     } else {
         Q->esp = P->k0;
-        Q->ml0 = .5 * Q->esp;
+        Q->ml0 = Q->esp;
     }
     return P;
 }

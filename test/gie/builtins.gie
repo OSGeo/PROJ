@@ -7539,6 +7539,24 @@ accept  -954364.4951660 -5458203.0413325
 expect  -150 -0.000001
 
 -------------------------------------------------------------------------------
+# Same, close to longitude +/-90 at the equator, where the forward easting
+# R * log((1 + b) / (1 - b)) / 2 lost up to 0.2 m, since b = cos(phi) * sin(lam)
+# is close to +/-1 there. The easting is badly conditioned there (one unit
+# in the last place of the longitude moves it by about 0.01 mm), hence the
+# larger tolerance.
+operation +proj=tmerc   +R=1737400
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept  -89.998988 -0.001034
+expect  -19597452.4882573 -1383231.7697083
+roundtrip 1
+
+accept  90.001468 0.001013
+expect  19233888.9285643 4408778.9085841
+roundtrip 1
+
+-------------------------------------------------------------------------------
 # Approx tmerc on a almost spherical ellipsoid, lat_0 north hemisphere
 
 operation +proj=tmerc   +a=6400000 +rf=1e12 +k=0.9 +lat_0=40 +approx
