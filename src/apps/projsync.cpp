@@ -83,7 +83,7 @@ class ParsingException : public std::exception {
 
 static std::vector<double> get_bbox(const json &j) {
     std::vector<double> res;
-    if (j.size() == 2 && j[0].is_number() && j[1].is_number()) {
+    if (j.size() >= 2 && j[0].is_number() && j[1].is_number()) {
         res.push_back(j[0].get<double>());
         res.push_back(j[1].get<double>());
         res.push_back(j[0].get<double>());
