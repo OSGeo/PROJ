@@ -1440,8 +1440,10 @@ static std::string pj_get_relative_share_proj_internal_no_check() {
     }
     std::string out(info.dli_fname);
     constexpr char dir_sep = '/';
-    // "optimization" for cmake builds where RUNPATH is set to ${prefix}/lib
-    out = replaceAll(out, "/bin/../", "/");
+    if (char *resolved = realpath(out.c_str(), nullptr)) {
+        out = resolved;
+        free(resolved);
+    }
 #ifdef __linux
     // If we get a filename without any path, this is most likely a static
     // binary. Resolve the executable name
