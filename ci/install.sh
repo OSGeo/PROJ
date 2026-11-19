@@ -44,7 +44,9 @@ if [ "$cmp_44" = "$sorted_44" ]; then  # CMake 4.4 or later
 else  # Before CMake 4.4
     cmake_diagnostics=dev
 fi
-CMAKE_OPTIONS="-Werror=${cmake_diagnostics} --log-level=VERBOSE"
+### added "-Wno-error=non-target-directive" until a better solution is found
+### see https://lists.osgeo.org/pipermail/proj/2026-November/012229.html
+CMAKE_OPTIONS="-Werror=${cmake_diagnostics} -Wno-error=non-target-directive --log-level=VERBOSE"
 
 if test "$TRAVIS" != ""; then
     # For some odd reason the tar xzvf $TAR_FILENAME doesn't work on Travis-CI ...

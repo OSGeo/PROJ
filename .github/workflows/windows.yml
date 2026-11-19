@@ -32,7 +32,9 @@ jobs:
         BUILD_SHARED_LIBS: ${{ matrix.BUILD_SHARED_LIBS }}
         BUILD_TYPE: ${{ matrix.BUILD_TYPE }}
         CMAKE_GENERATOR: Ninja
-        CMAKE_OPTIONS: "-Werror=dev --log-level=VERBOSE"
+        # Add -Wno-error=non-target-directive and change -Werror=author
+        # see https://lists.osgeo.org/pipermail/proj/2026-November/012229.html
+        CMAKE_OPTIONS: "-Werror=author -Wno-error=non-target-directive --log-level=VERBOSE"
 
     steps:
 
@@ -74,6 +76,7 @@ jobs:
             :: Not directly linked to BUILD_SHARED_LIBS, but a way to test different C++ standard versions
             if "${{ env.BUILD_SHARED_LIBS }}"=="ON" (set CMAKE_CXX_STANDARD="-DCMAKE_CXX_STANDARD=20")
             if "${{ env.BUILD_TYPE }}"=="Release" (set CMAKE_UNITY_BUILD_OPT="-DCMAKE_UNITY_BUILD=ON")
+            cmake --version
             cmake ${{ env.CMAKE_OPTIONS }} ^
               -D CMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" ^
               -D BUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" ^
@@ -133,7 +136,9 @@ jobs:
         BUILD_SHARED_LIBS: ${{ matrix.BUILD_SHARED_LIBS }}
         BUILD_TYPE: Release
         CMAKE_GENERATOR: "MSYS Makefiles"
-        CMAKE_OPTIONS: "-Werror=dev --log-level=VERBOSE"
+        # Add -Wno-error=non-target-directive and change -Werror=author
+        # see https://lists.osgeo.org/pipermail/proj/2026-November/012229.html
+        CMAKE_OPTIONS: "-Werror=author -Wno-error=non-target-directive --log-level=VERBOSE"
         CMAKE_BUILD_PARALLEL_LEVEL: 2
 
     steps:
@@ -169,6 +174,7 @@ jobs:
             ccache -s
             PROJ_BUILD=${GITHUB_WORKSPACE}/build
             PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
+            cmake --version
             cmake ${{ env.CMAKE_OPTIONS }} \
               -D CMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
               -D BUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} \
