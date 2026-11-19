@@ -1440,10 +1440,6 @@ static std::string pj_get_relative_share_proj_internal_no_check() {
     }
     std::string out(info.dli_fname);
     constexpr char dir_sep = '/';
-    if (char *resolved = realpath(out.c_str(), nullptr)) {
-        out = resolved;
-        free(resolved);
-    }
 #ifdef __linux
     // If we get a filename without any path, this is most likely a static
     // binary. Resolve the executable name
@@ -1466,15 +1462,7 @@ static std::string pj_get_relative_share_proj_internal_no_check() {
         return out;
     }
     out.resize(pos);
-    pos = out.find_last_of(dir_sep);
-    if (pos == std::string::npos) {
-        // The initial path was something like bin/libproj.so"
-        out = "share/proj";
-        return out;
-    }
-    out.resize(pos);
-    // The initial path was something like foo/bin/libproj.so"
-    out += "/share/proj";
+    out += "/../share/proj";
     return out;
 #else
     return std::string();
