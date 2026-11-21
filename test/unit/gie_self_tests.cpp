@@ -42,6 +42,96 @@ namespace {
 
 // ---------------------------------------------------------------------------
 
+TEST(gie, modified_stereographic_spherical) {
+    const struct {
+        const char *name;
+        double lon0, lat0;
+        double lon, lat;
+        double x, y;
+    } projections[] = {
+        {"mil_os", 20, 18, 10, 50, -703342.756346759, 3408756.058612172},
+        {"lee_os", -165, -10, -160, -5, 402459.336403933, 400796.688146556},
+        {"gs48", -96, 39, -95, 35, 90241.658071458, -439595.048485904},
+    };
+    const struct {
+        const char *parameters;
+        double radius;
+    } definitions[] = {
+        {"", 6378137},
+        {"+ellps=GRS80", 6378137},
+        {"+ellps=WGS84", 6378137},
+        {"+ellps=clrk66", 6378206.4},
+        {"+R=6370997", 6370997},
+        {"+R=6400000", 6400000},
+        {"+a=6400000 +b=6400000", 6400000},
+        {"+ellps=clrk66 +a=6400000", 6400000},
+    };
+    // Spherical stereographic coordinates followed by the defining polynomial;
+    // the reference radius is 6400000 m for mil_os/lee_os and 6370997 m for gs48.
+    for (const auto &projection : projections) {
+        for (const auto &definition : definitions) {
+            const std::string operation = std::string("+proj=") + projection.name +
+                                          " " + definition.parameters;
+            SCOPED_TRACE(operation);
+            PJ *P = proj_create(PJ_DEFAULT_CTX, operation.c_str());
+            ASSERT_NE(P, nullptr);
+            const auto center = proj_coord(proj_torad(projection.lon0),
+                                           proj_torad(projection.lat0), 0, 0);
+            const auto origin = proj_trans(P, PJ_FWD, center);
+            EXPECT_NEAR(origin.xy.x, 0, 1e-7);
+            EXPECT_NEAR(origin.xy.y, 0, 1e-7);
+            const auto point = proj_coord(proj_torad(projection.lon),
+                                          proj_torad(projection.lat), 0, 0);
+            const double scale = std::string(projection.name) == "gs48"
+                                     ? 1
+                                     : definition.radius / 6400000;
+            const auto expected = proj_coord(projection.x * scale,
+                                             projection.y * scale, 0, 0);
+            const auto projected = proj_trans(P, PJ_FWD, point);
+            EXPECT_NEAR(projected.xy.x, expected.xy.x, 1e-7);
+            EXPECT_NEAR(projected.xy.y, expected.xy.y, 1e-7);
+            const auto inverse = proj_trans(P, PJ_INV, expected);
+            EXPECT_NEAR(inverse.lp.lam, point.lp.lam, 1e-12);
+            EXPECT_NEAR(inverse.lp.phi, point.lp.phi, 1e-12);
+            EXPECT_EQ(proj_errno(P), 0);
+            proj_destroy(P);
+        }
+    }
+}
+
+TEST(gie, modified_stereographic_fixed_radius) {
+    const struct {
+        const char *name;
+        double lon, lat;
+    } projections[] = {
+        {"gs48", -119, 40},
+        {"alsk", -140, 60},
+        {"gs50", -100, 40},
+    };
+    for (const auto &projection : projections) {
+        for (const char *parameters :
+             {"", "+ellps=GRS80", "+ellps=WGS84", "+ellps=clrk66",
+              "+R=6370997", "+R=6400000", "+a=6400000 +b=6400000",
+              "+ellps=clrk66 +a=6400000"}) {
+            const std::string operation = std::string("+proj=") + projection.name +
+                                          " " + parameters;
+            SCOPED_TRACE(operation);
+            PJ *P = proj_create(PJ_DEFAULT_CTX, operation.c_str());
+            ASSERT_NE(P, nullptr);
+            const auto point = proj_coord(proj_torad(projection.lon),
+                                          proj_torad(projection.lat), 0, 0);
+            const auto projected = proj_trans(P, PJ_FWD, point);
+            const auto inverse = proj_trans(P, PJ_INV, projected);
+            EXPECT_NEAR(inverse.lp.lam, point.lp.lam, 1e-12);
+            EXPECT_NEAR(inverse.lp.phi, point.lp.phi, 1e-12);
+            EXPECT_EQ(proj_errno(P), 0);
+            proj_destroy(P);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(gie, cart_selftest) {
     PJ_CONTEXT *ctx;
     PJ *P;
