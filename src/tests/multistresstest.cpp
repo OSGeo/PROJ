@@ -133,6 +133,13 @@ static void TestThread()
     PJ_CONTEXT *ctx = proj_context_create();
 
     pj_list = (PJ **)calloc(test_count, sizeof(PJ *));
+    if (pj_list == nullptr) {
+        fprintf(stderr, "Cannot allocate memory for pj_list "
+                        "so test is not working well\n");
+        proj_context_destroy(ctx);
+        active_thread_count--; // to not stay iterating forever.
+        return;
+    }
 
     if (!reinit_every_iteration) {
         for (i = 0; i < test_count; i++) {
