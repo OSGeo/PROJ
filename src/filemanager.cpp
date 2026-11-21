@@ -42,6 +42,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <filesystem>
 #include <limits>
 #include <string>
 
@@ -1463,7 +1464,11 @@ static std::string pj_get_relative_share_proj_internal_no_check() {
     }
     out.resize(pos);
     out += "/../share/proj";
+#ifdef HAVE_STD_FILESYSTEM
+    return std::filesystem::path(out).lexically_normal().string();
+#else
     return out;
+#endif // HAVE_STD_FILESYSTEM
 #else
     return std::string();
 #endif
