@@ -2462,6 +2462,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             }
         }
 
+        // cppcheck-suppress knownConditionTrueFalse
         if (setNameAndId) {
             properties.set(IdentifiedObject::NAME_KEY, name);
             if (!authNameFromAlias.empty()) {
