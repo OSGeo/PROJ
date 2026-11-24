@@ -113,6 +113,11 @@ static PJ *mod_ster_setup(PJ *P) { /* general initialization */
         static_cast<struct pj_mod_ster_data *>(P->opaque);
     double esphi, chio;
 
+    P->e = P->f = P->b = 0;
+    const int err = pj_calc_ellipsoid_params(P, P->a, P->es);
+    if (err)
+        return pj_default_destructor(P, err);
+
     if (P->es != 0.0) {
         esphi = P->e * sin(P->phi0);
         chio = 2. * atan(tan((M_HALFPI + P->phi0) * .5) *
