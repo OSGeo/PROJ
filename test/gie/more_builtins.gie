@@ -1042,4 +1042,15 @@ expect 1 2 3
 operation proj=pipeline step proj=affine s11=1 s12=1 s13=1 s22=0 s33=0 omit_inv inv
 expect failure errno no_inverse_op
 
+-------------------------------------------------------------------------------
+# Albers inverse close to the poles (#4910).
+-------------------------------------------------------------------------------
+operation +proj=aea +ellps=WGS84 +lat_1=29.5 +lat_2=45.5
+tolerance 0.05 m
+direction inverse
+accept 1255269.4380381017 8444582.36025252
+expect 30 89.99
+accept 5247113.8641442405 -3777811.267742384
+expect 30 -89.99
+
 </gie-strict>
