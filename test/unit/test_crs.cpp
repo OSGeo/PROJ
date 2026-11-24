@@ -7755,6 +7755,79 @@ TEST(crs, promoteTo3D_and_demoteTo2D) {
     }
 }
 
+TEST(crs, promoteTo3D_and_demoteTo2D_bound_feetUS) {
+    auto dbContext = DatabaseContext::create();
+
+    // generated with
+    // 'projinfo ESRI:102630 --boundcrs-to-wgs84 -o wkt1_gdal -q --c-ify'
+    auto wkt = "PROJCS[\"NAD_1983_StatePlane_Alabama_West_FIPS_0102_Feet\",\n"
+               "  GEOGCS[\"NAD83\",\n"
+               "    DATUM[\"North_American_Datum_1983\",\n"
+               "      SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
+               "        AUTHORITY[\"EPSG\",\"7019\"]],\n"
+               "      TOWGS84[0.9956,-1.9013,-0.5215,"
+               "-0.025915,-0.009426,-0.011599,0.00062],\n"
+               "      AUTHORITY[\"EPSG\",\"6269\"]],\n"
+               "    PRIMEM[\"Greenwich\",0,\n"
+               "      AUTHORITY[\"EPSG\",\"8901\"]],\n"
+               "    UNIT[\"degree\",0.0174532925199433,\n"
+               "      AUTHORITY[\"EPSG\",\"9122\"]],\n"
+               "    AUTHORITY[\"EPSG\",\"4269\"]],\n"
+               "  PROJECTION[\"Transverse_Mercator\"],\n"
+               "  PARAMETER[\"latitude_of_origin\",30],\n"
+               "  PARAMETER[\"central_meridian\",-87.5],\n"
+               "  PARAMETER[\"scale_factor\",0.999933333333333],\n"
+               "  PARAMETER[\"false_easting\",1968500],\n"
+               "  PARAMETER[\"false_northing\",0],\n"
+               "  UNIT[\"US survey foot\",0.304800609601219,\n"
+               "    AUTHORITY[\"EPSG\",\"9003\"]],\n"
+               "  AXIS[\"Easting\",EAST],\n"
+               "  AXIS[\"Northing\",NORTH],\n"
+               "  AUTHORITY[\"ESRI\",\"102630\"]]";
+    const auto obj = WKTParser().createFromWKT(wkt);
+    const auto crs = nn_dynamic_pointer_cast<CRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    // promote to 3D
+    const auto crs3D = crs->promoteTo3D(std::string(), dbContext);
+    {
+        const auto crs3DAsBound = nn_dynamic_pointer_cast<BoundCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsBound != nullptr);
+
+        const auto baseCRS =
+            nn_dynamic_pointer_cast<ProjectedCRS>(crs3DAsBound->baseCRS());
+        ASSERT_TRUE(baseCRS != nullptr);
+        const auto &axes = baseCRS->coordinateSystem()->axisList();
+        ASSERT_EQ(axes.size(), 3U);
+        EXPECT_EQ(axes[2]->direction(), AxisDirection::UP);
+        EXPECT_EQ(axes[2]->unit().name(), axes[0]->unit().name());
+        EXPECT_NEAR(axes[2]->unit().conversionToSI(), 0.304800609601219, 1e-9);
+
+        const auto hubCRS =
+            nn_dynamic_pointer_cast<GeographicCRS>(crs3DAsBound->hubCRS());
+        ASSERT_TRUE(hubCRS != nullptr);
+        EXPECT_EQ(hubCRS->coordinateSystem()->axisList().size(), 3U);
+    }
+
+    // demote to 2D from 3D
+    auto crs2D = crs3D->demoteTo2D(std::string(), dbContext);
+    {
+        const auto crs2DAsBound = nn_dynamic_pointer_cast<BoundCRS>(crs2D);
+        ASSERT_TRUE(crs2DAsBound != nullptr);
+
+        const auto baseCRS =
+            nn_dynamic_pointer_cast<ProjectedCRS>(crs2DAsBound->baseCRS());
+        ASSERT_TRUE(baseCRS != nullptr);
+        const auto &axes = baseCRS->coordinateSystem()->axisList();
+        ASSERT_EQ(axes.size(), 2U);
+
+        const auto hubCRS =
+            nn_dynamic_pointer_cast<GeographicCRS>(crs2DAsBound->hubCRS());
+        ASSERT_TRUE(hubCRS != nullptr);
+        EXPECT_EQ(hubCRS->coordinateSystem()->axisList().size(), 2U);
+    }
+}
+
 // ---------------------------------------------------------------------------
 
 TEST(crs, normalizeForVisualization_derivedprojected_operation) {
