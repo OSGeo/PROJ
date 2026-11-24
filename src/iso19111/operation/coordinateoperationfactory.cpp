@@ -7454,6 +7454,13 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 verticalTransforms =
                     createOperations(componentsSrc[1], sourceEpoch,
                                      componentsDst[1], targetEpoch, context);
+                // Keep a direct unit/axis conversion on the same vertical
+                // datum instead of going through potentially different geoid
+                // models when the horizontal CRS changes.
+                const bool hasVerticalConversion =
+                    verticalTransforms.size() == 1 &&
+                    dynamic_cast<const Conversion *>(
+                        verticalTransforms.front().get()) != nullptr;
                 // If we didn't find a non-ballpark transformation between
                 // the 2 vertical CRS, then try through intermediate geographic
                 // CRS
@@ -7466,7 +7473,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 bTryThroughIntermediateGeogCRS =
                     (verticalTransforms.size() == 1 &&
                      verticalTransforms.front()->hasBallparkTransformation()) ||
-                    (!srcGeogIsSameAsDstGeog &&
+                    (!hasVerticalConversion && !srcGeogIsSameAsDstGeog &&
                      !intermGeogSrc->identifiers().empty() &&
                      !intermGeogDst->identifiers().empty() &&
                      !opsGeogSrcToGeogDst.empty() &&

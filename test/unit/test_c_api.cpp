@@ -5452,6 +5452,78 @@ TEST_F(CApi, proj_create_crs_to_crs_with_only_ballpark_transformations) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, compound_crs_same_vertical_datum_with_unit_or_axis_change) {
+    proj_context_set_enable_network(m_ctxt, false);
+    auto source = proj_create(m_ctxt, "EPSG:6588+6360");
+    ObjectKeeper keeper_source(source);
+    ASSERT_NE(source, nullptr);
+
+    auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+    ASSERT_NE(ctxt, nullptr);
+    // Consider geoid operations even when their grids are not installed, so
+    // this checks operation selection independently of local grid availability.
+    proj_operation_factory_context_set_grid_availability_use(
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+    proj_operation_factory_context_set_spatial_criterion(
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+    const char *horizontalCRSs[] = {"EPSG:6588", "EPSG:6344", "EPSG:3857",
+                                    "EPSG:4326"};
+    struct VerticalCase {
+        const char *code;
+        double factor;
+    };
+    const VerticalCase verticalCases[] = {
+        {"6360", 1.0},                      // NAVD88 height (ftUS)
+        {"5703", 1200.0 / 3937.0},          // NAVD88 height (m)
+        {"8228", 1200.0 / 3937.0 / 0.3048}, // NAVD88 height (ft)
+        {"6357", -1200.0 / 3937.0},         // NAVD88 depth (m)
+        {"6358", -1.0}};                    // NAVD88 depth (ftUS)
+    const auto input = proj_coord(3120038.778, 13841751.995, 300, 0);
+    for (const char *horizontalCRS : horizontalCRSs) {
+        // The compound operation must agree with the horizontal-only control.
+        auto horizontal =
+            proj_create_crs_to_crs(m_ctxt, "EPSG:6588", horizontalCRS, nullptr);
+        ObjectKeeper keeper_horizontal(horizontal);
+        ASSERT_NE(horizontal, nullptr);
+        const auto expectedHorizontal = proj_trans(horizontal, PJ_FWD, input);
+        for (const auto &vertical : verticalCases) {
+            const auto targetDef =
+                std::string(horizontalCRS) + "+" + vertical.code;
+            SCOPED_TRACE(targetDef);
+            auto target = proj_create(m_ctxt, targetDef.c_str());
+            ObjectKeeper keeper_target(target);
+            ASSERT_NE(target, nullptr);
+            auto operations =
+                proj_create_operations(m_ctxt, source, target, ctxt);
+            ObjListKeeper keeper_operations(operations);
+            ASSERT_NE(operations, nullptr);
+            ASSERT_GE(proj_list_get_count(operations), 1);
+            auto operation = proj_list_get(m_ctxt, operations, 0);
+            ObjectKeeper keeper_operation(operation);
+            ASSERT_NE(operation, nullptr);
+            // Same vertical datum: no ellipsoidal-height/geoid round trip.
+            ASSERT_EQ(
+                proj_coordoperation_get_grid_used_count(m_ctxt, operation), 0);
+            for (double height : {0.0, 300.0, -100.0}) {
+                auto point = input;
+                point.xyzt.z = height;
+                const auto result = proj_trans(operation, PJ_FWD, point);
+                EXPECT_NEAR(result.xyzt.x, expectedHorizontal.xyzt.x, 1e-8);
+                EXPECT_NEAR(result.xyzt.y, expectedHorizontal.xyzt.y, 1e-8);
+                EXPECT_NEAR(result.xyzt.z, height * vertical.factor, 1e-10);
+                const auto roundtrip = proj_trans(operation, PJ_INV, result);
+                EXPECT_NEAR(roundtrip.xyzt.x, point.xyzt.x, 1e-7);
+                EXPECT_NEAR(roundtrip.xyzt.y, point.xyzt.y, 1e-7);
+                EXPECT_NEAR(roundtrip.xyzt.z, height, 1e-10);
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(
     CApi,
     proj_create_crs_to_crs_from_custom_compound_crs_with_NAD83_2011_and_geoidgrid_ref_against_WGS84_to_WGS84_G1762) {
