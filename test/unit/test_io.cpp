@@ -12270,6 +12270,22 @@ TEST(io, projparse_krovak_czech) {
         "+proj=krovak +czech +type=crs");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
+    const auto &axisList = crs->baseCRS()->coordinateSystem()->axisList();
+    ASSERT_EQ(axisList.size(), 2U);
+    EXPECT_EQ(axisList[0]->nameStr(), "Longitude");
+    EXPECT_EQ(axisList[0]->abbreviation(), "lon");
+    EXPECT_EQ(axisList[0]->direction(), AxisDirection::EAST);
+    EXPECT_EQ(axisList[0]->unit(), UnitOfMeasure::DEGREE);
+    EXPECT_EQ(axisList[1]->nameStr(), "Latitude");
+    EXPECT_EQ(axisList[1]->abbreviation(), "lat");
+    EXPECT_EQ(axisList[1]->direction(), AxisDirection::NORTH);
+    EXPECT_EQ(axisList[1]->unit(), UnitOfMeasure::DEGREE);
+    auto conversion = crs->derivingConversion()->exportToPROJString(
+        PROJStringFormatter::create().get());
+    EXPECT_EQ(conversion.find("+proj=pipeline +step +proj=unitconvert "
+                              "+xy_in=deg +xy_out=rad +step +proj=krovak "),
+              0U)
+        << conversion;
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=krovak +czech +lat_0=49.5 +lon_0=24.8333333333333 "
               "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 "
@@ -12332,6 +12348,22 @@ TEST(io, projparse_krovak_modified_czech) {
         "+proj=mod_krovak +czech +x_0=5000000 +y_0=5000000 +type=crs");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
+    const auto &axisList = crs->baseCRS()->coordinateSystem()->axisList();
+    ASSERT_EQ(axisList.size(), 2U);
+    EXPECT_EQ(axisList[0]->nameStr(), "Longitude");
+    EXPECT_EQ(axisList[0]->abbreviation(), "lon");
+    EXPECT_EQ(axisList[0]->direction(), AxisDirection::EAST);
+    EXPECT_EQ(axisList[0]->unit(), UnitOfMeasure::DEGREE);
+    EXPECT_EQ(axisList[1]->nameStr(), "Latitude");
+    EXPECT_EQ(axisList[1]->abbreviation(), "lat");
+    EXPECT_EQ(axisList[1]->direction(), AxisDirection::NORTH);
+    EXPECT_EQ(axisList[1]->unit(), UnitOfMeasure::DEGREE);
+    auto conversion = crs->derivingConversion()->exportToPROJString(
+        PROJStringFormatter::create().get());
+    EXPECT_EQ(conversion.find("+proj=pipeline +step +proj=unitconvert "
+                              "+xy_in=deg +xy_out=rad +step +proj=mod_krovak "),
+              0U)
+        << conversion;
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=mod_krovak +czech +lat_0=49.5 +lon_0=24.8333333333333 "
               "+alpha=30.2881397527778 +k=0.9999 +x_0=5000000 +y_0=5000000 "
