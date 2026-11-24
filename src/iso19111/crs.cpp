@@ -1395,19 +1395,25 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
     common::UnitOfMeasure uom = common::UnitOfMeasure::METRE;
     std::string name = cs::AxisName::Ellipsoidal_height;
     std::string abbr = cs::AxisAbbreviation::h;
-    if (auto projCRS = dynamic_cast<const ProjectedCRS *>(this)) {
+    const CRS *unitCRS = this;
+    if (auto boundCRS = dynamic_cast<const BoundCRS *>(this)) {
+        // baseCRS is the CRS into which coordinates of the BoundCRS are
+        // expressed.
+        unitCRS = boundCRS->baseCRS().get();
+    }
+    if (auto projCRS = dynamic_cast<const ProjectedCRS *>(unitCRS)) {
         const auto &axisList = projCRS->coordinateSystem()->axisList();
         assert(!axisList.empty());
         uom = axisList[0]->unit();
     } else if (auto derivedProjCRS =
-                   dynamic_cast<const DerivedProjectedCRS *>(this)) {
+                   dynamic_cast<const DerivedProjectedCRS *>(unitCRS)) {
         const auto &cs = derivedProjCRS->coordinateSystem();
         if (dynamic_cast<const cs::CartesianCS *>(cs.get())) {
             const auto &axisList = cs->axisList();
             assert(!axisList.empty());
             uom = axisList[0]->unit();
         }
-    } else if (auto engCRS = dynamic_cast<const EngineeringCRS *>(this)) {
+    } else if (auto engCRS = dynamic_cast<const EngineeringCRS *>(unitCRS)) {
         const auto &axisList = engCRS->coordinateSystem()->axisList();
         assert(!axisList.empty());
         uom = axisList[0]->unit();
