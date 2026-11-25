@@ -82,18 +82,14 @@ static PJ_XY ortho_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
     return xy;
 }
 
-static PJ_LP ortho_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+// Spheroidal inverse of coordinates from which alpha and k are already removed
+static PJ_LP ortho_s_inverse_unrotated(PJ_XY xy, PJ *P) {
     PJ_LP lp;
     struct pj_ortho_data *Q = static_cast<struct pj_ortho_data *>(P->opaque);
     double sinc;
 
     lp.lam = HUGE_VAL;
     lp.phi = HUGE_VAL;
-
-    const double xf = xy.x;
-    const double yf = xy.y;
-    xy.x = (Q->cosalpha * xf + Q->sinalpha * yf) / P->k0;
-    xy.y = (-Q->sinalpha * xf + Q->cosalpha * yf) / P->k0;
 
     const double rh = hypot(xy.x, xy.y);
     sinc = rh;
@@ -141,6 +137,17 @@ static PJ_LP ortho_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
                      : atan2(xy.x, xy.y);
     }
     return lp;
+}
+
+static PJ_LP ortho_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    struct pj_ortho_data *Q = static_cast<struct pj_ortho_data *>(P->opaque);
+
+    const double xf = xy.x;
+    const double yf = xy.y;
+    xy.x = (Q->cosalpha * xf + Q->sinalpha * yf) / P->k0;
+    xy.y = (-Q->sinalpha * xf + Q->cosalpha * yf) / P->k0;
+
+    return ortho_s_inverse_unrotated(xy, P);
 }
 
 static PJ_XY ortho_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
@@ -260,7 +267,7 @@ static PJ_LP ortho_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
     // lp.lam = 0;
     // lp.phi = P->phi0;
     // But for poles, this will not converge well. Better use:
-    lp = ortho_s_inverse(xy_recentered, P);
+    lp = ortho_s_inverse_unrotated(xy_recentered, P);
 
     for (int i = 0; i < 20; i++) {
         const double cosphi = cos(lp.phi);
