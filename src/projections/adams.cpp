@@ -35,19 +35,19 @@
  *  https://en.wikipedia.org/wiki/Peirce_quincuncial_projection
  */
 
+#include <algorithm>
+#include <complex>
 #include <errno.h>
 #include <math.h>
-
-#include <algorithm>
 
 #include "proj.h"
 #include "proj_internal.h"
 
 PROJ_HEAD(guyou, "Guyou") "\n\tMisc Sph No inv";
-PROJ_HEAD(peirce_q, "Peirce Quincuncial") "\n\tMisc Sph No inv";
+PROJ_HEAD(peirce_q, "Peirce Quincuncial");
 PROJ_HEAD(adams_hemi, "Adams Hemisphere in a Square") "\n\tMisc Sph No inv";
 PROJ_HEAD(adams_ws1, "Adams World in a Square I") "\n\tMisc Sph No inv";
-PROJ_HEAD(adams_ws2, "Adams World in a Square II") "\n\tMisc Sph No inv";
+PROJ_HEAD(adams_ws2, "Adams World in a Square II");
 
 namespace { // anonymous namespace
 
@@ -105,6 +105,58 @@ static double ell_int_5(double phi) {
     }
 
     return phi * (y * d1 - d2 + 0.5 * C0);
+}
+
+// Based on Cephes ellpj.c by Stephen L. Moshier:
+// https://www.netlib.org/cephes/ellf.tgz
+// https://www.netlib.org/cephes/readme
+// Original code is copyrighted by Stephen L. Moshier and used freely
+// without any express or implied warranties.
+//
+// Adapted for the fixed parameter m = 0.5.
+// Returns false if the iteration does not converge.
+static bool ellpj_5(double u, double &sn, double &cn, double &dn) {
+    constexpr double m = 0.5;
+    constexpr double MACHEP = 1.11022302462515654042E-16; // 2**-53
+
+    double ai, b, phi, t, twon;
+    double a[9] = {0.0}, c[9] = {0.0};
+    int i;
+
+    /*	A. G. M. scale		*/
+    a[0] = 1.0;
+    b = sqrt(1.0 - m);
+    c[0] = sqrt(m);
+    twon = 1.0;
+    i = 0;
+
+    while (fabs(c[i] / a[i]) > MACHEP) {
+        if (i > 7) {
+            return false;
+        }
+        ai = a[i];
+        ++i;
+        c[i] = (ai - b) / 2.0;
+        t = sqrt(ai * b);
+        a[i] = (ai + b) / 2.0;
+        b = t;
+        twon *= 2.0;
+    }
+
+    /* backward recurrence */
+    phi = twon * a[i] * u;
+    do {
+        t = c[i] * sin(phi) / a[i];
+        phi = (asin(t) + phi) / 2.0;
+    } while (--i);
+
+    t = sin(phi);
+    sn = t;
+    cn = cos(phi);
+    /* Thanks to Hartmut Henkel for reporting a bug here:  */
+    dn = sqrt(1.0 - m * t * t);
+
+    return true;
 }
 
 static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
@@ -316,72 +368,64 @@ static PJ_LP adams_inverse(PJ_XY xy, PJ *P) {
     return pj_generic_inverse_2d(xy, P, lp, deltaXYTolerance);
 }
 
-static PJ_LP peirce_q_square_inverse(PJ_XY xy, PJ *P) {
-    /* Heuristics based on trial and repeat process */
-    PJ_LP lp;
-    lp.phi = 0;
-    if (xy.x == 0 && xy.y < 0) {
-        lp.lam = -M_PI / 4;
-        if (fabs(xy.y) < 2.622057580396)
-            lp.phi = M_PI / 4;
-    } else if (xy.x > 0 && fabs(xy.y) < 1e-7)
-        lp.lam = M_PI / 4;
-    else if (xy.x < 0 && fabs(xy.y) < 1e-7) {
-        lp.lam = -3 * M_PI / 4;
-        lp.phi = M_PI / 2 / 2.622057574224 * xy.x + M_PI / 2;
-    } else if (fabs(xy.x) < 1e-7 && xy.y > 0)
-        lp.lam = 3 * M_PI / 4;
-    else if (xy.x >= 0 && xy.y <= 0) {
-        lp.lam = 0;
-        if (xy.x == 0 && xy.y == 0) {
-            lp.phi = M_PI / 2;
-            return lp;
-        }
-    } else if (xy.x >= 0 && xy.y >= 0)
-        lp.lam = M_PI / 2;
-    else if (xy.x <= 0 && xy.y >= 0) {
-        if (fabs(xy.x) < fabs(xy.y))
-            lp.lam = M_PI * 0.9;
-        else
-            lp.lam = -M_PI * 0.9;
-    } else /* if( xy.x <= 0 && xy.y <= 0 ) */
-        lp.lam = -M_PI / 2;
+static PJ_LP peirce_q_inverse(PJ_XY xy, PJ *P) {
+    constexpr double K = 1.8540746773013719; // ellipk(m=0.5)
+    constexpr double m = 0.5;
 
-    constexpr double deltaXYTolerance = 1e-10;
-    return pj_generic_inverse_2d(xy, P, lp, deltaXYTolerance);
-}
+    double sn_x, cn_x, dn_x;
+    double sn_y, cn_y, dn_y;
+    double real = NAN, imag = NAN;
 
-static PJ_LP peirce_q_diamond_inverse(PJ_XY xy, PJ *P) {
-    /* Heuristics based on a trial and repeat process */
-    PJ_LP lp;
-    lp.phi = 0;
-    if (xy.x >= 0 && xy.y <= 0) {
-        lp.lam = M_PI / 4;
-        if (xy.x > 0 && xy.y == 0) {
-            lp.lam = M_PI / 2;
-            lp.phi = 0;
-        } else if (xy.x == 0 && xy.y == 0) {
-            lp.lam = 0;
-            lp.phi = M_PI / 2;
-            return lp;
-        } else if (xy.x == 0 && xy.y < 0) {
-            lp.lam = 0;
-            lp.phi = M_PI / 4;
-        }
-    } else if (xy.x >= 0 && xy.y >= 0)
-        lp.lam = 3 * M_PI / 4;
-    else if (xy.x <= 0 && xy.y >= 0) {
-        lp.lam = -3 * M_PI / 4;
-    } else /* if( xy.x <= 0 && xy.y <= 0 ) */
-        lp.lam = -M_PI / 4;
+    const auto *Q = static_cast<const pj_adams_data *>(P->opaque);
 
-    if (fabs(xy.x) > 1.8540746773013719 + 1e-3 ||
-        fabs(xy.y) > 1.8540746773013719 + 1e-3) {
-        lp.phi = -M_PI / 4;
+    // Normalize to a square from -K to K
+    switch (Q->pqshape) {
+    case PEIRCE_Q_SQUARE: {
+        real = xy.x * RSQRT2;
+        imag = xy.y * RSQRT2;
+    } break;
+
+    case PEIRCE_Q_DIAMOND: {
+        real = (xy.x - xy.y) / 2.0;
+        imag = (xy.x + xy.y) / 2.0;
+    } break;
+
+    case PEIRCE_Q_NHEMISPHERE: {
+        real = (xy.x - xy.y) / 2.0;
+        imag = (xy.x + xy.y) / 2.0;
+    } break;
+
+    case PEIRCE_Q_SHEMISPHERE: {
+        const double x = xy.x + 2 * K;
+        real = (x - xy.y) / 2.0;
+        imag = (x + xy.y) / 2.0;
+    } break;
+
+    case PEIRCE_Q_HORIZONTAL: {
+        const double x = xy.x + K - Q->scrollx * (4 * K);
+        real = (x - xy.y) / 2.0;
+        imag = (x + xy.y) / 2.0;
+    } break;
+
+    case PEIRCE_Q_VERTICAL: {
+        const double y = xy.y + K - Q->scrolly * (4 * K);
+        real = (xy.x - y) / 2.0;
+        imag = (xy.x + y) / 2.0;
+    } break;
     }
 
-    constexpr double deltaXYTolerance = 1e-10;
-    return pj_generic_inverse_2d(xy, P, lp, deltaXYTolerance);
+    if (!ellpj_5(real + K, sn_x, cn_x, dn_x) ||
+        !ellpj_5(imag, sn_y, cn_y, dn_y)) {
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM); // Does not converge
+        return proj_coord_error().lp;
+    }
+
+    double d = cn_y * cn_y + m * sn_x * sn_x * sn_y * sn_y;
+    const std::complex z(-cn_x * cn_y / d,
+                         sn_x * dn_x * sn_y * dn_y / d); // -cn(w+K, m=0.5)
+
+    return {remainder(std::arg(z) + M_PI_4, 2.0 * M_PI),
+            M_PI_2 - 2.0 * atan(std::abs(z))};
 }
 
 static PJ *pj_adams_setup(PJ *P, projection_type mode) {
@@ -403,16 +447,15 @@ static PJ *pj_adams_setup(PJ *P, projection_type mode) {
         // Quincuncial projections shape options: square, diamond, hemisphere,
         // horizontal (rectangle) or vertical (rectangle)
         const char *pqshape = pj_param(P->ctx, P->params, "sshape").s;
+        P->inv = peirce_q_inverse;
 
         if (!pqshape)
             pqshape = "diamond"; /* default if shape value not supplied */
 
         if (strcmp(pqshape, "square") == 0) {
             Q->pqshape = PEIRCE_Q_SQUARE;
-            P->inv = peirce_q_square_inverse;
         } else if (strcmp(pqshape, "diamond") == 0) {
             Q->pqshape = PEIRCE_Q_DIAMOND;
-            P->inv = peirce_q_diamond_inverse;
         } else if (strcmp(pqshape, "nhemisphere") == 0) {
             Q->pqshape = PEIRCE_Q_NHEMISPHERE;
         } else if (strcmp(pqshape, "shemisphere") == 0) {
