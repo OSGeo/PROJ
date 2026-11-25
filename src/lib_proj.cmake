@@ -137,6 +137,7 @@ set(SRC_LIBPROJ_PROJECTIONS
   projections/spilhaus.cpp
   projections/hourglass.cpp
   projections/interrupted.cpp
+  projections/rrdot.cpp
 )
 
 set(SRC_LIBPROJ_CONVERSIONS
