@@ -42,7 +42,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <filesystem>
 #include <limits>
 #include <string>
 
@@ -1441,6 +1440,8 @@ static std::string pj_get_relative_share_proj_internal_no_check() {
     }
     std::string out(info.dli_fname);
     constexpr char dir_sep = '/';
+    // "optimization" for cmake builds where RUNPATH is set to ${prefix}/lib
+    out = replaceAll(out, "/bin/../", "/");
 #ifdef __linux
     // If we get a filename without any path, this is most likely a static
     // binary. Resolve the executable name
@@ -1463,12 +1464,16 @@ static std::string pj_get_relative_share_proj_internal_no_check() {
         return out;
     }
     out.resize(pos);
-    out += "/../share/proj";
-#ifdef HAVE_STD_FILESYSTEM
-    return std::filesystem::path(out).lexically_normal().string();
-#else
+    pos = out.find_last_of(dir_sep);
+    if (pos == std::string::npos) {
+        // The initial path was something like bin/libproj.so"
+        out = "share/proj";
+        return out;
+    }
+    out.resize(pos);
+    // The initial path was something like foo/bin/libproj.so"
+    out += "/share/proj";
     return out;
-#endif // HAVE_STD_FILESYSTEM
 #else
     return std::string();
 #endif

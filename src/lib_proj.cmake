@@ -609,14 +609,6 @@ endif()
 
 target_link_libraries(proj PRIVATE SQLite3::SQLite3)
 
-# remove std::filesystem code when CMAKE_CXX_STANDARD > 17
-if(STD_FILESYSTEM_LIBRARY)
-    target_link_libraries(proj PRIVATE ${STD_FILESYSTEM_LIBRARY})
-endif()
-if(HAVE_STD_FILESYSTEM)
-    target_compile_definitions(proj PRIVATE HAVE_STD_FILESYSTEM)
-endif()
-
 if(NLOHMANN_JSON STREQUAL "external")
   target_compile_definitions(proj PRIVATE EXTERNAL_NLOHMANN_JSON)
   target_link_libraries(proj

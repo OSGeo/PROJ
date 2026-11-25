@@ -18,48 +18,6 @@ if(NOT WIN32)
   check_library_exists(m exp "" HAVE_LIBM)
 endif()
 
-# Check for std::filesystem, for better compatibility with
-# older systems. Can be removed together with any use of
-# HAVE_STD_FILESYSTEM under CMAKE_CXX_STANDARD > 17.
-include(CheckCXXSourceCompiles)
-include(CMakePushCheckState)
-
-set(std_filesystem_test [=[
-    #include <filesystem>
-
-    int main(void)
-    {
-        const auto path = std::filesystem::path("bin/../share/proj");
-        return path.lexically_normal().string().empty();
-    }
-]=])
-
-cmake_push_check_state(RESET)
-check_cxx_source_compiles(
-    "${std_filesystem_test}"
-    HAVE_STD_FILESYSTEM
-)
-# GCC 8 (-stdc++fs) or Clang 7-8 (-c++fs)?
-if(NOT HAVE_STD_FILESYSTEM)
-    foreach(lib IN ITEMS stdc++fs c++fs)
-        string(MAKE_C_IDENTIFIER "${lib}" lib_id)
-        set(CMAKE_REQUIRED_LIBRARIES "${lib}")
-
-        check_cxx_source_compiles(
-            "${std_filesystem_test}"
-            HAVE_STD_FILESYSTEM_WITH_${lib_id}
-        )
-
-        if(HAVE_STD_FILESYSTEM_WITH_${lib_id})
-            set(HAVE_STD_FILESYSTEM TRUE)
-            set(STD_FILESYSTEM_LIBRARY "${lib}")
-            break()
-        endif()
-    endforeach()
-endif()
-cmake_pop_check_state()
-unset(std_filesystem_test)
-
 set(PACKAGE "proj")
 set(PACKAGE_BUGREPORT "https://github.com/OSGeo/PROJ/issues")
 set(PACKAGE_NAME "PROJ")
