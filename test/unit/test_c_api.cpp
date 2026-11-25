@@ -7980,4 +7980,46 @@ TEST_F(CApi, proj_crs_is_dynamic) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_ellipsoid_from_proj_string) {
+    double a = 0;
+    double es = 0;
+
+    EXPECT_TRUE(proj_ellipsoid_from_proj_string(m_ctxt, "+ellps=WGS84", nullptr,
+                                                nullptr));
+    EXPECT_TRUE(
+        proj_ellipsoid_from_proj_string(m_ctxt, "+ellps=WGS84", &a, &es));
+    EXPECT_EQ(a, 6378137.0);
+    EXPECT_NEAR(es, 0.0066943799901413165, 1e-15);
+
+    // Spherification is honoured, unlike with proj_get_ellipsoid()
+    EXPECT_TRUE(
+        proj_ellipsoid_from_proj_string(m_ctxt, "+ellps=WGS84 +R_A", &a, &es));
+    EXPECT_NEAR(a, 6371007.1811, 1e-4);
+    EXPECT_EQ(es, 0.0);
+
+    // Unrelated keys are ignored, and +R_C is evaluated at latitude 0, as
+    // in proj_create()
+    EXPECT_TRUE(proj_ellipsoid_from_proj_string(
+        m_ctxt, "+proj=merc +lat_0=45 +ellps=WGS84 +R_C", &a, &es));
+    EXPECT_NEAR(a, 6356752.3142, 1e-4);
+    EXPECT_EQ(es, 0.0);
+
+    // +R overrules everything else
+    EXPECT_TRUE(proj_ellipsoid_from_proj_string(
+        m_ctxt, "R=1000 ellps=WGS84 R_A", &a, &es));
+    EXPECT_EQ(a, 1000.0);
+    EXPECT_EQ(es, 0.0);
+
+    EXPECT_TRUE(proj_ellipsoid_from_proj_string(m_ctxt, "+a=10 +b=5", &a, &es));
+    EXPECT_EQ(a, 10.0);
+    EXPECT_EQ(es, 0.75);
+
+    EXPECT_FALSE(proj_ellipsoid_from_proj_string(m_ctxt, nullptr, &a, &es));
+    EXPECT_FALSE(proj_ellipsoid_from_proj_string(m_ctxt, "", &a, &es));
+    EXPECT_FALSE(
+        proj_ellipsoid_from_proj_string(m_ctxt, "+ellps=unknown", &a, &es));
+}
+
 } // namespace
