@@ -213,8 +213,8 @@ static PJ_LP krovak_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
         // The default non-Czech convention uses easting, northing, so we have
         // to reverse the sign of the coordinates. But to do so, we have to take
         // into account the false easting/northing.
-        xy.y = -xy.y - 2 * P->x0 / P->a;
-        xy.x = -xy.x - 2 * P->y0 / P->a;
+        xy.x = -xy.x - 2 * P->x0 / P->a;
+        xy.y = -xy.y - 2 * P->y0 / P->a;
     }
 
     std::swap(xy.x, xy.y);
