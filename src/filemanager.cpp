@@ -1396,6 +1396,52 @@ static bool is_rel_or_absolute_filename(const char *name) {
            (name[0] != '\0' && name[1] == ':' && strchr(dir_chars, name[2]));
 }
 
+static std::string normalize_posix_path(const std::string &path) {
+    if (path.empty())
+        return path;
+
+    const bool absolute = path.front() == '/';
+    std::vector<std::string> parts;
+
+    size_t start = 0;
+
+    while (start < path.size()) {
+        const size_t end = path.find('/', start);
+        const size_t length =
+            (end == std::string::npos ? path.size() : end) - start;
+
+        const std::string part = path.substr(start, length);
+
+        if (part.empty() || part == ".") {
+            // Ignore empty and current-directory components.
+        } else if (part == "..") {
+            if (!parts.empty() && parts.back() != "..") {
+                parts.pop_back();
+            } else if (!absolute) {
+                parts.push_back("..");
+            }
+        } else {
+            parts.push_back(part);
+        }
+
+        if (end == std::string::npos)
+            break;
+
+        start = end + 1;
+    }
+
+    std::string result = absolute ? "/" : "";
+
+    for (const auto &part : parts) {
+        if (!result.empty() && result.back() != '/')
+            result += '/';
+
+        result += part;
+    }
+
+    return result.empty() ? "." : result;
+}
+
 // ---------------------------------------------------------------------------
 
 static std::string pj_get_relative_share_proj_internal_no_check() {
@@ -1473,7 +1519,7 @@ static std::string pj_get_relative_share_proj_internal_no_check() {
     out.resize(pos);
     // The initial path was something like foo/bin/libproj.so"
     out += "/share/proj";
-    return out;
+    return normalize_posix_path(out);
 #else
     return std::string();
 #endif
